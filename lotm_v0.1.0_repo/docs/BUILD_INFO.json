@@ -1,0 +1,12 @@
+{
+  "app_version": "v0.1.0",
+  "sim_version": "mvp_v0_1",
+  "code_fingerprint": "e5a128780b90c1cd2f02c85189a2759ada793743ff48e94c5e3003a8946a29c5",
+  "policy_ids": [
+    "prudent-builder",
+    "builder-forward",
+    "builder-forward/buffered"
+  ],
+  "created_at_utc": "2026-02-12T23:00:42Z",
+  "notes": "v0.1.0 hosted web readiness (vercel.json rewrites). dist_batch APP_VERSION aligned to v0.1.0 for no-deps QA artifacts."
+}
