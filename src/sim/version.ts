@@ -1,1 +1,1 @@
-export const SIM_VERSION = "v0.2.3";
+export const SIM_VERSION = "mvp_v0_1";

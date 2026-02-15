@@ -10,6 +10,90 @@ import { IMPROVEMENT_IDS } from "../dist_batch/src/content/improvements.js";
 import { relationshipBounds } from "../dist_batch/src/sim/relationships.js";
 import { APP_VERSION } from "../dist_batch/src/version.js";
 
+const PROSPECT_POLICIES = ["reject-all", "accept-all", "accept-if-net-positive"];
+const PROSPECT_TYPES = ["marriage", "grant", "inheritance_claim"];
+
+function initProspectsByType() {
+  return { marriage: 0, grant: 0, inheritance_claim: 0 };
+}
+
+function initProspectsCounters() {
+  return {
+    generated: initProspectsByType(),
+    shown: initProspectsByType(),
+    hidden: initProspectsByType(),
+    accepted: initProspectsByType(),
+    rejected: initProspectsByType(),
+    expired: initProspectsByType(),
+    shown_but_expired: initProspectsByType()
+  };
+}
+
+function addProspectsCounters(into, add) {
+  for (const k of Object.keys(into)) {
+    for (const t of PROSPECT_TYPES) {
+      into[k][t] += add[k][t];
+    }
+  }
+}
+
+function sumProspectsByType(c) {
+  return PROSPECT_TYPES.reduce((s, t) => s + (c[t] ?? 0), 0);
+}
+
+function parseProspectPolicy(raw) {
+  const v = raw || "reject-all";
+  if (!PROSPECT_POLICIES.includes(v)) {
+    throw new Error(`Invalid --prospectPolicy value: ${raw}. Allowed: ${PROSPECT_POLICIES.join("|")}`);
+  }
+  return v;
+}
+
+function prospectTypeFromWindow(window, prospectId) {
+  if (!window || !Array.isArray(window.prospects)) return null;
+  for (const p of window.prospects) {
+    if (p && p.id === prospectId) return p.type;
+  }
+  return null;
+}
+
+function computeProspectsActions(window, prospectPolicy) {
+  if (!window || window.schema_version !== "prospects_window_v1") return [];
+  if (!Array.isArray(window.shown_ids) || window.shown_ids.length === 0) return [];
+
+  const shownSet = new Set(window.shown_ids.map(String));
+  const indexed = (Array.isArray(window.prospects) ? window.prospects : [])
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => p && shownSet.has(String(p.id)))
+    // LOCKED tie-break: prospect_i
+    .sort((a, b) => a.i - b.i);
+
+  const out = [];
+  for (const { p } of indexed) {
+    let action = "reject";
+    if (prospectPolicy === "accept-all") action = "accept";
+    else if (prospectPolicy === "reject-all") action = "reject";
+    else {
+      const coinDeltaRaw = p?.predicted_effects?.coin_delta;
+      const costCoinRaw = p?.costs?.coin;
+      const coinDelta = typeof coinDeltaRaw === "number" && Number.isFinite(coinDeltaRaw) ? Math.trunc(coinDeltaRaw) : 0;
+      const costCoin = typeof costCoinRaw === "number" && Number.isFinite(costCoinRaw) ? Math.trunc(costCoinRaw) : 0;
+      const net = coinDelta - costCoin;
+      action = net > 0 ? "accept" : "reject";
+    }
+
+    const allowed = Array.isArray(p?.actions) ? p.actions.map(String) : ["accept", "reject"];
+    if (!allowed.includes(action)) {
+      if (allowed.includes("reject")) action = "reject";
+      else continue;
+    }
+
+    out.push({ prospect_id: String(p.id), action });
+  }
+
+  return out;
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, "..");
 
@@ -29,12 +113,13 @@ const CODE_FINGERPRINT = BUILD_INFO?.code_fingerprint || "";
 
 
 function parseArgs(argv) {
-  const a = { policy: "prudent-builder", runs: 250, turns: 15, outdir: "", baseSeed: "" };
+  const a = { policy: "prudent-builder", prospectPolicy: "reject-all", runs: 250, turns: 15, outdir: "", baseSeed: "" };
   for (const arg of argv) {
     if (!arg.startsWith("--")) continue;
     const [k, v] = arg.slice(2).split("=");
     if (!k) continue;
     if (k === "policy" && v) a.policy = v;
+    if (k === "prospectPolicy" && v) a.prospectPolicy = parseProspectPolicy(v);
     if (k === "runs" && v) a.runs = Number(v);
     if (k === "turns" && v) a.turns = Number(v);
     if (k === "outdir" && v) a.outdir = v;
@@ -77,18 +162,100 @@ function mean(arr) {
   return arr.reduce((s, x) => s + x, 0) / arr.length;
 }
 
-function runPolicy(seed, policy, turns) {
+function runPolicy(seed, policy, turns, prospectPolicy) {
   let state = createNewRun(seed);
+
+  // v0.2.3 Prospects rehydration requires prospect payload history, but we must
+  // keep state bounded for large batches. We keep a minimal "history" containing
+  // only `prospect_generated` events (payloads), and discard full turn logs.
+  const prospectsHistory = [];
+  const generatedSeen = new Set();
+
+  const prospects = initProspectsCounters();
+  const shownEver = new Set();
+
+  let lastFullEntry = null;
+
   for (let t = 0; t < turns; t++) {
-    // Batch harness: keep run state small (log is non-authoritative for outcomes).
-    // This avoids O(runs*turns) memory churn during large batches.
-    state.log = [];
-    const ctx = proposeTurn(state);
-    const decisions = decide(policy, state, ctx);
-    state = applyDecisions(state, decisions);
     if (state.game_over) break;
+
+    // Provide bounded history for prospect rehydration.
+    state.log = prospectsHistory.slice();
+
+    const ctx = proposeTurn(state);
+    const pw = ctx?.prospects_window ?? null;
+
+    // Prospects exposure counters (by type)
+    if (pw && pw.schema_version === "prospects_window_v1") {
+      for (const id of pw.shown_ids ?? []) {
+        const sid = String(id);
+        shownEver.add(sid);
+        const pt = prospectTypeFromWindow(pw, sid);
+        if (PROSPECT_TYPES.includes(pt)) prospects.shown[pt] += 1;
+      }
+      for (const id of pw.hidden_ids ?? []) {
+        const sid = String(id);
+        const pt = prospectTypeFromWindow(pw, sid);
+        if (PROSPECT_TYPES.includes(pt)) prospects.hidden[pt] += 1;
+      }
+    }
+
+    const decisions = decide(policy, state, ctx);
+
+    // v0.2.3.1 headless prospects policy hook (tooling-only)
+    if (pw && pw.schema_version === "prospects_window_v1") {
+      const actions = computeProspectsActions(pw, prospectPolicy);
+      decisions.prospects = { kind: "prospects", actions };
+    }
+
+    state = applyDecisions(state, decisions);
+
+    // Extract authoritative outcomes from this turn's log entry
+    lastFullEntry = Array.isArray(state.log) && state.log.length ? state.log[state.log.length - 1] : null;
+
+    const plog = lastFullEntry?.report?.prospects_log;
+    const genEvents = [];
+    if (Array.isArray(plog)) {
+      for (const ev of plog) {
+        if (!ev || typeof ev !== "object") continue;
+        const kind = ev.kind;
+        const type = ev.type;
+        const pid = ev.prospect_id;
+        if (!PROSPECT_TYPES.includes(type)) continue;
+
+        if (kind === "prospect_generated") {
+          prospects.generated[type] += 1;
+          const pidStr = String(pid);
+          if (!generatedSeen.has(pidStr)) {
+            generatedSeen.add(pidStr);
+            genEvents.push(ev);
+          }
+        }
+        if (kind === "prospect_accepted") prospects.accepted[type] += 1;
+        if (kind === "prospect_rejected") prospects.rejected[type] += 1;
+        if (kind === "prospect_expired") {
+          prospects.expired[type] += 1;
+          const pidStr = String(pid);
+          if (shownEver.has(pidStr)) prospects.shown_but_expired[type] += 1;
+        }
+      }
+    }
+
+    // Keep only the payload history needed for rehydration
+    if (genEvents.length > 0) {
+      prospectsHistory.push({ report: { prospects_log: genEvents } });
+      // hard bound: in v0.2.3, active prospects <= 3
+      if (prospectsHistory.length > 3) prospectsHistory.splice(0, prospectsHistory.length - 3);
+    }
+
+    // Drop the full log to keep memory bounded (we keep `lastFullEntry` separately).
+    state.log = [];
   }
-  return state;
+
+  // Restore a small log footprint for downstream summary selection (previous behavior).
+  state.log = lastFullEntry ? [lastFullEntry] : [];
+
+  return { state, prospects };
 }
 
 function pickExports(statesBySeed) {
@@ -120,6 +287,7 @@ function pickExports(statesBySeed) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const policyCanonical = canonicalizePolicyId(args.policy);
+  const prospectPolicy = parseProspectPolicy(args.prospectPolicy);
   const runs = Math.max(1, Math.trunc(args.runs));
   const turns = Math.max(1, Math.trunc(args.turns));
   const policySanitized = sanitizePolicyIdForArtifacts(policyCanonical);
@@ -149,11 +317,15 @@ function main() {
   const endArrearsBushels = [];
   const eventsPerTurn = [];
 
+  // v0.2.3.1 Prospects KPIs (headless)
+  const prospectsAgg = initProspectsCounters();
+
   const statesBySeed = {};
 
   for (let i = 0; i < runs; i++) {
     const seed = `${baseSeed}_${String(i).padStart(4,"0")}`;
-    const state = runPolicy(seed, policyCanonical, turns);
+    const { state, prospects } = runPolicy(seed, policyCanonical, turns, prospectPolicy);
+    addProspectsCounters(prospectsAgg, prospects);
     statesBySeed[seed] = state;
 
     const isComplete = !state.game_over && state.turn_index >= turns;
@@ -273,6 +445,7 @@ function main() {
     policy_logical: args.policy,
     policy_canonical: policyCanonical,
     policy_sanitized: policySanitized,
+    prospect_policy: prospectPolicy,
     horizon_turns: turns,
     attempted,
     completed,
@@ -305,7 +478,18 @@ function main() {
     },
     avg_events_per_turn: mean(eventsPerTurn),
     top_events: topEvents,
-    game_over_reasons: byReason
+    game_over_reasons: byReason,
+    prospects: {
+      generated: { total: sumProspectsByType(prospectsAgg.generated), by_type: prospectsAgg.generated },
+      shown: { total: sumProspectsByType(prospectsAgg.shown), by_type: prospectsAgg.shown },
+      hidden: { total: sumProspectsByType(prospectsAgg.hidden), by_type: prospectsAgg.hidden },
+      outcomes: {
+        accepted: { total: sumProspectsByType(prospectsAgg.accepted), by_type: prospectsAgg.accepted },
+        rejected: { total: sumProspectsByType(prospectsAgg.rejected), by_type: prospectsAgg.rejected },
+        expired: { total: sumProspectsByType(prospectsAgg.expired), by_type: prospectsAgg.expired },
+        shown_but_expired: { total: sumProspectsByType(prospectsAgg.shown_but_expired), by_type: prospectsAgg.shown_but_expired }
+      }
+    }
   };
 
   // write outputs

@@ -2,14 +2,112 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createNewRun, proposeTurn, applyDecisions } from "../src/sim/index";
-import type { RunState } from "../src/sim/types";
+import type { ProspectType, ProspectsWindow, RunState, TurnDecisions } from "../src/sim/types";
 import { decide, canonicalizePolicyId, sanitizePolicyIdForArtifacts, type PolicyId } from "../src/sim/policies";
 import { IMPROVEMENT_IDS } from "../src/content/improvements";
 import { relationshipBounds } from "../src/sim/relationships";
 import { buildRunSummary } from "../src/sim/exports";
 
+type ProspectPolicy = "reject-all" | "accept-all" | "accept-if-net-positive";
+const PROSPECT_POLICIES: ProspectPolicy[] = ["reject-all", "accept-all", "accept-if-net-positive"];
+const PROSPECT_TYPES: ProspectType[] = ["marriage", "grant", "inheritance_claim"];
+
+type ProspectsByTypeCounters = Record<ProspectType, number>;
+type ProspectsBatchCounters = {
+  generated: ProspectsByTypeCounters;
+  shown: ProspectsByTypeCounters;
+  hidden: ProspectsByTypeCounters;
+  accepted: ProspectsByTypeCounters;
+  rejected: ProspectsByTypeCounters;
+  expired: ProspectsByTypeCounters;
+  shown_but_expired: ProspectsByTypeCounters;
+};
+
+function initProspectsByType(): ProspectsByTypeCounters {
+  return { marriage: 0, grant: 0, inheritance_claim: 0 };
+}
+
+function initProspectsCounters(): ProspectsBatchCounters {
+  return {
+    generated: initProspectsByType(),
+    shown: initProspectsByType(),
+    hidden: initProspectsByType(),
+    accepted: initProspectsByType(),
+    rejected: initProspectsByType(),
+    expired: initProspectsByType(),
+    shown_but_expired: initProspectsByType()
+  };
+}
+
+function addProspectsCounters(into: ProspectsBatchCounters, add: ProspectsBatchCounters): void {
+  for (const k of Object.keys(into) as Array<keyof ProspectsBatchCounters>) {
+    for (const t of PROSPECT_TYPES) {
+      into[k][t] += add[k][t];
+    }
+  }
+}
+
+function sumProspectsByType(c: ProspectsByTypeCounters): number {
+  return PROSPECT_TYPES.reduce((s, t) => s + (c[t] ?? 0), 0);
+}
+
+function parseProspectPolicy(raw: string | undefined): ProspectPolicy {
+  const v = (raw ?? "reject-all") as ProspectPolicy;
+  if (!PROSPECT_POLICIES.includes(v)) {
+    throw new Error(`Invalid --prospectPolicy value: ${raw}. Allowed: ${PROSPECT_POLICIES.join("|")}`);
+  }
+  return v;
+}
+
+function prospectTypeFromWindow(window: ProspectsWindow, prospectId: string): ProspectType | null {
+  for (const p of window.prospects) {
+    if (p.id === prospectId) return p.type;
+  }
+  return null;
+}
+
+function computeProspectsActions(window: ProspectsWindow, prospectPolicy: ProspectPolicy): Array<{ prospect_id: string; action: "accept" | "reject" }> {
+  if (!Array.isArray(window.shown_ids) || window.shown_ids.length === 0) return [];
+
+  const shownSet = new Set(window.shown_ids);
+
+  const indexed = window.prospects
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => shownSet.has(p.id))
+    // LOCKED tie-break: prospect_i
+    .sort((a, b) => a.i - b.i);
+
+  const out: Array<{ prospect_id: string; action: "accept" | "reject" }> = [];
+
+  for (const { p } of indexed) {
+    let action: "accept" | "reject" = "reject";
+    if (prospectPolicy === "accept-all") action = "accept";
+    else if (prospectPolicy === "reject-all") action = "reject";
+    else {
+      const coinDeltaRaw = (p.predicted_effects as any)?.coin_delta;
+      const costCoinRaw = (p.costs as any)?.coin;
+      const coinDelta = typeof coinDeltaRaw === "number" && Number.isFinite(coinDeltaRaw) ? Math.trunc(coinDeltaRaw) : 0;
+      const costCoin = typeof costCoinRaw === "number" && Number.isFinite(costCoinRaw) ? Math.trunc(costCoinRaw) : 0;
+      const net = coinDelta - costCoin;
+      action = net > 0 ? "accept" : "reject";
+    }
+
+    // Safety: only emit actions that are allowed by the prospect payload.
+    const allowed = Array.isArray((p as any).actions) ? (p as any).actions.map(String) : ["accept", "reject"];
+    if (!allowed.includes(action)) {
+      if (allowed.includes("reject")) action = "reject";
+      else continue;
+    }
+
+    out.push({ prospect_id: p.id, action });
+  }
+
+  return out;
+}
+
 type Args = {
   policy: string;
+  prospectPolicy: ProspectPolicy;
   runs: number;
   turns: number;
   outdir?: string;
@@ -17,12 +115,13 @@ type Args = {
 };
 
 function parseArgs(argv: string[]): Args {
-  const a: Args = { policy: "prudent-builder", runs: 250, turns: 15 };
+  const a: Args = { policy: "prudent-builder", prospectPolicy: "reject-all", runs: 250, turns: 15 };
   for (const arg of argv) {
     if (!arg.startsWith("--")) continue;
     const [k, v] = arg.slice(2).split("=");
     if (!k) continue;
     if (k === "policy" && v) a.policy = v;
+    if (k === "prospectPolicy" && v) a.prospectPolicy = parseProspectPolicy(v);
     if (k === "runs" && v) a.runs = Number(v);
     if (k === "turns" && v) a.turns = Number(v);
     if (k === "outdir" && v) a.outdir = v;
@@ -82,20 +181,68 @@ function writeCsv(filePath: string, headers: string[], rows: Array<Record<string
   fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
 }
 
-function runPolicy(seed: string, policy: PolicyId, turns: number): RunState {
+function runPolicy(seed: string, policy: PolicyId, turns: number, prospectPolicy: ProspectPolicy): { state: RunState; prospects: ProspectsBatchCounters } {
   let state = createNewRun(seed);
+
+  const prospects = initProspectsCounters();
+  const shownEver = new Set<string>();
+
   for (let t = 0; t < turns; t++) {
     const ctx = proposeTurn(state);
-    const decisions = decide(policy, state, ctx);
+
+    // Prospects window exposure counters (by type)
+    const pw = ctx.prospects_window ?? null;
+    if (pw && pw.schema_version === "prospects_window_v1") {
+      for (const id of pw.shown_ids) {
+        shownEver.add(id);
+        const pt = prospectTypeFromWindow(pw, id);
+        if (pt) prospects.shown[pt] += 1;
+      }
+      for (const id of pw.hidden_ids) {
+        const pt = prospectTypeFromWindow(pw, id);
+        if (pt) prospects.hidden[pt] += 1;
+      }
+    }
+
+    const decisions: TurnDecisions = decide(policy, state, ctx);
+
+    // v0.2.3.1 headless prospects policy hook (tooling-only)
+    if (pw && pw.schema_version === "prospects_window_v1") {
+      const actions = computeProspectsActions(pw, prospectPolicy);
+      (decisions as any).prospects = { kind: "prospects", actions };
+    }
+
     state = applyDecisions(state, decisions);
+
+    // Outcome counters from log (authoritative)
+    const last = state.log[state.log.length - 1];
+    const plog: any[] = (last?.report as any)?.prospects_log ?? [];
+    if (Array.isArray(plog)) {
+      for (const ev of plog) {
+        if (!ev || typeof ev !== "object") continue;
+        const kind = (ev as any).kind;
+        const type = (ev as any).type as ProspectType;
+        const pid = (ev as any).prospect_id as string;
+        if (!PROSPECT_TYPES.includes(type)) continue;
+        if (kind === "prospect_generated") prospects.generated[type] += 1;
+        if (kind === "prospect_accepted") prospects.accepted[type] += 1;
+        if (kind === "prospect_rejected") prospects.rejected[type] += 1;
+        if (kind === "prospect_expired") {
+          prospects.expired[type] += 1;
+          if (typeof pid === "string" && shownEver.has(pid)) prospects.shown_but_expired[type] += 1;
+        }
+      }
+    }
+
     if (state.game_over) break;
   }
-  return state;
+  return { state, prospects };
 }
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const policy = canonicalizePolicyId(args.policy);
+  const prospectPolicy = parseProspectPolicy(args.prospectPolicy);
   const runs = Math.max(1, Math.trunc(args.runs));
   const turns = Math.max(1, Math.trunc(args.turns));
   const policySanitized = sanitizePolicyIdForArtifacts(policy);
@@ -135,11 +282,15 @@ function main() {
   let totalProjectsStarted = 0;
   let totalProjectsCompleted = 0;
 
+  // v0.2.3.1 Prospects KPIs (headless)
+  const prospectsAgg = initProspectsCounters();
+
   const fullExports: Array<{ seed: string; state: RunState; score: number }> = [];
 
   for (let i = 0; i < runs; i++) {
     const seed = `${baseSeed}_${String(i).padStart(4, "0")}`;
-    const state = runPolicy(seed, policy, turns);
+    const { state, prospects } = runPolicy(seed, policy, turns, prospectPolicy);
+    addProspectsCounters(prospectsAgg, prospects);
 
     const isComplete = !state.game_over && state.turn_index >= turns;
     if (isComplete) completed += 1;
@@ -293,6 +444,7 @@ function main() {
     ...(codeFingerprint ? { code_fingerprint: codeFingerprint } : {}),
     policy,
     policy_sanitized: policySanitized,
+    prospect_policy: prospectPolicy,
     horizon_turns: turns,
     attempted,
     completed,
@@ -337,6 +489,17 @@ function main() {
     events: {
       avg_events_per_turn: mean(eventsPerTurn),
       top10: topEvents
+    },
+    prospects: {
+      generated: { total: sumProspectsByType(prospectsAgg.generated), by_type: prospectsAgg.generated },
+      shown: { total: sumProspectsByType(prospectsAgg.shown), by_type: prospectsAgg.shown },
+      hidden: { total: sumProspectsByType(prospectsAgg.hidden), by_type: prospectsAgg.hidden },
+      outcomes: {
+        accepted: { total: sumProspectsByType(prospectsAgg.accepted), by_type: prospectsAgg.accepted },
+        rejected: { total: sumProspectsByType(prospectsAgg.rejected), by_type: prospectsAgg.rejected },
+        expired: { total: sumProspectsByType(prospectsAgg.expired), by_type: prospectsAgg.expired },
+        shown_but_expired: { total: sumProspectsByType(prospectsAgg.shown_but_expired), by_type: prospectsAgg.shown_but_expired }
+      }
     },
     allowed_game_over_reasons: ["Dispossessed", "DeathNoHeir"]
   };
