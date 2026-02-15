@@ -1,32 +1,30 @@
-# Dev Agent A — v0.2.3 Patch Notes (UI/Clarity)
+# Dev Agent A — v0.2.3.1 Hotfix (Hooks Order Violation)
 
-## Scope
-- Implemented **Prospects** Turn Report section (Workstream A-1) per `docs/ux/v0.2.3_copy.md`, `docs/ux/v0.2.3_info_hierarchy.md`, and `docs/ux/v0.2.3_clarity_acceptance.md`.
-- No new screens/routes.
-- No sim changes.
+## Issue
+Runtime crash after clicking **New Run**:
+- React error: **“Rendered more hooks than during the previous render”**
+- Triggered by **conditional early-returns** occurring before later `useMemo(...)` hooks ran.
 
-## What changed
-### Turn Report
-- Added a **Prospects** section (always present; shows empty states when no prospects).
-- Supports **shown vs hidden** relevance filtering:
-  - Renders `shown_ids` (stable order) and displays counts with the neutral “hidden” explanation.
-  - Adds a **Prospects log** `<details>` block with shown/hidden counts and any prospect-related notes found in run log `report.notes`.
+## Fix (UI-only)
+**File changed:** `src/App.tsx` (no sim/tooling changes)
 
-### Prospect cards
-- Renders type label, parties line, optional subject (marriage), summary, requirements, costs, expected effects, confidence, and expiry.
-- Adds **Accept** / **Reject** actions:
-  - Records decisions in `decisions.prospects.actions[]` as `{ prospect_id, action }`.
-  - Uses confirmation dialogs for accept (when costs exist) and for reject.
-  - Shows immediate toast acknowledgement or error messages using binding copy.
+1. **All hooks now run unconditionally**
+   - Moved/rewrote the formerly in-play `useMemo` hooks (`prospectLogLines`, `hasProspectExpiredThisTurn`) so they execute **every render** with **safe defaults** when `state`/`ctx` are null.
 
-## Data assumptions / compatibility
-- UI looks for a `prospects_window_v1` payload at:
-  - `ctx.prospects_window`, `ctx.prospectsWindow`, `ctx.report.prospects_window`, or `ctx.report.prospectsWindow`.
-- Safe when absent: section falls back to empty state.
-- Prospects decision schema introduced UI-side:
-  - `decisions.prospects = { kind: "prospects", actions: Array<{ prospect_id, action: "accept"|"reject" }> }`
-  - Sim can ignore or adopt this shape.
+2. **Single-return render pattern**
+   - Replaced conditional `return (...)` branches with a `content` variable.
+   - Component now **returns once** at the end: `return <>{content}</>;`.
 
-## Files changed
-- `src/App.tsx`
-- `DEV_NOTES.md`
+3. **Null-safe rendering**
+   - When `screen !== "new"` but `state/ctx` are temporarily null (e.g., batched updates), UI shows a small **Loading…** placeholder rather than returning `null`.
+
+## Acceptance checklist (manual)
+- `npm run dev`
+- Load app
+- Click **New Run**
+- ✅ No hook warning/error
+- ✅ No blank screen
+
+## Notes
+- No sim logic changes.
+- No new routes/screens.
