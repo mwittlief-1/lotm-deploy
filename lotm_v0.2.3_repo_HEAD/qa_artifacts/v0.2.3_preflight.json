@@ -1,0 +1,16 @@
+{
+  "gate": "preflight",
+  "app_version": "v0.2.3",
+  "sim_version": "mvp_v0_1",
+  "code_fingerprint": "2fd6b2b1c8b31526a816c3fd8651d4f2a83d134302049e94fab2e133e3b605f3",
+  "started_at": "2026-02-15T12:39:55.880Z",
+  "tests_run": 3,
+  "passed": 3,
+  "failed": 0,
+  "failures": [],
+  "notes": [
+    "determinism seed: lotm_v022_seed_001_baseline_extworld (turns scanned=12, windows seen=12)"
+  ],
+  "finished_at": "2026-02-15T12:39:58.193Z",
+  "ok": true
+}
