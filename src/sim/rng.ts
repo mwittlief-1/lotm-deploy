@@ -31,7 +31,8 @@ class Mulberry32 {
 
 // Stream isolation contract: each major system uses a distinct stream key.
 // v0.2.2 adds "worldgen" for external world seeding (turn_index=0 only).
-export type StreamKey = "weather" | "events" | "household" | "marriage" | "prospects" | "ai" | "market" | "worldgen";
+// v0.2.4 adds "court" for deterministic court officer generation (turn_index=0 only).
+export type StreamKey = "weather" | "events" | "household" | "marriage" | "prospects" | "court" | "ai" | "market" | "worldgen";
 
 export class Rng {
   private gen: Mulberry32;

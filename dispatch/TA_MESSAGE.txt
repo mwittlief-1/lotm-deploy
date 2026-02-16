@@ -1,0 +1,8 @@
+# DISPATCH — Technical Architect (v0.2.4) [copy/paste]
+Review determinism + snapshot risks for:
+- new RNG stream key `court` (officer generation)
+- court headcount derivation correctness
+- consumption split math (same bushel pool)
+- marriage roster update (spouse joins court roster)
+
+Deliver docs/arch/v0.2.4_court_household_review.md

@@ -1,34 +1,51 @@
-# Dev Agent A — v0.2.3.2 UI Polish Patch
+# Dev Agent A — v0.2.4 UI patch notes
 
-## Scope
-UI/Clarity only (Workstream C + v0.2.3.2 P1 UI items). **No sim/tooling changes. No new screens/routes.**
+## Scope (UI-only)
+Changes implement the v0.2.4 Dev A UI tasks against the latest v0.2.3.x certified baseline.
 
-## Changes
-All changes are in `src/App.tsx`.
+**No sim / content / tooling changes.**  
+All updates are contained to `src/App.tsx` plus this notes file.
 
-### Prospects (clarity)
-- Added **type-specific** accept confirmations and accept/reject acknowledgements per UX addendum:
-  - Marriage: “Accept marriage proposal?” / “Marriage accepted.” / “Marriage offer declined.”
-  - Grant: “Accept grant offer?” / “Grant accepted.” / “Grant offer declined.”
-  - Inheritance claim: “Accept inheritance claim?” / “Claim recorded.” / “Claim declined.”
-- When a prospect is acted on during the current turn, the card now shows a decided-state badge (**Accepted/Rejected**) and the hint **“Decision recorded.”**
-- Household details list now shows a **Marriage** badge for people marked `married` (so the effect of accepting a marriage prospect is visible).
+## What changed
 
-### Legacy marriage window
-- The old **Marriage Window** section is hidden when any Prospects are present for the turn (prevents dual systems on the same turn).
+### 1) Turn Summary top block
+- Added a lightweight top-of-screen summary block on the Play screen with headings:
+  - **“Last 3 years”**
+  - **“Now choose”**
+- Shows quick deltas (Population / Bushels / Coin / Unrest, and Shortage if present).
 
-### Obligations placement
-- Moved the payment inputs (**Pay coin / Pay bushels / War levy**) into a dedicated **Obligations** block and placed them adjacent to the due/arrears timing breakdown.
+### 2) Consumption split (Peasant vs Court) in Turn Report
+- Updated Food Balance → Consumption line to support the v0.2.4 TurnReport fields:
+  - `peasant_consumption_bushels`
+  - `court_consumption_bushels`
+  - `total_consumption_bushels`
+- When present, the UI renders:
+  - **Peasant Consumption (3y)**
+  - **Court Consumption (3y)**
+  - Plus the reconciliation copy:
+    - “Your court eats from the same stores as the manor.”
+    - “Both draw from the same Food Stores. Totals reconcile in Food Balance.”
+- Legacy fallback: if split fields are missing, the UI continues to use `consumption_bushels`.
 
-### End Turn feedback
-- Clicking **Advance Turn** now shows a toast: **“Turn X resolved.”** and scrolls the page to the top.
+### 3) Household/Court roster + Court Size
+- Household details panel now renders a **court roster** (deduped by `person.id` before render) that includes:
+  - Head / spouse / children
+  - Court officers (from `houses[player_house_id].court_officers`) with role titles:
+    - Steward / Clerk / Marshal
+  - Court “extra” members (from `houses[player_house_id].court_extra_ids`) such as married-in spouses
+- Each roster row shows:
+  - Status badges (Heir / Married / Widow/Widower/Widowed / Deceased)
+  - A relationship label (Son / Daughter / Spouse / Officer; or Kin fallback)
+  - Officer role shown as “Officer — Steward/Clerk/Marshal” where applicable
+- Added **Court Size** metric (alive unique count) with tooltip from v0.2.4 UX copy.
 
-### Unrest breakdown
-- Added a collapsible **“Unrest change this turn”** breakdown. If structured breakdown data exists, it renders **Increased by / Decreased by** contributors; otherwise it shows **“No breakdown available.”**
+### 4) Marriage accept confirmation toast (copy templates)
+- On accepting a **Marriage** prospect, toast now uses v0.2.4 explicit copy:
+  - “Marriage arranged. {child_name} is now married.”
+  - If spouse name is available, adds:
+    - “{spouse_name} joins your court. Court size increased.”
+- Toast container now uses `whiteSpace: "pre-line"` to render multi-line messages cleanly.
 
-### Construction selector
-- Disabled already-built improvements in the construction selector (prevents selecting completed improvements).
-
-## Hooks safety
-- Kept the v0.2.3.1 hook-order hotfix pattern intact: **all hooks run unconditionally** and the component returns once at the end.
-
+## Compatibility / safety
+- Court roster derivation is **tolerant to missing fields** (no crash if `court_officers` / `court_extra_ids` are absent).
+- No conditional hook execution was introduced; the component still follows the **single-return** pattern.

@@ -1,9 +1,9 @@
 {
-  "app_version": "v0.2.3.3",
-  "build_time_utc": "2026-02-16T02:36:34Z",
-  "code_fingerprint": "538647c8f821ae38815c8bb26e61b7875981c4032f7667ff8708d82f5de98098",
-  "created_at_utc": "2026-02-16T02:36:34Z",
-  "notes": "v0.2.3.3 completion patch: fill missing builder-forward 30T artifacts; add accept-all + accept-if-net-positive prospectPolicy batch runs; add prospects windows telemetry to batch_summary; playtest packet hygiene only.",
+  "app_version": "v0.2.4",
+  "build_time_utc": "2026-02-16T22:06:38Z",
+  "code_fingerprint": "b0bde94aeb2e7e6be9bad281ed844c1f59e22ad3561b2e9a7e39f46548742032",
+  "created_at_utc": "2026-02-16T22:06:38Z",
+  "notes": "v0.2.4 patch: Court & Household accounting per contract (court roster + officers; peasant vs court consumption reconciliation; marriage adds spouse to court).",
   "policy_ids": [
     "prudent-builder",
     "builder-forward",

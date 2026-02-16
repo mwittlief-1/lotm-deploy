@@ -194,6 +194,11 @@ export interface TurnReport {
   spoilage: { rate: number; loss_bushels: number };
   production_bushels: number;
   consumption_bushels: number;
+  // v0.2.4: consumption breakdown (3y). All values are in bushels and reconcile:
+  //   total = peasant + court
+  peasant_consumption_bushels: number;
+  court_consumption_bushels: number;
+  total_consumption_bushels: number;
   shortage_bushels: number;
   construction: {
     progress_added: number;
@@ -234,6 +239,11 @@ export interface TurnReport {
     was_oversubscribed: boolean;
     auto_clamped: boolean;
   };
+  // v0.2.3.4+: roster snapshot embedded for history-safe rendering (dedupe + death/heir badges).
+  household_roster?: HouseholdRoster;
+  // v0.2.4: court roster snapshot embedded for history-safe rendering (officers + married-in spouses).
+  court_roster?: CourtRoster;
+  court_headcount?: number;
   prospects_log?: ProspectsLogEvent[];
 }
 
@@ -251,6 +261,26 @@ export interface HouseholdRoster {
   schema_version: "household_roster_v1";
   turn_index: number;
   rows: HouseholdRosterRow[];
+}
+
+// --- Court (v0.2.4) ---
+
+export type CourtOfficerRole = "steward" | "clerk" | "marshal";
+export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse";
+
+export interface CourtRosterRow {
+  person_id: string;
+  role: CourtRosterRole;
+  // Officer role key (UI maps to title labels per UX contract).
+  officer_role: CourtOfficerRole | null;
+  badges: HouseholdRosterBadge[];
+}
+
+export interface CourtRoster {
+  schema_version: "court_roster_v1";
+  turn_index: number;
+  headcount_alive: number;
+  rows: CourtRosterRow[];
 }
 
 export interface MarriageOffer {
@@ -301,6 +331,8 @@ export type Prospect = {
   from_house_id: string;
   to_house_id: string;
   subject_person_id: string | null;
+  // v0.2.4: when present, identifies the spouse that joins the court on acceptance.
+  spouse_person_id?: string | null;
   summary: string;
   requirements: ProspectRequirement[];
   costs: ProspectCosts;
@@ -386,6 +418,8 @@ export interface TurnContext {
   prospects_window?: ProspectsWindow | null;
   // v0.2.3.2+: deduped roster view for UI.
   household_roster?: HouseholdRoster;
+  // v0.2.4: court roster view for UI.
+  court_roster?: CourtRoster;
 }
 
 export interface TurnLogEntry {

@@ -57,6 +57,7 @@ import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
 import { adjustEdge, relationshipBounds } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
+import { addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers } from "./court";
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -272,8 +273,11 @@ function applyProductionAndConstruction(state: RunState, weather_multiplier: num
   return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
 }
 
-function applyConsumptionAndShortage(state: RunState): {
+function applyConsumptionAndShortage(state: RunState, court_consumption_bushels: number): {
   consumption_bushels: number;
+  peasant_consumption_bushels: number;
+  court_consumption_bushels: number;
+  total_consumption_bushels: number;
   shortage_bushels: number;
   population_delta: number;
   // v0.2.3.2: structured signal when labor is auto-clamped due to population loss.
@@ -286,11 +290,25 @@ function applyConsumptionAndShortage(state: RunState): {
   const builders = state.manor.builders;
   const idle = Math.max(0, pop - farmers - builders);
 
-  const consumption = Math.floor((farmers * BUSHELS_PER_PERSON_PER_YEAR + builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) + idle * BUSHELS_PER_PERSON_PER_YEAR) * TURN_YEARS);
+  const peasantConsumption = Math.floor(
+    (farmers * BUSHELS_PER_PERSON_PER_YEAR +
+      builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) +
+      idle * BUSHELS_PER_PERSON_PER_YEAR) *
+      TURN_YEARS
+  );
+  const courtConsumption = Math.max(0, Math.trunc(court_consumption_bushels));
+  const consumption = asNonNegInt(peasantConsumption + courtConsumption);
   const before = state.manor.bushels_stored;
   if (before >= consumption) {
     state.manor.bushels_stored = asNonNegInt(before - consumption);
-    return { consumption_bushels: consumption, shortage_bushels: 0, population_delta: 0 };
+    return {
+      consumption_bushels: consumption,
+      peasant_consumption_bushels: peasantConsumption,
+      court_consumption_bushels: courtConsumption,
+      total_consumption_bushels: consumption,
+      shortage_bushels: 0,
+      population_delta: 0
+    };
   }
 
   const shortage = consumption - before;
@@ -330,12 +348,22 @@ function applyConsumptionAndShortage(state: RunState): {
 
   const res: {
     consumption_bushels: number;
+    peasant_consumption_bushels: number;
+    court_consumption_bushels: number;
+    total_consumption_bushels: number;
     shortage_bushels: number;
     population_delta: number;
     labor_auto_clamped?: boolean;
     labor_before?: { population: number; farmers: number; builders: number };
     labor_after?: { population: number; farmers: number; builders: number };
-  } = { consumption_bushels: consumption, shortage_bushels: shortage, population_delta: -lost };
+  } = {
+    consumption_bushels: consumption,
+    peasant_consumption_bushels: peasantConsumption,
+    court_consumption_bushels: courtConsumption,
+    total_consumption_bushels: consumption,
+    shortage_bushels: shortage,
+    population_delta: -lost
+  };
 
   if (labor_before && labor_after) {
     res.labor_auto_clamped = labor_auto_clamped;
@@ -772,6 +800,7 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
         from_house_id: sponsorHouseId,
         to_house_id: playerHouseId,
         subject_person_id: subjectId,
+        spouse_person_id: offer.house_person_id,
         summary: "Marriage proposal",
         requirements: [],
         costs: {},
@@ -792,6 +821,25 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
   const arrears = state.manor.obligations.arrears;
   const hasArrears = (arrears?.coin ?? 0) > 0 || (arrears?.bushels ?? 0) > 0;
   if (prospects.length < 3 && !activeTypes.has("grant") && hasArrears) {
+    // v0.2.3.4: minimal grant semantics (deterministic).
+    // Grant gives coin *now* (before obligation payments in applyDecisions), but increases liege leverage slightly.
+    const arrearsCoin = asNonNegInt(Math.trunc(arrears?.coin ?? 0));
+    const arrearsBushels = asNonNegInt(Math.trunc(arrears?.bushels ?? 0));
+    const pressure = arrearsCoin + Math.floor(arrearsBushels / 100);
+    const grantCoin = clampInt(2 + Math.floor(pressure * 0.5), 2, 12);
+
+    const relDeltas: any[] = [
+      {
+        scope: "person",
+        // Liege's view of the player (existing mechanics primarily use liege -> head).
+        from_id: state.locals.liege.id,
+        to_id: state.house.head.id,
+        allegiance_delta: +1,
+        respect_delta: -1,
+        threat_delta: +3
+      }
+    ];
+
     const p: Prospect = {
       id: makeId("grant", null),
       type: "grant",
@@ -801,7 +849,11 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
       summary: "Grant offer",
       requirements: [],
       costs: {},
-      predicted_effects: {},
+      predicted_effects: {
+        coin_delta: grantCoin,
+        relationship_deltas: relDeltas,
+        flags_set: []
+      },
       uncertainty: "likely",
       expires_turn: t + 2,
       actions: ["accept", "reject"]
@@ -964,6 +1016,15 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         for (const c of state.house.children) {
           if (c.id === sid) c.married = true;
         }
+
+        // v0.2.4: spouse joins the court roster by default (stored on house registry as court_extra_ids).
+        const spouseId: any = (prospect as any).spouse_person_id;
+        if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
+          addCourtExtraId(state, spouseId);
+          if (anyState.people && anyState.people[spouseId]) {
+            anyState.people[spouseId].married = true;
+          }
+        }
       }
 
       prospectsLog.push({
@@ -977,8 +1038,8 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         effects_applied: applied
       });
     } else if (act === "reject") {
-      // Reject: no-op unless relationship_deltas exist
-      applyRelationshipDeltas();
+      // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
+      // prospect type models explicit rejection penalties).
 
       prospectsLog.push({
         kind: "prospect_rejected",
@@ -1134,6 +1195,9 @@ export function proposeTurn(state: RunState): TurnContext {
         spoilage: { rate: 0, loss_bushels: 0 },
         production_bushels: 0,
         consumption_bushels: 0,
+        peasant_consumption_bushels: 0,
+        court_consumption_bushels: 0,
+        total_consumption_bushels: 0,
         shortage_bushels: 0,
         construction: { progress_added: 0, completed_improvement_id: null },
         obligations: {
@@ -1157,6 +1221,8 @@ export function proposeTurn(state: RunState): TurnContext {
   const working = deepCopy(state as any) as RunState;
   ensurePeopleFirst(working);
   ensureExternalHousesSeed_v0_2_2(working);
+  // v0.2.4: deterministic court officers (idempotent; stream-isolated).
+  ensureCourtOfficers(working);
 
   const houseLog: HouseLogEvent[] = [];
 
@@ -1168,6 +1234,27 @@ export function proposeTurn(state: RunState): TurnContext {
   // Track the most recent labor auto-clamp (for UX messaging).
   let laborSignalBefore: { population: number; farmers: number; builders: number } | null = null;
   let laborSignalAfter: { population: number; farmers: number; builders: number } | null = null;
+
+  // v0.2.3.4: If labor is oversubscribed entering the turn (edited/legacy state),
+  // clamp immediately *before* production/consumption math so the simulation runs on valid labor totals.
+  // NOTE: This preserves determinism for valid runs (oversubscription should never occur in normal play).
+  {
+    const pop0 = asNonNegInt(working.manor.population);
+    const f0 = asNonNegInt(working.manor.farmers);
+    const b0 = asNonNegInt(working.manor.builders);
+    if (f0 + b0 > pop0) {
+      laborSignalBefore = { population: pop0, farmers: f0, builders: b0 };
+      const overflow = f0 + b0 - pop0;
+      // Deterministic clamp rule: cut builders first, then farmers (same as shortage clamp).
+      const bCut = Math.min(b0, overflow);
+      const b1 = asNonNegInt(b0 - bCut);
+      const rem = overflow - bCut;
+      const f1 = rem > 0 ? asNonNegInt(Math.max(0, f0 - rem)) : f0;
+      working.manor.farmers = f1;
+      working.manor.builders = b1;
+      laborSignalAfter = { population: pop0, farmers: f1, builders: b1 };
+    }
+  }
 
   // 1) restore energy; compute heir
   working.house.energy.available = working.house.energy.max;
@@ -1186,8 +1273,36 @@ export function proposeTurn(state: RunState): TurnContext {
   // 3) production (+ construction progress)
   const prod = applyProductionAndConstruction(working, macro.weather_multiplier);
 
-  // 4) consumption
-  const cons = applyConsumptionAndShortage(working);
+  // 4) obligations
+  const unrestBeforeObl = working.manor.unrest;
+  applyObligationsAndArrearsPenalty(working, prod.production_bushels);
+  {
+    const diff = working.manor.unrest - unrestBeforeObl;
+    if (diff !== 0) unrestContribs.push({ label: "Arrears", diff });
+    unrestCursor = working.manor.unrest;
+  }
+
+  // 5) relationship drift
+  relationshipDrift(working);
+
+  // 6) household (births/deaths)
+  const hh = householdPhase(working, houseLog);
+
+  // v0.2.3.4: Recompute heir after births/deaths so the report/roster never points at a deceased heir.
+  {
+    const prev = working.house.heir_id ?? null;
+    const next = computeHeirId(working);
+    if (next && next !== prev) {
+      const heirName = working.house.children.find((c) => c.id === next)?.name;
+      if (heirName) houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
+    }
+  }
+
+  // 7) court size/consumption (v0.2.4)
+  const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS);
+
+  // 8) consumption (peasants + court)
+  const cons = applyConsumptionAndShortage(working, court.court_consumption_bushels);
 
   // Unrest contributor: shortage.
   {
@@ -1202,22 +1317,7 @@ export function proposeTurn(state: RunState): TurnContext {
     laborSignalAfter = cons.labor_after;
   }
 
-  // 5) obligations
-  const unrestBeforeObl = working.manor.unrest;
-  applyObligationsAndArrearsPenalty(working, prod.production_bushels);
-  {
-    const diff = working.manor.unrest - unrestBeforeObl;
-    if (diff !== 0) unrestContribs.push({ label: "Arrears", diff });
-    unrestCursor = working.manor.unrest;
-  }
-
-  // 6) relationship drift
-  relationshipDrift(working);
-
-  // 7) household (births/deaths)
-  const hh = householdPhase(working, houseLog);
-
-  // 8) event engine (independent)
+  // 9) event engine (independent)
   const events = applyEvents(working);
 
   // Unrest contributors: events.
@@ -1251,6 +1351,9 @@ export function proposeTurn(state: RunState): TurnContext {
     spoilage: spoil,
     production_bushels: prod.production_bushels,
     consumption_bushels: cons.consumption_bushels,
+    peasant_consumption_bushels: cons.peasant_consumption_bushels,
+    court_consumption_bushels: cons.court_consumption_bushels,
+    total_consumption_bushels: cons.total_consumption_bushels,
     shortage_bushels: cons.shortage_bushels,
     construction: { progress_added: prod.construction_progress_added, completed_improvement_id: prod.completed_improvement_id ?? null },
     obligations: {
@@ -1326,13 +1429,22 @@ export function proposeTurn(state: RunState): TurnContext {
   // Ensure registries remain in sync after preview simulation.
   ensurePeopleFirst(working);
 
+  const roster = buildHouseholdRoster_v0_2_3_2(working);
+  // v0.2.3.4: embed roster into the Turn Report so history views don't have to reconstruct it (dedupe + death badges).
+  report.household_roster = roster;
+
+  // v0.2.4: embed court roster + headcount into report for history-safe rendering.
+  report.court_roster = court.court_roster;
+  report.court_headcount = court.court_headcount;
+
   return {
     preview_state: working,
     report,
     marriage_window: marriageWindow,
     prospects_window: prospectsWindow,
     max_labor_shift: maxShift,
-    household_roster: buildHouseholdRoster_v0_2_3_2(working)
+    household_roster: roster,
+    court_roster: court.court_roster
   };
 }
 
@@ -1524,6 +1636,19 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
 
     // Mark married
     child.married = true;
+
+    // People-First registry mirror (prevents later sync overwrites in hybrid runs).
+    {
+      const anyState: any = state as any;
+      if (anyState.people && anyState.people[child.id]) anyState.people[child.id].married = true;
+    }
+
+    // v0.2.4: spouse joins the court roster by default.
+    addCourtExtraId(state, offer.house_person_id);
+    {
+      const anyState: any = state as any;
+      if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
+    }
 
     // Relationship deltas (to offering house + sometimes liege)
     adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);

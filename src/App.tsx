@@ -77,8 +77,11 @@ const COPY = {
   showDetails: "Show details",
   hideDetails: "Hide details",
   heirBadge: "Heir",
+  marriedBadge: "Married",
   widow: "Widow",
   widower: "Widower",
+  widowed: "Widowed",
+  deceasedBadge: "Deceased",
   unnamedRuler: "Unnamed ruler",
 
   // v0.2.2 binding copy (docs/ux/v0.2.2_copy.md)
@@ -113,6 +116,11 @@ const COPY = {
   laborDeltaCapError: (max: number, requested: number) =>
     `Labor change limit exceeded. Max ${max} this turn; requested ${requested}.`,
   laborDeltaCapClarifier: "Labor change limit applies to total changes across roles.",
+
+  // v0.2.3.x addendum: Labor oversubscription warning
+  laborOversubscribedTitle: "Labor oversubscribed",
+  laborOversubscribedBody: (assigned: number, available: number) => `Assigned: ${assigned}. Available: ${available}.`,
+  laborOversubscribedHelper: "Reduce assignments to match available workers.",
   // House Log templates
   logTitle_widowed: "Widowed",
   logOutcome_widowed: (spouseName: string) => `${spouseName} has died.`,
@@ -184,6 +192,18 @@ const COPY = {
   prospectDecisionBadgeAccepted: "Accepted",
   prospectDecisionBadgeRejected: "Rejected",
 
+  // v0.2.3.x addendum: Grant helper + conditional reject note
+  prospectGrantHelperLine: "Support from your liege to ease burdens this turn.",
+  prospectGrantRejectNote: "Declining may reduce your standing.",
+
+  // v0.2.3.x addendum: Immediate accept/reject confirmations
+  prospectToastAccepted: (prospectType: string, short_effect_summary: string) =>
+    `Accepted: ${prospectType}. ${short_effect_summary}`,
+  prospectToastDeclined: (prospectType: string) => `Declined: ${prospectType}.`,
+  prospectToastStandingMayDecrease: "Standing may decrease.",
+  prospectToastEffect_arrangementRecorded: "Arrangement recorded.",
+  prospectToastEffect_claimRecorded: "Claim recorded.",
+
   prospectErr_requirementsNotMet: "Cannot accept. Requirements not met.",
   prospectErr_insufficientResources: "Cannot accept. Insufficient resources.",
   prospectErr_alreadyDecided: "Already decided.",
@@ -207,6 +227,41 @@ const COPY = {
   prospectLog_accepted: (type: string, summary: string) => `Prospect accepted: ${type} — ${summary}`,
   prospectLog_rejected: (type: string, summary: string) => `Prospect rejected: ${type} — ${summary}`,
   prospectLog_expired: (type: string, summary: string) => `Prospect expired: ${type} — ${summary}`,
+
+
+  // v0.2.4 binding copy (docs/ux/v0.2.4_copy.md)
+  courtSizeLabel: "Court Size",
+  tooltipCourtSize: "Court Size — Number of people in your household and court supported by your stores.",
+  courtConsumptionLabel: "Court Consumption (3y)",
+  courtConsumptionHelper: "Court Consumption (3y) — Food used by your household and officers over the next 3 years.",
+  peasantConsumptionLabel: "Peasant Consumption (3y)",
+  peasantConsumptionHelper: "Peasant Consumption (3y) — Food used by the manor population over the next 3 years.",
+  consumptionReconcileNote: "Both draw from the same Food Stores. Totals reconcile in Food Balance.",
+  courtEatsSameStores: "Your court eats from the same stores as the manor.",
+
+  // Court roster role labels (exact)
+  courtRoleSteward: "Steward",
+  courtRoleClerk: "Clerk",
+  courtRoleMarshal: "Marshal",
+
+  // Household relationship type labels
+  relationship_son: "Son",
+  relationship_daughter: "Daughter",
+  relationship_spouse: "Spouse",
+  relationship_officer: "Officer",
+  relationship_kinsman: "Kinsman",
+  relationship_kinswoman: "Kinswoman",
+  relationship_kin: "Kin",
+
+  // Marriage confirmation toast (post-accept)
+  marriageToast_line1: (child_name: string) => `Marriage arranged. ${child_name} is now married.`,
+  marriageToast_line2_withSpouse: (spouse_name: string) => `${spouse_name} joins your court. Court size increased.`,
+  marriageToast_spouseJoinsCourt: (spouse_name: string) => `${spouse_name} joins your court.`,
+  marriageToast_courtSizeIncreased: "Court size increased.",
+
+  // Turn Summary top block
+  turnSummary_last3Years: "Last 3 years",
+  turnSummary_nowChoose: "Now choose",
 
   // v0.2.3.2 patch addendum: End Turn feedback
   turnResolvedToast: (turn_index: number) => `Turn ${turn_index} resolved.`
@@ -897,14 +952,35 @@ ${confirmBody}`);
 
           recordProspectDecision(id, "accept");
 
-          const acceptedMsg =
-            t === "marriage"
-              ? COPY.prospectToastAccepted_marriage
-              : t === "grant"
-                ? COPY.prospectToastAccepted_grant
-                : t === "inheritance_claim"
-                  ? COPY.prospectToastAccepted_inheritance_claim
-                  : COPY.prospectDecisionRecorded;
+          const typeToken = prospectTypeLabel(t);
+          const shortEffectSummary =
+            coinDelta !== null && coinDelta !== 0
+              ? `Coin ${fmtSigned(coinDelta)}.`
+              : t === "inheritance_claim"
+                ? COPY.prospectToastEffect_claimRecorded
+                : COPY.prospectToastEffect_arrangementRecorded;
+          const acceptedMsg = COPY.prospectToastAccepted(typeToken, shortEffectSummary);
+
+          // v0.2.4: Marriage acceptance confirmation (explicit copy + optional spouse/court note).
+          if (t === "marriage") {
+            const childName =
+              personNameFromRegistry(typeof p?.subject_person_id === "string" ? p.subject_person_id : null) ??
+              (typeof p?.subject_person_name === "string" ? p.subject_person_name : null);
+
+            const spouseName =
+              personNameFromRegistry(typeof p?.spouse_person_id === "string" ? p.spouse_person_id : null) ??
+              (typeof p?.spouse_name === "string" ? p.spouse_name : null) ??
+              (typeof p?.other_person_name === "string" ? p.other_person_name : null) ??
+              null;
+
+            if (childName) {
+              const line1 = COPY.marriageToast_line1(childName);
+              const msg = spouseName ? `${line1}\n${COPY.marriageToast_line2_withSpouse(spouseName)}` : line1;
+              setToast({ kind: "ok", message: msg });
+              return;
+            }
+          }
+
           setToast({ kind: "ok", message: acceptedMsg });
           return;
         }
@@ -916,14 +992,9 @@ ${confirmBody}`);
         if (!ok) return;
         recordProspectDecision(id, "reject");
 
-        const rejectedMsg =
-          t === "marriage"
-            ? COPY.prospectToastRejected_marriage
-            : t === "grant"
-              ? COPY.prospectToastRejected_grant
-              : t === "inheritance_claim"
-                ? COPY.prospectToastRejected_inheritance_claim
-                : COPY.prospectDecisionRecorded;
+        const typeToken = prospectTypeLabel(t);
+        const baseMsg = COPY.prospectToastDeclined(typeToken);
+        const rejectedMsg = rejectHasStandingRisk(p) ? `${baseMsg} ${COPY.prospectToastStandingMayDecrease}` : baseMsg;
         setToast({ kind: "ok", message: rejectedMsg });
       }
 
@@ -960,11 +1031,29 @@ ${confirmBody}`);
         return out as any;
       }
 
+      function rejectHasStandingRisk(p: any): boolean {
+        const pe: any = p?.predicted_effects;
+        const rds: any[] = Array.isArray(pe?.relationship_deltas) ? pe.relationship_deltas : [];
+        if (rds.length === 0) return false;
+        return rds.some((d) => {
+          const a = typeof d?.allegiance_delta === "number" ? d.allegiance_delta : 0;
+          const r = typeof d?.respect_delta === "number" ? d.respect_delta : 0;
+          const t = typeof d?.threat_delta === "number" ? d.threat_delta : 0;
+          return a < 0 || r < 0 || t > 0;
+        });
+      }
+
       // Labor delta cap (UX v0.2.2): total shift across roles
       const laborRequested =
         Math.abs(decisions.labor.desired_farmers - m.farmers) +
         Math.abs(decisions.labor.desired_builders - m.builders);
       const laborLimitExceeded = laborRequested > ctx.max_labor_shift;
+
+      const plannedFarmers = Number.isFinite(decisions.labor.desired_farmers) ? decisions.labor.desired_farmers : 0;
+      const plannedBuilders = Number.isFinite(decisions.labor.desired_builders) ? decisions.labor.desired_builders : 0;
+      const laborAssignedNextTurn = plannedFarmers + plannedBuilders;
+      const laborAvailableNextTurn = m.population;
+      const laborOversubscribed = laborAssignedNextTurn > laborAvailableNextTurn;
 
       type OblAmount = { coin: number; bushels: number };
       function readObAmount(v: any): OblAmount | null {
@@ -1012,6 +1101,225 @@ ${confirmBody}`);
       const consBuilders = m.builders * builderConsPerTurn;
       const consIdle = idle * baselineConsPerTurn;
 
+
+      // v0.2.4: Consumption split (peasant vs court) + optional court size.
+      const peasantConsumptionBushels: number | null = (() => {
+        const v: any = (ctx.report as any)?.peasant_consumption_bushels;
+        return typeof v === "number" && Number.isFinite(v) ? Math.trunc(v) : null;
+      })();
+      const courtConsumptionBushels: number | null = (() => {
+        const v: any = (ctx.report as any)?.court_consumption_bushels;
+        return typeof v === "number" && Number.isFinite(v) ? Math.trunc(v) : null;
+      })();
+      const totalConsumptionBushels: number | null = (() => {
+        const v: any = (ctx.report as any)?.total_consumption_bushels;
+        if (typeof v === "number" && Number.isFinite(v)) return Math.trunc(v);
+        const legacy = (ctx.report as any)?.consumption_bushels;
+        if (typeof legacy === "number" && Number.isFinite(legacy)) return Math.trunc(legacy);
+        if (peasantConsumptionBushels !== null && courtConsumptionBushels !== null) return peasantConsumptionBushels + courtConsumptionBushels;
+        return null;
+      })();
+      const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
+
+      // v0.2.4: Court roster derivation (UI-only; tolerant to missing fields).
+      type CourtRosterEntry = { person: PersonLike; relationship: string | null; officer_role: string | null; badges: string[] };
+
+      function officerRoleLabelFromKey(key: string): string | null {
+        const k = String(key || "").toLowerCase();
+        if (k.includes("steward") || k.includes("advisor")) return COPY.courtRoleSteward;
+        if (k.includes("clerk") || k.includes("chamberlain")) return COPY.courtRoleClerk;
+        if (k.includes("marshal")) return COPY.courtRoleMarshal;
+        return null;
+      }
+
+      function kinLabelForUnknown(p: PersonLike): string {
+        if ((p as any)?.sex === "M") return COPY.relationship_kinsman;
+        if ((p as any)?.sex === "F") return COPY.relationship_kinswoman;
+        return COPY.relationship_kin;
+      }
+
+      function childLabel(p: PersonLike): string {
+        if ((p as any)?.sex === "M") return COPY.relationship_son;
+        if ((p as any)?.sex === "F") return COPY.relationship_daughter;
+        return COPY.relationship_kin;
+      }
+
+      const courtRoster: { entries: CourtRosterEntry[]; alive_count: number } = (() => {
+        const entries: CourtRosterEntry[] = [];
+
+        const s: any = ctx.preview_state as any;
+        const playerHouseId: string | null = typeof s?.player_house_id === "string" ? s.player_house_id : null;
+        const houseRec: any = playerHouseId && s?.houses && typeof s.houses === "object" ? (s.houses as any)[playerHouseId] : null;
+        const peopleRec: any = s?.people && typeof s.people === "object" ? s.people : {};
+
+        // Collect base household people (head/spouse/children).
+        const head = hhView.head;
+        const spouse = hhView.spouse;
+        const kids = [...(hhView.children ?? [])];
+        kids.sort((a, b) => {
+          const aa = typeof a.age === "number" ? a.age : null;
+          const bb = typeof b.age === "number" ? b.age : null;
+          if (aa !== null && bb !== null && bb !== aa) return bb - aa;
+          return String(a.id).localeCompare(String(b.id));
+        });
+
+        const base: Array<{ person: PersonLike; relationship: string | null; officer_role: string | null }> = [];
+        if (head) base.push({ person: head, relationship: null, officer_role: null });
+        if (spouse) base.push({ person: spouse, relationship: COPY.relationship_spouse, officer_role: null });
+        for (const c of kids) base.push({ person: c, relationship: childLabel(c), officer_role: null });
+
+        // Officer IDs (v0.2.4 recommended storage: house.court_officers).
+        const officersRaw: any = houseRec?.court_officers ?? houseRec?.courtOfficers ?? null;
+        const officerPairs: Array<{ role_key: string; person_id: string }> = [];
+
+        if (officersRaw && typeof officersRaw === "object") {
+          if (Array.isArray(officersRaw)) {
+            for (const it of officersRaw) {
+              const role_key =
+                typeof (it as any)?.role === "string"
+                  ? (it as any).role
+                  : typeof (it as any)?.key === "string"
+                    ? (it as any).key
+                    : "";
+              const person_id =
+                typeof (it as any)?.person_id === "string"
+                  ? (it as any).person_id
+                  : typeof (it as any)?.id === "string"
+                    ? (it as any).id
+                    : "";
+              if (role_key && person_id) officerPairs.push({ role_key, person_id });
+            }
+          } else {
+            for (const [k, v] of Object.entries(officersRaw)) {
+              if (typeof v === "string" && v) officerPairs.push({ role_key: k, person_id: v });
+            }
+          }
+        }
+
+        // Stable officer ordering.
+        const roleRank = (role_key: string): number => {
+          const r = officerRoleLabelFromKey(role_key);
+          if (r === COPY.courtRoleSteward) return 1;
+          if (r === COPY.courtRoleClerk) return 2;
+          if (r === COPY.courtRoleMarshal) return 3;
+          return 9;
+        };
+        officerPairs.sort((a, b) => roleRank(a.role_key) - roleRank(b.role_key) || a.person_id.localeCompare(b.person_id));
+
+        const officers: Array<{ person: PersonLike; relationship: string; officer_role: string | null }> = [];
+        for (const op of officerPairs) {
+          const p = peopleRec?.[op.person_id];
+          if (!p || typeof p !== "object") continue;
+          const person = p as PersonLike;
+          const officer_role = officerRoleLabelFromKey(op.role_key);
+          // Only show titled officer rows if the role is recognized.
+          if (!officer_role) continue;
+          officers.push({ person, relationship: COPY.relationship_officer, officer_role });
+        }
+
+        // Extra court IDs (e.g., married-in spouses).
+        const extraIdsRaw: any = houseRec?.court_extra_ids ?? houseRec?.courtExtraIds ?? houseRec?.court_extra_ids_v0_2_4 ?? null;
+        const extraIds: string[] = Array.isArray(extraIdsRaw) ? extraIdsRaw.filter((x) => typeof x === "string") : [];
+        const kinEdges: any[] = Array.isArray(s?.kinship_edges) ? s.kinship_edges : Array.isArray(s?.kinship) ? s.kinship : [];
+
+        const baseIds = new Set<string>();
+        for (const b of base) if (b.person && typeof b.person.id === "string") baseIds.add(b.person.id);
+        for (const o of officers) if (o.person && typeof o.person.id === "string") baseIds.add(o.person.id);
+
+        function isSpouseOfKnown(id: string): boolean {
+          for (const e of kinEdges) {
+            if (!e || typeof e !== "object") continue;
+            if ((e as any).kind !== "spouse_of") continue;
+            const a = (e as any).a_id;
+            const b = (e as any).b_id;
+            if (typeof a !== "string" || typeof b !== "string") continue;
+            if (a === id && baseIds.has(b)) return true;
+            if (b === id && baseIds.has(a)) return true;
+          }
+          return false;
+        }
+
+        const extras: Array<{ person: PersonLike; relationship: string; officer_role: null }> = [];
+        for (const id of extraIds) {
+          const p = peopleRec?.[id];
+          if (!p || typeof p !== "object") continue;
+          const person = p as PersonLike;
+          const relationship = isSpouseOfKnown(id) ? COPY.relationship_spouse : kinLabelForUnknown(person);
+          extras.push({ person, relationship, officer_role: null });
+        }
+
+        const combined = [...base, ...officers, ...extras];
+
+        // Determine widow/widower (or fallback widowed) badge target.
+        let widowedId: string | null = null;
+        if (head && spouse) {
+          const headAlive = (head as any).alive !== false;
+          const spouseAlive = (spouse as any).alive !== false;
+          if (headAlive && !spouseAlive) widowedId = head.id;
+          else if (!headAlive && spouseAlive) widowedId = spouse.id;
+        }
+        if (!widowedId && spouse && hhView.spouse_status === "widow" && (spouse as any).alive !== false) {
+          widowedId = spouse.id;
+        }
+
+        function widowBadgeText(p: PersonLike): string {
+          if ((p as any)?.sex === "F") return COPY.widow;
+          if ((p as any)?.sex === "M") return COPY.widower;
+          return COPY.widowed;
+        }
+
+        function badgeOrderKey(b: string): number {
+          if (b === COPY.heirBadge) return 1;
+          if (b === COPY.marriedBadge) return 2;
+          if (b === COPY.widow || b === COPY.widower || b === COPY.widowed) return 3;
+          return 9;
+        }
+
+        const heirId = hhView.heir_id;
+
+        function computeBadges(p: PersonLike): string[] {
+          const alive = (p as any).alive !== false;
+          if (!alive) return [COPY.deceasedBadge];
+
+          const badges: string[] = [];
+          if (heirId && p.id === heirId) badges.push(COPY.heirBadge);
+          if ((p as any)?.married) badges.push(COPY.marriedBadge);
+          if (widowedId && p.id === widowedId) badges.push(widowBadgeText(p));
+
+          badges.sort((a, b) => badgeOrderKey(a) - badgeOrderKey(b));
+          return badges;
+        }
+
+        function clampBadges(badges: string[]): { shown: string[]; overflow: number } {
+          const max = 3;
+          if (badges.length <= max) return { shown: badges, overflow: 0 };
+          return { shown: badges.slice(0, max), overflow: badges.length - max };
+        }
+
+        const seen = new Set<string>();
+        let alive_count = 0;
+
+        for (const it of combined) {
+          const p = it.person;
+          const id = typeof p?.id === "string" ? p.id : "";
+          if (!id || seen.has(id)) continue;
+          seen.add(id);
+
+          const b = computeBadges(p);
+          const { shown, overflow } = clampBadges(b);
+          const finalBadges = overflow > 0 ? [...shown, `+${overflow}`] : shown;
+
+          if ((p as any).alive !== false) alive_count += 1;
+
+          entries.push({ person: p, relationship: it.relationship, officer_role: it.officer_role, badges: finalBadges });
+        }
+
+        return { entries, alive_count };
+      })();
+
+      const courtSize = courtRoster.alive_count;
+
+
       content = (
         <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -1034,6 +1342,7 @@ ${confirmBody}`);
                 padding: 10,
                 border: toast.kind === "error" ? "1px solid #f55" : "1px solid #ccc",
                 background: toast.kind === "error" ? "#fff5f5" : "#fafafa",
+                whiteSpace: "pre-line",
                 marginBottom: 12
               }}
             >
@@ -1041,7 +1350,32 @@ ${confirmBody}`);
             </div>
           ) : null}
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          
+          <div style={{ padding: 12, border: "1px solid #ccc", background: "#fafafa", marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>{COPY.turnSummary_last3Years}</div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 12 }}>
+              <div>
+                Population: <b>{fmtSigned(deltaPop)}</b> (now {m.population})
+              </div>
+              <div>
+                Bushels: <b>{fmtSigned(deltaBushels)}</b> (now {m.bushels_stored})
+              </div>
+              <div>
+                Coin: <b>{fmtSigned(deltaCoin)}</b> (now {m.coin})
+              </div>
+              <div>
+                Unrest: <b>{fmtSigned(deltaUnrest)}</b> (now {m.unrest}/100)
+              </div>
+              {ctx.report.shortage_bushels > 0 ? (
+                <div>
+                  <b>Shortage:</b> {ctx.report.shortage_bushels} bushels
+                </div>
+              ) : null}
+            </div>
+            <div style={{ marginTop: 10, fontWeight: 700 }}>{COPY.turnSummary_nowChoose}</div>
+          </div>
+
+<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ padding: 12, border: "1px solid #ccc" }}>
               <h3>
                 Manor State <span style={{ fontSize: 12, opacity: 0.7 }}>(before decisions)</span>
@@ -1218,6 +1552,9 @@ ${confirmBody}`);
                     <b>{COPY.childrenLabel}</b>{" "}
                     {hhView.children.length ? hhView.children.length : COPY.none}
                   </div>
+                  <div>
+                    <b>{COPY.courtSizeLabel}</b> {courtSize} <Tip text={COPY.tooltipCourtSize} />
+                  </div>
                   <div style={{ gridColumn: "1 / -1", fontSize: 12, opacity: 0.9 }}>
                     {lastSuccession
                       ? `${COPY.lastSuccessionLabel} Turn ${lastSuccession.turn_index} — ${COPY.logOutcome_succession(lastSuccession.new_ruler_name)}`
@@ -1227,52 +1564,28 @@ ${confirmBody}`);
 
                 {showHouseholdDetails ? (
                   <div style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}>
-                    <div style={{ fontWeight: 700, marginBottom: 6 }}>{COPY.family}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, marginBottom: 6 }}>
+                      {COPY.courtSizeLabel}: {courtSize} <Tip text={COPY.tooltipCourtSize} />
+                    </div>
 
-                    {(() => {
-                      const head = hhView.head;
-                      const spouse = hhView.spouse;
-                      const heirId = hhView.heir_id;
-                      const kids = [...(hhView.children ?? [])];
-                      kids.sort((a, b) => {
-                        const aa = typeof a.age === "number" ? a.age : null;
-                        const bb = typeof b.age === "number" ? b.age : null;
-                        if (aa !== null && bb !== null && bb !== aa) return bb - aa; // oldest first
-                        return String(a.id).localeCompare(String(b.id));
-                      });
-
-                      const familyRows: Array<{ key: string; person: PersonLike; badge?: string | null; extra?: string | null }>=[];
-                      if (head) familyRows.push({ key: `head:${head.id}`, person: head, badge: null, extra: formatAge(head.age) });
-
-                      const heir = heirId ? kids.find((c) => c.id === heirId) : null;
-                      if (heir && (!head || heir.id !== head.id)) {
-                        familyRows.push({ key: `heir:${heir.id}`, person: heir, badge: COPY.heirBadge, extra: formatAge(heir.age) });
-                      }
-
-                      if (spouse) {
-                        let widowBadge: string | null = null;
-                        if (hhView.spouse_status === "widow") {
-                          widowBadge = spouse.sex === "M" ? COPY.widower : COPY.widow;
-                        }
-                        familyRows.push({ key: `spouse:${spouse.id}`, person: spouse, badge: widowBadge, extra: formatAge(spouse.age) });
-                      }
-
-                      for (const c of kids) {
-                        familyRows.push({ key: `child:${c.id}`, person: c, badge: c.id === heirId ? COPY.heirBadge : null, extra: formatAge(c.age) });
-                      }
-
-                      return (
-                        <ul style={{ margin: "0 0 10px 18px" }}>
-                          {familyRows.map((r) => (
-                            <li key={r.key} style={{ marginBottom: 4 }}>
-                              <span>{formatPersonName(r.person)}</span>
-                              {r.badge ? <Badge text={r.badge} /> : null}
-                              {(r.person as any)?.married ? <Badge text={COPY.prospectType_marriage} /> : null}
-                            </li>
-                          ))}
-                        </ul>
-                      );
-                    })()}
+                    <ul style={{ margin: "0 0 10px 18px" }}>
+                      {courtRoster.entries.map((r) => (
+                        <li key={r.person.id} style={{ marginBottom: 6 }}>
+                          <div>
+                            <span>{formatPersonName(r.person)}</span>
+                            {r.badges.map((b) => (
+                              <Badge key={`${r.person.id}:${b}`} text={b} />
+                            ))}
+                          </div>
+                          {r.relationship || r.officer_role ? (
+                            <div style={{ fontSize: 12, opacity: 0.75 }}>
+                              {r.relationship ? r.relationship : null}
+                              {r.officer_role ? ` — ${r.officer_role}` : null}
+                            </div>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
 
                     <div style={{ fontWeight: 700, marginBottom: 6 }}>{COPY.houseLog}</div>
 
@@ -1369,10 +1682,22 @@ ${confirmBody}`);
                 <li>Weather multiplier: {ctx.report.weather_multiplier.toFixed(2)}</li>
                 <li>Production: +{ctx.report.production_bushels} bushels</li>
                 <li>
-                  Consumption: -{ctx.report.consumption_bushels} bushels
+                  Consumption: -{totalConsumptionBushels !== null ? totalConsumptionBushels : ctx.report.consumption_bushels} bushels
                   <Tip
                     text={`Baseline consumption: ${baselineConsPerTurn} bushels/turn per person. Builders cost +${builderExtraPerTurn} extra bushels/turn each (turn=${TURN_YEARS}y).`}
                   />
+                  {hasConsumptionSplit ? (
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                      <div>
+                        <b>{COPY.peasantConsumptionLabel}:</b> -{peasantConsumptionBushels} bushels <Tip text={COPY.peasantConsumptionHelper} />
+                      </div>
+                      <div>
+                        <b>{COPY.courtConsumptionLabel}:</b> -{courtConsumptionBushels} bushels <Tip text={COPY.courtConsumptionHelper} />
+                      </div>
+                      <div style={{ marginTop: 4 }}>{COPY.courtEatsSameStores}</div>
+                      <div>{COPY.consumptionReconcileNote}</div>
+                    </div>
+                  ) : null}
                 </li>
                 <li>
                   Spoilage: -{ctx.report.spoilage.loss_bushels} bushels ({(ctx.report.spoilage.rate * 100).toFixed(1)}%)
@@ -1392,8 +1717,17 @@ ${confirmBody}`);
                     <li>
                       Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels/turn
                     </li>
+                    {hasConsumptionSplit ? (
+                      <li>
+                        {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels/turn
+                      </li>
+                    ) : null}
                     <li>
-                      Total: {consFarmers + consBuilders + consIdle} bushels/turn
+                      Total:{" "}
+                      {hasConsumptionSplit && courtConsumptionBushels !== null
+                        ? consFarmers + consBuilders + consIdle + courtConsumptionBushels
+                        : consFarmers + consBuilders + consIdle}{" "}
+                      bushels/turn
                     </li>
                   </ul>
                   <div style={{ fontSize: 12, opacity: 0.85 }}>
@@ -1531,6 +1865,14 @@ ${confirmBody}`);
                             ) : null}
 
                             {summary ? <div style={{ marginTop: 6 }}>{summary}</div> : null}
+
+                            {t === "grant" ? (
+                              <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{COPY.prospectGrantHelperLine}</div>
+                            ) : null}
+
+                            {t === "grant" && canReject && rejectHasStandingRisk(p) ? (
+                              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{COPY.prospectGrantRejectNote}</div>
+                            ) : null}
 
                             {reqTexts.length > 0 ? (
                               <div style={{ marginTop: 10, fontSize: 12 }}>
@@ -1820,6 +2162,14 @@ ${confirmBody}`);
                   </div>
                 ) : null}
               </div>
+
+              {laborOversubscribed ? (
+                <div style={{ padding: 10, border: "1px solid #f55", background: "#fff5f5", marginTop: 10, marginBottom: 10 }}>
+                  <div style={{ fontWeight: 700 }}>{COPY.laborOversubscribedTitle}</div>
+                  <div style={{ marginTop: 4 }}>{COPY.laborOversubscribedBody(laborAssignedNextTurn, laborAvailableNextTurn)}</div>
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{COPY.laborOversubscribedHelper}</div>
+                </div>
+              ) : null}
 
               {/* Labor */}
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>

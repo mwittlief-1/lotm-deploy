@@ -6,6 +6,7 @@ import { normalizeState } from "./normalize";
 import { ensureEdge } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
+import { ensureCourtOfficers } from "./court";
 
 function traitLevel(rng: Rng): number {
   const r = rng.next();
@@ -123,6 +124,8 @@ export function createNewRun(run_seed: string): RunState {
   normalizeState(state);
   ensurePeopleFirst(state);
   ensureExternalHousesSeed_v0_2_2(state);
+  // v0.2.4: deterministic court officers (idempotent; stream-isolated).
+  ensureCourtOfficers(state);
   ensurePeopleFirst(state);
   return state;
 }

@@ -5,6 +5,7 @@ import { normalizeState } from "./normalize.js";
 import { ensureEdge } from "./relationships.js";
 import { ensurePeopleFirst } from "./peopleFirst.js";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen.js";
+import { ensureCourtOfficers } from "./court.js";
 function traitLevel(rng) {
     const r = rng.next();
     if (r < 0.03)
@@ -45,9 +46,11 @@ function mkPerson(rng, id, sex, age) {
 }
 export function createNewRun(run_seed) {
     const rng = new Rng(run_seed, "household", 0, "init");
-    const head = mkPerson(rng, "p_head", "M", 27);
+    // v0.2.3.2 age sanity (LOCK): first child at husband age 22, wife age 18.
+    // Keep deterministic starter ages (no randomness yet).
+    const head = mkPerson(rng, "p_head", "M", 34);
     head.married = true;
-    const spouse = mkPerson(rng, "p_spouse", "F", 24);
+    const spouse = mkPerson(rng, "p_spouse", "F", 30);
     spouse.married = true;
     const child1 = mkPerson(rng, "p_child1", rng.bool(0.55) ? "M" : "F", 12);
     const child2 = mkPerson(rng, "p_child2", rng.bool(0.55) ? "M" : "F", 9);
@@ -112,6 +115,8 @@ export function createNewRun(run_seed) {
     normalizeState(state);
     ensurePeopleFirst(state);
     ensureExternalHousesSeed_v0_2_2(state);
+    // v0.2.4: deterministic court officers (idempotent; stream-isolated).
+    ensureCourtOfficers(state);
     ensurePeopleFirst(state);
     return state;
 }

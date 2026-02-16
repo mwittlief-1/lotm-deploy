@@ -7,6 +7,7 @@ import { IMPROVEMENTS, hasImprovement } from "../content/improvements.js";
 import { adjustEdge } from "./relationships.js";
 import { ensurePeopleFirst } from "./peopleFirst.js";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen.js";
+import { addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers } from "./court.js";
 function modsObj(state) {
     const anyFlags = state.flags;
     if (!anyFlags._mods || typeof anyFlags._mods !== "object")
@@ -87,13 +88,61 @@ function computeHeirId(state) {
         // older first; deterministic tie-break by id
         if (b.age !== a.age)
             return b.age - a.age;
-        return String(a.id).localeCompare(String(b.id));
+        if (a.id < b.id)
+            return -1;
+        if (a.id > b.id)
+            return 1;
+        return 0;
     };
     const males = kids.filter((c) => c.sex === "M").sort(byPrimogeniture);
     const females = kids.filter((c) => c.sex === "F").sort(byPrimogeniture);
     const heir = (males[0] ?? females[0]) ?? null;
     state.house.heir_id = heir ? heir.id : null;
     return state.house.heir_id ?? null;
+}
+function buildHouseholdRoster_v0_2_3_2(state) {
+    const heirId = state.house.heir_id ?? null;
+    const spouse = state.house.spouse ?? null;
+    // Surviving spouse (if any) gets the widow/widower badge.
+    let widowedPersonId = null;
+    if (spouse) {
+        if (state.house.head.alive && !spouse.alive)
+            widowedPersonId = state.house.head.id;
+        else if (!state.house.head.alive && spouse.alive)
+            widowedPersonId = spouse.id;
+    }
+    const rows = [];
+    const seen = new Set();
+    const pushRow = (person, role) => {
+        if (!person?.id)
+            return;
+        if (seen.has(person.id))
+            return;
+        seen.add(person.id);
+        const badges = [];
+        if (!person.alive)
+            badges.push("deceased");
+        if (person.alive && widowedPersonId === person.id)
+            badges.push(person.sex === "M" ? "widower" : "widow");
+        if (person.id === heirId)
+            badges.push("heir");
+        rows.push({ person_id: person.id, role, badges });
+    };
+    pushRow(state.house.head, "head");
+    if (spouse)
+        pushRow(spouse, "spouse");
+    const sortedKids = [...state.house.children].sort((a, b) => {
+        if (b.age !== a.age)
+            return b.age - a.age;
+        if (a.id < b.id)
+            return -1;
+        if (a.id > b.id)
+            return 1;
+        return 0;
+    });
+    for (const c of sortedKids)
+        pushRow(c, "child");
+    return { schema_version: "household_roster_v1", turn_index: state.turn_index, rows };
 }
 function boundedSnapshot(state) {
     // LOCKED (v0.0.5 QA blocker fix): snapshots must never contain `log` (or nested history).
@@ -166,16 +215,28 @@ function applyProductionAndConstruction(state, weather_multiplier) {
     }
     return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
 }
-function applyConsumptionAndShortage(state) {
+function applyConsumptionAndShortage(state, court_consumption_bushels) {
     const pop = state.manor.population;
     const farmers = state.manor.farmers;
     const builders = state.manor.builders;
     const idle = Math.max(0, pop - farmers - builders);
-    const consumption = Math.floor((farmers * BUSHELS_PER_PERSON_PER_YEAR + builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) + idle * BUSHELS_PER_PERSON_PER_YEAR) * TURN_YEARS);
+    const peasantConsumption = Math.floor((farmers * BUSHELS_PER_PERSON_PER_YEAR +
+        builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) +
+        idle * BUSHELS_PER_PERSON_PER_YEAR) *
+        TURN_YEARS);
+    const courtConsumption = Math.max(0, Math.trunc(court_consumption_bushels));
+    const consumption = asNonNegInt(peasantConsumption + courtConsumption);
     const before = state.manor.bushels_stored;
     if (before >= consumption) {
         state.manor.bushels_stored = asNonNegInt(before - consumption);
-        return { consumption_bushels: consumption, shortage_bushels: 0, population_delta: 0 };
+        return {
+            consumption_bushels: consumption,
+            peasant_consumption_bushels: peasantConsumption,
+            court_consumption_bushels: courtConsumption,
+            total_consumption_bushels: consumption,
+            shortage_bushels: 0,
+            population_delta: 0
+        };
     }
     const shortage = consumption - before;
     state.manor.bushels_stored = 0;
@@ -186,7 +247,15 @@ function applyConsumptionAndShortage(state) {
     const lossFrac = 0.03 + hRng.next() * 0.08; // 3%..11%
     const lost = Math.max(1, Math.floor(state.manor.population * lossFrac));
     state.manor.population = asNonNegInt(state.manor.population - lost);
+    let labor_before;
+    let labor_after;
+    let labor_auto_clamped;
     if (state.manor.farmers + state.manor.builders > state.manor.population) {
+        labor_before = {
+            population: asNonNegInt(state.manor.population),
+            farmers: asNonNegInt(state.manor.farmers),
+            builders: asNonNegInt(state.manor.builders)
+        };
         // remove from builders first (construction labor tends to flee first)
         const overflow = state.manor.farmers + state.manor.builders - state.manor.population;
         const bCut = Math.min(state.manor.builders, overflow);
@@ -194,8 +263,27 @@ function applyConsumptionAndShortage(state) {
         const rem = overflow - bCut;
         if (rem > 0)
             state.manor.farmers = Math.max(0, state.manor.farmers - rem);
+        labor_after = {
+            population: asNonNegInt(state.manor.population),
+            farmers: asNonNegInt(state.manor.farmers),
+            builders: asNonNegInt(state.manor.builders)
+        };
+        labor_auto_clamped = labor_before.farmers !== labor_after.farmers || labor_before.builders !== labor_after.builders;
     }
-    return { consumption_bushels: consumption, shortage_bushels: shortage, population_delta: -lost };
+    const res = {
+        consumption_bushels: consumption,
+        peasant_consumption_bushels: peasantConsumption,
+        court_consumption_bushels: courtConsumption,
+        total_consumption_bushels: consumption,
+        shortage_bushels: shortage,
+        population_delta: -lost
+    };
+    if (labor_before && labor_after) {
+        res.labor_auto_clamped = labor_auto_clamped;
+        res.labor_before = labor_before;
+        res.labor_after = labor_after;
+    }
+    return res;
 }
 // small helper to keep constant name typo-proof in this file
 function UNREST_SHORTAGE_PENALALTY_SAFE() {
@@ -241,9 +329,14 @@ function householdPhase(state, houseLog) {
     const hasPhysician = hasImprovement(state.manor.improvements, "physician");
     const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
     const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
+    const headWasAlive = state.house.head.alive;
+    const spouseWasAlive = state.house.spouse?.alive ?? false;
     function deathRoll(p) {
         if (!p.alive)
             return false;
+        // v0.2.3.2: cap extreme old-age survival (turn = 3y). Prevent ~120y rulers.
+        if (p.age >= 99)
+            return true;
         let base = 0.0;
         if (p.age < 16)
             base = MORTALITY_P_UNDER16;
@@ -253,11 +346,15 @@ function householdPhase(state, houseLog) {
             base = MORTALITY_P_UNDER55;
         else if (p.age < 65)
             base = MORTALITY_P_UNDER65;
-        else
-            base = MORTALITY_P_65PLUS;
+        else {
+            // Steepen mortality beyond 65 (no new RNG; deterministic math only).
+            const yearsOver = p.age - 65;
+            base = MORTALITY_P_65PLUS * (1 + yearsOver * 0.06);
+        }
         // discipline reduces risk slightly
         base *= 1 - (p.traits.discipline - 3) * 0.01;
         base *= mult;
+        base = Math.max(0, Math.min(0.95, base));
         return r.fork(`d:${p.id}`).bool(base);
     }
     for (const p of people) {
@@ -266,10 +363,39 @@ function householdPhase(state, houseLog) {
             deaths.push(`${p.name} (${p.id})`);
         }
     }
-    // Widowhood: spouse dies while head survives.
-    if (state.house.spouse && state.house.spouse.alive === false && state.house.head.alive) {
+    const headDiedThisTurn = headWasAlive && !state.house.head.alive;
+    const spouseDiedThisTurn = spouseWasAlive && Boolean(state.house.spouse) && state.house.spouse.alive === false;
+    // v0.2.3.2 widow semantics:
+    // - Surviving spouse is Widow/Widower/Widowed.
+    // - Deceased spouse is Deceased.
+    // - Log only once, at the turn of death.
+    if ((headDiedThisTurn || spouseDiedThisTurn) && state.house.spouse) {
+        // Marriage ended; block further births.
         state.house.spouse_status = "widow";
-        houseLog.push({ kind: "widowed", turn_index: state.turn_index, spouse_name: state.house.spouse.name });
+        let survivor = null;
+        let deceased = null;
+        if (headDiedThisTurn && state.house.spouse.alive) {
+            survivor = state.house.spouse;
+            deceased = state.house.head;
+        }
+        else if (spouseDiedThisTurn && state.house.head.alive) {
+            survivor = state.house.head;
+            deceased = state.house.spouse;
+        }
+        if (survivor && deceased) {
+            houseLog.push({
+                kind: "widowed",
+                turn_index: state.turn_index,
+                // Back-compat: spouse_name remains the deceased person's name.
+                spouse_name: deceased.name,
+                survivor_name: survivor.name,
+                survivor_id: survivor.id,
+                survivor_sex: survivor.sex,
+                deceased_name: deceased.name,
+                deceased_id: deceased.id,
+                deceased_age: deceased.age
+            });
+        }
     }
     // births: only if spouse exists + spouse_status is spouse
     if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
@@ -332,405 +458,492 @@ function buildMarriageWindow(state) {
     }
     return { eligible_child_ids: eligible.map((c) => c.id), offers };
 }
-
-// --- Prospects (v0.2.3) ---
 function readActiveProspects(state) {
-  const anyFlags = state.flags;
-  const raw = anyFlags._prospects_active_v1;
-  if (!Array.isArray(raw)) return [];
-  const out = [];
-  for (const r of raw) {
-    if (!r || typeof r !== "object") continue;
-    const id = r.id;
-    const ex = r.expires_turn;
-    if (typeof id === "string" && typeof ex === "number" && Number.isFinite(ex)) {
-      out.push({ id, expires_turn: Math.trunc(ex) });
+    const anyFlags = state.flags;
+    const raw = anyFlags._prospects_active_v1;
+    if (!Array.isArray(raw))
+        return [];
+    const out = [];
+    for (const r of raw) {
+        if (!r || typeof r !== "object")
+            continue;
+        const id = r.id;
+        const ex = r.expires_turn;
+        if (typeof id === "string" && typeof ex === "number" && Number.isFinite(ex)) {
+            out.push({ id, expires_turn: Math.trunc(ex) });
+        }
     }
-  }
-  return out.slice(0, 3);
+    return out.slice(0, 3);
 }
 function writeActiveProspects(state, refs) {
-  const anyFlags = state.flags;
-  const bounded = refs.slice(0, 3).map((r) => ({ id: r.id, expires_turn: Math.trunc(r.expires_turn) }));
-  if (bounded.length === 0) {
-    delete anyFlags._prospects_active_v1;
-    return;
-  }
-  anyFlags._prospects_active_v1 = bounded;
+    const anyFlags = state.flags;
+    const bounded = refs.slice(0, 3).map((r) => ({ id: r.id, expires_turn: Math.trunc(r.expires_turn) }));
+    if (bounded.length === 0) {
+        delete anyFlags._prospects_active_v1;
+        return;
+    }
+    anyFlags._prospects_active_v1 = bounded;
 }
 function guessProspectTypeFromId(id) {
-  if (id.includes("marriage")) return "marriage";
-  if (id.includes("inheritance")) return "inheritance_claim";
-  if (id.includes("grant")) return "grant";
-  return "grant";
+    if (id.includes("marriage"))
+        return "marriage";
+    if (id.includes("inheritance"))
+        return "inheritance_claim";
+    if (id.includes("grant"))
+        return "grant";
+    return "grant";
 }
 function summaryForType(t) {
-  if (t === "marriage") return "Marriage proposal";
-  if (t === "grant") return "Grant offer";
-  return "Inheritance claim";
+    if (t === "marriage")
+        return "Marriage proposal";
+    if (t === "grant")
+        return "Grant offer";
+    return "Inheritance claim";
 }
 function uncertaintyForType(t) {
-  if (t === "marriage") return "known";
-  if (t === "grant") return "likely";
-  return "possible";
+    if (t === "marriage")
+        return "known";
+    if (t === "grant")
+        return "likely";
+    return "possible";
 }
 function lookupProspectFromHistory(state, prospectId) {
-  const log = state.log ?? [];
-  for (let i = log.length - 1; i >= 0; i--) {
-    const rep = log[i]?.report;
-    const evs = rep?.prospects_log;
-    if (!Array.isArray(evs)) continue;
-    for (let j = evs.length - 1; j >= 0; j--) {
-      const ev = evs[j];
-      if (ev && ev.kind === "prospect_generated" && ev.prospect_id === prospectId && ev.prospect && typeof ev.prospect === "object") {
-        return ev.prospect;
-      }
+    const log = (state.log ?? []);
+    for (let i = log.length - 1; i >= 0; i--) {
+        const rep = log[i]?.report;
+        const evs = rep?.prospects_log;
+        if (!Array.isArray(evs))
+            continue;
+        for (let j = evs.length - 1; j >= 0; j--) {
+            const ev = evs[j];
+            if (ev && ev.kind === "prospect_generated" && ev.prospect_id === prospectId && ev.prospect && typeof ev.prospect === "object") {
+                return ev.prospect;
+            }
+        }
     }
-  }
-  return null;
+    return null;
 }
 function pickSponsorHouseId(state) {
-  const anyState = state;
-  const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-  const houses = anyState.houses && typeof anyState.houses === "object" ? anyState.houses : {};
-  const playerHeadId = typeof houses[playerHouseId]?.head_id === "string" ? houses[playerHouseId].head_id : state.house.head.id;
-  let best = null;
-  let bestRespect = -1;
-  const ids = Object.keys(houses).filter((id) => id !== playerHouseId).sort();
-  for (const hid of ids) {
-    const headId = houses[hid]?.head_id;
-    if (typeof headId !== "string") continue;
-    const edge = state.relationships.find((e) => e.from_id === playerHeadId && e.to_id === headId);
-    if (!edge) continue;
-    if (edge.respect > bestRespect) {
-      bestRespect = edge.respect;
-      best = hid;
-    }
-  }
-  return best ?? playerHouseId;
-}
-function bestMarriageOfferIndex_v0_2_2_policy(state, mw) {
-  let bestIdx = null;
-  let bestScore = -Infinity;
-  for (let i = 0; i < mw.offers.length; i++) {
-    const o = mw.offers[i];
-    const dowry = o.dowry_coin_net;
-    if (dowry < 0 && state.manor.coin < Math.abs(dowry)) continue;
-    const score = dowry * 3 + o.relationship_delta.respect * 2 + o.relationship_delta.allegiance;
-    if (score > bestScore) {
-      bestScore = score;
-      bestIdx = i;
-    }
-  }
-  return bestIdx;
-}
-function buildProspectsWindow_v0_2_3(state, marriageWindow, prospectsLog) {
-  const t = state.turn_index;
-  const anyState = state;
-  const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-  const sponsorHouseId = pickSponsorHouseId(state);
-  const active0 = readActiveProspects(state);
-  const active = [];
-  for (const ref of active0) {
-    if (t > ref.expires_turn) {
-      const p = lookupProspectFromHistory(state, ref.id);
-      if (p) {
-        prospectsLog.push({
-          kind: "prospect_expired",
-          turn_index: t,
-          type: p.type,
-          from_house_id: p.from_house_id,
-          to_house_id: p.to_house_id,
-          subject_person_id: p.subject_person_id,
-          prospect_id: p.id,
-          effects_applied: {}
-        });
-      } else {
-        const tg = guessProspectTypeFromId(ref.id);
-        prospectsLog.push({
-          kind: "prospect_expired",
-          turn_index: t,
-          type: tg,
-          from_house_id: sponsorHouseId,
-          to_house_id: playerHouseId,
-          subject_person_id: null,
-          prospect_id: ref.id,
-          effects_applied: {}
-        });
-      }
-      continue;
-    }
-    active.push(ref);
-  }
-  writeActiveProspects(state, active);
-  const prospects = [];
-  for (const ref of active) {
-    const p = lookupProspectFromHistory(state, ref.id);
-    if (p) {
-      prospects.push({ ...p, expires_turn: ref.expires_turn });
-    } else {
-      const tg = guessProspectTypeFromId(ref.id);
-      prospects.push({
-        id: ref.id,
-        type: tg,
-        from_house_id: sponsorHouseId,
-        to_house_id: playerHouseId,
-        subject_person_id: null,
-        summary: summaryForType(tg),
-        requirements: [],
-        costs: {},
-        predicted_effects: {},
-        uncertainty: uncertaintyForType(tg),
-        expires_turn: ref.expires_turn,
-        actions: ["accept", "reject"]
-      });
-    }
-  }
-  const activeTypes = new Set(prospects.map((p) => p.type));
-  const idRng = new Rng(state.run_seed, "prospects", t, "id");
-  function makeId(pt, subject) {
-    const n = idRng.fork(`id:${pt}:${sponsorHouseId}:${subject ?? "none"}`).int(0, 1_000_000_000);
-    return `pros_${pt}_${t}_${n.toString(36)}`;
-  }
-  function emitGenerated(p) {
-    prospectsLog.push({
-      kind: "prospect_generated",
-      turn_index: t,
-      type: p.type,
-      from_house_id: p.from_house_id,
-      to_house_id: p.to_house_id,
-      subject_person_id: p.subject_person_id,
-      prospect_id: p.id,
-      prospect: p
-    });
-  }
-  function addProspect(p) {
-    if (prospects.length >= 3) return;
-    prospects.push(p);
-    active.push({ id: p.id, expires_turn: p.expires_turn });
-    activeTypes.add(p.type);
-    emitGenerated(p);
-  }
-  if (prospects.length < 3 && !activeTypes.has("marriage") && marriageWindow && marriageWindow.eligible_child_ids.length > 0 && marriageWindow.offers.length > 0) {
-    const subjectId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0];
-    const bestIdx = bestMarriageOfferIndex_v0_2_2_policy(state, marriageWindow);
-    if (bestIdx !== null) {
-      const offer = marriageWindow.offers[bestIdx];
-      const relDeltas = [];
-      relDeltas.push({
-        scope: "person",
-        from_id: state.house.head.id,
-        to_id: offer.house_person_id,
-        allegiance_delta: offer.relationship_delta.allegiance,
-        respect_delta: offer.relationship_delta.respect,
-        threat_delta: offer.relationship_delta.threat
-      });
-      if (offer.liege_delta) {
-        relDeltas.push({
-          scope: "person",
-          from_id: state.house.head.id,
-          to_id: state.locals.liege.id,
-          allegiance_delta: 0,
-          respect_delta: offer.liege_delta.respect,
-          threat_delta: offer.liege_delta.threat
-        });
-      }
-      const p = {
-        id: makeId("marriage", subjectId),
-        type: "marriage",
-        from_house_id: sponsorHouseId,
-        to_house_id: playerHouseId,
-        subject_person_id: subjectId,
-        summary: "Marriage proposal",
-        requirements: [],
-        costs: {},
-        predicted_effects: { coin_delta: offer.dowry_coin_net, relationship_deltas: relDeltas, flags_set: [] },
-        uncertainty: "known",
-        expires_turn: t + 2,
-        actions: ["accept", "reject"]
-      };
-      addProspect(p);
-    }
-  }
-  const arrears = state.manor.obligations.arrears;
-  const hasArrears = (arrears?.coin ?? 0) > 0 || (arrears?.bushels ?? 0) > 0;
-  if (prospects.length < 3 && !activeTypes.has("grant") && hasArrears) {
-    const p = {
-      id: makeId("grant", null),
-      type: "grant",
-      from_house_id: sponsorHouseId,
-      to_house_id: playerHouseId,
-      subject_person_id: null,
-      summary: "Grant offer",
-      requirements: [],
-      costs: {},
-      predicted_effects: {},
-      uncertainty: "likely",
-      expires_turn: t + 2,
-      actions: ["accept", "reject"]
-    };
-    addProspect(p);
-  }
-  const heir = state.house.heir_id ?? computeHeirId(state);
-  if (prospects.length < 3 && !activeTypes.has("inheritance_claim") && heir === null) {
-    const p = {
-      id: makeId("inheritance_claim", state.house.head.id),
-      type: "inheritance_claim",
-      from_house_id: sponsorHouseId,
-      to_house_id: playerHouseId,
-      subject_person_id: state.house.head.id,
-      summary: "Inheritance claim",
-      requirements: [],
-      costs: {},
-      predicted_effects: { flags_set: ["inheritance_claim_active"] },
-      uncertainty: "possible",
-      expires_turn: t + 2,
-      actions: ["accept", "reject"]
-    };
-    addProspect(p);
-  }
-  writeActiveProspects(state, active);
-  const order = { marriage: 0, grant: 1, inheritance_claim: 2 };
-  prospects.sort((a, b) => {
-    const da = order[a.type] ?? 99;
-    const db = order[b.type] ?? 99;
-    if (da != db) return da - db;
-    return a.id.localeCompare(b.id);
-  });
-  const householdIds = new Set();
-  householdIds.add(state.house.head.id);
-  if (state.house.spouse) householdIds.add(state.house.spouse.id);
-  for (const c of state.house.children) householdIds.add(c.id);
-  function sponsorRespectOk(fromHouseId) {
+    const anyState = state;
+    const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
     const houses = anyState.houses && typeof anyState.houses === "object" ? anyState.houses : {};
     const playerHeadId = typeof houses[playerHouseId]?.head_id === "string" ? houses[playerHouseId].head_id : state.house.head.id;
-    const sponsorHeadId = typeof houses[fromHouseId]?.head_id === "string" ? houses[fromHouseId].head_id : null;
-    if (!sponsorHeadId) return false;
-    const e = state.relationships.find((x) => x.from_id === playerHeadId && x.to_id === sponsorHeadId);
-    return Boolean(e && e.respect >= 55);
-  }
-  const shown_ids = [];
-  const hidden_ids = [];
-  for (const p of prospects) {
-    const involvesPlayer = p.subject_person_id ? householdIds.has(p.subject_person_id) : false;
-    const expiresThisTurn = p.expires_turn === t;
-    const sponsorOk = sponsorRespectOk(p.from_house_id);
-    const show = involvesPlayer || sponsorOk || expiresThisTurn;
-    if (show) shown_ids.push(p.id);
-    else hidden_ids.push(p.id);
-  }
-  if (prospects.length > 0) {
-    prospectsLog.push({ kind: "prospects_window_built", turn_index: t, shown_ids, hidden_ids });
-  }
-  return {
-    schema_version: "prospects_window_v1",
-    turn_index: t,
-    generated_at_turn_index: t,
-    prospects,
-    shown_ids,
-    hidden_ids
-  };
+    let best = null;
+    let bestRespect = -1;
+    const ids = Object.keys(houses).filter((id) => id !== playerHouseId).sort(); // tie-break: house_id asc
+    for (const hid of ids) {
+        const headId = houses[hid]?.head_id;
+        if (typeof headId !== "string")
+            continue;
+        const edge = state.relationships.find((e) => e.from_id === playerHeadId && e.to_id === headId);
+        if (!edge)
+            continue;
+        if (edge.respect > bestRespect) {
+            bestRespect = edge.respect;
+            best = hid;
+        }
+    }
+    return best ?? playerHouseId;
+}
+function bestMarriageOfferIndex_v0_2_2_policy(state, mw) {
+    let bestIdx = null;
+    let bestScore = -Infinity;
+    for (let i = 0; i < mw.offers.length; i++) {
+        const o = mw.offers[i];
+        const dowry = o.dowry_coin_net;
+        // same affordability filter as v0.2.2 prudent-builder marriage acceptance policy
+        if (dowry < 0 && state.manor.coin < Math.abs(dowry))
+            continue;
+        const score = dowry * 3 + o.relationship_delta.respect * 2 + o.relationship_delta.allegiance;
+        if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+        }
+    }
+    return bestIdx;
+}
+function buildProspectsWindow_v0_2_3(state, marriageWindow, prospectsLog) {
+    const t = state.turn_index;
+    const anyState = state;
+    const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+    const sponsorHouseId = pickSponsorHouseId(state);
+    // 1) Expire old prospects at start-of-turn (turn_index > expires_turn)
+    const active0 = readActiveProspects(state);
+    const active = [];
+    for (const ref of active0) {
+        if (t > ref.expires_turn) {
+            const p = lookupProspectFromHistory(state, ref.id);
+            if (p) {
+                prospectsLog.push({
+                    kind: "prospect_expired",
+                    turn_index: t,
+                    type: p.type,
+                    from_house_id: p.from_house_id,
+                    to_house_id: p.to_house_id,
+                    subject_person_id: p.subject_person_id,
+                    prospect_id: p.id,
+                    effects_applied: {}
+                });
+            }
+            else {
+                const tg = guessProspectTypeFromId(ref.id);
+                prospectsLog.push({
+                    kind: "prospect_expired",
+                    turn_index: t,
+                    type: tg,
+                    from_house_id: sponsorHouseId,
+                    to_house_id: playerHouseId,
+                    subject_person_id: null,
+                    prospect_id: ref.id,
+                    effects_applied: {}
+                });
+            }
+            continue;
+        }
+        active.push(ref);
+    }
+    // Keep flags bounded and accurate
+    writeActiveProspects(state, active);
+    const prospects = [];
+    // 2) Rehydrate active prospects from history (do not store payloads in flags)
+    for (const ref of active) {
+        const p = lookupProspectFromHistory(state, ref.id);
+        if (p) {
+            prospects.push({ ...p, expires_turn: ref.expires_turn });
+        }
+        else {
+            // Fallback minimal placeholder (should not happen in normal interactive runs)
+            const tg = guessProspectTypeFromId(ref.id);
+            prospects.push({
+                id: ref.id,
+                type: tg,
+                from_house_id: sponsorHouseId,
+                to_house_id: playerHouseId,
+                subject_person_id: null,
+                summary: summaryForType(tg),
+                requirements: [],
+                costs: {},
+                predicted_effects: {},
+                uncertainty: uncertaintyForType(tg),
+                expires_turn: ref.expires_turn,
+                actions: ["accept", "reject"]
+            });
+        }
+    }
+    const activeTypes = new Set(prospects.map((p) => p.type));
+    // 3) Deterministic trigger-only generation (no random chances)
+    const idRng = new Rng(state.run_seed, "prospects", t, "id");
+    function makeId(pt, subject) {
+        const n = idRng.fork(`id:${pt}:${sponsorHouseId}:${subject ?? "none"}`).int(0, 1_000_000_000);
+        return `pros_${pt}_${t}_${n.toString(36)}`;
+    }
+    function emitGenerated(p) {
+        prospectsLog.push({
+            kind: "prospect_generated",
+            turn_index: t,
+            type: p.type,
+            from_house_id: p.from_house_id,
+            to_house_id: p.to_house_id,
+            subject_person_id: p.subject_person_id,
+            prospect_id: p.id,
+            prospect: p
+        });
+    }
+    function addProspect(p) {
+        if (prospects.length >= 3)
+            return;
+        prospects.push(p);
+        active.push({ id: p.id, expires_turn: p.expires_turn });
+        activeTypes.add(p.type);
+        emitGenerated(p);
+    }
+    // 3.1) marriage
+    if (prospects.length < 3 && !activeTypes.has("marriage") && marriageWindow && marriageWindow.eligible_child_ids.length > 0 && marriageWindow.offers.length > 0) {
+        const subjectId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0];
+        const bestIdx = bestMarriageOfferIndex_v0_2_2_policy(state, marriageWindow);
+        if (bestIdx !== null) {
+            const offer = marriageWindow.offers[bestIdx];
+            const relDeltas = [];
+            relDeltas.push({
+                scope: "person",
+                from_id: state.house.head.id,
+                to_id: offer.house_person_id,
+                allegiance_delta: offer.relationship_delta.allegiance,
+                respect_delta: offer.relationship_delta.respect,
+                threat_delta: offer.relationship_delta.threat
+            });
+            if (offer.liege_delta) {
+                relDeltas.push({
+                    scope: "person",
+                    from_id: state.house.head.id,
+                    to_id: state.locals.liege.id,
+                    allegiance_delta: 0,
+                    respect_delta: offer.liege_delta.respect,
+                    threat_delta: offer.liege_delta.threat
+                });
+            }
+            const p = {
+                id: makeId("marriage", subjectId),
+                type: "marriage",
+                from_house_id: sponsorHouseId,
+                to_house_id: playerHouseId,
+                subject_person_id: subjectId,
+                spouse_person_id: offer.house_person_id,
+                summary: "Marriage proposal",
+                requirements: [],
+                costs: {},
+                predicted_effects: {
+                    coin_delta: offer.dowry_coin_net,
+                    relationship_deltas: relDeltas,
+                    flags_set: []
+                },
+                uncertainty: "known",
+                expires_turn: t + 2,
+                actions: ["accept", "reject"]
+            };
+            addProspect(p);
+        }
+    }
+    // 3.2) grant
+    const arrears = state.manor.obligations.arrears;
+    const hasArrears = (arrears?.coin ?? 0) > 0 || (arrears?.bushels ?? 0) > 0;
+    if (prospects.length < 3 && !activeTypes.has("grant") && hasArrears) {
+        // v0.2.3.4: minimal grant semantics (deterministic).
+        // Grant gives coin *now* (before obligation payments in applyDecisions), but increases liege leverage slightly.
+        const arrearsCoin = asNonNegInt(Math.trunc(arrears?.coin ?? 0));
+        const arrearsBushels = asNonNegInt(Math.trunc(arrears?.bushels ?? 0));
+        const pressure = arrearsCoin + Math.floor(arrearsBushels / 100);
+        const grantCoin = clampInt(2 + Math.floor(pressure * 0.5), 2, 12);
+        const relDeltas = [
+            {
+                scope: "person",
+                // Liege's view of the player (existing mechanics primarily use liege -> head).
+                from_id: state.locals.liege.id,
+                to_id: state.house.head.id,
+                allegiance_delta: +1,
+                respect_delta: -1,
+                threat_delta: +3
+            }
+        ];
+        const p = {
+            id: makeId("grant", null),
+            type: "grant",
+            from_house_id: sponsorHouseId,
+            to_house_id: playerHouseId,
+            subject_person_id: null,
+            summary: "Grant offer",
+            requirements: [],
+            costs: {},
+            predicted_effects: {
+                coin_delta: grantCoin,
+                relationship_deltas: relDeltas,
+                flags_set: []
+            },
+            uncertainty: "likely",
+            expires_turn: t + 2,
+            actions: ["accept", "reject"]
+        };
+        addProspect(p);
+    }
+    // 3.3) inheritance_claim
+    const heir = state.house.heir_id ?? computeHeirId(state);
+    if (prospects.length < 3 && !activeTypes.has("inheritance_claim") && heir === null) {
+        const p = {
+            id: makeId("inheritance_claim", state.house.head.id),
+            type: "inheritance_claim",
+            from_house_id: sponsorHouseId,
+            to_house_id: playerHouseId,
+            subject_person_id: state.house.head.id,
+            summary: "Inheritance claim",
+            requirements: [],
+            costs: {},
+            predicted_effects: { flags_set: ["inheritance_claim_active"] },
+            uncertainty: "possible",
+            expires_turn: t + 2,
+            actions: ["accept", "reject"]
+        };
+        addProspect(p);
+    }
+    // Keep flags updated after any generation
+    writeActiveProspects(state, active);
+    // 4) Stable ordering
+    const order = { marriage: 0, grant: 1, inheritance_claim: 2 };
+    prospects.sort((a, b) => {
+        const da = order[a.type] ?? 99;
+        const db = order[b.type] ?? 99;
+        if (da != db)
+            return da - db;
+        return a.id.localeCompare(b.id);
+    });
+    // 5) Presentation-only relevance filtering
+    const householdIds = new Set();
+    householdIds.add(state.house.head.id);
+    if (state.house.spouse)
+        householdIds.add(state.house.spouse.id);
+    for (const c of state.house.children)
+        householdIds.add(c.id);
+    function sponsorRespectOk(fromHouseId) {
+        const houses = anyState.houses && typeof anyState.houses === "object" ? anyState.houses : {};
+        const playerHeadId = typeof houses[playerHouseId]?.head_id === "string" ? houses[playerHouseId].head_id : state.house.head.id;
+        const sponsorHeadId = typeof houses[fromHouseId]?.head_id === "string" ? houses[fromHouseId].head_id : null;
+        if (!sponsorHeadId)
+            return false;
+        const e = state.relationships.find((x) => x.from_id === playerHeadId && x.to_id === sponsorHeadId);
+        return Boolean(e && e.respect >= 55);
+    }
+    const shown_ids = [];
+    const hidden_ids = [];
+    for (const p of prospects) {
+        const involvesPlayer = p.subject_person_id ? householdIds.has(p.subject_person_id) : false;
+        const expiresThisTurn = p.expires_turn === t;
+        const sponsorOk = sponsorRespectOk(p.from_house_id);
+        const show = involvesPlayer || sponsorOk || expiresThisTurn;
+        if (show)
+            shown_ids.push(p.id);
+        else
+            hidden_ids.push(p.id);
+    }
+    if (prospects.length > 0) {
+        prospectsLog.push({ kind: "prospects_window_built", turn_index: t, shown_ids, hidden_ids });
+    }
+    return {
+        schema_version: "prospects_window_v1",
+        turn_index: t,
+        generated_at_turn_index: t,
+        prospects,
+        shown_ids,
+        hidden_ids
+    };
 }
 function applyProspectsDecision(state, ctx, decisions, prospectsLog) {
-  const pd = decisions?.prospects;
-  if (!pd || typeof pd !== "object" || pd.kind !== "prospects") return;
-  const actions = Array.isArray(pd.actions) ? pd.actions : [];
-  if (actions.length === 0) return;
-  const active = readActiveProspects(state);
-  let activeList = active.slice();
-  const activeSet = new Set(activeList.map((r) => r.id));
-  const windowProspects = ctx.prospects_window?.prospects ?? [];
-  const byId = new Map(windowProspects.map((p) => [p.id, p]));
-  const processed = new Set();
-  for (const a of actions) {
-    if (!a || typeof a !== "object") continue;
-    const pid = a.prospect_id;
-    const act = a.action;
-    if (typeof pid !== "string" || (act !== "accept" && act !== "reject")) continue;
-    if (processed.has(pid)) continue;
-    if (!activeSet.has(pid)) continue;
-    const prospect = byId.get(pid) ?? lookupProspectFromHistory(state, pid);
-    if (!prospect) continue;
-    const applied = {};
-    function applyRelationshipDeltas() {
-      const rds = prospect.predicted_effects?.relationship_deltas;
-      if (!Array.isArray(rds) || rds.length === 0) return;
-      for (const rd of rds) {
-        if (!rd || typeof rd !== "object") continue;
-        const from = rd.from_id;
-        const to = rd.to_id;
-        if (typeof from !== "string" || typeof to !== "string") continue;
-        adjustEdge(state, from, to, {
-          allegiance: Math.trunc(rd.allegiance_delta ?? 0),
-          respect: Math.trunc(rd.respect_delta ?? 0),
-          threat: Math.trunc(rd.threat_delta ?? 0)
-        });
-      }
-      applied.relationship_deltas = rds;
+    const anyDecisions = decisions;
+    const pd = anyDecisions.prospects;
+    if (!pd || typeof pd !== "object" || pd.kind !== "prospects")
+        return;
+    const actions = Array.isArray(pd.actions) ? pd.actions : [];
+    if (actions.length === 0)
+        return;
+    const active = readActiveProspects(state);
+    let activeList = active.slice();
+    const activeSet = new Set(activeList.map((r) => r.id));
+    const windowProspects = ctx.prospects_window?.prospects ?? [];
+    const byId = new Map(windowProspects.map((p) => [p.id, p]));
+    const processed = new Set();
+    for (const a of actions) {
+        if (!a || typeof a !== "object")
+            continue;
+        const pid = a.prospect_id;
+        const act = a.action;
+        if (typeof pid !== "string" || (act !== "accept" && act !== "reject"))
+            continue;
+        if (processed.has(pid))
+            continue;
+        if (!activeSet.has(pid))
+            continue;
+        const prospect = byId.get(pid) ?? lookupProspectFromHistory(state, pid);
+        if (!prospect)
+            continue;
+        const applied = {};
+        function applyRelationshipDeltas() {
+            const rds = prospect.predicted_effects?.relationship_deltas;
+            if (!Array.isArray(rds) || rds.length === 0)
+                return;
+            for (const rd of rds) {
+                if (!rd || typeof rd !== "object")
+                    continue;
+                const from = rd.from_id;
+                const to = rd.to_id;
+                if (typeof from !== "string" || typeof to !== "string")
+                    continue;
+                adjustEdge(state, from, to, {
+                    allegiance: Math.trunc(rd.allegiance_delta ?? 0),
+                    respect: Math.trunc(rd.respect_delta ?? 0),
+                    threat: Math.trunc(rd.threat_delta ?? 0)
+                });
+            }
+            applied.relationship_deltas = rds;
+        }
+        if (act === "accept") {
+            const cd = prospect.predicted_effects?.coin_delta;
+            if (typeof cd === "number" && Number.isFinite(cd)) {
+                const d = Math.trunc(cd);
+                if (d >= 0)
+                    state.manor.coin = asNonNegInt(state.manor.coin + d);
+                else
+                    state.manor.coin = asNonNegInt(state.manor.coin - Math.abs(d));
+                applied.coin_delta = d;
+            }
+            applyRelationshipDeltas();
+            const fs = prospect.predicted_effects?.flags_set;
+            if (Array.isArray(fs) && fs.length > 0) {
+                const anyFlags = state.flags;
+                const appliedFlags = [];
+                for (const f of fs) {
+                    if (typeof f === "string" && f.length > 0) {
+                        anyFlags[f] = true;
+                        appliedFlags.push(f);
+                    }
+                }
+                if (appliedFlags.length > 0)
+                    applied.flags_set = appliedFlags;
+            }
+            if (prospect.type === "marriage" && prospect.subject_person_id) {
+                const sid = prospect.subject_person_id;
+                // People-First registry
+                const anyState = state;
+                if (anyState.people && anyState.people[sid]) {
+                    anyState.people[sid].married = true;
+                }
+                // legacy household
+                if (state.house.head.id === sid)
+                    state.house.head.married = true;
+                if (state.house.spouse && state.house.spouse.id === sid)
+                    state.house.spouse.married = true;
+                for (const c of state.house.children) {
+                    if (c.id === sid)
+                        c.married = true;
+                }
+                // v0.2.4: spouse joins the court roster by default (stored on house registry as court_extra_ids).
+                const spouseId = prospect.spouse_person_id;
+                if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
+                    addCourtExtraId(state, spouseId);
+                    if (anyState.people && anyState.people[spouseId]) {
+                        anyState.people[spouseId].married = true;
+                    }
+                }
+            }
+            prospectsLog.push({
+                kind: "prospect_accepted",
+                turn_index: state.turn_index,
+                type: prospect.type,
+                from_house_id: prospect.from_house_id,
+                to_house_id: prospect.to_house_id,
+                subject_person_id: prospect.subject_person_id,
+                prospect_id: prospect.id,
+                effects_applied: applied
+            });
+        }
+        else if (act === "reject") {
+            // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
+            // prospect type models explicit rejection penalties).
+            prospectsLog.push({
+                kind: "prospect_rejected",
+                turn_index: state.turn_index,
+                type: prospect.type,
+                from_house_id: prospect.from_house_id,
+                to_house_id: prospect.to_house_id,
+                subject_person_id: prospect.subject_person_id,
+                prospect_id: prospect.id,
+                effects_applied: applied
+            });
+        }
+        // remove from active list (decided)
+        activeList = activeList.filter((r) => r.id !== pid);
+        activeSet.delete(pid);
+        processed.add(pid);
     }
-    if (act === "accept") {
-      const cd = prospect.predicted_effects?.coin_delta;
-      if (typeof cd === "number" && Number.isFinite(cd)) {
-        const d = Math.trunc(cd);
-        if (d >= 0) state.manor.coin = asNonNegInt(state.manor.coin + d);
-        else state.manor.coin = asNonNegInt(state.manor.coin - Math.abs(d));
-        applied.coin_delta = d;
-      }
-      applyRelationshipDeltas();
-      const fs = prospect.predicted_effects?.flags_set;
-      if (Array.isArray(fs) && fs.length > 0) {
-        const anyFlags = state.flags;
-        const appliedFlags = [];
-        for (const f of fs) {
-          if (typeof f === "string" && f.length > 0) {
-            anyFlags[f] = true;
-            appliedFlags.push(f);
-          }
-        }
-        if (appliedFlags.length > 0) applied.flags_set = appliedFlags;
-      }
-      if (prospect.type === "marriage" && prospect.subject_person_id) {
-        const sid = prospect.subject_person_id;
-        const anyState2 = state;
-        if (anyState2.people && anyState2.people[sid]) {
-          anyState2.people[sid].married = true;
-        }
-        if (state.house.head.id === sid) state.house.head.married = true;
-        if (state.house.spouse && state.house.spouse.id === sid) state.house.spouse.married = true;
-        for (const c of state.house.children) {
-          if (c.id === sid) c.married = true;
-        }
-      }
-      prospectsLog.push({
-        kind: "prospect_accepted",
-        turn_index: state.turn_index,
-        type: prospect.type,
-        from_house_id: prospect.from_house_id,
-        to_house_id: prospect.to_house_id,
-        subject_person_id: prospect.subject_person_id,
-        prospect_id: prospect.id,
-        effects_applied: applied
-      });
-    } else if (act === "reject") {
-      applyRelationshipDeltas();
-      prospectsLog.push({
-        kind: "prospect_rejected",
-        turn_index: state.turn_index,
-        type: prospect.type,
-        from_house_id: prospect.from_house_id,
-        to_house_id: prospect.to_house_id,
-        subject_person_id: prospect.subject_person_id,
-        prospect_id: prospect.id,
-        effects_applied: applied
-      });
-    }
-    activeList = activeList.filter((r) => r.id !== pid);
-    activeSet.delete(pid);
-    processed.add(pid);
-  }
-  writeActiveProspects(state, activeList);
+    writeActiveProspects(state, activeList);
 }
-
 function applyEvents(state) {
     const t = state.turn_index;
     const rng = new Rng(state.run_seed, "events", t, "select");
@@ -853,6 +1066,9 @@ export function proposeTurn(state) {
                 spoilage: { rate: 0, loss_bushels: 0 },
                 production_bushels: 0,
                 consumption_bushels: 0,
+                peasant_consumption_bushels: 0,
+                court_consumption_bushels: 0,
+                total_consumption_bushels: 0,
                 shortage_bushels: 0,
                 construction: { progress_added: 0, completed_improvement_id: null },
                 obligations: {
@@ -875,7 +1091,36 @@ export function proposeTurn(state) {
     const working = deepCopy(state);
     ensurePeopleFirst(working);
     ensureExternalHousesSeed_v0_2_2(working);
+    // v0.2.4: deterministic court officers (idempotent; stream-isolated).
+    ensureCourtOfficers(working);
     const houseLog = [];
+    // v0.2.3.2: structured delta trackers (UI support; no mechanics).
+    const unrestBefore = working.manor.unrest;
+    let unrestCursor = unrestBefore;
+    const unrestContribs = [];
+    // Track the most recent labor auto-clamp (for UX messaging).
+    let laborSignalBefore = null;
+    let laborSignalAfter = null;
+    // v0.2.3.4: If labor is oversubscribed entering the turn (edited/legacy state),
+    // clamp immediately *before* production/consumption math so the simulation runs on valid labor totals.
+    // NOTE: This preserves determinism for valid runs (oversubscription should never occur in normal play).
+    {
+        const pop0 = asNonNegInt(working.manor.population);
+        const f0 = asNonNegInt(working.manor.farmers);
+        const b0 = asNonNegInt(working.manor.builders);
+        if (f0 + b0 > pop0) {
+            laborSignalBefore = { population: pop0, farmers: f0, builders: b0 };
+            const overflow = f0 + b0 - pop0;
+            // Deterministic clamp rule: cut builders first, then farmers (same as shortage clamp).
+            const bCut = Math.min(b0, overflow);
+            const b1 = asNonNegInt(b0 - bCut);
+            const rem = overflow - bCut;
+            const f1 = rem > 0 ? asNonNegInt(Math.max(0, f0 - rem)) : f0;
+            working.manor.farmers = f1;
+            working.manor.builders = b1;
+            laborSignalAfter = { population: pop0, farmers: f1, builders: b1 };
+        }
+    }
     // 1) restore energy; compute heir
     working.house.energy.available = working.house.energy.max;
     const prevHeir = working.house.heir_id ?? null;
@@ -891,17 +1136,70 @@ export function proposeTurn(state) {
     const macro = computeWeatherMarket(working);
     // 3) production (+ construction progress)
     const prod = applyProductionAndConstruction(working, macro.weather_multiplier);
-    // 4) consumption
-    const cons = applyConsumptionAndShortage(working);
-    // 5) obligations
+    // 4) obligations
+    const unrestBeforeObl = working.manor.unrest;
     applyObligationsAndArrearsPenalty(working, prod.production_bushels);
-    // 6) relationship drift
+    {
+        const diff = working.manor.unrest - unrestBeforeObl;
+        if (diff !== 0)
+            unrestContribs.push({ label: "Arrears", diff });
+        unrestCursor = working.manor.unrest;
+    }
+    // 5) relationship drift
     relationshipDrift(working);
-    // 7) household (births/deaths)
+    // 6) household (births/deaths)
     const hh = householdPhase(working, houseLog);
-    // 8) event engine (independent)
+    // v0.2.3.4: Recompute heir after births/deaths so the report/roster never points at a deceased heir.
+    {
+        const prev = working.house.heir_id ?? null;
+        const next = computeHeirId(working);
+        if (next && next !== prev) {
+            const heirName = working.house.children.find((c) => c.id === next)?.name;
+            if (heirName)
+                houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
+        }
+    }
+    // 7) court size/consumption (v0.2.4)
+    const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS);
+    // 8) consumption (peasants + court)
+    const cons = applyConsumptionAndShortage(working, court.court_consumption_bushels);
+    // Unrest contributor: shortage.
+    {
+        const diff = working.manor.unrest - unrestCursor;
+        if (diff !== 0)
+            unrestContribs.push({ label: "Shortage", diff });
+        unrestCursor = working.manor.unrest;
+    }
+    // Labor auto-clamp (from shortage population loss).
+    if (cons.labor_before && cons.labor_after) {
+        laborSignalBefore = cons.labor_before;
+        laborSignalAfter = cons.labor_after;
+    }
+    // 9) event engine (independent)
     const events = applyEvents(working);
+    // Unrest contributors: events.
+    for (const ev of events) {
+        const d = ev.deltas.find((x) => x.key === "unrest");
+        if (d && d.diff !== 0)
+            unrestContribs.push({ label: ev.title, diff: d.diff });
+    }
+    // Normalize/clamp state invariants.
+    // Capture labor auto-clamp here as well (e.g., event-driven population loss).
+    const laborBeforeNorm = {
+        population: asNonNegInt(working.manor.population),
+        farmers: asNonNegInt(working.manor.farmers),
+        builders: asNonNegInt(working.manor.builders)
+    };
     normalizeState(working);
+    const laborAfterNorm = {
+        population: asNonNegInt(working.manor.population),
+        farmers: asNonNegInt(working.manor.farmers),
+        builders: asNonNegInt(working.manor.builders)
+    };
+    if (laborBeforeNorm.farmers !== laborAfterNorm.farmers || laborBeforeNorm.builders !== laborAfterNorm.builders) {
+        laborSignalBefore = laborBeforeNorm;
+        laborSignalAfter = laborAfterNorm;
+    }
     const report = {
         turn_index: state.turn_index,
         weather_multiplier: macro.weather_multiplier,
@@ -909,6 +1207,9 @@ export function proposeTurn(state) {
         spoilage: spoil,
         production_bushels: prod.production_bushels,
         consumption_bushels: cons.consumption_bushels,
+        peasant_consumption_bushels: cons.peasant_consumption_bushels,
+        court_consumption_bushels: cons.court_consumption_bushels,
+        total_consumption_bushels: cons.total_consumption_bushels,
         shortage_bushels: cons.shortage_bushels,
         construction: { progress_added: prod.construction_progress_added, completed_improvement_id: prod.completed_improvement_id ?? null },
         obligations: {
@@ -925,6 +1226,49 @@ export function proposeTurn(state) {
         notes: []
     };
     report.top_drivers = computeTopDrivers(report, state, working);
+    // v0.2.3.2: labor oversubscription auto-clamp signal (UI).
+    if (laborSignalBefore && laborSignalAfter) {
+        const assigned_before = asNonNegInt(laborSignalBefore.farmers) + asNonNegInt(laborSignalBefore.builders);
+        const assigned_after = asNonNegInt(laborSignalAfter.farmers) + asNonNegInt(laborSignalAfter.builders);
+        const available = asNonNegInt(laborSignalAfter.population);
+        report.labor_signal = {
+            schema_version: "labor_signal_v1",
+            available,
+            assigned_before,
+            assigned_after,
+            farmers_before: asNonNegInt(laborSignalBefore.farmers),
+            farmers_after: asNonNegInt(laborSignalAfter.farmers),
+            builders_before: asNonNegInt(laborSignalBefore.builders),
+            builders_after: asNonNegInt(laborSignalAfter.builders),
+            was_oversubscribed: assigned_before > available,
+            auto_clamped: laborSignalBefore.farmers !== laborSignalAfter.farmers || laborSignalBefore.builders !== laborSignalAfter.builders
+        };
+    }
+    // v0.2.3.2: unrest delta breakdown (contributors up/down).
+    const unrestAfter = working.manor.unrest;
+    report.unrest_breakdown = {
+        schema_version: "unrest_breakdown_v1",
+        before: unrestBefore,
+        after: unrestAfter,
+        delta: unrestAfter - unrestBefore,
+        increased_by: unrestContribs.filter((c) => c.diff > 0).map((c) => ({ label: c.label, amount: c.diff })),
+        decreased_by: unrestContribs.filter((c) => c.diff < 0).map((c) => ({ label: c.label, amount: Math.abs(c.diff) }))
+    };
+    // v0.2.3.2: construction option availability (built / in-progress / available).
+    report.construction.options = Object.keys(IMPROVEMENTS)
+        .sort((a, b) => {
+        if (a < b)
+            return -1;
+        if (a > b)
+            return 1;
+        return 0;
+    })
+        .map((improvement_id) => {
+        const isBuilt = hasImprovement(working.manor.improvements, improvement_id);
+        const isActive = Boolean(working.manor.construction) && working.manor.construction?.improvement_id === improvement_id;
+        const status = isBuilt ? "built" : isActive ? "active_project" : "available";
+        return { improvement_id, status };
+    });
     const marriageWindow = buildMarriageWindow(working);
     // Prospects window + engine log (v0.2.3)
     const prospectsLog = [];
@@ -934,7 +1278,21 @@ export function proposeTurn(state) {
     const maxShift = maxLaborDeltaPerTurn(working.manor.population);
     // Ensure registries remain in sync after preview simulation.
     ensurePeopleFirst(working);
-    return { preview_state: working, report, marriage_window: marriageWindow, prospects_window: prospectsWindow, max_labor_shift: maxShift };
+    const roster = buildHouseholdRoster_v0_2_3_2(working);
+    // v0.2.3.4: embed roster into the Turn Report so history views don't have to reconstruct it (dedupe + death badges).
+    report.household_roster = roster;
+    // v0.2.4: embed court roster + headcount into report for history-safe rendering.
+    report.court_roster = court.court_roster;
+    report.court_headcount = court.court_headcount;
+    return {
+        preview_state: working,
+        report,
+        marriage_window: marriageWindow,
+        prospects_window: prospectsWindow,
+        max_labor_shift: maxShift,
+        household_roster: roster,
+        court_roster: court.court_roster
+    };
 }
 function payCoin(state, amount) {
     const pay = Math.min(state.manor.coin, Math.max(0, Math.trunc(amount)));
@@ -1114,6 +1472,19 @@ function applyMarriageDecision(state, ctx, decisions, reportNotes) {
             state.manor.coin = asNonNegInt(state.manor.coin - Math.abs(dowry));
         // Mark married
         child.married = true;
+        // People-First registry mirror (prevents later sync overwrites in hybrid runs).
+        {
+            const anyState = state;
+            if (anyState.people && anyState.people[child.id])
+                anyState.people[child.id].married = true;
+        }
+        // v0.2.4: spouse joins the court roster by default.
+        addCourtExtraId(state, offer.house_person_id);
+        {
+            const anyState = state;
+            if (anyState.people && anyState.people[offer.house_person_id])
+                anyState.people[offer.house_person_id].married = true;
+        }
         // Relationship deltas (to offering house + sometimes liege)
         adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);
         if (offer.liege_delta) {
@@ -1126,21 +1497,25 @@ function applyMarriageDecision(state, ctx, decisions, reportNotes) {
     }
 }
 function applyLaborDecision(state, decisions, maxShift, reportNotes) {
-    const desiredFarmers = Math.trunc(decisions.labor.desired_farmers);
-    const desiredBuilders = Math.trunc(decisions.labor.desired_builders);
+    const desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
+    const desiredBuilders = Math.max(0, Math.trunc(decisions.labor.desired_builders));
+    if (desiredFarmers + desiredBuilders > state.manor.population) {
+        reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
+        return;
+    }
     const curF = state.manor.farmers;
     const curB = state.manor.builders;
     const dF = Math.abs(desiredFarmers - curF);
     const dB = Math.abs(desiredBuilders - curB);
     const totalShift = dF + dB;
-    if (totalShift > maxShift) {
+    // v0.2.3.2: If the current state is oversubscribed (legacy save / earlier bug),
+    // allow rebalancing without being blocked by the per-turn labor delta cap.
+    const oversubscribedNow = curF + curB > state.manor.population;
+    if (!oversubscribedNow && totalShift > maxShift) {
         reportNotes.push(`Labor change exceeds cap (max ${maxShift}); no change applied.`);
         return;
     }
-    if (desiredFarmers + desiredBuilders > state.manor.population) {
-        reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
-        return;
-    }
+    // Intentionally no note: the UI can show structured labor warnings via report.labor_signal.
     // energy cost if any change
     if (totalShift > 0) {
         if (state.house.energy.available <= 0) {
@@ -1214,8 +1589,8 @@ function closeTurn(state, reportNotes, houseLog) {
         heir.married = true; // assume household continuity
         state.house.head = heir;
         if (state.house.spouse) {
-            // Status badge only (Widow/Widower). Do not create a separate widowed life log here;
-            // `widowed` log type is reserved for spouse death events (see householdPhase).
+            // Status only (Widow/Widower) — the widowed life log is emitted at the moment of death
+            // inside householdPhase (v0.2.3.2).
             state.house.spouse_status = "widow";
         }
         // Structured People-First life log events
