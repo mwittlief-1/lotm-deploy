@@ -1,0 +1,11 @@
+# DISPATCH — QA Engineer (v0.2.3) [copy/paste]
+
+Run:
+1) `npm run preflight` (must PASS)
+2) `npm run qa` (authoritative; no-deps fallback OK)
+
+Deliver:
+- `docs/qa/v0.2.3_qa_gate.md` CERTIFIABLE PASS/FAIL
+- `qa_artifacts/` outputs including preflight summary + no-deps gate json
+- `lotm_v0.2.3_repo_CERTIFIED_QA.zip`
+Quote BUILD_INFO app_version + code_fingerprint.
