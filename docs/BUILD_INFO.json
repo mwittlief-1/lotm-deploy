@@ -1,9 +1,9 @@
 {
-  "app_version": "v0.2.3.1",
-  "build_time_utc": "2026-02-15T16:33:06Z",
-  "code_fingerprint": "c4341557e729a0ad860425e6907ac6d8473fa5f82cb2713cb300dd9baaccd90d",
-  "created_at_utc": "2026-02-15T16:33:06Z",
-  "notes": "v0.2.3.1 tooling-only: headless prospectPolicy hook in batch runners + Prospects KPIs in batch summaries; Golden Layout fixes (sim/version export + casing).",
+  "app_version": "v0.2.3.2",
+  "build_time_utc": "2026-02-15T23:27:13Z",
+  "code_fingerprint": "efe80b576695d1377e6a6210dcfee19bf5446ee81988374dae2098117919e6bf",
+  "created_at_utc": "2026-02-15T23:27:13Z",
+  "notes": "v0.2.3.2 patch: DevB correctness fixes + DevA UI polish (hook order safe); maintain determinism; no scope expansion.",
   "policy_ids": [
     "prudent-builder",
     "builder-forward",

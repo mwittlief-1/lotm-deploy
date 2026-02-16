@@ -36,6 +36,14 @@ export interface HouseLogEvent {
   turn_index: number;
   // For templated outcome lines (UX binding): keep only the minimal IDs/names.
   spouse_name?: string;
+  // v0.2.3.2+: widowed is a household-status transition; provide both survivor + deceased.
+  // (UI can choose which copy line to render.)
+  survivor_name?: string;
+  survivor_id?: string;
+  survivor_sex?: Sex;
+  deceased_name?: string;
+  deceased_id?: string;
+  deceased_age?: number;
   heir_name?: string;
   new_ruler_name?: string;
 }
@@ -187,7 +195,12 @@ export interface TurnReport {
   production_bushels: number;
   consumption_bushels: number;
   shortage_bushels: number;
-  construction: { progress_added: number; completed_improvement_id?: string | null };
+  construction: {
+    progress_added: number;
+    completed_improvement_id?: string | null;
+    // v0.2.3.2+: per-option availability signal (UI can disable/remove built improvements).
+    options?: Array<{ improvement_id: string; status: "available" | "built" | "active_project" }>;
+  };
   obligations: {
     tax_due_coin: number;
     tithe_due_bushels: number;
@@ -200,7 +213,44 @@ export interface TurnReport {
   events: EventResult[];
   top_drivers: string[]; // top 3 explanation strings
   notes: string[]; // additional log notes
+  // v0.2.3.2+: structured deltas for UI clarity (no mechanics).
+  unrest_breakdown?: {
+    schema_version: "unrest_breakdown_v1";
+    before: number;
+    after: number;
+    delta: number;
+    increased_by: Array<{ label: string; amount: number }>;
+    decreased_by: Array<{ label: string; amount: number }>;
+  };
+  labor_signal?: {
+    schema_version: "labor_signal_v1";
+    available: number;
+    assigned_before: number;
+    assigned_after: number;
+    farmers_before: number;
+    farmers_after: number;
+    builders_before: number;
+    builders_after: number;
+    was_oversubscribed: boolean;
+    auto_clamped: boolean;
+  };
   prospects_log?: ProspectsLogEvent[];
+}
+
+// v0.2.3.2+: a UI-ready household roster (deduped; heir is a badge).
+export type HouseholdRosterRole = "head" | "spouse" | "child";
+export type HouseholdRosterBadge = "heir" | "widow" | "widower" | "widowed" | "deceased";
+
+export interface HouseholdRosterRow {
+  person_id: string;
+  role: HouseholdRosterRole;
+  badges: HouseholdRosterBadge[];
+}
+
+export interface HouseholdRoster {
+  schema_version: "household_roster_v1";
+  turn_index: number;
+  rows: HouseholdRosterRow[];
 }
 
 export interface MarriageOffer {
@@ -334,6 +384,8 @@ export interface TurnContext {
   marriage_window: MarriageWindow | null;
   max_labor_shift: number;
   prospects_window?: ProspectsWindow | null;
+  // v0.2.3.2+: deduped roster view for UI.
+  household_roster?: HouseholdRoster;
 }
 
 export interface TurnLogEntry {

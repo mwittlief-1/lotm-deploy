@@ -101,6 +101,12 @@ const COPY = {
   obligationsArrears: "Arrears (carried forward)",
   obligationsTotal: "Total obligations",
   obligationsHelper: "Unpaid obligations become arrears and can increase unrest and relationship risk.",
+
+  // v0.2.3.2 patch addendum: Unrest breakdown
+  unrestBreakdownTitle: "Unrest change this turn",
+  unrestBreakdownIncreasedBy: "Increased by",
+  unrestBreakdownDecreasedBy: "Decreased by",
+  unrestBreakdownNone: "No breakdown available.",
   // Labor timing helper text + delta cap validation
   laborTimingProduction: "Labor changes affect next turn’s production.",
   laborTimingBuilders: "Builders contribute to construction progress this turn.",
@@ -157,11 +163,26 @@ const COPY = {
   prospectAcceptConfirmTitle: "Accept prospect?",
   prospectAcceptConfirmBody_withCosts: "This will apply the listed costs. Continue?",
   prospectAcceptConfirmBody_noCosts: "Accept this prospect?",
+  prospectAcceptConfirmBody_marriage_noCosts: "Accept this marriage proposal?",
+  prospectAcceptConfirmBody_grant_noCosts: "Accept this grant offer?",
+  prospectAcceptConfirmBody_marriage_dowry: (signedCoin: string) => `Dowry: ${signedCoin}. Continue?`,
   prospectRejectConfirmTitle: "Reject prospect?",
   prospectRejectConfirmBody: "This opportunity will be declined. Continue?",
 
-  prospectToastAccepted: "Prospect accepted.",
-  prospectToastRejected: "Prospect rejected.",
+  // v0.2.3.2 patch addendum: type-specific confirmations + acknowledgements
+  prospectAcceptConfirmTitle_marriage: "Accept marriage proposal?",
+  prospectAcceptConfirmTitle_grant: "Accept grant offer?",
+  prospectAcceptConfirmTitle_inheritance_claim: "Accept inheritance claim?",
+  prospectAcceptConfirmBody_inheritance_claim: "This will record the claim. Continue?",
+  prospectToastAccepted_marriage: "Marriage accepted.",
+  prospectToastAccepted_grant: "Grant accepted.",
+  prospectToastAccepted_inheritance_claim: "Claim recorded.",
+  prospectToastRejected_marriage: "Marriage offer declined.",
+  prospectToastRejected_grant: "Grant offer declined.",
+  prospectToastRejected_inheritance_claim: "Claim declined.",
+  prospectDecisionRecorded: "Decision recorded.",
+  prospectDecisionBadgeAccepted: "Accepted",
+  prospectDecisionBadgeRejected: "Rejected",
 
   prospectErr_requirementsNotMet: "Cannot accept. Requirements not met.",
   prospectErr_insufficientResources: "Cannot accept. Insufficient resources.",
@@ -185,7 +206,10 @@ const COPY = {
     `Prospects window built. Shown: ${shown_count}. Hidden: ${hidden_count}.`,
   prospectLog_accepted: (type: string, summary: string) => `Prospect accepted: ${type} — ${summary}`,
   prospectLog_rejected: (type: string, summary: string) => `Prospect rejected: ${type} — ${summary}`,
-  prospectLog_expired: (type: string, summary: string) => `Prospect expired: ${type} — ${summary}`
+  prospectLog_expired: (type: string, summary: string) => `Prospect expired: ${type} — ${summary}`,
+
+  // v0.2.3.2 patch addendum: End Turn feedback
+  turnResolvedToast: (turn_index: number) => `Turn ${turn_index} resolved.`
 } as const;
 
 type PersonLike = {
@@ -195,6 +219,7 @@ type PersonLike = {
   short_id?: string;
   alive?: boolean;
   sex?: "M" | "F";
+  married?: boolean;
 };
 
 function formatAge(age: number | undefined): string | null {
@@ -479,9 +504,12 @@ export default function App() {
 
   function advanceTurn() {
     if (!state) return;
+    const resolvedTurnIndex = state.turn_index;
     const next = applyDecisions(state, decisions);
     setState(next);
     setShowHouseholdDetails(false);
+    setToast({ kind: "ok", message: COPY.turnResolvedToast(resolvedTurnIndex) });
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (!next.game_over) {
       setDecisions((d) => ({
         ...d,
@@ -579,6 +607,80 @@ export default function App() {
       const deltaBushels = m.bushels_stored - beforeM.bushels_stored;
       const deltaCoin = m.coin - beforeM.coin;
       const deltaUnrest = m.unrest - beforeM.unrest;
+
+      // v0.2.3.2: Unrest delta breakdown (data-driven; UI renders if available)
+      type UnrestLine = { label: string; amount: number };
+
+      function parseUnrestBreakdown(raw: any): { increased: UnrestLine[]; decreased: UnrestLine[] } | null {
+        if (!raw || typeof raw !== "object") return null;
+
+        const increased: UnrestLine[] = [];
+        const decreased: UnrestLine[] = [];
+
+        function pushLine(labelRaw: any, amtRaw: any, signed: boolean) {
+          const label = typeof labelRaw === "string" ? labelRaw : typeof labelRaw === "number" ? String(labelRaw) : "";
+          const amtNum = typeof amtRaw === "number" && Number.isFinite(amtRaw) ? Math.trunc(amtRaw) : null;
+          if (!label || amtNum === null || amtNum === 0) return;
+          const amt = signed ? amtNum : Math.abs(amtNum);
+          if (amtNum > 0) increased.push({ label, amount: Math.abs(amt) });
+          else decreased.push({ label, amount: Math.abs(amt) });
+        }
+
+        // Preferred: contributors with signed deltas
+        const contributors: any[] = Array.isArray((raw as any).contributors) ? (raw as any).contributors : [];
+        if (contributors.length > 0) {
+          for (const c of contributors) {
+            if (!c || typeof c !== "object") continue;
+            const label = (c as any).label ?? (c as any).reason ?? (c as any).key ?? (c as any).code;
+            const delta = (c as any).delta ?? (c as any).amount ?? (c as any).value;
+            pushLine(label, delta, true);
+          }
+        }
+
+        // Alternate: separate up/down lists
+        const ups: any[] =
+          Array.isArray((raw as any).increased_by) ? (raw as any).increased_by : Array.isArray((raw as any).increases) ? (raw as any).increases : [];
+        const downs: any[] =
+          Array.isArray((raw as any).decreased_by) ? (raw as any).decreased_by : Array.isArray((raw as any).decreases) ? (raw as any).decreases : [];
+
+        function parseList(list: any[], target: "increased" | "decreased") {
+          for (const it of list) {
+            if (it == null) continue;
+            if (typeof it === "string") continue;
+            if (typeof it === "object") {
+              const label = (it as any).label ?? (it as any).reason ?? (it as any).key ?? (it as any).code;
+              const amt = (it as any).amount ?? (it as any).delta ?? (it as any).value;
+              const labelStr = typeof label === "string" ? label : "";
+              const amtNum = typeof amt === "number" && Number.isFinite(amt) ? Math.trunc(amt) : null;
+              if (!labelStr || amtNum === null || amtNum === 0) continue;
+              const line = { label: labelStr, amount: Math.abs(amtNum) };
+              if (target === "increased") increased.push(line);
+              else decreased.push(line);
+            }
+          }
+        }
+
+        if (ups.length) parseList(ups, "increased");
+        if (downs.length) parseList(downs, "decreased");
+
+        if (increased.length === 0 && decreased.length === 0) return null;
+
+        // Stable ordering: largest contribution first
+        increased.sort((a, b) => b.amount - a.amount || a.label.localeCompare(b.label));
+        decreased.sort((a, b) => b.amount - a.amount || a.label.localeCompare(b.label));
+
+        return { increased, decreased };
+      }
+
+      const unrestBreakdownRaw: any =
+        (ctx.report as any)?.unrest_breakdown ??
+        (ctx.report as any)?.unrest_delta_breakdown ??
+        (ctx.report as any)?.unrest_change_breakdown ??
+        (ctx.report as any)?.unrestBreakdown ??
+        null;
+
+      const unrestBreakdown = parseUnrestBreakdown(unrestBreakdownRaw);
+      const showUnrestBreakdown = Boolean(deltaUnrest !== 0 || (unrestBreakdown && (unrestBreakdown.increased.length || unrestBreakdown.decreased.length)));
 
       const baselineConsPerTurn = BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS;
       const builderExtraPerTurn = BUILDER_EXTRA_BUSHELS_PER_YEAR * TURN_YEARS;
@@ -734,6 +836,8 @@ export default function App() {
           return;
         }
 
+        const t = typeof p?.type === "string" ? (p.type as string) : null;
+
         const expiresTurn = typeof p?.expires_turn === "number" ? p.expires_turn : null;
         const nowTurn = ctx.report.turn_index;
 
@@ -764,14 +868,44 @@ export default function App() {
             setToast({ kind: "error", message: COPY.prospectErr_insufficientResources });
             return;
           }
-          if (anyCost) {
-            const ok = window.confirm(`${COPY.prospectAcceptConfirmTitle}
+          // v0.2.3.2: type-specific accept confirmations (copy-only)
+          const pe: any = p?.predicted_effects;
+          const coinDelta = typeof pe?.coin_delta === "number" && Number.isFinite(pe.coin_delta) ? Math.trunc(pe.coin_delta) : null;
 
-    ${COPY.prospectAcceptConfirmBody_withCosts}`);
-            if (!ok) return;
+          let confirmTitle = COPY.prospectAcceptConfirmTitle;
+          let confirmBody = anyCost ? COPY.prospectAcceptConfirmBody_withCosts : COPY.prospectAcceptConfirmBody_noCosts;
+
+          if (t === "marriage") {
+            confirmTitle = COPY.prospectAcceptConfirmTitle_marriage;
+            confirmBody = anyCost
+              ? COPY.prospectAcceptConfirmBody_withCosts
+              : coinDelta !== null
+                ? COPY.prospectAcceptConfirmBody_marriage_dowry(fmtSigned(coinDelta))
+                : COPY.prospectAcceptConfirmBody_marriage_noCosts;
+          } else if (t === "grant") {
+            confirmTitle = COPY.prospectAcceptConfirmTitle_grant;
+            confirmBody = anyCost ? COPY.prospectAcceptConfirmBody_withCosts : COPY.prospectAcceptConfirmBody_grant_noCosts;
+          } else if (t === "inheritance_claim") {
+            confirmTitle = COPY.prospectAcceptConfirmTitle_inheritance_claim;
+            confirmBody = COPY.prospectAcceptConfirmBody_inheritance_claim;
           }
+
+          const ok = window.confirm(`${confirmTitle}
+
+${confirmBody}`);
+          if (!ok) return;
+
           recordProspectDecision(id, "accept");
-          setToast({ kind: "ok", message: COPY.prospectToastAccepted });
+
+          const acceptedMsg =
+            t === "marriage"
+              ? COPY.prospectToastAccepted_marriage
+              : t === "grant"
+                ? COPY.prospectToastAccepted_grant
+                : t === "inheritance_claim"
+                  ? COPY.prospectToastAccepted_inheritance_claim
+                  : COPY.prospectDecisionRecorded;
+          setToast({ kind: "ok", message: acceptedMsg });
           return;
         }
 
@@ -781,7 +915,16 @@ export default function App() {
     ${COPY.prospectRejectConfirmBody}`);
         if (!ok) return;
         recordProspectDecision(id, "reject");
-        setToast({ kind: "ok", message: COPY.prospectToastRejected });
+
+        const rejectedMsg =
+          t === "marriage"
+            ? COPY.prospectToastRejected_marriage
+            : t === "grant"
+              ? COPY.prospectToastRejected_grant
+              : t === "inheritance_claim"
+                ? COPY.prospectToastRejected_inheritance_claim
+                : COPY.prospectDecisionRecorded;
+        setToast({ kind: "ok", message: rejectedMsg });
       }
 
       function prospectTypeLabel(t: string | null | undefined): string {
@@ -934,6 +1077,41 @@ export default function App() {
                   <Tip text="If Unrest is ≥ 100 at end of a turn, you are Dispossessed (game over)." />
                 </li>
               </ul>
+
+              {showUnrestBreakdown ? (
+                <details style={{ marginTop: 6 }}>
+                  <summary>{COPY.unrestBreakdownTitle}</summary>
+                  <div style={{ fontSize: 12, marginTop: 6 }}>
+                    {!unrestBreakdown ? (
+                      <div style={{ opacity: 0.85 }}>{COPY.unrestBreakdownNone}</div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 10 }}>
+                        {unrestBreakdown.increased.length ? (
+                          <div>
+                            <div style={{ fontWeight: 700 }}>{COPY.unrestBreakdownIncreasedBy}</div>
+                            <ul style={{ margin: "6px 0 0 18px" }}>
+                              {unrestBreakdown.increased.map((l) => (
+                                <li key={`up:${l.label}`}>{l.label}: {l.amount}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
+
+                        {unrestBreakdown.decreased.length ? (
+                          <div>
+                            <div style={{ fontWeight: 700 }}>{COPY.unrestBreakdownDecreasedBy}</div>
+                            <ul style={{ margin: "6px 0 0 18px" }}>
+                              {unrestBreakdown.decreased.map((l) => (
+                                <li key={`down:${l.label}`}>{l.label}: {l.amount}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                </details>
+              ) : null}
 
               <h4>Construction</h4>
               {ctx.report.construction.completed_improvement_id ? (
@@ -1089,6 +1267,7 @@ export default function App() {
                             <li key={r.key} style={{ marginBottom: 4 }}>
                               <span>{formatPersonName(r.person)}</span>
                               {r.badge ? <Badge text={r.badge} /> : null}
+                              {(r.person as any)?.married ? <Badge text={COPY.prospectType_marriage} /> : null}
                             </li>
                           ))}
                         </ul>
@@ -1337,6 +1516,10 @@ export default function App() {
                                 <span style={{ fontSize: 12, border: "1px solid #ddd", padding: "2px 6px" }}>
                                   {COPY.prospectExpiredBadge}
                                 </span>
+                              ) : decided ? (
+                                <span style={{ fontSize: 12, border: "1px solid #ddd", padding: "2px 6px" }}>
+                                  {decided === "accept" ? COPY.prospectDecisionBadgeAccepted : COPY.prospectDecisionBadgeRejected}
+                                </span>
                               ) : null}
                             </div>
 
@@ -1446,7 +1629,7 @@ export default function App() {
                             {expired ? (
                               <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>{COPY.prospectExpiredHint}</div>
                             ) : decided ? (
-                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>{COPY.prospectErr_alreadyDecided}</div>
+                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 6 }}>{COPY.prospectDecisionRecorded}</div>
                             ) : null}
                           </div>
                         );
@@ -1680,54 +1863,77 @@ export default function App() {
                   />
                   <span style={{ opacity: 0.8 }}> (cap {ctx.report.market.sell_cap_bushels})</span>
                 </div>
+              </div>
 
-                {/* Pay obligations */}
-                <div>
-                  <label>
-                    Pay coin:
-                    <Tip text="Payments apply to arrears first, then this turn’s dues (tax/tithe). Unpaid dues become arrears at end of turn." />
-                    {" "}
-                  </label>
-                  <input
-                    type="number"
-                    value={decisions.obligations.pay_coin}
-                    onChange={(e) =>
-                      setDecisions((d) => ({ ...d, obligations: { ...d.obligations, pay_coin: Number(e.target.value) } }))
-                    }
-                    style={{ width: 80 }}
-                  />
-                </div>
-                <div>
-                  <label>Pay bushels: </label>
-                  <input
-                    type="number"
-                    value={decisions.obligations.pay_bushels}
-                    onChange={(e) =>
-                      setDecisions((d) => ({ ...d, obligations: { ...d.obligations, pay_bushels: Number(e.target.value) } }))
-                    }
-                    style={{ width: 90 }}
-                  />
-                </div>
+              {/* Obligations (payments are manual) */}
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #eee" }}>
+                <h4 style={{ margin: 0 }}>Obligations</h4>
+                <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{COPY.obligationsHelper}</div>
 
-                {/* War levy */}
-                {ob.war_levy_due ? (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10, fontSize: 12 }}>
                   <div>
-                    <label>War levy: </label>
-                    <select
-                      value={decisions.obligations.war_levy_choice ?? "ignore"}
-                      onChange={(e) =>
-                        setDecisions((d) => ({ ...d, obligations: { ...d.obligations, war_levy_choice: e.target.value as any } }))
-                      }
-                    >
-                      <option value="coin">Pay coin</option>
-                      <option value="men">Provide men</option>
-                      <option value="ignore">Refuse</option>
-                    </select>
-                    <span style={{ opacity: 0.8, marginLeft: 8 }}>
-                      Due: {ob.war_levy_due.kind === "men_or_coin" ? `${ob.war_levy_due.men} men OR ${ob.war_levy_due.coin} coin` : ""}
-                    </span>
+                    <div>
+                      <b>{COPY.obligationsTotal}</b>: {fmtObAmount(totalObligations)}
+                    </div>
+                    <div style={{ marginTop: 4 }}>{COPY.obligationsDueEntering}: {fmtObAmount(dueEntering)}</div>
+                    {accruedThisTurn ? (
+                      <div style={{ marginTop: 4 }}>{COPY.obligationsAccrued}: {fmtObAmount(accruedThisTurn)}</div>
+                    ) : null}
+                    <div style={{ marginTop: 4 }}>{COPY.obligationsArrears}: {fmtObAmount(arrearsCarried)}</div>
                   </div>
-                ) : null}
+
+                  <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
+                    <div>
+                      <label>
+                        Pay coin:
+                        <Tip text="Payments apply to arrears first, then this turn’s dues (tax/tithe). Unpaid dues become arrears at end of turn." />
+                        {" "}
+                      </label>
+                      <input
+                        type="number"
+                        value={decisions.obligations.pay_coin}
+                        onChange={(e) =>
+                          setDecisions((d) => ({ ...d, obligations: { ...d.obligations, pay_coin: Number(e.target.value) } }))
+                        }
+                        style={{ width: 100 }}
+                      />
+                    </div>
+
+                    <div>
+                      <label>Pay bushels: </label>
+                      <input
+                        type="number"
+                        value={decisions.obligations.pay_bushels}
+                        onChange={(e) =>
+                          setDecisions((d) => ({ ...d, obligations: { ...d.obligations, pay_bushels: Number(e.target.value) } }))
+                        }
+                        style={{ width: 120 }}
+                      />
+                    </div>
+
+                    {ob.war_levy_due ? (
+                      <div>
+                        <label>War levy: </label>
+                        <select
+                          value={decisions.obligations.war_levy_choice ?? "ignore"}
+                          onChange={(e) =>
+                            setDecisions((d) => ({
+                              ...d,
+                              obligations: { ...d.obligations, war_levy_choice: e.target.value as any }
+                            }))
+                          }
+                        >
+                          <option value="coin">Pay coin</option>
+                          <option value="men">Provide men</option>
+                          <option value="ignore">Refuse</option>
+                        </select>
+                        <span style={{ opacity: 0.8, marginLeft: 8 }}>
+                          Due: {ob.war_levy_due.kind === "men_or_coin" ? `${ob.war_levy_due.men} men OR ${ob.war_levy_due.coin} coin` : ""}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
               </div>
 
               {/* Construction */}
@@ -1746,7 +1952,7 @@ export default function App() {
                       Select project…
                     </option>
                     {IMPROVEMENT_IDS.map((id) => (
-                      <option key={id} value={id}>
+                      <option key={id} value={id} disabled={Array.isArray(m.improvements) ? m.improvements.includes(id) : false}>
                         {IMPROVEMENTS[id].name} (coin {IMPROVEMENTS[id].coin_cost}, req {IMPROVEMENTS[id].required})
                       </option>
                     ))}
@@ -1759,7 +1965,7 @@ export default function App() {
               </div>
 
               {/* Marriage */}
-              {mw ? (
+              {mw && prospectsTotalCount === 0 ? (
                 <div style={{ marginTop: 10 }}>
                   <h4>Marriage Window</h4>
                   <div style={{ opacity: 0.85 }}>Eligible children: {mw.eligible_child_ids.join(", ")}</div>

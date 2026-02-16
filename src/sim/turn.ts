@@ -9,6 +9,7 @@ import type {
   Person,
   RunSnapshot,
   HouseLogEvent,
+  HouseholdRoster,
   ProspectsWindow,
   Prospect,
   ProspectType,
@@ -135,13 +136,56 @@ function computeHeirId(state: RunState): string | null {
   const byPrimogeniture = (a: Person, b: Person) => {
     // older first; deterministic tie-break by id
     if (b.age !== a.age) return b.age - a.age;
-    return String(a.id).localeCompare(String(b.id));
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
   };
   const males = kids.filter((c) => c.sex === "M").sort(byPrimogeniture);
   const females = kids.filter((c) => c.sex === "F").sort(byPrimogeniture);
   const heir = (males[0] ?? females[0]) ?? null;
   state.house.heir_id = heir ? heir.id : null;
   return state.house.heir_id ?? null;
+}
+
+function buildHouseholdRoster_v0_2_3_2(state: RunState): HouseholdRoster {
+  const heirId = state.house.heir_id ?? null;
+  const spouse = state.house.spouse ?? null;
+
+  // Surviving spouse (if any) gets the widow/widower badge.
+  let widowedPersonId: string | null = null;
+  if (spouse) {
+    if (state.house.head.alive && !spouse.alive) widowedPersonId = state.house.head.id;
+    else if (!state.house.head.alive && spouse.alive) widowedPersonId = spouse.id;
+  }
+
+  const rows: HouseholdRoster["rows"] = [];
+  const seen = new Set<string>();
+
+  const pushRow = (person: Person, role: "head" | "spouse" | "child") => {
+    if (!person?.id) return;
+    if (seen.has(person.id)) return;
+    seen.add(person.id);
+
+    const badges: HouseholdRoster["rows"][number]["badges"] = [];
+    if (!person.alive) badges.push("deceased");
+    if (person.alive && widowedPersonId === person.id) badges.push(person.sex === "M" ? "widower" : "widow");
+    if (person.id === heirId) badges.push("heir");
+
+    rows.push({ person_id: person.id, role, badges });
+  };
+
+  pushRow(state.house.head, "head");
+  if (spouse) pushRow(spouse, "spouse");
+
+  const sortedKids = [...state.house.children].sort((a, b) => {
+    if (b.age !== a.age) return b.age - a.age;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  });
+  for (const c of sortedKids) pushRow(c, "child");
+
+  return { schema_version: "household_roster_v1", turn_index: state.turn_index, rows };
 }
 
 
@@ -228,7 +272,15 @@ function applyProductionAndConstruction(state: RunState, weather_multiplier: num
   return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
 }
 
-function applyConsumptionAndShortage(state: RunState): { consumption_bushels: number; shortage_bushels: number; population_delta: number } {
+function applyConsumptionAndShortage(state: RunState): {
+  consumption_bushels: number;
+  shortage_bushels: number;
+  population_delta: number;
+  // v0.2.3.2: structured signal when labor is auto-clamped due to population loss.
+  labor_auto_clamped?: boolean;
+  labor_before?: { population: number; farmers: number; builders: number };
+  labor_after?: { population: number; farmers: number; builders: number };
+} {
   const pop = state.manor.population;
   const farmers = state.manor.farmers;
   const builders = state.manor.builders;
@@ -252,16 +304,45 @@ function applyConsumptionAndShortage(state: RunState): { consumption_bushels: nu
   const lossFrac = 0.03 + hRng.next() * 0.08; // 3%..11%
   const lost = Math.max(1, Math.floor(state.manor.population * lossFrac));
   state.manor.population = asNonNegInt(state.manor.population - lost);
+  let labor_before: { population: number; farmers: number; builders: number } | undefined;
+  let labor_after: { population: number; farmers: number; builders: number } | undefined;
+  let labor_auto_clamped: boolean | undefined;
   if (state.manor.farmers + state.manor.builders > state.manor.population) {
+    labor_before = {
+      population: asNonNegInt(state.manor.population),
+      farmers: asNonNegInt(state.manor.farmers),
+      builders: asNonNegInt(state.manor.builders)
+    };
     // remove from builders first (construction labor tends to flee first)
     const overflow = state.manor.farmers + state.manor.builders - state.manor.population;
     const bCut = Math.min(state.manor.builders, overflow);
     state.manor.builders -= bCut;
     const rem = overflow - bCut;
     if (rem > 0) state.manor.farmers = Math.max(0, state.manor.farmers - rem);
+
+    labor_after = {
+      population: asNonNegInt(state.manor.population),
+      farmers: asNonNegInt(state.manor.farmers),
+      builders: asNonNegInt(state.manor.builders)
+    };
+    labor_auto_clamped = labor_before.farmers !== labor_after.farmers || labor_before.builders !== labor_after.builders;
   }
 
-  return { consumption_bushels: consumption, shortage_bushels: shortage, population_delta: -lost };
+  const res: {
+    consumption_bushels: number;
+    shortage_bushels: number;
+    population_delta: number;
+    labor_auto_clamped?: boolean;
+    labor_before?: { population: number; farmers: number; builders: number };
+    labor_after?: { population: number; farmers: number; builders: number };
+  } = { consumption_bushels: consumption, shortage_bushels: shortage, population_delta: -lost };
+
+  if (labor_before && labor_after) {
+    res.labor_auto_clamped = labor_auto_clamped;
+    res.labor_before = labor_before;
+    res.labor_after = labor_after;
+  }
+  return res;
 }
 
 // small helper to keep constant name typo-proof in this file
@@ -313,17 +394,29 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
   const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
   const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
 
+  const headWasAlive = state.house.head.alive;
+  const spouseWasAlive = state.house.spouse?.alive ?? false;
+
   function deathRoll(p: Person): boolean {
     if (!p.alive) return false;
+
+    // v0.2.3.2: cap extreme old-age survival (turn = 3y). Prevent ~120y rulers.
+    if (p.age >= 99) return true;
+
     let base = 0.0;
     if (p.age < 16) base = MORTALITY_P_UNDER16;
     else if (p.age < 40) base = MORTALITY_P_UNDER40;
     else if (p.age < 55) base = MORTALITY_P_UNDER55;
     else if (p.age < 65) base = MORTALITY_P_UNDER65;
-    else base = MORTALITY_P_65PLUS;
+    else {
+      // Steepen mortality beyond 65 (no new RNG; deterministic math only).
+      const yearsOver = p.age - 65;
+      base = MORTALITY_P_65PLUS * (1 + yearsOver * 0.06);
+    }
     // discipline reduces risk slightly
     base *= 1 - (p.traits.discipline - 3) * 0.01;
     base *= mult;
+    base = Math.max(0, Math.min(0.95, base));
     return r.fork(`d:${p.id}`).bool(base);
   }
 
@@ -334,10 +427,41 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
-  // Widowhood: spouse dies while head survives.
-  if (state.house.spouse && state.house.spouse.alive === false && state.house.head.alive) {
+  const headDiedThisTurn = headWasAlive && !state.house.head.alive;
+  const spouseDiedThisTurn = spouseWasAlive && Boolean(state.house.spouse) && state.house.spouse!.alive === false;
+
+  // v0.2.3.2 widow semantics:
+  // - Surviving spouse is Widow/Widower/Widowed.
+  // - Deceased spouse is Deceased.
+  // - Log only once, at the turn of death.
+  if ((headDiedThisTurn || spouseDiedThisTurn) && state.house.spouse) {
+    // Marriage ended; block further births.
     state.house.spouse_status = "widow";
-    houseLog.push({ kind: "widowed", turn_index: state.turn_index, spouse_name: state.house.spouse.name });
+
+    let survivor: Person | null = null;
+    let deceased: Person | null = null;
+    if (headDiedThisTurn && state.house.spouse.alive) {
+      survivor = state.house.spouse;
+      deceased = state.house.head;
+    } else if (spouseDiedThisTurn && state.house.head.alive) {
+      survivor = state.house.head;
+      deceased = state.house.spouse;
+    }
+
+    if (survivor && deceased) {
+      houseLog.push({
+        kind: "widowed",
+        turn_index: state.turn_index,
+        // Back-compat: spouse_name remains the deceased person's name.
+        spouse_name: deceased.name,
+        survivor_name: survivor.name,
+        survivor_id: survivor.id,
+        survivor_sex: survivor.sex,
+        deceased_name: deceased.name,
+        deceased_id: deceased.id,
+        deceased_age: deceased.age
+      });
+    }
   }
 
   // births: only if spouse exists + spouse_status is spouse
@@ -1036,6 +1160,15 @@ export function proposeTurn(state: RunState): TurnContext {
 
   const houseLog: HouseLogEvent[] = [];
 
+  // v0.2.3.2: structured delta trackers (UI support; no mechanics).
+  const unrestBefore = working.manor.unrest;
+  let unrestCursor = unrestBefore;
+  const unrestContribs: Array<{ label: string; diff: number }> = [];
+
+  // Track the most recent labor auto-clamp (for UX messaging).
+  let laborSignalBefore: { population: number; farmers: number; builders: number } | null = null;
+  let laborSignalAfter: { population: number; farmers: number; builders: number } | null = null;
+
   // 1) restore energy; compute heir
   working.house.energy.available = working.house.energy.max;
   const prevHeir = working.house.heir_id ?? null;
@@ -1056,8 +1189,27 @@ export function proposeTurn(state: RunState): TurnContext {
   // 4) consumption
   const cons = applyConsumptionAndShortage(working);
 
+  // Unrest contributor: shortage.
+  {
+    const diff = working.manor.unrest - unrestCursor;
+    if (diff !== 0) unrestContribs.push({ label: "Shortage", diff });
+    unrestCursor = working.manor.unrest;
+  }
+
+  // Labor auto-clamp (from shortage population loss).
+  if (cons.labor_before && cons.labor_after) {
+    laborSignalBefore = cons.labor_before;
+    laborSignalAfter = cons.labor_after;
+  }
+
   // 5) obligations
+  const unrestBeforeObl = working.manor.unrest;
   applyObligationsAndArrearsPenalty(working, prod.production_bushels);
+  {
+    const diff = working.manor.unrest - unrestBeforeObl;
+    if (diff !== 0) unrestContribs.push({ label: "Arrears", diff });
+    unrestCursor = working.manor.unrest;
+  }
 
   // 6) relationship drift
   relationshipDrift(working);
@@ -1068,7 +1220,29 @@ export function proposeTurn(state: RunState): TurnContext {
   // 8) event engine (independent)
   const events = applyEvents(working);
 
+  // Unrest contributors: events.
+  for (const ev of events) {
+    const d = ev.deltas.find((x) => x.key === "unrest");
+    if (d && d.diff !== 0) unrestContribs.push({ label: ev.title, diff: d.diff });
+  }
+
+  // Normalize/clamp state invariants.
+  // Capture labor auto-clamp here as well (e.g., event-driven population loss).
+  const laborBeforeNorm = {
+    population: asNonNegInt(working.manor.population),
+    farmers: asNonNegInt(working.manor.farmers),
+    builders: asNonNegInt(working.manor.builders)
+  };
   normalizeState(working);
+  const laborAfterNorm = {
+    population: asNonNegInt(working.manor.population),
+    farmers: asNonNegInt(working.manor.farmers),
+    builders: asNonNegInt(working.manor.builders)
+  };
+  if (laborBeforeNorm.farmers !== laborAfterNorm.farmers || laborBeforeNorm.builders !== laborAfterNorm.builders) {
+    laborSignalBefore = laborBeforeNorm;
+    laborSignalAfter = laborAfterNorm;
+  }
 
   const report: TurnReport = {
     turn_index: state.turn_index,
@@ -1095,6 +1269,51 @@ export function proposeTurn(state: RunState): TurnContext {
 
   report.top_drivers = computeTopDrivers(report, state, working);
 
+  // v0.2.3.2: labor oversubscription auto-clamp signal (UI).
+  if (laborSignalBefore && laborSignalAfter) {
+    const assigned_before = asNonNegInt(laborSignalBefore.farmers) + asNonNegInt(laborSignalBefore.builders);
+    const assigned_after = asNonNegInt(laborSignalAfter.farmers) + asNonNegInt(laborSignalAfter.builders);
+    const available = asNonNegInt(laborSignalAfter.population);
+    report.labor_signal = {
+      schema_version: "labor_signal_v1",
+      available,
+      assigned_before,
+      assigned_after,
+      farmers_before: asNonNegInt(laborSignalBefore.farmers),
+      farmers_after: asNonNegInt(laborSignalAfter.farmers),
+      builders_before: asNonNegInt(laborSignalBefore.builders),
+      builders_after: asNonNegInt(laborSignalAfter.builders),
+      was_oversubscribed: assigned_before > available,
+      auto_clamped:
+        laborSignalBefore.farmers !== laborSignalAfter.farmers || laborSignalBefore.builders !== laborSignalAfter.builders
+    };
+  }
+
+  // v0.2.3.2: unrest delta breakdown (contributors up/down).
+  const unrestAfter = working.manor.unrest;
+  report.unrest_breakdown = {
+    schema_version: "unrest_breakdown_v1",
+    before: unrestBefore,
+    after: unrestAfter,
+    delta: unrestAfter - unrestBefore,
+    increased_by: unrestContribs.filter((c) => c.diff > 0).map((c) => ({ label: c.label, amount: c.diff })),
+    decreased_by: unrestContribs.filter((c) => c.diff < 0).map((c) => ({ label: c.label, amount: Math.abs(c.diff) }))
+  };
+
+  // v0.2.3.2: construction option availability (built / in-progress / available).
+  report.construction.options = Object.keys(IMPROVEMENTS)
+    .sort((a, b) => {
+      if (a < b) return -1;
+      if (a > b) return 1;
+      return 0;
+    })
+    .map((improvement_id) => {
+      const isBuilt = hasImprovement(working.manor.improvements, improvement_id);
+      const isActive = Boolean(working.manor.construction) && working.manor.construction?.improvement_id === improvement_id;
+      const status = isBuilt ? "built" : isActive ? "active_project" : "available";
+      return { improvement_id, status };
+    });
+
   const marriageWindow = buildMarriageWindow(working);
 
   // Prospects window + engine log (v0.2.3)
@@ -1107,7 +1326,14 @@ export function proposeTurn(state: RunState): TurnContext {
   // Ensure registries remain in sync after preview simulation.
   ensurePeopleFirst(working);
 
-  return { preview_state: working, report, marriage_window: marriageWindow, prospects_window: prospectsWindow, max_labor_shift: maxShift };
+  return {
+    preview_state: working,
+    report,
+    marriage_window: marriageWindow,
+    prospects_window: prospectsWindow,
+    max_labor_shift: maxShift,
+    household_roster: buildHouseholdRoster_v0_2_3_2(working)
+  };
 }
 
 function payCoin(state: RunState, amount: number): number {
@@ -1314,8 +1540,13 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
 }
 
 function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift: number, reportNotes: string[]): void {
-  const desiredFarmers = Math.trunc(decisions.labor.desired_farmers);
-  const desiredBuilders = Math.trunc(decisions.labor.desired_builders);
+  const desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
+  const desiredBuilders = Math.max(0, Math.trunc(decisions.labor.desired_builders));
+
+  if (desiredFarmers + desiredBuilders > state.manor.population) {
+    reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
+    return;
+  }
 
   const curF = state.manor.farmers;
   const curB = state.manor.builders;
@@ -1324,15 +1555,15 @@ function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift:
   const dB = Math.abs(desiredBuilders - curB);
   const totalShift = dF + dB;
 
-  if (totalShift > maxShift) {
+  // v0.2.3.2: If the current state is oversubscribed (legacy save / earlier bug),
+  // allow rebalancing without being blocked by the per-turn labor delta cap.
+  const oversubscribedNow = curF + curB > state.manor.population;
+
+  if (!oversubscribedNow && totalShift > maxShift) {
     reportNotes.push(`Labor change exceeds cap (max ${maxShift}); no change applied.`);
     return;
   }
-
-  if (desiredFarmers + desiredBuilders > state.manor.population) {
-    reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
-    return;
-  }
+  // Intentionally no note: the UI can show structured labor warnings via report.labor_signal.
 
   // energy cost if any change
   if (totalShift > 0) {
@@ -1411,8 +1642,8 @@ function closeTurn(state: RunState, reportNotes: string[], houseLog: HouseLogEve
     state.house.head = heir;
 
     if (state.house.spouse) {
-      // Status badge only (Widow/Widower). Do not create a separate widowed life log here;
-      // `widowed` log type is reserved for spouse death events (see householdPhase).
+      // Status only (Widow/Widower) — the widowed life log is emitted at the moment of death
+      // inside householdPhase (v0.2.3.2).
       state.house.spouse_status = "widow";
     }
 

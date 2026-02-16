@@ -48,9 +48,11 @@ function mkPerson(rng: Rng, id: string, sex: Sex, age: number): Person {
 
 export function createNewRun(run_seed: string): RunState {
   const rng = new Rng(run_seed, "household", 0, "init");
-  const head = mkPerson(rng, "p_head", "M", 27);
+  // v0.2.3.2 age sanity (LOCK): first child at husband age 22, wife age 18.
+  // Keep deterministic starter ages (no randomness yet).
+  const head = mkPerson(rng, "p_head", "M", 34);
   head.married = true;
-  const spouse = mkPerson(rng, "p_spouse", "F", 24);
+  const spouse = mkPerson(rng, "p_spouse", "F", 30);
   spouse.married = true;
 
   const child1 = mkPerson(rng, "p_child1", rng.bool(0.55) ? "M" : "F", 12);

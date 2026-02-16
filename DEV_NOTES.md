@@ -1,30 +1,34 @@
-# Dev Agent A — v0.2.3.1 Hotfix (Hooks Order Violation)
+# Dev Agent A — v0.2.3.2 UI Polish Patch
 
-## Issue
-Runtime crash after clicking **New Run**:
-- React error: **“Rendered more hooks than during the previous render”**
-- Triggered by **conditional early-returns** occurring before later `useMemo(...)` hooks ran.
+## Scope
+UI/Clarity only (Workstream C + v0.2.3.2 P1 UI items). **No sim/tooling changes. No new screens/routes.**
 
-## Fix (UI-only)
-**File changed:** `src/App.tsx` (no sim/tooling changes)
+## Changes
+All changes are in `src/App.tsx`.
 
-1. **All hooks now run unconditionally**
-   - Moved/rewrote the formerly in-play `useMemo` hooks (`prospectLogLines`, `hasProspectExpiredThisTurn`) so they execute **every render** with **safe defaults** when `state`/`ctx` are null.
+### Prospects (clarity)
+- Added **type-specific** accept confirmations and accept/reject acknowledgements per UX addendum:
+  - Marriage: “Accept marriage proposal?” / “Marriage accepted.” / “Marriage offer declined.”
+  - Grant: “Accept grant offer?” / “Grant accepted.” / “Grant offer declined.”
+  - Inheritance claim: “Accept inheritance claim?” / “Claim recorded.” / “Claim declined.”
+- When a prospect is acted on during the current turn, the card now shows a decided-state badge (**Accepted/Rejected**) and the hint **“Decision recorded.”**
+- Household details list now shows a **Marriage** badge for people marked `married` (so the effect of accepting a marriage prospect is visible).
 
-2. **Single-return render pattern**
-   - Replaced conditional `return (...)` branches with a `content` variable.
-   - Component now **returns once** at the end: `return <>{content}</>;`.
+### Legacy marriage window
+- The old **Marriage Window** section is hidden when any Prospects are present for the turn (prevents dual systems on the same turn).
 
-3. **Null-safe rendering**
-   - When `screen !== "new"` but `state/ctx` are temporarily null (e.g., batched updates), UI shows a small **Loading…** placeholder rather than returning `null`.
+### Obligations placement
+- Moved the payment inputs (**Pay coin / Pay bushels / War levy**) into a dedicated **Obligations** block and placed them adjacent to the due/arrears timing breakdown.
 
-## Acceptance checklist (manual)
-- `npm run dev`
-- Load app
-- Click **New Run**
-- ✅ No hook warning/error
-- ✅ No blank screen
+### End Turn feedback
+- Clicking **Advance Turn** now shows a toast: **“Turn X resolved.”** and scrolls the page to the top.
 
-## Notes
-- No sim logic changes.
-- No new routes/screens.
+### Unrest breakdown
+- Added a collapsible **“Unrest change this turn”** breakdown. If structured breakdown data exists, it renders **Increased by / Decreased by** contributors; otherwise it shows **“No breakdown available.”**
+
+### Construction selector
+- Disabled already-built improvements in the construction selector (prevents selecting completed improvements).
+
+## Hooks safety
+- Kept the v0.2.3.1 hook-order hotfix pattern intact: **all hooks run unconditionally** and the component returns once at the end.
+
