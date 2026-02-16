@@ -181,11 +181,15 @@ function writeCsv(filePath: string, headers: string[], rows: Array<Record<string
   fs.writeFileSync(filePath, lines.join("\n"), "utf-8");
 }
 
-function runPolicy(seed: string, policy: PolicyId, turns: number, prospectPolicy: ProspectPolicy): { state: RunState; prospects: ProspectsBatchCounters } {
+function runPolicy(seed: string, policy: PolicyId, turns: number, prospectPolicy: ProspectPolicy): { state: RunState; prospects: ProspectsBatchCounters; prospects_windows_total: number; prospects_windows_by_turn: number[] } {
   let state = createNewRun(seed);
 
   const prospects = initProspectsCounters();
   const shownEver = new Set<string>();
+
+  // Prospects windows telemetry
+  const windowsByTurn = Array.from({ length: turns }, () => 0);
+  let windowsTotal = 0;
 
   for (let t = 0; t < turns; t++) {
     const ctx = proposeTurn(state);
@@ -193,6 +197,8 @@ function runPolicy(seed: string, policy: PolicyId, turns: number, prospectPolicy
     // Prospects window exposure counters (by type)
     const pw = ctx.prospects_window ?? null;
     if (pw && pw.schema_version === "prospects_window_v1") {
+      windowsTotal += 1;
+      if (t >= 0 && t < windowsByTurn.length) windowsByTurn[t] += 1;
       for (const id of pw.shown_ids) {
         shownEver.add(id);
         const pt = prospectTypeFromWindow(pw, id);
@@ -236,7 +242,7 @@ function runPolicy(seed: string, policy: PolicyId, turns: number, prospectPolicy
 
     if (state.game_over) break;
   }
-  return { state, prospects };
+  return { state, prospects, prospects_windows_total: windowsTotal, prospects_windows_by_turn: windowsByTurn };
 }
 
 function main() {
@@ -284,12 +290,18 @@ function main() {
 
   // v0.2.3.1 Prospects KPIs (headless)
   const prospectsAgg = initProspectsCounters();
+  let windowsAggTotal = 0;
+  const windowsAggByTurn = Array.from({ length: turns }, () => 0);
 
   const fullExports: Array<{ seed: string; state: RunState; score: number }> = [];
 
   for (let i = 0; i < runs; i++) {
     const seed = `${baseSeed}_${String(i).padStart(4, "0")}`;
-    const { state, prospects } = runPolicy(seed, policy, turns, prospectPolicy);
+    const { state, prospects, prospects_windows_total, prospects_windows_by_turn } = runPolicy(seed, policy, turns, prospectPolicy);
+    windowsAggTotal += (prospects_windows_total ?? 0);
+    if (Array.isArray(prospects_windows_by_turn)) {
+      for (let i = 0; i < windowsAggByTurn.length; i++) windowsAggByTurn[i] += (prospects_windows_by_turn[i] ?? 0);
+    }
     addProspectsCounters(prospectsAgg, prospects);
 
     const isComplete = !state.game_over && state.turn_index >= turns;
@@ -494,6 +506,8 @@ function main() {
       generated: { total: sumProspectsByType(prospectsAgg.generated), by_type: prospectsAgg.generated },
       shown: { total: sumProspectsByType(prospectsAgg.shown), by_type: prospectsAgg.shown },
       hidden: { total: sumProspectsByType(prospectsAgg.hidden), by_type: prospectsAgg.hidden },
+      windows_total: windowsAggTotal,
+      windows_by_turn: windowsAggByTurn,
       outcomes: {
         accepted: { total: sumProspectsByType(prospectsAgg.accepted), by_type: prospectsAgg.accepted },
         rejected: { total: sumProspectsByType(prospectsAgg.rejected), by_type: prospectsAgg.rejected },
