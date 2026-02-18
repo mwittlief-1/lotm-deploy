@@ -1,9 +1,9 @@
 {
-  "app_version": "v0.2.4",
-  "build_time_utc": "2026-02-16T22:06:38Z",
-  "code_fingerprint": "b0bde94aeb2e7e6be9bad281ed844c1f59e22ad3561b2e9a7e39f46548742032",
-  "created_at_utc": "2026-02-16T22:06:38Z",
-  "notes": "v0.2.4 patch: Court & Household accounting per contract (court roster + officers; peasant vs court consumption reconciliation; marriage adds spouse to court).",
+  "app_version": "v0.2.7",
+  "build_time_utc": "2026-02-18T11:20:23Z",
+  "code_fingerprint": "42422a45b0b2aa9903f904c622ce8ba5bedaf5dab9bde64f2ad521624ed55b2e",
+  "created_at_utc": "2026-02-18T11:20:23Z",
+  "notes": "v0.2.7 UI legibility pass: Turn Report adds Diff Ledger + Council Agenda panels per binding UX docs; prospects/events show Confidence labels (Known/Likely/Possible / Known for resolved); Play UI no longer exposes odds/roll debug details (Debug/Log retains deep inspection). No sim mechanics changes; retains v0.2.6.2 runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8).",
   "policy_ids": [
     "prudent-builder",
     "builder-forward",

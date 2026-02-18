@@ -258,10 +258,58 @@ const COPY = {
   marriageToast_line2_withSpouse: (spouse_name: string) => `${spouse_name} joins your court. Court size increased.`,
   marriageToast_spouseJoinsCourt: (spouse_name: string) => `${spouse_name} joins your court.`,
   marriageToast_courtSizeIncreased: "Court size increased.",
+  marriageToast_childLeavesCourt: (child_name: string) => `${child_name} leaves your court.`,
+  marriageToast_courtSizeDecreased: "Court size decreased.",
+  marriageToast_line2_childLeaves: (child_name: string) => `${child_name} leaves your court. Court size decreased.`,
 
   // Turn Summary top block
   turnSummary_last3Years: "Last 3 years",
   turnSummary_nowChoose: "Now choose",
+
+  // v0.2.7 binding copy (docs/ux/v0.2.7_copy.md)
+  diffLedgerTitle: "Diff Ledger",
+  diffLedgerHelper: "Biggest changes from the last 3 years, with a one-line why.",
+  diffLedgerWhyLabel: "Why:",
+  diffLedgerMultipleCauses: "Multiple causes this turn.",
+  diffLedgerLine_food: (food_delta_signed: string, food_stores: number) => `Food: ${food_delta_signed} bushels · Stores: ${food_stores}`,
+  diffLedgerLine_coin: (coin_delta_signed: string) => `Coin: ${coin_delta_signed}`,
+  diffLedgerLine_population: (pop_delta_signed: string) => `Population: ${pop_delta_signed}`,
+  diffLedgerLine_unrest: (unrest_delta_signed: string) => `Unrest: ${unrest_delta_signed}`,
+  diffLedgerLine_relations: (target_name: string, a_delta: string, r_delta: string, t_delta: string) =>
+    `Relations (${target_name}): A ${a_delta} / R ${r_delta} / T ${t_delta}`,
+  sourceTag_decision: "decision",
+  sourceTag_event: "event",
+  sourceTag_systemPressure: "system_pressure",
+  sourceTag_prospect: "prospect",
+
+  councilAgendaTitle: "Council Agenda",
+  councilAgendaHelper: "Three priorities for this turn.",
+  agenda_labor_title: "Labor needs attention",
+  agenda_labor_context: "Assignments exceed available workers.",
+  agenda_food_title: "Food balance is worsening",
+  agenda_food_context: "Stores may fall if trends continue.",
+  agenda_obligations_title: "Obligations are pressing",
+  agenda_obligations_context: "Payments are due entering this turn.",
+  agenda_unrest_title: "Unrest is rising",
+  agenda_unrest_context: "Recent pressures increased unrest.",
+  agenda_prospect_title: "Opportunity expires soon",
+  agenda_prospect_context: (turn_index: number) => `A prospect expires end of Turn ${turn_index}.`,
+  agenda_succession_title: "Succession needs attention",
+  agenda_succession_context: "Heir status changed this turn.",
+  // Routine fillers (TA v0.2.7 review; UX copy TBD)
+
+  cta_reviewLabor: "Review labor",
+  cta_viewFoodDetails: "View food details",
+  cta_reviewObligations: "Review obligations",
+  cta_viewUnrestDetails: "View unrest details",
+  cta_viewProspects: "View prospects",
+  cta_viewHousehold: "View household",
+  cta_viewEvents: "View events",
+  cta_openDetails: "Open details",
+
+  // v0.2.5: Population change reasons (Turn Summary)
+  populationChange_deaths: "Deaths",
+  populationChange_runaways: "Runaways",
 
   // v0.2.3.2 patch addendum: End Turn feedback
   turnResolvedToast: (turn_index: number) => `Turn ${turn_index} resolved.`
@@ -663,6 +711,73 @@ export default function App() {
       const deltaCoin = m.coin - beforeM.coin;
       const deltaUnrest = m.unrest - beforeM.unrest;
 
+      // v0.2.5: Population change breakdown (deaths vs runaways) for Turn Summary.
+      type PopChangeLine = { label: string; amount: number };
+
+      function parsePopulationChangeBreakdown(report: any): PopChangeLine[] | null {
+        const raw: any =
+          report?.population_change_breakdown ??
+          report?.population_change ??
+          report?.population_delta_breakdown ??
+          report?.population_change_reasons ??
+          report?.populationBreakdown ??
+          report?.population_breakdown ??
+          null;
+
+        if (!raw || (typeof raw !== "object" && !Array.isArray(raw))) return null;
+
+        const lines: PopChangeLine[] = [];
+
+        function add(label: string, amtRaw: any) {
+          const amtNum = typeof amtRaw === "number" && Number.isFinite(amtRaw) ? Math.trunc(amtRaw) : null;
+          if (!label || amtNum === null || amtNum === 0) return;
+          lines.push({ label, amount: Math.abs(amtNum) });
+        }
+
+        const normalizeKey = (k: string): string => String(k || "").toLowerCase().replace(/[^a-z]/g, "");
+
+        function labelForKey(keyRaw: any): string {
+          const k = typeof keyRaw === "string" ? keyRaw : String(keyRaw ?? "");
+          const nk = normalizeKey(k);
+          if (nk === "deaths" || nk === "death" || nk === "died" || nk === "dead" || nk === "mortality") return COPY.populationChange_deaths;
+          if (nk === "runaways" || nk === "runaway" || nk === "fled" || nk === "flee" || nk === "deserted" || nk === "ranaway")
+            return COPY.populationChange_runaways;
+          const cleaned = k.replace(/_/g, " ").trim();
+          return cleaned ? cleaned.slice(0, 1).toUpperCase() + cleaned.slice(1) : k;
+        }
+
+        if (Array.isArray(raw)) {
+          for (const it of raw) {
+            if (!it || typeof it !== "object") continue;
+            const key = (it as any).kind ?? (it as any).cause ?? (it as any).reason ?? (it as any).label ?? (it as any).code;
+            const amt = (it as any).count ?? (it as any).amount ?? (it as any).delta ?? (it as any).value;
+            if (key != null) add(labelForKey(key), amt);
+          }
+        } else {
+          const obj: any =
+            (raw as any).breakdown && typeof (raw as any).breakdown === "object" ? (raw as any).breakdown : raw;
+          if (obj && typeof obj === "object") {
+            for (const [k, v] of Object.entries(obj)) {
+              if (typeof v === "number" && Number.isFinite(v) && v !== 0) add(labelForKey(k), v);
+            }
+          }
+        }
+
+        if (!lines.length) return null;
+
+        // Stable ordering: deaths/runaways first, then largest → smallest.
+        const rank = (label: string): number => {
+          if (label === COPY.populationChange_deaths) return 1;
+          if (label === COPY.populationChange_runaways) return 2;
+          return 9;
+        };
+        lines.sort((a, b) => rank(a.label) - rank(b.label) || b.amount - a.amount || a.label.localeCompare(b.label));
+        return lines;
+      }
+
+      const popChangeLines = parsePopulationChangeBreakdown(ctx.report as any);
+      const popChangeSummary = popChangeLines ? popChangeLines.map((l) => `${l.label} ${l.amount}`).join(", ") : null;
+
       // v0.2.3.2: Unrest delta breakdown (data-driven; UI renders if available)
       type UnrestLine = { label: string; amount: number };
 
@@ -963,8 +1078,17 @@ ${confirmBody}`);
 
           // v0.2.4: Marriage acceptance confirmation (explicit copy + optional spouse/court note).
           if (t === "marriage") {
+            const childId: string | null =
+              typeof p?.subject_person_id === "string"
+                ? p.subject_person_id
+                : typeof p?.child_id === "string"
+                  ? p.child_id
+                  : typeof p?.person_id === "string"
+                    ? p.person_id
+                    : null;
+
             const childName =
-              personNameFromRegistry(typeof p?.subject_person_id === "string" ? p.subject_person_id : null) ??
+              personNameFromRegistry(childId) ??
               (typeof p?.subject_person_name === "string" ? p.subject_person_name : null);
 
             const spouseName =
@@ -973,9 +1097,20 @@ ${confirmBody}`);
               (typeof p?.other_person_name === "string" ? p.other_person_name : null) ??
               null;
 
+            // Residence rule visibility: daughters marry out; sons marry in.
+            const people: any = (ctx.preview_state as any).people;
+            const childRec: any = childId && people && typeof people === "object" ? people[childId] : null;
+            const childSex: "M" | "F" | null =
+              childRec && typeof childRec === "object" && (childRec.sex === "M" || childRec.sex === "F") ? childRec.sex : null;
+
             if (childName) {
               const line1 = COPY.marriageToast_line1(childName);
-              const msg = spouseName ? `${line1}\n${COPY.marriageToast_line2_withSpouse(spouseName)}` : line1;
+              const msg =
+                childSex === "F"
+                  ? `${line1}\n${COPY.marriageToast_line2_childLeaves(childName)}`
+                  : spouseName
+                    ? `${line1}\n${COPY.marriageToast_line2_withSpouse(spouseName)}`
+                    : line1;
               setToast({ kind: "ok", message: msg });
               return;
             }
@@ -1319,6 +1454,377 @@ ${confirmBody}`);
 
       const courtSize = courtRoster.alive_count;
 
+      // v0.2.7: Anchors for Council Agenda CTAs (scroll only; no new routes).
+      const ANCHOR = {
+        labor: "anchor_labor",
+        food: "anchor_food",
+        obligations: "anchor_obligations",
+        unrest: "anchor_unrest",
+        prospects: "anchor_prospects",
+        household: "anchor_household",
+        events: "anchor_events"
+      } as const;
+
+      function scrollToAnchor(anchorId: string) {
+        try {
+          const el = document.getElementById(anchorId);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch {
+          // no-op
+        }
+      }
+
+      // --- v0.2.7 Diff Ledger (derived; UI-only) ---
+      type SourceTag = "decision" | "event" | "system_pressure" | "prospect";
+      type LedgerItem = {
+        id: string;
+        sort_mag: number;
+        tie_key: string;
+        primary: string;
+        why: string;
+        source: SourceTag;
+      };
+
+      function pickEventWhyForDeltaKey(deltaKey: string): { why: string; source: SourceTag } | null {
+        const evs: any[] = Array.isArray(ctx.report.events) ? (ctx.report.events as any[]) : [];
+        let best: { id: string; title: string; mag: number } | null = null;
+
+        for (const e of evs) {
+          const deltas: any[] = Array.isArray(e?.deltas) ? e.deltas : [];
+          const d = deltas.find((x) => x && typeof x === "object" && x.key === deltaKey);
+          const diff = typeof d?.diff === "number" && Number.isFinite(d.diff) ? Math.trunc(d.diff) : 0;
+          const mag = Math.abs(diff);
+          if (mag <= 0) continue;
+          const id = typeof e?.id === "string" ? e.id : "";
+          const title = typeof e?.title === "string" ? e.title : "";
+          if (!title) continue;
+
+          if (!best) {
+            best = { id, title, mag };
+            continue;
+          }
+
+          if (mag > best.mag) {
+            best = { id, title, mag };
+            continue;
+          }
+
+          if (mag === best.mag) {
+            const a = id;
+            const b = best.id;
+            if (a && b && a < b) best = { id, title, mag };
+          }
+        }
+
+        if (!best) return null;
+        return { why: best.title, source: "event" };
+      }
+
+      function pickTopDriver(prefix: string): string | null {
+        const ds: any[] = Array.isArray(ctx.report.top_drivers) ? (ctx.report.top_drivers as any[]) : [];
+        for (const d of ds) {
+          if (typeof d === "string" && d.startsWith(prefix)) return d;
+        }
+        return null;
+      }
+
+      function whyForMetric(metric: "food" | "coin" | "population" | "unrest" | "relations"): { why: string; source: SourceTag } {
+        // Decision/prospect attribution is intentionally omitted in the live (pre-decision) Turn Report.
+        if (metric === "food") {
+          return (
+            pickEventWhyForDeltaKey("bushels") ??
+            (pickTopDriver("Food:") ? { why: pickTopDriver("Food:") as string, source: "system_pressure" } : null) ??
+            { why: COPY.diffLedgerMultipleCauses, source: "system_pressure" }
+          );
+        }
+        if (metric === "coin") {
+          return (
+            pickEventWhyForDeltaKey("coin") ??
+            (pickTopDriver("Coin:") ? { why: pickTopDriver("Coin:") as string, source: "system_pressure" } : null) ??
+            { why: COPY.diffLedgerMultipleCauses, source: "system_pressure" }
+          );
+        }
+        if (metric === "unrest") {
+          return (
+            pickEventWhyForDeltaKey("unrest") ??
+            (pickTopDriver("Unrest:") ? { why: pickTopDriver("Unrest:") as string, source: "system_pressure" } : null) ??
+            { why: COPY.diffLedgerMultipleCauses, source: "system_pressure" }
+          );
+        }
+        if (metric === "population") {
+          return (
+            pickEventWhyForDeltaKey("population") ??
+            (popChangeSummary ? { why: popChangeSummary, source: "system_pressure" } : null) ??
+            { why: COPY.diffLedgerMultipleCauses, source: "system_pressure" }
+          );
+        }
+        // relations
+        return { why: COPY.diffLedgerMultipleCauses, source: "system_pressure" };
+      }
+
+      const diffLedgerItems: LedgerItem[] = (() => {
+        const items: LedgerItem[] = [];
+
+        items.push({
+          id: "food",
+          sort_mag: Math.abs(deltaBushels),
+          tie_key: "00_food",
+          primary: COPY.diffLedgerLine_food(fmtSigned(deltaBushels), m.bushels_stored),
+          ...whyForMetric("food")
+        });
+
+        items.push({
+          id: "coin",
+          sort_mag: Math.abs(deltaCoin),
+          tie_key: "01_coin",
+          primary: COPY.diffLedgerLine_coin(fmtSigned(deltaCoin)),
+          ...whyForMetric("coin")
+        });
+
+        items.push({
+          id: "population",
+          sort_mag: Math.abs(deltaPop),
+          tie_key: "02_population",
+          primary: COPY.diffLedgerLine_population(fmtSigned(deltaPop)),
+          ...whyForMetric("population")
+        });
+
+        items.push({
+          id: "unrest",
+          sort_mag: Math.abs(deltaUnrest),
+          tie_key: "03_unrest",
+          primary: COPY.diffLedgerLine_unrest(fmtSigned(deltaUnrest)),
+          ...whyForMetric("unrest")
+        });
+
+        // Relationship movers (bounded): incoming edges to player head.
+        const playerHeadId: string | null =
+          typeof ctx.preview_state?.house?.head?.id === "string" ? ctx.preview_state.house.head.id : typeof state.house?.head?.id === "string" ? state.house.head.id : null;
+
+        const beforeArr: any[] = Array.isArray((state as any).relationships) ? ((state as any).relationships as any[]) : [];
+        const afterArr: any[] = Array.isArray((ctx.preview_state as any).relationships) ? ((ctx.preview_state as any).relationships as any[]) : [];
+
+        const keyOf = (from_id: string, to_id: string) => `${from_id}|${to_id}`;
+        const beforeMap = new Map<string, any>();
+        const afterMap = new Map<string, any>();
+
+        for (const e of beforeArr) {
+          const from_id = typeof e?.from_id === "string" ? e.from_id : "";
+          const to_id = typeof e?.to_id === "string" ? e.to_id : "";
+          if (from_id && to_id) beforeMap.set(keyOf(from_id, to_id), e);
+        }
+        for (const e of afterArr) {
+          const from_id = typeof e?.from_id === "string" ? e.from_id : "";
+          const to_id = typeof e?.to_id === "string" ? e.to_id : "";
+          if (from_id && to_id) afterMap.set(keyOf(from_id, to_id), e);
+        }
+
+        // Map head_id -> house label ("House {name}") for stable target display.
+        const headIdToHouseLabel = new Map<string, string>();
+        {
+          const houses: any = (ctx.preview_state as any)?.houses;
+          if (houses && typeof houses === "object") {
+            for (const hid of Object.keys(houses).sort()) {
+              const h: any = houses[hid];
+              if (!h || typeof h !== "object") continue;
+              const head_id = typeof h.head_id === "string" ? h.head_id : null;
+              const house_name = typeof h.house_name === "string" ? h.house_name : typeof h.name === "string" ? h.name : null;
+              if (head_id && house_name) headIdToHouseLabel.set(head_id, COPY.housePrefix(house_name));
+            }
+          }
+        }
+
+        type RelMove = { from_id: string; to_id: string; dA: number; dR: number; dT: number; score: number };
+        const moves: RelMove[] = [];
+
+        if (playerHeadId) {
+          const keys = new Set<string>();
+          for (const k of beforeMap.keys()) keys.add(k);
+          for (const k of afterMap.keys()) keys.add(k);
+
+          for (const k of keys) {
+            const [from_id, to_id] = k.split("|");
+            if (!from_id || !to_id) continue;
+            if (to_id !== playerHeadId) continue;
+            if (from_id === playerHeadId) continue;
+
+            const b: any = beforeMap.get(k);
+            const a: any = afterMap.get(k);
+
+            const dA =
+              (typeof a?.allegiance === "number" ? a.allegiance : 0) - (typeof b?.allegiance === "number" ? b.allegiance : 0);
+            const dR = (typeof a?.respect === "number" ? a.respect : 0) - (typeof b?.respect === "number" ? b.respect : 0);
+            const dT = (typeof a?.threat === "number" ? a.threat : 0) - (typeof b?.threat === "number" ? b.threat : 0);
+            const score = Math.abs(dA) + Math.abs(dR) + Math.abs(dT);
+            if (score <= 0) continue;
+
+            moves.push({ from_id, to_id, dA, dR, dT, score });
+          }
+        }
+
+        moves.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          if (a.from_id < b.from_id) return -1;
+          if (a.from_id > b.from_id) return 1;
+          if (a.to_id < b.to_id) return -1;
+          if (a.to_id > b.to_id) return 1;
+          return 0;
+        });
+
+        for (const mv of moves.slice(0, 3)) {
+          const target =
+            headIdToHouseLabel.get(mv.from_id) ??
+            personNameFromRegistry(mv.from_id) ??
+            mv.from_id;
+
+          items.push({
+            id: `rel:${mv.from_id}->${mv.to_id}`,
+            sort_mag: mv.score,
+            tie_key: `10_rel:${mv.from_id}->${mv.to_id}`,
+            primary: COPY.diffLedgerLine_relations(target, fmtSigned(mv.dA), fmtSigned(mv.dR), fmtSigned(mv.dT)),
+            ...whyForMetric("relations")
+          });
+        }
+
+        items.sort((a, b) => {
+          if (b.sort_mag !== a.sort_mag) return b.sort_mag - a.sort_mag;
+          if (a.tie_key < b.tie_key) return -1;
+          if (a.tie_key > b.tie_key) return 1;
+          return 0;
+        });
+
+        return items;
+      })();
+
+      // --- v0.2.7 Council Agenda (derived; UI-only) ---
+      type AgendaItem = {
+        id: string;
+        score: number;
+        tie_key: string;
+        title: string;
+        context: string;
+        cta_label: string;
+        anchor: string;
+      };
+
+      const councilAgendaItems: AgendaItem[] = (() => {
+        const items: AgendaItem[] = [];
+
+        const nowTurn = ctx.report.turn_index;
+
+        // 1) Labor oversubscribed (reuse banner signal)
+        if (laborOversubscribed) {
+          items.push({
+            id: "agenda_labor_oversubscribed",
+            score: 1000,
+            tie_key: "00_labor",
+            title: COPY.agenda_labor_title,
+            context: COPY.agenda_labor_context,
+            cta_label: COPY.cta_reviewLabor,
+            anchor: ANCHOR.labor
+          });
+        }
+
+        // 2) Food risk
+        if (ctx.report.shortage_bushels > 0 || deltaBushels < 0) {
+          const severity = (ctx.report.shortage_bushels ?? 0) + Math.abs(Math.min(0, deltaBushels));
+          items.push({
+            id: "agenda_food_shortage",
+            score: 900 + severity,
+            tie_key: "01_food",
+            title: COPY.agenda_food_title,
+            context: COPY.agenda_food_context,
+            cta_label: COPY.cta_viewFoodDetails,
+            anchor: ANCHOR.food
+          });
+        }
+
+        // 3) Obligations pressing (due entering)
+        const dueTotal = (dueEntering.coin ?? 0) + (dueEntering.bushels ?? 0);
+        if (dueTotal > 0) {
+          const severity = dueTotal + (arrearsCarried.coin ?? 0) + (arrearsCarried.bushels ?? 0);
+          items.push({
+            id: "agenda_obligations_due",
+            score: 850 + severity,
+            tie_key: "02_obligations",
+            title: COPY.agenda_obligations_title,
+            context: COPY.agenda_obligations_context,
+            cta_label: COPY.cta_reviewObligations,
+            anchor: ANCHOR.obligations
+          });
+        }
+
+        // 4) Unrest rising
+        if (deltaUnrest > 0) {
+          items.push({
+            id: "agenda_unrest_rising",
+            score: 800 + deltaUnrest,
+            tie_key: "03_unrest",
+            title: COPY.agenda_unrest_title,
+            context: COPY.agenda_unrest_context,
+            cta_label: COPY.cta_viewUnrestDetails,
+            anchor: ANCHOR.unrest
+          });
+        }
+
+        // 5) Prospect expiring soon (cap to 1)
+        {
+          const ps: any[] = Array.isArray(prospectsAll) ? (prospectsAll as any[]) : [];
+          const expiring = ps
+            .filter((p) => typeof p?.expires_turn === "number" && Number.isFinite(p.expires_turn))
+            .map((p) => ({ id: typeof p?.id === "string" ? p.id : "", expires_turn: Math.trunc(p.expires_turn as number) }))
+            .filter((p) => p.id && p.expires_turn <= nowTurn + 1);
+
+          expiring.sort((a, b) => {
+            if (a.expires_turn !== b.expires_turn) return a.expires_turn - b.expires_turn;
+            if (a.id < b.id) return -1;
+            if (a.id > b.id) return 1;
+            return 0;
+          });
+
+          const pick = expiring[0];
+          if (pick) {
+            const severity = Math.max(0, (nowTurn + 1) - pick.expires_turn);
+            items.push({
+              id: `agenda_prospect_expiring:${pick.id}`,
+              score: 780 + severity,
+              tie_key: `10_prospect:${pick.id}`,
+              title: COPY.agenda_prospect_title,
+              context: COPY.agenda_prospect_context(pick.expires_turn),
+              cta_label: COPY.cta_viewProspects,
+              anchor: ANCHOR.prospects
+            });
+          }
+        }
+
+        // 6) Succession/heir attention (only when heir status changed this turn)
+        {
+          const hl: any[] = Array.isArray((ctx.report as any)?.house_log) ? (((ctx.report as any).house_log) as any[]) : [];
+          const changed = hl.some((e) => e?.kind === "heir_selected" || e?.kind === "succession");
+          if (changed) {
+            items.push({
+              id: "agenda_succession",
+              score: 760,
+              tie_key: "06_heir",
+              title: COPY.agenda_succession_title,
+              context: COPY.agenda_succession_context,
+              cta_label: COPY.cta_viewHousehold,
+              anchor: ANCHOR.household
+            });
+          }
+        }
+
+        items.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          if (a.tie_key < b.tie_key) return -1;
+          if (a.tie_key > b.tie_key) return 1;
+          return 0;
+        });
+
+        const k = Math.min(5, Math.max(3, items.length));
+        return items.slice(0, k);
+      })();
+
 
       content = (
         <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
@@ -1351,28 +1857,64 @@ ${confirmBody}`);
           ) : null}
 
           
+          {/* v0.2.7: Diff Ledger (biggest changes + one-line why) */}
           <div style={{ padding: 12, border: "1px solid #ccc", background: "#fafafa", marginBottom: 12 }}>
-            <div style={{ fontWeight: 700, marginBottom: 6 }}>{COPY.turnSummary_last3Years}</div>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 12 }}>
-              <div>
-                Population: <b>{fmtSigned(deltaPop)}</b> (now {m.population})
-              </div>
-              <div>
-                Bushels: <b>{fmtSigned(deltaBushels)}</b> (now {m.bushels_stored})
-              </div>
-              <div>
-                Coin: <b>{fmtSigned(deltaCoin)}</b> (now {m.coin})
-              </div>
-              <div>
-                Unrest: <b>{fmtSigned(deltaUnrest)}</b> (now {m.unrest}/100)
-              </div>
-              {ctx.report.shortage_bushels > 0 ? (
-                <div>
-                  <b>Shortage:</b> {ctx.report.shortage_bushels} bushels
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>{COPY.diffLedgerTitle}</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>{COPY.diffLedgerHelper}</div>
+
+            <div style={{ display: "grid", gap: 8 }}>
+              {diffLedgerItems.map((it) => (
+                <div key={it.id} style={{ padding: 10, border: "1px solid #ddd", background: "#fff" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
+                    <div style={{ fontWeight: 700 }}>{it.primary}</div>
+                    <span
+                      title="Source of the change (highest-priority contributor)."
+                      style={{
+                        fontSize: 12,
+                        padding: "2px 8px",
+                        border: "1px solid #ddd",
+                        borderRadius: 999,
+                        background: "#fafafa",
+                        whiteSpace: "nowrap"
+                      }}
+                    >
+                      {it.source}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>{it.why}</div>
                 </div>
-              ) : null}
+              ))}
             </div>
-            <div style={{ marginTop: 10, fontWeight: 700 }}>{COPY.turnSummary_nowChoose}</div>
+          </div>
+
+          {/* v0.2.7: Council Agenda (3–5 items) */}
+          <div style={{ padding: 12, border: "1px solid #ccc", background: "#fafafa", marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>{COPY.councilAgendaTitle}</div>
+            <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>{COPY.councilAgendaHelper}</div>
+            <div style={{ display: "grid", gap: 8 }}>
+              {councilAgendaItems.map((a) => (
+                <div
+                  key={a.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: 10,
+                    border: "1px solid #ddd",
+                    background: "#fff"
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{a.title}</div>
+                    <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{a.context}</div>
+                  </div>
+                  <button onClick={() => scrollToAnchor(a.anchor)} style={{ whiteSpace: "nowrap" }}>
+                    {a.cta_label}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1387,13 +1929,14 @@ ${confirmBody}`);
 
               <ul>
                 <li>
-                  Population: {m.population} {deltaPop !== 0 ? <span style={{ opacity: 0.75 }}>(Δ {fmtSigned(deltaPop)})</span> : null}
+                  Population: {m.population} {deltaPop !== 0 ? <span style={{ opacity: 0.75 }}>(Δ {fmtSigned(deltaPop)})</span> : null}{" "}
+                  {popChangeSummary ? <span style={{ opacity: 0.75 }}>({popChangeSummary})</span> : null}
                 </li>
                 <li>Farmers: {m.farmers}</li>
                 <li>
                   Builders: {m.builders}
                   <Tip
-                    text={`Builder food premium: each builder consumes +${builderExtraPerTurn} bushels/turn (turn=${TURN_YEARS}y) compared to a farmer/idle worker.`}
+                    text={`Builder food premium: each builder consumes +${builderExtraPerTurn} extra bushels this turn (${TURN_YEARS}y) compared to a farmer/idle worker.`}
                   />
                 </li>
                 <li>
@@ -1403,7 +1946,7 @@ ${confirmBody}`);
                 <li>
                   Coin: {m.coin} {deltaCoin !== 0 ? <span style={{ opacity: 0.75 }}>(Δ {fmtSigned(deltaCoin)})</span> : null}
                 </li>
-                <li style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <li id={ANCHOR.unrest} style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <span>
                     Unrest: <b>{m.unrest}</b>/100 {deltaUnrest !== 0 ? <span style={{ opacity: 0.75 }}>(Δ {fmtSigned(deltaUnrest)})</span> : null}
                   </span>
@@ -1523,7 +2066,7 @@ ${confirmBody}`);
                 </div>
               </div>
 
-              <h4>{COPY.household}</h4>
+              <h4 id={ANCHOR.household}>{COPY.household}</h4>
               <div style={{ padding: 10, border: "1px solid #eee", background: "#fff", marginBottom: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline" }}>
                   <div>
@@ -1647,6 +2190,111 @@ ${confirmBody}`);
                                   : heirParts.displayName
                                 : "";
                               if (heirName) details = COPY.logDetails_succession_heir(heirName);
+                            } else if (kind === "marriage" || kind === "marriage_arranged" || kind === "marriage_resolved") {
+                              title = COPY.prospectType_marriage;
+
+                              const childId: string | null =
+                                typeof e?.child_id === "string"
+                                  ? e.child_id
+                                  : typeof e?.subject_person_id === "string"
+                                    ? e.subject_person_id
+                                    : typeof e?.person_id === "string"
+                                      ? e.person_id
+                                      : null;
+
+                              const childNameFromReg = personNameFromRegistry(childId);
+                              const childParts = formatNameParts(
+                                e?.child_name ?? e?.person_name ?? e?.subject_person_name,
+                                e?.child_age ?? e?.person_age ?? e?.subject_person_age,
+                                e?.child_short_id ?? e?.person_short_id ?? e?.subject_person_short_id,
+                                e?.child_id ?? e?.person_id ?? e?.subject_person_id
+                              );
+                              const childName = childNameFromReg ?? (childParts.displayName
+                                ? childParts.ageText
+                                  ? `${childParts.displayName} (${childParts.ageText})`
+                                  : childParts.displayName
+                                : "");
+
+                              const spouseId: string | null =
+                                typeof e?.spouse_id === "string"
+                                  ? e.spouse_id
+                                  : typeof e?.spouse_person_id === "string"
+                                    ? e.spouse_person_id
+                                    : null;
+                              const spouseNameFromReg = personNameFromRegistry(spouseId);
+                              const spouseParts = formatNameParts(e?.spouse_name, e?.spouse_age, e?.spouse_short_id, e?.spouse_id);
+                              const spouseName = spouseNameFromReg ?? (spouseParts.displayName
+                                ? spouseParts.ageText
+                                  ? `${spouseParts.displayName} (${spouseParts.ageText})`
+                                  : spouseParts.displayName
+                                : "");
+
+                              const otherHouseName: string | null =
+                                typeof e?.other_house_name === "string"
+                                  ? e.other_house_name
+                                  : typeof e?.otherHouseName === "string"
+                                    ? e.otherHouseName
+                                    : typeof e?.other_house_id === "string"
+                                      ? houseNameFromRegistry(e.other_house_id)
+                                      : typeof e?.from_house_id === "string"
+                                        ? houseNameFromRegistry(e.from_house_id)
+                                        : null;
+
+                              if (childName && spouseName) outcome = `${childName} married ${spouseName}.`;
+                              else if (childName && otherHouseName) outcome = `${childName} married into House ${otherHouseName}.`;
+                              else if (childName) outcome = `${childName} married.`;
+
+                              // Details: dowry + residence change (joined/left court).
+                              const detailsParts: string[] = [];
+
+                              const dowrySigned = typeof e?.dowry_signed_coin === "string" ? e.dowry_signed_coin : null;
+                              if (dowrySigned) {
+                                detailsParts.push(`Dowry: ${dowrySigned}.`);
+                              } else {
+                                const amt = typeof e?.dowry_amount === "number" && Number.isFinite(e.dowry_amount) ? Math.trunc(e.dowry_amount) : null;
+                                const dir = typeof e?.dowry_direction === "string" ? e.dowry_direction : null;
+                                if (amt !== null && amt !== 0) {
+                                  const signed = amt > 0 ? `+${amt}` : String(amt);
+                                  if (dir === "paid" || dir === "received") detailsParts.push(`Dowry: ${signed} coin (${dir}).`);
+                                  else detailsParts.push(`Dowry: ${signed} coin.`);
+                                }
+                              }
+
+                              function inferResidenceChange(): "spouse_joins" | "child_leaves" | null {
+                                if (e?.spouse_joins_court === true || e?.spouse_joined_court === true) return "spouse_joins";
+                                if (e?.child_leaves_court === true || e?.child_left_court === true) return "child_leaves";
+
+                                const r = typeof e?.residence === "string" ? e.residence.toLowerCase() : null;
+                                if (r) {
+                                  if (r.includes("join") || r.includes("in") || r.includes("court")) return "spouse_joins";
+                                  if (r.includes("leave") || r.includes("out")) return "child_leaves";
+                                }
+
+                                const courtDelta = typeof e?.court_delta === "number" && Number.isFinite(e.court_delta) ? Math.trunc(e.court_delta) : null;
+                                if (courtDelta !== null) {
+                                  if (courtDelta > 0) return "spouse_joins";
+                                  if (courtDelta < 0) return "child_leaves";
+                                }
+
+                                // Fallback rule: daughters marry out; sons marry in.
+                                const people: any = (ctx.preview_state as any).people;
+                                const childRec: any = childId && people && typeof people === "object" ? people[childId] : null;
+                                const sex = childRec && typeof childRec === "object" ? childRec.sex : null;
+                                if (sex === "F") return "child_leaves";
+                                if (sex === "M") return "spouse_joins";
+                                return null;
+                              }
+
+                              const residenceChange = inferResidenceChange();
+                              if (residenceChange === "spouse_joins") {
+                                if (spouseName) detailsParts.push(`${COPY.marriageToast_spouseJoinsCourt(spouseName)} ${COPY.marriageToast_courtSizeIncreased}`);
+                                else detailsParts.push(COPY.marriageToast_courtSizeIncreased);
+                              } else if (residenceChange === "child_leaves") {
+                                if (childName) detailsParts.push(`${COPY.marriageToast_childLeavesCourt(childName)} ${COPY.marriageToast_courtSizeDecreased}`);
+                                else detailsParts.push(COPY.marriageToast_courtSizeDecreased);
+                              }
+
+                              details = detailsParts.length ? detailsParts.join(" ") : null;
                             }
                             const turnIndex = typeof e?.turn_index === "number" ? e.turn_index : null;
                             if (!title || !outcome || turnIndex === null) return null;
@@ -1677,14 +2325,14 @@ ${confirmBody}`);
                 <div style={{ opacity: 0.7 }}>None</div>
               )}
 
-              <h4>Food & stores</h4>
+              <h4 id={ANCHOR.food}>Food & stores</h4>
               <ul>
                 <li>Weather multiplier: {ctx.report.weather_multiplier.toFixed(2)}</li>
                 <li>Production: +{ctx.report.production_bushels} bushels</li>
                 <li>
                   Consumption: -{totalConsumptionBushels !== null ? totalConsumptionBushels : ctx.report.consumption_bushels} bushels
                   <Tip
-                    text={`Baseline consumption: ${baselineConsPerTurn} bushels/turn per person. Builders cost +${builderExtraPerTurn} extra bushels/turn each (turn=${TURN_YEARS}y).`}
+                    text={`Baseline consumption: ${baselineConsPerTurn} bushels this turn (${TURN_YEARS}y) per person. Builders cost +${builderExtraPerTurn} extra bushels this turn (${TURN_YEARS}y) each.`}
                   />
                   {hasConsumptionSplit ? (
                     <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
@@ -1707,19 +2355,20 @@ ${confirmBody}`);
               <details style={{ marginTop: 6 }}>
                 <summary>Consumption breakdown</summary>
                 <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
+                  <div style={{ marginBottom: 6, opacity: 0.85 }}>All values are for this turn ({TURN_YEARS}y).</div>
                   <ul>
                     <li>
-                      Farmers: {m.farmers} × {baselineConsPerTurn} = {consFarmers} bushels/turn
+                      Farmers: {m.farmers} × {baselineConsPerTurn} = {consFarmers} bushels
                     </li>
                     <li>
-                      Builders: {m.builders} × {builderConsPerTurn} = {consBuilders} bushels/turn
+                      Builders: {m.builders} × {builderConsPerTurn} = {consBuilders} bushels
                     </li>
                     <li>
-                      Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels/turn
+                      Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels
                     </li>
                     {hasConsumptionSplit ? (
                       <li>
-                        {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels/turn
+                        {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
                       </li>
                     ) : null}
                     <li>
@@ -1727,11 +2376,11 @@ ${confirmBody}`);
                       {hasConsumptionSplit && courtConsumptionBushels !== null
                         ? consFarmers + consBuilders + consIdle + courtConsumptionBushels
                         : consFarmers + consBuilders + consIdle}{" "}
-                      bushels/turn
+                      bushels
                     </li>
                   </ul>
                   <div style={{ fontSize: 12, opacity: 0.85 }}>
-                    Builder premium: +{builderExtraPerTurn} bushels/turn <b>per builder</b>.
+                    Builder premium: +{builderExtraPerTurn} bushels this turn ({TURN_YEARS}y) <b>per builder</b>.
                   </div>
                 </div>
               </details>
@@ -1766,7 +2415,7 @@ ${confirmBody}`);
               </ul>
               <div style={{ fontSize: 12, opacity: 0.85 }}>{COPY.obligationsHelper}</div>
 
-              <h4 style={{ marginTop: 12 }}>{COPY.prospects}</h4>
+              <h4 id={ANCHOR.prospects} style={{ marginTop: 12 }}>{COPY.prospects}</h4>
               <div style={{ fontSize: 12, opacity: 0.85 }}>{COPY.prospectsHelper}</div>
 
               {(() => {
@@ -2100,14 +2749,18 @@ ${confirmBody}`);
                 </div>
               )}
 
-    <h4 style={{ marginTop: 12 }}>Events</h4>
+    <h4 id={ANCHOR.events} style={{ marginTop: 12 }}>Events</h4>
               {ctx.report.events.length === 0 ? <div>None</div> : null}
               {ctx.report.events.map((e) => {
-                const { player, debug } = splitWhyNotes(e.why.notes);
+                const { player } = splitWhyNotes(e.why.notes);
                 return (
                   <div key={e.id} style={{ padding: 8, border: "1px solid #ddd", marginBottom: 6 }}>
                     <div>
                       <b>{e.title}</b> <span style={{ opacity: 0.7 }}>({e.category})</span>
+                    </div>
+
+                    <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                      <b>{COPY.prospectConfidenceLabel}</b> {COPY.prospectConfidence_known}
                     </div>
 
                     {player.length ? (
@@ -2119,17 +2772,6 @@ ${confirmBody}`);
                           ))}
                         </ul>
                       </div>
-                    ) : null}
-
-                    {debug.length ? (
-                      <details style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>
-                        <summary>Odds details</summary>
-                        <ul style={{ margin: "4px 0 0 18px" }}>
-                          {debug.map((n, idx) => (
-                            <li key={idx}>{n}</li>
-                          ))}
-                        </ul>
-                      </details>
                     ) : null}
 
                     <ul style={{ marginTop: 6 }}>
@@ -2172,7 +2814,7 @@ ${confirmBody}`);
               ) : null}
 
               {/* Labor */}
-              <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+              <div id={ANCHOR.labor} style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 <div>
                   <label>Farmers (next turn): </label>
                   <input
@@ -2188,7 +2830,7 @@ ${confirmBody}`);
                   <label>
                     Builders (next turn):
                     <Tip
-                      text={`Builders contribute to construction progress this turn (rate = builders × ${BUILD_RATE_PER_BUILDER_PER_TURN}). They also consume +${builderExtraPerTurn} extra bushels/turn each (turn=${TURN_YEARS}y).`}
+                      text={`Builders contribute to construction progress this turn (rate = builders × ${BUILD_RATE_PER_BUILDER_PER_TURN}). They also consume +${builderExtraPerTurn} extra bushels this turn (${TURN_YEARS}y) each.`}
                     />
                     {" "}
                   </label>
@@ -2216,7 +2858,7 @@ ${confirmBody}`);
               </div>
 
               {/* Obligations (payments are manual) */}
-              <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #eee" }}>
+              <div id={ANCHOR.obligations} style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #eee" }}>
                 <h4 style={{ margin: 0 }}>Obligations</h4>
                 <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{COPY.obligationsHelper}</div>
 
@@ -2310,7 +2952,7 @@ ${confirmBody}`);
                   <button onClick={() => setDecisions((d) => ({ ...d, construction: { kind: "construction", action: "none" } }))}>Clear</button>
                 </div>
                 <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
-                  Construction is <b>not instant</b>. Progress each turn = builders × {BUILD_RATE_PER_BUILDER_PER_TURN}. Builders also consume +{builderExtraPerTurn} extra bushels/turn each.
+                  Construction is <b>not instant</b>. Progress each turn = builders × {BUILD_RATE_PER_BUILDER_PER_TURN}. Builders also consume +{builderExtraPerTurn} extra bushels this turn ({TURN_YEARS}y) each.
                 </div>
               </div>
 

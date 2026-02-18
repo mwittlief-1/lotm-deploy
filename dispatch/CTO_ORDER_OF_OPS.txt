@@ -1,5 +1,6 @@
-# CTO Order of Operations — v0.2.4
-1) UX + TA start in parallel
-2) Dev B starts now on sim/data changes (no copy)
-3) Dev A starts after UX docs arrive (can scaffold with placeholders but no ad hoc copy)
-4) BE integrates when DevA+DevB patches ready; runs gates; packages Golden Layout; hands to QA/Balance/Deploy
+# CTO Order of Operations — v0.2.6
+1) DevB (tooling/harness completeness) starts immediately if any harness gaps remain.
+2) BE starts tuning loop immediately (KNOBS-based) using baseline v0.2.5.
+3) Balance runs DOE grid on each candidate packet; iterates knob recommendations.
+4) QA certifies final candidate only (avoid repeated cert cycles during tuning).
+5) Deploy + CEO smoke playtest on Vercel after QA PASS.

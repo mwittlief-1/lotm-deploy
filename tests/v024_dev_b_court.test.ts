@@ -4,8 +4,8 @@ import { BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS } from "../src/sim/constants";
 import { createNewRun } from "../src/sim/state";
 import { applyDecisions, createDefaultDecisions, proposeTurn } from "../src/sim/turn";
 
-describe("v0.2.4 Court/Household (Dev B)", () => {
-  it("generates deterministic officer stubs and reconciles consumption totals", () => {
+describe("v0.2.5 Court/Household (Dev B)", () => {
+  it("generates deterministic steward stub and reconciles consumption totals", () => {
     const state = createNewRun(12345);
     const anyState: any = state as any;
     const playerHouseId: string = anyState.player_house_id ?? "h_player";
@@ -14,13 +14,11 @@ describe("v0.2.4 Court/Household (Dev B)", () => {
     expect(h).toBeTruthy();
     expect(h.court_officers).toBeTruthy();
     expect(h.court_officers.steward).toBe("p_court_steward");
-    expect(h.court_officers.clerk).toBe("p_court_clerk");
-    expect(h.court_officers.marshal).toBe("p_court_marshal");
+    expect(h.court_officers.clerk).toBeUndefined();
+    expect(h.court_officers.marshal).toBeUndefined();
 
     // Officers must exist as people records.
     expect(anyState.people?.[h.court_officers.steward]).toBeTruthy();
-    expect(anyState.people?.[h.court_officers.clerk]).toBeTruthy();
-    expect(anyState.people?.[h.court_officers.marshal]).toBeTruthy();
 
     const ctx = proposeTurn(state);
     expect(ctx.report.peasant_consumption_bushels).toBeGreaterThanOrEqual(0);
@@ -39,16 +37,20 @@ describe("v0.2.4 Court/Household (Dev B)", () => {
     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
     const officerRoles = new Set(officerRows.map((r) => r.officer_role));
     expect(officerRoles.has("steward")).toBe(true);
-    expect(officerRoles.has("clerk")).toBe(true);
-    expect(officerRoles.has("marshal")).toBe(true);
+    expect(officerRoles.has("clerk")).toBe(false);
+    expect(officerRoles.has("marshal")).toBe(false);
   });
 
-  it("accepting a marriage prospect adds spouse to court roster via court_extra_ids", () => {
+  it("accepting a marriage prospect for the heir/eldest son adds spouse to court roster via court_extra_ids", () => {
     const state = createNewRun(777);
 
     // Force an eligible unmarried child so a marriage prospect is generated.
     state.house.children[0].age = 15;
     state.house.children[0].married = false;
+
+    // v0.2.5: marriage prospects are opposite-sex; ensure the subject is a son and pool contains a daughter/spouse.
+    state.house.children[0].sex = "M";
+    if (state.locals.nobles.length > 0) state.locals.nobles[0].sex = "F";
 
     const ctx = proposeTurn(state);
     const pw = ctx.prospects_window;

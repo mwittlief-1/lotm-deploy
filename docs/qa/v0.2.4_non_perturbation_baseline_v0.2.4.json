@@ -1,6 +1,6 @@
 {
   "baseline_source_app_version": "v0.2.4",
-  "baseline_source_code_fingerprint": "4a35d9596b78be07b7c3714afaf11a1dd2dcebc9f756a30c4b3de5608aa6078d",
+  "baseline_source_code_fingerprint": "6c1b961d0891ea625895a308e6b9325b19a00466a85f4abb20df464a37cad67c",
   "turns": 15,
   "policies": [
     "prudent-builder",

@@ -57,7 +57,7 @@ import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
 import { adjustEdge, relationshipBounds } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers } from "./court";
+import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, removeCourtExcludeId } from "./court";
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -75,6 +75,20 @@ function consumeMod(state: RunState, key: string, defaultValue = 1): number {
   const v = typeof mods[key] === "number" ? (mods[key] as number) : defaultValue;
   delete mods[key];
   return v;
+}
+
+// v0.2.6.2 DOE lane: tuning knobs are stored as persistent values (defaults 1.0).
+// No RNG streams; deterministic math only.
+function tuningObj(state: RunState): Record<string, unknown> {
+  const anyFlags: any = state.flags as any;
+  if (!anyFlags._tuning || typeof anyFlags._tuning !== "object") anyFlags._tuning = {};
+  return anyFlags._tuning as Record<string, unknown>;
+}
+
+function tuningNumber(state: RunState, key: string, defaultValue = 1.0): number {
+  const t: any = tuningObj(state);
+  const v = t?.[key];
+  return typeof v === "number" && Number.isFinite(v) ? v : defaultValue;
 }
 
 function currentSpoilageRate(state: RunState): number {
@@ -280,6 +294,9 @@ function applyConsumptionAndShortage(state: RunState, court_consumption_bushels:
   total_consumption_bushels: number;
   shortage_bushels: number;
   population_delta: number;
+  // v0.2.5: population change visibility (labor pool): split shortage losses.
+  population_deaths: number;
+  population_runaways: number;
   // v0.2.3.2: structured signal when labor is auto-clamped due to population loss.
   labor_auto_clamped?: boolean;
   labor_before?: { population: number; farmers: number; builders: number };
@@ -307,7 +324,9 @@ function applyConsumptionAndShortage(state: RunState, court_consumption_bushels:
       court_consumption_bushels: courtConsumption,
       total_consumption_bushels: consumption,
       shortage_bushels: 0,
-      population_delta: 0
+      population_delta: 0,
+      population_deaths: 0,
+      population_runaways: 0
     };
   }
 
@@ -321,6 +340,13 @@ function applyConsumptionAndShortage(state: RunState, court_consumption_bushels:
   const hRng = new Rng(state.run_seed, "household", state.turn_index, "shortage");
   const lossFrac = 0.03 + hRng.next() * 0.08; // 3%..11%
   const lost = Math.max(1, Math.floor(state.manor.population * lossFrac));
+
+  // v0.2.5: split population loss into deaths vs runaways (deterministic; no new RNG).
+  const sev01 = Math.max(0, Math.min(1, (lossFrac - 0.03) / 0.08));
+  const deathFrac = 0.3 + sev01 * 0.2; // 30%..50%
+  const deaths = Math.min(lost, Math.floor(lost * deathFrac));
+  const runaways = Math.max(0, lost - deaths);
+
   state.manor.population = asNonNegInt(state.manor.population - lost);
   let labor_before: { population: number; farmers: number; builders: number } | undefined;
   let labor_after: { population: number; farmers: number; builders: number } | undefined;
@@ -353,6 +379,8 @@ function applyConsumptionAndShortage(state: RunState, court_consumption_bushels:
     total_consumption_bushels: number;
     shortage_bushels: number;
     population_delta: number;
+    population_deaths: number;
+    population_runaways: number;
     labor_auto_clamped?: boolean;
     labor_before?: { population: number; farmers: number; builders: number };
     labor_after?: { population: number; farmers: number; builders: number };
@@ -362,7 +390,9 @@ function applyConsumptionAndShortage(state: RunState, court_consumption_bushels:
     court_consumption_bushels: courtConsumption,
     total_consumption_bushels: consumption,
     shortage_bushels: shortage,
-    population_delta: -lost
+    population_delta: -lost,
+    population_deaths: deaths,
+    population_runaways: runaways
   };
 
   if (labor_before && labor_after) {
@@ -411,15 +441,40 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
   const deaths: string[] = [];
   let popDelta = 0;
 
-  // age key people + children by 3 years (turn)
-  const people: Person[] = [state.house.head];
-  if (state.house.spouse) people.push(state.house.spouse);
-  for (const c of state.house.children) people.push(c);
+  // Age household members by 3 years (turn = 3y).
+  // v0.2.5 LOCK: court officers must also age (prevents immortal stewards).
+  const people: Person[] = [];
+  const seenIds = new Set<string>();
+  const push = (p: Person | null | undefined) => {
+    if (!p || typeof p !== "object") return;
+    if (typeof p.id !== "string" || !p.id) return;
+    if (seenIds.has(p.id)) return;
+    seenIds.add(p.id);
+    people.push(p);
+  };
+
+  push(state.house.head);
+  if (state.house.spouse) push(state.house.spouse);
+  for (const c of state.house.children) push(c);
+
+  // Court officers (People-First registry; back-compat no-op if registry missing).
+  {
+    const anyState: any = state as any;
+    const reg: Record<string, Person> | undefined = anyState.people as any;
+    if (reg) {
+      for (const { person_id } of getCourtOfficerIds(state)) {
+        const op = reg[person_id];
+        if (op) push(op);
+      }
+    }
+  }
+
   for (const p of people) p.age += 3;
 
   // deaths (simple): older increases risk; physician reduces risk.
   const hasPhysician = hasImprovement(state.manor.improvements, "physician");
   const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
+  const mortMult = tuningNumber(state, "mortality_mult", 1.0);
   const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
 
   const headWasAlive = state.house.head.alive;
@@ -444,6 +499,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     // discipline reduces risk slightly
     base *= 1 - (p.traits.discipline - 3) * 0.01;
     base *= mult;
+    base *= mortMult;
     base = Math.max(0, Math.min(0.95, base));
     return r.fork(`d:${p.id}`).bool(base);
   }
@@ -501,7 +557,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const base = BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24;
       const mods = (state.flags as any)._mods ?? {};
       const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
-      const chance = Math.min(0.95, Math.max(0, base * bonus));
+      const fertMult = tuningNumber(state, "fertility_mult", 1.0);
+      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult));
       const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
       if (bRng.bool(chance)) {
         const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
@@ -531,15 +588,34 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   // Trigger when any child >=15 and unmarried OR an offer flag exists.
   const anyFlags: any = state.flags;
   const forced = Boolean(anyFlags.MarriageOffer);
-  const eligible = state.house.children.filter((c) => c.alive && !c.married && c.age >= 15);
-  if (!forced && eligible.length === 0) return null;
+
+  const eligibleAll = state.house.children.filter((c) => c.alive && !c.married && c.age >= 15);
+  if (!forced && eligibleAll.length === 0) return null;
+
+  // v0.2.5: pick a single subject child (eldest eligible). This keeps the offer list coherent and
+  // allows same-sex marriage to be disabled without changing the window schema.
+  if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
+
+  const subject = [...eligibleAll].sort((a, b) => {
+    if (b.age !== a.age) return b.age - a.age; // older first
+    return a.id.localeCompare(b.id);
+  })[0]!;
+
+  const desiredSpouseSex: "M" | "F" = subject.sex === "M" ? "F" : "M";
+  const pool = state.locals.nobles.filter((n) => n.alive && n.sex === desiredSpouseSex);
+
+  // If no opposite-sex candidates exist, do not generate a same-sex marriage window.
+  if (pool.length === 0) {
+    if (forced) return { eligible_child_ids: [subject.id], offers: [] };
+    return null;
+  }
 
   const rng = new Rng(state.run_seed, "marriage", state.turn_index, "offers");
   const offers: MarriageOffer[] = [];
   const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
 
   for (let i = 0; i < offerCount; i++) {
-    const noble = rng.pick(state.locals.nobles);
+    const noble = rng.pick(pool);
     const quality = rng.next(); // 0..1
     const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
     offers.push({
@@ -555,7 +631,7 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
     });
   }
 
-  return { eligible_child_ids: eligible.map((c) => c.id), offers };
+  return { eligible_child_ids: [subject.id], offers };
 }
 
 
@@ -960,6 +1036,21 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
     const prospect = byId.get(pid) ?? lookupProspectFromHistory(state, pid);
     if (!prospect) continue;
 
+    let effectiveAct: "accept" | "reject" = act;
+
+    // v0.2.5 LOCK: same-sex marriage is disabled. Enforce at apply-time for safety/legacy states.
+    if (effectiveAct === "accept" && prospect.type === "marriage") {
+      const sid: any = (prospect as any).subject_person_id;
+      const spouseId: any = (prospect as any).spouse_person_id;
+      const anyState: any = state as any;
+      const reg: Record<string, Person> | undefined = anyState.people as any;
+      const subj = sid && reg ? reg[sid] : null;
+      const sp = spouseId && reg ? reg[spouseId] : null;
+      if (subj && sp && subj.sex === sp.sex) {
+        effectiveAct = "reject";
+      }
+    }
+
     const applied: any = {};
 
     function applyRelationshipDeltas(): void {
@@ -979,7 +1070,7 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
       applied.relationship_deltas = rds;
     }
 
-    if (act === "accept") {
+    if (effectiveAct === "accept") {
       const cd = (prospect as any).predicted_effects?.coin_delta;
       if (typeof cd === "number" && Number.isFinite(cd)) {
         const d = Math.trunc(cd);
@@ -1017,13 +1108,37 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
           if (c.id === sid) c.married = true;
         }
 
-        // v0.2.4: spouse joins the court roster by default (stored on house registry as court_extra_ids).
         const spouseId: any = (prospect as any).spouse_person_id;
         if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
-          addCourtExtraId(state, spouseId);
           if (anyState.people && anyState.people[spouseId]) {
             anyState.people[spouseId].married = true;
           }
+        }
+
+        // v0.2.5 marriage residence LOCK:
+        // - Daughters marry out (leave the household court).
+        // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
+        const heirId = state.house.heir_id ?? null;
+        const eldestSonId =
+          [...state.house.children]
+            .filter((c) => c.alive && c.sex === "M")
+            .sort((a, b) => {
+              if (b.age !== a.age) return b.age - a.age;
+              return a.id.localeCompare(b.id);
+            })[0]?.id ?? null;
+
+        const subjectChild = state.house.children.find((c) => c.id === sid) ?? null;
+        const spouseJoinsCourt =
+          Boolean(subjectChild) && subjectChild!.sex === "M" && (sid === heirId || sid === eldestSonId);
+
+        if (spouseJoinsCourt && typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
+          addCourtExtraId(state, spouseId);
+          // Defensive: if the subject was previously excluded from court residency, restore them.
+          removeCourtExcludeId(state, sid);
+        } else if (subjectChild) {
+          // v0.2.6.1 WP-12 LOCK: marriage-out affects court residency only; it must NOT remove from lineage.
+          // Keep the child in `house.children` for succession, but exclude them from court headcount/consumption.
+          addCourtExcludeId(state, sid);
         }
       }
 
@@ -1037,7 +1152,7 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         prospect_id: prospect.id,
         effects_applied: applied
       });
-    } else if (act === "reject") {
+    } else if (effectiveAct === "reject") {
       // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
       // prospect type models explicit rejection penalties).
 
@@ -1363,7 +1478,18 @@ export function proposeTurn(state: RunState): TurnContext {
       arrears_bushels: working.manor.obligations.arrears.bushels,
       war_levy_due: working.manor.obligations.war_levy_due
     },
-    household: { births: hh.births, deaths: hh.deaths, population_delta: cons.population_delta + hh.population_delta },
+    household: {
+      births: hh.births,
+      deaths: hh.deaths,
+      population_delta: cons.population_delta + hh.population_delta,
+      // v0.2.5: make labor-pool changes visible (runaways vs deaths).
+      population_change_breakdown: {
+        schema_version: "population_change_breakdown_v1",
+        births: Math.max(0, hh.population_delta),
+        deaths: asNonNegInt(cons.population_deaths),
+        runaways: asNonNegInt(cons.population_runaways)
+      }
+    },
     house_log: houseLog,
     events,
     top_drivers: [],
@@ -1620,6 +1746,18 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
       return;
     }
 
+    // v0.2.5 LOCK: same-sex marriage is disabled.
+    // Offers are generated to avoid this, but enforce at accept-time for safety/legacy states.
+    {
+      const anyState: any = state as any;
+      const reg: Record<string, Person> | undefined = anyState.people as any;
+      const spousePerson = reg ? reg[offer.house_person_id] : null;
+      if (spousePerson && spousePerson.sex === child.sex) {
+        reportNotes.push("Cannot accept: same-sex marriage is disallowed.");
+        return;
+      }
+    }
+
     const dowry = offer.dowry_coin_net;
 
     // Must-fix: negative dowry requires sufficient coin; do not silently proceed.
@@ -1641,13 +1779,31 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
     {
       const anyState: any = state as any;
       if (anyState.people && anyState.people[child.id]) anyState.people[child.id].married = true;
+      if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
     }
 
-    // v0.2.4: spouse joins the court roster by default.
-    addCourtExtraId(state, offer.house_person_id);
-    {
-      const anyState: any = state as any;
-      if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
+    // v0.2.5 marriage residence LOCK:
+    // - Daughters marry out (leave the household court).
+    // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
+    const heirId = state.house.heir_id ?? null;
+    const eldestSonId =
+      [...state.house.children]
+        .filter((c) => c.alive && c.sex === "M")
+        .sort((a, b) => {
+          if (b.age !== a.age) return b.age - a.age;
+          return a.id.localeCompare(b.id);
+        })[0]?.id ?? null;
+
+    const spouseJoinsCourt = child.sex === "M" && (child.id === heirId || child.id === eldestSonId);
+
+    if (spouseJoinsCourt) {
+      addCourtExtraId(state, offer.house_person_id);
+      // Defensive: if the subject was previously excluded from court residency, restore them.
+      removeCourtExcludeId(state, child.id);
+    } else {
+      // v0.2.6.1 WP-12 LOCK: marriage-out affects court residency only; it must NOT remove from lineage.
+      // Keep the child in `house.children` for succession, but exclude them from court headcount/consumption.
+      addCourtExcludeId(state, child.id);
     }
 
     // Relationship deltas (to offering house + sometimes liege)
@@ -1765,6 +1921,10 @@ function closeTurn(state: RunState, reportNotes: string[], houseLog: HouseLogEve
     const heir = state.house.children.splice(idx, 1)[0]!;
     heir.married = true; // assume household continuity
     state.house.head = heir;
+
+    // v0.2.6.1 WP-12: a married-out heir may have been excluded from court residency.
+    // Once they become the ruling head, they are in-court again.
+    removeCourtExcludeId(state, heir.id);
 
     if (state.house.spouse) {
       // Status only (Widow/Widower) — the widowed life log is emitted at the moment of death

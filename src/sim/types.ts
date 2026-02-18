@@ -213,7 +213,19 @@ export interface TurnReport {
     arrears_bushels: number;
     war_levy_due: WarLevyDue;
   };
-  household: { births: string[]; deaths: string[]; population_delta: number };
+  household: {
+    births: string[];
+    deaths: string[];
+    population_delta: number;
+    // v0.2.5: population (labor pool) change visibility.
+    // Positive counts; net delta = births - deaths - runaways.
+    population_change_breakdown?: {
+      schema_version: "population_change_breakdown_v1";
+      births: number;
+      deaths: number;
+      runaways: number;
+    };
+  };
   house_log: HouseLogEvent[];
   events: EventResult[];
   top_drivers: string[]; // top 3 explanation strings

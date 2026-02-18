@@ -1,0 +1,10 @@
+{
+  "app_version": "v0.2.6.2",
+  "runtime_defaults": {
+    "flags._tuning.court_variant": "B",
+    "flags._tuning.fertility_mult": 2.0,
+    "flags._tuning.mortality_mult": 0.8
+  },
+  "supported_court_variants": ["A", "B", "C"],
+  "notes": "Release preset: Court B is default at tag time; Court A and Court C remain supported variants. Promoted tuning preset applied as runtime defaults."
+}

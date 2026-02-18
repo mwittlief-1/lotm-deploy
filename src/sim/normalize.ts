@@ -37,4 +37,14 @@ export function normalizeState(state: RunState): void {
     e.respect = clampInt(asNonNegInt(e.respect), 0, 100);
     e.threat = clampInt(asNonNegInt(e.threat), 0, 100);
   }
+
+  // v0.2.6.2 RELEASE (LOCK): ensure runtime tuning defaults exist when absent.
+  // This is configuration only (no RNG), so applying on load is deterministic.
+  const anyFlags: any = state.flags as any;
+  if (!anyFlags._tuning || typeof anyFlags._tuning !== "object") anyFlags._tuning = {};
+  const t: any = anyFlags._tuning;
+  const cv = t.court_variant;
+  if (cv !== "A" && cv !== "B" && cv !== "C") t.court_variant = "B";
+  if (!(typeof t.fertility_mult === "number" && Number.isFinite(t.fertility_mult))) t.fertility_mult = 2.0;
+  if (!(typeof t.mortality_mult === "number" && Number.isFinite(t.mortality_mult))) t.mortality_mult = 0.8;
 }

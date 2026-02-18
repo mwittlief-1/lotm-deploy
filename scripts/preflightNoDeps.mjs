@@ -254,8 +254,18 @@ await runTest("schema_snapshot_v1_present", async () => {
 
 await runTest("determinism_smoke_prospects_window", async () => {
   // Scan baseline seeds for at least one prospects window within a bounded horizon.
-  const baselinePath = path.resolve("docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json");
-  assert(fs.existsSync(baselinePath), "missing preflight baseline file (docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json)");
+  const baselinePath = path.resolve(
+    (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2")))
+      ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6")
+      ? "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.5")
+        ? "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.4")
+        ? "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json"
+        : "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json"
+  );
+  assert(fs.existsSync(baselinePath), `missing preflight baseline file (${baselinePath})`);
   const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
   const seeds = Array.isArray(baseline?.seeds) ? baseline.seeds : [];
   assert(seeds.length > 0, "baseline seeds empty");
@@ -310,7 +320,17 @@ await runTest("determinism_smoke_prospects_window", async () => {
 });
 
 await runTest("non_perturbation_golden_seeds_no_accepts", async () => {
-  const baselinePath = path.resolve("docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json");
+  const baselinePath = path.resolve(
+    (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2"))
+      ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6")
+      ? "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.5")
+        ? "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json"
+      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.4")
+        ? "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json"
+        : "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json"
+  );
   assert(fs.existsSync(baselinePath), "missing preflight baseline file");
   const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
 

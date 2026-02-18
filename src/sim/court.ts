@@ -44,7 +44,7 @@ function defaultOfficerId(role: CourtOfficerRole): string {
 
 function mkOfficerPerson(rng: Rng, id: string, role: CourtOfficerRole): Person {
   // Very small flavor, but deterministic and bounded.
-  const sex: "M" | "F" = rng.bool(role === "marshal" ? 0.75 : 0.6) ? "M" : "F";
+  const sex: "M" = "M"; // v0.2.5 LOCK: court officers must be male.
   const age = rng.int(28, 55);
   const name = pickName(rng.fork("name"), sex);
   return {
@@ -68,6 +68,15 @@ function getHouseRegistry(state: RunState): any {
   return h;
 }
 
+export type CourtVariant = "A" | "B" | "C";
+
+function readCourtVariant(state: RunState): CourtVariant | null {
+  const anyFlags: any = state.flags as any;
+  const v = anyFlags?._tuning?.court_variant;
+  if (v === "A" || v === "B" || v === "C") return v;
+  return null;
+}
+
 export function ensureCourtOfficers(state: RunState): void {
   const anyState: any = state as any;
   if (!anyState.people || !anyState.houses) return;
@@ -81,21 +90,55 @@ export function ensureCourtOfficers(state: RunState): void {
 
   if (!houseRec.court_officers || typeof houseRec.court_officers !== "object") houseRec.court_officers = {};
   if (!Array.isArray(houseRec.court_extra_ids)) houseRec.court_extra_ids = [];
+  if (!Array.isArray(houseRec.court_exclude_ids)) houseRec.court_exclude_ids = [];
 
   const people: Record<string, Person> = anyState.people as Record<string, Person>;
 
-  const base = new Rng(state.run_seed, "court", 0, "court_officers/v0.2.4");
+  const base = new Rng(state.run_seed, "court", 0, "court_officers/v0.2.5");
 
-  const roles: CourtOfficerRole[] = ["steward", "clerk", "marshal"];
-  for (const role of roles) {
+
+  // v0.2.6.1 HARDENING: deterministic court seed variants (A/B/C).
+  // - A: no officers
+  // - B: steward only
+  // - C: steward + clerk
+  // Presets only; no RNG. Enforced only when `flags._tuning.court_variant` is set.
+  const variant = readCourtVariant(state);
+  const enforceVariant = Boolean(variant);
+  const desired: CourtOfficerRole[] = enforceVariant
+    ? (variant === "A" ? [] : variant === "B" ? ["steward"] : ["steward", "clerk"])
+    : [];
+
+  // v0.2.5 affordability LOCK: court starts small by default.
+  // Back-compat: if a save already has clerk/marshal IDs, preserve them and ensure their Person records exist.
+  const ensureRole = (role: CourtOfficerRole, createIfMissing: boolean) => {
     const cur = houseRec.court_officers?.[role];
+    if (!createIfMissing && !(typeof cur === "string" && cur.length > 0)) return;
+
     const id = typeof cur === "string" && cur.length > 0 ? cur : defaultOfficerId(role);
     houseRec.court_officers[role] = id;
     if (!people[id]) {
       const r = base.fork(`role/${role}`);
       people[id] = mkOfficerPerson(r, id, role);
     }
+    // v0.2.5 LOCK: officers must be male (enforce even for legacy saves).
+    if (people[id] && people[id].sex !== "M") people[id].sex = "M";
+  };
+
+  if (enforceVariant) {
+    // Remove non-desired roles (mapping only; Person records may remain in registry but will not be counted).
+    const roles: CourtOfficerRole[] = ["steward", "clerk", "marshal"];
+    for (const role of roles) {
+      if (!desired.includes(role)) delete houseRec.court_officers?.[role];
+    }
+    for (const role of desired) ensureRole(role, true);
+  } else {
+    // Default behavior (v0.2.5): steward only.
+    ensureRole("steward", true);
+    // Legacy: only if explicitly present on the house registry.
+    ensureRole("clerk", false);
+    ensureRole("marshal", false);
   }
+
 }
 
 export function getCourtOfficerIds(state: RunState): Array<{ role: CourtOfficerRole; person_id: string }> {
@@ -119,6 +162,16 @@ export function getCourtExtraIds(state: RunState): string[] {
   return out;
 }
 
+export function getCourtExcludeIds(state: RunState): string[] {
+  const h = getHouseRegistry(state);
+  const raw: any[] = Array.isArray(h?.court_exclude_ids) ? h.court_exclude_ids : [];
+  const out: string[] = [];
+  for (const x of raw) {
+    if (typeof x === "string" && x.length > 0) out.push(x);
+  }
+  return out;
+}
+
 export function addCourtExtraId(state: RunState, personId: string): void {
   if (!personId) return;
   const anyState: any = state as any;
@@ -133,10 +186,39 @@ export function addCourtExtraId(state: RunState, personId: string): void {
   h.court_extra_ids = ids;
 }
 
+export function addCourtExcludeId(state: RunState, personId: string): void {
+  if (!personId) return;
+  const anyState: any = state as any;
+  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const houses: any = anyState.houses;
+  if (!houses || typeof houses !== "object") return;
+  if (!houses[playerHouseId] || typeof houses[playerHouseId] !== "object") houses[playerHouseId] = { id: playerHouseId };
+  const h = houses[playerHouseId];
+  const raw: any[] = Array.isArray(h.court_exclude_ids) ? h.court_exclude_ids : [];
+  const ids = raw.filter((x) => typeof x === "string" && x.length > 0);
+  if (!ids.includes(personId)) ids.push(personId);
+  h.court_exclude_ids = ids;
+}
+
+export function removeCourtExcludeId(state: RunState, personId: string): void {
+  if (!personId) return;
+  const anyState: any = state as any;
+  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const houses: any = anyState.houses;
+  if (!houses || typeof houses !== "object") return;
+  const h = houses[playerHouseId];
+  if (!h || typeof h !== "object") return;
+  if (!Array.isArray(h.court_exclude_ids)) return;
+  h.court_exclude_ids = h.court_exclude_ids.filter((x: any) => x !== personId);
+  if (Array.isArray(h.court_exclude_ids) && h.court_exclude_ids.length === 0) delete h.court_exclude_ids;
+}
+
 export function deriveCourtMemberIds(state: RunState): string[] {
   // Stable ordering: head, spouse, children (oldest->youngest, id tie-break), officers (fixed role order), extras (id asc).
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
+
+  const excluded = new Set(getCourtExcludeIds(state));
 
   const ids: string[] = [];
   const seen = new Set<string>();
@@ -144,6 +226,9 @@ export function deriveCourtMemberIds(state: RunState): string[] {
     if (!id || typeof id !== "string") return;
     if (seen.has(id)) return;
     if (!people[id]) return; // skip unknown IDs
+    // Exclusions apply to court membership only (married-out children, etc.).
+    // Never exclude the current head/spouse (defensive).
+    if (excluded.has(id) && id !== state.house.head?.id && id !== state.house.spouse?.id) return;
     seen.add(id);
     ids.push(id);
   };
@@ -169,6 +254,7 @@ export function deriveCourtMemberIds(state: RunState): string[] {
 }
 
 export function buildCourtRoster_v0_2_4(state: RunState): CourtRoster {
+  const excluded = new Set(getCourtExcludeIds(state));
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
 
@@ -190,6 +276,8 @@ export function buildCourtRoster_v0_2_4(state: RunState): CourtRoster {
     if (seen.has(personId)) return;
     const p = people[personId];
     if (!p) return;
+    // Exclusions apply to court membership only. Never exclude current head/spouse.
+    if (excluded.has(personId) && personId !== state.house.head?.id && personId !== state.house.spouse?.id) return;
     seen.add(personId);
 
     const badges: CourtRosterRow["badges"] = [];

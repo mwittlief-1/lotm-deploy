@@ -256,8 +256,20 @@ function main() {
   const appVersion = buildInfo?.app_version ?? "unknown";
   const codeFingerprint = buildInfo?.code_fingerprint ?? "";
 
+  // NOTE (v0.2.6 harness contract): prospectPolicy is a required grid dimension.
+  // Default outdir MUST include prospectPolicy to avoid overwriting evidence runs.
+  // Seed does NOT include prospectPolicy by default so that prospect policy variants
+  // are directly comparable under identical seeds.
   const baseSeed = args.baseSeed ?? `batch_${appVersion}_${policySanitized}`;
-  const outdir = args.outdir ?? path.join("artifacts", appVersion, policySanitized, `turns_${turns}`);
+  const outdir =
+    args.outdir ??
+    path.join(
+      "artifacts",
+      appVersion,
+      policySanitized,
+      `prospects_${prospectPolicy}`,
+      `turns_${turns}`
+    );
 
   ensureDir(outdir);
 

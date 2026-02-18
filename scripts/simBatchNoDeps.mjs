@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 // Import compiled sim core (no deps)
 import { createNewRun, proposeTurn, applyDecisions } from "../dist_batch/src/sim/index.js";
+import { ensureCourtOfficers } from "../dist_batch/src/sim/court.js";
 import { decide, canonicalizePolicyId, sanitizePolicyIdForArtifacts } from "../dist_batch/src/sim/policies.js";
 import { IMPROVEMENT_IDS } from "../dist_batch/src/content/improvements.js";
 import { relationshipBounds } from "../dist_batch/src/sim/relationships.js";
@@ -12,6 +13,8 @@ import { APP_VERSION } from "../dist_batch/src/version.js";
 
 const PROSPECT_POLICIES = ["reject-all", "accept-all", "accept-if-net-positive"];
 const PROSPECT_TYPES = ["marriage", "grant", "inheritance_claim"];
+
+const COURT_VARIANTS = ["A", "B", "C"];
 
 function initProspectsByType() {
   return { marriage: 0, grant: 0, inheritance_claim: 0 };
@@ -47,6 +50,20 @@ function parseProspectPolicy(raw) {
     throw new Error(`Invalid --prospectPolicy value: ${raw}. Allowed: ${PROSPECT_POLICIES.join("|")}`);
   }
   return v;
+}
+
+function parseCourtVariant(raw) {
+  const v = raw || "B";
+  if (!COURT_VARIANTS.includes(v)) {
+    throw new Error(`Invalid --courtVariant value: ${raw}. Allowed: ${COURT_VARIANTS.join("|")}`);
+  }
+  return v;
+}
+
+function parseNum(raw, fallback) {
+  if (raw == null || raw === "") return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
 }
 
 function prospectTypeFromWindow(window, prospectId) {
@@ -113,13 +130,26 @@ const CODE_FINGERPRINT = BUILD_INFO?.code_fingerprint || "";
 
 
 function parseArgs(argv) {
-  const a = { policy: "prudent-builder", prospectPolicy: "reject-all", runs: 250, turns: 15, outdir: "", baseSeed: "" };
+  const a = {
+    policy: "prudent-builder",
+    prospectPolicy: "reject-all",
+    courtVariant: "B",
+    fertilityMult: 1.0,
+    mortalityMult: 1.0,
+    runs: 250,
+    turns: 15,
+    outdir: "",
+    baseSeed: ""
+  };
   for (const arg of argv) {
     if (!arg.startsWith("--")) continue;
     const [k, v] = arg.slice(2).split("=");
     if (!k) continue;
     if (k === "policy" && v) a.policy = v;
     if (k === "prospectPolicy" && v) a.prospectPolicy = parseProspectPolicy(v);
+    if (k === "courtVariant" && v) a.courtVariant = parseCourtVariant(v);
+    if (k === "fertilityMult") a.fertilityMult = parseNum(v, a.fertilityMult);
+    if (k === "mortalityMult") a.mortalityMult = parseNum(v, a.mortalityMult);
     if (k === "runs" && v) a.runs = Number(v);
     if (k === "turns" && v) a.turns = Number(v);
     if (k === "outdir" && v) a.outdir = v;
@@ -162,8 +192,18 @@ function mean(arr) {
   return arr.reduce((s, x) => s + x, 0) / arr.length;
 }
 
-function runPolicy(seed, policy, turns, prospectPolicy) {
+function runPolicy(seed, policy, turns, prospectPolicy, courtVariant, fertilityMult, mortalityMult) {
   let state = createNewRun(seed);
+
+  // Deterministic seed presets / tuning knobs for headless harness + DOE.
+  // - courtVariant controls starting officers (A/B/C)
+  // - fertilityMult and mortalityMult are persistent multipliers (DOE lane)
+  state.flags._tuning = state.flags._tuning && typeof state.flags._tuning === "object" ? state.flags._tuning : {};
+  state.flags._tuning.court_variant = courtVariant;
+  state.flags._tuning.fertility_mult = fertilityMult;
+  state.flags._tuning.mortality_mult = mortalityMult;
+  // Re-run after setting variant so the preset is enforced (idempotent).
+  ensureCourtOfficers(state);
 
   // v0.2.3 Prospects rehydration requires prospect payload history, but we must
   // keep state bounded for large batches. We keep a minimal "history" containing
@@ -178,6 +218,10 @@ function runPolicy(seed, policy, turns, prospectPolicy) {
   const windowsByTurn = Array.from({ length: turns }, () => 0);
   let windowsTotal = 0;
 
+  // Debugging (DOE): aggregate births/deaths across the run.
+  let birthsTotal = 0;
+  let deathsTotal = 0;
+
   let lastFullEntry = null;
 
   for (let t = 0; t < turns; t++) {
@@ -187,6 +231,11 @@ function runPolicy(seed, policy, turns, prospectPolicy) {
     state.log = prospectsHistory.slice();
 
     const ctx = proposeTurn(state);
+    const hh = ctx?.report?.household;
+    if (hh && typeof hh === "object") {
+      if (Array.isArray(hh.births)) birthsTotal += hh.births.length;
+      if (Array.isArray(hh.deaths)) deathsTotal += hh.deaths.length;
+    }
     const pw = ctx?.prospects_window ?? null;
 
     // Prospects exposure counters (by type)
@@ -210,8 +259,6 @@ function runPolicy(seed, policy, turns, prospectPolicy) {
 
     // v0.2.3.1 headless prospects policy hook (tooling-only)
     if (pw && pw.schema_version === "prospects_window_v1") {
-      windowsTotal += 1;
-      if (t >= 0 && t < windowsByTurn.length) windowsByTurn[t] += 1;
       const actions = computeProspectsActions(pw, prospectPolicy);
       decisions.prospects = { kind: "prospects", actions };
     }
@@ -263,7 +310,14 @@ function runPolicy(seed, policy, turns, prospectPolicy) {
   // Restore a small log footprint for downstream summary selection (previous behavior).
   state.log = lastFullEntry ? [lastFullEntry] : [];
 
-  return { state, prospects, prospects_windows_total: windowsTotal, prospects_windows_by_turn: windowsByTurn };
+  return {
+    state,
+    prospects,
+    prospects_windows_total: windowsTotal,
+    prospects_windows_by_turn: windowsByTurn,
+    births_total: birthsTotal,
+    deaths_total: deathsTotal
+  };
 }
 
 function pickExports(statesBySeed) {
@@ -296,12 +350,28 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const policyCanonical = canonicalizePolicyId(args.policy);
   const prospectPolicy = parseProspectPolicy(args.prospectPolicy);
+  const courtVariant = parseCourtVariant(args.courtVariant);
+  const fertilityMult = args.fertilityMult;
+  const mortalityMult = args.mortalityMult;
   const runs = Math.max(1, Math.trunc(args.runs));
   const turns = Math.max(1, Math.trunc(args.turns));
   const policySanitized = sanitizePolicyIdForArtifacts(policyCanonical);
 
-    const baseSeed = args.baseSeed || `batch_${APP_VERSION_STAMP}_${policySanitized}`;
-    const outdir = args.outdir || path.join("artifacts", APP_VERSION_STAMP, policySanitized, `turns_${turns}`);
+  // NOTE (v0.2.6 harness contract): prospectPolicy is a required grid dimension.
+  // Default outdir MUST include prospectPolicy to avoid overwriting evidence runs.
+  // Seed does NOT include prospectPolicy by default so that prospect policy variants
+  // are directly comparable under identical seeds.
+  const baseSeed = args.baseSeed || `batch_${APP_VERSION_STAMP}_${policySanitized}`;
+  const outdir =
+    args.outdir ||
+    path.join(
+      "artifacts",
+      APP_VERSION_STAMP,
+      policySanitized,
+      `court_${courtVariant}`,
+      `prospects_${prospectPolicy}`,
+      `turns_${turns}`
+    );
 
   ensureDir(outdir);
 
@@ -330,11 +400,24 @@ function main() {
   let windowsAggTotal = 0;
   const windowsAggByTurn = Array.from({ length: turns }, () => 0);
 
+  // Debugging (DOE): aggregate births/deaths and DeathNoHeir failure turns.
+  let birthsAgg = 0;
+  let deathsAgg = 0;
+  const deathNoHeirTurnHist = Array.from({ length: turns }, () => 0);
+
   const statesBySeed = {};
 
   for (let i = 0; i < runs; i++) {
     const seed = `${baseSeed}_${String(i).padStart(4,"0")}`;
-    const { state, prospects, prospects_windows_total, prospects_windows_by_turn } = runPolicy(seed, policyCanonical, turns, prospectPolicy);
+    const { state, prospects, prospects_windows_total, prospects_windows_by_turn, births_total, deaths_total } = runPolicy(
+      seed,
+      policyCanonical,
+      turns,
+      prospectPolicy,
+      courtVariant,
+      fertilityMult,
+      mortalityMult
+    );
 
     windowsAggTotal += (prospects_windows_total ?? 0);
     if (Array.isArray(prospects_windows_by_turn)) {
@@ -352,6 +435,13 @@ function main() {
 
     const reason = state.game_over?.reason ?? "";
     if (reason) byReason[reason] = (byReason[reason] ?? 0) + 1;
+
+    birthsAgg += typeof births_total === "number" ? births_total : 0;
+    deathsAgg += typeof deaths_total === "number" ? deaths_total : 0;
+    if (reason === "DeathNoHeir") {
+      const ti = state.game_over?.turn_index;
+      if (Number.isFinite(ti) && ti >= 0 && ti < deathNoHeirTurnHist.length) deathNoHeirTurnHist[Math.trunc(ti)] += 1;
+    }
 
     endBushels.push(state.manor.bushels_stored);
     endCoin.push(state.manor.coin);
@@ -461,10 +551,16 @@ function main() {
     policy_canonical: policyCanonical,
     policy_sanitized: policySanitized,
     prospect_policy: prospectPolicy,
+    court_variant: courtVariant,
+    fertility_mult: fertilityMult,
+    mortality_mult: mortalityMult,
     horizon_turns: turns,
     attempted,
     completed,
     completion_rate: completionRate,
+    births_total: birthsAgg,
+    deaths_total: deathsAgg,
+    death_no_heir_turn_histogram: deathNoHeirTurnHist,
     stable_finish: {
       definition: "end_unrest<=40 AND end_arrears_bushels<=100 AND not game_over",
       count: stableFinish,

@@ -56,8 +56,17 @@ export function createNewRun(run_seed) {
     const child2 = mkPerson(rng, "p_child2", rng.bool(0.55) ? "M" : "F", 9);
     const liege = mkPerson(rng, "p_liege", "M", 41);
     const clergy = mkPerson(rng, "p_clergy", "M", 52);
+    // v0.2.5: ensure marriage pool has both sexes (same-sex marriage disabled).
+    const nobleSexes = Array.from({ length: 4 }).map(() => (rng.bool(0.7) ? "M" : "F"));
+    const hasM = nobleSexes.includes("M");
+    const hasF = nobleSexes.includes("F");
+    if (!hasM)
+        nobleSexes[nobleSexes.length - 1] = "M";
+    if (!hasF)
+        nobleSexes[nobleSexes.length - 1] = "F";
     const nobles = Array.from({ length: 4 }).map((_, i) => {
-        const n = mkPerson(rng, `p_noble${i + 1}`, rng.bool(0.7) ? "M" : "F", rng.int(22, 55));
+        const sex = nobleSexes[i] ?? "M";
+        const n = mkPerson(rng, `p_noble${i + 1}`, sex, rng.int(22, 55));
         n.name = `${n.name} of ${rng.pick(HOUSE_NAMES)}`;
         return n;
     });
@@ -68,7 +77,7 @@ export function createNewRun(run_seed) {
         turn_index: 0,
         manor: {
             population: 45,
-            farmers: 28,
+            farmers: 36, // v0.2.5: start nearer food-stable (population is labor pool)
             builders: 0,
             bushels_stored: 900,
             coin: 10,
@@ -98,7 +107,15 @@ export function createNewRun(run_seed) {
         relationships: [],
         flags: {
             _cooldowns: {},
-            _mods: {}
+            _mods: {},
+            // v0.2.6.2 RELEASE (LOCK): promoted tuning preset + default court variant.
+            // - court_variant: A/B/C supported; default is B.
+            // - fertility_mult, mortality_mult are persistent tuning knobs (see turn.ts tuningNumber).
+            _tuning: {
+                court_variant: "B",
+                fertility_mult: 2.0,
+                mortality_mult: 0.8
+            }
         },
         log: [],
         game_over: null
