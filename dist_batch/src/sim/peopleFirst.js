@@ -137,7 +137,21 @@ function syncPeopleFirstFromLegacyUpsert(state) {
             ? s.kinship
             : [];
     const playerIds = new Set([headId ?? "", spouseId ?? "", ...childIds].filter(Boolean));
-    const kept = prior.filter((e) => !kinInvolvesAny(e, playerIds));
+    // v0.2.7.1 HOTFIX: preserve spouse_of edges for player children (do not wipe child marriages during People-First sync).
+    // Only overwrite the HoH<->Spouse edge + parent edges for the player household.
+    const kept = prior.filter((e) => {
+        if (!kinInvolvesAny(e, playerIds))
+            return true;
+        if (e.kind !== "spouse_of")
+            return false;
+        // Always overwrite the current HoH<->Spouse edge from household state.
+        if (headId && spouseId) {
+            if ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId))
+                return false;
+        }
+        // Preserve child spouse edges (child <-> spouse).
+        return Boolean(childIds.includes(e.a_id) || childIds.includes(e.b_id));
+    });
     const desired = [];
     if (headId && spouseId)
         desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });

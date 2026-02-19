@@ -1,0 +1,15 @@
+{
+  "gate": "qa_no_deps",
+  "app_version": "v0.2.7.1",
+  "sim_version": "mvp_v0_1",
+  "started_at": "2026-02-19T13:43:17.257Z",
+  "tests_run": 7,
+  "passed": 7,
+  "failed": 0,
+  "failures": [],
+  "notes": [
+    "golden seeds loaded: docs/golden_seeds_v0.2.7.1.json (n=8)"
+  ],
+  "finished_at": "2026-02-19T13:43:21.623Z",
+  "ok": true
+}

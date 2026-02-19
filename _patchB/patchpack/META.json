@@ -1,0 +1,13 @@
+{
+  "package": "devB_patchpack_v0.2.7.1_correctness",
+  "created_utc": "2026-02-19T12:28:25Z",
+  "scope": [
+    "P0.1 Aging invariant: all instantiated registry people age +TURN_YEARS",
+    "P0.2/P0.3 Same-turn HoH succession + spouse swap + dowager visibility",
+    "P0.4 Marriage accept wires spouse_of edge deterministically",
+    "P0.3 Widow badge correctness via houseLog when available",
+    "P0.5 UI attribution for prospect-applied effects (coin + relationship)",
+    "P0.1 Gate test template"
+  ],
+  "notes": "Searchpatch recipe captured from prior thread; actual baseline files not included in this pack."
+}

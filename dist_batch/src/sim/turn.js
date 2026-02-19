@@ -370,8 +370,28 @@ function householdPhase(state, houseLog) {
             }
         }
     }
-    for (const p of people)
-        p.age += 3;
+    // v0.2.7.1 HOTFIX: Aging invariant — every instantiated person in People/Registry ages +TURN_YEARS per turn.
+    {
+        const anyState = state;
+        const reg = anyState.people;
+        if (reg) {
+            for (const p of Object.values(reg)) {
+                if (!p || typeof p !== "object")
+                    continue;
+                if (!p.alive)
+                    continue; // keep age-at-death stable
+                p.age += TURN_YEARS;
+            }
+        }
+        else {
+            // legacy fallback: only the bounded household/court set
+            for (const p of people) {
+                if (!p.alive)
+                    continue;
+                p.age += TURN_YEARS;
+            }
+        }
+    }
     // deaths (simple): older increases risk; physician reduces risk.
     const hasPhysician = hasImprovement(state.manor.improvements, "physician");
     const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
@@ -989,6 +1009,10 @@ function applyProspectsDecision(state, ctx, decisions, prospectsLog) {
                         anyState.people[spouseId].married = true;
                     }
                 }
+                // v0.2.7.1 HOTFIX: Wire spouse edge deterministically for later succession spouse swap.
+                if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
+                    ensureKinshipSpouseOf(state, sid, spouseId);
+                }
                 // v0.2.5 marriage residence LOCK:
                 // - Daughters marry out (leave the household court).
                 // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
@@ -1260,8 +1284,10 @@ export function proposeTurn(state) {
                 houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
         }
     }
+    // v0.2.7.1 HOTFIX: If HoH died this processed turn, resolve succession now so Turn Report/preview never shows a dead ruler.
+    resolveSuccessionNow_v0_2_7_1(working, houseLog);
     // 7) court size/consumption (v0.2.4)
-    const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS);
+    const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS, houseLog);
     // 8) consumption (peasants + court)
     const cons = applyConsumptionAndShortage(working, court.court_consumption_bushels);
     // Unrest contributor: shortage.
@@ -1603,6 +1629,8 @@ function applyMarriageDecision(state, ctx, decisions, reportNotes) {
             if (anyState.people && anyState.people[offer.house_person_id])
                 anyState.people[offer.house_person_id].married = true;
         }
+        // v0.2.7.1 HOTFIX: Wire spouse edge deterministically for later succession spouse swap.
+        ensureKinshipSpouseOf(state, child.id, offer.house_person_id);
         // v0.2.5 marriage residence LOCK:
         // - Daughters marry out (leave the household court).
         // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
@@ -1687,6 +1715,75 @@ function applySellDecision(state, ctx, decisions, reportNotes) {
     if (sell > allowed)
         reportNotes.push("Sell amount trimmed to market cap.");
 }
+function spouseIdFromKinship(state, personId) {
+    const anyState = state;
+    const edges = (anyState.kinship_edges ?? []);
+    for (const e of edges) {
+        if (!e || e.kind !== "spouse_of")
+            continue;
+        if (e.a_id === personId)
+            return e.b_id;
+        if (e.b_id === personId)
+            return e.a_id;
+    }
+    return null;
+}
+function ensureKinshipSpouseOf(state, aId, bId) {
+    if (!aId || !bId || aId === bId)
+        return;
+    const anyState = state;
+    anyState.kinship_edges = (anyState.kinship_edges ?? []);
+    const edges = anyState.kinship_edges;
+    const exists = edges.some((e) => e?.kind === "spouse_of" &&
+        ((e.a_id === aId && e.b_id === bId) || (e.a_id === bId && e.b_id === aId)));
+    if (!exists)
+        edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
+}
+function resolveSuccessionNow_v0_2_7_1(state, houseLog, reportNotes) {
+    if (state.house.head.alive)
+        return;
+    const heirId = computeHeirId(state);
+    if (!heirId) {
+        state.game_over = { reason: "DeathNoHeir", turn_index: state.turn_index };
+        return;
+    }
+    const priorSpouseId = state.house.spouse?.id ?? null;
+    // Promote heir
+    const idx = state.house.children.findIndex((c) => c.id === heirId);
+    const heir = state.house.children.splice(idx, 1)[0];
+    heir.married = true;
+    state.house.head = heir;
+    // v0.2.6.1 WP-12: married-out head is now in-court
+    removeCourtExcludeId(state, heir.id);
+    // Swap spouse to new HoH spouse (if any)
+    const anyState = state;
+    const reg = anyState.people;
+    const heirSpouseId = spouseIdFromKinship(state, heir.id);
+    if (heirSpouseId && reg?.[heirSpouseId]) {
+        state.house.spouse = reg[heirSpouseId];
+        state.house.spouse_status = "spouse";
+    }
+    else {
+        // No spouse known → clear active spouse slot
+        state.house.spouse = undefined;
+        state.house.spouse_status = undefined;
+    }
+    // Prior HoH spouse becomes dowager: keep visible via court extras; widow badge comes from houseLog widowed.survivor_id
+    if (priorSpouseId && priorSpouseId !== state.house.spouse?.id) {
+        addCourtExtraId(state, priorSpouseId);
+    }
+    houseLog.push({ kind: "succession", turn_index: state.turn_index, new_ruler_name: heir.name });
+    // Recompute heir after succession (same turn)
+    const prev = state.house.heir_id ?? null;
+    const next = computeHeirId(state);
+    if (next && next !== prev) {
+        const nm = state.house.children.find((c) => c.id === next)?.name;
+        if (nm)
+            houseLog.push({ kind: "heir_selected", turn_index: state.turn_index, heir_name: nm });
+    }
+    if (reportNotes)
+        reportNotes.push("Succession resolved.");
+}
 function closeTurn(state, reportNotes, houseLog) {
     const ob = state.manor.obligations;
     // move any unpaid due into arrears (end-of-turn)
@@ -1717,37 +1814,10 @@ function closeTurn(state, reportNotes, houseLog) {
     // clear transient flags
     delete state.flags.Shortage;
     delete state.flags.MarriageOffer;
-    // succession (minimal)
-    if (!state.house.head.alive) {
-        const heirId = computeHeirId(state);
-        if (!heirId) {
-            state.game_over = { reason: "DeathNoHeir", turn_index: state.turn_index };
-            return;
-        }
-        const idx = state.house.children.findIndex((c) => c.id === heirId);
-        const heir = state.house.children.splice(idx, 1)[0];
-        heir.married = true; // assume household continuity
-        state.house.head = heir;
-        // v0.2.6.1 WP-12: a married-out heir may have been excluded from court residency.
-        // Once they become the ruling head, they are in-court again.
-        removeCourtExcludeId(state, heir.id);
-        if (state.house.spouse) {
-            // Status only (Widow/Widower) — the widowed life log is emitted at the moment of death
-            // inside householdPhase (v0.2.3.2).
-            state.house.spouse_status = "widow";
-        }
-        // Structured People-First life log events
-        houseLog.push({ kind: "succession", turn_index: state.turn_index, new_ruler_name: heir.name });
-        // Heir selection after succession (same turn) — keep deterministic.
-        const prev = state.house.heir_id ?? null;
-        const next = computeHeirId(state);
-        if (next && next !== prev) {
-            const nm = state.house.children.find((c) => c.id === next)?.name;
-            if (nm)
-                houseLog.push({ kind: "heir_selected", turn_index: state.turn_index, heir_name: nm });
-        }
-        reportNotes.push(`Succession resolved.`);
-    }
+    // v0.2.7.1 HOTFIX: succession semantics unified (HoH swap + spouse swap + dowager visibility).
+    resolveSuccessionNow_v0_2_7_1(state, houseLog, reportNotes);
+    if (state.game_over)
+        return;
     // game-over: dispossession rule
     if (state.manor.unrest >= 100) {
         state.game_over = { reason: "Dispossessed", turn_index: state.turn_index, details: { unrest: state.manor.unrest } };

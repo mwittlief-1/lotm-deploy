@@ -1,4 +1,4 @@
-import type { CourtOfficerRole, CourtRoster, CourtRosterRow, Person, RunState } from "./types";
+import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState } from "./types";
 import { Rng } from "./rng";
 
 // v0.2.4 Court + Household integration.
@@ -253,7 +253,7 @@ export function deriveCourtMemberIds(state: RunState): string[] {
   return ids;
 }
 
-export function buildCourtRoster_v0_2_4(state: RunState): CourtRoster {
+export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEvent[]): CourtRoster {
   const excluded = new Set(getCourtExcludeIds(state));
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
@@ -261,9 +261,13 @@ export function buildCourtRoster_v0_2_4(state: RunState): CourtRoster {
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;
 
-  // Widow semantics: same as household roster.
+  // Widow semantics: prefer explicit life log (same-turn correctness); fallback to head/spouse alive mismatch.
   let widowedPersonId: string | null = null;
-  if (spouse) {
+  if (houseLog && houseLog.length) {
+    const w = [...houseLog].reverse().find((e) => e.kind === "widowed" && (e as any).survivor_id);
+    if ((w as any)?.survivor_id) widowedPersonId = (w as any).survivor_id;
+  }
+  if (!widowedPersonId && spouse) {
     if (state.house.head.alive && !spouse.alive) widowedPersonId = state.house.head.id;
     else if (!state.house.head.alive && spouse.alive) widowedPersonId = spouse.id;
   }
@@ -316,12 +320,12 @@ export function buildCourtRoster_v0_2_4(state: RunState): CourtRoster {
   };
 }
 
-export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPersonPerYear: number, turnYears: number): {
+export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPersonPerYear: number, turnYears: number, houseLog?: HouseLogEvent[]): {
   court_headcount: number;
   court_consumption_bushels: number;
   court_roster: CourtRoster;
 } {
-  const roster = buildCourtRoster_v0_2_4(state);
+  const roster = buildCourtRoster_v0_2_4(state, houseLog);
   const headcount = roster.headcount_alive;
   const courtConsumption = Math.max(0, Math.floor(headcount * bushelsPerPersonPerYear * turnYears));
   return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };

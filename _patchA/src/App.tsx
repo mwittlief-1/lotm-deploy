@@ -1428,14 +1428,6 @@ ${confirmBody}`);
 
         // Determine widow/widower (or fallback widowed) badge target.
         let widowedId: string | null = null;
-        // v0.2.7.1 HOTFIX: prefer explicit People-First life log (same-turn correctness + dowager after succession spouse swap).
-        {
-          const hl: any = (ctx.report as any)?.house_log;
-          if (Array.isArray(hl) && hl.length) {
-            const w = [...hl].reverse().find((e: any) => e && e.kind === "widowed" && typeof e.survivor_id === "string" && e.survivor_id);
-            if (w && typeof w.survivor_id === "string") widowedId = w.survivor_id;
-          }
-        }
         if (head && spouse) {
           const headAlive = (head as any).alive !== false;
           const spouseAlive = (spouse as any).alive !== false;

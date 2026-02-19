@@ -255,15 +255,20 @@ export function deriveCourtMemberIds(state) {
         push(id);
     return ids;
 }
-export function buildCourtRoster_v0_2_4(state) {
+export function buildCourtRoster_v0_2_4(state, houseLog) {
     const excluded = new Set(getCourtExcludeIds(state));
     const anyState = state;
     const people = (anyState.people ?? {});
     const heirId = state.house.heir_id ?? null;
     const spouse = state.house.spouse ?? null;
-    // Widow semantics: same as household roster.
+    // Widow semantics: prefer explicit life log (same-turn correctness); fallback to head/spouse alive mismatch.
     let widowedPersonId = null;
-    if (spouse) {
+    if (houseLog && houseLog.length) {
+        const w = [...houseLog].reverse().find((e) => e.kind === "widowed" && e.survivor_id);
+        if (w?.survivor_id)
+            widowedPersonId = w.survivor_id;
+    }
+    if (!widowedPersonId && spouse) {
         if (state.house.head.alive && !spouse.alive)
             widowedPersonId = state.house.head.id;
         else if (!state.house.head.alive && spouse.alive)
@@ -319,8 +324,8 @@ export function buildCourtRoster_v0_2_4(state) {
         rows
     };
 }
-export function courtConsumptionBushels_v0_2_4(state, bushelsPerPersonPerYear, turnYears) {
-    const roster = buildCourtRoster_v0_2_4(state);
+export function courtConsumptionBushels_v0_2_4(state, bushelsPerPersonPerYear, turnYears, houseLog) {
+    const roster = buildCourtRoster_v0_2_4(state, houseLog);
     const headcount = roster.headcount_alive;
     const courtConsumption = Math.max(0, Math.floor(headcount * bushelsPerPersonPerYear * turnYears));
     return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };
