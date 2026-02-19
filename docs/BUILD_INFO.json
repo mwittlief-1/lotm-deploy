@@ -1,13 +1,13 @@
 {
-  "app_version": "v0.2.7.1",
-  "build_time_utc": "2026-02-19T13:37:33Z",
-  "code_fingerprint": "9d0b18102b12e74657dbe09ffd763644da3ccd77f42f9a449e4a2e912162b64c",
-  "created_at_utc": "2026-02-19T13:37:33Z",
-  "notes": "v0.2.7.1 correctness hotfix: enforce aging invariant (all alive People-First registry persons age by TURN_YEARS each turn); resolve succession in the processed turn so preview/report never shows a dead ruler; on succession swap active spouse to the new HoH spouse (via spouse_of kinship edge) while keeping the prior spouse visible via court_extra_ids; marriage acceptance (MarriageWindow + Prospects) writes deterministic spouse_of kinship edges; People-First sync preserves spouse_of edges for player children (prevents wiping child marriages). UI widow badge prefers widowed life-log survivor_id for same-turn accuracy. No new mechanics or tuning changes; retains v0.2.6.2 runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8).",
+  "app_version": "v0.2.7.2",
+  "sim_version": "v0.2.7.2",
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "build_time_utc": "2026-02-19T18:47:51Z",
+  "created_at_utc": "2026-02-19T18:47:51Z",
   "policy_ids": [
     "prudent-builder",
     "builder-forward",
     "builder-forward/buffered"
   ],
-  "sim_version": "v0.2.7.1"
+  "notes": "v0.2.7.2 hotfix (P0 only): fixes marriage coherence + prospect attribution and surfaces the fixes in UI. Sim: buildMarriageWindow sources spouse candidates from People-First external houses (prefer local noble houses h_noble_XX) rather than legacy locals.nobles (removes phantom spouses); marriage prospects stamp from_house_id using spouse candidate’s actual house_id (via house scan); spouseIdFromKinship hardened to deterministic selection (lexicographically smallest spouse id) when multiple spouse_of edges exist. UI: marriage prospect card shows spouse name + age + house; roster shows spouse subline per person via spouse_of edges (no global spouse field); Known Houses panel hydrates from house_id lists; Diff Ledger prefers sim-provided diff_ledger items when present; marriage toast mirrors sim residence rule (heir/eldest son brings spouse in; otherwise child marries out). No new mechanics or tuning changes; retains v0.2.7.x runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8)."
 }

@@ -10,6 +10,29 @@ function sortRecord<T>(rec: Record<string, T>): Record<string, T> {
   return out;
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+function inferHouseNameFromNobleName(name: string): string {
+  const raw = String(name ?? "");
+  const idx = raw.lastIndexOf(" of ");
+  if (idx >= 0 && idx + 4 < raw.length) return raw.slice(idx + 4).trim() || raw.trim();
+  return raw.trim() || "Noble";
+}
+
+function houseIdForPerson(houses: Record<string, any>, personId: string): string | null {
+  for (const hid of Object.keys(houses).sort()) {
+    const h: any = houses[hid];
+    if (!h || typeof h !== "object") continue;
+    if (h.head_id === personId) return hid;
+    if (h.spouse_id === personId) return hid;
+    const childIds: any = h.child_ids;
+    if (Array.isArray(childIds) && childIds.some((cid) => cid === personId)) return hid;
+  }
+  return null;
+}
+
 function kinKey(e: KinshipEdge): string {
   if (e.kind === "parent_of") return `parent_of|${e.parent_id}|${e.child_id}`;
   // spouse_of is symmetric; normalize order for dedupe/sort.
@@ -136,6 +159,37 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
     child_ids: childIds,
     heir_id: state.house?.heir_id ?? null
   };
+
+  // v0.2.7.2 P0 (phantom spouse fix support): ensure legacy local nobles have a real House membership
+  // in the People-First registry. This allows marriage offers to source from registries while
+  // preserving deterministic behavior of the prior local-noble pool.
+  const nobleIds = Object.keys(people)
+    .filter((id) => /^p_noble\d+$/.test(id))
+    .sort((a, b) => a.localeCompare(b));
+
+  for (const pid of nobleIds) {
+    // If already in a house, do nothing.
+    if (houseIdForPerson(houses, pid)) continue;
+    const m = pid.match(/^p_noble(\d+)$/);
+    const n = m ? Math.trunc(Number(m[1])) : 0;
+    const hid = `h_noble_${pad2(n || 0)}`;
+
+    const p = people[pid];
+    const name = p && typeof (p as any).name === "string" ? String((p as any).name) : pid;
+    const inferred = inferHouseNameFromNobleName(name);
+
+    const prior = houses[hid] && typeof houses[hid] === "object" ? houses[hid] : {};
+    houses[hid] = {
+      ...prior,
+      id: hid,
+      name: typeof prior.name === "string" && prior.name ? prior.name : inferred,
+      tier: prior.tier ?? "Knight",
+      holdings_count: typeof prior.holdings_count === "number" ? prior.holdings_count : 1,
+      head_id: typeof prior.head_id === "string" && prior.head_id ? prior.head_id : pid,
+      spouse_id: prior.spouse_id ?? null,
+      child_ids: Array.isArray(prior.child_ids) ? prior.child_ids : []
+    };
+  }
 
   // Kinship edges: preserve non-player edges; replace only edges involving the player household IDs.
   const prior: KinshipEdge[] = Array.isArray(s.kinship_edges)

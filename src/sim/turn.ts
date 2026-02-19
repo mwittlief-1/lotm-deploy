@@ -619,7 +619,66 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   })[0]!;
 
   const desiredSpouseSex: "M" | "F" = subject.sex === "M" ? "F" : "M";
-  const pool = state.locals.nobles.filter((n) => n.alive && n.sex === desiredSpouseSex);
+
+  // v0.2.7.2 P0: spouse candidates must come from People-First registries (external Houses),
+  // not legacy locals.nobles.
+  const anyState: any = state as any;
+  const people: Record<string, Person> =
+    anyState.people && typeof anyState.people === "object" ? (anyState.people as Record<string, Person>) : {};
+  const houses: Record<string, any> =
+    anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
+  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+
+  const candidates: Array<{ person_id: string; house_id: string; house_name: string }> = [];
+  const seen = new Set<string>();
+
+  const allHouseIds = Object.keys(houses)
+    .filter((hid) => hid !== playerHouseId)
+    .sort((a, b) => a.localeCompare(b));
+
+  // Prefer "local noble" Houses if present (h_noble_XX). This keeps marriage offer behavior stable
+  // while sourcing strictly from People-First registries.
+  const nobleHouseIds = allHouseIds.filter((hid) => hid.startsWith("h_noble_"));
+  const houseIds = nobleHouseIds.length > 0 ? nobleHouseIds : allHouseIds;
+
+  for (const hid of houseIds) {
+    const h: any = houses[hid];
+    if (!h || typeof h !== "object") continue;
+
+    const houseName = typeof h.name === "string" && h.name ? String(h.name) : String(hid);
+
+    const ids: string[] = [];
+    const headId = typeof h.head_id === "string" ? String(h.head_id) : "";
+    if (headId) ids.push(headId);
+    const spouseId = typeof h.spouse_id === "string" ? String(h.spouse_id) : "";
+    if (spouseId) ids.push(spouseId);
+
+    const childIds: any = h.child_ids;
+    if (Array.isArray(childIds)) {
+      for (const cid of childIds) if (typeof cid === "string" && cid) ids.push(cid);
+    }
+
+    for (const pid of ids) {
+      if (!pid || seen.has(pid)) continue;
+      seen.add(pid);
+
+      const person: any = people[pid];
+      if (!person || typeof person !== "object") continue;
+      if (person.alive !== true) continue;
+      if (person.sex !== desiredSpouseSex) continue;
+      // Keep offers coherent: avoid already-married candidates when that info exists.
+      if (person.married === true) continue;
+
+      candidates.push({ person_id: pid, house_id: hid, house_name: houseName });
+    }
+  }
+
+  // Stable order before RNG picks.
+  const pool = candidates.sort((a, b) => {
+    const h = a.house_id.localeCompare(b.house_id);
+    if (h !== 0) return h;
+    return a.person_id.localeCompare(b.person_id);
+  });
 
   // If no opposite-sex candidates exist, do not generate a same-sex marriage window.
   if (pool.length === 0) {
@@ -632,14 +691,18 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
 
   for (let i = 0; i < offerCount; i++) {
-    const noble = rng.pick(pool);
+    const cand = rng.pick(pool);
     const quality = rng.next(); // 0..1
     const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
     offers.push({
-      house_person_id: noble.id,
-      house_label: noble.name,
+      house_person_id: cand.person_id,
+      house_label: `House ${cand.house_name}`,
       dowry_coin_net: dowry,
-      relationship_delta: { respect: Math.trunc(2 + quality * 6), allegiance: Math.trunc(1 + quality * 4), threat: Math.trunc(-1 - quality * 2) },
+      relationship_delta: {
+        respect: Math.trunc(2 + quality * 6),
+        allegiance: Math.trunc(1 + quality * 4),
+        threat: Math.trunc(-1 - quality * 2)
+      },
       liege_delta: rng.bool(0.35) ? { respect: 1, threat: -1 } : null,
       risk_tags: [
         quality > 0.75 ? "prestige" : quality < 0.25 ? "shady" : "plain",
@@ -649,6 +712,24 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   }
 
   return { eligible_child_ids: [subject.id], offers };
+}
+
+function houseIdForPerson_v0_2_7_2(state: RunState, personId: string): string | null {
+  if (!personId) return null;
+  const anyState: any = state as any;
+  const houses: Record<string, any> =
+    anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
+
+  for (const hid of Object.keys(houses).sort((a, b) => a.localeCompare(b))) {
+    const h: any = houses[hid];
+    if (!h || typeof h !== "object") continue;
+    if (h.head_id === personId) return hid;
+    if (h.spouse_id === personId) return hid;
+    const childIds: any = h.child_ids;
+    if (Array.isArray(childIds) && childIds.some((cid) => cid === personId)) return hid;
+  }
+
+  return null;
 }
 
 
@@ -867,6 +948,7 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
     const bestIdx = bestMarriageOfferIndex_v0_2_2_policy(state, marriageWindow);
     if (bestIdx !== null) {
       const offer = marriageWindow.offers[bestIdx]!;
+      const spouseHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id) ?? sponsorHouseId;
       const relDeltas: any[] = [];
       relDeltas.push({
         scope: "person",
@@ -890,7 +972,7 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
       const p: Prospect = {
         id: makeId("marriage", subjectId),
         type: "marriage",
-        from_house_id: sponsorHouseId,
+        from_house_id: spouseHouseId,
         to_house_id: playerHouseId,
         subject_person_id: subjectId,
         spouse_person_id: offer.house_person_id,
@@ -1910,12 +1992,16 @@ function applySellDecision(state: RunState, ctx: TurnContext, decisions: TurnDec
 function spouseIdFromKinship(state: RunState, personId: string): string | null {
   const anyState: any = state as any;
   const edges = (anyState.kinship_edges ?? []) as any[];
+
+  const matches = new Set<string>();
   for (const e of edges) {
     if (!e || e.kind !== "spouse_of") continue;
-    if (e.a_id === personId) return e.b_id;
-    if (e.b_id === personId) return e.a_id;
+    if (e.a_id === personId && typeof e.b_id === "string") matches.add(e.b_id);
+    else if (e.b_id === personId && typeof e.a_id === "string") matches.add(e.a_id);
   }
-  return null;
+
+  const sorted = [...matches].sort((a, b) => a.localeCompare(b));
+  return sorted[0] ?? null;
 }
 
 function ensureKinshipSpouseOf(state: RunState, aId: string, bId: string): void {

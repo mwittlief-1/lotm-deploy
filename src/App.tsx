@@ -901,8 +901,79 @@ export default function App() {
 
       const hasArrears = ob.arrears.coin > 0 || ob.arrears.bushels > 0;
 
-      const knownHousesRaw = (ctx.report as any)?.known_houses;
-      const knownHouses: any[] = Array.isArray(knownHousesRaw) ? (knownHousesRaw as any[]) : [];
+      // Known Houses: tolerant to multiple shapes (objects or house_id list).
+      const knownHousesRaw: any =
+        (ctx.report as any)?.known_houses ??
+        (ctx.report as any)?.knownHouses ??
+        (ctx.preview_state as any)?.known_houses ??
+        (ctx.preview_state as any)?.knownHouses ??
+        (ctx.preview_state as any)?.house?.known_houses ??
+        (ctx.preview_state as any)?.house?.knownHouses ??
+        null;
+
+      const knownHouses: any[] = (() => {
+        const raw: any[] = Array.isArray(knownHousesRaw) ? (knownHousesRaw as any[]) : [];
+        if (raw.length === 0) return [];
+
+        // If the sim returns an array of house IDs, hydrate from registry for display.
+        const allStrings = raw.every((x) => typeof x === "string");
+        if (allStrings) {
+          const houses: any = (ctx.preview_state as any).houses;
+          const people: any = (ctx.preview_state as any).people;
+          const out: any[] = [];
+
+          for (const hid of raw as any as string[]) {
+            const h = houses && typeof houses === "object" ? houses[hid] : null;
+            const house_name = h && typeof h === "object" ? String((h as any).house_name ?? (h as any).name ?? (h as any).houseName ?? "").trim() : "";
+            const tier = h && typeof h === "object" ? String((h as any).tier ?? "").trim() : "";
+
+            const head_id: string | null =
+              h && typeof h === "object"
+                ? typeof (h as any).head_id === "string"
+                  ? (h as any).head_id
+                  : typeof (h as any).head?.id === "string"
+                    ? (h as any).head.id
+                    : null
+                : null;
+
+            const head = head_id && people && typeof people === "object" ? people[head_id] : null;
+
+            const rel = relationshipToPlayerFromHouse(hid);
+
+            out.push({
+              house_id: hid,
+              house_name: house_name || hid,
+              tier,
+              head_id,
+              head_name: head && typeof head === "object" ? (head as any).name : "",
+              head_age: head && typeof head === "object" ? (head as any).age : null,
+              head_short_id: head && typeof head === "object" ? (head as any).short_id : null,
+              head_status:
+                head && typeof head === "object" && typeof (head as any).alive === "boolean" ? ((head as any).alive ? "Alive" : "Deceased") : "",
+              relationship: rel
+            });
+          }
+
+          out.sort(
+            (a, b) =>
+              String(a.house_name).localeCompare(String(b.house_name)) ||
+              String(a.house_id).localeCompare(String(b.house_id))
+          );
+
+          return out;
+        }
+
+        // Otherwise assume already objects.
+        const objs = raw.filter((x) => x && typeof x === "object");
+        const nameOf = (h: any) => String(h?.house_name ?? h?.houseName ?? h?.name ?? h?.house_id ?? h?.id ?? "");
+        objs.sort(
+          (a, b) =>
+            nameOf(a).localeCompare(nameOf(b)) ||
+            String(a?.house_id ?? a?.id ?? "").localeCompare(String(b?.house_id ?? b?.id ?? ""))
+        );
+        return objs;
+      })();
+
       const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
       const hasMoreKnownHouses = knownHouses.length > 5;
 
@@ -1146,12 +1217,25 @@ ${confirmBody}`);
 
             if (childName) {
               const line1 = COPY.marriageToast_line1(childName);
+              // Mirror sim residence rule (v0.2.5):
+              // - Daughters always marry out.
+              // - Sons marry in only if heir or eldest son; otherwise they marry out.
+              const hh: any = (ctx.preview_state as any)?.house;
+              const heirId: string | null = typeof hh?.heir_id === "string" ? hh.heir_id : null;
+              const kidsArr: any[] = Array.isArray(hh?.children) ? hh.children : [];
+              const eldestSonId: string | null = kidsArr
+                .filter((c) => c && typeof c === "object" && c.alive !== false && c.sex === "M" && typeof c.id === "string")
+                .sort((a, b) => (Number(b.age ?? 0) - Number(a.age ?? 0)) || String(a.id).localeCompare(String(b.id)))
+                [0]?.id ?? null;
+
+              const spouseJoinsCourt = childSex === "M" && Boolean(childId) && (childId === heirId || childId === eldestSonId);
+
               const msg =
-                childSex === "F"
-                  ? `${line1}\n${COPY.marriageToast_line2_childLeaves(childName)}`
-                  : spouseName
-                    ? `${line1}\n${COPY.marriageToast_line2_withSpouse(spouseName)}`
-                    : line1;
+                spouseJoinsCourt && spouseName
+                  ? `${line1}
+${COPY.marriageToast_line2_withSpouse(spouseName)}`
+                  : `${line1}
+${COPY.marriageToast_line2_childLeaves(childName)}`;
               setToast({ kind: "ok", message: msg });
               return;
             }
@@ -1503,6 +1587,35 @@ ${confirmBody}`);
 
       const courtSize = courtRoster.alive_count;
 
+      // Spouse lookup by person_id (use kinship_edges spouse_of); avoids relying on a global household spouse field.
+      const spouseIdByPersonId: Map<string, string> = (() => {
+        const m = new Map<string, string>();
+        const s: any = ctx.preview_state as any;
+        const edges: any[] = Array.isArray(s?.kinship_edges) ? s.kinship_edges : Array.isArray(s?.kinship) ? s.kinship : [];
+        for (const e of edges) {
+          if (!e || typeof e !== "object") continue;
+          if ((e as any).kind !== "spouse_of") continue;
+          const a = (e as any).a_id;
+          const b = (e as any).b_id;
+          if (typeof a !== "string" || typeof b !== "string" || !a || !b) continue;
+          if (a === b) continue;
+          // Deterministic even if multiple spouse_of edges exist: keep lexicographically smallest spouse id.
+          const setMin = (k: string, v: string) => {
+            const cur = m.get(k);
+            if (!cur || v.localeCompare(cur) < 0) m.set(k, v);
+          };
+          setMin(a, b);
+          setMin(b, a);
+        }
+        return m;
+      })();
+
+      function spouseNameForPersonId(person_id: string): string | null {
+        const sid = spouseIdByPersonId.get(person_id);
+        if (!sid || sid === person_id) return null;
+        return personNameFromRegistry(sid) ?? null;
+      }
+
       // v0.2.7: Anchors for Council Agenda CTAs (scroll only; no new routes).
       const ANCHOR = {
         labor: "anchor_labor",
@@ -1631,7 +1744,64 @@ ${confirmBody}`);
       }
 
       const diffLedgerItems: LedgerItem[] = (() => {
+        // Prefer sim-provided diff ledger if present (prospect attribution + house labels).
+        const reportLedgerRaw: any =
+          (ctx.report as any)?.diff_ledger_items ??
+          (ctx.report as any)?.diff_ledger ??
+          (ctx.report as any)?.diffLedger ??
+          (ctx.report as any)?.delta_ledger ??
+          (ctx.report as any)?.ledger_diff ??
+          null;
+
+        const normalizeSource = (src: any): SourceTag => {
+          const s = typeof src === "string" ? src : "";
+          if (s === "decision" || s === "event" || s === "system_pressure" || s === "prospect") return s;
+          return "system_pressure";
+        };
+
+        if (Array.isArray(reportLedgerRaw) && reportLedgerRaw.length > 0) {
+          const parsed: LedgerItem[] = [];
+          for (let i = 0; i < reportLedgerRaw.length; i++) {
+            const it: any = reportLedgerRaw[i];
+            if (!it || typeof it !== "object") continue;
+            const primary: string =
+              typeof it.primary === "string"
+                ? it.primary
+                : typeof it.line === "string"
+                  ? it.line
+                  : typeof it.text === "string"
+                    ? it.text
+                    : "";
+            if (!primary) continue;
+            const why: string =
+              typeof it.why === "string"
+                ? it.why
+                : typeof it.reason === "string"
+                  ? it.reason
+                  : typeof it.note === "string"
+                    ? it.note
+                    : "";
+            const src = normalizeSource(it.source ?? it.source_tag ?? it.sourceTag ?? it.kind);
+            const id = typeof it.id === "string" ? it.id : `report_ledger_${i}`;
+            parsed.push({
+              id,
+              sort_mag: typeof it.sort_mag === "number" && Number.isFinite(it.sort_mag) ? it.sort_mag : Math.max(0, primary.length),
+              tie_key: typeof it.tie_key === "string" ? it.tie_key : `r${String(i).padStart(2, "0")}`,
+              primary,
+              why: why || COPY.diffLedgerMultipleCauses,
+              source: src
+            });
+          }
+          if (parsed.length) return parsed;
+        }
+
         const items: LedgerItem[] = [];
+
+        const inferSourceFromWhy = (why: string, fallback: SourceTag): SourceTag => {
+          const w = String(why || "").toLowerCase();
+          if (w.includes("grant") || w.includes("marriage") || w.includes("prospect")) return "prospect";
+          return fallback;
+        };
 
         items.push({
           id: "food",
@@ -2211,22 +2381,32 @@ ${confirmBody}`);
                     </div>
 
                     <ul style={{ margin: "0 0 10px 18px" }}>
-                      {courtRoster.entries.map((r) => (
-                        <li key={r.person.id} style={{ marginBottom: 6 }}>
-                          <div>
-                            <span>{formatPersonName(r.person)}</span>
-                            {r.badges.map((b) => (
-                              <Badge key={`${r.person.id}:${b}`} text={b} />
-                            ))}
-                          </div>
-                          {r.relationship || r.officer_role ? (
-                            <div style={{ fontSize: 12, opacity: 0.75 }}>
-                              {r.relationship ? r.relationship : null}
-                              {r.officer_role ? ` — ${r.officer_role}` : null}
+                      {courtRoster.entries.map((r) => {
+                        const spouseName = spouseNameForPersonId(r.person.id);
+                        return (
+                          <li key={r.person.id} style={{ marginBottom: 6 }}>
+                            <div>
+                              <span>{formatPersonName(r.person)}</span>
+                              {r.badges.map((b) => (
+                                <Badge key={`${r.person.id}:${b}`} text={b} />
+                              ))}
                             </div>
-                          ) : null}
-                        </li>
-                      ))}
+
+                            {spouseName ? (
+                              <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
+                                Spouse: {spouseName}
+                              </div>
+                            ) : null}
+
+                            {r.relationship || r.officer_role ? (
+                              <div style={{ fontSize: 12, opacity: 0.75, marginTop: spouseName ? 2 : 0 }}>
+                                {r.relationship ? r.relationship : null}
+                                {r.officer_role ? ` — ${r.officer_role}` : null}
+                              </div>
+                            ) : null}
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     <div style={{ fontWeight: 700, marginBottom: 6 }}>{COPY.houseLog}</div>
@@ -2610,6 +2790,54 @@ ${confirmBody}`);
                               <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
                                 {COPY.prospectSubjectLabel} {subject}
                               </div>
+                            ) : null}
+
+                            {/* v0.2.7.2 UI: marriage cards should show offered spouse identity (name + age) */}
+                            {t === "marriage" ? (
+                              (() => {
+                                const spouseId: string | null =
+                                  typeof (p as any)?.spouse_person_id === "string"
+                                    ? ((p as any).spouse_person_id as string)
+                                    : typeof (p as any)?.offer_person_id === "string"
+                                      ? ((p as any).offer_person_id as string)
+                                      : typeof (p as any)?.offer_personId === "string"
+                                        ? ((p as any).offer_personId as string)
+                                        : null;
+
+                                const people: any = (ctx.preview_state as any).people;
+                                const spouseRec: any = spouseId && people && typeof people === "object" ? people[spouseId] : null;
+                                const spouseSex: string | null = spouseRec && typeof spouseRec === "object" ? spouseRec.sex : null;
+                                const label = spouseSex === "F" ? "Bride" : spouseSex === "M" ? "Groom" : "Spouse";
+
+                                const spouseName: string | null =
+                                  personNameFromRegistry(spouseId) ??
+                                  (typeof (p as any)?.spouse_name === "string" ? String((p as any).spouse_name) : null) ??
+                                  (typeof (p as any)?.other_person_name === "string" ? String((p as any).other_person_name) : null);
+
+                                const spouseAgeFromRec: number | null =
+                                  spouseRec && typeof spouseRec === "object" && typeof spouseRec.age === "number" && Number.isFinite(spouseRec.age)
+                                    ? Math.trunc(spouseRec.age)
+                                    : null;
+
+                                const spouseAge: number | null =
+                                  typeof (p as any)?.spouse_age === "number" && Number.isFinite((p as any).spouse_age)
+                                    ? Math.trunc((p as any).spouse_age)
+                                    : spouseAgeFromRec;
+
+                                const spouseText: string | null = (() => {
+                                  if (!spouseName) return null;
+                                  // If the registry name already includes age, don't double-add.
+                                  if (spouseAge !== null && !spouseName.includes("Age")) return `${spouseName} (Age ${spouseAge})`;
+                                  return spouseName;
+                                })();
+
+                                return spouseText ? (
+                                  <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                                    {label}: {spouseText}
+                                    {fromHouse ? ` — House ${fromHouse}` : ""}
+                                  </div>
+                                ) : null;
+                              })()
                             ) : null}
 
                             {summary ? <div style={{ marginTop: 6 }}>{summary}</div> : null}
