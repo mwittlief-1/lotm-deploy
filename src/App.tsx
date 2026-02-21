@@ -2839,7 +2839,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                           </div>
                         );
                       })
-                      )}
+                      }
                     </div>
 
                     <details style={{ marginTop: 10 }}>
