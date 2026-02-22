@@ -1,0 +1,20 @@
+{
+  "started_at": "2026-02-17T22:20:48.648Z",
+  "map_path": "qa_artifacts/map_seed_batch/MAPGEN_SEED_v0_3_006/map_v1.json",
+  "config_path": "data/map/map_v1_config.json",
+  "metrics_out": "qa_artifacts/map_seed_batch/MAPGEN_SEED_v0_3_006/mapgen_metrics.json",
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "message": "market_towns_total out of band",
+      "ctx": {
+        "count": 41,
+        "band": [
+          22,
+          35
+        ]
+      }
+    }
+  ]
+}

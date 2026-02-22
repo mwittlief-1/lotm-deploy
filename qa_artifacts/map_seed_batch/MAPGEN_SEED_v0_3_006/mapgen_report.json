@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-02-17T22:20:48.448Z",
+  "map_out": "qa_artifacts/map_seed_batch/MAPGEN_SEED_v0_3_006/map_v1.json",
+  "public_out": "/mnt/work/repo/qa_artifacts/map_seed_batch/MAPGEN_SEED_v0_3_006/map_v1.json",
+  "seed": "MAPGEN_SEED_v0_3_006",
+  "config_path": "data/map/map_v1_config.json",
+  "config_sha256": "9e1af01f0bde205e91ccae4be7b005993304a20a99c90011ece86ff37f587508",
+  "metrics_path": "/mnt/work/repo/qa_artifacts/map_seed_batch/MAPGEN_SEED_v0_3_006/mapgen_metrics.json"
+}
