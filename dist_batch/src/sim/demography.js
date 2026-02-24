@@ -55,7 +55,8 @@ export function processNobleFertility(state, tierSets, rng, turn) {
         if (motherAge == null || fatherAge == null)
             continue;
         // Simple age bands.
-        if (motherAge < 16 || motherAge > 40)
+        // Credibility gate (v0.2.8 P0): female fertility declines strongly after ~35 and approaches ~0 by late 40s.
+        if (motherAge < 16 || motherAge > 48)
             continue;
         if (fatherAge < 16 || fatherAge > 70)
             continue;
@@ -225,14 +226,22 @@ function pickMotherFather(pA, pB) {
     return aId < bId ? { mother: pA, father: pB } : { mother: pB, father: pA };
 }
 function birthChancePerTurn(motherAge) {
-    // v0.2.8 simple curve: peak around mid-20s, taper to 0 by 16 and 40.
+    // v0.2.8.2 hotfix: fertility curve is intentionally simple but must be credible.
+    // - modest rise into 20s
+    // - gradual fall through early/mid 30s
+    // - sharp decline after 35; ~0 by late 40s
     // Scaled for a 3-year turn (chance per turn, not per year).
-    const peakAge = 26;
-    const halfWidth = 14; // gives 12..40; we clamp at 16..40 anyway.
-    const raw = 1 - Math.abs(motherAge - peakAge) / halfWidth;
-    const fertility = clamp01(raw);
-    const maxPerTurn = 0.35;
-    return fertility * maxPerTurn;
+    if (motherAge < 16 || motherAge > 48)
+        return 0;
+    const peakAge = 27;
+    const halfWidth = 16; // yields a broad 11..43 triangle before we apply the 35+ taper.
+    const tri = 1 - Math.abs(motherAge - peakAge) / halfWidth;
+    const baseShape = clamp01(tri);
+    // Strong 35+ taper: exp(-k*(age-35)). Choose k so 48 is effectively ~0.
+    const k = 0.4;
+    const ageTaper = motherAge <= 35 ? 1 : Math.exp(-k * (motherAge - 35));
+    const maxPerTurn = 0.32;
+    return clamp01(baseShape * ageTaper) * maxPerTurn;
 }
 function clamp01(x) {
     if (x <= 0)

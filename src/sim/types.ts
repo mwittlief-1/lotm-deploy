@@ -365,6 +365,15 @@ export interface CourtRosterRow {
   // Officer role key (UI maps to title labels per UX contract).
   officer_role: CourtOfficerRole | null;
   badges: HouseholdRosterBadge[];
+
+  /**
+   * v0.2.8.2 hotfix: presentation-only relationship label rebased on current HoH.
+   *
+   * Why: court membership is still derived from legacy `state.house.children`, which may
+   * include siblings after succession. The UI should display correct relationships (e.g.
+   * Sister/Brother; Son/Daughter) even when the underlying roster role is "child".
+   */
+  relationship_label?: string | null;
 }
 
 export interface CourtRoster {

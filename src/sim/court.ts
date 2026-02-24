@@ -1,5 +1,6 @@
 import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState, ServiceRecord } from "./types";
 import { Rng } from "./rng";
+import { getChildren, getParents, getSiblings } from "./kinship";
 
 // v0.2.4 Court + Household integration.
 // Tooling/QA note: Court officer generation must be deterministic and stream-isolated.
@@ -307,6 +308,36 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
 
+  // v0.2.8.2 hotfix: derive relationship labels relative to the *current* HoH.
+  // Court membership is still driven by legacy `state.house.children`, which may contain
+  // siblings after succession (they remain in household). The label must rebase.
+  const headId = state.house?.head?.id ?? null;
+  const spouseId = state.house?.spouse?.id ?? null;
+  const parentsOfHead = headId ? new Set(getParents(state as any, headId)) : new Set<string>();
+  const childrenOfHead = headId ? new Set(getChildren(state as any, headId)) : new Set<string>();
+  const siblingsOfHead = headId ? new Set(getSiblings(state as any, headId)) : new Set<string>();
+
+  const relationshipLabel = (personId: string): string | null => {
+    if (!headId) return null;
+    if (personId === headId) return "Head of House";
+    if (spouseId && personId === spouseId) return "Spouse";
+
+    const p = people[personId];
+    const sex = p?.sex;
+
+    if (parentsOfHead.has(personId)) {
+      return sex === "F" ? "Mother" : sex === "M" ? "Father" : "Parent";
+    }
+    if (siblingsOfHead.has(personId)) {
+      return sex === "F" ? "Sister" : sex === "M" ? "Brother" : "Sibling";
+    }
+    if (childrenOfHead.has(personId)) {
+      return sex === "F" ? "Daughter" : sex === "M" ? "Son" : "Child";
+    }
+
+    return null;
+  };
+
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;
 
@@ -338,7 +369,7 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
     if (p.alive && widowedPersonId === p.id) badges.push(p.sex === "M" ? "widower" : "widow");
     if (heirId && p.id === heirId) badges.push("heir");
 
-    rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges });
+    rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges, relationship_label: relationshipLabel(p.id) });
   };
 
   // Family

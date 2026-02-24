@@ -1,4 +1,5 @@
 import { Rng } from "./rng.js";
+import { getChildren, getParents, getSiblings } from "./kinship.js";
 // v0.2.4 Court + Household integration.
 // Tooling/QA note: Court officer generation must be deterministic and stream-isolated.
 const MALE_NAMES = ["Edmund", "Hugh", "Robert", "Walter", "Geoffrey", "Aldric", "Oswin", "Giles", "Roger", "Simon"];
@@ -305,6 +306,32 @@ export function buildCourtRoster_v0_2_4(state, houseLog) {
     const excluded = new Set(getCourtExcludeIds(state));
     const anyState = state;
     const people = (anyState.people ?? {});
+
+    // v0.2.8.2 hotfix: derive relationship labels relative to the *current* HoH.
+    // Court membership is still driven by legacy `state.house.children`, which may contain
+    // siblings after succession (they remain in household). The label must rebase.
+    const headId = state.house?.head?.id ?? null;
+    const spouseId = state.house?.spouse?.id ?? null;
+    const parentsOfHead = headId ? new Set(getParents(state, headId)) : new Set();
+    const childrenOfHead = headId ? new Set(getChildren(state, headId)) : new Set();
+    const siblingsOfHead = headId ? new Set(getSiblings(state, headId)) : new Set();
+    const relationshipLabel = (personId) => {
+        if (!headId)
+            return null;
+        if (personId === headId)
+            return "Head of House";
+        if (spouseId && personId === spouseId)
+            return "Spouse";
+        const p = people[personId];
+        const sex = p?.sex;
+        if (parentsOfHead.has(personId))
+            return sex === "F" ? "Mother" : sex === "M" ? "Father" : "Parent";
+        if (siblingsOfHead.has(personId))
+            return sex === "F" ? "Sister" : sex === "M" ? "Brother" : "Sibling";
+        if (childrenOfHead.has(personId))
+            return sex === "F" ? "Daughter" : sex === "M" ? "Son" : "Child";
+        return null;
+    };
     const heirId = state.house.heir_id ?? null;
     const spouse = state.house.spouse ?? null;
     // Widow semantics: prefer explicit life log (same-turn correctness); fallback to head/spouse alive mismatch.
@@ -341,7 +368,7 @@ export function buildCourtRoster_v0_2_4(state, houseLog) {
             badges.push(p.sex === "M" ? "widower" : "widow");
         if (heirId && p.id === heirId)
             badges.push("heir");
-        rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges });
+        rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges, relationship_label: relationshipLabel(p.id) });
     };
     // Family
     pushRow(state.house.head.id, "head");
