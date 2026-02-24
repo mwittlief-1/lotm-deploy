@@ -35,6 +35,85 @@ function fmtMult(mult: number): string {
   return `×${m.toFixed(2)}`;
 }
 
+function buildHouseIndexes(houses: any): {
+  houseLabelById: Map<string, string>;
+  personHouseById: Map<string, string>;
+} {
+  const houseLabelById = new Map<string, string>();
+  const personHouseById = new Map<string, string>();
+
+  if (!houses || typeof houses !== "object") return { houseLabelById, personHouseById };
+
+  // Stable iteration order.
+  const entries = Object.entries(houses as Record<string, any>).sort(([a], [b]) => a.localeCompare(b));
+  for (const [hid, h] of entries) {
+    if (!h || typeof h !== "object") continue;
+    const name = typeof h.house_name === "string" && h.house_name.trim().length > 0 ? h.house_name.trim() : hid;
+    houseLabelById.set(hid, `House ${name}`);
+
+    // Prefer head/spouse mapping over child mapping.
+    const head = typeof h.head_id === "string" ? h.head_id : null;
+    const spouse = typeof h.spouse_id === "string" ? h.spouse_id : null;
+    if (head && !personHouseById.has(head)) personHouseById.set(head, hid);
+    if (spouse && !personHouseById.has(spouse)) personHouseById.set(spouse, hid);
+
+    const childIds: any[] = Array.isArray(h.child_ids) ? h.child_ids : [];
+    const children = childIds.filter((x) => typeof x === "string" && x.length > 0).sort((a, b) => a.localeCompare(b));
+    for (const cid of children) {
+      if (!personHouseById.has(cid)) personHouseById.set(cid, hid);
+    }
+  }
+
+  return { houseLabelById, personHouseById };
+}
+
+function buildParentsIndex(kinshipEdges: any): Map<string, string[]> {
+  const parentsByChild = new Map<string, string[]>();
+  const edges: any[] = Array.isArray(kinshipEdges) ? kinshipEdges : [];
+  for (const e of edges) {
+    if (!e || typeof e !== "object") continue;
+    if (e.kind !== "parent_of") continue;
+    const parentId = typeof e.parent_id === "string" ? e.parent_id : null;
+    const childId = typeof e.child_id === "string" ? e.child_id : null;
+    if (!parentId || !childId) continue;
+    const arr = parentsByChild.get(childId) ?? [];
+    if (!arr.includes(parentId)) arr.push(parentId);
+    parentsByChild.set(childId, arr);
+  }
+  // Stable ordering of parent lists.
+  for (const [cid, arr] of parentsByChild.entries()) {
+    parentsByChild.set(cid, [...arr].sort((a, b) => a.localeCompare(b)));
+  }
+  return parentsByChild;
+}
+
+function formatPersonWithAgeAndHouse(
+  personId: string,
+  people: any,
+  houseLabelById: Map<string, string>,
+  personHouseById: Map<string, string>
+): string {
+  const p = people && typeof people === "object" ? (people as any)[personId] : null;
+  const name = typeof p?.name === "string" && p.name.trim().length > 0 ? p.name.trim() : personId;
+  const age = typeof p?.age === "number" && Number.isFinite(p.age) ? Math.trunc(p.age) : null;
+  const hid = personHouseById.get(personId) ?? null;
+  const hLabel = hid ? houseLabelById.get(hid) ?? hid : null;
+  return `${name}${age !== null ? ` (Age ${age})` : ""}${hLabel ? ` — ${hLabel}` : ""}`;
+}
+
+function formatParentsLine(
+  personId: string,
+  parentsByChild: Map<string, string[]>,
+  people: any,
+  houseLabelById: Map<string, string>,
+  personHouseById: Map<string, string>
+): string | null {
+  const pids = parentsByChild.get(personId);
+  if (!pids || pids.length === 0) return null;
+  const parts = pids.map((pid) => formatPersonWithAgeAndHouse(pid, people, houseLabelById, personHouseById));
+  return parts.join(" · ");
+}
+
 
 function Tip({ text }: { text: string }) {
   return (
@@ -511,6 +590,7 @@ export default function App() {
   const [decisions, setDecisions] = useState<DecisionsState>(defaultDecisions);
   const [showHouseholdDetails, setShowHouseholdDetails] = useState<boolean>(false);
   const [showAllKnownHouses, setShowAllKnownHouses] = useState<boolean>(false);
+  const [allPeopleFilter, setAllPeopleFilter] = useState<string>("");
 
   const [toast, setToast] = useState<{ kind: "ok" | "error"; message: string } | null>(null);
   const autoObDefaultsKeyRef = React.useRef<string>("");
@@ -724,6 +804,113 @@ export default function App() {
             2
           )}
         </pre>
+
+        <details style={{ marginTop: 16 }}>
+          <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+            All People Registry (debug)
+            {(() => {
+              const ppl: any = (state as any)?.people;
+              const n = ppl && typeof ppl === "object" ? Object.keys(ppl).length : 0;
+              return ` — ${n} people`;
+            })()}
+          </summary>
+
+          <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <label style={{ fontSize: 12, opacity: 0.85 }}>Filter:</label>
+            <input
+              value={allPeopleFilter}
+              onChange={(e) => setAllPeopleFilter(e.target.value)}
+              placeholder="id or name"
+              style={{ padding: 6, minWidth: 220 }}
+            />
+            <div style={{ fontSize: 12, opacity: 0.75 }}>Tip: expand a person to see raw JSON.</div>
+          </div>
+
+          {(() => {
+            const sAny: any = state as any;
+            const peopleRec: any = sAny?.people && typeof sAny.people === "object" ? sAny.people : {};
+            const housesRec: any = sAny?.houses && typeof sAny.houses === "object" ? sAny.houses : {};
+            const kinEdges: any[] = Array.isArray(sAny?.kinship_edges) ? sAny.kinship_edges : Array.isArray(sAny?.kinship) ? sAny.kinship : [];
+            const parentsByChild = buildParentsIndex(kinEdges);
+            const { houseLabelById, personHouseById } = buildHouseIndexes(housesRec);
+
+            const filter = String(allPeopleFilter ?? "").trim().toLowerCase();
+            const ids = Object.keys(peopleRec).sort((a, b) => a.localeCompare(b));
+            const filtered = filter
+              ? ids.filter((pid) => {
+                  const nm = typeof peopleRec?.[pid]?.name === "string" ? String(peopleRec[pid].name) : "";
+                  return pid.toLowerCase().includes(filter) || nm.toLowerCase().includes(filter);
+                })
+              : ids;
+
+            const LIMIT = 250;
+            const show = filtered.slice(0, LIMIT);
+
+            const playerHeadId: string | null = typeof sAny?.house?.head?.id === "string" ? String(sAny.house.head.id) : null;
+
+            function relToPlayer(pid: string): string | null {
+              if (!playerHeadId) return null;
+              const rels: any[] = Array.isArray(sAny?.relationships) ? sAny.relationships : [];
+              const e = rels.find((x) => x && x.from_id === pid && x.to_id === playerHeadId);
+              if (!e) return null;
+              const a = typeof e.allegiance === "number" ? Math.trunc(e.allegiance) : null;
+              const r = typeof e.respect === "number" ? Math.trunc(e.respect) : null;
+              const t = typeof e.threat === "number" ? Math.trunc(e.threat) : null;
+              if (a === null && r === null && t === null) return null;
+              return `A ${a ?? "?"} · R ${r ?? "?"} · T ${t ?? "?"}`;
+            }
+
+            return (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
+                  Showing {show.length} of {filtered.length} matches.
+                  {filtered.length > LIMIT ? ` (limit ${LIMIT})` : ""}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {show.map((pid) => {
+                    const p: any = peopleRec?.[pid] && typeof peopleRec[pid] === "object" ? peopleRec[pid] : { id: pid };
+                    const name = typeof p.name === "string" && p.name.trim().length > 0 ? p.name.trim() : pid;
+                    const age = typeof p.age === "number" && Number.isFinite(p.age) ? Math.trunc(p.age) : null;
+                    const sex = typeof p.sex === "string" ? p.sex : null;
+                    const alive = typeof p.alive === "boolean" ? p.alive : null;
+                    const married = typeof p.married === "boolean" ? p.married : null;
+                    const hid = personHouseById.get(pid) ?? null;
+                    const hLabel = hid ? houseLabelById.get(hid) ?? hid : null;
+                    const parentsLine = formatParentsLine(pid, parentsByChild, peopleRec, houseLabelById, personHouseById);
+                    const relLine = relToPlayer(pid);
+
+                    return (
+                      <details key={pid} style={{ border: "1px solid #2a2a2a", padding: 10, borderRadius: 8 }}>
+                        <summary style={{ cursor: "pointer" }}>
+                          <span style={{ fontWeight: 650 }}>{name}</span>
+                          <span style={{ opacity: 0.8 }}>
+                            {age !== null ? ` — Age ${age}` : ""}
+                            {sex ? ` — ${sex}` : ""}
+                            {alive === false ? " — deceased" : ""}
+                            {married === true ? " — married" : ""}
+                            {hLabel ? ` — ${hLabel}` : ""}
+                          </span>
+                        </summary>
+
+                        {parentsLine ? (
+                          <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>Parents: {parentsLine}</div>
+                        ) : null}
+                        {relLine ? (
+                          <div style={{ fontSize: 12, opacity: 0.85, marginTop: parentsLine ? 2 : 6 }}>To player head: {relLine}</div>
+                        ) : null}
+
+                        <pre style={{ marginTop: 8, background: "#111", color: "#eee", padding: 10, overflow: "auto" }}>
+                          {JSON.stringify(p, null, 2)}
+                        </pre>
+                      </details>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+        </details>
       </div>
       );
     }
@@ -741,6 +928,17 @@ export default function App() {
       const m = ctx.preview_state.manor;
       const ob = ctx.preview_state.manor.obligations;
       const mw = ctx.marriage_window;
+
+      // People-First debug indices (used for parent/house display in UI cards).
+      const pfStateAny: any = ctx.preview_state as any;
+      const pfPeopleRec: any = pfStateAny?.people && typeof pfStateAny.people === "object" ? pfStateAny.people : {};
+      const pfKinEdges: any[] = Array.isArray(pfStateAny?.kinship_edges)
+        ? pfStateAny.kinship_edges
+        : Array.isArray(pfStateAny?.kinship)
+          ? pfStateAny.kinship
+          : [];
+      const pfParentsByChild = buildParentsIndex(pfKinEdges);
+      const pfHouseIx = buildHouseIndexes(pfStateAny?.houses);
 
       // v0.2.8 UI (presentation-only): Eligible Maidens (Local) read-only list.
       // Snapshot field must be provided by sim; if absent, UI renders "(Not available in this build)".
@@ -1395,14 +1593,59 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
       const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
 
             // v0.2.8 UI (presentation-only):
-            // Court roster + derived role labels are expected to be provided by the snapshot (no UI derivation).
-            type CourtRosterEntry = { person: PersonLike; role_label: string | null; officer_role_label: string | null; badges: string[] };
+            // Court roster rows come from sim, but we derive missing presentation fields (labels + parents) as a debug affordance.
+            type CourtRosterEntry = {
+              person: PersonLike;
+              role_label: string | null;
+              officer_role_label: string | null;
+              badges: string[];
+              parents_line: string | null;
+            };
       
             function readCourtRosterFromSnapshot(): { entries: CourtRosterEntry[]; court_size: number | null } {
               const entries: CourtRosterEntry[] = [];
       
               const s: any = ctx.preview_state as any;
               const peopleRec: any = s?.people && typeof s.people === "object" ? s.people : {};
+
+              const kinEdges: any[] = Array.isArray(s?.kinship_edges) ? s.kinship_edges : Array.isArray(s?.kinship) ? s.kinship : [];
+              const parentsByChild = buildParentsIndex(kinEdges);
+              const { houseLabelById, personHouseById } = buildHouseIndexes(s?.houses);
+
+              const householdRosterView: any = (ctx.report as any)?.household_roster_view ?? null;
+              const householdRoleByPersonId = new Map<string, { role_label: string | null; badges: string[] }>();
+              {
+                const rows: any[] =
+                  (householdRosterView && Array.isArray(householdRosterView.rows) && householdRosterView.rows) ||
+                  (householdRosterView && Array.isArray(householdRosterView.entries) && householdRosterView.entries) ||
+                  [];
+                for (const rr of rows) {
+                  const pid = typeof rr?.person_id === "string" ? rr.person_id : typeof rr?.id === "string" ? rr.id : "";
+                  if (!pid) continue;
+                  const rl = typeof rr?.role_label === "string" ? rr.role_label : null;
+                  const badges: string[] = Array.isArray(rr?.badges) ? rr.badges.filter((b: any) => typeof b === "string") : [];
+                  householdRoleByPersonId.set(pid, { role_label: rl, badges });
+                }
+              }
+
+              const officerRoleLabel = (r: string | null): string | null => {
+                if (!r) return null;
+                if (r === "steward") return "Steward";
+                if (r === "clerk") return "Clerk";
+                if (r === "marshal") return "Marshal";
+                return r;
+              };
+
+              const genericRoleLabel = (r: string | null): string | null => {
+                if (!r) return null;
+                if (r === "head") return "Head of House";
+                if (r === "spouse") return "Spouse";
+                if (r === "child") return "Child";
+                if (r === "courtier") return "Courtier";
+                if (r === "resident") return "Resident";
+                if (r === "officer") return "Officer";
+                return r;
+              };
       
               const courtSizeRaw: any =
                 (ctx.report as any)?.court_headcount ??
@@ -1440,6 +1683,9 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
       
                 const p = peopleRec?.[person_id];
                 const person: PersonLike = p && typeof p === "object" ? (p as PersonLike) : ({ id: person_id, name: person_id } as any);
+
+                const roleRaw: string | null = typeof (r as any).role === "string" ? (r as any).role : null;
+                const officerRoleRaw: string | null = typeof (r as any).officer_role === "string" ? (r as any).officer_role : null;
       
                 const role_label: string | null =
                   typeof (r as any).role_label === "string"
@@ -1448,18 +1694,22 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                       ? (r as any).derived_role_label
                       : typeof (r as any).relationship_label === "string"
                         ? (r as any).relationship_label
-                        : null;
+                        : householdRoleByPersonId.get(person_id)?.role_label ?? genericRoleLabel(roleRaw);
       
                 const officer_role_label: string | null =
                   typeof (r as any).officer_role_label === "string"
                     ? (r as any).officer_role_label
                     : typeof (r as any).officerRoleLabel === "string"
                       ? (r as any).officerRoleLabel
-                      : null;
+                      : officerRoleLabel(officerRoleRaw);
       
-                const badges: string[] = Array.isArray((r as any).badges) ? (r as any).badges.filter((b: any) => typeof b === "string") : [];
+                const badgesRaw: string[] = Array.isArray((r as any).badges) ? (r as any).badges.filter((b: any) => typeof b === "string") : [];
+                const hhBadges = householdRoleByPersonId.get(person_id)?.badges ?? [];
+                const badges = [...new Set([...badgesRaw, ...hhBadges])].sort((a, b) => a.localeCompare(b));
+
+                const parents_line = formatParentsLine(person_id, parentsByChild, peopleRec, houseLabelById, personHouseById);
       
-                entries.push({ person, role_label, officer_role_label, badges });
+                entries.push({ person, role_label, officer_role_label, badges, parents_line });
               }
       
               return { entries, court_size };
@@ -1716,9 +1966,10 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
           ...whyForMetric("unrest")
         });
 
-        // Relationship movers (bounded): incoming edges to player head.
+        // Relationship movers (bounded): incoming edges to player head OR player house.
         const playerHeadId: string | null =
           typeof ctx.preview_state?.house?.head?.id === "string" ? ctx.preview_state.house.head.id : typeof state.house?.head?.id === "string" ? state.house.head.id : null;
+        const playerHouseId: string | null = typeof (ctx.preview_state as any)?.player_house_id === "string" ? String((ctx.preview_state as any).player_house_id) : null;
 
         const beforeArr: any[] = Array.isArray((state as any).relationships) ? ((state as any).relationships as any[]) : [];
         const afterArr: any[] = Array.isArray((ctx.preview_state as any).relationships) ? ((ctx.preview_state as any).relationships as any[]) : [];
@@ -1740,6 +1991,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
 
         // Map head_id -> house label ("House {name}") for stable target display.
         const headIdToHouseLabel = new Map<string, string>();
+        const houseIdToHouseLabel = new Map<string, string>();
         {
           const houses: any = (ctx.preview_state as any)?.houses;
           if (houses && typeof houses === "object") {
@@ -1748,6 +2000,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
               if (!h || typeof h !== "object") continue;
               const head_id = typeof h.head_id === "string" ? h.head_id : null;
               const house_name = typeof h.house_name === "string" ? h.house_name : typeof h.name === "string" ? h.name : null;
+              if (house_name) houseIdToHouseLabel.set(hid, COPY.housePrefix(house_name));
               if (head_id && house_name) headIdToHouseLabel.set(head_id, COPY.housePrefix(house_name));
             }
           }
@@ -1756,16 +2009,21 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
         type RelMove = { from_id: string; to_id: string; dA: number; dR: number; dT: number; score: number };
         const moves: RelMove[] = [];
 
-        if (playerHeadId) {
+        {
           const keys = new Set<string>();
           for (const k of beforeMap.keys()) keys.add(k);
           for (const k of afterMap.keys()) keys.add(k);
 
+          const targets = new Set<string>();
+          if (playerHeadId) targets.add(playerHeadId);
+          if (playerHouseId) targets.add(playerHouseId);
+
           for (const k of keys) {
             const [from_id, to_id] = k.split("|");
             if (!from_id || !to_id) continue;
-            if (to_id !== playerHeadId) continue;
-            if (from_id === playerHeadId) continue;
+            if (!targets.has(to_id)) continue;
+            if (playerHeadId && from_id === playerHeadId) continue;
+            if (playerHouseId && from_id === playerHouseId) continue;
 
             const b: any = beforeMap.get(k);
             const a: any = afterMap.get(k);
@@ -1807,6 +2065,8 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
             const nm = personNameFromRegistry(from_id) ?? (ctx.preview_state.locals?.clergy?.name ? String(ctx.preview_state.locals.clergy.name) : from_id);
             return `${nm} (Clergy)`;
           }
+          const houseById = houseIdToHouseLabel.get(from_id);
+          if (houseById) return houseById;
           const house = headIdToHouseLabel.get(from_id);
           if (house) return house;
           if (nobleIds.has(from_id)) {
@@ -2282,6 +2542,12 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                               </div>
                             ) : null}
 
+                            {r.parents_line ? (
+                              <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
+                                Parents: {r.parents_line}
+                              </div>
+                            ) : null}
+
                             {r.role_label || r.officer_role_label ? (
                               <div style={{ fontSize: 12, opacity: 0.75, marginTop: spouseName ? 2 : 0 }}>
                                 {r.role_label ? r.role_label : null}
@@ -2630,8 +2896,13 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                         const fromHouse = houseLabel(fromHouseId);
                         const partiesLine = fromHouse ? COPY.prospectFromToLine(fromHouse) : null;
 
+                        const subjectId: string | null = typeof p?.subject_person_id === "string" ? (p.subject_person_id as string) : null;
+                        const subjectParentsLine: string | null = subjectId
+                          ? formatParentsLine(subjectId, pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)
+                          : null;
+
                         const subject =
-                          personNameFromRegistry(typeof p?.subject_person_id === "string" ? p.subject_person_id : null) ??
+                          personNameFromRegistry(subjectId) ??
                           (typeof p?.subject_person_name === "string" ? p.subject_person_name : null) ??
                           null;
 
@@ -2679,6 +2950,10 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                               </div>
                             ) : null}
 
+                            {t === "marriage" && subjectParentsLine ? (
+                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Parents: {subjectParentsLine}</div>
+                            ) : null}
+
                             {/* v0.2.7.2 UI: marriage cards should show offered spouse identity (name + age) */}
                             {t === "marriage" ? (
                               (() => {
@@ -2718,11 +2993,20 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                                   return spouseName;
                                 })();
 
+                                const spouseParentsLine: string | null = spouseId
+                                  ? formatParentsLine(spouseId, pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)
+                                  : null;
+
                                 return spouseText ? (
-                                  <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
-                                    {label}: {spouseText}
-                                    {fromHouse ? ` — House ${fromHouse}` : ""}
-                                  </div>
+                                  <>
+                                    <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
+                                      {label}: {spouseText}
+                                      {fromHouse ? ` — House ${fromHouse}` : ""}
+                                    </div>
+                                    {spouseParentsLine ? (
+                                      <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Parents: {spouseParentsLine}</div>
+                                    ) : null}
+                                  </>
                                 ) : null;
                               })()
                             ) : null}
@@ -3210,7 +3494,21 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
               {mw && prospectsTotalCount === 0 ? (
                 <div style={{ marginTop: 10 }}>
                   <h4>Marriage Window</h4>
-                  <div style={{ opacity: 0.85 }}>Eligible children: {mw.eligible_child_ids.join(", ")}</div>
+                  <div style={{ opacity: 0.85 }}>
+                    Eligible children: {mw.eligible_child_ids.join(", ")}
+                    {mw.eligible_child_ids && mw.eligible_child_ids.length > 0 ? (
+                      <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>
+                        <div>
+                          Subject: {formatPersonWithAgeAndHouse(mw.eligible_child_ids[0], pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)}
+                        </div>
+                        {formatParentsLine(mw.eligible_child_ids[0], pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById) ? (
+                          <div style={{ opacity: 0.8, marginTop: 2 }}>
+                            Parents: {formatParentsLine(mw.eligible_child_ids[0], pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
 
                   <div style={{ marginTop: 10, padding: 8, border: "1px solid #eee" }}>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>Eligible Maidens (Local)</div>
@@ -3269,6 +3567,14 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                     <div key={idx} style={{ padding: 8, border: "1px solid #ddd", marginTop: 6 }}>
                       <b>{o.house_label}</b> — Dowry {o.dowry_coin_net >= 0 ? "+" : ""}
                       {o.dowry_coin_net} coin — tags: {o.risk_tags.join(", ")}
+                      <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>
+                        Candidate: {formatPersonWithAgeAndHouse(o.house_person_id, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)}
+                      </div>
+                      {formatParentsLine(o.house_person_id, pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById) ? (
+                        <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
+                          Parents: {formatParentsLine(o.house_person_id, pfParentsByChild, pfPeopleRec, pfHouseIx.houseLabelById, pfHouseIx.personHouseById)}
+                        </div>
+                      ) : null}
                       <div style={{ marginTop: 6 }}>
                         <button
                           disabled={o.dowry_coin_net < 0 && m.coin < Math.abs(o.dowry_coin_net)}

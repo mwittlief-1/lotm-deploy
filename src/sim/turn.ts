@@ -941,19 +941,21 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
       const offer = marriageWindow.offers[bestIdx]!;
       const spouseHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id) ?? sponsorHouseId;
       const relDeltas: any[] = [];
+      // Primary: house ↔ house relationship delta.
       relDeltas.push({
-        scope: "person",
-        from_id: state.house.head.id,
-        to_id: offer.house_person_id,
+        scope: "house",
+        from_id: spouseHouseId,
+        to_id: playerHouseId,
         allegiance_delta: offer.relationship_delta.allegiance,
         respect_delta: offer.relationship_delta.respect,
         threat_delta: offer.relationship_delta.threat
       });
+      // Liege reaction uses existing direction (liege -> head).
       if (offer.liege_delta) {
         relDeltas.push({
           scope: "person",
-          from_id: state.house.head.id,
-          to_id: state.locals.liege.id,
+          from_id: state.locals.liege.id,
+          to_id: state.house.head.id,
           allegiance_delta: 0,
           respect_delta: offer.liege_delta.respect,
           threat_delta: offer.liege_delta.threat
@@ -1973,10 +1975,17 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
       addCourtExcludeId(state, child.id);
     }
 
-    // Relationship deltas (to offering house + sometimes liege)
-    adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);
+    // Relationship deltas
+    // - Primary: house ↔ house (the player's House relationship to the offering House).
+    //   This is what we surface in the ledger as A/R/T shifts from the other House.
+    // - Secondary: liege reaction uses existing direction (liege -> head).
+    const playerHouseId: string = String((state as any).player_house_id ?? "h_player");
+    const otherHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id);
+    if (otherHouseId) {
+      adjustEdge(state, otherHouseId, playerHouseId, offer.relationship_delta);
+    }
     if (offer.liege_delta) {
-      adjustEdge(state, state.house.head.id, state.locals.liege.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
+      adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
     }
 
     // Set flag increasing birth chance slightly

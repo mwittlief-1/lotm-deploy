@@ -204,35 +204,48 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
     };
   }
 
-  // Kinship edges: preserve non-player edges; replace only edges involving the player household IDs.
+  // Kinship edges: upsert only (never rewrite).
+  // IMPORTANT: legacy `state.house.children` is a lineage/court membership view, NOT a biological parentage truth.
+  // Rewriting parent_of facts from that view causes re-parenting bugs after succession.
   const prior: KinshipEdge[] = Array.isArray(s.kinship_edges)
     ? (s.kinship_edges as KinshipEdge[])
     : Array.isArray(s.kinship)
       ? (s.kinship as KinshipEdge[])
       : [];
 
-  const playerIds = new Set<string>([headId ?? "", spouseId ?? "", ...childIds].filter(Boolean));
-
-  // v0.2.7.1 HOTFIX: preserve spouse_of edges for player children (do not wipe child marriages during People-First sync).
-  // Only overwrite the HoH<->Spouse edge + parent edges for the player household.
-  const kept = prior.filter((e) => {
-    if (!kinInvolvesAny(e, playerIds)) return true;
-    if (e.kind !== "spouse_of") return false;
-    // Always overwrite the current HoH<->Spouse edge from household state.
-    if (headId && spouseId) {
-      if ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId)) return false;
-    }
-    // Preserve child spouse edges (child <-> spouse).
-    return Boolean(childIds.includes((e as any).a_id) || childIds.includes((e as any).b_id));
-  });
-
   const desired: KinshipEdge[] = [];
-  if (headId && spouseId) desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });
-  if (headId) for (const cid of childIds) desired.push({ kind: "parent_of", parent_id: headId, child_id: cid });
-  if (spouseId) for (const cid of childIds) desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
+
+  // Ensure the current HoH<->Spouse marriage edge exists (but never duplicates).
+  if (headId && spouseId) {
+    const hasSpouse = prior.some((e) =>
+      e.kind === "spouse_of" &&
+      ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId))
+    );
+    if (!hasSpouse) desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });
+  }
+
+  // Add parent edges ONLY when a child has no recorded parents yet (typically new births).
+  // This avoids re-parenting existing lineage members when the head changes.
+  const hasAnyParent = (childId: string): boolean =>
+    prior.some((e) => e.kind === "parent_of" && String((e as any).child_id) === childId);
+
+  if (headId) {
+    for (const cid of childIds) {
+      if (!cid) continue;
+      if (hasAnyParent(cid)) continue;
+      desired.push({ kind: "parent_of", parent_id: headId, child_id: cid });
+    }
+  }
+  if (spouseId) {
+    for (const cid of childIds) {
+      if (!cid) continue;
+      if (hasAnyParent(cid)) continue;
+      desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
+    }
+  }
 
   const mergedByKey = new Map<string, KinshipEdge>();
-  for (const e of [...kept, ...desired]) mergedByKey.set(kinKey(e), e);
+  for (const e of [...prior, ...desired]) mergedByKey.set(kinKey(e), e);
   const merged = [...mergedByKey.values()].sort((a, b) => kinKey(a).localeCompare(kinKey(b)));
 
   // Stable enumeration for serialization: re-materialize registries in sorted key order.

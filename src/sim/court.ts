@@ -1,4 +1,4 @@
-import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState } from "./types";
+import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState, ServiceRecord } from "./types";
 import { Rng } from "./rng";
 
 // v0.2.4 Court + Household integration.
@@ -139,6 +139,55 @@ export function ensureCourtOfficers(state: RunState): void {
     ensureRole("marshal", false);
   }
 
+  // v0.2.8.1 HOTFIX: ensure we have minimal ServiceRecords for court officer roles.
+  // This is a People-First invariant and unblocks downstream obligations/debug UI.
+  syncCourtOfficerServiceRecords(state, playerHouseId, houseRec.court_officers as Record<CourtOfficerRole, string>);
+
+}
+
+function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, roles: Record<CourtOfficerRole, string>): void {
+  const anyState: any = state as any;
+  const prior: ServiceRecord[] = Array.isArray(anyState.service_records) ? (anyState.service_records as ServiceRecord[]) : [];
+
+  const byId = new Map<string, ServiceRecord>();
+  for (const r of prior) {
+    if (!r || typeof r !== "object") continue;
+    const id = (r as any).id;
+    if (typeof id !== "string" || !id) continue;
+    byId.set(id, r);
+  }
+
+  const actor = { kind: "house", id: playerHouseId } as const;
+  const nowT = typeof (state as any).turn_index === "number" ? (state as any).turn_index : 0;
+
+  const roleKeys = (Object.keys(roles) as CourtOfficerRole[]).sort((a, b) => String(a).localeCompare(String(b)));
+  for (const role of roleKeys) {
+    const personId = roles[role];
+    if (typeof personId !== "string" || !personId) continue;
+
+    const id = `sr_${playerHouseId}_${role}`;
+    const existing = byId.get(id);
+    if (existing) {
+      if (existing.person_id !== personId) {
+        existing.person_id = personId;
+        existing.start_turn_index = nowT;
+      }
+      existing.serving_actor_id = actor as any;
+      existing.role = role;
+      existing.end_turn_index = null;
+    } else {
+      byId.set(id, {
+        id,
+        person_id: personId,
+        serving_actor_id: actor as any,
+        role,
+        start_turn_index: nowT,
+        end_turn_index: null,
+      });
+    }
+  }
+
+  anyState.service_records = [...byId.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 }
 
 export function getCourtOfficerIds(state: RunState): Array<{ role: CourtOfficerRole; person_id: string }> {

@@ -8,6 +8,10 @@ import { adjustEdge } from "./relationships.js";
 import { ensurePeopleFirst } from "./peopleFirst.js";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen.js";
 import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, removeCourtExcludeId } from "./court.js";
+import { computeTierSets } from "./tiers.js";
+import { deriveHouseholdRoster } from "./householdView.js";
+import { processNobleFertility } from "./demography.js";
+import { listEligibleCandidates, reserveCandidate, clearReservation, gcExpiredReservations } from "./marriageMarket.js";
 function modsObj(state) {
     const anyFlags = state.flags;
     if (!anyFlags._mods || typeof anyFlags._mods !== "object")
@@ -169,6 +173,8 @@ function boundedSnapshot(state) {
         houses: state.houses,
         player_house_id: state.player_house_id,
         kinship_edges: state.kinship_edges ?? state.kinship,
+        institutions: state.institutions,
+        service_records: state.service_records,
         flags: state.flags,
         game_over: state.game_over ?? null
     });
@@ -500,15 +506,14 @@ function householdPhase(state, houseLog) {
     }
     return { births, deaths, population_delta: popDelta };
 }
-function buildMarriageWindow(state) {
+function buildMarriageWindow(state, tierSets) {
     // Trigger when any child >=15 and unmarried OR an offer flag exists.
     const anyFlags = state.flags;
     const forced = Boolean(anyFlags.MarriageOffer);
     const eligibleAll = state.house.children.filter((c) => c.alive && !c.married && c.age >= 15);
     if (!forced && eligibleAll.length === 0)
         return null;
-    // v0.2.5: pick a single subject child (eldest eligible). This keeps the offer list coherent and
-    // allows same-sex marriage to be disabled without changing the window schema.
+    // v0.2.5: pick a single subject child (eldest eligible).
     if (eligibleAll.length === 0)
         return { eligible_child_ids: [], offers: [] };
     const subject = [...eligibleAll].sort((a, b) => {
@@ -516,87 +521,50 @@ function buildMarriageWindow(state) {
             return b.age - a.age; // older first
         return a.id.localeCompare(b.id);
     })[0];
-    const desiredSpouseSex = subject.sex === "M" ? "F" : "M";
-    // v0.2.7.2 P0: spouse candidates must come from People-First registries (external Houses),
-    // not legacy locals.nobles.
     const anyState = state;
-    const people = anyState.people && typeof anyState.people === "object" ? anyState.people : {};
     const houses = anyState.houses && typeof anyState.houses === "object" ? anyState.houses : {};
     const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-    const candidates = [];
-    const seen = new Set();
-    const allHouseIds = Object.keys(houses)
-        .filter((hid) => hid !== playerHouseId)
-        .sort((a, b) => a.localeCompare(b));
-    // Prefer "local noble" Houses if present (h_noble_XX). This keeps marriage offer behavior stable
-    // while sourcing strictly from People-First registries.
-    const nobleHouseIds = allHouseIds.filter((hid) => hid.startsWith("h_noble_"));
-    const houseIds = nobleHouseIds.length > 0 ? nobleHouseIds : allHouseIds;
-    for (const hid of houseIds) {
-        const h = houses[hid];
-        if (!h || typeof h !== "object")
-            continue;
-        const houseName = typeof h.name === "string" && h.name ? String(h.name) : String(hid);
-        const ids = [];
-        const headId = typeof h.head_id === "string" ? String(h.head_id) : "";
-        if (headId)
-            ids.push(headId);
-        const spouseId = typeof h.spouse_id === "string" ? String(h.spouse_id) : "";
-        if (spouseId)
-            ids.push(spouseId);
-        const childIds = h.child_ids;
-        if (Array.isArray(childIds)) {
-            for (const cid of childIds)
-                if (typeof cid === "string" && cid)
-                    ids.push(cid);
-        }
-        for (const pid of ids) {
-            if (!pid || seen.has(pid))
-                continue;
-            seen.add(pid);
-            const person = people[pid];
-            if (!person || typeof person !== "object")
-                continue;
-            if (person.alive !== true)
-                continue;
-            if (person.sex !== desiredSpouseSex)
-                continue;
-            // Keep offers coherent: avoid already-married candidates when that info exists.
-            if (person.married === true)
-                continue;
-            candidates.push({ person_id: pid, house_id: hid, house_name: houseName });
-        }
-    }
-    // Stable order before RNG picks.
-    const pool = candidates.sort((a, b) => {
-        const h = a.house_id.localeCompare(b.house_id);
-        if (h !== 0)
-            return h;
-        return a.person_id.localeCompare(b.person_id);
+    // v0.2.8: spouse candidates must come from the Tier1 eligible pool (People-First registries).
+    const tier1HouseIds = tierSets
+        ? [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseId).sort((a, b) => a.localeCompare(b))
+        : Object.keys(houses).filter((hid) => hid !== playerHouseId).sort((a, b) => a.localeCompare(b));
+    const poolIds = listEligibleCandidates(state, {
+        subject_person_id: subject.id,
+        scope: { kind: "house_ids", house_ids: tier1HouseIds },
     });
-    // If no opposite-sex candidates exist, do not generate a same-sex marriage window.
-    if (pool.length === 0) {
+    // If no candidates exist, do not generate a same-sex marriage window.
+    if (poolIds.length === 0) {
         if (forced)
             return { eligible_child_ids: [subject.id], offers: [] };
         return null;
     }
+    // Stable order before RNG picks; select WITHOUT replacement.
+    const pool = poolIds.slice();
     const rng = new Rng(state.run_seed, "marriage", state.turn_index, "offers");
     const offers = [];
     const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
-    for (let i = 0; i < offerCount; i++) {
-        const cand = rng.pick(pool);
+    for (let i = 0; i < offerCount && pool.length > 0; i++) {
+        const idx = rng.int(0, Math.max(0, pool.length - 1));
+        const pid = pool.splice(idx, 1)[0];
+        const hid = houseIdForPerson_v0_2_7_2(state, pid) ?? "";
+        const h = hid ? houses[hid] : null;
+        const houseName = typeof h?.name === "string" && h.name ? String(h.name) : hid ? String(hid) : "Unknown";
         const quality = rng.next(); // 0..1
         const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
         offers.push({
-            house_person_id: cand.person_id,
-            house_label: `House ${cand.house_name}`,
+            house_person_id: pid,
+            house_label: `House ${houseName}`,
             dowry_coin_net: dowry,
-            relationship_delta: { respect: Math.trunc(2 + quality * 6), allegiance: Math.trunc(1 + quality * 4), threat: Math.trunc(-1 - quality * 2) },
+            relationship_delta: {
+                respect: Math.trunc(2 + quality * 6),
+                allegiance: Math.trunc(1 + quality * 4),
+                threat: Math.trunc(-1 - quality * 2),
+            },
             liege_delta: rng.bool(0.35) ? { respect: 1, threat: -1 } : null,
             risk_tags: [
                 quality > 0.75 ? "prestige" : quality < 0.25 ? "shady" : "plain",
-                dowry < 0 ? "costly" : "profitable"
-            ]
+                dowry < 0 ? "costly" : "profitable",
+            ],
         });
     }
     return { eligible_child_ids: [subject.id], offers };
@@ -645,6 +613,22 @@ function writeActiveProspects(state, refs) {
         return;
     }
     anyFlags._prospects_active_v1 = bounded;
+}
+// v0.2.8 P0: clear marriage reservations tied to a prospect id (deterministic, bounded).
+function clearMarriageReservationsByProspectId(state, prospectId) {
+    const anyFlags = state.flags;
+    const raw = anyFlags?.marriage_reservations;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw))
+        return;
+    const pid = String(prospectId ?? "");
+    if (!pid)
+        return;
+    for (const k of Object.keys(raw).sort((a, b) => a.localeCompare(b))) {
+        const e = raw[k];
+        if (e && typeof e === "object" && String(e.prospect_id ?? "") === pid) {
+            delete raw[k];
+        }
+    }
 }
 function guessProspectTypeFromId(id) {
     if (id.includes("marriage"))
@@ -734,7 +718,15 @@ function buildProspectsWindow_v0_2_3(state, marriageWindow, prospectsLog) {
     const active = [];
     for (const ref of active0) {
         if (t > ref.expires_turn) {
+            // Clear any marriage reservation tied to this prospect id (if present).
+            clearMarriageReservationsByProspectId(state, ref.id);
             const p = lookupProspectFromHistory(state, ref.id);
+            // Also clear explicit spouse reservation when payload exists (belt + suspenders).
+            if (p && p.type === "marriage") {
+                const spouseId = p.spouse_person_id;
+                if (typeof spouseId === "string" && spouseId.length > 0)
+                    clearReservation(state, spouseId);
+            }
             if (p) {
                 prospectsLog.push({
                     kind: "prospect_expired",
@@ -827,19 +819,21 @@ function buildProspectsWindow_v0_2_3(state, marriageWindow, prospectsLog) {
             const offer = marriageWindow.offers[bestIdx];
             const spouseHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id) ?? sponsorHouseId;
             const relDeltas = [];
+            // Primary: house ↔ house relationship delta.
             relDeltas.push({
-                scope: "person",
-                from_id: state.house.head.id,
-                to_id: offer.house_person_id,
+                scope: "house",
+                from_id: spouseHouseId,
+                to_id: playerHouseId,
                 allegiance_delta: offer.relationship_delta.allegiance,
                 respect_delta: offer.relationship_delta.respect,
                 threat_delta: offer.relationship_delta.threat
             });
+            // Liege reaction uses existing direction (liege -> head).
             if (offer.liege_delta) {
                 relDeltas.push({
                     scope: "person",
-                    from_id: state.house.head.id,
-                    to_id: state.locals.liege.id,
+                    from_id: state.locals.liege.id,
+                    to_id: state.house.head.id,
                     allegiance_delta: 0,
                     respect_delta: offer.liege_delta.respect,
                     threat_delta: offer.liege_delta.threat
@@ -864,6 +858,8 @@ function buildProspectsWindow_v0_2_3(state, marriageWindow, prospectsLog) {
                 expires_turn: t + 2,
                 actions: ["accept", "reject"]
             };
+            // v0.2.8 P0: reserve the spouse candidate until the prospect resolves/expires.
+            reserveCandidate(state, offer.house_person_id, p.id, p.expires_turn);
             addProspect(p);
         }
     }
@@ -1138,6 +1134,13 @@ function applyProspectsDecision(state, ctx, decisions, prospectsLog) {
                 effects_applied: applied
             });
         }
+        // v0.2.8 P0: clear any marriage reservation once the prospect is decided (accept/reject).
+        if (prospect.type === "marriage") {
+            const spouseForReservation = prospect.spouse_person_id;
+            if (typeof spouseForReservation === "string" && spouseForReservation.length > 0) {
+                clearReservation(state, spouseForReservation);
+            }
+        }
         // remove from active list (decided)
         activeList = activeList.filter((r) => r.id !== pid);
         activeSet.delete(pid);
@@ -1294,6 +1297,12 @@ export function proposeTurn(state) {
     ensureExternalHousesSeed_v0_2_2(working);
     // v0.2.4: deterministic court officers (idempotent; stream-isolated).
     ensureCourtOfficers(working);
+    // v0.2.8 P0: GC expired marriage reservations (once per turn) before building any offer windows.
+    gcExpiredReservations(working, working.turn_index);
+    // v0.2.8: compute tier sets once per turn (cached; deterministic).
+    const tierSets = computeTierSets(working);
+    const anyWorking = working;
+    const playerHouseIdPF = typeof anyWorking.player_house_id === "string" ? anyWorking.player_house_id : "h_player";
     const houseLog = [];
     // v0.2.3.2: structured delta trackers (UI support; no mechanics).
     const unrestBefore = working.manor.unrest;
@@ -1348,6 +1357,17 @@ export function proposeTurn(state) {
     }
     // 5) relationship drift
     relationshipDrift(working);
+    // 5.5) noble demography (Tier0/1 only; excludes the player House to avoid double-processing with householdPhase).
+    {
+        const tier0HouseIds = [...tierSets.tier0.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
+        const tier1HouseIds = [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
+        const demogRng = new Rng(working.run_seed, "demography", working.turn_index, "fertility");
+        const demog = processNobleFertility(working, { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds }, { float01: (label) => demogRng.fork(label).next() }, { year: working.turn_index * TURN_YEARS });
+        // Optional (debug-only) counter in flags; does not affect mechanics.
+        if (demog && Array.isArray(demog.births)) {
+            working.flags._demography_births_last_turn = demog.births.length;
+        }
+    }
     // 6) household (births/deaths)
     const hh = householdPhase(working, houseLog);
     // v0.2.3.4: Recompute heir after births/deaths so the report/roster never points at a deceased heir.
@@ -1483,7 +1503,7 @@ export function proposeTurn(state) {
         const status = isBuilt ? "built" : isActive ? "active_project" : "available";
         return { improvement_id, status };
     });
-    const marriageWindow = buildMarriageWindow(working);
+    const marriageWindow = buildMarriageWindow(working, tierSets);
     // Prospects window + engine log (v0.2.3)
     const prospectsLog = [];
     const prospectsWindow = buildProspectsWindow_v0_2_3(working, marriageWindow, prospectsLog);
@@ -1492,9 +1512,40 @@ export function proposeTurn(state) {
     const maxShift = maxLaborDeltaPerTurn(working.manor.population);
     // Ensure registries remain in sync after preview simulation.
     ensurePeopleFirst(working);
+    // v0.2.3.4: embed canonical household roster (schema unchanged).
     const roster = buildHouseholdRoster_v0_2_3_2(working);
-    // v0.2.3.4: embed roster into the Turn Report so history views don't have to reconstruct it (dedupe + death badges).
     report.household_roster = roster;
+    // v0.2.8: derived household roster view (roles relative to current HoH; view-only).
+    const derived = deriveHouseholdRoster(working, playerHouseIdPF);
+    const heirId = working.house.heir_id ?? null;
+    // Widow/widower badge (same rule as household_roster_v1).
+    const spouse = working.house.spouse ?? null;
+    let widowedPersonId = null;
+    if (spouse) {
+        if (working.house.head.alive && !spouse.alive)
+            widowedPersonId = working.house.head.id;
+        else if (!working.house.head.alive && spouse.alive)
+            widowedPersonId = spouse.id;
+    }
+    const peoplePF = working.people && typeof working.people === "object" ? working.people : {};
+    const rosterView = {
+        schema_version: "household_roster_view_v1",
+        turn_index: working.turn_index,
+        rows: derived.map((r) => {
+            const badges = [];
+            const p = peoplePF?.[r.person_id];
+            const alive = p && typeof p === "object" && typeof p.alive === "boolean" ? p.alive : true;
+            const sex = p && typeof p === "object" && (p.sex === "M" || p.sex === "F") ? p.sex : null;
+            if (!alive)
+                badges.push("deceased");
+            if (alive && widowedPersonId === r.person_id && sex)
+                badges.push(sex === "M" ? "widower" : "widow");
+            if (heirId && r.person_id === heirId)
+                badges.push("heir");
+            return { person_id: r.person_id, role: r.role, badges };
+        })
+    };
+    report.household_roster_view = rosterView;
     // v0.2.4: embed court roster + headcount into report for history-safe rendering.
     report.court_roster = court.court_roster;
     report.court_headcount = court.court_headcount;
@@ -1505,6 +1556,7 @@ export function proposeTurn(state) {
         prospects_window: prospectsWindow,
         max_labor_shift: maxShift,
         household_roster: roster,
+        household_roster_view: rosterView,
         court_roster: court.court_roster
     };
 }
@@ -1729,10 +1781,17 @@ function applyMarriageDecision(state, ctx, decisions, reportNotes) {
             // Keep the child in `house.children` for succession, but exclude them from court headcount/consumption.
             addCourtExcludeId(state, child.id);
         }
-        // Relationship deltas (to offering house + sometimes liege)
-        adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);
+        // Relationship deltas
+        // - Primary: house ↔ house (the player's House relationship to the offering House).
+        //   This is what we surface in the ledger as A/R/T shifts from the other House.
+        // - Secondary: liege reaction uses existing direction (liege -> head).
+        const playerHouseId = String(state.player_house_id ?? "h_player");
+        const otherHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id);
+        if (otherHouseId) {
+            adjustEdge(state, otherHouseId, playerHouseId, offer.relationship_delta);
+        }
         if (offer.liege_delta) {
-            adjustEdge(state, state.house.head.id, state.locals.liege.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
+            adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
         }
         // Set flag increasing birth chance slightly
         const mods = modsObj(state);
@@ -1803,7 +1862,7 @@ function spouseIdFromKinship(state, personId) {
         else if (e.b_id === personId && typeof e.a_id === "string")
             matches.add(e.a_id);
     }
-    const sorted = [...matches].sort((a, b) => String(a).localeCompare(String(b)));
+    const sorted = [...matches].sort((a, b) => a.localeCompare(b));
     return sorted[0] ?? null;
 }
 function ensureKinshipSpouseOf(state, aId, bId) {

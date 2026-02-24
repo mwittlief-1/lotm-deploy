@@ -1,6 +1,6 @@
 {
-  "app_version": "v0.2.7.2",
-  "sim_version": "v0.2.7.2",
+  "app_version": "v0.2.8.1",
+  "sim_version": "v0.2.8.1",
   "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
   "build_time_utc": "2026-02-19T18:47:51Z",
   "created_at_utc": "2026-02-19T18:47:51Z",
@@ -9,5 +9,5 @@
     "builder-forward",
     "builder-forward/buffered"
   ],
-  "notes": "v0.2.7.2 hotfix (P0 only): fixes marriage coherence + prospect attribution and surfaces the fixes in UI. Sim: buildMarriageWindow sources spouse candidates from People-First external houses (prefer local noble houses h_noble_XX) rather than legacy locals.nobles (removes phantom spouses); marriage prospects stamp from_house_id using spouse candidate’s actual house_id (via house scan); spouseIdFromKinship hardened to deterministic selection (lexicographically smallest spouse id) when multiple spouse_of edges exist. UI: marriage prospect card shows spouse name + age + house; roster shows spouse subline per person via spouse_of edges (no global spouse field); Known Houses panel hydrates from house_id lists; Diff Ledger prefers sim-provided diff_ledger items when present; marriage toast mirrors sim residence rule (heir/eldest son brings spouse in; otherwise child marries out). No new mechanics or tuning changes; retains v0.2.7.x runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8)."
+  "notes": "v0.2.8.1 hotfix (debug+correctness): fixes People-First kinship sync to preserve parent_of facts across succession (prevents child re-parenting / age inversions), adds house↔house relationship deltas for marriage outcomes so A/R/T shifts appear in the ledger, and ensures court/household roles render without placeholders (roles derived from household_roster_view when available). Adds debug UI: View All People registry (with house + parents) and displays parents (name/age/house) in Court roster + marriage offers. Sim: creates/maintains court officer ServiceRecords for downstream obligations/debug. No economy tuning changes."
 }
