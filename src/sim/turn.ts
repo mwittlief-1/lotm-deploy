@@ -61,7 +61,7 @@ import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ens
 import { computeTierSets } from "./tiers";
 import type { TierSets } from "./tiers";
 import { deriveHouseholdRoster } from "./householdView";
-import { processNobleFertility } from "./demography";
+import { processNobleFertility, processNobleMarriages, processNobleMortality } from "./demography";
 import { listEligibleCandidates, reserveCandidate, clearReservation, gcExpiredReservations } from "./marriageMarket";
 
 
@@ -496,59 +496,6 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
-  // v0.2.8.2 P0 (credibility gate): world mortality for all instantiated People-First persons.
-  // - Applies to *everyone* in `state.people` EXCEPT the bounded household/court-officer set above.
-  // - Gompertz-like adult hazard that rises ~exponentially with age.
-  // - Stream-isolated RNG.
-  // NOTE: We intentionally do not apply the player's Physician improvement to the world.
-  {
-    const anyState: any = state as any;
-    const reg: Record<string, Person> | undefined = anyState.people as any;
-    if (reg) {
-      const mortMult = tuningNumber(state, "mortality_mult", 1.0);
-      const rWorld = new Rng(state.run_seed, "world", state.turn_index, "mortality");
-      const ids = Object.keys(reg).sort((a, b) => a.localeCompare(b));
-
-      // Parameterization chosen for qualitative behavior only (monotone & steep late-life).
-      // Annual hazard h(age) = A * exp(B * age); convert to per-turn p with turn-years.
-      const A = 0.000313;
-      const B = 0.0693;
-
-      let deathsThisTurn = 0;
-      for (const id of ids) {
-        if (!id || seenIds.has(id)) continue;
-        const p = reg[id];
-        if (!p || typeof p !== "object") continue;
-        if (!p.alive) continue;
-
-        const age = typeof p.age === "number" && Number.isFinite(p.age) ? p.age : 0;
-        if (age < 16) continue;
-
-        // Hard ceiling: prevent 120y+ immortals even under extreme tuning.
-        if (age >= 110) {
-          p.alive = false;
-          (p as any).death_turn = state.turn_index;
-          deathsThisTurn += 1;
-          continue;
-        }
-
-        const hazardPerYear = A * Math.exp(B * age);
-        let pTurn = 1 - Math.exp(-hazardPerYear * TURN_YEARS);
-        pTurn *= mortMult;
-        pTurn = Math.max(0, Math.min(0.995, pTurn));
-
-        if (rWorld.fork(`d:${p.id}`).bool(pTurn)) {
-          p.alive = false;
-          (p as any).death_turn = state.turn_index;
-          deathsThisTurn += 1;
-        }
-      }
-
-      // Debug-only: visible in run exports; does not affect mechanics.
-      (state.flags as any)._world_deaths_last_turn = deathsThisTurn;
-    }
-  }
-
   // deaths (simple): older increases risk; physician reduces risk.
   const hasPhysician = hasImprovement(state.manor.improvements, "physician");
   const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
@@ -636,12 +583,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const mods = (state.flags as any)._mods ?? {};
       const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
       const fertMult = tuningNumber(state, "fertility_mult", 1.0);
-
-      // v0.2.8.2 P0 (credibility gate): female fertility declines strongly after ~35 and approaches ~0 by late 40s.
-      const k = 0.4;
-      const ageTaper = spouse.age <= 35 ? 1 : Math.exp(-k * (spouse.age - 35));
-
-      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult * ageTaper));
+      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult));
       const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
       if (bRng.bool(chance)) {
         const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
@@ -999,21 +941,19 @@ function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWi
       const offer = marriageWindow.offers[bestIdx]!;
       const spouseHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id) ?? sponsorHouseId;
       const relDeltas: any[] = [];
-      // Primary: house ↔ house relationship delta.
       relDeltas.push({
-        scope: "house",
-        from_id: spouseHouseId,
-        to_id: playerHouseId,
+        scope: "person",
+        from_id: state.house.head.id,
+        to_id: offer.house_person_id,
         allegiance_delta: offer.relationship_delta.allegiance,
         respect_delta: offer.relationship_delta.respect,
         threat_delta: offer.relationship_delta.threat
       });
-      // Liege reaction uses existing direction (liege -> head).
       if (offer.liege_delta) {
         relDeltas.push({
           scope: "person",
-          from_id: state.locals.liege.id,
-          to_id: state.house.head.id,
+          from_id: state.house.head.id,
+          to_id: state.locals.liege.id,
           allegiance_delta: 0,
           respect_delta: offer.liege_delta.respect,
           threat_delta: offer.liege_delta.threat
@@ -1578,17 +1518,38 @@ export function proposeTurn(state: RunState): TurnContext {
     const tier0HouseIds = [...tierSets.tier0.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
     const tier1HouseIds = [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
 
-    const demogRng = new Rng(working.run_seed, "demography", working.turn_index, "fertility");
-    const demog = processNobleFertility(working as any,
+    // Option B (v0.2.8+): marriages -> fertility -> mortality
+    // Use an isolated RNG stream so demography does not perturb other phase randomness.
+    const year = working.turn_index * TURN_YEARS;
+
+    const marriageRng = new Rng(working.run_seed, "demography", working.turn_index, "marriage");
+    const marriages = processNobleMarriages(
+      working as any,
       { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
-      { float01: (label: string) => demogRng.fork(label).next() },
-      { year: working.turn_index * TURN_YEARS }
+      { float01: (label: string) => marriageRng.fork(label).next() },
+      { year }
     );
 
-    // Optional (debug-only) counter in flags; does not affect mechanics.
-    if (demog && Array.isArray((demog as any).births)) {
-      (working.flags as any)._demography_births_last_turn = (demog as any).births.length;
-    }
+    const fertilityRng = new Rng(working.run_seed, "demography", working.turn_index, "fertility");
+    const births = processNobleFertility(
+      working as any,
+      { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
+      { float01: (label: string) => fertilityRng.fork(label).next() },
+      { year }
+    );
+
+    const mortalityRng = new Rng(working.run_seed, "demography", working.turn_index, "mortality");
+    const deaths = processNobleMortality(
+      working as any,
+      { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
+      { float01: (label: string) => mortalityRng.fork(label).next() },
+      { year }
+    );
+
+    // Optional (debug-only) counters in flags; does not affect mechanics.
+    if (marriages && Array.isArray((marriages as any).marriages)) (working.flags as any)._demography_marriages_last_turn = (marriages as any).marriages.length;
+    if (births && Array.isArray((births as any).births)) (working.flags as any)._demography_births_last_turn = (births as any).births.length;
+    if (deaths && Array.isArray((deaths as any).deaths)) (working.flags as any)._demography_deaths_last_turn = (deaths as any).deaths.length;
   }
 
   // 6) household (births/deaths)
@@ -2033,17 +1994,10 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
       addCourtExcludeId(state, child.id);
     }
 
-    // Relationship deltas
-    // - Primary: house ↔ house (the player's House relationship to the offering House).
-    //   This is what we surface in the ledger as A/R/T shifts from the other House.
-    // - Secondary: liege reaction uses existing direction (liege -> head).
-    const playerHouseId: string = String((state as any).player_house_id ?? "h_player");
-    const otherHouseId = houseIdForPerson_v0_2_7_2(state, offer.house_person_id);
-    if (otherHouseId) {
-      adjustEdge(state, otherHouseId, playerHouseId, offer.relationship_delta);
-    }
+    // Relationship deltas (to offering house + sometimes liege)
+    adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);
     if (offer.liege_delta) {
-      adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
+      adjustEdge(state, state.house.head.id, state.locals.liege.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
     }
 
     // Set flag increasing birth chance slightly

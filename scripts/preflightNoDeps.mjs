@@ -255,7 +255,7 @@ await runTest("schema_snapshot_v1_present", async () => {
 await runTest("determinism_smoke_prospects_window", async () => {
   // Scan baseline seeds for at least one prospects window within a bounded horizon.
   const baselinePath = path.resolve(
-    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.8") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
+    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
       ? "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json"
       : (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2"))
       ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"
@@ -323,7 +323,7 @@ await runTest("determinism_smoke_prospects_window", async () => {
 
 await runTest("non_perturbation_golden_seeds_no_accepts", async () => {
   const baselinePath = path.resolve(
-    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.8") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
+    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
       ? "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json"
       : (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2"))
       ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"

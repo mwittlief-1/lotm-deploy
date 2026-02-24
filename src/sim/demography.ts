@@ -12,6 +12,8 @@
  *   (canonical-in → canonical-out; legacy-in → legacy-out), so lane tests remain intact.
  */
 
+import { BIRTH_CHANCE_BY_FERTILITY, BIRTH_FERTILE_AGE_MAX, BIRTH_FERTILE_AGE_MIN, TURN_YEARS } from "./constants";
+
 export type BirthEvent = {
   child_person_id: string;
   mother_person_id: string;
@@ -38,8 +40,10 @@ type PersonLike = {
   is_dead?: boolean;
   alive?: boolean;
 
+  // v0.2.8+ traits (canonical sim schema)
+  traits?: any;
+
   married?: boolean;
-  traits?: Record<string, number>;
 
   // optional loose membership hints
   house_id?: string | null;
@@ -91,11 +95,20 @@ type RunStateLike = {
   flags?: Record<string, unknown>;
 };
 
+// Tier sets evolved across versions.
+// - Legacy: flat iterables (tier0_house_ids, tier1_house_ids, ...)
+// - v0.2.8+: nested sets (tier0.houses, tier1.houses, ...)
+// This module stays tolerant so it can run against both runtime and unit tests.
 type TierSetsLike = {
+  // Legacy shape
   tier0_house_ids?: Iterable<string>;
   tier1_house_ids?: Iterable<string>;
   tier0_person_ids?: Iterable<string>;
   tier1_person_ids?: Iterable<string>;
+
+  // v0.2.8+ shape
+  tier0?: { houses?: Iterable<string>; people?: Iterable<string> };
+  tier1?: { houses?: Iterable<string>; people?: Iterable<string> };
 };
 
 type RngLike = {
@@ -124,6 +137,48 @@ const SPOUSE_EDGE_KINDS = new Set<string>([
   'wife_of',
   'partner_of',
 ]);
+
+const PARENT_EDGE_KINDS = new Set<string>(['parent_of', 'parent', 'child_of']);
+
+function listKinshipEdges(state: RunStateLike): any[] {
+  const edges: any = (state as any)?.kinship_edges ?? (state as any)?.kinship ?? [];
+  return Array.isArray(edges) ? edges : [];
+}
+
+function coerceHouseId(p: PersonLike): string | null {
+  const raw = (p as any)?.house_id ?? (p as any)?.houseId ?? (p as any)?.house ?? null;
+  return typeof raw === 'string' && raw.length > 0 ? raw : null;
+}
+
+function buildSpouseIndex(state: RunStateLike): Map<string, Set<string>> {
+  const idx = new Map<string, Set<string>>();
+  for (const e of listKinshipEdges(state)) {
+    const kind = String((e as any)?.kind ?? (e as any)?.type ?? (e as any)?.relation ?? '');
+    if (!SPOUSE_EDGE_KINDS.has(kind)) continue;
+    const a = String((e as any)?.a_id ?? (e as any)?.spouse_a ?? (e as any)?.from_person_id ?? (e as any)?.person_a_id ?? '');
+    const b = String((e as any)?.b_id ?? (e as any)?.spouse_b ?? (e as any)?.to_person_id ?? (e as any)?.person_b_id ?? '');
+    if (!a || !b) continue;
+    if (!idx.has(a)) idx.set(a, new Set());
+    if (!idx.has(b)) idx.set(b, new Set());
+    idx.get(a)!.add(b);
+    idx.get(b)!.add(a);
+  }
+  return idx;
+}
+
+function buildParentsIndex(state: RunStateLike): Map<string, Set<string>> {
+  const idx = new Map<string, Set<string>>();
+  for (const e of listKinshipEdges(state)) {
+    const kind = String((e as any)?.kind ?? (e as any)?.type ?? (e as any)?.relation ?? '');
+    if (!PARENT_EDGE_KINDS.has(kind)) continue;
+    const parent = String((e as any)?.parent_id ?? (e as any)?.from_person_id ?? (e as any)?.parent ?? '');
+    const child = String((e as any)?.child_id ?? (e as any)?.to_person_id ?? (e as any)?.child ?? '');
+    if (!parent || !child) continue;
+    if (!idx.has(child)) idx.set(child, new Set());
+    idx.get(child)!.add(parent);
+  }
+  return idx;
+}
 
 const MALE_NAMES = ["Edmund", "Hugh", "Robert", "Walter", "Geoffrey", "Aldric", "Oswin", "Giles", "Roger", "Simon"];
 const FEMALE_NAMES = ["Matilda", "Alice", "Joan", "Agnes", "Isolde", "Edith", "Beatrice", "Margery", "Cecily", "Elinor"];
@@ -163,12 +218,11 @@ export function processNobleFertility(
     const fatherAge = coerceAge(father, year);
     if (motherAge == null || fatherAge == null) continue;
 
-    // Simple age bands.
-    // Credibility gate (v0.2.8 P0): female fertility declines strongly after ~35 and approaches ~0 by late 40s.
-    if (motherAge < 16 || motherAge > 48) continue;
+    // Fertility age bounds.
+    if (motherAge < BIRTH_FERTILE_AGE_MIN || motherAge > BIRTH_FERTILE_AGE_MAX) continue;
     if (fatherAge < 16 || fatherAge > 70) continue;
 
-    const p = birthChancePerTurn(motherAge);
+    const p = birthChancePerTurn(state, mother, motherAge);
     if (p <= 0) continue;
 
     const draw = rngFloat01(rng, `demography.birth.${year}.${motherId}.${fatherId}`);
@@ -261,6 +315,206 @@ export function processNobleFertility(
   return { births };
 }
 
+export type MarriageEvent = {
+  spouse_a_person_id: string;
+  spouse_b_person_id: string;
+  year: number;
+};
+
+// Option B (v0.2.8+): world noble marriage formation so Gen2 births are possible.
+// Deterministic + scalable: greedy matching with bounded candidate scans, keyed RNG.
+export function processNobleMarriages(
+  state: RunStateLike,
+  tierSets: TierSetsLike,
+  rng: RngLike,
+  turn: TurnLike
+): { marriages: MarriageEvent[] } {
+  const marriages: MarriageEvent[] = [];
+  const year = coerceYear(turn);
+
+  const eligible = collectTier01PersonIds(state, tierSets);
+  if (eligible.size === 0) return { marriages };
+
+  const spouseIndex = buildSpouseIndex(state);
+  const parentsIndex = buildParentsIndex(state);
+  const currentTurnIndex = (state as any)?.turn_index ?? Math.round(year / TURN_YEARS);
+
+  const isReserved = (personId: string): boolean => {
+    const raw: any = (state as any)?.flags?.marriage_reservations;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
+    const e = raw[personId];
+    const ex = e?.expires_turn;
+    if (typeof ex !== "number" || !Number.isFinite(ex)) return false;
+    return Math.trunc(currentTurnIndex) <= Math.trunc(ex);
+  };
+
+  // Candidate lists (stable ordering).
+  const males: { id: string; age: number; house_id: string | null }[] = [];
+  const females: { id: string; age: number; house_id: string | null }[] = [];
+
+  for (const id of Array.from(eligible).sort((a, b) => a.localeCompare(b))) {
+    const p = state.people?.[id];
+    if (!p || typeof p !== "object") continue;
+    if (!isAlive(p)) continue;
+    if (isReserved(id)) continue;
+
+    // Skip anyone with a spouse edge already (no remarriage in v0.2.8).
+    if (spouseIndex.has(id)) continue;
+
+    const sex = sexNorm((p as any).sex);
+    if (!sex) continue;
+    const age = coerceAge(p, year);
+    if (typeof age !== "number" || !Number.isFinite(age)) continue;
+    if (age < 16) continue;
+    if (age > 75) continue;
+
+    const hid = coerceHouseId(p);
+    if (sex === "M") males.push({ id, age, house_id: hid });
+    else females.push({ id, age, house_id: hid });
+  }
+
+  // Sort older-first so we don't strand older singles.
+  males.sort((a, b) => (b.age - a.age) || a.id.localeCompare(b.id));
+  females.sort((a, b) => (b.age - a.age) || a.id.localeCompare(b.id));
+
+  const maxPairs = Math.min(males.length, females.length);
+  if (maxPairs <= 0) return { marriages };
+
+  // Scalable defaults: we want marriages to continue in small worlds/early turns,
+  // and also not bottleneck in larger worlds.
+  const houseCount = [...readTier0HouseIds(tierSets), ...readTier1HouseIds(tierSets)].length;
+  const rate = readTuningNumber(state, "world_marriage_rate", 0.25);
+  const defaultCap = Math.max(50, Math.ceil(houseCount * 0.5));
+  const cap = Math.max(0, Math.trunc(readTuningNumber(state, "world_marriage_cap", defaultCap)));
+  const defaultMin = Math.max(1, Math.floor(houseCount * 0.05));
+  const minPerTurn = Math.max(0, Math.trunc(readTuningNumber(state, "world_marriage_min", defaultMin)));
+
+  let target = Math.trunc(maxPairs * rate);
+  target = Math.max(target, minPerTurn);
+  target = Math.min(target, cap, maxPairs);
+  if (target <= 0) return { marriages };
+
+  const usedFemales = new Set<string>();
+  const usedMales = new Set<string>();
+
+  const ageCompatible = (mAge: number, fAge: number): boolean => {
+    // Simple plausibility constraints; tune later.
+    if (fAge < 15 || fAge > 50) return false;
+    if (mAge < 15 || mAge > 80) return false;
+    // Prefer older male, but allow close ages.
+    if (mAge + 5 < fAge) return false;
+    if (mAge - 25 > fAge) return false;
+    return true;
+  };
+
+  const areCloseKin = (aId: string, bId: string): boolean => {
+    if (aId === bId) return true;
+    // parent/child
+    const aParents = parentsIndex.get(aId);
+    const bParents = parentsIndex.get(bId);
+    if (aParents?.has(bId) || bParents?.has(aId)) return true;
+    // siblings: share any parent
+    if (aParents && bParents) {
+      for (const p of aParents) if (bParents.has(p)) return true;
+    }
+    return false;
+  };
+
+  const ensureKinshipEdgesArray = () => {
+    if (!Array.isArray((state as any).kinship_edges)) (state as any).kinship_edges = [];
+    return (state as any).kinship_edges as any[];
+  };
+
+  for (const m of males) {
+    if (marriages.length >= target) break;
+    if (usedMales.has(m.id)) continue;
+
+    // Build a bounded pool of viable females in stable order.
+    const pool: string[] = [];
+    for (const f of females) {
+      if (pool.length >= 24) break;
+      if (usedFemales.has(f.id)) continue;
+      if (!ageCompatible(m.age, f.age)) continue;
+      // Avoid intra-house marriages when possible.
+      if (m.house_id && f.house_id && m.house_id === f.house_id) continue;
+      if (areCloseKin(m.id, f.id)) continue;
+      pool.push(f.id);
+    }
+    if (pool.length === 0) continue;
+
+    const r = rngFloat01(rng, `demography.marriage.pick.${year}.${m.id}`);
+    const pick = pool[Math.min(pool.length - 1, Math.max(0, Math.trunc(r * pool.length)))]!;
+    if (!pick) continue;
+
+    usedMales.add(m.id);
+    usedFemales.add(pick);
+
+    // Apply.
+    const edges = ensureKinshipEdgesArray();
+    edges.push({ kind: "spouse_of", a_id: m.id, b_id: pick });
+    const mp: any = state.people?.[m.id];
+    const fp: any = state.people?.[pick];
+    if (mp && typeof mp === "object") mp.married = true;
+    if (fp && typeof fp === "object") fp.married = true;
+
+    marriages.push({ spouse_a_person_id: m.id, spouse_b_person_id: pick, year });
+  }
+
+  return { marriages };
+}
+
+export type DeathEvent = {
+  person_id: string;
+  year: number;
+  age: number;
+};
+
+// Option B (v0.2.8+): world noble mortality (Tier0/1 houses), Gompertz-like adult hazard.
+export function processNobleMortality(
+  state: RunStateLike,
+  tierSets: TierSetsLike,
+  rng: RngLike,
+  turn: TurnLike
+): { deaths: DeathEvent[] } {
+  const deaths: DeathEvent[] = [];
+  const year = coerceYear(turn);
+
+  const eligible = collectTier01PersonIds(state, tierSets);
+  if (eligible.size === 0) return { deaths };
+
+  const mortalityMult = readTuningNumber(state, "mortality_mult", 1.0);
+
+  const hazardPerTurn = (ageYears: number): number => {
+    if (ageYears < 16) return 0;
+    // Gompertz-like: hazard rises ~exponentially with age.
+    // per-year baseline at age 30, then exp growth.
+    const base30 = 0.0010; // ~0.1% per year at 30
+    const scale = 12; // smaller => faster rise
+    const perYear = base30 * Math.exp((ageYears - 30) / scale);
+    // Convert to per-turn probability over TURN_YEARS years.
+    const perTurn = 1 - Math.pow(1 - Math.min(perYear, 0.95), TURN_YEARS);
+    return Math.min(Math.max(perTurn * mortalityMult, 0), 0.95);
+  };
+
+  for (const id of Array.from(eligible).sort((a, b) => a.localeCompare(b))) {
+    const p: any = state.people?.[id];
+    if (!p || typeof p !== "object") continue;
+    if (!isAlive(p)) continue;
+    const age = coerceAge(p, year);
+    if (typeof age !== "number" || !Number.isFinite(age)) continue;
+
+    const h = hazardPerTurn(age);
+    if (h <= 0) continue;
+    const r = rngFloat01(rng, `demography.mortality.roll.${year}.${id}`);
+    if (r < h) {
+      p.alive = false;
+      deaths.push({ person_id: id, year, age });
+    }
+  }
+
+  return { deaths };
+}
+
 function detectCanonicalWriteMode(state: RunStateLike): boolean {
   // If any existing person record has `id`, prefer canonical output.
   for (const p of Object.values(state.people ?? {})) {
@@ -328,26 +582,59 @@ function pickMotherFather(pA: PersonLike, pB: PersonLike): { mother: PersonLike;
   return aId < bId ? { mother: pA, father: pB } : { mother: pB, father: pA };
 }
 
-function birthChancePerTurn(motherAge: number): number {
-  // v0.2.8.2 hotfix: fertility curve is intentionally simple but must be credible.
-  // - modest rise into 20s
-  // - gradual fall through early/mid 30s
-  // - sharp decline after 35; ~0 by late 40s
-  // Scaled for a 3-year turn (chance per turn, not per year).
+function readTuningNumber(state: RunStateLike, key: string, fallback: number): number {
+  const anyFlags: any = (state as any)?.flags;
+  const v = anyFlags?._tuning?.[key];
+  return typeof v === "number" && Number.isFinite(v) ? v : fallback;
+}
 
-  if (motherAge < 16 || motherAge > 48) return 0;
+function readTrait01to5(p: PersonLike, key: string, fallback: number): number {
+  const t: any = (p as any)?.traits;
+  const raw = t && typeof t === "object" ? (t as any)[key] : undefined;
+  const n = typeof raw === "number" && Number.isFinite(raw) ? raw : fallback;
+  // Clamp to [1..5] with default 3.
+  if (n <= 1) return 1;
+  if (n >= 5) return 5;
+  return Math.round(n);
+}
 
-  const peakAge = 27;
-  const halfWidth = 16; // yields a broad 11..43 triangle before we apply the 35+ taper.
-  const tri = 1 - Math.abs(motherAge - peakAge) / halfWidth;
-  const baseShape = clamp01(tri);
+function fertilityAgeFactor(motherAge: number): number {
+  // Credibility gate: strong decline after 35 and ~0 by late 40s.
+  // Return [0..1] multiplier.
+  if (motherAge < BIRTH_FERTILE_AGE_MIN) return 0;
+  if (motherAge > BIRTH_FERTILE_AGE_MAX) return 0;
 
-  // Strong 35+ taper: exp(-k*(age-35)). Choose k so 48 is effectively ~0.
-  const k = 0.4;
-  const ageTaper = motherAge <= 35 ? 1 : Math.exp(-k * (motherAge - 35));
+  // Piecewise-linear, tuned for 3-year turns.
+  if (motherAge <= 30) return 1.0;
+  if (motherAge <= 35) {
+    // 30..35: 1.0 -> 0.75
+    return 1.0 - (motherAge - 30) * (0.25 / 5);
+  }
+  if (motherAge <= 40) {
+    // 35..40: 0.75 -> 0.25
+    return 0.75 - (motherAge - 35) * (0.50 / 5);
+  }
+  if (motherAge <= 45) {
+    // 40..45: 0.25 -> 0.07
+    return 0.25 - (motherAge - 40) * (0.18 / 5);
+  }
+  // 45..48: 0.07 -> 0.01
+  return 0.07 - (motherAge - 45) * (0.06 / 3);
+}
 
-  const maxPerTurn = 0.32;
-  return clamp01(baseShape * ageTaper) * maxPerTurn;
+function birthChancePerTurn(state: RunStateLike, mother: PersonLike, motherAge: number): number {
+  const fertilityTrait = readTrait01to5(mother, "fertility", 3);
+  const base = (BIRTH_CHANCE_BY_FERTILITY as any)[fertilityTrait] ?? (BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 0.26;
+
+  const ageFactor = fertilityAgeFactor(motherAge);
+  if (ageFactor <= 0) return 0;
+
+  // Respect global tuning multipliers (defaults aligned with createNewRun).
+  const fertilityMult = readTuningNumber(state, "fertility_mult", 1.0);
+
+  // Clamp to avoid runaway population explosions under aggressive tuning.
+  const p = base * ageFactor * fertilityMult;
+  return Math.min(Math.max(p, 0), 0.65);
 }
 
 function clamp01(x: number): number {
@@ -388,18 +675,26 @@ function collectTier01PersonIds(state: RunStateLike, tierSets: TierSetsLike): Se
     for (const id of it) out.add(String(id));
   };
 
+  // Legacy tier set shape
   addAll(tierSets.tier0_person_ids);
   addAll(tierSets.tier1_person_ids);
 
-  if ((tierSets.tier0_house_ids || tierSets.tier1_house_ids) && state.houses) {
+  // v0.2.8+ tier set shape
+  addAll(tierSets.tier0?.people);
+  addAll(tierSets.tier1?.people);
+
+  if (state.houses) {
     const houseIds: string[] = [];
     if (tierSets.tier0_house_ids) for (const id of tierSets.tier0_house_ids) houseIds.push(String(id));
     if (tierSets.tier1_house_ids) for (const id of tierSets.tier1_house_ids) houseIds.push(String(id));
+    if (tierSets.tier0?.houses) for (const id of tierSets.tier0.houses) houseIds.push(String(id));
+    if (tierSets.tier1?.houses) for (const id of tierSets.tier1.houses) houseIds.push(String(id));
 
-    // Stable.
+    // Stable + de-dupe.
     houseIds.sort();
+    const uniqHouseIds = houseIds.filter((v, i) => (i === 0 ? true : v !== houseIds[i - 1]));
 
-    for (const hid of houseIds) {
+    for (const hid of uniqHouseIds) {
       const h = state.houses[hid];
       if (!h) continue;
 

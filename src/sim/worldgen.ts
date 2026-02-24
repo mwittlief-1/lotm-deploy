@@ -293,6 +293,10 @@ function ensureFamilySnapshotForHouse(opts: {
   // Upsert head/spouse persons.
   if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
   if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  // Cache current house membership on each person (People-First convenience).
+  // This is additive-only and does not change the canonical house registry.
+  if (people[headId] && typeof people[headId] === "object") people[headId].house_id = hid;
+  if (spousePresent && people[spouseId] && typeof people[spouseId] === "object") people[spouseId].house_id = hid;
 
   // Child count + smoothed ages.
   const desiredChildCount = childCountForTier(tier, hRng.fork("child_count"));
@@ -320,6 +324,7 @@ function ensureFamilySnapshotForHouse(opts: {
       // If upgrading existing, lightly smooth (no large gaps) without changing plausible late-child cases.
       if (typeof people[cid].age === "number") people[cid].age = clampAge(people[cid].age);
     }
+    if (people[cid] && typeof people[cid] === "object") people[cid].house_id = hid;
   }
 
   // If we have existing children beyond the generated ages (legacy), run smoothing pass to avoid massive gaps.

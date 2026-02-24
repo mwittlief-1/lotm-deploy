@@ -76,7 +76,7 @@ function runPolicy(seed, policyId, turns=15) {
 }
 
 function checkBoundedSnapshot(entry) {
-  const allowed = new Set(["turn_index","manor","house","relationships","flags","game_over","people","houses","player_house_id","kinship","kinship_edges","institutions","service_records"]);
+  const allowed = new Set(["turn_index","manor","house","relationships","flags","game_over","people","houses","player_house_id","kinship","kinship_edges"]);
   for (const key of Object.keys(entry.snapshot_before ?? {})) assert(allowed.has(key), `snapshot_before forbidden key: ${key}`);
   for (const key of Object.keys(entry.snapshot_after ?? {})) assert(allowed.has(key), `snapshot_after forbidden key: ${key}`);
   assert(!("log" in (entry.snapshot_before ?? {})), "snapshot_before contains log");

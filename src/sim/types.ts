@@ -13,6 +13,10 @@ export interface Person {
   sex: Sex;
   age: number; // years
   alive: boolean;
+  // People-First: the person's current house membership, if known.
+  // This is optional and treated as a cache; the canonical membership still lives on `state.houses`.
+  // Used primarily to keep world demography scalable (birth house inference, marriage filters, etc.).
+  house_id?: string | null;
   traits: Traits;
   married?: boolean;
 
@@ -364,16 +368,10 @@ export interface CourtRosterRow {
   role: CourtRosterRole;
   // Officer role key (UI maps to title labels per UX contract).
   officer_role: CourtOfficerRole | null;
+  // Optional display labels (hotfix/debug): lets UI show relationships without hardcoding sim internals.
+  role_label?: string;
+  officer_role_label?: string;
   badges: HouseholdRosterBadge[];
-
-  /**
-   * v0.2.8.2 hotfix: presentation-only relationship label rebased on current HoH.
-   *
-   * Why: court membership is still derived from legacy `state.house.children`, which may
-   * include siblings after succession. The UI should display correct relationships (e.g.
-   * Sister/Brother; Son/Daughter) even when the underlying roster role is "child".
-   */
-  relationship_label?: string | null;
 }
 
 export interface CourtRoster {

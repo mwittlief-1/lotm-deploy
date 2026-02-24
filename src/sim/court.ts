@@ -1,6 +1,6 @@
-import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState, ServiceRecord } from "./types";
+import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState } from "./types";
 import { Rng } from "./rng";
-import { getChildren, getParents, getSiblings } from "./kinship";
+import { deriveHouseholdRoster } from "./householdView";
 
 // v0.2.4 Court + Household integration.
 // Tooling/QA note: Court officer generation must be deterministic and stream-isolated.
@@ -140,55 +140,6 @@ export function ensureCourtOfficers(state: RunState): void {
     ensureRole("marshal", false);
   }
 
-  // v0.2.8.1 HOTFIX: ensure we have minimal ServiceRecords for court officer roles.
-  // This is a People-First invariant and unblocks downstream obligations/debug UI.
-  syncCourtOfficerServiceRecords(state, playerHouseId, houseRec.court_officers as Record<CourtOfficerRole, string>);
-
-}
-
-function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, roles: Record<CourtOfficerRole, string>): void {
-  const anyState: any = state as any;
-  const prior: ServiceRecord[] = Array.isArray(anyState.service_records) ? (anyState.service_records as ServiceRecord[]) : [];
-
-  const byId = new Map<string, ServiceRecord>();
-  for (const r of prior) {
-    if (!r || typeof r !== "object") continue;
-    const id = (r as any).id;
-    if (typeof id !== "string" || !id) continue;
-    byId.set(id, r);
-  }
-
-  const actor = { kind: "house", id: playerHouseId } as const;
-  const nowT = typeof (state as any).turn_index === "number" ? (state as any).turn_index : 0;
-
-  const roleKeys = (Object.keys(roles) as CourtOfficerRole[]).sort((a, b) => String(a).localeCompare(String(b)));
-  for (const role of roleKeys) {
-    const personId = roles[role];
-    if (typeof personId !== "string" || !personId) continue;
-
-    const id = `sr_${playerHouseId}_${role}`;
-    const existing = byId.get(id);
-    if (existing) {
-      if (existing.person_id !== personId) {
-        existing.person_id = personId;
-        existing.start_turn_index = nowT;
-      }
-      existing.serving_actor_id = actor as any;
-      existing.role = role;
-      existing.end_turn_index = null;
-    } else {
-      byId.set(id, {
-        id,
-        person_id: personId,
-        serving_actor_id: actor as any,
-        role,
-        start_turn_index: nowT,
-        end_turn_index: null,
-      });
-    }
-  }
-
-  anyState.service_records = [...byId.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 }
 
 export function getCourtOfficerIds(state: RunState): Array<{ role: CourtOfficerRole; person_id: string }> {
@@ -308,36 +259,6 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
 
-  // v0.2.8.2 hotfix: derive relationship labels relative to the *current* HoH.
-  // Court membership is still driven by legacy `state.house.children`, which may contain
-  // siblings after succession (they remain in household). The label must rebase.
-  const headId = state.house?.head?.id ?? null;
-  const spouseId = state.house?.spouse?.id ?? null;
-  const parentsOfHead = headId ? new Set(getParents(state as any, headId)) : new Set<string>();
-  const childrenOfHead = headId ? new Set(getChildren(state as any, headId)) : new Set<string>();
-  const siblingsOfHead = headId ? new Set(getSiblings(state as any, headId)) : new Set<string>();
-
-  const relationshipLabel = (personId: string): string | null => {
-    if (!headId) return null;
-    if (personId === headId) return "Head of House";
-    if (spouseId && personId === spouseId) return "Spouse";
-
-    const p = people[personId];
-    const sex = p?.sex;
-
-    if (parentsOfHead.has(personId)) {
-      return sex === "F" ? "Mother" : sex === "M" ? "Father" : "Parent";
-    }
-    if (siblingsOfHead.has(personId)) {
-      return sex === "F" ? "Sister" : sex === "M" ? "Brother" : "Sibling";
-    }
-    if (childrenOfHead.has(personId)) {
-      return sex === "F" ? "Daughter" : sex === "M" ? "Son" : "Child";
-    }
-
-    return null;
-  };
-
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;
 
@@ -369,7 +290,7 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
     if (p.alive && widowedPersonId === p.id) badges.push(p.sex === "M" ? "widower" : "widow");
     if (heirId && p.id === heirId) badges.push("heir");
 
-    rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges, relationship_label: relationshipLabel(p.id) });
+    rows.push({ person_id: p.id, role, officer_role: officer_role ?? null, badges });
   };
 
   // Family
@@ -389,6 +310,41 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
   // Married-in spouses (extras)
   const extras = getCourtExtraIds(state).slice().sort((a, b) => a.localeCompare(b));
   for (const id of extras) pushRow(id, "married_in_spouse");
+
+  // ----- Display labels (hotfix/debug) -----
+  // Compute relationships relative to the *current* HoH using People-First kinship so
+  // siblings/parents don't remain tagged as "child" after succession.
+  const playerHouseIdPF = (state as any).player_house_id ?? "h_player";
+  const derived = deriveHouseholdRoster(state as any, playerHouseIdPF);
+  const relRoleByPerson = new Map<string, string>();
+  for (const e of derived ?? []) {
+    if (e?.person_id) relRoleByPerson.set(String(e.person_id), String(e.role));
+  }
+
+  const labelForRel = (rel: string, sex: any): string => {
+    const s = sex === "M" || sex === "F" ? sex : null;
+    if (rel === "head") return "Head";
+    if (rel === "spouse") return "Spouse";
+    if (rel === "child") return s === "M" ? "Son" : s === "F" ? "Daughter" : "Child";
+    if (rel === "sibling") return s === "M" ? "Brother" : s === "F" ? "Sister" : "Sibling";
+    if (rel === "parent") return s === "M" ? "Father" : s === "F" ? "Mother" : "Parent";
+    return rel;
+  };
+
+  for (const r of rows) {
+    const p = people[r.person_id] as any;
+    const rel = relRoleByPerson.get(r.person_id);
+    if (rel) r.role_label = labelForRel(rel, p?.sex);
+    else {
+      if (r.role === "head") r.role_label = "Head";
+      else if (r.role === "spouse") r.role_label = "Spouse";
+      else if (r.role === "child") r.role_label = p?.sex === "M" ? "Son" : p?.sex === "F" ? "Daughter" : "Child";
+      else if (r.role === "officer") r.role_label = "Officer";
+      else if (r.role === "married_in_spouse") r.role_label = "Spouse";
+    }
+
+    if (r.officer_role) r.officer_role_label = officerTitle(r.officer_role);
+  }
 
   const headcount_alive = rows.reduce((acc, r) => (r.badges.includes("deceased") ? acc : acc + 1), 0);
 
