@@ -57,7 +57,7 @@ import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
 import { adjustEdge, relationshipBounds } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, removeCourtExcludeId } from "./court";
+import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, getCourtExtraIds, removeCourtExcludeId } from "./court";
 import { computeTierSets } from "./tiers";
 import type { TierSets } from "./tiers";
 import { deriveHouseholdRoster } from "./householdView";
