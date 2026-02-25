@@ -14,6 +14,29 @@
 
 import { BIRTH_CHANCE_BY_FERTILITY, BIRTH_FERTILE_AGE_MAX, BIRTH_FERTILE_AGE_MIN, TURN_YEARS } from "./constants";
 
+// --- TierSets compatibility helpers (v0.2.8.x)
+// We accept either the "TierSets" shape (tier0.houses Set, tier1.houses Set)
+// or the lightweight shape passed from turn.ts ({ tier0_house_ids: string[], tier1_house_ids: string[] }).
+function readTier0HouseIds(tierSets: any): string[] {
+  if (!tierSets) return [];
+  const a = (tierSets as any).tier0_house_ids;
+  if (Array.isArray(a)) return a as string[];
+  const t0 = (tierSets as any).tier0;
+  const houses = t0?.houses;
+  if (houses && typeof houses[Symbol.iterator] === "function") return Array.from(houses) as string[];
+  return [];
+}
+
+function readTier1HouseIds(tierSets: any): string[] {
+  if (!tierSets) return [];
+  const a = (tierSets as any).tier1_house_ids;
+  if (Array.isArray(a)) return a as string[];
+  const t1 = (tierSets as any).tier1;
+  const houses = t1?.houses;
+  if (houses && typeof houses[Symbol.iterator] === "function") return Array.from(houses) as string[];
+  return [];
+}
+
 export type BirthEvent = {
   child_person_id: string;
   mother_person_id: string;
