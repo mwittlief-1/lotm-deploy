@@ -26,9 +26,11 @@ function houseIdForPerson(houses: Record<string, any>, personId: string): string
     const h: any = houses[hid];
     if (!h || typeof h !== "object") continue;
     if (h.head_id === personId) return hid;
-    if (h.spouse_id === personId) return hid;
-    const childIds: any = h.child_ids;
+    if (h.spouse_id === personId) return hid;    const childIds: any = h.child_ids;
     if (Array.isArray(childIds) && childIds.some((cid) => cid === personId)) return hid;
+
+    const members: any = (h as any).member_person_ids ?? (h as any).members ?? (h as any).people_ids;
+    if (Array.isArray(members) && members.some((mid) => mid === personId)) return hid;
   }
   return null;
 }
@@ -217,19 +219,41 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
   // Only overwrite the HoH<->Spouse edge + parent edges for the player household.
   const kept = prior.filter((e) => {
     if (!kinInvolvesAny(e, playerIds)) return true;
+
+    // Parent edges are factual lineage: NEVER rewrite them during sync.
+    if (e.kind === "parent_of") return true;
+
+    // Only spouse edges are candidates for overwrite.
     if (e.kind !== "spouse_of") return false;
+
     // Always overwrite the current HoH<->Spouse edge from household state.
     if (headId && spouseId) {
       if ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId)) return false;
     }
+
     // Preserve child spouse edges (child <-> spouse).
     return Boolean(childIds.includes((e as any).a_id) || childIds.includes((e as any).b_id));
   });
 
   const desired: KinshipEdge[] = [];
   if (headId && spouseId) desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });
-  if (headId) for (const cid of childIds) desired.push({ kind: "parent_of", parent_id: headId, child_id: cid });
-  if (spouseId) for (const cid of childIds) desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
+
+  // Parent edges: additive-only.
+  // Only attach parents for children that currently have NO recorded parents.
+  const parentCountByChild = new Map<string, number>();
+  for (const e of prior) {
+    if (!e || typeof e !== "object") continue;
+    if (e.kind !== "parent_of") continue;
+    const cid = String((e as any).child_id ?? "");
+    if (!cid) continue;
+    parentCountByChild.set(cid, (parentCountByChild.get(cid) ?? 0) + 1);
+  }
+
+  for (const cid of childIds) {
+    if ((parentCountByChild.get(cid) ?? 0) > 0) continue;
+    if (headId) desired.push({ kind: "parent_of", parent_id: headId, child_id: cid });
+    if (spouseId) desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
+  }
 
   const mergedByKey = new Map<string, KinshipEdge>();
   for (const e of [...kept, ...desired]) mergedByKey.set(kinKey(e), e);

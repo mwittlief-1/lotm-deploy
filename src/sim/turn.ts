@@ -606,6 +606,127 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
+  // v0.2.8.x P0: In-house married couples fertility (player house).
+  // Goal: enable Gen2 births in the player-visible slice (adult children can have children).
+  {
+    const anyState: any = state as any;
+    const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+    const peopleReg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
+    const kinEdges: any[] = Array.isArray(anyState.kinship_edges) ? anyState.kinship_edges : [];
+
+    const spouseOf = new Map<string, string>();
+    for (const e of kinEdges) {
+      if (!e || typeof e !== "object") continue;
+      if (e.kind !== "spouse_of") continue;
+      const a = e.a_id;
+      const b = e.b_id;
+      if (typeof a !== "string" || typeof b !== "string" || !a || !b || a === b) continue;
+      if (!spouseOf.has(a)) spouseOf.set(a, b);
+      if (!spouseOf.has(b)) spouseOf.set(b, a);
+    }
+
+    const extras = new Set<string>(getCourtExtraIds(state));
+
+    const ageFactor = (age: number): number => {
+      if (age < 16) return 0;
+      if (age <= 30) return 1.0;
+      if (age <= 34) return 0.75;
+      if (age <= 37) return 0.45;
+      if (age <= 40) return 0.20;
+      if (age <= 43) return 0.06;
+      if (age <= 45) return 0.02;
+      return 0.0;
+    };
+
+    const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth_family");
+
+    const allocId = (): string => {
+      if (!state.flags || typeof state.flags !== "object") (state as any).flags = {};
+      const f: any = state.flags;
+      const pref = typeof f.demography_person_id_prefix === "string" ? f.demography_person_id_prefix : "p";
+      const joiner = typeof f.demography_person_id_joiner === "string" ? f.demography_person_id_joiner : "";
+      let seq = typeof f.demography_next_person_seq === "number" ? Math.trunc(f.demography_next_person_seq) : 1;
+      let id = `${pref}${joiner}${seq}`;
+      while (peopleReg[id]) {
+        seq += 1;
+        id = `${pref}${joiner}${seq}`;
+      }
+      f.demography_person_id_prefix = pref;
+      f.demography_person_id_joiner = joiner;
+      f.demography_next_person_seq = seq + 1;
+      return id;
+    };
+
+    const ensureMemberList = (): string[] => {
+      const houses: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses : null;
+      const h: any = houses ? houses[playerHouseId] : null;
+      if (!h || typeof h !== "object") return [];
+      if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
+      return h.member_person_ids as string[];
+    };
+
+    const memberIds = ensureMemberList();
+
+    for (const son of state.house.children) {
+      if (!son || !son.alive) continue;
+      if (son.sex !== "M") continue;
+      if (!son.married) continue;
+
+      const spouseId = spouseOf.get(son.id);
+      if (!spouseId) continue;
+
+      const spouse = peopleReg[spouseId];
+      if (!spouse || typeof spouse !== "object") continue;
+      if (!spouse.alive) continue;
+
+      const spouseHouse = typeof spouse.house_id === "string" ? spouse.house_id : null;
+      if (spouseHouse !== playerHouseId && !extras.has(spouseId)) continue;
+
+      if (spouse.sex !== "F") continue;
+      const mother = spouse;
+      const father = son;
+
+      const a = Number(mother.age);
+      if (!Number.isFinite(a)) continue;
+      const fertileAge = a >= BIRTH_FERTILE_AGE_MIN && a <= BIRTH_FERTILE_AGE_MAX;
+      if (!fertileAge) continue;
+
+      const fert = clampInt((mother.traits?.fertility ?? 3) as any, 1, 5);
+      const base = BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24;
+      const fertMult = tuningNumber(state, "fertility_mult", 1.0);
+      const chance = Math.min(0.95, Math.max(0, base * ageFactor(a) * fertMult));
+      if (chance <= 0) continue;
+
+      if (bRng.fork(`b:${father.id}:${mother.id}`).bool(chance)) {
+        const childId = allocId();
+        const sex = bRng.fork(`s:${childId}`).bool(0.52) ? "M" : "F";
+        const baby: any = {
+          id: childId,
+          name: sex === "M" ? "Thomas" : "Anne",
+          sex,
+          age: 0,
+          alive: true,
+          married: false,
+          traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+          house_id: playerHouseId,
+        };
+
+        peopleReg[childId] = baby;
+
+        if (!Array.isArray(anyState.kinship_edges)) anyState.kinship_edges = [];
+        anyState.kinship_edges.push({ kind: "parent_of", parent_id: mother.id, child_id: childId });
+        anyState.kinship_edges.push({ kind: "parent_of", parent_id: father.id, child_id: childId });
+
+        if (!memberIds.includes(childId)) memberIds.push(childId);
+
+        births.push(`${baby.name} (${baby.id})`);
+        state.manor.population = asNonNegInt(state.manor.population + 1);
+        popDelta += 1;
+      }
+    }
+  }
+
+
   return { births, deaths, population_delta: popDelta };
 }
 
@@ -1212,29 +1333,28 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
           ensureKinshipSpouseOf(state, sid, spouseId);
         }
 
-        // v0.2.5 marriage residence LOCK:
+        // v0.2.8 HOTFIX: residency policy (patrilocal for player house)
         // - Daughters marry out (leave the household court).
-        // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
-        const heirId = state.house.heir_id ?? null;
-        const eldestSonId =
-          [...state.house.children]
-            .filter((c) => c.alive && c.sex === "M")
-            .sort((a, b) => {
-              if (b.age !== a.age) return b.age - a.age;
-              return a.id.localeCompare(b.id);
-            })[0]?.id ?? null;
-
+        // - Sons stay in the household court; spouse joins.
         const subjectChild = state.house.children.find((c) => c.id === sid) ?? null;
-        const spouseJoinsCourt =
-          Boolean(subjectChild) && subjectChild!.sex === "M" && (sid === heirId || sid === eldestSonId);
+        const spouseJoinsCourt = Boolean(subjectChild) && subjectChild!.sex === "M";
 
         if (spouseJoinsCourt && typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
           addCourtExtraId(state, spouseId);
-          // Defensive: if the subject was previously excluded from court residency, restore them.
+          // Patrilocal: spouse joins player house residency.
+          {
+            const anyState: any = state as any;
+            const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+            if (anyState.people && anyState.people[spouseId]) anyState.people[spouseId].house_id = playerHouseId;
+            if (anyState.houses && anyState.houses[playerHouseId]) {
+              const h: any = anyState.houses[playerHouseId];
+              if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
+              if (!h.member_person_ids.includes(spouseId)) h.member_person_ids.push(spouseId);
+            }
+          }
           removeCourtExcludeId(state, sid);
-        } else if (subjectChild) {
-          // v0.2.6.1 WP-12 LOCK: marriage-out affects court residency only; it must NOT remove from lineage.
-          // Keep the child in `house.children` for succession, but exclude them from court headcount/consumption.
+        } else if (subjectChild && subjectChild.sex === "F") {
+          // Marriage-out affects court residency only; it must NOT remove from lineage.
           addCourtExcludeId(state, sid);
         }
       }
@@ -1518,6 +1638,30 @@ export function proposeTurn(state: RunState): TurnContext {
     const tier0HouseIds = [...tierSets.tier0.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
     const tier1HouseIds = [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
 
+    // Include Tier0/Tier1 person ids as well (locals, officers, institutions-as-people)
+    // so demography applies to on-screen actors. Exclude the player household to avoid double-processing.
+    const playerPersonIds = new Set<string>(
+      [
+        working.house?.head?.id,
+        working.house?.spouse?.id,
+        ...(working.house?.children ?? []).map((c) => c.id),
+      ].filter((x): x is string => typeof x === "string" && x.length > 0)
+    );
+
+    const tier0PersonIds = [...tierSets.tier0.people]
+      .filter((pid) => !playerPersonIds.has(pid))
+      .sort((a, b) => a.localeCompare(b));
+    const tier1PersonIds = [...tierSets.tier1.people]
+      .filter((pid) => !playerPersonIds.has(pid))
+      .sort((a, b) => a.localeCompare(b));
+
+    const tierArg = {
+      tier0_house_ids: tier0HouseIds,
+      tier1_house_ids: tier1HouseIds,
+      tier0_person_ids: tier0PersonIds,
+      tier1_person_ids: tier1PersonIds,
+    };
+
     const demogRng = new Rng(working.run_seed, "demography", working.turn_index, "fertility");
 
     const marriageRng = new Rng(working.run_seed, "demography", working.turn_index, "marriage");
@@ -1525,13 +1669,13 @@ export function proposeTurn(state: RunState): TurnContext {
 
     // Option B: world marriages (Tier0/1) so Gen2 births are possible.
     processNobleMarriages(working as any,
-      { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
+      tierArg,
       { float01: (label: string) => marriageRng.fork(label).next() },
       { year: working.turn_index * TURN_YEARS }
     );
 
     const demog = processNobleFertility(working as any,
-      { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
+      tierArg,
       { float01: (label: string) => demogRng.fork(label).next() },
       { year: working.turn_index * TURN_YEARS }
     );
@@ -1539,7 +1683,7 @@ export function proposeTurn(state: RunState): TurnContext {
 
     // Option B: world mortality (Tier0/1) — adult-only hazard.
     processNobleMortality(working as any,
-      { tier0_house_ids: tier0HouseIds, tier1_house_ids: tier1HouseIds },
+      tierArg,
       { float01: (label: string) => mortalityRng.fork(label).next() },
       { year: working.turn_index * TURN_YEARS }
     );
@@ -1968,27 +2112,27 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
     // v0.2.7.1 HOTFIX: Wire spouse edge deterministically for later succession spouse swap.
     ensureKinshipSpouseOf(state, child.id, offer.house_person_id);
 
-    // v0.2.5 marriage residence LOCK:
+    // v0.2.8 HOTFIX: residency policy (patrilocal for player house)
     // - Daughters marry out (leave the household court).
-    // - Sons marry in only if they are the heir / eldest son; otherwise they also marry out.
-    const heirId = state.house.heir_id ?? null;
-    const eldestSonId =
-      [...state.house.children]
-        .filter((c) => c.alive && c.sex === "M")
-        .sort((a, b) => {
-          if (b.age !== a.age) return b.age - a.age;
-          return a.id.localeCompare(b.id);
-        })[0]?.id ?? null;
-
-    const spouseJoinsCourt = child.sex === "M" && (child.id === heirId || child.id === eldestSonId);
+    // - Sons stay in the household court; spouse joins.
+    const spouseJoinsCourt = child.sex === "M";
 
     if (spouseJoinsCourt) {
       addCourtExtraId(state, offer.house_person_id);
-      // Defensive: if the subject was previously excluded from court residency, restore them.
+      // Patrilocal: spouse joins player house residency.
+      {
+        const anyState: any = state as any;
+        const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+        if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].house_id = playerHouseId;
+        if (anyState.houses && anyState.houses[playerHouseId]) {
+          const h: any = anyState.houses[playerHouseId];
+          if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
+          if (!h.member_person_ids.includes(offer.house_person_id)) h.member_person_ids.push(offer.house_person_id);
+        }
+      }
       removeCourtExcludeId(state, child.id);
     } else {
-      // v0.2.6.1 WP-12 LOCK: marriage-out affects court residency only; it must NOT remove from lineage.
-      // Keep the child in `house.children` for succession, but exclude them from court headcount/consumption.
+      // Marriage-out affects court residency only; it must NOT remove from lineage.
       addCourtExcludeId(state, child.id);
     }
 
