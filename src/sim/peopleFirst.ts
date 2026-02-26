@@ -128,6 +128,19 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
   if (!s.houses || typeof s.houses !== "object") s.houses = {};
   if (!s.people || typeof s.people !== "object") s.people = {};
 
+  // v0.2.8: additive graph registries (no behavior; BE wires later)
+  if (!s.institutions || typeof s.institutions !== "object" || Array.isArray(s.institutions)) s.institutions = {};
+  if (!Array.isArray(s.service_records)) s.service_records = [];
+  // v0.2.8: marriage candidate reservation locks (canonical facts; must be additive).
+  // Ensure flags.marriage_reservations exists and is an object (reject arrays).
+  if (!s.flags || typeof s.flags !== "object" || Array.isArray(s.flags)) s.flags = {};
+  {
+    const f: any = s.flags;
+    const raw: any = f.marriage_reservations;
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) f.marriage_reservations = {};
+  }
+
+
   // Start from existing registries (superset), then upsert legacy persons.
   const people: Record<string, Person> = { ...(s.people as Record<string, Person>) };
   const upsert = (p: Person | null | undefined) => {

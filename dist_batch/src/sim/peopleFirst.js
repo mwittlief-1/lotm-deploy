@@ -7,11 +7,9 @@ function sortRecord(rec) {
         out[k] = rec[k];
     return out;
 }
-
 function pad2(n) {
     return String(n).padStart(2, "0");
 }
-
 function inferHouseNameFromNobleName(name) {
     const raw = String(name ?? "");
     const idx = raw.lastIndexOf(" of ");
@@ -19,7 +17,6 @@ function inferHouseNameFromNobleName(name) {
         return raw.slice(idx + 4).trim() || raw.trim();
     return raw.trim() || "Noble";
 }
-
 function houseIdForPerson(houses, personId) {
     for (const hid of Object.keys(houses).sort()) {
         const h = houses[hid];
@@ -127,6 +124,21 @@ function syncPeopleFirstFromLegacyUpsert(state) {
         s.houses = {};
     if (!s.people || typeof s.people !== "object")
         s.people = {};
+    // v0.2.8: additive graph registries (no behavior; BE wires later)
+    if (!s.institutions || typeof s.institutions !== "object" || Array.isArray(s.institutions))
+        s.institutions = {};
+    if (!Array.isArray(s.service_records))
+        s.service_records = [];
+    // v0.2.8: marriage candidate reservation locks (canonical facts; must be additive).
+    // Ensure flags.marriage_reservations exists and is an object (reject arrays).
+    if (!s.flags || typeof s.flags !== "object" || Array.isArray(s.flags))
+        s.flags = {};
+    {
+        const f = s.flags;
+        const raw = f.marriage_reservations;
+        if (!raw || typeof raw !== "object" || Array.isArray(raw))
+            f.marriage_reservations = {};
+    }
     // Start from existing registries (superset), then upsert legacy persons.
     const people = { ...s.people };
     const upsert = (p) => {
@@ -158,13 +170,14 @@ function syncPeopleFirstFromLegacyUpsert(state) {
         child_ids: childIds,
         heir_id: state.house?.heir_id ?? null
     };
-
     // v0.2.7.2 P0 (phantom spouse fix support): ensure legacy local nobles have a real House membership
-    // in the People-First registry.
+    // in the People-First registry. This allows marriage offers to source from registries while
+    // preserving deterministic behavior of the prior local-noble pool.
     const nobleIds = Object.keys(people)
         .filter((id) => /^p_noble\d+$/.test(id))
         .sort((a, b) => a.localeCompare(b));
     for (const pid of nobleIds) {
+        // If already in a house, do nothing.
         if (houseIdForPerson(houses, pid))
             continue;
         const m = pid.match(/^p_noble(\d+)$/);
@@ -185,39 +198,45 @@ function syncPeopleFirstFromLegacyUpsert(state) {
             child_ids: Array.isArray(prior.child_ids) ? prior.child_ids : []
         };
     }
-    // Kinship edges: preserve non-player edges; replace only edges involving the player household IDs.
+    // Kinship edges: upsert only (never rewrite).
+    // IMPORTANT: legacy `state.house.children` is a lineage/court membership view, NOT a biological parentage truth.
+    // Rewriting parent_of facts from that view causes re-parenting bugs after succession.
     const prior = Array.isArray(s.kinship_edges)
         ? s.kinship_edges
         : Array.isArray(s.kinship)
             ? s.kinship
             : [];
-    const playerIds = new Set([headId ?? "", spouseId ?? "", ...childIds].filter(Boolean));
-    // v0.2.7.1 HOTFIX: preserve spouse_of edges for player children (do not wipe child marriages during People-First sync).
-    // Only overwrite the HoH<->Spouse edge + parent edges for the player household.
-    const kept = prior.filter((e) => {
-        if (!kinInvolvesAny(e, playerIds))
-            return true;
-        if (e.kind !== "spouse_of")
-            return false;
-        // Always overwrite the current HoH<->Spouse edge from household state.
-        if (headId && spouseId) {
-            if ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId))
-                return false;
-        }
-        // Preserve child spouse edges (child <-> spouse).
-        return Boolean(childIds.includes(e.a_id) || childIds.includes(e.b_id));
-    });
     const desired = [];
-    if (headId && spouseId)
-        desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });
-    if (headId)
-        for (const cid of childIds)
+    // Ensure the current HoH<->Spouse marriage edge exists (but never duplicates).
+    if (headId && spouseId) {
+        const hasSpouse = prior.some((e) => e.kind === "spouse_of" &&
+            ((e.a_id === headId && e.b_id === spouseId) || (e.a_id === spouseId && e.b_id === headId)));
+        if (!hasSpouse)
+            desired.push({ kind: "spouse_of", a_id: headId, b_id: spouseId });
+    }
+    // Add parent edges ONLY when a child has no recorded parents yet (typically new births).
+    // This avoids re-parenting existing lineage members when the head changes.
+    const hasAnyParent = (childId) => prior.some((e) => e.kind === "parent_of" && String(e.child_id) === childId);
+    if (headId) {
+        for (const cid of childIds) {
+            if (!cid)
+                continue;
+            if (hasAnyParent(cid))
+                continue;
             desired.push({ kind: "parent_of", parent_id: headId, child_id: cid });
-    if (spouseId)
-        for (const cid of childIds)
+        }
+    }
+    if (spouseId) {
+        for (const cid of childIds) {
+            if (!cid)
+                continue;
+            if (hasAnyParent(cid))
+                continue;
             desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
+        }
+    }
     const mergedByKey = new Map();
-    for (const e of [...kept, ...desired])
+    for (const e of [...prior, ...desired])
         mergedByKey.set(kinKey(e), e);
     const merged = [...mergedByKey.values()].sort((a, b) => kinKey(a).localeCompare(kinKey(b)));
     // Stable enumeration for serialization: re-materialize registries in sorted key order.

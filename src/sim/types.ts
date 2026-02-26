@@ -15,6 +15,60 @@ export interface Person {
   alive: boolean;
   traits: Traits;
   married?: boolean;
+
+  // v0.2.8: optional origin House for clergy/outsiders (does not change current household/House membership)
+  origin_house_id?: string | null;
+}
+
+
+// --- Graph Actors & Institutions (v0.2.8) ---
+
+export type ActorKind = "person" | "house" | "institution";
+
+export type ActorId =
+  | { kind: "person"; id: string }
+  | { kind: "house"; id: string }
+  | { kind: "institution"; id: string };
+
+export type InstitutionType = "bishopric" | "abbey" | "parish" | "town_corporation"; // town reserved (no mechanics yet)
+
+export interface InstitutionCommon {
+  id: string;
+  type: InstitutionType;
+  name?: string;
+  seat_hex?: string;
+  county_id?: string;
+}
+
+export interface BishopricInstitution extends InstitutionCommon {
+  type: "bishopric";
+}
+
+export interface AbbeyInstitution extends InstitutionCommon {
+  type: "abbey";
+}
+
+export interface TownCorporationInstitution extends InstitutionCommon {
+  type: "town_corporation";
+}
+
+export interface ParishInstitution extends InstitutionCommon {
+  type: "parish";
+  patron_actor_id: ActorId;
+  priest_person_id?: string | null;
+}
+
+export type Institution = BishopricInstitution | AbbeyInstitution | TownCorporationInstitution | ParishInstitution;
+
+// --- Service Records (v0.2.8; structure only) ---
+// A person can serve in a court/institution without changing House membership.
+export interface ServiceRecord {
+  id: string;
+  person_id: string;
+  serving_actor_id: ActorId;
+  role: string;
+  start_turn_index?: number | null;
+  end_turn_index?: number | null;
 }
 
 export interface RelationshipEdge {
@@ -118,6 +172,10 @@ export interface RunState {
   player_house_id?: string;
   kinship_edges?: KinshipEdge[];
   kinship?: KinshipEdge[];
+  // v0.2.8 graph registries (additive; wired later)
+  institutions?: Record<string, Institution>;
+  service_records?: ServiceRecord[];
+
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
   game_over?: GameOverState | null;
@@ -141,6 +199,9 @@ export interface RunSnapshot {
   player_house_id?: string;
   kinship_edges?: KinshipEdge[];
   kinship?: KinshipEdge[];
+  // v0.2.8 graph registries (bounded snapshot; debug + UI scaffolding)
+  institutions?: Record<string, Institution>;
+  service_records?: ServiceRecord[];
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }
@@ -253,6 +314,8 @@ export interface TurnReport {
   };
   // v0.2.3.4+: roster snapshot embedded for history-safe rendering (dedupe + death/heir badges).
   household_roster?: HouseholdRoster;
+  // v0.2.8: derived household roles (rebased on succession; view-only; does not change household_roster schema).
+  household_roster_view?: HouseholdRosterView;
   // v0.2.4: court roster snapshot embedded for history-safe rendering (officers + married-in spouses).
   court_roster?: CourtRoster;
   court_headcount?: number;
@@ -273,6 +336,22 @@ export interface HouseholdRoster {
   schema_version: "household_roster_v1";
   turn_index: number;
   rows: HouseholdRosterRow[];
+}
+
+
+// v0.2.8: derived household roster view (roles relative to current HoH; additive).
+export type HouseholdRosterViewRole = "head" | "spouse" | "child" | "sibling" | "parent";
+
+export interface HouseholdRosterViewRow {
+  person_id: string;
+  role: HouseholdRosterViewRole;
+  badges: HouseholdRosterBadge[];
+}
+
+export interface HouseholdRosterView {
+  schema_version: "household_roster_view_v1";
+  turn_index: number;
+  rows: HouseholdRosterViewRow[];
 }
 
 // --- Court (v0.2.4) ---
@@ -430,6 +509,8 @@ export interface TurnContext {
   prospects_window?: ProspectsWindow | null;
   // v0.2.3.2+: deduped roster view for UI.
   household_roster?: HouseholdRoster;
+  // v0.2.8: derived household roles view for UI/debug.
+  household_roster_view?: HouseholdRosterView;
   // v0.2.4: court roster view for UI.
   court_roster?: CourtRoster;
 }
