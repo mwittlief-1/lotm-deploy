@@ -2,6 +2,8 @@
 
 This repo contains the web MVP + deterministic simulation core + batch/QA harness.
 
+_Maintenance note:_ minor documentation update to verify remote fetch + PR workflow.
+
 ## Install / Run (UI)
 ```bash
 npm install
