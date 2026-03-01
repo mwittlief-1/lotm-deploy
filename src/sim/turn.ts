@@ -1931,12 +1931,19 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
 }
 
 function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift: number, reportNotes: string[]): void {
-  const desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
+  // v0.2.9: baseline labor allocation — no idle peasants.
+  // Builders are explicit; farmers fill the remaining population.
   const desiredBuilders = Math.max(0, Math.trunc(decisions.labor.desired_builders));
+  let desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
 
   if (desiredFarmers + desiredBuilders > state.manor.population) {
     reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
     return;
+  }
+
+  // Auto-fill any remainder into farming (no idle labor).
+  if (desiredFarmers + desiredBuilders < state.manor.population) {
+    desiredFarmers = Math.max(0, state.manor.population - desiredBuilders);
   }
 
   const curF = state.manor.farmers;
@@ -1944,7 +1951,8 @@ function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift:
 
   const dF = Math.abs(desiredFarmers - curF);
   const dB = Math.abs(desiredBuilders - curB);
-  const totalShift = dF + dB;
+  // Actual moved heads between roles is half the L1 change when totals are conserved.
+  const totalShift = Math.trunc((dF + dB) / 2);
 
   // v0.2.3.2: If the current state is oversubscribed (legacy save / earlier bug),
   // allow rebalancing without being blocked by the per-turn labor delta cap.
@@ -1954,7 +1962,6 @@ function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift:
     reportNotes.push(`Labor change exceeds cap (max ${maxShift}); no change applied.`);
     return;
   }
-  // Intentionally no note: the UI can show structured labor warnings via report.labor_signal.
 
   // energy cost if any change
   if (totalShift > 0) {
@@ -1965,8 +1972,8 @@ function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift:
     state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
   }
 
-  state.manor.farmers = clampInt(desiredFarmers, 0, state.manor.population);
   state.manor.builders = clampInt(desiredBuilders, 0, state.manor.population);
+  state.manor.farmers = clampInt(Math.max(0, state.manor.population - state.manor.builders), 0, state.manor.population);
   reportNotes.push(`Labor plan set (takes effect next turn's production): farmers ${state.manor.farmers}, builders ${state.manor.builders}.`);
 }
 
@@ -2111,6 +2118,18 @@ function closeTurn(state: RunState, reportNotes: string[], houseLog: HouseLogEve
 
   // advance turn
   state.turn_index += 1;
+}
+
+
+export function createDefaultDecisions(): TurnDecisions {
+  return {
+    labor: { kind: "labor", desired_farmers: 0, desired_builders: 0 },
+    sell: { kind: "sell", sell_bushels: 0 },
+    obligations: { kind: "pay_obligations", pay_coin: 0, pay_bushels: 0, war_levy_choice: "ignore" },
+    construction: { kind: "construction", action: "none" },
+    marriage: { kind: "marriage", action: "none" },
+    prospects: { kind: "prospects", actions: [] }
+  };
 }
 
 export function applyDecisions(state: RunState, decisions: TurnDecisions): RunState {
