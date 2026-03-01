@@ -591,7 +591,11 @@ function buildMarriageWindow(state) {
             house_person_id: cand.person_id,
             house_label: `House ${cand.house_name}`,
             dowry_coin_net: dowry,
-            relationship_delta: { respect: Math.trunc(2 + quality * 6), allegiance: Math.trunc(1 + quality * 4), threat: Math.trunc(-1 - quality * 2) },
+            relationship_delta: {
+                respect: Math.trunc(2 + quality * 6),
+                allegiance: Math.trunc(1 + quality * 4),
+                threat: Math.trunc(-1 - quality * 2)
+            },
             liege_delta: rng.bool(0.35) ? { respect: 1, threat: -1 } : null,
             risk_tags: [
                 quality > 0.75 ? "prestige" : quality < 0.25 ? "shady" : "plain",
@@ -1741,17 +1745,24 @@ function applyMarriageDecision(state, ctx, decisions, reportNotes) {
     }
 }
 function applyLaborDecision(state, decisions, maxShift, reportNotes) {
-    const desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
+    // v0.2.9: baseline labor allocation — no idle peasants.
+    // Builders are explicit; farmers fill the remaining population.
     const desiredBuilders = Math.max(0, Math.trunc(decisions.labor.desired_builders));
+    let desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
     if (desiredFarmers + desiredBuilders > state.manor.population) {
         reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
         return;
+    }
+    // Auto-fill any remainder into farming (no idle labor).
+    if (desiredFarmers + desiredBuilders < state.manor.population) {
+        desiredFarmers = Math.max(0, state.manor.population - desiredBuilders);
     }
     const curF = state.manor.farmers;
     const curB = state.manor.builders;
     const dF = Math.abs(desiredFarmers - curF);
     const dB = Math.abs(desiredBuilders - curB);
-    const totalShift = dF + dB;
+    // Actual moved heads between roles is half the L1 change when totals are conserved.
+    const totalShift = Math.trunc((dF + dB) / 2);
     // v0.2.3.2: If the current state is oversubscribed (legacy save / earlier bug),
     // allow rebalancing without being blocked by the per-turn labor delta cap.
     const oversubscribedNow = curF + curB > state.manor.population;
@@ -1759,7 +1770,6 @@ function applyLaborDecision(state, decisions, maxShift, reportNotes) {
         reportNotes.push(`Labor change exceeds cap (max ${maxShift}); no change applied.`);
         return;
     }
-    // Intentionally no note: the UI can show structured labor warnings via report.labor_signal.
     // energy cost if any change
     if (totalShift > 0) {
         if (state.house.energy.available <= 0) {
@@ -1768,8 +1778,8 @@ function applyLaborDecision(state, decisions, maxShift, reportNotes) {
         }
         state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
     }
-    state.manor.farmers = clampInt(desiredFarmers, 0, state.manor.population);
     state.manor.builders = clampInt(desiredBuilders, 0, state.manor.population);
+    state.manor.farmers = clampInt(Math.max(0, state.manor.population - state.manor.builders), 0, state.manor.population);
     reportNotes.push(`Labor plan set (takes effect next turn's production): farmers ${state.manor.farmers}, builders ${state.manor.builders}.`);
 }
 function applySellDecision(state, ctx, decisions, reportNotes) {
@@ -1803,7 +1813,7 @@ function spouseIdFromKinship(state, personId) {
         else if (e.b_id === personId && typeof e.a_id === "string")
             matches.add(e.a_id);
     }
-    const sorted = [...matches].sort((a, b) => String(a).localeCompare(String(b)));
+    const sorted = [...matches].sort((a, b) => a.localeCompare(b));
     return sorted[0] ?? null;
 }
 function ensureKinshipSpouseOf(state, aId, bId) {
@@ -1903,6 +1913,16 @@ function closeTurn(state, reportNotes, houseLog) {
     }
     // advance turn
     state.turn_index += 1;
+}
+export function createDefaultDecisions() {
+    return {
+        labor: { kind: "labor", desired_farmers: 0, desired_builders: 0 },
+        sell: { kind: "sell", sell_bushels: 0 },
+        obligations: { kind: "pay_obligations", pay_coin: 0, pay_bushels: 0, war_levy_choice: "ignore" },
+        construction: { kind: "construction", action: "none" },
+        marriage: { kind: "marriage", action: "none" },
+        prospects: { kind: "prospects", actions: [] }
+    };
 }
 export function applyDecisions(state, decisions) {
     if (state.game_over)
