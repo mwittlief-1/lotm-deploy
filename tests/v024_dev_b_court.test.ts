@@ -26,13 +26,32 @@ describe("v0.2.5 Court/Household (Dev B)", () => {
     expect(ctx.report.total_consumption_bushels).toBe(ctx.report.peasant_consumption_bushels + ctx.report.court_consumption_bushels);
     expect(ctx.report.consumption_bushels).toBe(ctx.report.total_consumption_bushels);
 
-    // Court consumption must follow the locked formula.
-    const headcount = ctx.report.court_headcount ?? ctx.report.court_roster?.headcount_alive;
+    // Court consumption must follow the v0.2.9 age-weighted formula (children consume less than adults).
+    const roster = ctx.report.court_roster;
+    const headcount = ctx.report.court_headcount ?? roster?.headcount_alive;
     expect(typeof headcount).toBe("number");
-    expect(ctx.report.court_consumption_bushels).toBe((headcount as number) * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS);
+
+    const anyPrev: any = ctx.preview_state as any;
+    const people: any = anyPrev.people ?? {};
+    const w = (age: number): number => {
+      const a = Math.max(0, Math.trunc(age));
+      if (a <= 2) return 0.35;
+      if (a <= 5) return 0.50;
+      if (a <= 12) return 0.70;
+      if (a <= 15) return 0.85;
+      return 1.0;
+    };
+
+    let adultEq = 0;
+    for (const r of roster?.rows ?? []) {
+      if (r.badges?.includes("deceased")) continue;
+      const p = people[r.person_id];
+      adultEq += w(typeof p?.age === "number" ? p.age : 0);
+    }
+
+    expect(ctx.report.court_consumption_bushels).toBe(Math.floor(adultEq * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS));
 
     // Court roster must include the officers with role keys.
-    const roster = ctx.report.court_roster;
     expect(roster?.schema_version).toBe("court_roster_v1");
     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
     const officerRoles = new Set(officerRows.map((r) => r.officer_role));

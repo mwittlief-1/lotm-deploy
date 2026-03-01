@@ -56,8 +56,14 @@ export function createNewRun(run_seed: string): RunState {
   const spouse = mkPerson(rng, "p_spouse", "F", 30);
   spouse.married = true;
 
-  const child1 = mkPerson(rng, "p_child1", rng.bool(0.55) ? "M" : "F", 12);
-  const child2 = mkPerson(rng, "p_child2", rng.bool(0.55) ? "M" : "F", 9);
+  // v0.2.9: child age smoothing (avoid always-multiples-of-3, keep plausible spacing)
+  const childAgeRng = rng.fork("child_ages");
+  const c1Age = childAgeRng.int(11, 16);
+  const gap = childAgeRng.int(2, 6);
+  const c2Age = Math.max(0, c1Age - gap);
+
+  const child1 = mkPerson(rng, "p_child1", rng.bool(0.55) ? "M" : "F", c1Age);
+  const child2 = mkPerson(rng, "p_child2", rng.bool(0.55) ? "M" : "F", c2Age);
 
   const liege = mkPerson(rng, "p_liege", "M", 41);
   const clergy = mkPerson(rng, "p_clergy", "M", 52);
@@ -83,7 +89,7 @@ export function createNewRun(run_seed: string): RunState {
     turn_index: 0,
     manor: {
       population: 45,
-      farmers: 36, // v0.2.5: start nearer food-stable (population is labor pool)
+      farmers: 45, // v0.2.9: baseline all farmers (no idle)
       builders: 0,
       bushels_stored: 900,
       coin: 10,
