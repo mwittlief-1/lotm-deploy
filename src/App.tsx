@@ -1380,6 +1380,29 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
         return null;
       })();
       const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
+      const courtConsumptionBreakdown: {
+        adults_count: number;
+        adults_rate_bushels_per_turn: number;
+        children_count: number;
+        children_rate_bushels_per_turn: number;
+        total_bushels: number;
+      } | null = (() => {
+        const raw: any = (ctx.report as any)?.court_consumption_breakdown;
+        if (!raw || typeof raw !== "object") return null;
+        const adultsCount = Number(raw.adults_count);
+        const adultsRate = Number(raw.adults_rate_bushels_per_turn);
+        const childrenCount = Number(raw.children_count);
+        const childrenRate = Number(raw.children_rate_bushels_per_turn);
+        const total = Number(raw.total_bushels);
+        if (![adultsCount, adultsRate, childrenCount, childrenRate, total].every(Number.isFinite)) return null;
+        return {
+          adults_count: Math.trunc(adultsCount),
+          adults_rate_bushels_per_turn: Math.trunc(adultsRate),
+          children_count: Math.trunc(childrenCount),
+          children_rate_bushels_per_turn: Math.trunc(childrenRate),
+          total_bushels: Math.trunc(total)
+        };
+      })();
 
       // v0.2.4: Court roster derivation (UI-only; tolerant to missing fields).
       type CourtRosterEntry = { person: PersonLike; relationship: string | null; officer_role: string | null; badges: string[] };
@@ -1614,6 +1637,30 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
         const sid = spouseIdByPersonId.get(person_id);
         if (!sid || sid === person_id) return null;
         return personNameFromRegistry(sid) ?? null;
+      }
+
+      const parentNamesByChildId: Map<string, string[]> = (() => {
+        const out = new Map<string, string[]>();
+        const s: any = ctx.preview_state as any;
+        const edges: any[] = Array.isArray(s?.kinship_edges) ? s.kinship_edges : Array.isArray(s?.kinship) ? s.kinship : [];
+        for (const e of edges) {
+          if (!e || typeof e !== "object" || (e as any).kind !== "parent_of") continue;
+          const parentId = (e as any).parent_id;
+          const childId = (e as any).child_id;
+          if (typeof parentId !== "string" || typeof childId !== "string" || !parentId || !childId) continue;
+          const current = out.get(childId) ?? [];
+          if (!current.includes(parentId)) current.push(parentId);
+          current.sort((a, b) => a.localeCompare(b));
+          out.set(childId, current);
+        }
+        return out;
+      })();
+
+      function parentTextForPersonId(person_id: string): string | null {
+        const parentIds = parentNamesByChildId.get(person_id) ?? [];
+        if (!parentIds.length) return null;
+        const names = parentIds.map((id) => personNameFromRegistry(id) ?? id).sort((a, b) => a.localeCompare(b));
+        return names.length ? `Parents: ${names.join(", ")}` : null;
       }
 
       // v0.2.7: Anchors for Council Agenda CTAs (scroll only; no new routes).
@@ -2404,6 +2451,8 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                                 {r.officer_role ? ` — ${r.officer_role}` : null}
                               </div>
                             ) : null}
+
+                            {parentTextForPersonId(r.person.id) ? <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{parentTextForPersonId(r.person.id)}</div> : null}
                           </li>
                         );
                       })}
@@ -2646,9 +2695,16 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                       Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels
                     </li>
                     {hasConsumptionSplit ? (
-                      <li>
-                        {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
-                      </li>
+                      <>
+                        <li>
+                          {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
+                        </li>
+                        {courtConsumptionBreakdown ? (
+                          <li>
+                            Court detail: adults {courtConsumptionBreakdown.adults_count} × rate = {courtConsumptionBreakdown.adults_rate_bushels_per_turn}, children {courtConsumptionBreakdown.children_count} × rate = {courtConsumptionBreakdown.children_rate_bushels_per_turn}, total = {courtConsumptionBreakdown.total_bushels}
+                          </li>
+                        ) : null}
+                      </>
                     ) : null}
                     <li>
                       Total:{" "}

@@ -59,6 +59,8 @@ import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
 import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, removeCourtExcludeId } from "./court";
 
+const MARRIAGE_REJECT_COOLDOWN_TURNS = 8;
+
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
   if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
@@ -436,6 +438,16 @@ function relationshipDrift(state: RunState): void {
   }
 }
 
+function maternalAgeBirthMultiplier(ageYears: number): number {
+  const a = Math.max(0, Math.trunc(ageYears));
+  if (a >= 45) return 0;
+  if (a >= 41) return 0.05;
+  if (a >= 39) return 0.18;
+  if (a >= 37) return 0.45;
+  if (a >= 35) return 0.7;
+  return 1.0;
+}
+
 function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: string[]; deaths: string[]; population_delta: number } {
   const births: string[] = [];
   const deaths: string[] = [];
@@ -575,16 +587,18 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const mods = (state.flags as any)._mods ?? {};
       const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
       const fertMult = tuningNumber(state, "fertility_mult", 1.0);
-      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult));
+      const maternalMult = maternalAgeBirthMultiplier(spouse.age);
+      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult * maternalMult));
       const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
       if (bRng.bool(chance)) {
         const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
         const sex = bRng.bool(0.52) ? "M" : "F";
+        const ageOffsetYears = bRng.fork("age_offset").int(0, 2);
         const baby: Person = {
           id: childId,
           name: sex === "M" ? "Thomas" : "Anne",
           sex,
-          age: 0,
+          age: ageOffsetYears,
           alive: true,
           traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
           married: false
@@ -620,6 +634,13 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
 
   const desiredSpouseSex: "M" | "F" = subject.sex === "M" ? "F" : "M";
 
+  function isEligibleSpouseCandidate(person: Person): boolean {
+    if (person.alive !== true) return false;
+    if (person.married === true) return false;
+    if (person.sex !== desiredSpouseSex) return false;
+    return person.age >= 15;
+  }
+
   // v0.2.7.2 P0: spouse candidates must come from People-First registries (external Houses),
   // not legacy locals.nobles.
   const anyState: any = state as any;
@@ -628,8 +649,16 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   const houses: Record<string, any> =
     anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
   const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const rejectCooldowns: Record<string, number> =
+    anyState.flags && typeof anyState.flags._marriage_reject_cooldowns === "object" ? anyState.flags._marriage_reject_cooldowns : {};
 
-  const candidates: Array<{ person_id: string; house_id: string; house_name: string }> = [];
+  const isRejectedPairActive = (subjectId: string, spouseId: string): boolean => {
+    const pairKey = `${subjectId}::${spouseId}`;
+    const expiresAt = rejectCooldowns[pairKey];
+    return typeof expiresAt === "number" && Number.isFinite(expiresAt) && expiresAt > state.turn_index;
+  };
+
+  const candidates: Array<{ person_id: string; house_id: string; house_name: string; is_house_head: boolean }> = [];
   const seen = new Set<string>();
 
   const allHouseIds = Object.keys(houses)
@@ -664,17 +693,16 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
 
       const person: any = people[pid];
       if (!person || typeof person !== "object") continue;
-      if (person.alive !== true) continue;
-      if (person.sex !== desiredSpouseSex) continue;
-      // Keep offers coherent: avoid already-married candidates when that info exists.
-      if (person.married === true) continue;
+      if (!isEligibleSpouseCandidate(person as Person)) continue;
+      if (isRejectedPairActive(subject.id, pid)) continue;
 
-      candidates.push({ person_id: pid, house_id: hid, house_name: houseName });
+      candidates.push({ person_id: pid, house_id: hid, house_name: houseName, is_house_head: pid === headId });
     }
   }
 
   // Stable order before RNG picks.
   const pool = candidates.sort((a, b) => {
+    if (a.is_house_head !== b.is_house_head) return a.is_house_head ? 1 : -1;
     const h = a.house_id.localeCompare(b.house_id);
     if (h !== 0) return h;
     return a.person_id.localeCompare(b.person_id);
@@ -691,7 +719,9 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
 
   for (let i = 0; i < offerCount; i++) {
-    const cand = rng.pick(pool);
+    const nonHeadPool = pool.filter((c) => !c.is_house_head);
+    const sourcePool = nonHeadPool.length > 0 ? nonHeadPool : pool;
+    const cand = rng.pick(sourcePool);
     const quality = rng.next(); // 0..1
     const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
     offers.push({
@@ -1123,6 +1153,11 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
   const byId = new Map(windowProspects.map((p) => [p.id, p] as const));
 
   const processed = new Set<string>();
+  const anyFlags: any = state.flags as any;
+  if (!anyFlags._marriage_reject_cooldowns || typeof anyFlags._marriage_reject_cooldowns !== "object") {
+    anyFlags._marriage_reject_cooldowns = {};
+  }
+  const rejectCooldowns: Record<string, number> = anyFlags._marriage_reject_cooldowns as Record<string, number>;
 
   for (const a of actions) {
     if (!a || typeof a !== "object") continue;
@@ -1257,8 +1292,32 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         effects_applied: applied
       });
     } else if (effectiveAct === "reject") {
-      // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
-      // prospect type models explicit rejection penalties).
+      if (prospect.type === "marriage") {
+        const sid: any = (prospect as any).subject_person_id;
+        const spouseId: any = (prospect as any).spouse_person_id;
+        if (typeof sid === "string" && sid && typeof spouseId === "string" && spouseId && sid !== spouseId) {
+          const allegianceDelta = -1;
+          const respectDelta = -2;
+          const threatDelta = +1;
+          adjustEdge(state, state.house.head.id, spouseId, {
+            allegiance: allegianceDelta,
+            respect: respectDelta,
+            threat: threatDelta
+          });
+          applied.relationship_deltas = [
+            {
+              scope: "person",
+              from_id: state.house.head.id,
+              to_id: spouseId,
+              allegiance_delta: allegianceDelta,
+              respect_delta: respectDelta,
+              threat_delta: threatDelta
+            }
+          ];
+          rejectCooldowns[`${sid}::${spouseId}`] = state.turn_index + MARRIAGE_REJECT_COOLDOWN_TURNS;
+          applied.cooldown_turns = MARRIAGE_REJECT_COOLDOWN_TURNS;
+        }
+      }
 
       prospectsLog.push({
         kind: "prospect_rejected",
@@ -1576,6 +1635,7 @@ export function proposeTurn(state: RunState): TurnContext {
     peasant_consumption_bushels: cons.peasant_consumption_bushels,
     court_consumption_bushels: cons.court_consumption_bushels,
     total_consumption_bushels: cons.total_consumption_bushels,
+    court_consumption_breakdown: court.court_consumption_breakdown,
     shortage_bushels: cons.shortage_bushels,
     construction: { progress_added: prod.construction_progress_added, completed_improvement_id: prod.completed_improvement_id ?? null },
     obligations: {

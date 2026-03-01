@@ -330,6 +330,13 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
   court_headcount: number;
   court_consumption_bushels: number;
   court_roster: CourtRoster;
+  court_consumption_breakdown: {
+    adults_count: number;
+    adults_rate_bushels_per_turn: number;
+    children_count: number;
+    children_rate_bushels_per_turn: number;
+    total_bushels: number;
+  };
 } {
   const roster = buildCourtRoster_v0_2_4(state, houseLog);
   const headcount = roster.headcount_alive;
@@ -338,15 +345,33 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
   let adultEq = 0;
+  let adultsCount = 0;
+  let childrenCount = 0;
   for (const r of roster.rows) {
     if (r.badges.includes("deceased")) continue;
     const p = people[r.person_id];
     const age = typeof p?.age === "number" ? p.age : 0;
-    adultEq += consumptionWeightByAge(age);
+    const weight = consumptionWeightByAge(age);
+    adultEq += weight;
+    if (weight < 1) childrenCount += 1;
+    else adultsCount += 1;
   }
 
+  const adultsRate = Math.max(0, Math.floor(adultsCount * bushelsPerPersonPerYear * turnYears));
+  const childrenRate = Math.max(0, Math.floor((adultEq - adultsCount) * bushelsPerPersonPerYear * turnYears));
   const courtConsumption = Math.max(0, Math.floor(adultEq * bushelsPerPersonPerYear * turnYears));
-  return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };
+  return {
+    court_headcount: headcount,
+    court_consumption_bushels: courtConsumption,
+    court_roster: roster,
+    court_consumption_breakdown: {
+      adults_count: adultsCount,
+      adults_rate_bushels_per_turn: adultsRate,
+      children_count: childrenCount,
+      children_rate_bushels_per_turn: childrenRate,
+      total_bushels: courtConsumption
+    }
+  };
 }
 
 // v0.2.9 consumption weights (adult-equivalents)

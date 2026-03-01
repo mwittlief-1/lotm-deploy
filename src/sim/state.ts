@@ -56,11 +56,13 @@ export function createNewRun(run_seed: string): RunState {
   const spouse = mkPerson(rng, "p_spouse", "F", 30);
   spouse.married = true;
 
-  // v0.2.9: child age smoothing (avoid always-multiples-of-3, keep plausible spacing)
+  // v0.2.9: child age smoothing + deterministic non-quantized offsets.
   const childAgeRng = rng.fork("child_ages");
-  const c1Age = childAgeRng.int(11, 16);
+  const c1BaseAge = childAgeRng.int(11, 16);
   const gap = childAgeRng.int(2, 6);
-  const c2Age = Math.max(0, c1Age - gap);
+  const c2BaseAge = Math.max(0, c1BaseAge - gap);
+  const c1Age = c1BaseAge;
+  const c2Age = c2BaseAge + childAgeRng.fork("offset:c2").int(0, 2);
 
   const child1 = mkPerson(rng, "p_child1", rng.bool(0.55) ? "M" : "F", c1Age);
   const child2 = mkPerson(rng, "p_child2", rng.bool(0.55) ? "M" : "F", c2Age);
