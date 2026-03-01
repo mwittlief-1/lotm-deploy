@@ -7,6 +7,11 @@ export function normalizeState(state) {
     if (m.farmers + m.builders > m.population) {
         m.builders = Math.max(0, m.population - m.farmers);
     }
+    // v0.2.9: no idle peasants baseline — any unassigned labor defaults to farming.
+    // Keep builders explicit; farmers fill remainder deterministically.
+    if (m.farmers + m.builders < m.population) {
+        m.farmers = Math.max(0, m.population - m.builders);
+    }
     m.bushels_stored = asNonNegInt(m.bushels_stored);
     m.coin = asNonNegInt(m.coin);
     m.unrest = clampInt(asNonNegInt(m.unrest), 0, 100);

@@ -278,7 +278,7 @@ export interface HouseholdRoster {
 // --- Court (v0.2.4) ---
 
 export type CourtOfficerRole = "steward" | "clerk" | "marshal";
-export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse";
+export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse" | "resident";
 
 export interface CourtRosterRow {
   person_id: string;
@@ -286,6 +286,8 @@ export interface CourtRosterRow {
   // Officer role key (UI maps to title labels per UX contract).
   officer_role: CourtOfficerRole | null;
   badges: HouseholdRosterBadge[];
+  // Derived relative-to-HoH label (son/daughter/brother/etc). Optional for back-compat.
+  relationship_label?: string | null;
 }
 
 export interface CourtRoster {

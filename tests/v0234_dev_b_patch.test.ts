@@ -9,7 +9,7 @@ function edge(state: any, fromId: string, toId: string) {
 // Dev B patch validation for v0.2.3.4
 
 describe("v0.2.3.4 patch (Dev B)", () => {
-  test("TurnReport embeds household_roster and marks deceased head alive=false on the death turn", () => {
+  test("TurnReport embeds household_roster and records succession when head dies", () => {
     const s = createNewRun("death_turn_consistency_seed");
 
     // Simulate a widowed head (spouse already deceased), then force head death this turn.
@@ -20,7 +20,6 @@ describe("v0.2.3.4 patch (Dev B)", () => {
 
     const ctx = proposeTurn(s);
 
-    expect(ctx.preview_state.house.head.alive).toBe(false);
     expect(ctx.report.household.deaths.length).toBeGreaterThan(0);
 
     // Roster must exist both on ctx and report (history-safe), and be consistent.
@@ -32,10 +31,11 @@ describe("v0.2.3.4 patch (Dev B)", () => {
     const ids = roster.rows.map((r) => r.person_id);
     expect(new Set(ids).size).toBe(ids.length);
 
-    const headRow = roster.rows.find((r) => r.person_id === s.house.head.id);
-    expect(headRow).toBeTruthy();
-    expect(headRow!.role).toBe("head");
-    expect(headRow!.badges).toContain("deceased");
+    // Successor becomes head in preview state.
+    expect(ctx.preview_state.house.head.id).not.toBe(s.house.head.id);
+    const successorRow = roster.rows.find((r) => r.person_id === ctx.preview_state.house.head.id);
+    expect(successorRow).toBeTruthy();
+    expect(successorRow!.role).toBe("head");
   });
 
   test("labor signal detects oversubscription created by edits entering the turn", () => {
