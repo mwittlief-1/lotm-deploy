@@ -1,0 +1,340 @@
+diff --git a/docs/BUILD_INFO.json b/docs/BUILD_INFO.json
+index 990c66f..4c90610 100644
+--- a/docs/BUILD_INFO.json
++++ b/docs/BUILD_INFO.json
+@@ -1,6 +1,6 @@
+ {
+-  "app_version": "v0.2.7.2",
+-  "sim_version": "v0.2.7.2",
++  "app_version": "v0.2.9",
++  "sim_version": "v0.2.9",
+   "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+   "build_time_utc": "2026-02-19T18:47:51Z",
+   "created_at_utc": "2026-02-19T18:47:51Z",
+@@ -9,5 +9,5 @@
+     "builder-forward",
+     "builder-forward/buffered"
+   ],
+-  "notes": "v0.2.7.2 hotfix (P0 only): fixes marriage coherence + prospect attribution and surfaces the fixes in UI. Sim: buildMarriageWindow sources spouse candidates from People-First external houses (prefer local noble houses h_noble_XX) rather than legacy locals.nobles (removes phantom spouses); marriage prospects stamp from_house_id using spouse candidate’s actual house_id (via house scan); spouseIdFromKinship hardened to deterministic selection (lexicographically smallest spouse id) when multiple spouse_of edges exist. UI: marriage prospect card shows spouse name + age + house; roster shows spouse subline per person via spouse_of edges (no global spouse field); Known Houses panel hydrates from house_id lists; Diff Ledger prefers sim-provided diff_ledger items when present; marriage toast mirrors sim residence rule (heir/eldest son brings spouse in; otherwise child marries out). No new mechanics or tuning changes; retains v0.2.7.x runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8)."
++  "notes": "v0.2.7.2 hotfix (P0 only): fixes marriage coherence + prospect attribution and surfaces the fixes in UI. Sim: buildMarriageWindow sources spouse candidates from People-First external houses (prefer local noble houses h_noble_XX) rather than legacy locals.nobles (removes phantom spouses); marriage prospects stamp from_house_id using spouse candidate\u2019s actual house_id (via house scan); spouseIdFromKinship hardened to deterministic selection (lexicographically smallest spouse id) when multiple spouse_of edges exist. UI: marriage prospect card shows spouse name + age + house; roster shows spouse subline per person via spouse_of edges (no global spouse field); Known Houses panel hydrates from house_id lists; Diff Ledger prefers sim-provided diff_ledger items when present; marriage toast mirrors sim residence rule (heir/eldest son brings spouse in; otherwise child marries out). No new mechanics or tuning changes; retains v0.2.7.x runtime defaults (court_variant=B; fertility_mult=2.0; mortality_mult=0.8)."
+ }
+diff --git a/package.json b/package.json
+index 5df0337..ee879ad 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "lords-of-the-manor-mvp",
+-  "version": "0.2.8.4",
++  "version": "0.2.9",
+   "private": true,
+   "type": "module",
+   "scripts": {
+diff --git a/src/sim/court.ts b/src/sim/court.ts
+index d1ecaf4..7a88f3e 100644
+--- a/src/sim/court.ts
++++ b/src/sim/court.ts
+@@ -263,6 +263,14 @@ export function removeCourtExcludeId(state: RunState, personId: string): void {
+   if (Array.isArray(h.court_exclude_ids) && h.court_exclude_ids.length === 0) delete h.court_exclude_ids;
+ }
+ 
++function consumptionWeightByAge(age: number): number {
++  if (age <= 2) return 0.35;
++  if (age <= 5) return 0.5;
++  if (age <= 12) return 0.7;
++  if (age <= 15) return 0.85;
++  return 1.0;
++}
++
+ export function deriveCourtMemberIds(state: RunState): string[] {
+   // Stable ordering: head, spouse, children (oldest->youngest, id tie-break), officers (fixed role order), extras (id asc).
+   const anyState: any = state as any;
+@@ -292,6 +300,24 @@ export function deriveCourtMemberIds(state: RunState): string[] {
+   });
+   for (const c of kids) push(c.id);
+ 
++  // v0.2.9: include People-First in-house residents (e.g., grandchildren / dependents).
++  const playerHouseId: string | null = (anyState.player_house_id ?? null) as any;
++  const houseRec: any = playerHouseId && anyState.houses ? anyState.houses[playerHouseId] : null;
++  const memberIds: string[] = Array.isArray(houseRec?.member_person_ids) ? houseRec.member_person_ids : [];
++  const residentIds = memberIds
++    .filter((id) => typeof id === "string")
++    .filter((id) => id !== state.house.head?.id && id !== state.house.spouse?.id)
++    .filter((id) => !kids.some((k) => k.id === id))
++    .sort((a, b) => {
++      const pa = people[a];
++      const pb = people[b];
++      const aa = pa ? pa.age : 0;
++      const bb = pb ? pb.age : 0;
++      if (bb !== aa) return bb - aa;
++      return String(a).localeCompare(String(b));
++    });
++  for (const id of residentIds) push(id);
++
+   for (const { role, person_id } of getCourtOfficerIds(state)) {
+     // ensure stable role ordering by iterating fixed role order in getCourtOfficerIds
+     push(person_id);
+@@ -381,6 +407,25 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
+   });
+   for (const c of kids) pushRow(c.id, "child");
+ 
++  // v0.2.9: include People-First in-house residents as roster rows.
++  const playerHouseId: string | null = (anyState.player_house_id ?? null) as any;
++  const houseRec: any = playerHouseId && anyState.houses ? anyState.houses[playerHouseId] : null;
++  const memberIds: string[] = Array.isArray(houseRec?.member_person_ids) ? houseRec.member_person_ids : [];
++  const residentIds = memberIds
++    .filter((id) => typeof id === "string")
++    .filter((id) => id !== state.house.head?.id && id !== state.house.spouse?.id)
++    .filter((id) => !kids.some((k) => k.id === id))
++    .filter((id) => !excluded.has(id))
++    .sort((a, b) => {
++      const pa = people[a];
++      const pb = people[b];
++      const aa = pa ? pa.age : 0;
++      const bb = pb ? pb.age : 0;
++      if (bb !== aa) return bb - aa;
++      return String(a).localeCompare(String(b));
++    });
++  for (const id of residentIds) pushRow(id, "resident");
++
+   // Officers
+   for (const { role, person_id } of getCourtOfficerIds(state)) {
+     pushRow(person_id, "officer", role);
+@@ -407,6 +452,18 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
+ } {
+   const roster = buildCourtRoster_v0_2_4(state, houseLog);
+   const headcount = roster.headcount_alive;
+-  const courtConsumption = Math.max(0, Math.floor(headcount * bushelsPerPersonPerYear * turnYears));
++  const anyState: any = state as any;
++  const people: Record<string, Person> = (anyState.people ?? {}) as any;
++
++  // v0.2.9: age-weighted consumption to avoid child-heavy courts instantly breaking food balance.
++  let adultEquiv = 0;
++  for (const row of roster.rows) {
++    const p = people[row.person_id];
++    if (!p) continue;
++    if (p.alive === false) continue;
++    adultEquiv += consumptionWeightByAge(p.age ?? 0);
++  }
++
++  const courtConsumption = Math.max(0, Math.floor(adultEquiv * bushelsPerPersonPerYear * turnYears));
+   return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };
+ }
+diff --git a/src/sim/normalize.ts b/src/sim/normalize.ts
+index a1f058c..96bc177 100644
+--- a/src/sim/normalize.ts
++++ b/src/sim/normalize.ts
+@@ -10,6 +10,11 @@ export function normalizeState(state: RunState): void {
+   if (m.farmers + m.builders > m.population) {
+     m.builders = Math.max(0, m.population - m.farmers);
+   }
++  // v0.2.9 baseline simplification: no idle peasants by default.
++  // When labor is not explicitly allocated, remainder is assumed to farm.
++  if (m.farmers + m.builders < m.population) {
++    m.farmers = Math.max(0, m.population - m.builders);
++  }
+ 
+   m.bushels_stored = asNonNegInt(m.bushels_stored);
+   m.coin = asNonNegInt(m.coin);
+diff --git a/src/sim/state.ts b/src/sim/state.ts
+index 264e1d3..251456b 100644
+--- a/src/sim/state.ts
++++ b/src/sim/state.ts
+@@ -83,7 +83,7 @@ export function createNewRun(run_seed: string): RunState {
+     turn_index: 0,
+     manor: {
+       population: 45,
+-      farmers: 36, // v0.2.5: start nearer food-stable (population is labor pool)
++      farmers: 45, // v0.2.5: start nearer food-stable (population is labor pool)
+       builders: 0,
+       bushels_stored: 900,
+       coin: 10,
+diff --git a/src/sim/types.ts b/src/sim/types.ts
+index 8b3b0b5..da6e54f 100644
+--- a/src/sim/types.ts
++++ b/src/sim/types.ts
+@@ -330,6 +330,8 @@ export interface HouseholdRosterRow {
+   person_id: string;
+   role: HouseholdRosterRole;
+   badges: HouseholdRosterBadge[];
++  // v0.2.8.2 hotfix: relationship labels relative to current HoH.
++  relationship_label?: string | null;
+ }
+ 
+ export interface HouseholdRoster {
+@@ -357,7 +359,7 @@ export interface HouseholdRosterView {
+ // --- Court (v0.2.4) ---
+ 
+ export type CourtOfficerRole = "steward" | "clerk" | "marshal";
+-export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse";
++export type CourtRosterRole = "head" | "spouse" | "child" | "resident" | "officer" | "married_in_spouse";
+ 
+ export interface CourtRosterRow {
+   person_id: string;
+diff --git a/src/version.ts b/src/version.ts
+index e2d127d..4451de1 100644
+--- a/src/version.ts
++++ b/src/version.ts
+@@ -1 +1 @@
+-export const APP_VERSION = "v0.2.8.4";
++export const APP_VERSION = "v0.2.9";
+diff --git a/tests/v024_dev_b_court.test 2.ts b/tests/v024_dev_b_court.test 2.ts
+index 9066042..9907371 100644
+--- a/tests/v024_dev_b_court.test 2.ts	
++++ b/tests/v024_dev_b_court.test 2.ts	
+@@ -4,6 +4,14 @@ import { BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS } from "../src/sim/constants";
+ import { createNewRun } from "../src/sim/state";
+ import { applyDecisions, createDefaultDecisions, proposeTurn } from "../src/sim/turn";
+ 
++function weightByAge(age: number): number {
++  if (age <= 2) return 0.35;
++  if (age <= 5) return 0.5;
++  if (age <= 12) return 0.7;
++  if (age <= 15) return 0.85;
++  return 1.0;
++}
++
+ describe("v0.2.5 Court/Household (Dev B)", () => {
+   it("generates deterministic steward stub and reconciles consumption totals", () => {
+     const state = createNewRun(12345);
+@@ -29,9 +37,18 @@ describe("v0.2.5 Court/Household (Dev B)", () => {
+     // Court consumption must follow the locked formula.
+     const headcount = ctx.report.court_headcount ?? ctx.report.court_roster?.headcount_alive;
+     expect(typeof headcount).toBe("number");
+-    expect(ctx.report.court_consumption_bushels).toBe((headcount as number) * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS);
++    // v0.2.9: court consumption uses age-weighted adult equivalents
++    const rosterRows = ctx.report.court_roster?.rows ?? [];
++    let adultEquiv = 0;
++    for (const r of rosterRows) {
++      const p = (anyState.people ?? {})[r.person_id];
++      if (!p) continue;
++      if (p.alive === false) continue;
++      adultEquiv += weightByAge(p.age ?? 0);
++    }
++    expect(ctx.report.court_consumption_bushels).toBe(Math.floor(adultEquiv * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS));
+ 
+-    // Court roster must include the officers with role keys.
++// Court roster must include the officers with role keys.
+     const roster = ctx.report.court_roster;
+     expect(roster?.schema_version).toBe("court_roster_v1");
+     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
+diff --git a/tests/v024_dev_b_court.test 3.ts b/tests/v024_dev_b_court.test 3.ts
+index 9066042..9907371 100644
+--- a/tests/v024_dev_b_court.test 3.ts	
++++ b/tests/v024_dev_b_court.test 3.ts	
+@@ -4,6 +4,14 @@ import { BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS } from "../src/sim/constants";
+ import { createNewRun } from "../src/sim/state";
+ import { applyDecisions, createDefaultDecisions, proposeTurn } from "../src/sim/turn";
+ 
++function weightByAge(age: number): number {
++  if (age <= 2) return 0.35;
++  if (age <= 5) return 0.5;
++  if (age <= 12) return 0.7;
++  if (age <= 15) return 0.85;
++  return 1.0;
++}
++
+ describe("v0.2.5 Court/Household (Dev B)", () => {
+   it("generates deterministic steward stub and reconciles consumption totals", () => {
+     const state = createNewRun(12345);
+@@ -29,9 +37,18 @@ describe("v0.2.5 Court/Household (Dev B)", () => {
+     // Court consumption must follow the locked formula.
+     const headcount = ctx.report.court_headcount ?? ctx.report.court_roster?.headcount_alive;
+     expect(typeof headcount).toBe("number");
+-    expect(ctx.report.court_consumption_bushels).toBe((headcount as number) * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS);
++    // v0.2.9: court consumption uses age-weighted adult equivalents
++    const rosterRows = ctx.report.court_roster?.rows ?? [];
++    let adultEquiv = 0;
++    for (const r of rosterRows) {
++      const p = (anyState.people ?? {})[r.person_id];
++      if (!p) continue;
++      if (p.alive === false) continue;
++      adultEquiv += weightByAge(p.age ?? 0);
++    }
++    expect(ctx.report.court_consumption_bushels).toBe(Math.floor(adultEquiv * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS));
+ 
+-    // Court roster must include the officers with role keys.
++// Court roster must include the officers with role keys.
+     const roster = ctx.report.court_roster;
+     expect(roster?.schema_version).toBe("court_roster_v1");
+     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
+diff --git a/tests/v024_dev_b_court.test 4.ts b/tests/v024_dev_b_court.test 4.ts
+index 9066042..9907371 100644
+--- a/tests/v024_dev_b_court.test 4.ts	
++++ b/tests/v024_dev_b_court.test 4.ts	
+@@ -4,6 +4,14 @@ import { BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS } from "../src/sim/constants";
+ import { createNewRun } from "../src/sim/state";
+ import { applyDecisions, createDefaultDecisions, proposeTurn } from "../src/sim/turn";
+ 
++function weightByAge(age: number): number {
++  if (age <= 2) return 0.35;
++  if (age <= 5) return 0.5;
++  if (age <= 12) return 0.7;
++  if (age <= 15) return 0.85;
++  return 1.0;
++}
++
+ describe("v0.2.5 Court/Household (Dev B)", () => {
+   it("generates deterministic steward stub and reconciles consumption totals", () => {
+     const state = createNewRun(12345);
+@@ -29,9 +37,18 @@ describe("v0.2.5 Court/Household (Dev B)", () => {
+     // Court consumption must follow the locked formula.
+     const headcount = ctx.report.court_headcount ?? ctx.report.court_roster?.headcount_alive;
+     expect(typeof headcount).toBe("number");
+-    expect(ctx.report.court_consumption_bushels).toBe((headcount as number) * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS);
++    // v0.2.9: court consumption uses age-weighted adult equivalents
++    const rosterRows = ctx.report.court_roster?.rows ?? [];
++    let adultEquiv = 0;
++    for (const r of rosterRows) {
++      const p = (anyState.people ?? {})[r.person_id];
++      if (!p) continue;
++      if (p.alive === false) continue;
++      adultEquiv += weightByAge(p.age ?? 0);
++    }
++    expect(ctx.report.court_consumption_bushels).toBe(Math.floor(adultEquiv * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS));
+ 
+-    // Court roster must include the officers with role keys.
++// Court roster must include the officers with role keys.
+     const roster = ctx.report.court_roster;
+     expect(roster?.schema_version).toBe("court_roster_v1");
+     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
+diff --git a/tests/v024_dev_b_court.test.ts b/tests/v024_dev_b_court.test.ts
+index 9066042..9907371 100644
+--- a/tests/v024_dev_b_court.test.ts
++++ b/tests/v024_dev_b_court.test.ts
+@@ -4,6 +4,14 @@ import { BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS } from "../src/sim/constants";
+ import { createNewRun } from "../src/sim/state";
+ import { applyDecisions, createDefaultDecisions, proposeTurn } from "../src/sim/turn";
+ 
++function weightByAge(age: number): number {
++  if (age <= 2) return 0.35;
++  if (age <= 5) return 0.5;
++  if (age <= 12) return 0.7;
++  if (age <= 15) return 0.85;
++  return 1.0;
++}
++
+ describe("v0.2.5 Court/Household (Dev B)", () => {
+   it("generates deterministic steward stub and reconciles consumption totals", () => {
+     const state = createNewRun(12345);
+@@ -29,9 +37,18 @@ describe("v0.2.5 Court/Household (Dev B)", () => {
+     // Court consumption must follow the locked formula.
+     const headcount = ctx.report.court_headcount ?? ctx.report.court_roster?.headcount_alive;
+     expect(typeof headcount).toBe("number");
+-    expect(ctx.report.court_consumption_bushels).toBe((headcount as number) * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS);
++    // v0.2.9: court consumption uses age-weighted adult equivalents
++    const rosterRows = ctx.report.court_roster?.rows ?? [];
++    let adultEquiv = 0;
++    for (const r of rosterRows) {
++      const p = (anyState.people ?? {})[r.person_id];
++      if (!p) continue;
++      if (p.alive === false) continue;
++      adultEquiv += weightByAge(p.age ?? 0);
++    }
++    expect(ctx.report.court_consumption_bushels).toBe(Math.floor(adultEquiv * BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS));
+ 
+-    // Court roster must include the officers with role keys.
++// Court roster must include the officers with role keys.
+     const roster = ctx.report.court_roster;
+     expect(roster?.schema_version).toBe("court_roster_v1");
+     const officerRows = roster?.rows.filter((r) => r.role === "officer") ?? [];
