@@ -7,11 +7,9 @@ function sortRecord(rec) {
         out[k] = rec[k];
     return out;
 }
-
 function pad2(n) {
     return String(n).padStart(2, "0");
 }
-
 function inferHouseNameFromNobleName(name) {
     const raw = String(name ?? "");
     const idx = raw.lastIndexOf(" of ");
@@ -19,7 +17,6 @@ function inferHouseNameFromNobleName(name) {
         return raw.slice(idx + 4).trim() || raw.trim();
     return raw.trim() || "Noble";
 }
-
 function houseIdForPerson(houses, personId) {
     for (const hid of Object.keys(houses).sort()) {
         const h = houses[hid];
@@ -158,13 +155,14 @@ function syncPeopleFirstFromLegacyUpsert(state) {
         child_ids: childIds,
         heir_id: state.house?.heir_id ?? null
     };
-
     // v0.2.7.2 P0 (phantom spouse fix support): ensure legacy local nobles have a real House membership
-    // in the People-First registry.
+    // in the People-First registry. This allows marriage offers to source from registries while
+    // preserving deterministic behavior of the prior local-noble pool.
     const nobleIds = Object.keys(people)
         .filter((id) => /^p_noble\d+$/.test(id))
         .sort((a, b) => a.localeCompare(b));
     for (const pid of nobleIds) {
+        // If already in a house, do nothing.
         if (houseIdForPerson(houses, pid))
             continue;
         const m = pid.match(/^p_noble(\d+)$/);

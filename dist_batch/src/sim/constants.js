@@ -25,7 +25,7 @@ export const MORTALITY_MULT_WITH_PHYSICIAN = 0.6;
 // Birth tuning (durability): base fertility odds by spouse fertility trait (per 3-year turn)
 export const BIRTH_CHANCE_BY_FERTILITY = [0, 0.09, 0.17, 0.26, 0.34, 0.42];
 export const BIRTH_FERTILE_AGE_MIN = 16;
-export const BIRTH_FERTILE_AGE_MAX = 48; // inclusive
+export const BIRTH_FERTILE_AGE_MAX = 44; // inclusive (v0.2.9: 45+ effectively zero)
 // Mortality tuning (durability): base death odds per 3-year turn by age band
 export const MORTALITY_P_UNDER16 = 0.0035;
 export const MORTALITY_P_UNDER40 = 0.006;

@@ -308,6 +308,12 @@ export function buildCourtRoster_v0_2_4(state, houseLog) {
     });
     for (const c of kids)
         pushRow(c.id, "child");
+    // v0.2.9: include additional in-house residents (e.g., grandchildren) from People-First house membership.
+    const houseRec = getHouseRegistry(state);
+    const memberIdsRaw = Array.isArray(houseRec?.member_person_ids) ? houseRec.member_person_ids : [];
+    const memberIds = memberIdsRaw.filter((x) => typeof x === "string" && x.length > 0).sort((a, b) => String(a).localeCompare(String(b)));
+    for (const id of memberIds)
+        pushRow(String(id), "resident");
     // Officers
     for (const { role, person_id } of getCourtOfficerIds(state)) {
         pushRow(person_id, "officer", role);
@@ -327,6 +333,30 @@ export function buildCourtRoster_v0_2_4(state, houseLog) {
 export function courtConsumptionBushels_v0_2_4(state, bushelsPerPersonPerYear, turnYears, houseLog) {
     const roster = buildCourtRoster_v0_2_4(state, houseLog);
     const headcount = roster.headcount_alive;
-    const courtConsumption = Math.max(0, Math.floor(headcount * bushelsPerPersonPerYear * turnYears));
+    // v0.2.9: age-weighted consumption (children consume less than adults).
+    const anyState = state;
+    const people = (anyState.people ?? {});
+    let adultEq = 0;
+    for (const r of roster.rows) {
+        if (r.badges.includes("deceased"))
+            continue;
+        const p = people[r.person_id];
+        const age = typeof p?.age === "number" ? p.age : 0;
+        adultEq += consumptionWeightByAge(age);
+    }
+    const courtConsumption = Math.max(0, Math.floor(adultEq * bushelsPerPersonPerYear * turnYears));
     return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };
+}
+// v0.2.9 consumption weights (adult-equivalents)
+function consumptionWeightByAge(ageYears) {
+    const a = Math.max(0, Math.trunc(ageYears));
+    if (a <= 2)
+        return 0.35;
+    if (a <= 5)
+        return 0.50;
+    if (a <= 12)
+        return 0.70;
+    if (a <= 15)
+        return 0.85;
+    return 1.00;
 }
