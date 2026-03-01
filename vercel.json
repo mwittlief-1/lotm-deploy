@@ -5,6 +5,6 @@
       "destination": "/index.html"
     }
   ],
-  "installCommand": "npm ci --no-audit --no-fund",
+  "installCommand": "npm ci --include=dev --no-audit --no-fund",
   "buildCommand": "npm run build"
 }
