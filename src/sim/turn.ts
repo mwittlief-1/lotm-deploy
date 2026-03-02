@@ -125,6 +125,18 @@ function decrementCooldowns(state: RunState): void {
   }
 }
 
+function cleanupMarriageRejectCooldowns(state: RunState): void {
+  const anyFlags: any = state.flags as any;
+  const raw = anyFlags?._marriage_reject_cooldowns;
+  if (!raw || typeof raw !== "object") return;
+  for (const k of Object.keys(raw)) {
+    const expiresAt = raw[k];
+    if (!(typeof expiresAt === "number" && Number.isFinite(expiresAt) && expiresAt > state.turn_index)) {
+      delete raw[k];
+    }
+  }
+}
+
 function chooseEventCount(rng: Rng): 0 | 1 | 2 {
   const r = rng.next();
   let acc = 0;
@@ -718,10 +730,13 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   const offers: MarriageOffer[] = [];
   const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
 
-  for (let i = 0; i < offerCount; i++) {
-    const nonHeadPool = pool.filter((c) => !c.is_house_head);
-    const sourcePool = nonHeadPool.length > 0 ? nonHeadPool : pool;
+  const remainingPool = pool.slice();
+  for (let i = 0; i < offerCount && remainingPool.length > 0; i++) {
+    const nonHeadPool = remainingPool.filter((c) => !c.is_house_head);
+    const sourcePool = nonHeadPool.length > 0 ? nonHeadPool : remainingPool;
     const cand = rng.pick(sourcePool);
+    const usedIdx = remainingPool.findIndex((x) => x.person_id === cand.person_id);
+    if (usedIdx >= 0) remainingPool.splice(usedIdx, 1);
     const quality = rng.next(); // 0..1
     const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
     offers.push({
@@ -1545,6 +1560,7 @@ export function proposeTurn(state: RunState): TurnContext {
 
   // 2) macro env shift
   decrementCooldowns(working);
+  cleanupMarriageRejectCooldowns(working);
   const spoil = applySpoilage(working);
   const macro = computeWeatherMarket(working);
 

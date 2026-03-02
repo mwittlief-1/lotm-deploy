@@ -201,9 +201,9 @@ export interface TurnReport {
   total_consumption_bushels: number;
   court_consumption_breakdown?: {
     adults_count: number;
-    adults_rate_bushels_per_turn: number;
+    adults_total_bushels: number;
     children_count: number;
-    children_rate_bushels_per_turn: number;
+    children_total_bushels: number;
     total_bushels: number;
   };
   shortage_bushels: number;

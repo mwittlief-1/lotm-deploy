@@ -332,9 +332,9 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
   court_roster: CourtRoster;
   court_consumption_breakdown: {
     adults_count: number;
-    adults_rate_bushels_per_turn: number;
+    adults_total_bushels: number;
     children_count: number;
-    children_rate_bushels_per_turn: number;
+    children_total_bushels: number;
     total_bushels: number;
   };
 } {
@@ -366,9 +366,9 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
     court_roster: roster,
     court_consumption_breakdown: {
       adults_count: adultsCount,
-      adults_rate_bushels_per_turn: adultsRate,
+      adults_total_bushels: adultsRate,
       children_count: childrenCount,
-      children_rate_bushels_per_turn: childrenRate,
+      children_total_bushels: childrenRate,
       total_bushels: courtConsumption
     }
   };

@@ -80,7 +80,45 @@ describe("v0.2.9 UAT fixes", () => {
     }
 
     const cooldowns = s.flags?._marriage_reject_cooldowns ?? {};
-    expect(cooldowns[`${subject.id}::p_ext_reject_spouse`]).toBeGreaterThanOrEqual(s.turn_index);
+    const key = `${subject.id}::p_ext_reject_spouse`;
+    const expiresAt = Number(cooldowns[key]);
+    expect(Number.isFinite(expiresAt)).toBe(true);
+
+    while (s.turn_index <= expiresAt) {
+      s.flags.MarriageOffer = true;
+      s = applyDecisions(s, defaultDecisions(s));
+    }
+
+    const cooldownsAfter = s.flags?._marriage_reject_cooldowns ?? {};
+    expect(cooldownsAfter[key]).toBeUndefined();
+
+    const spouseRec = s.people["p_ext_reject_spouse"];
+    expect(spouseRec).toBeTruthy();
+    spouseRec.alive = true;
+    spouseRec.married = false;
+    spouseRec.age = 20;
+
+    let subjAfter = s.house.children.find((c: any) => c.id === subject.id) ?? s.house.children[0];
+    if (!subjAfter) {
+      subjAfter = {
+        id: subject.id,
+        name: "Subject",
+        sex: "M",
+        age: 18,
+        alive: true,
+        married: false,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+      };
+      s.house.children.push(subjAfter);
+    }
+    subjAfter.alive = true;
+    subjAfter.married = false;
+    subjAfter.sex = "M";
+    subjAfter.age = Math.max(18, subjAfter.age);
+
+    s.flags.MarriageOffer = true;
+    const ctxAfter: any = proposeTurn(s);
+    expect(ctxAfter.marriage_window).toBeTruthy();
   });
 
   it("reject writes relationship delta receipt in prospects log", () => {
@@ -135,6 +173,19 @@ describe("v0.2.9 UAT fixes", () => {
     expect(marriage.spouse_person_id).not.toBe("p_ext_head_candidate");
   });
 
+  it("marriage window offers do not repeat the same spouse candidate", () => {
+    const s: any = createNewRun("TEST_v029_no_duplicate_marriage_offers");
+    const subject = s.house.children[0];
+    subject.sex = "M";
+    subject.age = 18;
+    subject.alive = true;
+    subject.married = false;
+
+    const ctx: any = proposeTurn(s);
+    const ids = (ctx.marriage_window?.offers ?? []).map((o: any) => String(o.house_person_id));
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("birth age offsets break strict multiples-of-3 age buckets", () => {
     let s: any = createNewRun("TEST_v029_age_offsets");
     s.house.spouse.age = 22;
@@ -169,6 +220,6 @@ describe("v0.2.9 UAT fixes", () => {
     expect(b).toBeTruthy();
     expect(b.children_count).toBeGreaterThan(0);
     expect(b.adults_count).toBeGreaterThan(0);
-    expect(b.children_rate_bushels_per_turn / b.children_count).toBeLessThan(b.adults_rate_bushels_per_turn / b.adults_count);
+    expect(b.children_total_bushels / b.children_count).toBeLessThan(b.adults_total_bushels / b.adults_count);
   });
 });

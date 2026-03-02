@@ -1382,24 +1382,24 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
       const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
       const courtConsumptionBreakdown: {
         adults_count: number;
-        adults_rate_bushels_per_turn: number;
+        adults_total_bushels: number;
         children_count: number;
-        children_rate_bushels_per_turn: number;
+        children_total_bushels: number;
         total_bushels: number;
       } | null = (() => {
         const raw: any = (ctx.report as any)?.court_consumption_breakdown;
         if (!raw || typeof raw !== "object") return null;
         const adultsCount = Number(raw.adults_count);
-        const adultsRate = Number(raw.adults_rate_bushels_per_turn);
+        const adultsRate = Number(raw.adults_total_bushels);
         const childrenCount = Number(raw.children_count);
-        const childrenRate = Number(raw.children_rate_bushels_per_turn);
+        const childrenRate = Number(raw.children_total_bushels);
         const total = Number(raw.total_bushels);
         if (![adultsCount, adultsRate, childrenCount, childrenRate, total].every(Number.isFinite)) return null;
         return {
           adults_count: Math.trunc(adultsCount),
-          adults_rate_bushels_per_turn: Math.trunc(adultsRate),
+          adults_total_bushels: Math.trunc(adultsRate),
           children_count: Math.trunc(childrenCount),
-          children_rate_bushels_per_turn: Math.trunc(childrenRate),
+          children_total_bushels: Math.trunc(childrenRate),
           total_bushels: Math.trunc(total)
         };
       })();
@@ -2430,6 +2430,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                     <ul style={{ margin: "0 0 10px 18px" }}>
                       {courtRoster.entries.map((r) => {
                         const spouseName = spouseNameForPersonId(r.person.id);
+                        const parentText = parentTextForPersonId(r.person.id);
                         return (
                           <li key={r.person.id} style={{ marginBottom: 6 }}>
                             <div>
@@ -2452,7 +2453,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                               </div>
                             ) : null}
 
-                            {parentTextForPersonId(r.person.id) ? <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{parentTextForPersonId(r.person.id)}</div> : null}
+                            {parentText ? <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{parentText}</div> : null}
                           </li>
                         );
                       })}
@@ -2701,7 +2702,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                         </li>
                         {courtConsumptionBreakdown ? (
                           <li>
-                            Court detail: adults {courtConsumptionBreakdown.adults_count} × rate = {courtConsumptionBreakdown.adults_rate_bushels_per_turn}, children {courtConsumptionBreakdown.children_count} × rate = {courtConsumptionBreakdown.children_rate_bushels_per_turn}, total = {courtConsumptionBreakdown.total_bushels}
+                            Court detail: adults {courtConsumptionBreakdown.adults_count} contribute {courtConsumptionBreakdown.adults_total_bushels}, children {courtConsumptionBreakdown.children_count} contribute {courtConsumptionBreakdown.children_total_bushels}, total = {courtConsumptionBreakdown.total_bushels}
                           </li>
                         ) : null}
                       </>
