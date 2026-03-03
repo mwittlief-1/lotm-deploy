@@ -13,9 +13,7 @@
     "matrices": "tsx scripts/generateMatrices.ts",
     "sim:batch:no-deps": "node scripts/simBatchNoDeps.mjs",
     "preflight": "node scripts/preflightNoDeps.mjs",
-    "prospects:stub": "node scripts/prospectsStub.mjs",
-    "demography:batch:cohort": "tsx scripts/demographyBatchCohort.ts",
-    "demography:batch:sim": "tsx scripts/demographyBatchSim.ts"
+    "prospects:stub": "node scripts/prospectsStub.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

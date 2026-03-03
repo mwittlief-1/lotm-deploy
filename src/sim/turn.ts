@@ -436,31 +436,13 @@ function relationshipDrift(state: RunState): void {
   }
 }
 
-function maternalAgeBirthMultiplier(ageYears: number): number {
-  const a = Math.max(0, Math.trunc(ageYears));
-  if (a >= 45) return 0;
-  if (a >= 41) return 0.04;
-  if (a >= 38) return 0.2;
-  if (a >= 35) return 0.55;
-  return 1;
-}
-
-function mortalityHazardByAge(ageYears: number): number {
-  const a = Math.max(0, Math.trunc(ageYears));
-  if (a <= 2) return 0.02;
-  if (a <= 10) return 0.008;
-  if (a < 45) return 0.0012;
-  if (a < 60) return 0.006;
-  if (a < 75) return 0.018;
-  if (a < 90) return 0.06;
-  return 0.2;
-}
-
 function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: string[]; deaths: string[]; population_delta: number } {
   const births: string[] = [];
   const deaths: string[] = [];
   let popDelta = 0;
 
+  // Age household members by 3 years (turn = 3y).
+  // v0.2.5 LOCK: court officers must also age (prevents immortal stewards).
   const people: Person[] = [];
   const seenIds = new Set<string>();
   const push = (p: Person | null | undefined) => {
@@ -475,6 +457,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
   if (state.house.spouse) push(state.house.spouse);
   for (const c of state.house.children) push(c);
 
+  // Court officers (People-First registry; back-compat no-op if registry missing).
   {
     const anyState: any = state as any;
     const reg: Record<string, Person> | undefined = anyState.people as any;
@@ -486,92 +469,74 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
-  const hasPhysician = hasImprovement(state.manor.improvements, "physician");
-  const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
-  const mortMult = tuningNumber(state, "mortality_mult", 1.0);
-  const headWasAlive = state.house.head.alive;
-  const spouseWasAlive = state.house.spouse?.alive ?? false;
-
-  const anyFlags: any = state.flags as any;
-  if (!anyFlags._birth_last_year || typeof anyFlags._birth_last_year !== "object") anyFlags._birth_last_year = {};
-  const birthLastYear: Record<string, number> = anyFlags._birth_last_year as Record<string, number>;
-  const turnBaseYear = state.turn_index * TURN_YEARS;
-
-  for (let yearStep = 0; yearStep < TURN_YEARS; yearStep++) {
-    const yearIdx = turnBaseYear + yearStep;
-    const yearRng = new Rng(state.run_seed, "household", state.turn_index, `year_${yearStep}`);
-
+  // v0.2.7.1 HOTFIX: Aging invariant — every instantiated person in People/Registry ages +TURN_YEARS per turn.
+  {
     const anyState: any = state as any;
     const reg: Record<string, Person> | undefined = anyState.people as any;
     if (reg) {
       for (const p of Object.values(reg)) {
-        if (!p || typeof p !== "object" || !p.alive) continue;
-        p.age += 1;
+        if (!p || typeof p !== "object") continue;
+        if (!p.alive) continue; // keep age-at-death stable
+        p.age += TURN_YEARS;
       }
     } else {
+      // legacy fallback: only the bounded household/court set
       for (const p of people) {
         if (!p.alive) continue;
-        p.age += 1;
+        p.age += TURN_YEARS;
       }
     }
+  }
 
-    for (const p of people) {
-      if (!p.alive) continue;
-      if (p.age >= 110) {
-        p.alive = false;
-        deaths.push(`${p.name} (${p.id})`);
-        continue;
-      }
-      const ageHaz = mortalityHazardByAge(p.age);
-      const traitAdj = 1 - (p.traits.discipline - 3) * 0.01;
-      const chance = Math.max(0, Math.min(0.95, ageHaz * traitAdj * mult * mortMult));
-      if (yearRng.fork(`d:${p.id}`).bool(chance)) {
-        p.alive = false;
-        deaths.push(`${p.name} (${p.id})`);
-      }
+  // deaths (simple): older increases risk; physician reduces risk.
+  const hasPhysician = hasImprovement(state.manor.improvements, "physician");
+  const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
+  const mortMult = tuningNumber(state, "mortality_mult", 1.0);
+  const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
+
+  const headWasAlive = state.house.head.alive;
+  const spouseWasAlive = state.house.spouse?.alive ?? false;
+
+  function deathRoll(p: Person): boolean {
+    if (!p.alive) return false;
+
+    // v0.2.3.2: cap extreme old-age survival (turn = 3y). Prevent ~120y rulers.
+    if (p.age >= 99) return true;
+
+    let base = 0.0;
+    if (p.age < 16) base = MORTALITY_P_UNDER16;
+    else if (p.age < 40) base = MORTALITY_P_UNDER40;
+    else if (p.age < 55) base = MORTALITY_P_UNDER55;
+    else if (p.age < 65) base = MORTALITY_P_UNDER65;
+    else {
+      // Steepen mortality beyond 65 (no new RNG; deterministic math only).
+      const yearsOver = p.age - 65;
+      base = MORTALITY_P_65PLUS * (1 + yearsOver * 0.06);
     }
+    // discipline reduces risk slightly
+    base *= 1 - (p.traits.discipline - 3) * 0.01;
+    base *= mult;
+    base *= mortMult;
+    base = Math.max(0, Math.min(0.95, base));
+    return r.fork(`d:${p.id}`).bool(base);
+  }
 
-    if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
-      const spouse = state.house.spouse;
-      const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
-      if (fertileAge) {
-        const fert = clampInt(spouse.traits.fertility, 1, 5);
-        const base = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / TURN_YEARS;
-        const mods = (state.flags as any)._mods ?? {};
-        const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
-        const fertMult = tuningNumber(state, "fertility_mult", 1.0);
-        const ageMult = maternalAgeBirthMultiplier(spouse.age);
-        const motherId = spouse.id;
-        const lastYear = typeof birthLastYear[motherId] === "number" ? birthLastYear[motherId] : -999;
-        const spacingOk = yearIdx - lastYear >= 2;
-        const chance = spacingOk ? Math.min(0.9, Math.max(0, base * bonus * fertMult * ageMult)) : 0;
-        if (yearRng.fork(`birth:${motherId}`).bool(chance)) {
-          const childId = `p_child_${state.turn_index}_${yearStep}_${state.house.children.length + 1}`;
-          const sex = yearRng.fork(`birthsex:${childId}`).bool(0.52) ? "M" : "F";
-          const baby: Person = {
-            id: childId,
-            name: sex === "M" ? "Thomas" : "Anne",
-            sex,
-            age: 0,
-            alive: true,
-            traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
-            married: false
-          };
-          state.house.children.push(baby);
-          push(baby);
-          births.push(`${baby.name} (${baby.id})`);
-          state.manor.population = asNonNegInt(state.manor.population + 1);
-          popDelta += 1;
-          birthLastYear[motherId] = yearIdx;
-        }
-      }
+  for (const p of people) {
+    if (deathRoll(p)) {
+      p.alive = false;
+      deaths.push(`${p.name} (${p.id})`);
     }
   }
 
   const headDiedThisTurn = headWasAlive && !state.house.head.alive;
   const spouseDiedThisTurn = spouseWasAlive && Boolean(state.house.spouse) && state.house.spouse!.alive === false;
 
+  // v0.2.3.2 widow semantics:
+  // - Surviving spouse is Widow/Widower/Widowed.
+  // - Deceased spouse is Deceased.
+  // - Log only once, at the turn of death.
   if ((headDiedThisTurn || spouseDiedThisTurn) && state.house.spouse) {
+    // Marriage ended; block further births.
     state.house.spouse_status = "widow";
 
     let survivor: Person | null = null;
@@ -588,6 +553,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       houseLog.push({
         kind: "widowed",
         turn_index: state.turn_index,
+        // Back-compat: spouse_name remains the deceased person's name.
         spouse_name: deceased.name,
         survivor_name: survivor.name,
         survivor_id: survivor.id,
@@ -596,6 +562,39 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
         deceased_id: deceased.id,
         deceased_age: deceased.age
       });
+    }
+  }
+
+  // births: only if spouse exists + spouse_status is spouse
+  if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
+    const spouse = state.house.spouse;
+    const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
+    if (fertileAge) {
+      const fert = clampInt(spouse.traits.fertility, 1, 5);
+      const base = BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24;
+      const mods = (state.flags as any)._mods ?? {};
+      const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
+      const fertMult = tuningNumber(state, "fertility_mult", 1.0);
+      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult));
+      const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
+      if (bRng.bool(chance)) {
+        const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
+        const sex = bRng.bool(0.52) ? "M" : "F";
+        const baby: Person = {
+          id: childId,
+          name: sex === "M" ? "Thomas" : "Anne",
+          sex,
+          age: 0,
+          alive: true,
+          traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+          married: false
+        };
+        state.house.children.push(baby);
+        births.push(`${baby.name} (${baby.id})`);
+        // population increases too (abstract)
+        state.manor.population = asNonNegInt(state.manor.population + 1);
+        popDelta += 1;
+      }
     }
   }
 
@@ -1535,7 +1534,7 @@ export function proposeTurn(state: RunState): TurnContext {
   }
 
   // Labor auto-clamp (from shortage population loss).
-  if (cons.labor_before && cons.labor_after && laborSignalBefore === null && laborSignalAfter === null) {
+  if (cons.labor_before && cons.labor_after) {
     laborSignalBefore = cons.labor_before;
     laborSignalAfter = cons.labor_after;
   }
@@ -1562,7 +1561,7 @@ export function proposeTurn(state: RunState): TurnContext {
     farmers: asNonNegInt(working.manor.farmers),
     builders: asNonNegInt(working.manor.builders)
   };
-  if ((laborBeforeNorm.farmers !== laborAfterNorm.farmers || laborBeforeNorm.builders !== laborAfterNorm.builders) && laborSignalBefore === null && laborSignalAfter === null) {
+  if (laborBeforeNorm.farmers !== laborAfterNorm.farmers || laborBeforeNorm.builders !== laborAfterNorm.builders) {
     laborSignalBefore = laborBeforeNorm;
     laborSignalAfter = laborAfterNorm;
   }
@@ -2017,28 +2016,13 @@ function ensureKinshipSpouseOf(state: RunState, aId: string, bId: string): void 
   if (!aId || !bId || aId === bId) return;
   const anyState: any = state as any;
   anyState.kinship_edges = (anyState.kinship_edges ?? []) as any[];
-  let edges = anyState.kinship_edges as any[];
-
-  // spouse exclusivity: one spouse edge per person.
-  edges = edges.filter((e) => {
-    if (!e || e.kind !== "spouse_of") return true;
-    const x = e.a_id;
-    const y = e.b_id;
-    const touchesA = x === aId || y === aId;
-    const touchesB = x === bId || y === bId;
-    const isTarget = (x === aId && y === bId) || (x === bId && y === aId);
-    if (isTarget) return false;
-    if (touchesA || touchesB) return false;
-    return true;
-  });
-
-  edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
-  edges.sort((l, r) => {
-    const lk = `${l.kind}|${String((l as any).a_id ?? (l as any).parent_id ?? "")}|${String((l as any).b_id ?? (l as any).child_id ?? "")}`;
-    const rk = `${r.kind}|${String((r as any).a_id ?? (r as any).parent_id ?? "")}|${String((r as any).b_id ?? (r as any).child_id ?? "")}`;
-    return lk.localeCompare(rk);
-  });
-  anyState.kinship_edges = edges;
+  const edges = anyState.kinship_edges as any[];
+  const exists = edges.some(
+    (e) =>
+      e?.kind === "spouse_of" &&
+      ((e.a_id === aId && e.b_id === bId) || (e.a_id === bId && e.b_id === aId))
+  );
+  if (!exists) edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
 }
 
 function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[], reportNotes?: string[]): void {

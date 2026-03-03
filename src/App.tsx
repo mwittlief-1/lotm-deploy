@@ -1379,7 +1379,7 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
         if (peasantConsumptionBushels !== null && courtConsumptionBushels !== null) return peasantConsumptionBushels + courtConsumptionBushels;
         return null;
       })();
-            const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
+      const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
       const courtConsumptionBreakdown: {
         adults_count: number;
         adults_total_bushels: number;
@@ -2612,48 +2612,6 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                 ) : null}
               </div>
 
-              <details style={{ marginBottom: 10 }}>
-                <summary>Locals status</summary>
-                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                  {(() => {
-                    const l: any = ctx.preview_state.locals ?? {};
-                    const items: Array<{ label: string; p: any }> = [
-                      { label: "Liege", p: l.liege },
-                      { label: "Clergy", p: l.clergy }
-                    ];
-                    return (
-                      <ul>
-                        {items.map((it, i) => {
-                          const nm = typeof it.p?.name === "string" ? it.p.name : "Vacant";
-                          const alive = it.p && it.p.alive === false ? "deceased" : it.p ? "alive" : "vacant";
-                          return <li key={i}>{it.label}: {nm} ({alive})</li>;
-                        })}
-                      </ul>
-                    );
-                  })()}
-                </div>
-              </details>
-
-              <details style={{ marginBottom: 10 }}>
-                <summary>Relationship Drawer (HH + PP)</summary>
-                <div style={{ fontSize: 12, opacity: 0.9, marginTop: 6 }}>
-                  {(() => {
-                    const rels: any[] = Array.isArray(ctx.preview_state.relationships) ? ctx.preview_state.relationships : [];
-                    const hhIds = new Set<string>([
-                      hhView.head?.id,
-                      hhView.spouse?.id,
-                      ...(hhView.children ?? []).map((c) => c.id)
-                    ].filter(Boolean) as string[]);
-                    const rows = rels
-                      .filter((e: any) => hhIds.has(String(e?.from_id)) || hhIds.has(String(e?.to_id)))
-                      .map((e: any) => `${personNameFromRegistry(String(e.from_id)) ?? e.from_id} → ${personNameFromRegistry(String(e.to_id)) ?? e.to_id}: A ${e.allegiance} / R ${e.respect} / T ${e.threat}`)
-                      .sort((a: string, b: string) => a.localeCompare(b));
-                    if (!rows.length) return <div>None</div>;
-                    return <ul>{rows.map((r: string, i: number) => <li key={i}>{r}</li>)}</ul>;
-                  })()}
-                </div>
-              </details>
-
               <h4>Top drivers (3)</h4>
               {ctx.report.top_drivers.length ? (
                 <ol>
@@ -2712,7 +2670,9 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                           {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
                         </li>
                         {courtConsumptionBreakdown ? (
-                          <li>Court detail: adults {courtConsumptionBreakdown.adults_count} contribute {courtConsumptionBreakdown.adults_total_bushels}, children {courtConsumptionBreakdown.children_count} contribute {courtConsumptionBreakdown.children_total_bushels}, total {courtConsumptionBreakdown.total_bushels}</li>
+                          <li>
+                            Court detail: adults {courtConsumptionBreakdown.adults_count} contribute {courtConsumptionBreakdown.adults_total_bushels}, children {courtConsumptionBreakdown.children_count} contribute {courtConsumptionBreakdown.children_total_bushels}, total {courtConsumptionBreakdown.total_bushels}
+                          </li>
                         ) : null}
                       </>
                     ) : null}

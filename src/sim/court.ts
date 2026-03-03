@@ -346,7 +346,7 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
   let adultEq = 0;
   let adultsCount = 0;
-  let childrenEq = 0;
+  let childEq = 0;
   let childrenCount = 0;
   for (const r of roster.rows) {
     if (r.badges.includes("deceased")) continue;
@@ -357,12 +357,12 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
     if (w >= 1) adultsCount += 1;
     else {
       childrenCount += 1;
-      childrenEq += w;
+      childEq += w;
     }
   }
 
   const adultsTotal = Math.max(0, Math.floor(adultsCount * bushelsPerPersonPerYear * turnYears));
-  const childrenTotal = Math.max(0, Math.floor(childrenEq * bushelsPerPersonPerYear * turnYears));
+  const childrenTotal = Math.max(0, Math.floor(childEq * bushelsPerPersonPerYear * turnYears));
   const courtConsumption = Math.max(0, Math.floor(adultEq * bushelsPerPersonPerYear * turnYears));
   return {
     court_headcount: headcount,
