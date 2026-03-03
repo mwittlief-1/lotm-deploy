@@ -454,107 +454,119 @@ function relationshipDrift(state: RunState): void {
   }
 }
 
+
+function maternalAgeBirthMultiplier(ageYears: number): number {
+  if (ageYears >= 45) return 0;
+  if (ageYears >= 43) return 0.03;
+  if (ageYears >= 41) return 0.08;
+  if (ageYears >= 39) return 0.2;
+  if (ageYears >= 36) return 0.45;
+  if (ageYears >= 31) return 0.8;
+  return 1.0;
+}
+
+function mortalityHazardByAge(ageYears: number): number {
+  if (ageYears <= 2) return 0.03;
+  if (ageYears <= 10) return 0.01;
+  if (ageYears <= 25) return 0.002;
+  if (ageYears <= 44) return 0.004;
+  if (ageYears <= 60) return 0.015 + (ageYears - 45) * 0.003;
+  if (ageYears <= 80) return 0.08 + (ageYears - 60) * 0.01;
+  if (ageYears <= 95) return 0.28 + (ageYears - 80) * 0.02;
+  return 0.8;
+}
+
 function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: string[]; deaths: string[]; population_delta: number } {
   const births: string[] = [];
   const deaths: string[] = [];
   let popDelta = 0;
 
-  // Age household members by 3 years (turn = 3y).
-  // v0.2.5 LOCK: court officers must also age (prevents immortal stewards).
-  const people: Person[] = [];
-  const seenIds = new Set<string>();
-  const push = (p: Person | null | undefined) => {
-    if (!p || typeof p !== "object") return;
-    if (typeof p.id !== "string" || !p.id) return;
-    if (seenIds.has(p.id)) return;
-    seenIds.add(p.id);
-    people.push(p);
+  const anyState: any = state as any;
+  const registry: Record<string, Person> | undefined = anyState.people as any;
+  const allPeople = (): Person[] => {
+    if (registry) return Object.values(registry).filter((p): p is Person => Boolean(p && typeof p === "object" && typeof p.id === "string"));
+    const list: Person[] = [];
+    const seen = new Set<string>();
+    const push = (p: Person | null | undefined) => {
+      if (!p || seen.has(p.id)) return;
+      seen.add(p.id);
+      list.push(p);
+    };
+    push(state.house.head);
+    push(state.house.spouse ?? null);
+    for (const c of state.house.children) push(c);
+    return list;
   };
 
-  push(state.house.head);
-  if (state.house.spouse) push(state.house.spouse);
-  for (const c of state.house.children) push(c);
-
-  // Court officers (People-First registry; back-compat no-op if registry missing).
-  {
-    const anyState: any = state as any;
-    const reg: Record<string, Person> | undefined = anyState.people as any;
-    if (reg) {
-      for (const { person_id } of getCourtOfficerIds(state)) {
-        const op = reg[person_id];
-        if (op) push(op);
-      }
-    }
-  }
-
-  // v0.2.7.1 HOTFIX: Aging invariant — every instantiated person in People/Registry ages +TURN_YEARS per turn.
-  {
-    const anyState: any = state as any;
-    const reg: Record<string, Person> | undefined = anyState.people as any;
-    if (reg) {
-      for (const p of Object.values(reg)) {
-        if (!p || typeof p !== "object") continue;
-        if (!p.alive) continue; // keep age-at-death stable
-        p.age += TURN_YEARS;
-      }
-    } else {
-      // legacy fallback: only the bounded household/court set
-      for (const p of people) {
-        if (!p.alive) continue;
-        p.age += TURN_YEARS;
-      }
-    }
-  }
-
-  // deaths (simple): older increases risk; physician reduces risk.
   const hasPhysician = hasImprovement(state.manor.improvements, "physician");
-  const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
-  const mortMult = tuningNumber(state, "mortality_mult", 1.0);
-  const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
+  const mortMult = tuningNumber(state, "mortality_mult", 1.0) * (hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0);
+  const fertMult = tuningNumber(state, "fertility_mult", 1.0);
+
+  const flagsAny: any = state.flags as any;
+  if (!flagsAny._mother_last_birth_year || typeof flagsAny._mother_last_birth_year !== "object") flagsAny._mother_last_birth_year = {};
+  const lastBirthYear: Record<string, number> = flagsAny._mother_last_birth_year as Record<string, number>;
 
   const headWasAlive = state.house.head.alive;
   const spouseWasAlive = state.house.spouse?.alive ?? false;
 
-  function deathRoll(p: Person): boolean {
-    if (!p.alive) return false;
+  for (let yearStep = 0; yearStep < TURN_YEARS; yearStep++) {
+    const absoluteYear = state.turn_index * TURN_YEARS + yearStep;
+    const rMort = new Rng(state.run_seed, "household", state.turn_index, `mortality:y${yearStep}`);
 
-    // v0.2.3.2: cap extreme old-age survival (turn = 3y). Prevent ~120y rulers.
-    if (p.age >= 99) return true;
-
-    let base = 0.0;
-    if (p.age < 16) base = MORTALITY_P_UNDER16;
-    else if (p.age < 40) base = MORTALITY_P_UNDER40;
-    else if (p.age < 55) base = MORTALITY_P_UNDER55;
-    else if (p.age < 65) base = MORTALITY_P_UNDER65;
-    else {
-      // Steepen mortality beyond 65 (no new RNG; deterministic math only).
-      const yearsOver = p.age - 65;
-      base = MORTALITY_P_65PLUS * (1 + yearsOver * 0.06);
+    for (const p of allPeople()) {
+      if (!p.alive) continue;
+      let hazard = mortalityHazardByAge(Math.max(0, Math.trunc(p.age)));
+      hazard *= 1 - (clampInt(p.traits.discipline, 1, 5) - 3) * 0.01;
+      hazard *= mortMult;
+      hazard = Math.max(0, Math.min(0.98, hazard));
+      if (rMort.fork(`d:${p.id}`).bool(hazard)) {
+        p.alive = false;
+        deaths.push(`${p.name} (${p.id})`);
+      }
     }
-    // discipline reduces risk slightly
-    base *= 1 - (p.traits.discipline - 3) * 0.01;
-    base *= mult;
-    base *= mortMult;
-    base = Math.max(0, Math.min(0.95, base));
-    return r.fork(`d:${p.id}`).bool(base);
-  }
 
-  for (const p of people) {
-    if (deathRoll(p)) {
-      p.alive = false;
-      deaths.push(`${p.name} (${p.id})`);
+    if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
+      const mother = state.house.spouse;
+      const motherAge = Math.max(0, Math.trunc(mother.age));
+      const spacingOk = typeof lastBirthYear[mother.id] !== "number" || absoluteYear - lastBirthYear[mother.id] >= 2;
+      if (motherAge >= BIRTH_FERTILE_AGE_MIN && motherAge <= BIRTH_FERTILE_AGE_MAX && spacingOk) {
+        const fert = clampInt(mother.traits.fertility, 1, 5);
+        const base = BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24;
+        const ageMult = maternalAgeBirthMultiplier(motherAge);
+        const chance = Math.min(0.85, Math.max(0, (base / TURN_YEARS) * fertMult * ageMult));
+        const bRng = new Rng(state.run_seed, "household", state.turn_index, `birth:y${yearStep}`);
+        if (bRng.bool(chance)) {
+          const childId = `p_child_${state.turn_index}_${yearStep}_${state.house.children.length + 1}`;
+          const sex = bRng.bool(0.52) ? "M" : "F";
+          const baby: Person = {
+            id: childId,
+            name: sex === "M" ? "Thomas" : "Anne",
+            sex,
+            age: -1,
+            alive: true,
+            traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+            married: false
+          };
+          state.house.children.push(baby);
+          births.push(`${baby.name} (${baby.id})`);
+          state.manor.population = asNonNegInt(state.manor.population + 1);
+          popDelta += 1;
+          lastBirthYear[mother.id] = absoluteYear;
+        }
+      }
+    }
+
+    for (const p of allPeople()) {
+      if (!p.alive) continue;
+      p.age += 1;
+      if (p.age < 0) p.age = 0;
     }
   }
 
   const headDiedThisTurn = headWasAlive && !state.house.head.alive;
   const spouseDiedThisTurn = spouseWasAlive && Boolean(state.house.spouse) && state.house.spouse!.alive === false;
 
-  // v0.2.3.2 widow semantics:
-  // - Surviving spouse is Widow/Widower/Widowed.
-  // - Deceased spouse is Deceased.
-  // - Log only once, at the turn of death.
   if ((headDiedThisTurn || spouseDiedThisTurn) && state.house.spouse) {
-    // Marriage ended; block further births.
     state.house.spouse_status = "widow";
 
     let survivor: Person | null = null;
@@ -571,7 +583,6 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       houseLog.push({
         kind: "widowed",
         turn_index: state.turn_index,
-        // Back-compat: spouse_name remains the deceased person's name.
         spouse_name: deceased.name,
         survivor_name: survivor.name,
         survivor_id: survivor.id,
@@ -583,41 +594,9 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
-  // births: only if spouse exists + spouse_status is spouse
-  if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
-    const spouse = state.house.spouse;
-    const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
-    if (fertileAge) {
-      const fert = clampInt(spouse.traits.fertility, 1, 5);
-      const base = BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24;
-      const mods = (state.flags as any)._mods ?? {};
-      const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
-      const fertMult = tuningNumber(state, "fertility_mult", 1.0);
-      const chance = Math.min(0.95, Math.max(0, base * bonus * fertMult));
-      const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
-      if (bRng.bool(chance)) {
-        const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
-        const sex = bRng.bool(0.52) ? "M" : "F";
-        const baby: Person = {
-          id: childId,
-          name: sex === "M" ? "Thomas" : "Anne",
-          sex,
-          age: 0,
-          alive: true,
-          traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
-          married: false
-        };
-        state.house.children.push(baby);
-        births.push(`${baby.name} (${baby.id})`);
-        // population increases too (abstract)
-        state.manor.population = asNonNegInt(state.manor.population + 1);
-        popDelta += 1;
-      }
-    }
-  }
-
   return { births, deaths, population_delta: popDelta };
 }
+
 
 function buildMarriageWindow(state: RunState): MarriageWindow | null {
   // Trigger when any child >=15 and unmarried OR an offer flag exists.
