@@ -59,6 +59,8 @@ import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
 import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, removeCourtExcludeId } from "./court";
 
+const MARRIAGE_REJECT_COOLDOWN_TURNS = 8;
+
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
   if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
@@ -68,6 +70,22 @@ function cooldownsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
   if (!anyFlags._cooldowns || typeof anyFlags._cooldowns !== "object") anyFlags._cooldowns = {};
   return anyFlags._cooldowns as Record<string, number>;
+}
+
+function rejectCooldownsObj(state: RunState): Record<string, number> {
+  const anyFlags: any = state.flags as any;
+  if (!anyFlags._marriage_reject_cooldowns || typeof anyFlags._marriage_reject_cooldowns !== "object") {
+    anyFlags._marriage_reject_cooldowns = {};
+  }
+  return anyFlags._marriage_reject_cooldowns as Record<string, number>;
+}
+
+function cleanupRejectCooldowns(state: RunState): void {
+  const cd = rejectCooldownsObj(state);
+  for (const k of Object.keys(cd)) {
+    const v = cd[k];
+    if (!(typeof v === "number" && Number.isFinite(v) && v > state.turn_index)) delete cd[k];
+  }
 }
 
 function consumeMod(state: RunState, key: string, defaultValue = 1): number {
@@ -628,6 +646,7 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
   const houses: Record<string, any> =
     anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
   const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const rejectCooldowns = rejectCooldownsObj(state);
 
   const candidates: Array<{ person_id: string; house_id: string; house_name: string }> = [];
   const seen = new Set<string>();
@@ -668,6 +687,8 @@ function buildMarriageWindow(state: RunState): MarriageWindow | null {
       if (person.sex !== desiredSpouseSex) continue;
       // Keep offers coherent: avoid already-married candidates when that info exists.
       if (person.married === true) continue;
+      const pairKey = `${subject.id}::${pid}`;
+      if (typeof rejectCooldowns[pairKey] === "number" && rejectCooldowns[pairKey] > state.turn_index) continue;
 
       candidates.push({ person_id: pid, house_id: hid, house_name: houseName });
     }
@@ -1123,6 +1144,7 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
   const byId = new Map(windowProspects.map((p) => [p.id, p] as const));
 
   const processed = new Set<string>();
+  const rejectCooldowns = rejectCooldownsObj(state);
 
   for (const a of actions) {
     if (!a || typeof a !== "object") continue;
@@ -1146,6 +1168,9 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
       const subj = sid && reg ? reg[sid] : null;
       const sp = spouseId && reg ? reg[spouseId] : null;
       if (subj && sp && subj.sex === sp.sex) {
+        effectiveAct = "reject";
+      }
+      if (sp && sp.married === true) {
         effectiveAct = "reject";
       }
     }
@@ -1257,8 +1282,17 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         effects_applied: applied
       });
     } else if (effectiveAct === "reject") {
-      // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
-      // prospect type models explicit rejection penalties).
+      if (prospect.type === "marriage") {
+        const sid = (prospect as any).subject_person_id;
+        const spouseId = (prospect as any).spouse_person_id;
+        if (typeof sid === "string" && sid && typeof spouseId === "string" && spouseId) {
+          const relDelta = { scope: "person", from_id: sid, to_id: spouseId, allegiance_delta: -1, respect_delta: -2, threat_delta: +1 };
+          adjustEdge(state, relDelta.from_id, relDelta.to_id, { allegiance: relDelta.allegiance_delta, respect: relDelta.respect_delta, threat: relDelta.threat_delta });
+          applied.relationship_deltas = [relDelta];
+          rejectCooldowns[`${sid}::${spouseId}`] = state.turn_index + MARRIAGE_REJECT_COOLDOWN_TURNS;
+          applied.cooldown_turns = MARRIAGE_REJECT_COOLDOWN_TURNS;
+        }
+      }
 
       prospectsLog.push({
         kind: "prospect_rejected",
@@ -1576,7 +1610,6 @@ export function proposeTurn(state: RunState): TurnContext {
     peasant_consumption_bushels: cons.peasant_consumption_bushels,
     court_consumption_bushels: cons.court_consumption_bushels,
     total_consumption_bushels: cons.total_consumption_bushels,
-    court_consumption_breakdown: court.court_consumption_breakdown,
     shortage_bushels: cons.shortage_bushels,
     construction: { progress_added: prod.construction_progress_added, completed_improvement_id: prod.completed_improvement_id ?? null },
     obligations: {
@@ -1651,12 +1684,13 @@ export function proposeTurn(state: RunState): TurnContext {
       return { improvement_id, status };
     });
 
+  cleanupRejectCooldowns(working);
   const marriageWindow = buildMarriageWindow(working);
 
   // Prospects window + engine log (v0.2.3)
   const prospectsLog: ProspectsLogEvent[] = [];
   const prospectsWindow = buildProspectsWindow_v0_2_3(working, marriageWindow, prospectsLog);
-  if (prospectsLog.length) report.prospects_log = prospectsLog;
+  report.prospects_log = prospectsLog;
 
   const maxShift = maxLaborDeltaPerTurn(working.manor.population);
 
@@ -2211,7 +2245,7 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
     processed_turn_index: ctx.report.turn_index,
     summary,
     // Order rule: if succession + heir_selected occur same turn, show Succession first.
-    report: { ...ctx.report, house_log: orderedHouseLog, notes: [...ctx.report.notes, ...notes], prospects_log: prospectsLog.length ? prospectsLog : undefined },
+    report: { ...ctx.report, house_log: orderedHouseLog, notes: [...ctx.report.notes, ...notes], prospects_log: prospectsLog },
     decisions,
     snapshot_before: snapshotBefore,
     snapshot_after: snapshotAfter,

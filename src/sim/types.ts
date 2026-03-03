@@ -199,13 +199,6 @@ export interface TurnReport {
   peasant_consumption_bushels: number;
   court_consumption_bushels: number;
   total_consumption_bushels: number;
-  court_consumption_breakdown?: {
-    adults_count: number;
-    adults_total_bushels: number;
-    children_count: number;
-    children_total_bushels: number;
-    total_bushels: number;
-  };
   shortage_bushels: number;
   construction: {
     progress_added: number;

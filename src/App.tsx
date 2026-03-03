@@ -1380,25 +1380,6 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
         return null;
       })();
       const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
-      const courtConsumptionBreakdown: {
-        adults_count: number;
-        adults_total_bushels: number;
-        children_count: number;
-        children_total_bushels: number;
-        total_bushels: number;
-      } | null = (() => {
-        const raw: any = (ctx.report as any)?.court_consumption_breakdown;
-        if (!raw || typeof raw !== "object") return null;
-        const vals = [raw.adults_count, raw.adults_total_bushels, raw.children_count, raw.children_total_bushels, raw.total_bushels].map(Number);
-        if (!vals.every(Number.isFinite)) return null;
-        return {
-          adults_count: Math.trunc(vals[0]!),
-          adults_total_bushels: Math.trunc(vals[1]!),
-          children_count: Math.trunc(vals[2]!),
-          children_total_bushels: Math.trunc(vals[3]!),
-          total_bushels: Math.trunc(vals[4]!)
-        };
-      })();
 
       // v0.2.4: Court roster derivation (UI-only; tolerant to missing fields).
       type CourtRosterEntry = { person: PersonLike; relationship: string | null; officer_role: string | null; badges: string[] };
@@ -2665,16 +2646,9 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                       Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels
                     </li>
                     {hasConsumptionSplit ? (
-                      <>
-                        <li>
-                          {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
-                        </li>
-                        {courtConsumptionBreakdown ? (
-                          <li>
-                            Court detail: adults {courtConsumptionBreakdown.adults_count} contribute {courtConsumptionBreakdown.adults_total_bushels}, children {courtConsumptionBreakdown.children_count} contribute {courtConsumptionBreakdown.children_total_bushels}, total {courtConsumptionBreakdown.total_bushels}
-                          </li>
-                        ) : null}
-                      </>
+                      <li>
+                        {COPY.courtConsumptionLabel}: {courtConsumptionBushels} bushels
+                      </li>
                     ) : null}
                     <li>
                       Total:{" "}
