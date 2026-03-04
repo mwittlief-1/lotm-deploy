@@ -591,6 +591,8 @@ export default function App() {
   const [showHouseholdDetails, setShowHouseholdDetails] = useState<boolean>(false);
   const [showAllKnownHouses, setShowAllKnownHouses] = useState<boolean>(false);
   const [allPeopleFilter, setAllPeopleFilter] = useState<string>("");
+  const [relationshipDrawerTab, setRelationshipDrawerTab] = useState<"house" | "person">("house");
+  const [relationshipDrawerQuery, setRelationshipDrawerQuery] = useState<string>("");
 
   const [toast, setToast] = useState<{ kind: "ok" | "error"; message: string } | null>(null);
   const autoObDefaultsKeyRef = React.useRef<string>("");
@@ -675,7 +677,9 @@ export default function App() {
       }
       if (k === "prospect_accepted") {
         const s = summaryById.get(ev.prospect_id) ?? ev.type;
-        return COPY.prospectLog_accepted(ev.type, s);
+        const base = COPY.prospectLog_accepted(ev.type, s);
+        const receipt = typeof ev?.effects_applied?.receipt_line === "string" ? ev.effects_applied.receipt_line : null;
+        return receipt ? `${base} — ${receipt}` : base;
       }
       if (k === "prospect_rejected") {
         const s = summaryById.get(ev.prospect_id) ?? ev.type;
@@ -955,6 +959,36 @@ export default function App() {
 
       const hhView = getPlayerHousehold(ctx.preview_state);
       const lastSuccession = findLastSuccession(state);
+
+      type LocalStatusRow = { key: string; role: string; name: string; status: "alive" | "deceased" | "vacant" };
+      const localStatusRows: LocalStatusRow[] = (() => {
+        const sAny: any = ctx.preview_state as any;
+        const people: any = sAny?.people && typeof sAny.people === "object" ? sAny.people : {};
+        const rows: LocalStatusRow[] = [];
+
+        const pushLocal = (role: string, key: string, p: any) => {
+          const id = typeof p?.id === "string" ? p.id : null;
+          const reg = id ? people?.[id] : null;
+          const nameRaw =
+            typeof reg?.name === "string"
+              ? reg.name
+              : typeof p?.name === "string"
+                ? p.name
+                : `${role} (Vacant)`;
+          const name = String(nameRaw).trim().length > 0 ? String(nameRaw).trim() : `${role} (Vacant)`;
+          const alive = typeof reg?.alive === "boolean" ? reg.alive : typeof p?.alive === "boolean" ? p.alive : false;
+          const status: LocalStatusRow["status"] = !id || /\(Vacant\)/i.test(name) ? "vacant" : alive ? "alive" : "deceased";
+          rows.push({ key, role, name, status });
+        };
+
+        pushLocal("Liege", "liege", sAny?.locals?.liege);
+        pushLocal("Clergy", "clergy", sAny?.locals?.clergy);
+
+        const nobles: any[] = Array.isArray(sAny?.locals?.nobles) ? sAny.locals.nobles : [];
+        nobles.forEach((n, i) => pushLocal(`Local ${i + 1}`, `noble:${i}`, n));
+
+        return rows.sort((a, b) => a.key.localeCompare(b.key));
+      })();
 
       const beforeM = state.manor;
 
@@ -2492,7 +2526,9 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                     <b>{COPY.heirLabel}</b>{" "}
                     {hhView.heir_id
                       ? (() => {
-                          const heir = hhView.children.find((c) => c.id === hhView.heir_id);
+                          const heir = hhView.children.find((c) => c.id === hhView.heir_id)
+                            ?? (ctx.preview_state as any)?.people?.[hhView.heir_id]
+                            ?? null;
                           return heir ? formatPersonName(heir) : COPY.none;
                         })()
                       : COPY.none}
@@ -2513,6 +2549,20 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                       ? `${COPY.lastSuccessionLabel} Turn ${lastSuccession.turn_index} — ${COPY.logOutcome_succession(lastSuccession.new_ruler_name)}`
                       : COPY.lastSuccessionNone}
                   </div>
+                </div>
+
+                <div style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Locals</div>
+                  <ul style={{ margin: "0 0 0 18px" }}>
+                    {localStatusRows.map((r) => (
+                      <li key={r.key} style={{ marginBottom: 4 }}>
+                        <span style={{ fontWeight: 600 }}>{r.role}:</span> {r.name}
+                        <span style={{ marginLeft: 6, fontSize: 12, opacity: 0.8 }}>
+                          ({r.status === "alive" ? "Alive" : r.status === "deceased" ? "Deceased" : "Vacant"})
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
                 {showHouseholdDetails ? (
@@ -3247,6 +3297,78 @@ ${COPY.marriageToast_line2_childLeaves(childName)}`;
                   ) : null}
                 </div>
               )}
+
+
+              <h4 style={{ marginTop: 12 }}>Relationship Drawer</h4>
+              {(() => {
+                const sAny: any = (ctx.preview_state as any) ?? {};
+                const rels: any[] = Array.isArray(sAny.relationships) ? sAny.relationships : [];
+                const people: Record<string, any> = sAny.people && typeof sAny.people === "object" ? sAny.people : {};
+                const houses: Record<string, any> = sAny.houses && typeof sAny.houses === "object" ? sAny.houses : {};
+                const q = relationshipDrawerQuery.trim().toLowerCase();
+
+                const isHouse = (id: string): boolean => Boolean(houses[id]) || id.startsWith("h_");
+                const isPerson = (id: string): boolean => Boolean(people[id]) || id.startsWith("p_");
+
+                const label = (id: string): string => {
+                  if (houses[id]) {
+                    const n = typeof houses[id]?.name === "string" ? houses[id].name : id;
+                    return `House ${n}`;
+                  }
+                  if (people[id]) {
+                    const n = typeof people[id]?.name === "string" ? people[id].name : id;
+                    return `${n} (${id})`;
+                  }
+                  return id;
+                };
+
+                const rows = rels.filter((e) => {
+                  const from = typeof e?.from_id === "string" ? e.from_id : "";
+                  const to = typeof e?.to_id === "string" ? e.to_id : "";
+                  if (!from || !to) return false;
+                  const ok = relationshipDrawerTab === "house"
+                    ? (isHouse(from) && isHouse(to))
+                    : (isPerson(from) && isPerson(to));
+                  if (!ok) return false;
+                  const hay = `${label(from)} ${label(to)}`.toLowerCase();
+                  return q ? hay.includes(q) : true;
+                }).sort((a, b) => {
+                  const af = label(String(a.from_id));
+                  const bf = label(String(b.from_id));
+                  if (af !== bf) return af.localeCompare(bf);
+                  const at = label(String(a.to_id));
+                  const bt = label(String(b.to_id));
+                  if (at !== bt) return at.localeCompare(bt);
+                  return `${a.from_id}|${a.to_id}`.localeCompare(`${b.from_id}|${b.to_id}`);
+                });
+
+                return (
+                  <div style={{ border: "1px solid #eee", padding: 10, background: "#fff", marginBottom: 8 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+                      <button onClick={() => setRelationshipDrawerTab("house")} style={{ fontSize: 12, fontWeight: relationshipDrawerTab === "house" ? 700 : 400 }}>House↔House</button>
+                      <button onClick={() => setRelationshipDrawerTab("person")} style={{ fontSize: 12, fontWeight: relationshipDrawerTab === "person" ? 700 : 400 }}>Person↔Person</button>
+                      <input
+                        value={relationshipDrawerQuery}
+                        onChange={(e) => setRelationshipDrawerQuery(e.target.value)}
+                        placeholder="Filter (contains)"
+                        style={{ padding: 6, minWidth: 220 }}
+                      />
+                    </div>
+                    {rows.length === 0 ? (
+                      <div style={{ opacity: 0.7, fontSize: 12 }}>No relationship edges match this filter.</div>
+                    ) : (
+                      <div style={{ display: "grid", gap: 6 }}>
+                        {rows.map((e: any, i: number) => (
+                          <div key={`${e.from_id}|${e.to_id}|${i}`} style={{ fontSize: 12 }}>
+                            <b>{label(String(e.from_id))}</b> → <b>{label(String(e.to_id))}</b>
+                            {` · A ${Math.trunc(Number(e.allegiance ?? 0))} · R ${Math.trunc(Number(e.respect ?? 0))} · T ${Math.trunc(Number(e.threat ?? 0))}`}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
     <h4 id={ANCHOR.events} style={{ marginTop: 12 }}>Events</h4>
               {ctx.report.events.length === 0 ? <div>None</div> : null}

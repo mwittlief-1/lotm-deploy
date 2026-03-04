@@ -1,0 +1,213 @@
+{
+  "mode": "sim",
+  "seeds": 64,
+  "turns": 18,
+  "tuning": {
+    "fertilityScale": 1,
+    "mortalityScaleChild": 1,
+    "mortalityScaleAdult": 1
+  },
+  "years": 54,
+  "total_births": 10996,
+  "total_deaths": 18393,
+  "per_turn": [
+    {
+      "turn": 0,
+      "births": 1313,
+      "deaths": 1353
+    },
+    {
+      "turn": 1,
+      "births": 1188,
+      "deaths": 1125
+    },
+    {
+      "turn": 2,
+      "births": 1292,
+      "deaths": 1371
+    },
+    {
+      "turn": 3,
+      "births": 1510,
+      "deaths": 1581
+    },
+    {
+      "turn": 4,
+      "births": 1454,
+      "deaths": 1760
+    },
+    {
+      "turn": 5,
+      "births": 1140,
+      "deaths": 1879
+    },
+    {
+      "turn": 6,
+      "births": 858,
+      "deaths": 1924
+    },
+    {
+      "turn": 7,
+      "births": 654,
+      "deaths": 1952
+    },
+    {
+      "turn": 8,
+      "births": 562,
+      "deaths": 1670
+    },
+    {
+      "turn": 9,
+      "births": 447,
+      "deaths": 1478
+    },
+    {
+      "turn": 10,
+      "births": 291,
+      "deaths": 1175
+    },
+    {
+      "turn": 11,
+      "births": 156,
+      "deaths": 629
+    },
+    {
+      "turn": 12,
+      "births": 74,
+      "deaths": 303
+    },
+    {
+      "turn": 13,
+      "births": 28,
+      "deaths": 122
+    },
+    {
+      "turn": 14,
+      "births": 17,
+      "deaths": 49
+    },
+    {
+      "turn": 15,
+      "births": 12,
+      "deaths": 22
+    },
+    {
+      "turn": 16,
+      "births": 0,
+      "deaths": 0
+    },
+    {
+      "turn": 17,
+      "births": 0,
+      "deaths": 0
+    }
+  ],
+  "births_by_maternal_age_band": {
+    "15-19": 0,
+    "20-24": 0,
+    "25-29": 0,
+    "30-34": 15,
+    "35-39": 0,
+    "40-44": 0,
+    "45+": 0
+  },
+  "deaths_by_age_band": {
+    "0": 255,
+    "1": 156,
+    "2": 129,
+    "3-4": 160,
+    "5-9": 362,
+    "10-14": 225,
+    "15-19": 356,
+    "20-29": 1047,
+    "30-39": 1467,
+    "40-49": 1998,
+    "50-59": 3265,
+    "60-69": 4275,
+    "70-79": 3259,
+    "80-89": 1241,
+    "90-99": 186,
+    "100+": 12
+  },
+  "survival_to_5": 0.9618,
+  "survival_to_10": 0.9152,
+  "survival_to_16": 0.8563,
+  "alive_at_80": 0.019,
+  "alive_at_90": 0.0014,
+  "alive_at_100": 0.0001,
+  "birth_spacing_distribution": {
+    "2": 0,
+    "3": 1,
+    "4": 0,
+    "5": 0,
+    "6-8": 0
+  },
+  "spacing_lt_2_count": 0,
+  "implied_annual_growth_rate": -0.000305,
+  "population_cagr": -0.000305,
+  "newborn_end_of_turn_age_distribution": {
+    "0": 15,
+    "1": 3909,
+    "2": 3491
+  },
+  "life_stage_buckets": [
+    {
+      "label": "0-14",
+      "min": 0,
+      "max": 14
+    },
+    {
+      "label": "15-25",
+      "min": 15,
+      "max": 25
+    },
+    {
+      "label": "26-40",
+      "min": 26,
+      "max": 40
+    },
+    {
+      "label": "41-65",
+      "min": 41,
+      "max": 65
+    },
+    {
+      "label": "66+",
+      "min": 66,
+      "max": 999
+    }
+  ],
+  "age_structure_stability": {
+    "0-14": {
+      "mean_share": 0.141996,
+      "std_share": 0.053305,
+      "mean_age_in_bucket": 7.929807,
+      "std_age_in_bucket": 0.631844
+    },
+    "15-25": {
+      "mean_share": 0.1452,
+      "std_share": 0.056341,
+      "mean_age_in_bucket": 20.111724,
+      "std_age_in_bucket": 0.412945
+    },
+    "26-40": {
+      "mean_share": 0.226267,
+      "std_share": 0.051421,
+      "mean_age_in_bucket": 33.083718,
+      "std_age_in_bucket": 0.735493
+    },
+    "41-65": {
+      "mean_share": 0.371524,
+      "std_share": 0.071334,
+      "mean_age_in_bucket": 52.231798,
+      "std_age_in_bucket": 1.077377
+    },
+    "66+": {
+      "mean_share": 0.115013,
+      "std_share": 0.052009,
+      "mean_age_in_bucket": 71.081004,
+      "std_age_in_bucket": 5.581911
+    }
+  },
+  "hash": "84e8fd49072ebf4a93102019aa88a17c0a1d3904fac73080d794b4c58990ac99"
+}

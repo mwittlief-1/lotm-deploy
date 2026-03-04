@@ -42,6 +42,54 @@ const APP_VERSION_STAMP = BUILD_INFO?.app_version || APP_VERSION || null;
 const CODE_FINGERPRINT = BUILD_INFO?.code_fingerprint || "";
 const SIM_VERSION = sim.SIM_VERSION ?? null;
 
+
+const SHOULD_UPDATE_BASELINES = String(process.env.UPDATE_BASELINES || "").trim() === "1";
+
+function baselinePathForVersion(appVersion) {
+  const v = String(appVersion ?? "");
+  if (v.startsWith("v0.2.9") || v.startsWith("0.2.9")) return "docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json";
+  if (v.startsWith("v0.2.7.1") || v.startsWith("v0.2.7.2")) return "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json";
+  if (v.startsWith("v0.2.7") || v.startsWith("v0.2.6.2")) return "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json";
+  if (v.startsWith("v0.2.6")) return "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json";
+  if (v.startsWith("v0.2.5")) return "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json";
+  if (v.startsWith("v0.2.4")) return "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json";
+  return "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json";
+}
+
+function baselinePayloadFromCurrent(turns, policyIds, seeds) {
+  const expected = {};
+  for (const pid of policyIds) {
+    expected[pid] = {};
+    for (const seed of seeds) {
+      expected[pid][seed] = coreEconomySig(runPolicy(seed, pid, turns));
+    }
+  }
+  const payload = {
+    baseline_source_app_version: APP_VERSION_STAMP,
+    baseline_source_code_fingerprint: CODE_FINGERPRINT,
+    turns,
+    policies: policyIds,
+    seeds,
+    expected,
+  };
+  payload.hash = sha256(stableStringify(payload));
+  return payload;
+}
+
+
+function defaultGoldenSeeds() {
+  return [
+    "lotm_v022_seed_001_baseline_extworld",
+    "lotm_v022_seed_002_relationship_edges",
+    "lotm_v022_seed_003_succession_pressure",
+    "lotm_v022_seed_004_widow_line",
+    "lotm_v022_seed_005_unrest_pressure",
+    "lotm_v022_seed_006_construction_path",
+    "lotm_v022_seed_007_weather_volatility",
+    "lotm_v022_seed_008_long_tail_check"
+  ];
+}
+
 const out = {
   gate: "preflight",
   app_version: APP_VERSION_STAMP,
@@ -254,22 +302,13 @@ await runTest("schema_snapshot_v1_present", async () => {
 
 await runTest("determinism_smoke_prospects_window", async () => {
   // Scan baseline seeds for at least one prospects window within a bounded horizon.
-  const baselinePath = path.resolve(
-    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
-      ? "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json"
-      : (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2"))
-      ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6")
-      ? "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.5")
-        ? "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.4")
-        ? "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json"
-        : "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json"
-  );
-  assert(fs.existsSync(baselinePath), `missing preflight baseline file (${baselinePath})`);
-  const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
-  const seeds = Array.isArray(baseline?.seeds) ? baseline.seeds : [];
+  const baselinePath = path.resolve(baselinePathForVersion(APP_VERSION_STAMP));
+  console.log(`[preflight] stamp=${APP_VERSION_STAMP}`);
+  console.log(`[preflight] baseline=${baselinePath}`);
+  const baseline = fs.existsSync(baselinePath)
+    ? JSON.parse(fs.readFileSync(baselinePath, "utf8"))
+    : { seeds: defaultGoldenSeeds() };
+  const seeds = Array.isArray(baseline?.seeds) ? baseline.seeds : defaultGoldenSeeds();
   assert(seeds.length > 0, "baseline seeds empty");
 
   const policyId = "prudent-builder";
@@ -322,36 +361,45 @@ await runTest("determinism_smoke_prospects_window", async () => {
 });
 
 await runTest("non_perturbation_golden_seeds_no_accepts", async () => {
-  const baselinePath = path.resolve(
-    String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.1") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7.2")
-      ? "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json"
-      : (String(APP_VERSION_STAMP ?? "").startsWith("v0.2.7") || String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6.2"))
-      ? "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.6")
-      ? "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.5")
-        ? "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json"
-      : String(APP_VERSION_STAMP ?? "").startsWith("v0.2.4")
-        ? "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json"
-        : "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json"
-  );
-  assert(fs.existsSync(baselinePath), "missing preflight baseline file");
-  const baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+  const baselinePath = path.resolve(baselinePathForVersion(APP_VERSION_STAMP));
+  console.log(`[preflight] stamp=${APP_VERSION_STAMP}`);
+  console.log(`[preflight] baseline=${baselinePath}`);
+
+  let baseline = null;
+  if (fs.existsSync(baselinePath)) {
+    baseline = JSON.parse(fs.readFileSync(baselinePath, "utf8"));
+  } else if (SHOULD_UPDATE_BASELINES) {
+    baseline = {
+      turns: 15,
+      policies: ["prudent-builder", "builder-forward"],
+      seeds: defaultGoldenSeeds(),
+      expected: {}
+    };
+  } else {
+    throw new Error(`missing preflight baseline file (${baselinePath}). Generate intentionally with: UPDATE_BASELINES=1 node scripts/preflightNoDeps.mjs`);
+  }
 
   const turns = Number(baseline?.turns ?? 15);
-  const expected = baseline?.expected ?? {};
   const seeds = Array.isArray(baseline?.seeds) ? baseline.seeds : [];
   const policyIds = Array.isArray(baseline?.policies) ? baseline.policies : [];
+  let expected = baseline?.expected ?? {};
 
   assert(seeds.length > 0, "baseline seeds empty");
   assert(policyIds.length > 0, "baseline policies empty");
+
+  if (SHOULD_UPDATE_BASELINES) {
+    const refreshed = baselinePayloadFromCurrent(turns, policyIds, seeds);
+    fs.writeFileSync(baselinePath, JSON.stringify(refreshed, null, 2), "utf8");
+    expected = refreshed.expected;
+    out.notes.push(`baseline updated: ${baselinePath}`);
+  }
 
   const mismatches = [];
 
   for (const pid of policyIds) {
     for (const seed of seeds) {
       const exp = expected?.[pid]?.[seed] ?? null;
-      assert(exp, `missing baseline entry for policy=${pid} seed=${seed}`);
+      if (!exp) throw new Error(`missing baseline entry for policy=${pid} seed=${seed}`);
       const got = coreEconomySig(runPolicy(seed, pid, turns));
       const e = stableStringify(exp);
       const g = stableStringify(got);
@@ -362,9 +410,11 @@ await runTest("non_perturbation_golden_seeds_no_accepts", async () => {
   }
 
   if (mismatches.length) {
+    console.log(`[preflight] test3_mismatches=${mismatches.length}`);
     const head = mismatches.slice(0, 3).map((m) => `- ${m.policy} / ${m.seed}`).join("\n");
     throw new Error(`non-perturbation FAIL: ${mismatches.length} mismatches vs baseline (showing first 3):\n${head}`);
   }
+  console.log(`[preflight] test3_mismatches=0`);
 });
 
 out.finished_at = nowIso();

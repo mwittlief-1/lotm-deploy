@@ -15,6 +15,8 @@ export interface Person {
   alive: boolean;
   traits: Traits;
   married?: boolean;
+  // v0.2.9 demography spacing lock
+  last_birth_year?: number;
 
   // v0.2.8: optional origin House for clergy/outsiders (does not change current household/House membership)
   origin_house_id?: string | null;
@@ -277,6 +279,12 @@ export interface TurnReport {
   household: {
     births: string[];
     deaths: string[];
+    // v0.2.9 reporting integrity
+    births_count?: number;
+    deaths_count?: number;
+    births_unitemized_count?: number;
+    deaths_unitemized_count?: number;
+    omissions_note?: string;
     population_delta: number;
     // v0.2.5: population (labor pool) change visibility.
     // Positive counts; net delta = births - deaths - runaways.
@@ -345,6 +353,7 @@ export type HouseholdRosterViewRole = "head" | "spouse" | "child" | "sibling" | 
 export interface HouseholdRosterViewRow {
   person_id: string;
   role: HouseholdRosterViewRole;
+  relationship_label?: string;
   badges: HouseholdRosterBadge[];
 }
 

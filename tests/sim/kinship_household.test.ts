@@ -59,9 +59,9 @@ describe("kinship invariants + household view", () => {
     // On succession: HoH becomes B, so C should become sibling (not child) relative to B.
     const baseState: any = {
       people: {
-        A: { person_id: "A", age: 60 },
-        B: { person_id: "B", age: 30 },
-        C: { person_id: "C", age: 28 },
+        A: { person_id: "A", age: 60, sex: "M" },
+        B: { person_id: "B", age: 30, sex: "M" },
+        C: { person_id: "C", age: 28, sex: "F" },
       },
       houses: {
         H1: { house_id: "H1", head_id: "A" },
@@ -91,5 +91,10 @@ describe("kinship invariants + household view", () => {
     expect(roleOfB("B")).toBe("head");
     expect(roleOfB("A")).toBe("parent");
     expect(roleOfB("C")).toBe("sibling");
+
+    const relLabelOfB = (pid: string) => rosterB.find((r) => r.person_id === pid)?.relationship_label;
+
+    expect(relLabelOfB("A")).toBe("Father");
+    expect(relLabelOfB("C")).toBe("Sister");
   });
 });
