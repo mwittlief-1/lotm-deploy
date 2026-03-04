@@ -1,6 +1,6 @@
 {
   "name": "lords-of-the-manor-mvp",
-  "version": "0.2.8.4",
+  "version": "0.2.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,11 @@
     "matrices": "tsx scripts/generateMatrices.ts",
     "sim:batch:no-deps": "node scripts/simBatchNoDeps.mjs",
     "preflight": "node scripts/preflightNoDeps.mjs",
-    "prospects:stub": "node scripts/prospectsStub.mjs"
+    "prospects:stub": "node scripts/prospectsStub.mjs",
+    "demography:batch:cohort": "tsx scripts/demographyBatch.ts cohort",
+    "demography:batch:sim": "tsx scripts/demographyBatch.ts sim",
+    "demography:doe": "tsx scripts/demographyDoe.ts",
+    "preflight:update-baselines": "UPDATE_BASELINES=1 node scripts/preflightNoDeps.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

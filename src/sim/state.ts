@@ -41,6 +41,7 @@ function mkPerson(rng: Rng, id: string, sex: Sex, age: number): Person {
     name: pickName(rng, sex),
     sex,
     age,
+    birth_year: -Math.trunc(age),
     alive: true,
     traits: genTraits(rng.fork(`traits:${id}`)),
     married: false
@@ -83,7 +84,7 @@ export function createNewRun(run_seed: string): RunState {
     turn_index: 0,
     manor: {
       population: 45,
-      farmers: 36, // v0.2.5: start nearer food-stable (population is labor pool)
+      farmers: 45, // v0.2.9: default 100% farmers until player changes labor
       builders: 0,
       bushels_stored: 900,
       coin: 10,
@@ -119,8 +120,9 @@ export function createNewRun(run_seed: string): RunState {
       // - fertility_mult, mortality_mult are persistent tuning knobs (see turn.ts tuningNumber).
       _tuning: {
         court_variant: "B",
-        fertility_mult: 2.0,
-        mortality_mult: 0.8
+        fertilityScale: 1.0,
+        mortalityScaleChild: 1.0,
+        mortalityScaleAdult: 1.0
       }
     },
     log: [],

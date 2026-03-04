@@ -11,6 +11,7 @@ export type HouseholdRole = "head" | "spouse" | "child" | "sibling" | "parent";
 export type HouseholdRosterRow = {
   person_id: string;
   role: HouseholdRole;
+  relationship_label?: string;
   badges?: string[];
 };
 
@@ -39,6 +40,24 @@ function getAge(state: AnyRecord, person_id: string): number | null {
   }
 
   return null;
+}
+
+
+function getSex(state: AnyRecord, person_id: string): "M" | "F" | null {
+  const p = getPeopleMap(state)?.[person_id];
+  const sex = p?.sex;
+  if (sex === "M" || sex === "F") return sex;
+  return null;
+}
+
+function relationshipLabel(state: AnyRecord, person_id: string, role: HouseholdRole): string {
+  if (role === "head") return "Head of House";
+  if (role === "spouse") return "Spouse";
+  const sex = getSex(state, person_id);
+  if (role === "child") return sex === "M" ? "Son" : sex === "F" ? "Daughter" : "Child";
+  if (role === "sibling") return sex === "M" ? "Brother" : sex === "F" ? "Sister" : "Sibling";
+  if (role === "parent") return sex === "M" ? "Father" : sex === "F" ? "Mother" : "Parent";
+  return "Kin";
 }
 
 const ROLE_PRIORITY: Record<HouseholdRole, number> = {
@@ -98,6 +117,7 @@ export function deriveHouseholdRoster(state: AnyRecord, house_id: string): House
   const rows: HouseholdRosterRow[] = Array.from(roleById.entries()).map(([person_id, role]) => ({
     person_id,
     role,
+    relationship_label: relationshipLabel(state, person_id, role),
   }));
 
   return sortRoster(state, rows);

@@ -13,6 +13,7 @@
  */
 
 import { BIRTH_CHANCE_BY_FERTILITY, BIRTH_FERTILE_AGE_MAX, BIRTH_FERTILE_AGE_MIN, TURN_YEARS } from "./constants";
+import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "./demographyCurves";
 
 // --- TierSets compatibility helpers (v0.2.8.x)
 // We accept either the "TierSets" shape (tier0.houses Set, tier1.houses Set)
@@ -245,7 +246,7 @@ export function processNobleFertility(
     if (motherAge < BIRTH_FERTILE_AGE_MIN || motherAge > BIRTH_FERTILE_AGE_MAX) continue;
     if (fatherAge < 16 || fatherAge > 70) continue;
 
-    const p = birthChancePerTurn(state, mother, motherAge);
+    const p = birthChancePerTurn(state, mother, motherAge, year);
     if (p <= 0) continue;
 
     const draw = rngFloat01(rng, `demography.birth.${year}.${motherId}.${fatherId}`);
@@ -291,7 +292,8 @@ export function processNobleFertility(
         else if (Array.isArray((h as any).people_ids)) (h as any).people_ids.push(childId);
       }
 
-      births.push({
+      (mother as any).last_birth_year = year;
+    births.push({
         child_person_id: childId,
         mother_person_id: motherId,
         father_person_id: fatherId,
@@ -325,7 +327,8 @@ export function processNobleFertility(
         else if (Array.isArray((h as any).people_ids)) (h as any).people_ids.push(childId);
       }
 
-      births.push({
+      (mother as any).last_birth_year = year;
+    births.push({
         child_person_id: childId,
         mother_person_id: motherId,
         father_person_id: fatherId,
@@ -505,18 +508,13 @@ export function processNobleMortality(
   const eligible = collectTier01PersonIds(state, tierSets);
   if (eligible.size === 0) return { deaths };
 
-  const mortalityMult = readTuningNumber(state, "mortality_mult", 1.0);
+  const childMult = readTuningNumber(state, "mortalityScaleChild", 1.0);
+  const adultMult = readTuningNumber(state, "mortalityScaleAdult", 1.0);
 
-  const hazardPerTurn = (ageYears: number): number => {
-    if (ageYears < 16) return 0;
-    // Gompertz-like: hazard rises ~exponentially with age.
-    // per-year baseline at age 30, then exp growth.
-    const base30 = 0.0010; // ~0.1% per year at 30
-    const scale = 12; // smaller => faster rise
-    const perYear = base30 * Math.exp((ageYears - 30) / scale);
-    // Convert to per-turn probability over TURN_YEARS years.
-    const perTurn = 1 - Math.pow(1 - Math.min(perYear, 0.95), TURN_YEARS);
-    return Math.min(Math.max(perTurn * mortalityMult, 0), 0.95);
+  const annualMortality = (ageYears: number): number => {
+    const base = mortalityAnnualProbabilityByAge(ageYears);
+    const mult = ageYears <= 14 ? childMult : adultMult;
+    return Math.max(0, Math.min(0.95, base * mult));
   };
 
   for (const id of Array.from(eligible).sort((a, b) => a.localeCompare(b))) {
@@ -526,7 +524,7 @@ export function processNobleMortality(
     const age = coerceAge(p, year);
     if (typeof age !== "number" || !Number.isFinite(age)) continue;
 
-    const h = hazardPerTurn(age);
+    const h = annualMortality(age);
     if (h <= 0) continue;
     const r = rngFloat01(rng, `demography.mortality.roll.${year}.${id}`);
     if (r < h) {
@@ -621,43 +619,19 @@ function readTrait01to5(p: PersonLike, key: string, fallback: number): number {
   return Math.round(n);
 }
 
-function fertilityAgeFactor(motherAge: number): number {
-  // Credibility gate: strong decline after 35 and ~0 by late 40s.
-  // Return [0..1] multiplier.
-  if (motherAge < BIRTH_FERTILE_AGE_MIN) return 0;
-  if (motherAge > BIRTH_FERTILE_AGE_MAX) return 0;
+function birthChancePerTurn(state: RunStateLike, mother: PersonLike, motherAge: number, year: number): number {
+  if (motherAge >= 45) return 0;
+  const lastBirthYear = (mother as any)?.last_birth_year;
+  if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && year - Math.trunc(lastBirthYear) < 2) return 0;
 
-  // Piecewise-linear, tuned for 3-year turns.
-  if (motherAge <= 30) return 1.0;
-  if (motherAge <= 35) {
-    // 30..35: 1.0 -> 0.75
-    return 1.0 - (motherAge - 30) * (0.25 / 5);
-  }
-  if (motherAge <= 40) {
-    // 35..40: 0.75 -> 0.25
-    return 0.75 - (motherAge - 35) * (0.50 / 5);
-  }
-  if (motherAge <= 45) {
-    // 40..45: 0.25 -> 0.07
-    return 0.25 - (motherAge - 40) * (0.18 / 5);
-  }
-  // 45..48: 0.07 -> 0.01
-  return 0.07 - (motherAge - 45) * (0.06 / 3);
-}
-
-function birthChancePerTurn(state: RunStateLike, mother: PersonLike, motherAge: number): number {
   const fertilityTrait = readTrait01to5(mother, "fertility", 3);
-  const base = (BIRTH_CHANCE_BY_FERTILITY as any)[fertilityTrait] ?? (BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 0.26;
+  const traitBase = (BIRTH_CHANCE_BY_FERTILITY as any)[fertilityTrait] ?? (BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 0.26;
+  const tableBase = fertilityAnnualProbabilityByAge(motherAge);
+  const fertilityScale = readTuningNumber(state, "fertilityScale", readTuningNumber(state, "fertility_mult", 1.0));
+  const traitAdj = traitBase / ((BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 1);
 
-  const ageFactor = fertilityAgeFactor(motherAge);
-  if (ageFactor <= 0) return 0;
-
-  // Respect global tuning multipliers (defaults aligned with createNewRun).
-  const fertilityMult = readTuningNumber(state, "fertility_mult", 1.0);
-
-  // Clamp to avoid runaway population explosions under aggressive tuning.
-  const p = base * ageFactor * fertilityMult;
-  return Math.min(Math.max(p, 0), 0.65);
+  const p = tableBase * traitAdj * fertilityScale;
+  return Math.min(Math.max(p, 0), 0.95);
 }
 
 function clamp01(x: number): number {

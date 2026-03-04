@@ -176,6 +176,40 @@ describe("tiering + worldgen (v0.2.8)", () => {
     expect(countsA).toEqual(countsB);
   });
 
+
+  it("Worldgen child spacing follows plausible maternal-age bounds and >=2y spacing", () => {
+    const state = mkBaseState("TEST_SEED_005", { spouse_age: 34, child_ages: [12, 10] });
+    ensureExternalHousesSeed_v0_2_8(state);
+
+    const houses: Record<string, any> = state.houses;
+    const people: Record<string, any> = state.people;
+
+    for (const hid of Object.keys(houses).filter((id) => id.startsWith("h_ext_")).sort()) {
+      const h = houses[hid];
+      const spouse = typeof h?.spouse_id === "string" ? people[h.spouse_id] : null;
+      if (!spouse || spouse.sex !== "F" || typeof spouse.age !== "number") continue;
+
+      const ages = (Array.isArray(h.child_ids) ? h.child_ids : [])
+        .map((cid: string) => people[cid])
+        .filter((p: any) => p && typeof p.age === "number")
+        .map((p: any) => Number(p.age))
+        .sort((a: number, b: number) => b - a);
+
+      for (let i = 0; i < ages.length; i++) {
+        const childAge = ages[i]!;
+        const maternalAgeAtBirth = Number(spouse.age) - childAge;
+        expect(maternalAgeAtBirth).toBeGreaterThanOrEqual(15);
+        expect(maternalAgeAtBirth).toBeLessThanOrEqual(44);
+
+        if (i > 0) {
+          const spacing = ages[i - 1]! - childAge;
+          expect(spacing).toBeGreaterThanOrEqual(2);
+          expect(spacing).toBeLessThanOrEqual(8);
+        }
+      }
+    }
+  });
+
   it("Tier0 includes Tier0 guide actors when present (player house, player court, liege/clergy, parish)", () => {
     const state = mkBaseState("TEST_SEED_004", { spouse_age: 30, child_ages: [8, 6] });
     // Provide an instantiated parish institution (actor) so Tier0 can include it.

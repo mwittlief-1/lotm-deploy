@@ -51,11 +51,13 @@ function genTraits(rng: Rng): Traits {
 }
 
 function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, married: boolean): Person {
+  const a = clampAge(age);
   return {
     id,
     name: `${pickName(rng, sex)} ${surname}`,
     sex,
-    age,
+    age: a,
+    birth_year: -a,
     alive: true,
     traits: genTraits(rng.fork(`traits:${id}`)),
     married,
@@ -122,10 +124,9 @@ function clampAge(n: number): number {
 /**
  * Deterministic child age generation with smoothing.
  *
- * Rule:
- * - pick oldest within a feasible band
- * - then subtract spacing (1–3y) iteratively, bounded so the remaining children can still fit
- * - optionally allow one "late child" if mother age supports (explicitly marked)
+ * Canonical v0.2.9 constraints:
+ * - sibling spacing uses weighted intervals (2y:45%, 3y:30%, 4y:15%, 5y:7%, 6-8y:3%)
+ * - each birth must imply plausible maternal age in [15, 44]
  */
 function genChildAgesSmoothed(rng: Rng, motherAge: number, fatherAge: number, desiredCount: number): { ages_desc: number[]; late_child: boolean } {
   const mAge = clampAge(motherAge);
@@ -134,41 +135,56 @@ function genChildAgesSmoothed(rng: Rng, motherAge: number, fatherAge: number, de
   let n = Math.max(0, Math.trunc(desiredCount));
   if (n === 0) return { ages_desc: [], late_child: false };
 
-  // Conservative fertility envelope: oldest child must be <= min(mother-16, father-14).
-  const maxOldest = Math.max(0, Math.min(mAge - 16, fAge - 14));
-  if (maxOldest <= 0) return { ages_desc: [], late_child: false };
+  // Child age envelope implied by maternal birth ages [15, 44], plus conservative paternal bound.
+  const oldestCapByMother = Math.max(0, mAge - 15);
+  const youngestCapByMother = Math.max(0, mAge - 44);
+  const oldestCap = Math.max(0, Math.min(oldestCapByMother, Math.max(0, fAge - 14)));
+  if (oldestCap <= 0) return { ages_desc: [], late_child: false };
 
-  // Ensure feasibility with min spacing of 1 year.
-  if (maxOldest < n - 1) n = maxOldest + 1;
+  const minSpacing = 2;
+  const maxSpacing = 8;
+
+  const pickSpacing = (): number => {
+    const u = rng.next();
+    if (u < 0.45) return 2;
+    if (u < 0.75) return 3;
+    if (u < 0.90) return 4;
+    if (u < 0.97) return 5;
+    return rng.int(6, 8);
+  };
+
+  // Ensure feasibility with min spacing and youngest lower bound.
+  while (n > 0) {
+    const minOldestForN = youngestCapByMother + (n - 1) * minSpacing;
+    if (minOldestForN <= oldestCap) break;
+    n -= 1;
+  }
   if (n <= 0) return { ages_desc: [], late_child: false };
 
-  const minOldest = Math.max(1, n - 1);
-  const oldest = rng.int(minOldest, Math.max(minOldest, maxOldest));
-
+  const minOldest = youngestCapByMother + (n - 1) * minSpacing;
+  const oldest = rng.int(minOldest, oldestCap);
   const ages: number[] = [oldest];
 
   for (let idx = 2; idx <= n; idx++) {
     const prev = ages[ages.length - 1]!;
     const remainingAfter = n - idx;
-    const maxSpacingAllowed = Math.min(3, prev - remainingAfter);
-    const spacing = maxSpacingAllowed <= 1 ? 1 : rng.int(1, maxSpacingAllowed);
-    ages.push(Math.max(0, prev - spacing));
+    const minCur = youngestCapByMother + remainingAfter * minSpacing;
+    const maxCur = prev - minSpacing;
+    if (maxCur < minCur) break;
+
+    const sampledSpacing = pickSpacing();
+    const spacingMin = Math.max(minSpacing, prev - maxCur);
+    const spacingMax = Math.min(maxSpacing, prev - minCur);
+    const spacing = Math.max(spacingMin, Math.min(sampledSpacing, spacingMax));
+    ages.push(prev - spacing);
   }
 
-  // Optional late child: only if mother is older AND youngest isn't already a toddler.
-  let late_child = false;
-  if (mAge >= 36 && ages.length >= 2) {
-    const youngest = ages[ages.length - 1]!;
-    // If the youngest is at least 5, we can add a late child with a small probability.
-    if (youngest >= 5 && rng.bool(0.12)) {
-      ages.push(rng.int(0, 2));
-      late_child = true;
-    }
-  }
+  // Defensive guarantee: every child implies maternal birth age in [15, 44].
+  const bounded = ages
+    .map((a) => Math.max(youngestCapByMother, Math.min(a, oldestCapByMother)))
+    .sort((a, b) => b - a);
 
-  // Ensure descending-ish ordering (allow twins: equal ages).
-  ages.sort((a, b) => b - a);
-  return { ages_desc: ages, late_child };
+  return { ages_desc: bounded, late_child: false };
 }
 
 function childCountForTier(tier: HouseTier, rng: Rng): number {
@@ -223,7 +239,7 @@ function smoothExistingChildrenAgesInPlace(opts: {
   for (let i = 0; i < kids.length; i++) {
     const k = kids[i]!;
     const newAge = ages[i]!;
-    if (people[k.id]) people[k.id].age = newAge;
+    if (people[k.id]) { people[k.id].age = newAge; people[k.id].birth_year = -newAge; }
   }
 }
 
@@ -249,7 +265,7 @@ function smoothPlayerHouseholdChildren(state: RunState): void {
   // Keep legacy embedded household objects in sync.
   for (const c of kids) {
     const p = people[c.id];
-    if (p && typeof p === "object" && typeof p.age === "number") c.age = p.age;
+    if (p && typeof p === "object" && typeof p.age === "number") { c.age = p.age; if (typeof p.birth_year === "number") c.birth_year = p.birth_year; }
   }
 }
 
@@ -293,6 +309,8 @@ function ensureFamilySnapshotForHouse(opts: {
   // Upsert head/spouse persons.
   if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
   if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  if (typeof people[headId]?.age === "number") people[headId].birth_year = -clampAge(people[headId].age);
+  if (spousePresent && typeof people[spouseId]?.age === "number") people[spouseId].birth_year = -clampAge(people[spouseId].age);
 
   // Child count + smoothed ages.
   const desiredChildCount = childCountForTier(tier, hRng.fork("child_count"));
@@ -318,7 +336,7 @@ function ensureFamilySnapshotForHouse(opts: {
       people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false);
     } else {
       // If upgrading existing, lightly smooth (no large gaps) without changing plausible late-child cases.
-      if (typeof people[cid].age === "number") people[cid].age = clampAge(people[cid].age);
+      if (typeof people[cid].age === "number") { people[cid].age = clampAge(people[cid].age); people[cid].birth_year = -people[cid].age; }
     }
   }
 
