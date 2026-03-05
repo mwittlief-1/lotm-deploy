@@ -22,6 +22,11 @@ export type Summary = {
   tuning: Tuning;
   years: number;
   births_by_maternal_age_band: Record<string, number>;
+  births_by_mother_residency: {
+    player_house_resident: number;
+    non_player_house_resident: number;
+    unknown_mother_or_residency: number;
+  };
   deaths_by_age_band: Record<string, number>;
   survival_to_5: number;
   survival_to_10: number;
@@ -31,14 +36,28 @@ export type Summary = {
   alive_at_100: number;
   birth_spacing_distribution: Record<string, number>;
   spacing_lt_2_count: number;
-  implied_annual_growth_rate: number;
-  population_cagr: number;
+  alive_people_start: number;
+  alive_people_end: number;
+  population_growth_turn_0_to_n: number;
+  population_count_basis: "alive_people_registry";
   newborn_end_of_turn_age_distribution: Record<string, number>;
   life_stage_buckets: AgeBucket[];
   age_structure_stability: Record<string, BucketStability>;
   total_births: number;
   total_deaths: number;
   per_turn: Array<{ turn: number; births: number; deaths: number }>;
+  seed_game_over_outcomes: Array<{
+    seed: number;
+    first_game_over_turn: number | null;
+    alive_turns_count: number;
+    game_over_reason: string | null;
+    survived_past_turn_29: boolean;
+  }>;
+  game_over_reason_counts: Record<string, number>;
+  first_game_over_turn_stats: { min: number | null; max: number | null; mean: number | null; median: number | null; count: number };
+  alive_turns_count_stats: { min: number; max: number; mean: number; median: number };
+  seeds_surviving_past_turn_29_count: number;
+  seeds_surviving_past_turn_29_share: number;
 };
 
 const MAT_BANDS: Array<[string, number, number]> = [["15-19", 15, 19], ["20-24", 20, 24], ["25-29", 25, 29], ["30-34", 30, 34], ["35-39", 35, 39], ["40-44", 40, 44], ["45+", 45, 999]];
@@ -70,6 +89,10 @@ function readAge(p: any): number | null {
   return typeof raw === "number" && Number.isFinite(raw) ? Math.trunc(raw) : null;
 }
 
+function countAlivePeople(state: any): number {
+  return Object.values((state as any)?.people ?? {}).reduce((acc: number, p: any) => acc + (p?.alive === false ? 0 : 1), 0);
+}
+
 function buildDecisions(state: any): any {
   return {
     labor: { kind: "labor", desired_farmers: state.manor.farmers, desired_builders: state.manor.builders },
@@ -91,6 +114,14 @@ function stddev(arr: number[]): number {
   const m = mean(arr);
   const variance = arr.reduce((a, x) => a + (x - m) * (x - m), 0) / arr.length;
   return Math.sqrt(variance);
+}
+
+function median(arr: number[]): number {
+  if (arr.length === 0) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 1) return sorted[mid] ?? 0;
+  return ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2;
 }
 
 function matchingBucket(age: number, buckets: AgeBucket[]): AgeBucket {
@@ -130,12 +161,6 @@ export function parseBucketOverride(raw?: string): AgeBucket[] {
     });
   if (parsed.length === 0) return DEFAULT_LIFE_STAGE_BUCKETS;
   return sortBuckets(parsed);
-}
-
-export function computeCagr(popStart: number, popEnd: number, years: number): number {
-  const safeYears = Math.max(1, years);
-  if (!(popStart > 0) || !(popEnd >= 0)) return 0;
-  return Math.pow(popEnd / popStart, 1 / safeYears) - 1;
 }
 
 function selectMotherForChild(next: any, childId: string, child: any): any | null {
@@ -209,6 +234,22 @@ export function computeAgeBucketSnapshot(aliveAges: number[], bucketsInput?: Age
   return out;
 }
 
+
+export function evaluateLateHorizonActivity(
+  perTurn: Array<{ turn: number; births: number; deaths: number }> | undefined,
+  turns: number,
+  turnStart: number,
+  turnEnd: number,
+  minBirthsPlusDeaths: number,
+): { activity: number; hasWindow: boolean; valid: boolean } {
+  const hasWindow = turns > turnStart && turnStart <= turnEnd;
+  const activity = (perTurn ?? [])
+    .filter((row) => Number(row?.turn) >= turnStart && Number(row?.turn) <= turnEnd)
+    .reduce((acc, row) => acc + Number(row?.births ?? 0) + Number(row?.deaths ?? 0), 0);
+  const valid = !hasWindow || activity >= minBirthsPlusDeaths;
+  return { activity: Number(activity.toFixed(3)), hasWindow, valid };
+}
+
 export function runDemographyBatch(
   seeds: number[],
   turns: number,
@@ -218,6 +259,11 @@ export function runDemographyBatch(
 ): Summary {
   const lifeStageBuckets = sortBuckets(options?.lifeStageBuckets && options.lifeStageBuckets.length > 0 ? options.lifeStageBuckets : DEFAULT_LIFE_STAGE_BUCKETS);
   const birthsByBand = zeroed(MAT_BANDS.map(([k]) => k));
+  const birthsByMotherResidency = {
+    player_house_resident: 0,
+    non_player_house_resident: 0,
+    unknown_mother_or_residency: 0,
+  };
   const deathsByBand = zeroed(AGE_BANDS.map(([k]) => k));
   const newbornAges = { "0": 0, "1": 0, "2": 0 };
   const perTurn = Array.from({ length: turns }, (_, t) => ({ turn: t, births: 0, deaths: 0 }));
@@ -245,6 +291,13 @@ export function runDemographyBatch(
 
   let popStart = 0;
   let popEnd = 0;
+  const seedOutcomes: Array<{
+    seed: number;
+    first_game_over_turn: number | null;
+    alive_turns_count: number;
+    game_over_reason: string | null;
+    survived_past_turn_29: boolean;
+  }> = [];
 
   for (let t = 0; t < turns; t++) {
     for (const b of lifeStageBuckets) {
@@ -256,14 +309,22 @@ export function runDemographyBatch(
   for (const seed of seeds) {
     let state: any = createNewRun(`batch_${seed}`);
     state.flags._tuning = { ...(state.flags?._tuning ?? {}), ...tuning };
-    popStart += Number(state.manor.population) || 0;
+    popStart += countAlivePeople(state);
+    let firstGameOverTurn: number | null = null;
+    let aliveTurnsCount = 0;
+    let gameOverReason: string | null = null;
 
     for (let t = 0; t < turns; t++) {
+      if (!state?.game_over) aliveTurnsCount += 1;
       const beforePeople = new Map<string, any>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, { ...(p as any) }]));
       const beforeAlive = new Map<string, boolean>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, Boolean((p as any)?.alive !== false)]));
 
       const ctx = proposeTurn(state as any);
       const next = ctx.preview_state as any;
+      if (firstGameOverTurn === null && next?.game_over) {
+        firstGameOverTurn = t;
+        gameOverReason = String(next.game_over?.reason ?? "Unknown");
+      }
 
       // births: ids newly present in people map
       for (const [pid, p] of Object.entries(next.people ?? {})) {
@@ -279,6 +340,22 @@ export function runDemographyBatch(
 
         const mom = selectMotherForChild(next, pid, child) as any;
         if (mom) {
+          const motherId = typeof mom?.id === "string" ? mom.id : null;
+          let motherHouseId: string | null = null;
+          if (motherId) {
+            for (const [hid, house] of Object.entries((next as any).houses ?? {})) {
+              const members: unknown[] = Array.isArray((house as any)?.member_person_ids) ? (house as any).member_person_ids : [];
+              if (members.some((x) => x === motherId)) {
+                motherHouseId = hid;
+                break;
+              }
+            }
+          }
+          const playerHouseId = typeof (next as any).player_house_id === "string" ? String((next as any).player_house_id) : "h_player";
+          if (motherHouseId === null) birthsByMotherResidency.unknown_mother_or_residency += 1;
+          else if (motherHouseId === playerHouseId) birthsByMotherResidency.player_house_resident += 1;
+          else birthsByMotherResidency.non_player_house_resident += 1;
+
           const motherBirthYear = readBirthYear(mom);
           const childBirthYear = readBirthYear(child);
 
@@ -294,6 +371,8 @@ export function runDemographyBatch(
             arr.push(childBirthYear);
             motherBirthYears.set(String(mom.id), arr);
           }
+        } else {
+          birthsByMotherResidency.unknown_mother_or_residency += 1;
         }
       }
 
@@ -310,6 +389,10 @@ export function runDemographyBatch(
       }
 
       state = applyDecisions(next, buildDecisions(next));
+      if (firstGameOverTurn === null && state?.game_over) {
+        firstGameOverTurn = t;
+        gameOverReason = String(state.game_over?.reason ?? "Unknown");
+      }
 
       const aliveAges: number[] = [];
       for (const p of Object.values((state as any).people ?? {})) {
@@ -325,7 +408,14 @@ export function runDemographyBatch(
       }
     }
 
-    popEnd += Number(state.manor.population) || 0;
+    popEnd += countAlivePeople(state);
+    seedOutcomes.push({
+      seed,
+      first_game_over_turn: firstGameOverTurn,
+      alive_turns_count: aliveTurnsCount,
+      game_over_reason: gameOverReason,
+      survived_past_turn_29: firstGameOverTurn === null || firstGameOverTurn > 29,
+    });
 
     for (const p of Object.values((state as any).people ?? {})) {
       const pp: any = p;
@@ -378,7 +468,19 @@ export function runDemographyBatch(
   }
 
   const years = Math.max(1, turns * 3);
-  const annualGrowth = computeCagr(popStart, popEnd, years);
+  const populationGrowthTurn0ToN = popStart > 0 ? (popEnd - popStart) / popStart : 0;
+
+  const gameOverReasonCounts: Record<string, number> = {};
+  for (const row of seedOutcomes) {
+    const key = row.game_over_reason ?? "None";
+    gameOverReasonCounts[key] = (gameOverReasonCounts[key] ?? 0) + 1;
+  }
+
+  const firstTurns = seedOutcomes
+    .map((row) => row.first_game_over_turn)
+    .filter((x): x is number => typeof x === "number" && Number.isFinite(x));
+  const aliveTurns = seedOutcomes.map((row) => row.alive_turns_count);
+  const survivePast29Count = seedOutcomes.filter((row) => row.survived_past_turn_29).length;
 
   return {
     mode,
@@ -390,6 +492,7 @@ export function runDemographyBatch(
     total_deaths: totalDeaths,
     per_turn: perTurn,
     births_by_maternal_age_band: birthsByBand,
+    births_by_mother_residency: birthsByMotherResidency,
     deaths_by_age_band: deathsByBand,
     survival_to_5: aliveTotal ? Number((alive5 / aliveTotal).toFixed(4)) : 0,
     survival_to_10: aliveTotal ? Number((alive10 / aliveTotal).toFixed(4)) : 0,
@@ -399,11 +502,30 @@ export function runDemographyBatch(
     alive_at_100: aliveTotal ? Number((alive100 / aliveTotal).toFixed(4)) : 0,
     birth_spacing_distribution: birthSpacingDistribution,
     spacing_lt_2_count: spacingLt2Count,
-    implied_annual_growth_rate: Number(annualGrowth.toFixed(6)),
-    population_cagr: Number(annualGrowth.toFixed(6)),
+    alive_people_start: Number(popStart.toFixed(3)),
+    alive_people_end: Number(popEnd.toFixed(3)),
+    population_growth_turn_0_to_n: Number(populationGrowthTurn0ToN.toFixed(12)),
+    population_count_basis: "alive_people_registry",
     newborn_end_of_turn_age_distribution: newbornAges,
     life_stage_buckets: lifeStageBuckets,
     age_structure_stability: ageStructureStability,
+    seed_game_over_outcomes: seedOutcomes,
+    game_over_reason_counts: gameOverReasonCounts,
+    first_game_over_turn_stats: {
+      min: firstTurns.length > 0 ? Math.min(...firstTurns) : null,
+      max: firstTurns.length > 0 ? Math.max(...firstTurns) : null,
+      mean: firstTurns.length > 0 ? Number(mean(firstTurns).toFixed(3)) : null,
+      median: firstTurns.length > 0 ? Number(median(firstTurns).toFixed(3)) : null,
+      count: firstTurns.length,
+    },
+    alive_turns_count_stats: {
+      min: aliveTurns.length > 0 ? Math.min(...aliveTurns) : 0,
+      max: aliveTurns.length > 0 ? Math.max(...aliveTurns) : 0,
+      mean: aliveTurns.length > 0 ? Number(mean(aliveTurns).toFixed(3)) : 0,
+      median: aliveTurns.length > 0 ? Number(median(aliveTurns).toFixed(3)) : 0,
+    },
+    seeds_surviving_past_turn_29_count: survivePast29Count,
+    seeds_surviving_past_turn_29_share: seedOutcomes.length > 0 ? Number((survivePast29Count / seedOutcomes.length).toFixed(6)) : 0,
   };
 }
 
