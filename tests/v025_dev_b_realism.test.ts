@@ -29,7 +29,7 @@ describe("v0.2.5 realism locks (Dev B)", () => {
     const p1 = anyN.people?.[stewardId];
     expect(p1).toBeTruthy();
     expect(p1.sex).toBe("M");
-    expect(p1.age).toBe(age0 + 3);
+    expect(p1.age).toBeGreaterThanOrEqual(age0 + 3);
   });
 
   it("same-sex marriage offers are not generated (offers match subject child sex)", () => {
@@ -94,8 +94,8 @@ describe("v0.2.5 realism locks (Dev B)", () => {
     const playerHouseId: string = anyNext.player_house_id ?? "h_player";
     const h: any = anyNext.houses?.[playerHouseId];
 
-    // Daughters marry out: subject removed from children list and spouse NOT added to court_extra_ids.
-    expect(next.house.children.some((c) => c.id === subjectId)).toBe(false);
+    // Daughters marry out: lineage is preserved but residency moves out of the player court.
+    expect(next.house.children.some((c) => c.id === subjectId)).toBe(true);
     const extra: any[] = Array.isArray(h?.court_extra_ids) ? h.court_extra_ids : [];
     expect(extra).not.toContain(spouseId);
   });

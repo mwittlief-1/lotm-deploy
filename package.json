@@ -17,7 +17,8 @@
     "demography:batch:cohort": "tsx scripts/demographyBatch.ts cohort",
     "demography:batch:sim": "tsx scripts/demographyBatch.ts sim",
     "demography:doe": "tsx scripts/demographyDoe.ts",
-    "preflight:update-baselines": "UPDATE_BASELINES=1 node scripts/preflightNoDeps.mjs"
+    "preflight:update-baselines": "UPDATE_BASELINES=1 node scripts/preflightNoDeps.mjs",
+    "demography:audit": "tsx scripts/demographyAudit.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

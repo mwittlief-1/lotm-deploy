@@ -1,0 +1,148 @@
+{
+  "mode": "sim",
+  "seeds": 12,
+  "turns": 20,
+  "probe_grid": [
+    [
+      1.3,
+      1,
+      1
+    ],
+    [
+      1.4,
+      1,
+      1
+    ],
+    [
+      1.5,
+      1,
+      1
+    ],
+    [
+      1.5,
+      0.9,
+      1
+    ],
+    [
+      1.5,
+      1.1,
+      1.1
+    ],
+    [
+      1.4,
+      0.9,
+      1.1
+    ]
+  ],
+  "generated_at": "2026-03-05T18:24:53.857Z",
+  "results": [
+    {
+      "fertilityScale": 1.5,
+      "mortalityScaleChild": 0.9,
+      "mortalityScaleAdult": 1,
+      "population_growth_turn_0_to_n": -0.056696220252,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.11843739649289614,
+      "total_births": 2777,
+      "total_deaths": 2908,
+      "late_horizon_activity": 839,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0.083333,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2777
+      }
+    },
+    {
+      "fertilityScale": 1.5,
+      "mortalityScaleChild": 1,
+      "mortalityScaleAdult": 1,
+      "population_growth_turn_0_to_n": -0.072561829211,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.13430300545189616,
+      "total_births": 2726,
+      "total_deaths": 2921,
+      "late_horizon_activity": 813,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0.083333,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2726
+      }
+    },
+    {
+      "fertilityScale": 1.5,
+      "mortalityScaleChild": 1.1,
+      "mortalityScaleAdult": 1.1,
+      "population_growth_turn_0_to_n": -0.10429304713,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.16603422337089613,
+      "total_births": 2322,
+      "total_deaths": 2562,
+      "late_horizon_activity": 508,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2322
+      }
+    },
+    {
+      "fertilityScale": 1.4,
+      "mortalityScaleChild": 0.9,
+      "mortalityScaleAdult": 1.1,
+      "population_growth_turn_0_to_n": -0.120391973868,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.18213315010889614,
+      "total_births": 2268,
+      "total_deaths": 2640,
+      "late_horizon_activity": 596,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2268
+      }
+    },
+    {
+      "fertilityScale": 1.3,
+      "mortalityScaleChild": 1,
+      "mortalityScaleAdult": 1,
+      "population_growth_turn_0_to_n": -0.154456369575,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.21619754581589615,
+      "total_births": 2309,
+      "total_deaths": 2799,
+      "late_horizon_activity": 536,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0.083333,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2309
+      }
+    },
+    {
+      "fertilityScale": 1.4,
+      "mortalityScaleChild": 1,
+      "mortalityScaleAdult": 1,
+      "population_growth_turn_0_to_n": -0.16938870742,
+      "target_growth_turn_0_to_n": 0.061741176240896145,
+      "distance_to_target": 0.23112988366089615,
+      "total_births": 2603,
+      "total_deaths": 3130,
+      "late_horizon_activity": 1029,
+      "late_horizon_valid": true,
+      "seeds_surviving_past_turn_29_share": 0.166667,
+      "births_by_mother_residency": {
+        "player_house_resident": 0,
+        "non_player_house_resident": 0,
+        "unknown_mother_or_residency": 2603
+      }
+    }
+  ]
+}

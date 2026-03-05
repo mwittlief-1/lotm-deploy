@@ -206,6 +206,16 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
     };
   }
 
+  for (const pid of Object.keys(people).sort()) {
+    const p: any = people[pid];
+    if (!p || typeof p !== "object") continue;
+    const inferredHouseId = houseIdForPerson(houses, pid);
+    if ((typeof p.house_id !== "string" || !p.house_id) && inferredHouseId) p.house_id = inferredHouseId;
+    if (typeof p.residence_house_id !== "string" || !p.residence_house_id) {
+      p.residence_house_id = (typeof p.house_id === "string" && p.house_id) ? p.house_id : inferredHouseId;
+    }
+  }
+
   // Kinship edges: preserve non-player edges; replace only edges involving the player household IDs.
   const prior: KinshipEdge[] = Array.isArray(s.kinship_edges)
     ? (s.kinship_edges as KinshipEdge[])

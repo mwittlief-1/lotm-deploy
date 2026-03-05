@@ -50,7 +50,7 @@ function genTraits(rng: Rng): Traits {
   };
 }
 
-function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, married: boolean): Person {
+function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, married: boolean, houseId?: string): Person {
   const a = clampAge(age);
   return {
     id,
@@ -61,7 +61,14 @@ function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, 
     alive: true,
     traits: genTraits(rng.fork(`traits:${id}`)),
     married,
+    house_id: houseId ?? null,
+    residence_house_id: houseId ?? null,
   };
+}
+
+function clampAge(n: number): number {
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.trunc(n));
 }
 
 function holdingsForTier(tier: HouseTier, rng: Rng): number {
@@ -115,9 +122,26 @@ function ensureRelationshipEdgesToPlayerHead(state: RunState, extHouseIds: strin
   }
 }
 
-function clampAge(n: number): number {
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.trunc(n));
+function pickHouseholdProfileAges(rng: Rng): { headAge: number; spouseAge: number; spousePresent: boolean } {
+  const u = rng.next();
+  if (u < 0.30) {
+    const headAge = rng.int(24, 36);
+    return { headAge, spouseAge: Math.max(18, headAge - rng.int(-2, 6)), spousePresent: true };
+  }
+  if (u < 0.58) {
+    const headAge = rng.int(34, 48);
+    return { headAge, spouseAge: Math.max(18, headAge - rng.int(0, 8)), spousePresent: true };
+  }
+  if (u < 0.76) {
+    const headAge = rng.int(46, 60);
+    return { headAge, spouseAge: Math.max(24, headAge - rng.int(2, 10)), spousePresent: rng.bool(0.8) };
+  }
+  if (u < 0.90) {
+    const headAge = rng.int(52, 70);
+    return { headAge, spouseAge: Math.max(30, headAge - rng.int(4, 12)), spousePresent: rng.bool(0.7) };
+  }
+  const headAge = rng.int(66, 82);
+  return { headAge, spouseAge: Math.max(42, headAge - rng.int(4, 12)), spousePresent: rng.bool(0.55) };
 }
 
 
@@ -300,17 +324,20 @@ function ensureFamilySnapshotForHouse(opts: {
   const headId: string = typeof prior.head_id === "string" && prior.head_id ? prior.head_id : extPersonId(houseIndex, "head");
   const spouseId: string = typeof prior.spouse_id === "string" && prior.spouse_id ? prior.spouse_id : extPersonId(houseIndex, "spouse");
 
-  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : hRng.int(24, 60);
-  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(0.85);
+  const profile = pickHouseholdProfileAges(hRng.fork("profile"));
+  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : profile.headAge;
+  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : profile.spousePresent;
   const spouseAge: number = spousePresent
-    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(0, 12)))
+    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : profile.spouseAge)
     : 0;
 
   // Upsert head/spouse persons.
-  if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
-  if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent, hid);
+  if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true, hid);
   if (typeof people[headId]?.age === "number") people[headId].birth_year = -clampAge(people[headId].age);
+  if (people[headId] && typeof people[headId] === "object") { people[headId].house_id = hid; if (!people[headId].residence_house_id) people[headId].residence_house_id = hid; }
   if (spousePresent && typeof people[spouseId]?.age === "number") people[spouseId].birth_year = -clampAge(people[spouseId].age);
+  if (spousePresent && people[spouseId] && typeof people[spouseId] === "object") { people[spouseId].house_id = hid; if (!people[spouseId].residence_house_id) people[spouseId].residence_house_id = hid; }
 
   // Child count + smoothed ages.
   const desiredChildCount = childCountForTier(tier, hRng.fork("child_count"));
@@ -333,10 +360,12 @@ function ensureFamilySnapshotForHouse(opts: {
     const age = ages_desc[ci]!;
     if (!people[cid]) {
       const sex: Sex = hRng.fork(`child_sex:${cid}`).bool(0.55) ? "M" : "F";
-      people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false);
+      people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false, hid);
     } else {
       // If upgrading existing, lightly smooth (no large gaps) without changing plausible late-child cases.
       if (typeof people[cid].age === "number") { people[cid].age = clampAge(people[cid].age); people[cid].birth_year = -people[cid].age; }
+      people[cid].house_id = hid;
+      if (!people[cid].residence_house_id) people[cid].residence_house_id = hid;
     }
   }
 
@@ -371,6 +400,10 @@ function ensureFamilySnapshotForHouse(opts: {
   for (const cid of childIds) {
     ensureKinshipEdge(state, { kind: "parent_of", parent_id: headId, child_id: cid });
     if (spousePresent) ensureKinshipEdge(state, { kind: "parent_of", parent_id: spouseId, child_id: cid });
+    if (people[cid] && typeof people[cid] === "object") {
+      people[cid].father_id = headId;
+      people[cid].mother_id = spousePresent ? spouseId : null;
+    }
   }
 }
 

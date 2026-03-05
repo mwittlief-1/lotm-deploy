@@ -12,9 +12,15 @@ export interface Person {
   name: string;
   sex: Sex;
   age: number; // years
+  birth_year?: number;
   alive: boolean;
   traits: Traits;
   married?: boolean;
+  spouse_id?: string | null;
+  house_id?: string | null;
+  residence_house_id?: string | null;
+  mother_id?: string | null;
+  father_id?: string | null;
   // v0.2.9 demography spacing lock
   last_birth_year?: number;
 

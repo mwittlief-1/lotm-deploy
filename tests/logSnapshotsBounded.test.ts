@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { createNewRun, proposeTurn, applyDecisions } from "../src/sim";
 import { decide } from "../src/sim/policies";
 
-const ALLOWED_KEYS = new Set(["turn_index", "manor", "house", "relationships", "flags", "game_over", "people", "houses", "player_house_id", "kinship", "kinship_edges"]);
+const ALLOWED_KEYS = new Set(["turn_index", "manor", "house", "relationships", "flags", "game_over", "people", "houses", "player_house_id", "kinship", "kinship_edges", "institutions", "service_records"]);
 
 describe("TurnLogEntry snapshots", () => {
   it("snapshot_before/after are bounded and never include log history", () => {

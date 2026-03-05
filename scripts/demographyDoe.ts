@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { parseBucketOverride, runDemographyBatch, type AgeBucket } from "./demographyBatch";
+import { evaluateLateHorizonActivity, parseBucketOverride, runDemographyBatch, type AgeBucket } from "./demographyBatch";
 
 function ensureDir(p: string) { fs.mkdirSync(p, { recursive: true }); }
 function sha(v: string) { return crypto.createHash("sha256").update(v).digest("hex"); }
@@ -25,10 +25,16 @@ const dir = "qa_artifacts/demography_batch";
 const seedsCount = envInt("DOE_SEEDS", 240);
 const turns = envInt("DOE_TURNS", 45);
 const mode = (process.env.DOE_MODE === "cohort" ? "cohort" : "sim") as "cohort" | "sim";
-const targetCagrMin = envFloat("DOE_TARGET_CAGR_MIN", 0.0);
-const targetCagrMax = envFloat("DOE_TARGET_CAGR_MAX", 0.003);
+const targetTurnGrowth = envFloat("DOE_TARGET_TURN_GROWTH", 1.003);
+const lateTurnStart = envInt("DOE_LATE_TURN_START", 16);
+const lateTurnEnd = envInt("DOE_LATE_TURN_END", 29);
+const lateHorizonActivityMin = envFloat("DOE_LATE_ACTIVITY_MIN", 1);
+const survivalTurn = envInt("DOE_SURVIVAL_TURN", 29);
+const minSurvivalShare = envFloat("DOE_MIN_SURVIVAL_SHARE", 0);
+const maxUnknownMotherResidencyShare = envFloat("DOE_MAX_UNKNOWN_MOTHER_RESIDENCY_SHARE", 0.1);
 const lifeStageBuckets = parseBucketOverride(process.env.DOE_BUCKETS);
 const seeds = Array.from({ length: seedsCount }, (_, i) => i + 1);
+const targetPopulationGrowthTurn0ToN = Math.pow(targetTurnGrowth, turns) - 1;
 
 ensureDir(dir);
 
@@ -44,7 +50,9 @@ for (const fertilityScale of fertilityVals) {
         { lifeStageBuckets },
       );
 
-      const cagr = Number(summary.population_cagr ?? summary.implied_annual_growth_rate ?? 0);
+      const alivePeopleStart = Number(summary.alive_people_start ?? 0);
+      const alivePeopleEnd = Number(summary.alive_people_end ?? 0);
+      const populationGrowthTurn0ToN = Number(summary.population_growth_turn_0_to_n ?? (alivePeopleStart > 0 ? (alivePeopleEnd - alivePeopleStart) / alivePeopleStart : 0));
       const births45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
       const spacingLt2 = Number(summary.spacing_lt_2_count ?? 0);
 
@@ -55,15 +63,27 @@ for (const fertilityScale of fertilityVals) {
         .map((x: any) => Number(x?.std_age_in_bucket ?? 0))
         .reduce((a, b) => a + b, 0);
 
-      const cagrBandPenalty = cagr < targetCagrMin
-        ? (targetCagrMin - cagr) * 100
-        : cagr > targetCagrMax
-          ? (cagr - targetCagrMax) * 100
-          : 0;
+      const populationChangePenalty = Math.abs(populationGrowthTurn0ToN - targetPopulationGrowthTurn0ToN) * 100;
+
+      const lateHorizonActivity = evaluateLateHorizonActivity(summary.per_turn, turns, lateTurnStart, lateTurnEnd, lateHorizonActivityMin);
+      const survivalShare = turns > survivalTurn
+        ? Number((summary.seed_game_over_outcomes ?? []).filter((row: any) => row?.first_game_over_turn === null || Number(row?.first_game_over_turn) > survivalTurn).length / Math.max(1, summary.seeds ?? 1))
+        : 1;
+      const survivalCoverageValid = turns <= survivalTurn || survivalShare >= minSurvivalShare;
+      const unknownMotherResidencyShare = summary.total_births > 0
+        ? Number(summary.births_by_mother_residency?.unknown_mother_or_residency ?? 0) / Number(summary.total_births)
+        : 0;
+      const motherResidencyCoverageValid = unknownMotherResidencyShare <= maxUnknownMotherResidencyShare;
+      const invalidReasons: string[] = [];
+      if (!lateHorizonActivity.valid) invalidReasons.push("late_horizon_activity");
+      if (!survivalCoverageValid) invalidReasons.push("survival_coverage");
+      if (!motherResidencyCoverageValid) invalidReasons.push("mother_residency_coverage");
+      const invalidForRanking = invalidReasons.length > 0;
 
       const gatePenalty = births45 > 0 || spacingLt2 > 0 ? 1000 : 0;
+      const invalidRankingPenalty = invalidForRanking ? 1000000 : 0;
       const stabilityPenalty = stabilityShareStd * 10 + stabilityMeanAgeStd * 0.1;
-      const score = Number((cagrBandPenalty + stabilityPenalty + gatePenalty).toFixed(6));
+      const score = Number((populationChangePenalty + stabilityPenalty + gatePenalty + invalidRankingPenalty).toFixed(6));
 
       ranked.push({
         fertilityScale,
@@ -71,33 +91,57 @@ for (const fertilityScale of fertilityVals) {
         mortalityScaleAdult,
         score,
         rank_inputs: {
-          target_cagr_min: targetCagrMin,
-          target_cagr_max: targetCagrMax,
-          cagr_band_penalty: Number(cagrBandPenalty.toFixed(6)),
+          target_turn_growth: targetTurnGrowth,
+          target_population_growth_turn_0_to_n: Number(targetPopulationGrowthTurn0ToN.toFixed(12)),
+          population_change_penalty: Number(populationChangePenalty.toFixed(6)),
           stability_share_std_sum: Number(stabilityShareStd.toFixed(6)),
           stability_mean_age_std_sum: Number(stabilityMeanAgeStd.toFixed(6)),
           stability_penalty: Number(stabilityPenalty.toFixed(6)),
           gate_penalty: gatePenalty,
+          invalid_ranking_penalty: invalidRankingPenalty,
+          survival_share: Number(survivalShare.toFixed(6)),
+          unknown_mother_residency_share: Number(unknownMotherResidencyShare.toFixed(6)),
+          invalid_reasons: invalidReasons,
         },
         gates: {
           births_45_plus_must_be_zero: births45 === 0,
           spacing_ge_2_years: spacingLt2 === 0,
+          late_horizon_activity_nonzero: lateHorizonActivity.valid,
+          survival_coverage_meets_min: survivalCoverageValid,
+          mother_residency_coverage_meets_max_unknown: motherResidencyCoverageValid,
+          invalid_for_ranking_reason_coded: invalidReasons.length > 0,
         },
         kpis: {
-          population_cagr: cagr,
-          implied_annual_growth_rate: Number(summary.implied_annual_growth_rate ?? 0),
+          alive_people_start: alivePeopleStart,
+          alive_people_end: alivePeopleEnd,
+          population_growth_turn_0_to_n: Number(populationGrowthTurn0ToN.toFixed(12)),
+          target_population_growth_turn_0_to_n: Number(targetPopulationGrowthTurn0ToN.toFixed(12)),
+          population_count_basis: summary.population_count_basis,
           births_45_plus: births45,
           spacing_lt_2_count: spacingLt2,
+          late_horizon_activity: lateHorizonActivity.activity,
+          invalid_for_ranking: invalidForRanking,
+          survival_share_past_turn: Number(survivalShare.toFixed(6)),
           age_structure_stability: summary.age_structure_stability,
+          first_game_over_turn_stats: summary.first_game_over_turn_stats,
+          alive_turns_count_stats: summary.alive_turns_count_stats,
+          game_over_reason_counts: summary.game_over_reason_counts,
+          seeds_surviving_past_turn_29_count: summary.seeds_surviving_past_turn_29_count,
+          seeds_surviving_past_turn_29_share: summary.seeds_surviving_past_turn_29_share,
+          unknown_mother_residency_share: Number(unknownMotherResidencyShare.toFixed(6)),
+          invalid_reasons: invalidReasons,
           newborn_end_of_turn_age_distribution: summary.newborn_end_of_turn_age_distribution ?? { "0": 0, "1": 0, "2": 0 },
+          births_by_mother_residency: summary.births_by_mother_residency,
         },
+        invalid_for_ranking: invalidForRanking,
+        invalid_reasons: invalidReasons,
         summary,
       });
     }
   }
 }
 
-ranked.sort((a, b) => a.score - b.score || a.fertilityScale - b.fertilityScale || a.mortalityScaleChild - b.mortalityScaleChild || a.mortalityScaleAdult - b.mortalityScaleAdult);
+ranked.sort((a, b) => Number(a.invalid_for_ranking) - Number(b.invalid_for_ranking) || a.score - b.score || a.fertilityScale - b.fertilityScale || a.mortalityScaleChild - b.mortalityScaleChild || a.mortalityScaleAdult - b.mortalityScaleAdult);
 
 const out = {
   mode,
@@ -106,7 +150,28 @@ const out = {
   grid_values: { fertilityScale: fertilityVals, mortalityScaleChild: mortalityVals, mortalityScaleAdult: mortalityVals },
   life_stage_buckets: lifeStageBuckets,
   bucket_override: stableBucketString(lifeStageBuckets),
-  target_cagr: { min: targetCagrMin, max: targetCagrMax },
+  target_turn_growth: targetTurnGrowth,
+  target_population_growth_turn_0_to_n: Number(targetPopulationGrowthTurn0ToN.toFixed(12)),
+  population_count_basis: "alive_people_registry",
+  late_horizon_activity_gate: {
+    turn_start: lateTurnStart,
+    turn_end: lateTurnEnd,
+    min_births_plus_deaths: lateHorizonActivityMin,
+  },
+  survival_coverage_gate: {
+    survival_turn: survivalTurn,
+    min_survival_share: minSurvivalShare,
+  },
+  mother_residency_coverage_gate: {
+    max_unknown_share: maxUnknownMotherResidencyShare,
+  },
+  invalid_for_ranking_count: ranked.filter((x) => x.invalid_for_ranking).length,
+  invalid_reason_counts: {
+    late_horizon_activity: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("late_horizon_activity")).length,
+    survival_coverage: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("survival_coverage")).length,
+    mother_residency_coverage: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("mother_residency_coverage")).length,
+    both: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.length > 1).length,
+  },
   ranked,
 };
 

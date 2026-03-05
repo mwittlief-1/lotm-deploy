@@ -71,6 +71,11 @@ type PersonLike = {
 
   // optional loose membership hints
   house_id?: string | null;
+  residence_house_id?: string | null;
+  spouse_id?: string | null;
+  mother_id?: string | null;
+  father_id?: string | null;
+  vowed?: boolean;
 };
 
 type HouseLike = {
@@ -275,6 +280,9 @@ export function processNobleFertility(
           fertility: 3,
         },
         house_id: houseId,
+        residence_house_id: (mother as any)?.residence_house_id ?? houseId,
+        mother_id: motherId,
+        father_id: fatherId,
       };
       state.people[childId] = newborn;
 
@@ -307,6 +315,9 @@ export function processNobleFertility(
         birth_year: year,
         alive: true,
         house_id: houseId,
+        residence_house_id: (mother as any)?.residence_house_id ?? houseId,
+        mother_id: motherId,
+        father_id: fatherId,
         death_year: null,
       };
 
@@ -393,6 +404,7 @@ export function processNobleMarriages(
     if (typeof age !== "number" || !Number.isFinite(age)) continue;
     if (age < 16) continue;
     if (age > 75) continue;
+    if ((p as any).vowed === true) continue;
 
     const hid = coerceHouseId(p);
     if (sex === "M") males.push({ id, age, house_id: hid });
@@ -417,6 +429,13 @@ export function processNobleMarriages(
 
   let target = Math.trunc(maxPairs * rate);
   target = Math.max(target, minPerTurn);
+
+  const youngerEligibleWomen = females.filter((f) => f.age >= 16 && f.age <= 28).length;
+  if (currentTurnIndex <= 1 && youngerEligibleWomen > 0) {
+    const coverageTarget = Math.ceil(youngerEligibleWomen * 0.65);
+    target = Math.max(target, coverageTarget);
+  }
+
   target = Math.min(target, cap, maxPairs);
   if (target <= 0) return { marriages };
 
@@ -480,8 +499,17 @@ export function processNobleMarriages(
     edges.push({ kind: "spouse_of", a_id: m.id, b_id: pick });
     const mp: any = state.people?.[m.id];
     const fp: any = state.people?.[pick];
-    if (mp && typeof mp === "object") mp.married = true;
-    if (fp && typeof fp === "object") fp.married = true;
+    if (mp && typeof mp === "object") {
+      mp.married = true;
+      mp.spouse_id = pick;
+    }
+    if (fp && typeof fp === "object") {
+      fp.married = true;
+      fp.spouse_id = m.id;
+      const groomResidence = (mp as any)?.residence_house_id ?? (mp as any)?.house_id ?? m.house_id ?? null;
+      if (groomResidence && (typeof fp.residence_house_id !== "string" || !fp.residence_house_id)) fp.residence_house_id = groomResidence;
+      if (groomResidence && (typeof fp.house_id !== "string" || !fp.house_id)) fp.house_id = groomResidence;
+    }
 
     marriages.push({ spouse_a_person_id: m.id, spouse_b_person_id: pick, year });
   }
