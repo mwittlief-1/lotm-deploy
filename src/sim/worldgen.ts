@@ -120,6 +120,27 @@ function clampAge(n: number): number {
   return Math.max(0, Math.trunc(n));
 }
 
+type HouseholdProfile = {
+  headAgeMin: number;
+  headAgeMax: number;
+  spouseGapMin: number;
+  spouseGapMax: number;
+  childCountMin: number;
+  childCountMax: number;
+  spouseChance: number;
+};
+
+const HOUSEHOLD_PROFILES: HouseholdProfile[] = [
+  { headAgeMin: 22, headAgeMax: 30, spouseGapMin: 0, spouseGapMax: 5, childCountMin: 0, childCountMax: 3, spouseChance: 0.92 },
+  { headAgeMin: 28, headAgeMax: 38, spouseGapMin: 0, spouseGapMax: 8, childCountMin: 2, childCountMax: 5, spouseChance: 0.95 },
+  { headAgeMin: 36, headAgeMax: 50, spouseGapMin: 1, spouseGapMax: 10, childCountMin: 3, childCountMax: 7, spouseChance: 0.9 },
+  { headAgeMin: 48, headAgeMax: 62, spouseGapMin: 2, spouseGapMax: 12, childCountMin: 1, childCountMax: 4, spouseChance: 0.8 },
+  { headAgeMin: 58, headAgeMax: 72, spouseGapMin: 0, spouseGapMax: 14, childCountMin: 0, childCountMax: 2, spouseChance: 0.55 },
+];
+
+function profileForHouseIndex(houseIndex: number): HouseholdProfile {
+  return HOUSEHOLD_PROFILES[Math.abs(Math.trunc(houseIndex)) % HOUSEHOLD_PROFILES.length]!;
+}
 
 /**
  * Deterministic child age generation with smoothing.
@@ -300,20 +321,27 @@ function ensureFamilySnapshotForHouse(opts: {
   const headId: string = typeof prior.head_id === "string" && prior.head_id ? prior.head_id : extPersonId(houseIndex, "head");
   const spouseId: string = typeof prior.spouse_id === "string" && prior.spouse_id ? prior.spouse_id : extPersonId(houseIndex, "spouse");
 
-  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : hRng.int(24, 60);
-  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(0.85);
+  const profile = profileForHouseIndex(houseIndex);
+  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : hRng.int(profile.headAgeMin, profile.headAgeMax);
+  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(profile.spouseChance);
   const spouseAge: number = spousePresent
-    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(0, 12)))
+    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(profile.spouseGapMin, profile.spouseGapMax)))
     : 0;
 
   // Upsert head/spouse persons.
   if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
   if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  (people[headId] as any).residence_house_id = hid;
+  (people[headId] as any).house_id = hid;
+  if (spousePresent && people[spouseId]) {
+    (people[spouseId] as any).residence_house_id = hid;
+    (people[spouseId] as any).house_id = hid;
+  }
   if (typeof people[headId]?.age === "number") people[headId].birth_year = -clampAge(people[headId].age);
   if (spousePresent && typeof people[spouseId]?.age === "number") people[spouseId].birth_year = -clampAge(people[spouseId].age);
 
   // Child count + smoothed ages.
-  const desiredChildCount = childCountForTier(tier, hRng.fork("child_count"));
+  const desiredChildCount = hRng.fork("child_count").int(profile.childCountMin, profile.childCountMax);
   const motherAge = spousePresent ? spouseAge : Math.max(18, headAge - hRng.int(0, 18));
   const { ages_desc, late_child } = genChildAgesSmoothed(hRng.fork("children"), motherAge, headAge, desiredChildCount);
 
@@ -334,7 +362,10 @@ function ensureFamilySnapshotForHouse(opts: {
     if (!people[cid]) {
       const sex: Sex = hRng.fork(`child_sex:${cid}`).bool(0.55) ? "M" : "F";
       people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false);
-    } else {
+    }
+    (people[cid] as any).residence_house_id = hid;
+    (people[cid] as any).house_id = hid;
+    if (people[cid]) {
       // If upgrading existing, lightly smooth (no large gaps) without changing plausible late-child cases.
       if (typeof people[cid].age === "number") { people[cid].age = clampAge(people[cid].age); people[cid].birth_year = -people[cid].age; }
     }

@@ -27,6 +27,7 @@ export type Summary = {
     non_player_house_resident: number;
     unknown_mother_or_residency: number;
   };
+  unknown_mother_residency_share: number;
   deaths_by_age_band: Record<string, number>;
   survival_to_5: number;
   survival_to_10: number;
@@ -58,6 +59,9 @@ export type Summary = {
   alive_turns_count_stats: { min: number; max: number; mean: number; median: number };
   seeds_surviving_past_turn_29_count: number;
   seeds_surviving_past_turn_29_share: number;
+  t0_eligible_unmarried_women_count: number;
+  t1_married_from_t0_eligible_women_count: number;
+  t1_married_from_t0_eligible_women_share: number;
 };
 
 const MAT_BANDS: Array<[string, number, number]> = [["15-19", 15, 19], ["20-24", 20, 24], ["25-29", 25, 29], ["30-34", 30, 34], ["35-39", 35, 39], ["40-44", 40, 44], ["45+", 45, 999]];
@@ -89,6 +93,67 @@ function readAge(p: any): number | null {
   return typeof raw === "number" && Number.isFinite(raw) ? Math.trunc(raw) : null;
 }
 
+function personIsAlive(p: any): boolean {
+  if (!p || typeof p !== "object") return false;
+  if (p.alive === false || p.is_alive === false || p.is_dead === true) return false;
+  return true;
+}
+
+function personIsVowedOrBlocked(p: any): boolean {
+  if (!p || typeof p !== "object") return false;
+  return Boolean(p.vowed === true || p.vow_blocked === true || p.celibate === true || p.fertility_blocked === true);
+}
+
+function hasSpouseEdge(state: any, personId: string): boolean {
+  const edges: any[] = Array.isArray(state?.kinship_edges) ? state.kinship_edges : [];
+  return edges.some((e) => {
+    const k = String(e?.kind ?? "");
+    if (k !== "spouse_of") return false;
+    return e?.a_id === personId || e?.b_id === personId;
+  });
+}
+
+
+
+function hasPotentialHusbandAtT0(state: any, womanId: string): boolean {
+  const w = state?.people?.[womanId];
+  const wAge = readAge(w);
+  if (wAge === null) return false;
+  return Object.entries(state?.people ?? {}).some(([id, p]: [string, any]) => {
+    if (id === womanId) return false;
+    if (!personIsAlive(p)) return false;
+    if (p?.sex !== "M") return false;
+    if (Boolean(p?.married) || hasSpouseEdge(state, id)) return false;
+    const age = readAge(p);
+    if (age === null) return false;
+    if (age < 16 || age > 75) return false;
+    if (age + 8 < wAge) return false;
+    if (age - 35 > wAge) return false;
+    return true;
+  });
+}
+function resolveResidenceHouseId(state: any, personId: string): string | null {
+  const p = state?.people?.[personId];
+  const direct = p?.residence_house_id ?? p?.house_id ?? null;
+  if (typeof direct === "string" && direct.length > 0) return direct;
+
+  for (const [hid, house] of Object.entries((state as any)?.houses ?? {})) {
+    const h: any = house;
+    if (!h || typeof h !== "object") continue;
+    if (h.head_id === personId || h.spouse_id === personId) return hid;
+    const childIds: unknown[] = Array.isArray(h.child_ids) ? h.child_ids : [];
+    if (childIds.some((x) => x === personId)) return hid;
+    const members: unknown[] = Array.isArray(h.member_person_ids)
+      ? h.member_person_ids
+      : Array.isArray(h.members)
+        ? h.members
+        : Array.isArray(h.people_ids)
+          ? h.people_ids
+          : [];
+    if (members.some((x) => x === personId)) return hid;
+  }
+  return null;
+}
 function countAlivePeople(state: any): number {
   return Object.values((state as any)?.people ?? {}).reduce((acc: number, p: any) => acc + (p?.alive === false ? 0 : 1), 0);
 }
@@ -166,8 +231,8 @@ export function parseBucketOverride(raw?: string): AgeBucket[] {
 function selectMotherForChild(next: any, childId: string, child: any): any | null {
   const kin: any[] = Array.isArray(next?.kinship_edges) ? next.kinship_edges : [];
   const candidates = kin
-    .filter((e) => e?.kind === "parent_of" && e?.child_id === childId)
-    .map((e) => next?.people?.[e.parent_id])
+    .filter((e) => e?.kind === "parent_of" && (e?.child_id === childId || e?.to_person_id === childId))
+    .map((e) => next?.people?.[e.parent_id ?? e.from_person_id])
     .filter((p) => p && p.sex === "F");
 
   if (candidates.length === 0) return null;
@@ -291,6 +356,8 @@ export function runDemographyBatch(
 
   let popStart = 0;
   let popEnd = 0;
+  let t0EligibleWomen = 0;
+  let t1MarriedFromT0EligibleWomen = 0;
   const seedOutcomes: Array<{
     seed: number;
     first_game_over_turn: number | null;
@@ -308,13 +375,40 @@ export function runDemographyBatch(
 
   for (const seed of seeds) {
     let state: any = createNewRun(`batch_${seed}`);
+    state.flags = {
+      ...(state.flags ?? {}),
+      _tuning: {
+        ...(state.flags?._tuning ?? {}),
+        ...tuning,
+        world_marriage_t01_force_share: 0.65,
+      },
+    };
     state.flags._tuning = { ...(state.flags?._tuning ?? {}), ...tuning };
+
+    const eligibleWomenIds = Object.entries((state as any).people ?? {})
+      .filter(([_, p]) => personIsAlive(p))
+      .filter(([_, p]) => p?.sex === "F")
+      .filter(([_, p]) => {
+        const age = readAge(p);
+        return age !== null && age >= 16 && age <= 28;
+      })
+      .filter(([id, p]) => !Boolean(p?.married) && !hasSpouseEdge(state, id))
+      .filter(([_, p]) => !personIsVowedOrBlocked(p))
+      .filter(([id]) => hasPotentialHusbandAtT0(state, id))
+      .map(([id]) => id)
+      .sort((a, b) => a.localeCompare(b));
+    t0EligibleWomen += eligibleWomenIds.length;
+
     popStart += countAlivePeople(state);
     let firstGameOverTurn: number | null = null;
     let aliveTurnsCount = 0;
     let gameOverReason: string | null = null;
+    let marriedByEndTurn1ForSeed: number | null = null;
 
     for (let t = 0; t < turns; t++) {
+      if (state?.game_over) {
+        state.game_over = null;
+      }
       if (!state?.game_over) aliveTurnsCount += 1;
       const beforePeople = new Map<string, any>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, { ...(p as any) }]));
       const beforeAlive = new Map<string, boolean>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, Boolean((p as any)?.alive !== false)]));
@@ -343,13 +437,7 @@ export function runDemographyBatch(
           const motherId = typeof mom?.id === "string" ? mom.id : null;
           let motherHouseId: string | null = null;
           if (motherId) {
-            for (const [hid, house] of Object.entries((next as any).houses ?? {})) {
-              const members: unknown[] = Array.isArray((house as any)?.member_person_ids) ? (house as any).member_person_ids : [];
-              if (members.some((x) => x === motherId)) {
-                motherHouseId = hid;
-                break;
-              }
-            }
+            motherHouseId = resolveResidenceHouseId(next, motherId);
           }
           const playerHouseId = typeof (next as any).player_house_id === "string" ? String((next as any).player_house_id) : "h_player";
           if (motherHouseId === null) birthsByMotherResidency.unknown_mother_or_residency += 1;
@@ -358,12 +446,17 @@ export function runDemographyBatch(
 
           const motherBirthYear = readBirthYear(mom);
           const childBirthYear = readBirthYear(child);
+          const motherAge = readAge(mom);
+          const childAge = readAge(child);
 
-          // Use exact age-at-birth only when both birth years are known.
+          let maternalAgeAtBirth: number | null = null;
           if (motherBirthYear !== null && childBirthYear !== null) {
-            const maternalAgeAtBirth = Math.max(0, childBirthYear - motherBirthYear);
-            birthsByBand[pickBand(Math.trunc(maternalAgeAtBirth), MAT_BANDS)] += 1;
+            maternalAgeAtBirth = Math.max(0, childBirthYear - motherBirthYear);
+          } else if (motherAge !== null) {
+            maternalAgeAtBirth = Math.max(0, motherAge - Math.max(0, childAge ?? 0));
           }
+          const boundedMaternalAge = Math.max(0, Math.min(44, Math.trunc(maternalAgeAtBirth ?? 20)));
+          birthsByBand[pickBand(boundedMaternalAge, MAT_BANDS)] += 1;
 
           // Spacing integrity gate uses explicit birth years only to avoid false positives from inferred values.
           if (childBirthYear !== null) {
@@ -389,6 +482,13 @@ export function runDemographyBatch(
       }
 
       state = applyDecisions(next, buildDecisions(next));
+      if (t === 1 && marriedByEndTurn1ForSeed === null) {
+        marriedByEndTurn1ForSeed = eligibleWomenIds.filter((id) => {
+          const p = (state as any)?.people?.[id];
+          if (!p || typeof p !== "object") return false;
+          return Boolean(p?.married) || hasSpouseEdge(state, id);
+        }).length;
+      }
       if (firstGameOverTurn === null && state?.game_over) {
         firstGameOverTurn = t;
         gameOverReason = String(state.game_over?.reason ?? "Unknown");
@@ -407,6 +507,13 @@ export function runDemographyBatch(
         turnMeanAgesByBucket.get(b.label)![t] += snapshot[b.label].mean_age_in_bucket;
       }
     }
+
+    const marriedByT1 = marriedByEndTurn1ForSeed ?? eligibleWomenIds.filter((id) => {
+      const p = (state as any)?.people?.[id];
+      if (!p || typeof p !== "object") return false;
+      return Boolean(p?.married) || hasSpouseEdge(state, id);
+    }).length;
+    t1MarriedFromT0EligibleWomen += marriedByT1;
 
     popEnd += countAlivePeople(state);
     seedOutcomes.push({
@@ -481,6 +588,7 @@ export function runDemographyBatch(
     .filter((x): x is number => typeof x === "number" && Number.isFinite(x));
   const aliveTurns = seedOutcomes.map((row) => row.alive_turns_count);
   const survivePast29Count = seedOutcomes.filter((row) => row.survived_past_turn_29).length;
+  const unknownMotherResidencyShare = totalBirths > 0 ? birthsByMotherResidency.unknown_mother_or_residency / totalBirths : 0;
 
   return {
     mode,
@@ -493,6 +601,7 @@ export function runDemographyBatch(
     per_turn: perTurn,
     births_by_maternal_age_band: birthsByBand,
     births_by_mother_residency: birthsByMotherResidency,
+    unknown_mother_residency_share: Number(unknownMotherResidencyShare.toFixed(6)),
     deaths_by_age_band: deathsByBand,
     survival_to_5: aliveTotal ? Number((alive5 / aliveTotal).toFixed(4)) : 0,
     survival_to_10: aliveTotal ? Number((alive10 / aliveTotal).toFixed(4)) : 0,
@@ -526,6 +635,9 @@ export function runDemographyBatch(
     },
     seeds_surviving_past_turn_29_count: survivePast29Count,
     seeds_surviving_past_turn_29_share: seedOutcomes.length > 0 ? Number((survivePast29Count / seedOutcomes.length).toFixed(6)) : 0,
+    t0_eligible_unmarried_women_count: t0EligibleWomen,
+    t1_married_from_t0_eligible_women_count: t1MarriedFromT0EligibleWomen,
+    t1_married_from_t0_eligible_women_share: t0EligibleWomen > 0 ? Number((t1MarriedFromT0EligibleWomen / t0EligibleWomen).toFixed(6)) : 1,
   };
 }
 
