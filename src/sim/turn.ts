@@ -57,7 +57,7 @@ import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
 import { adjustEdge, relationshipBounds } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtOfficerIds, getCourtExtraIds, removeCourtExcludeId } from "./court";
+import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtExcludeIds, getCourtOfficerIds, getCourtExtraIds, removeCourtExcludeId } from "./court";
 import { computeTierSets } from "./tiers";
 import type { TierSets } from "./tiers";
 import { deriveHouseholdRoster } from "./householdView";
@@ -1529,6 +1529,22 @@ function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: Tu
         } else if (subjectChild && subjectChild.sex === "F") {
           // Marriage-out affects court residency only; it must NOT remove from lineage.
           addCourtExcludeId(state, sid);
+          // Residency transfer for married-out daughters: move to spouse's house roster when known.
+          {
+            const anyState: any = state as any;
+            const destHouseId = typeof prospect.from_house_id === "string" && prospect.from_house_id.length > 0 ? prospect.from_house_id : null;
+            if (anyState.people && anyState.people[sid] && destHouseId) anyState.people[sid].house_id = destHouseId;
+            const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+            const playerHouseRec: any = anyState.houses?.[playerHouseId];
+            if (playerHouseRec && Array.isArray(playerHouseRec.member_person_ids)) {
+              playerHouseRec.member_person_ids = playerHouseRec.member_person_ids.filter((x: any) => x !== sid);
+            }
+            const destHouseRec: any = destHouseId ? anyState.houses?.[destHouseId] : null;
+            if (destHouseRec) {
+              if (!Array.isArray(destHouseRec.member_person_ids)) destHouseRec.member_person_ids = [];
+              if (!destHouseRec.member_person_ids.includes(sid)) destHouseRec.member_person_ids.push(sid);
+            }
+          }
         }
       }
 
@@ -1813,11 +1829,23 @@ export function proposeTurn(state: RunState): TurnContext {
 
     // Include Tier0/Tier1 person ids as well (locals, officers, institutions-as-people)
     // so demography applies to on-screen actors. Exclude the player household to avoid double-processing.
+    const playerHouseRecPF: any = (working as any).houses?.[playerHouseIdPF];
+    const playerMemberIdsPF = new Set<string>(
+      Array.isArray(playerHouseRecPF?.member_person_ids)
+        ? playerHouseRecPF.member_person_ids.filter((x: any): x is string => typeof x === "string" && x.length > 0)
+        : []
+    );
+    const courtExcludedPF = new Set<string>(getCourtExcludeIds(working));
+    const residentPlayerChildIds = (working.house?.children ?? [])
+      .map((c) => c.id)
+      .filter((pid): pid is string => typeof pid === "string" && pid.length > 0)
+      .filter((pid) => playerMemberIdsPF.has(pid) && !courtExcludedPF.has(pid));
+
     const playerPersonIds = new Set<string>(
       [
         working.house?.head?.id,
         working.house?.spouse?.id,
-        ...(working.house?.children ?? []).map((c) => c.id),
+        ...residentPlayerChildIds,
       ].filter((x): x is string => typeof x === "string" && x.length > 0)
     );
 

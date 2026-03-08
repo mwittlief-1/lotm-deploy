@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { createNewRun, proposeTurn } from "../src/sim";
+import { applyDecisions, createDefaultDecisions } from "../src/sim/turn";
 
 function findHouseIdForPerson(state: any, personId: string): string | null {
   const houses = state?.houses ?? {};
@@ -85,6 +86,81 @@ describe("v0.2.7.2 DevB P0 regressions", () => {
     const hid = findHouseIdForPerson(ctx.preview_state, spouseId);
     expect(hid).toBeTruthy();
     expect(marriage.from_house_id).toBe(hid);
+  });
+
+
+  it("female marriage prospect transfers court residency while preserving lineage", () => {
+    const s0: any = createNewRun("TEST_v0272_female_marriage_residency_transfer");
+
+    const daughter = s0.house.children[0];
+    daughter.age = 18;
+    daughter.sex = "F";
+    daughter.alive = true;
+    daughter.married = false;
+
+    s0.manor.coin = 250;
+    s0.people = s0.people ?? {};
+    s0.houses = s0.houses ?? {};
+
+    const extHeadId = "p_ext_transfer_head";
+    const extGroomId = "p_ext_transfer_groom";
+    const extHouseId = "h_ext_transfer_01";
+
+    s0.people[extHeadId] = {
+      id: extHeadId,
+      name: "Odo Transfer",
+      sex: "M",
+      age: 41,
+      alive: true,
+      married: false,
+      traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+    };
+
+    s0.people[extGroomId] = {
+      id: extGroomId,
+      name: "Robert Transfer",
+      sex: "M",
+      age: 21,
+      alive: true,
+      married: false,
+      traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+    };
+
+    s0.houses[extHouseId] = {
+      id: extHouseId,
+      name: "Transfer",
+      tier: "Knight",
+      holdings_count: 1,
+      head_id: extHeadId,
+      spouse_id: null,
+      child_ids: [extGroomId],
+      member_person_ids: [extHeadId, extGroomId]
+    };
+
+    const ctx: any = proposeTurn(s0);
+    const marriage = (ctx.prospects_window?.prospects ?? []).find((p: any) => p?.type === "marriage" && p?.subject_person_id === daughter.id);
+    expect(marriage).toBeTruthy();
+
+    const destinationHouseId: string = String(marriage.from_house_id ?? "");
+    expect(destinationHouseId.length).toBeGreaterThan(0);
+
+    const decisions: any = createDefaultDecisions();
+    decisions.prospects = {
+      kind: "prospects",
+      actions: [{ prospect_id: marriage.id, action: "accept", prospect_i: 0 }]
+    };
+
+    const next: any = applyDecisions(s0, decisions);
+    const playerHouseId: string = next.player_house_id ?? "h_player";
+    const playerMembers: string[] = Array.isArray(next.houses?.[playerHouseId]?.member_person_ids) ? next.houses[playerHouseId].member_person_ids : [];
+    const destinationMembers: string[] = Array.isArray(next.houses?.[destinationHouseId]?.member_person_ids) ? next.houses[destinationHouseId].member_person_ids : [];
+    const courtExcludeIds: string[] = Array.isArray(next.houses?.[playerHouseId]?.court_exclude_ids) ? next.houses[playerHouseId].court_exclude_ids : [];
+
+    expect(courtExcludeIds).toContain(daughter.id);
+    expect(playerMembers).not.toContain(daughter.id);
+    expect(destinationMembers).toContain(daughter.id);
+    // Lineage should remain intact for succession accounting.
+    expect(next.house.children.some((c: any) => c.id === daughter.id)).toBe(true);
   });
 
   it("succession spouse swap uses the stable spouse (no phantom local noble)", () => {
