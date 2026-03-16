@@ -383,7 +383,6 @@ export function runDemographyBatch(
         world_marriage_t01_force_share: 0.65,
       },
     };
-    state.flags._tuning = { ...(state.flags?._tuning ?? {}), ...tuning };
 
     const eligibleWomenIds = Object.entries((state as any).people ?? {})
       .filter(([_, p]) => personIsAlive(p))

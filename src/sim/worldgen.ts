@@ -121,6 +121,8 @@ function clampAge(n: number): number {
 }
 
 type HouseholdProfile = {
+  key: "growing" | "established" | "young_heir_core" | "widowed" | "second_marriage";
+  weight: number;
   headAgeMin: number;
   headAgeMax: number;
   spouseGapMin: number;
@@ -131,15 +133,21 @@ type HouseholdProfile = {
 };
 
 const HOUSEHOLD_PROFILES: HouseholdProfile[] = [
-  { headAgeMin: 22, headAgeMax: 30, spouseGapMin: 0, spouseGapMax: 5, childCountMin: 0, childCountMax: 3, spouseChance: 0.92 },
-  { headAgeMin: 28, headAgeMax: 38, spouseGapMin: 0, spouseGapMax: 8, childCountMin: 2, childCountMax: 5, spouseChance: 0.95 },
-  { headAgeMin: 36, headAgeMax: 50, spouseGapMin: 1, spouseGapMax: 10, childCountMin: 3, childCountMax: 7, spouseChance: 0.9 },
-  { headAgeMin: 48, headAgeMax: 62, spouseGapMin: 2, spouseGapMax: 12, childCountMin: 1, childCountMax: 4, spouseChance: 0.8 },
-  { headAgeMin: 58, headAgeMax: 72, spouseGapMin: 0, spouseGapMax: 14, childCountMin: 0, childCountMax: 2, spouseChance: 0.55 },
+  { key: "growing", weight: 0.35, headAgeMin: 25, headAgeMax: 34, spouseGapMin: 0, spouseGapMax: 6, childCountMin: 2, childCountMax: 4, spouseChance: 0.97 },
+  { key: "established", weight: 0.25, headAgeMin: 35, headAgeMax: 45, spouseGapMin: 1, spouseGapMax: 8, childCountMin: 3, childCountMax: 6, spouseChance: 0.96 },
+  { key: "young_heir_core", weight: 0.25, headAgeMin: 18, headAgeMax: 27, spouseGapMin: 0, spouseGapMax: 4, childCountMin: 0, childCountMax: 2, spouseChance: 0.94 },
+  { key: "widowed", weight: 0.1, headAgeMin: 40, headAgeMax: 55, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 1, childCountMax: 3, spouseChance: 0.08 },
+  { key: "second_marriage", weight: 0.05, headAgeMin: 45, headAgeMax: 60, spouseGapMin: 4, spouseGapMax: 18, childCountMin: 1, childCountMax: 4, spouseChance: 0.9 },
 ];
 
-function profileForHouseIndex(houseIndex: number): HouseholdProfile {
-  return HOUSEHOLD_PROFILES[Math.abs(Math.trunc(houseIndex)) % HOUSEHOLD_PROFILES.length]!;
+function profileForHouseIndex(root: Rng, hid: string): HouseholdProfile {
+  const r = root.fork(`profile:${hid}`).next();
+  let acc = 0;
+  for (const p of HOUSEHOLD_PROFILES) {
+    acc += p.weight;
+    if (r <= acc) return p;
+  }
+  return HOUSEHOLD_PROFILES[HOUSEHOLD_PROFILES.length - 1]!;
 }
 
 /**
@@ -321,8 +329,12 @@ function ensureFamilySnapshotForHouse(opts: {
   const headId: string = typeof prior.head_id === "string" && prior.head_id ? prior.head_id : extPersonId(houseIndex, "head");
   const spouseId: string = typeof prior.spouse_id === "string" && prior.spouse_id ? prior.spouse_id : extPersonId(houseIndex, "spouse");
 
-  const profile = profileForHouseIndex(houseIndex);
-  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : hRng.int(profile.headAgeMin, profile.headAgeMax);
+  const profile = profileForHouseIndex(root, hid);
+  let sampledHeadAge = hRng.int(profile.headAgeMin, profile.headAgeMax);
+  if ((profile.key === "widowed" || profile.key === "second_marriage") && hRng.fork("elder_roll").bool(0.3)) {
+    sampledHeadAge = Math.max(sampledHeadAge, hRng.int(62, 78));
+  }
+  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : sampledHeadAge;
   const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(profile.spouseChance);
   const spouseAge: number = spousePresent
     ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(profile.spouseGapMin, profile.spouseGapMax)))
