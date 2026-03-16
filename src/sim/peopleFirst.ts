@@ -255,6 +255,19 @@ function syncPeopleFirstFromLegacyUpsert(state: RunState): RunState {
     if (spouseId) desired.push({ kind: "parent_of", parent_id: spouseId, child_id: cid });
   }
 
+  for (const pid of Object.keys(people)) {
+    const person: any = people[pid];
+    if (!person || typeof person !== "object") continue;
+    const hid = houseIdForPerson(houses, pid);
+    if (hid) {
+      person.residence_house_id = hid;
+      if (typeof person.house_id !== "string" || !person.house_id) person.house_id = hid;
+    } else if (typeof person.residence_house_id !== "string" || !person.residence_house_id) {
+      person.residence_house_id = playerHouseId;
+      if (typeof person.house_id !== "string" || !person.house_id) person.house_id = playerHouseId;
+    }
+  }
+
   const mergedByKey = new Map<string, KinshipEdge>();
   for (const e of [...kept, ...desired]) mergedByKey.set(kinKey(e), e);
   const merged = [...mergedByKey.values()].sort((a, b) => kinKey(a).localeCompare(kinKey(b)));

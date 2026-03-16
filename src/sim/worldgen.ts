@@ -120,6 +120,35 @@ function clampAge(n: number): number {
   return Math.max(0, Math.trunc(n));
 }
 
+type HouseholdProfile = {
+  key: "growing" | "established" | "young_heir_core" | "widowed" | "second_marriage";
+  weight: number;
+  headAgeMin: number;
+  headAgeMax: number;
+  spouseGapMin: number;
+  spouseGapMax: number;
+  childCountMin: number;
+  childCountMax: number;
+  spouseChance: number;
+};
+
+const HOUSEHOLD_PROFILES: HouseholdProfile[] = [
+  { key: "growing", weight: 0.35, headAgeMin: 25, headAgeMax: 34, spouseGapMin: 0, spouseGapMax: 6, childCountMin: 2, childCountMax: 4, spouseChance: 0.97 },
+  { key: "established", weight: 0.25, headAgeMin: 35, headAgeMax: 45, spouseGapMin: 1, spouseGapMax: 8, childCountMin: 3, childCountMax: 6, spouseChance: 0.96 },
+  { key: "young_heir_core", weight: 0.25, headAgeMin: 18, headAgeMax: 27, spouseGapMin: 0, spouseGapMax: 4, childCountMin: 0, childCountMax: 2, spouseChance: 0.94 },
+  { key: "widowed", weight: 0.1, headAgeMin: 40, headAgeMax: 55, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 1, childCountMax: 3, spouseChance: 0.08 },
+  { key: "second_marriage", weight: 0.05, headAgeMin: 45, headAgeMax: 60, spouseGapMin: 4, spouseGapMax: 18, childCountMin: 1, childCountMax: 4, spouseChance: 0.9 },
+];
+
+function profileForHouseIndex(root: Rng, hid: string): HouseholdProfile {
+  const r = root.fork(`profile:${hid}`).next();
+  let acc = 0;
+  for (const p of HOUSEHOLD_PROFILES) {
+    acc += p.weight;
+    if (r <= acc) return p;
+  }
+  return HOUSEHOLD_PROFILES[HOUSEHOLD_PROFILES.length - 1]!;
+}
 
 /**
  * Deterministic child age generation with smoothing.
@@ -300,20 +329,31 @@ function ensureFamilySnapshotForHouse(opts: {
   const headId: string = typeof prior.head_id === "string" && prior.head_id ? prior.head_id : extPersonId(houseIndex, "head");
   const spouseId: string = typeof prior.spouse_id === "string" && prior.spouse_id ? prior.spouse_id : extPersonId(houseIndex, "spouse");
 
-  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : hRng.int(24, 60);
-  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(0.85);
+  const profile = profileForHouseIndex(root, hid);
+  let sampledHeadAge = hRng.int(profile.headAgeMin, profile.headAgeMax);
+  if ((profile.key === "widowed" || profile.key === "second_marriage") && hRng.fork("elder_roll").bool(0.3)) {
+    sampledHeadAge = Math.max(sampledHeadAge, hRng.int(62, 78));
+  }
+  const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : sampledHeadAge;
+  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(profile.spouseChance);
   const spouseAge: number = spousePresent
-    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(0, 12)))
+    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(profile.spouseGapMin, profile.spouseGapMax)))
     : 0;
 
   // Upsert head/spouse persons.
   if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
   if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  (people[headId] as any).residence_house_id = hid;
+  (people[headId] as any).house_id = hid;
+  if (spousePresent && people[spouseId]) {
+    (people[spouseId] as any).residence_house_id = hid;
+    (people[spouseId] as any).house_id = hid;
+  }
   if (typeof people[headId]?.age === "number") people[headId].birth_year = -clampAge(people[headId].age);
   if (spousePresent && typeof people[spouseId]?.age === "number") people[spouseId].birth_year = -clampAge(people[spouseId].age);
 
   // Child count + smoothed ages.
-  const desiredChildCount = childCountForTier(tier, hRng.fork("child_count"));
+  const desiredChildCount = hRng.fork("child_count").int(profile.childCountMin, profile.childCountMax);
   const motherAge = spousePresent ? spouseAge : Math.max(18, headAge - hRng.int(0, 18));
   const { ages_desc, late_child } = genChildAgesSmoothed(hRng.fork("children"), motherAge, headAge, desiredChildCount);
 
@@ -334,7 +374,10 @@ function ensureFamilySnapshotForHouse(opts: {
     if (!people[cid]) {
       const sex: Sex = hRng.fork(`child_sex:${cid}`).bool(0.55) ? "M" : "F";
       people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false);
-    } else {
+    }
+    (people[cid] as any).residence_house_id = hid;
+    (people[cid] as any).house_id = hid;
+    if (people[cid]) {
       // If upgrading existing, lightly smooth (no large gaps) without changing plausible late-child cases.
       if (typeof people[cid].age === "number") { people[cid].age = clampAge(people[cid].age); people[cid].birth_year = -people[cid].age; }
     }
