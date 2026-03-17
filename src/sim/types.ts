@@ -12,6 +12,7 @@ export interface Person {
   name: string;
   sex: Sex;
   age: number; // years
+  birth_year?: number;
   alive: boolean;
   traits: Traits;
   married?: boolean;
@@ -20,6 +21,8 @@ export interface Person {
 
   // v0.2.8: optional origin House for clergy/outsiders (does not change current household/House membership)
   origin_house_id?: string | null;
+  residence_house_id?: string | null;
+  house_id?: string | null;
 }
 
 

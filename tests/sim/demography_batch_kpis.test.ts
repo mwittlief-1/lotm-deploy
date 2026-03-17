@@ -60,5 +60,19 @@ describe("demography batch KPI helpers", () => {
     expect(Object.values(summary.game_over_reason_counts).reduce((a, b) => a + b, 0)).toBe(2);
   });
 
+  it("reconciles maternal age bands and reports unknown residency share", () => {
+    const summary = runDemographyBatch([1], 8, { fertilityScale: 1.3, mortalityScaleChild: 1.0, mortalityScaleAdult: 1.0 }, "sim");
+    const maternalBandBirths = Object.values(summary.births_by_maternal_age_band).reduce((a, b) => a + Number(b), 0);
+    expect(maternalBandBirths).toBe(summary.total_births);
+    expect(summary.unknown_mother_residency_share).toBeGreaterThanOrEqual(0);
+    expect(summary.unknown_mother_residency_share).toBeLessThanOrEqual(1);
+  });
+
+  it("tracks T0 eligible women married by end of T1", () => {
+    const summary = runDemographyBatch([1, 2], 4, { fertilityScale: 1.2, mortalityScaleChild: 1.0, mortalityScaleAdult: 1.0 }, "sim");
+    expect(summary.t1_married_from_t0_eligible_women_share).toBeGreaterThanOrEqual(0.65);
+    expect(summary.t1_married_from_t0_eligible_women_share).toBeLessThanOrEqual(1);
+  });
+
 
 });

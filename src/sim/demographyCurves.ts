@@ -2,13 +2,19 @@ import { clampInt } from "./util";
 
 export function fertilityAnnualProbabilityByAge(ageYears: number): number {
   const age = clampInt(Math.trunc(ageYears), 0, 200);
-  if (age < 15) return 0;
-  if (age <= 19) return 0.10;
-  if (age <= 24) return 0.22;
-  if (age <= 29) return 0.26;
-  if (age <= 34) return 0.20;
-  if (age <= 39) return 0.10;
-  if (age <= 44) return 0.02;
+  // v0.2.final profile target:
+  // - meaningful teen fertility
+  // - strongest 20-24 band
+  // - 30-34 below 20-24
+  // - sharp taper into 40s
+  // - hard cutoff at 45+
+  if (age < 16) return 0;
+  if (age <= 19) return 0.16;
+  if (age <= 24) return 0.27;
+  if (age <= 29) return 0.24;
+  if (age <= 34) return 0.18;
+  if (age <= 39) return 0.09;
+  if (age <= 44) return 0.015;
   return 0;
 }
 

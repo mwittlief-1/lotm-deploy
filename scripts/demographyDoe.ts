@@ -31,6 +31,9 @@ const lateTurnEnd = envInt("DOE_LATE_TURN_END", 29);
 const lateHorizonActivityMin = envFloat("DOE_LATE_ACTIVITY_MIN", 1);
 const survivalTurn = envInt("DOE_SURVIVAL_TURN", 29);
 const minSurvivalShare = envFloat("DOE_MIN_SURVIVAL_SHARE", 0);
+const maxUnknownMotherResidencyShare = envFloat("DOE_MAX_UNKNOWN_MOTHER_RESIDENCY_SHARE", 0.01);
+const minT1MarriageCoverageShare = envFloat("DOE_T1_MARRIAGE_COVERAGE_MIN", 0.65);
+const minBirthsEndToStartRatio = envFloat("DOE_BIRTHS_END_TO_START_MIN", 0.35);
 const lifeStageBuckets = parseBucketOverride(process.env.DOE_BUCKETS);
 const seeds = Array.from({ length: seedsCount }, (_, i) => i + 1);
 const targetPopulationGrowthTurn0ToN = Math.pow(targetTurnGrowth, turns) - 1;
@@ -54,6 +57,11 @@ for (const fertilityScale of fertilityVals) {
       const populationGrowthTurn0ToN = Number(summary.population_growth_turn_0_to_n ?? (alivePeopleStart > 0 ? (alivePeopleEnd - alivePeopleStart) / alivePeopleStart : 0));
       const births45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
       const spacingLt2 = Number(summary.spacing_lt_2_count ?? 0);
+      const unknownMotherResidencyShare = Number(summary.unknown_mother_residency_share ?? 1);
+      const t1MarriageCoverageShare = Number(summary.t1_married_from_t0_eligible_women_share ?? 0);
+      const birthsTurn0 = Number(summary.per_turn?.[0]?.births ?? 0);
+      const birthsTurnEnd = Number(summary.per_turn?.[Math.max(0, turns - 1)]?.births ?? 0);
+      const birthsEndToStartRatio = birthsTurn0 > 0 ? birthsTurnEnd / birthsTurn0 : 1;
 
       const stabilityShareStd = Object.values(summary.age_structure_stability ?? {})
         .map((x: any) => Number(x?.std_share ?? 0))
@@ -72,6 +80,9 @@ for (const fertilityScale of fertilityVals) {
       const invalidReasons: string[] = [];
       if (!lateHorizonActivity.valid) invalidReasons.push("late_horizon_activity");
       if (!survivalCoverageValid) invalidReasons.push("survival_coverage");
+      if (unknownMotherResidencyShare > maxUnknownMotherResidencyShare) invalidReasons.push("unknown_mother_residency_share");
+      if (t1MarriageCoverageShare < minT1MarriageCoverageShare) invalidReasons.push("t1_marriage_coverage");
+      if (birthsEndToStartRatio < minBirthsEndToStartRatio) invalidReasons.push("births_crater");
       const invalidForRanking = invalidReasons.length > 0;
 
       const gatePenalty = births45 > 0 || spacingLt2 > 0 ? 1000 : 0;
@@ -94,6 +105,9 @@ for (const fertilityScale of fertilityVals) {
           gate_penalty: gatePenalty,
           invalid_ranking_penalty: invalidRankingPenalty,
           survival_share: Number(survivalShare.toFixed(6)),
+          unknown_mother_residency_share: Number(unknownMotherResidencyShare.toFixed(6)),
+          t1_marriage_coverage_share: Number(t1MarriageCoverageShare.toFixed(6)),
+          births_end_to_start_ratio: Number(birthsEndToStartRatio.toFixed(6)),
           invalid_reasons: invalidReasons,
         },
         gates: {
@@ -101,6 +115,9 @@ for (const fertilityScale of fertilityVals) {
           spacing_ge_2_years: spacingLt2 === 0,
           late_horizon_activity_nonzero: lateHorizonActivity.valid,
           survival_coverage_meets_min: survivalCoverageValid,
+          unknown_mother_residency_share_within_max: unknownMotherResidencyShare <= maxUnknownMotherResidencyShare,
+          t1_marriage_coverage_meets_min: t1MarriageCoverageShare >= minT1MarriageCoverageShare,
+          births_end_to_start_ratio_meets_min: birthsEndToStartRatio >= minBirthsEndToStartRatio,
           invalid_for_ranking_reason_coded: invalidReasons.length > 0,
         },
         kpis: {
@@ -123,6 +140,13 @@ for (const fertilityScale of fertilityVals) {
           invalid_reasons: invalidReasons,
           newborn_end_of_turn_age_distribution: summary.newborn_end_of_turn_age_distribution ?? { "0": 0, "1": 0, "2": 0 },
           births_by_mother_residency: summary.births_by_mother_residency,
+          unknown_mother_residency_share: Number(unknownMotherResidencyShare.toFixed(6)),
+          t0_eligible_unmarried_women_count: summary.t0_eligible_unmarried_women_count,
+          t1_married_from_t0_eligible_women_count: summary.t1_married_from_t0_eligible_women_count,
+          t1_married_from_t0_eligible_women_share: Number(t1MarriageCoverageShare.toFixed(6)),
+          births_turn_0: birthsTurn0,
+          births_turn_end: birthsTurnEnd,
+          births_end_to_start_ratio: Number(birthsEndToStartRatio.toFixed(6)),
         },
         invalid_for_ranking: invalidForRanking,
         invalid_reasons: invalidReasons,
@@ -134,7 +158,11 @@ for (const fertilityScale of fertilityVals) {
 
 ranked.sort((a, b) => Number(a.invalid_for_ranking) - Number(b.invalid_for_ranking) || a.score - b.score || a.fertilityScale - b.fertilityScale || a.mortalityScaleChild - b.mortalityScaleChild || a.mortalityScaleAdult - b.mortalityScaleAdult);
 
-const out = {
+const out: any = {
+  generated_at: new Date().toISOString(),
+  git_sha: process.env.GIT_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA ?? "unknown",
+  DOE_SEEDS: seedsCount,
+  DOE_TURNS: turns,
   mode,
   seeds: seedsCount,
   turns,
@@ -149,6 +177,15 @@ const out = {
     turn_end: lateTurnEnd,
     min_births_plus_deaths: lateHorizonActivityMin,
   },
+  mother_residency_gate: {
+    max_unknown_mother_residency_share: maxUnknownMotherResidencyShare,
+  },
+  t1_marriage_coverage_gate: {
+    min_share: minT1MarriageCoverageShare,
+  },
+  births_stability_gate: {
+    min_births_end_to_start_ratio: minBirthsEndToStartRatio,
+  },
   survival_coverage_gate: {
     survival_turn: survivalTurn,
     min_survival_share: minSurvivalShare,
@@ -157,6 +194,9 @@ const out = {
   invalid_reason_counts: {
     late_horizon_activity: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("late_horizon_activity")).length,
     survival_coverage: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("survival_coverage")).length,
+    unknown_mother_residency_share: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("unknown_mother_residency_share")).length,
+    t1_marriage_coverage: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("t1_marriage_coverage")).length,
+    births_crater: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.includes("births_crater")).length,
     both: ranked.filter((x) => Array.isArray(x.invalid_reasons) && x.invalid_reasons.length > 1).length,
   },
   ranked,
@@ -174,4 +214,6 @@ const hashes = {
   doe_ranked: sha(doeTxt),
 };
 fs.writeFileSync(`${dir}/hashes.json`, JSON.stringify(hashes, null, 2));
+out.hash_manifest = hashes;
+fs.writeFileSync(`${dir}/doe_ranked.json`, JSON.stringify(out, null, 2));
 console.log(`wrote doe_ranked.json and hashes.json (${seedsCount} seeds x ${turns} turns x ${fertilityVals.length * mortalityVals.length * mortalityVals.length} combos)`);
