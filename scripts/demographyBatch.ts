@@ -62,6 +62,7 @@ export type Summary = {
   t0_eligible_unmarried_women_count: number;
   t1_married_from_t0_eligible_women_count: number;
   t1_married_from_t0_eligible_women_share: number;
+  worldgen_t0_profile: Record<string, unknown>;
 };
 
 const MAT_BANDS: Array<[string, number, number]> = [["15-19", 15, 19], ["20-24", 20, 24], ["25-29", 25, 29], ["30-34", 30, 34], ["35-39", 35, 39], ["40-44", 40, 44], ["45+", 45, 999]];
@@ -188,6 +189,26 @@ function median(arr: number[]): number {
   if (sorted.length % 2 === 1) return sorted[mid] ?? 0;
   return ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2;
 }
+function ageBandForT0(age: number): "0-14" | "15-40" | "41-65" | "66+" {
+  if (age <= 14) return "0-14";
+  if (age <= 40) return "15-40";
+  if (age <= 65) return "41-65";
+  return "66+";
+}
+
+function maritalAgeBand(age: number): "15-19" | "20-24" | "25-29" | "30-34" | "35-40" | "41+" {
+  if (age <= 19) return "15-19";
+  if (age <= 24) return "20-24";
+  if (age <= 29) return "25-29";
+  if (age <= 34) return "30-34";
+  if (age <= 40) return "35-40";
+  return "41+";
+}
+
+function ratio(n: number, d: number): number {
+  return d > 0 ? Number((n / d).toFixed(6)) : 0;
+}
+
 
 function matchingBucket(age: number, buckets: AgeBucket[]): AgeBucket {
   for (const b of buckets) {
@@ -358,6 +379,21 @@ export function runDemographyBatch(
   let popEnd = 0;
   let t0EligibleWomen = 0;
   let t1MarriedFromT0EligibleWomen = 0;
+
+  const t0AgeCounts = { "0-14": 0, "15-40": 0, "41-65": 0, "66+": 0 };
+  const t0SexCounts = { M: 0, F: 0 };
+  const t0Sex1540Counts = { M: 0, F: 0 };
+  const t0MaritalBySexAge: Record<string, { married: number; unmarried: number; widowed: number; total: number }> = {};
+  for (const sex of ["M", "F"]) {
+    for (const band of ["15-19", "20-24", "25-29", "30-34", "35-40", "41+"]) {
+      t0MaritalBySexAge[`${sex}:${band}`] = { married: 0, unmarried: 0, widowed: 0, total: 0 };
+    }
+  }
+  const t0SpouseAges: number[] = [];
+  const t0ChildrenPerHouse: number[] = [];
+  let t0Couples = 0;
+  let t0YoungCoresidentCouples = 0;
+  let t0PeopleCount = 0;
   const seedOutcomes: Array<{
     seed: number;
     first_game_over_turn: number | null;
@@ -383,6 +419,64 @@ export function runDemographyBatch(
         world_marriage_t01_force_share: 0.65,
       },
     };
+
+    const seedPeople = (state as any).people ?? {};
+    for (const [pid, p] of Object.entries(seedPeople as Record<string, any>)) {
+      if (!personIsAlive(p)) continue;
+      const age = readAge(p);
+      if (age === null) continue;
+      t0PeopleCount += 1;
+      t0AgeCounts[ageBandForT0(age)] += 1;
+      const sex = p?.sex === "F" ? "F" : "M";
+      t0SexCounts[sex] += 1;
+      if (age >= 15 && age <= 40) t0Sex1540Counts[sex] += 1;
+      if (age >= 15) {
+        const band = maritalAgeBand(age);
+        const row = t0MaritalBySexAge[`${sex}:${band}`];
+        row.total += 1;
+        const married = Boolean(p?.married) || hasSpouseEdge(state, pid);
+        if (married) row.married += 1;
+        else if (Boolean(p?.married) && !hasSpouseEdge(state, pid)) row.widowed += 1;
+        else row.unmarried += 1;
+      }
+    }
+
+    const kinEdges: any[] = Array.isArray((state as any).kinship_edges) ? (state as any).kinship_edges : [];
+    const seenCouples = new Set<string>();
+    for (const e of kinEdges) {
+      if (e?.kind !== "spouse_of") continue;
+      const a = String(e?.a_id ?? "");
+      const b = String(e?.b_id ?? "");
+      if (!a || !b) continue;
+      const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+      if (seenCouples.has(key)) continue;
+      seenCouples.add(key);
+      t0Couples += 1;
+      const pa: any = seedPeople[a];
+      const pb: any = seedPeople[b];
+      const ageA = readAge(pa);
+      const ageB = readAge(pb);
+      const female = pa?.sex === "F" ? pa : pb?.sex === "F" ? pb : null;
+      const femaleAge = readAge(female);
+      if (femaleAge !== null) t0SpouseAges.push(femaleAge);
+      else if (ageA !== null && ageB !== null) t0SpouseAges.push((ageA + ageB) / 2);
+
+      const male = pa?.sex === "M" ? pa : pb?.sex === "M" ? pb : null;
+      const maleAge = readAge(male);
+      const femaleAge2 = readAge(female);
+      const maleRes = male?.residence_house_id ?? male?.house_id ?? null;
+      const femaleRes = female?.residence_house_id ?? female?.house_id ?? null;
+      if (maleAge !== null && femaleAge2 !== null && maleAge >= 18 && maleAge <= 26 && femaleAge2 >= 16 && femaleAge2 <= 24 && maleRes && femaleRes && maleRes === femaleRes) {
+        t0YoungCoresidentCouples += 1;
+      }
+    }
+
+    for (const h of Object.values(((state as any).houses ?? {}) as Record<string, any>)) {
+      if (!h || typeof h !== "object") continue;
+      if (typeof h.head_id !== "string") continue;
+      const cids: unknown[] = Array.isArray(h.child_ids) ? h.child_ids : [];
+      t0ChildrenPerHouse.push(cids.length);
+    }
 
     const eligibleWomenIds = Object.entries((state as any).people ?? {})
       .filter(([_, p]) => personIsAlive(p))
@@ -637,6 +731,36 @@ export function runDemographyBatch(
     t0_eligible_unmarried_women_count: t0EligibleWomen,
     t1_married_from_t0_eligible_women_count: t1MarriedFromT0EligibleWomen,
     t1_married_from_t0_eligible_women_share: t0EligibleWomen > 0 ? Number((t1MarriedFromT0EligibleWomen / t0EligibleWomen).toFixed(6)) : 1,
+    worldgen_t0_profile: {
+      age_band_counts: t0AgeCounts,
+      age_band_shares: {
+        "0-14": ratio(t0AgeCounts["0-14"], t0PeopleCount),
+        "15-40": ratio(t0AgeCounts["15-40"], t0PeopleCount),
+        "41-65": ratio(t0AgeCounts["41-65"], t0PeopleCount),
+        "66+": ratio(t0AgeCounts["66+"], t0PeopleCount),
+      },
+      sex_ratio_overall_m_to_f: ratio(t0SexCounts.M, Math.max(1, t0SexCounts.F)),
+      sex_ratio_15_40_m_to_f: ratio(t0Sex1540Counts.M, Math.max(1, t0Sex1540Counts.F)),
+      marital_status_rates_by_age_sex: Object.fromEntries(Object.entries(t0MaritalBySexAge).map(([k, v]) => [k, {
+        married_share: ratio(v.married, v.total),
+        unmarried_share: ratio(v.unmarried, v.total),
+        widowed_share: ratio(v.widowed, v.total),
+        count: v.total,
+      }])),
+      spouse_age_stats_t0: {
+        median: Number(median(t0SpouseAges).toFixed(3)),
+        pct_ge_35: ratio(t0SpouseAges.filter((x) => x >= 35).length, t0SpouseAges.length),
+        pct_ge_40: ratio(t0SpouseAges.filter((x) => x >= 40).length, t0SpouseAges.length),
+      },
+      children_per_house_distribution: {
+        "0": t0ChildrenPerHouse.filter((x) => x === 0).length,
+        "1": t0ChildrenPerHouse.filter((x) => x === 1).length,
+        "2": t0ChildrenPerHouse.filter((x) => x === 2).length,
+        "3": t0ChildrenPerHouse.filter((x) => x === 3).length,
+        "4+": t0ChildrenPerHouse.filter((x) => x >= 4).length,
+      },
+      co_resident_young_couple_share: ratio(t0YoungCoresidentCouples, t0Couples),
+    },
   };
 }
 
@@ -648,6 +772,25 @@ function runCli(): void {
   const tuning: Tuning = { fertilityScale: 1.0, mortalityScaleChild: 1.0, mortalityScaleAdult: 1.0 };
 
   const summary = runDemographyBatch(seeds, turns, tuning, mode);
+
+  if (mode === "cohort") {
+    const t0: any = summary.worldgen_t0_profile ?? {};
+    const kidsShare = Number(t0?.age_band_shares?.["0-14"] ?? 0);
+    const eldersShare = Number(t0?.age_band_shares?.["66+"] ?? 0);
+    const band15to19 = Number(summary.births_by_maternal_age_band?.["15-19"] ?? 0);
+    const band20to24 = Number(summary.births_by_maternal_age_band?.["20-24"] ?? 0);
+    const band30to34 = Number(summary.births_by_maternal_age_band?.["30-34"] ?? 0);
+    const band45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
+    const teenShare = summary.total_births > 0 ? band15to19 / summary.total_births : 0;
+    const checks: string[] = [];
+    if (kidsShare < 0.25) checks.push(`T0 kids share too low: ${kidsShare.toFixed(4)}`);
+    if (eldersShare > 0.10) checks.push(`T0 66+ share too high: ${eldersShare.toFixed(4)}`);
+    if (band45 > 0) checks.push(`45+ births must be zero, got ${band45}`);
+    if (band20to24 < band30to34) checks.push(`20-24 births must be >= 30-34, got ${band20to24} < ${band30to34}`);
+    if (teenShare < 0.06) checks.push(`15-19 birth share too low: ${teenShare.toFixed(4)}`);
+    if (checks.length > 0) throw new Error(`cohort demography validation failed: ${checks.join("; ")}`);
+  }
+
   const out = { ...summary, hash: stableHash(summary) };
 
   const dir = "qa_artifacts/demography_batch";

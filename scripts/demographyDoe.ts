@@ -213,5 +213,7 @@ const hashes = {
   sim_summary: sha(simTxt),
   doe_ranked: sha(doeTxt),
 };
+fs.writeFileSync(`${dir}/hashes.json`, JSON.stringify(hashes, null, 2));
+out.hash_manifest = hashes;
 fs.writeFileSync(`${dir}/doe_ranked.json`, JSON.stringify(out, null, 2));
 console.log(`wrote doe_ranked.json and hashes.json (${seedsCount} seeds x ${turns} turns x ${fertilityVals.length * mortalityVals.length * mortalityVals.length} combos)`);

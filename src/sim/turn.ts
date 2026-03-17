@@ -99,6 +99,12 @@ function tuningNumber(state: RunState, key: string, defaultValue = 1.0): number 
   return typeof v === "number" && Number.isFinite(v) ? v : defaultValue;
 }
 
+
+function annualProbabilityToTurnProbability(pAnnual: number): number {
+  const bounded = Math.max(0, Math.min(0.999, pAnnual));
+  return 1 - Math.pow(1 - bounded, TURN_YEARS);
+}
+
 function currentSpoilageRate(state: RunState): number {
   if (hasImprovement(state.manor.improvements, "granary_upgrade")) return SPOILAGE_RATE_GRANARY;
   return SPOILAGE_RATE_BASE;
@@ -704,7 +710,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const mods = (state.flags as any)._mods ?? {};
       const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
       const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chance = Math.min(0.95, Math.max(0, tableBase * traitAdj * bonus * fertScale));
+      const chanceAnnual = Math.max(0, tableBase * traitAdj * bonus * fertScale);
+      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
       const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
       if (bRng.bool(chance)) {
         const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
@@ -828,7 +835,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
       const tableBase = fertilityAnnualProbabilityByAge(a);
       const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chance = Math.min(0.95, Math.max(0, tableBase * ageFactor(a) * traitAdj * fertScale));
+      const chanceAnnual = Math.max(0, tableBase * ageFactor(a) * traitAdj * fertScale);
+      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
       if (chance <= 0) continue;
 
       if (bRng.fork(`b:${father.id}:${mother.id}`).bool(chance)) {
