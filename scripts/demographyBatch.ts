@@ -499,6 +499,9 @@ export function runDemographyBatch(
     let marriedByEndTurn1ForSeed: number | null = null;
 
     for (let t = 0; t < turns; t++) {
+      if (state?.game_over) {
+        state.game_over = null;
+      }
       if (!state?.game_over) aliveTurnsCount += 1;
       const beforePeople = new Map<string, any>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, { ...(p as any) }]));
       const beforeAlive = new Map<string, boolean>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, Boolean((p as any)?.alive !== false)]));
