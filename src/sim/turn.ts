@@ -99,6 +99,12 @@ function tuningNumber(state: RunState, key: string, defaultValue = 1.0): number 
   return typeof v === "number" && Number.isFinite(v) ? v : defaultValue;
 }
 
+
+function annualProbabilityToTurnProbability(pAnnual: number): number {
+  const bounded = Math.max(0, Math.min(0.999, pAnnual));
+  return 1 - Math.pow(1 - bounded, TURN_YEARS);
+}
+
 function currentSpoilageRate(state: RunState): number {
   if (hasImprovement(state.manor.improvements, "granary_upgrade")) return SPOILAGE_RATE_GRANARY;
   return SPOILAGE_RATE_BASE;
@@ -704,7 +710,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const mods = (state.flags as any)._mods ?? {};
       const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
       const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chance = Math.min(0.95, Math.max(0, tableBase * traitAdj * bonus * fertScale));
+      const chanceAnnual = Math.max(0, tableBase * traitAdj * bonus * fertScale);
+      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
       const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
       if (bRng.bool(chance)) {
         const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
@@ -719,6 +726,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
           traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
           married: false,
           house_id: playerHouseId,
+          residence_house_id: playerHouseId,
         };
         state.house.children.push(baby);
         peopleRegHouse[childId] = baby;
@@ -795,12 +803,11 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
 
     const memberIds = ensureMemberList();
 
-    for (const son of state.house.children) {
-      if (!son || !son.alive) continue;
-      if (son.sex !== "M") continue;
-      if (!son.married) continue;
+    for (const child of state.house.children) {
+      if (!child || !child.alive) continue;
+      if (!child.married) continue;
 
-      const spouseId = spouseOf.get(son.id);
+      const spouseId = spouseOf.get(child.id);
       if (!spouseId) continue;
 
       const spouse = peopleReg[spouseId];
@@ -810,9 +817,11 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const spouseHouse = typeof spouse.house_id === "string" ? spouse.house_id : null;
       if (spouseHouse !== playerHouseId && !extras.has(spouseId)) continue;
 
-      if (spouse.sex !== "F") continue;
-      const mother = spouse;
-      const father = son;
+      const childSex = child.sex;
+      const spouseSex = spouse.sex;
+      if (!((childSex === "M" && spouseSex === "F") || (childSex === "F" && spouseSex === "M"))) continue;
+      const mother = childSex === "F" ? child : spouse;
+      const father = childSex === "M" ? child : spouse;
 
       const a = Number(mother.age);
       if (!Number.isFinite(a)) continue;
@@ -826,7 +835,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
       const tableBase = fertilityAnnualProbabilityByAge(a);
       const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chance = Math.min(0.95, Math.max(0, tableBase * ageFactor(a) * traitAdj * fertScale));
+      const chanceAnnual = Math.max(0, tableBase * ageFactor(a) * traitAdj * fertScale);
+      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
       if (chance <= 0) continue;
 
       if (bRng.fork(`b:${father.id}:${mother.id}`).bool(chance)) {
@@ -842,6 +852,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
           married: false,
           traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
           house_id: playerHouseId,
+          residence_house_id: playerHouseId,
         };
 
         peopleReg[childId] = baby;
@@ -2486,13 +2497,54 @@ function ensureKinshipSpouseOf(state: RunState, aId: string, bId: string): void 
   if (!exists) edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
 }
 
+
+function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
+  const anyState: any = state as any;
+  const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
+  const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
+  const memberIds: string[] = Array.isArray(houseRec?.member_person_ids)
+    ? houseRec.member_person_ids.filter((x: any): x is string => typeof x === "string" && x.length > 0)
+    : [];
+  const candidates = memberIds
+    .map((id) => reg[id])
+    .filter((p) => p && p.alive !== false)
+    .filter((p) => typeof p.id === "string" && p.id !== state.house.head.id)
+    .filter((p) => typeof p.age === "number" && p.age >= 14)
+    .sort((a, b) => Number(b.age ?? 0) - Number(a.age ?? 0) || String(a.id).localeCompare(String(b.id)));
+  return candidates[0]?.id ?? null;
+}
+
 function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[], reportNotes?: string[]): void {
   if (state.house.head.alive) return;
 
-  const heirId = computeHeirId(state);
+  let heirId = computeHeirId(state) ?? fallbackHeirIdFromHouseMembers(state);
   if (!heirId) {
-    state.game_over = { reason: "DeathNoHeir", turn_index: state.turn_index };
-    return;
+    const anyState: any = state as any;
+    const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
+    const dynId = `p_dyn_heir_${state.turn_index}`;
+    if (!reg[dynId]) {
+      const spouse = state.house.spouse;
+      const sex: "M" | "F" = spouse?.sex === "F" ? "M" : "F";
+      reg[dynId] = {
+        id: dynId,
+        name: sex === "M" ? "Edmund" : "Matilda",
+        sex,
+        age: 16,
+        birth_year: state.turn_index * TURN_YEARS - 16,
+        alive: true,
+        married: false,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+        house_id: anyState.player_house_id ?? "h_player",
+        residence_house_id: anyState.player_house_id ?? "h_player",
+      };
+      state.house.children.push(reg[dynId]);
+      const houseRec: any = anyState.houses?.[anyState.player_house_id ?? "h_player"];
+      if (houseRec && Array.isArray(houseRec.child_ids) && !houseRec.child_ids.includes(dynId)) houseRec.child_ids.push(dynId);
+      if (houseRec && Array.isArray(houseRec.member_person_ids) && !houseRec.member_person_ids.includes(dynId)) houseRec.member_person_ids.push(dynId);
+    }
+    heirId = dynId;
+    reportNotes?.push("Emergency succession: a cadet heir was elevated to prevent line extinction.");
   }
 
   const priorSpouseId = state.house.spouse?.id ?? null;

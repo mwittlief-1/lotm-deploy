@@ -174,6 +174,11 @@ function coerceHouseId(p: PersonLike): string | null {
   return typeof raw === 'string' && raw.length > 0 ? raw : null;
 }
 
+function coerceResidenceHouseId(p: PersonLike): string | null {
+  const raw = (p as any)?.residence_house_id ?? (p as any)?.residenceHouseId ?? null;
+  return typeof raw === 'string' && raw.length > 0 ? raw : null;
+}
+
 function buildSpouseIndex(state: RunStateLike): Map<string, Set<string>> {
   const idx = new Map<string, Set<string>>();
   for (const e of listKinshipEdges(state)) {
@@ -275,6 +280,7 @@ export function processNobleFertility(
           fertility: 3,
         },
         house_id: houseId,
+        residence_house_id: houseId,
       };
       state.people[childId] = newborn;
 
@@ -307,6 +313,7 @@ export function processNobleFertility(
         birth_year: year,
         alive: true,
         house_id: houseId,
+        residence_house_id: houseId,
         death_year: null,
       };
 
@@ -394,7 +401,7 @@ export function processNobleMarriages(
     if (age < 16) continue;
     if (age > 75) continue;
 
-    const hid = coerceHouseId(p);
+    const hid = coerceResidenceHouseId(p) ?? coerceHouseId(p);
     if (sex === "M") males.push({ id, age, house_id: hid });
     else females.push({ id, age, house_id: hid });
   }
@@ -406,17 +413,28 @@ export function processNobleMarriages(
   const maxPairs = Math.min(males.length, females.length);
   if (maxPairs <= 0) return { marriages };
 
+  const forceShare = Math.max(0, Math.min(1, readTuningNumber(state, "world_marriage_t01_force_share", 0)));
+  const forceApplies = forceShare > 0 && currentTurnIndex <= 1;
+  const t0EligibleFemaleCount = females.filter((f) => f.age >= 16 && f.age <= 28).length;
+
   // Scalable defaults: we want marriages to continue in small worlds/early turns,
   // and also not bottleneck in larger worlds.
   const houseCount = [...readTier0HouseIds(tierSets), ...readTier1HouseIds(tierSets)].length;
-  const rate = readTuningNumber(state, "world_marriage_rate", 0.25);
-  const defaultCap = Math.max(50, Math.ceil(houseCount * 0.5));
+  const rate = readTuningNumber(state, "world_marriage_rate", 0.32);
+  const defaultCap = Math.max(60, Math.ceil(houseCount * 0.65));
   const cap = Math.max(0, Math.trunc(readTuningNumber(state, "world_marriage_cap", defaultCap)));
-  const defaultMin = Math.max(1, Math.floor(houseCount * 0.05));
+  const defaultMin = Math.max(2, Math.floor(houseCount * 0.08));
   const minPerTurn = Math.max(0, Math.trunc(readTuningNumber(state, "world_marriage_min", defaultMin)));
 
   let target = Math.trunc(maxPairs * rate);
   target = Math.max(target, minPerTurn);
+  const activeFertileWomen = females.filter((f) => f.age >= 16 && f.age <= 28).length;
+  const upkeepNeeded = Math.ceil(activeFertileWomen * 0.22);
+  target = Math.max(target, upkeepNeeded);
+  if (forceApplies && t0EligibleFemaleCount > 0) {
+    const forcedNeeded = Math.ceil(t0EligibleFemaleCount * forceShare);
+    target = Math.max(target, forcedNeeded);
+  }
   target = Math.min(target, cap, maxPairs);
   if (target <= 0) return { marriages };
 
@@ -424,6 +442,13 @@ export function processNobleMarriages(
   const usedMales = new Set<string>();
 
   const ageCompatible = (mAge: number, fAge: number): boolean => {
+    if (forceApplies) {
+      if (fAge < 16 || fAge > 60) return false;
+      if (mAge < 16 || mAge > 85) return false;
+      if (mAge + 12 < fAge) return false;
+      if (mAge - 45 > fAge) return false;
+      return true;
+    }
     // Simple plausibility constraints; tune later.
     if (fAge < 15 || fAge > 50) return false;
     if (mAge < 15 || mAge > 80) return false;
@@ -451,6 +476,14 @@ export function processNobleMarriages(
     return (state as any).kinship_edges as any[];
   };
 
+  const addHouseMember = (houseId: string | null, personId: string): void => {
+    if (!houseId || !state.houses || !state.houses[houseId]) return;
+    const h: any = state.houses[houseId];
+    if (Array.isArray(h.member_person_ids) && !h.member_person_ids.includes(personId)) h.member_person_ids.push(personId);
+    if (Array.isArray(h.people_ids) && !h.people_ids.includes(personId)) h.people_ids.push(personId);
+    if (Array.isArray(h.members) && !h.members.includes(personId)) h.members.push(personId);
+  };
+
   for (const m of males) {
     if (marriages.length >= target) break;
     if (usedMales.has(m.id)) continue;
@@ -462,7 +495,7 @@ export function processNobleMarriages(
       if (usedFemales.has(f.id)) continue;
       if (!ageCompatible(m.age, f.age)) continue;
       // Avoid intra-house marriages when possible.
-      if (m.house_id && f.house_id && m.house_id === f.house_id) continue;
+      if (!forceApplies && m.house_id && f.house_id && m.house_id === f.house_id) continue;
       if (areCloseKin(m.id, f.id)) continue;
       pool.push(f.id);
     }
@@ -482,6 +515,15 @@ export function processNobleMarriages(
     const fp: any = state.people?.[pick];
     if (mp && typeof mp === "object") mp.married = true;
     if (fp && typeof fp === "object") fp.married = true;
+
+    const groomResidence = (mp && (typeof mp.residence_house_id === "string" && mp.residence_house_id ? mp.residence_house_id : (typeof mp.house_id === "string" ? mp.house_id : null))) || m.house_id || null;
+    if (fp && typeof fp === "object") {
+      if (groomResidence) {
+        fp.residence_house_id = groomResidence;
+        fp.house_id = groomResidence;
+        addHouseMember(groomResidence, pick);
+      }
+    }
 
     marriages.push({ spouse_a_person_id: m.id, spouse_b_person_id: pick, year });
   }
