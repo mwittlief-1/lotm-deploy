@@ -623,6 +623,9 @@ export function runDemographyBatch(
     let marriedByEndTurn1ForSeed: number | null = null;
 
     for (let t = 0; t < turns; t++) {
+      if (state?.game_over) {
+        state.game_over = null;
+      }
       if (!state?.game_over) aliveTurnsCount += 1;
       const beforePeople = new Map<string, any>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, { ...(p as any) }]));
       const beforeAlive = new Map<string, boolean>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, Boolean((p as any)?.alive !== false)]));
@@ -965,14 +968,77 @@ function runCli(): void {
 
   const out = { ...summary, hash: stableHash(summary) };
 
+function writeBatchOutputs(mode: "cohort" | "sim", summary: any) {
   const dir = "qa_artifacts/demography_batch";
   ensureDir(dir);
+
+  const out = { ...summary, hash: stableHash(summary) };
   const file = mode === "cohort" ? "cohort_summary.json" : "sim_summary.json";
   fs.writeFileSync(`${dir}/${file}`, JSON.stringify(out, null, 2));
+
   const subDir = `${dir}/${mode}`;
   ensureDir(subDir);
   fs.writeFileSync(`${subDir}/summary.json`, JSON.stringify(out, null, 2));
+
   console.log(`wrote ${dir}/${file}`);
+}
+
+function validateCohort(summary: any) {
+  // These gates are intentionally strict; failures should still leave artifacts behind.
+  const t0: any = summary.worldgen_t0_profile ?? {};
+  const kidsShare = Number(t0?.age_band_shares?.["0-14"] ?? 0);
+  const eldersShare = Number(t0?.age_band_shares?.["66+"] ?? 0);
+
+  const band15to19 = Number(summary.births_by_maternal_age_band?.["15-19"] ?? 0);
+  const band20to24 = Number(summary.births_by_maternal_age_band?.["20-24"] ?? 0);
+  const band30to34 = Number(summary.births_by_maternal_age_band?.["30-34"] ?? 0);
+  const band45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
+  const teenShare = summary.total_births > 0 ? band15to19 / summary.total_births : 0;
+
+  const checks: string[] = [];
+  if (kidsShare < 0.25) checks.push(`T0 kids share too low: ${kidsShare.toFixed(4)} (< 0.25)`);
+  if (eldersShare > 0.10) checks.push(`T0 66+ share too high: ${eldersShare.toFixed(4)} (> 0.10)`);
+  if (band45 > 0) checks.push(`45+ births must be zero, got ${band45}`);
+  if (band20to24 < band30to34) checks.push(`20-24 births must be >= 30-34, got ${band20to24} < ${band30to34}`);
+  if (teenShare < 0.06) checks.push(`15-19 birth share too low: ${teenShare.toFixed(4)} (< 0.06)`);
+
+  if (checks.length > 0) {
+    // Print enough context to debug without opening JSON.
+    const bands = summary.births_by_maternal_age_band ?? {};
+    const shares = t0?.age_band_shares ?? {};
+    throw new Error(
+      `cohort demography validation failed: ${checks.join("; ")}\n` +
+      `births_by_maternal_age_band=${JSON.stringify(bands)}\n` +
+      `worldgen_t0_profile.age_band_shares=${JSON.stringify(shares)}`
+    );
+  }
+}
+
+function runCli() {
+  const mode = getArgMode(process.argv);
+
+  // IMPORTANT: allow DOE_SEEDS / DOE_TURNS to drive cohort+sim runs
+  const envSeeds = parsePositiveInt(process.env.DOE_SEEDS);
+  const envTurns = parsePositiveInt(process.env.DOE_TURNS);
+
+  const defaultSeeds = mode === "cohort" ? 128 : 64;
+  const defaultTurns = mode === "cohort" ? 10 : 18;
+
+  const seedsCount = envSeeds ?? defaultSeeds;
+  const turns = envTurns ?? defaultTurns;
+
+  const seeds = buildSeeds(seedsCount);
+
+  // Keep tuning fixed for batch mode; DOE grid handles tuning separately.
+  const tuning: Tuning = { fertilityScale: 1.0, mortalityScaleChild: 1.0, mortalityScaleAdult: 1.0 };
+
+  const summary = runDemographyBatch(seeds, turns, tuning, mode);
+
+  // Always write artifacts first (even if validation fails)
+  writeBatchOutputs(mode, summary);
+
+  // Cohort-only validations
+  if (mode === "cohort") validateCohort(summary);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) runCli();
