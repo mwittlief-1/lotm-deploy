@@ -63,6 +63,20 @@ export type Summary = {
   t1_married_from_t0_eligible_women_count: number;
   t1_married_from_t0_eligible_women_share: number;
   worldgen_t0_profile: Record<string, unknown>;
+  alive_people_per_turn: number[];
+  net_births_minus_deaths_per_turn: number[];
+  marriages_formed_per_turn: number[];
+  eligible_unmarried_women_per_turn: number[];
+  eligible_unmarried_men_per_turn: number[];
+  married_share_of_eligible_women_per_turn: number[];
+  eligible_mothers_per_turn: number[];
+  births_per_turn: number[];
+  distribution_checkpoints: Record<string, {
+    age_band_shares: Record<string, number>;
+    sex_ratio_overall: number;
+    sex_ratio_15_40: number;
+    median_age: number;
+  }>;
 };
 
 const MAT_BANDS: Array<[string, number, number]> = [["15-19", 15, 19], ["20-24", 20, 24], ["25-29", 25, 29], ["30-34", 30, 34], ["35-39", 35, 39], ["40-44", 40, 44], ["45+", 45, 999]];
@@ -207,6 +221,107 @@ function maritalAgeBand(age: number): "15-19" | "20-24" | "25-29" | "30-34" | "3
 
 function ratio(n: number, d: number): number {
   return d > 0 ? Number((n / d).toFixed(6)) : 0;
+}
+
+function checkpointTurns(turns: number): number[] {
+  const raw = [0, 5, 10, 15, 20, 25, Math.max(0, turns - 1)];
+  return [...new Set(raw.filter((t) => t >= 0 && t < turns))].sort((a, b) => a - b);
+}
+
+function spouseIdsFromState(state: any): Set<string> {
+  const out = new Set<string>();
+  const edges: any[] = Array.isArray(state?.kinship_edges) ? state.kinship_edges : [];
+  for (const e of edges) {
+    if (e?.kind !== "spouse_of") continue;
+    if (typeof e?.a_id === "string") out.add(e.a_id);
+    if (typeof e?.b_id === "string") out.add(e.b_id);
+  }
+  return out;
+}
+
+function marriageEdgeKeys(state: any): Set<string> {
+  const out = new Set<string>();
+  const edges: any[] = Array.isArray(state?.kinship_edges) ? state.kinship_edges : [];
+  for (const e of edges) {
+    if (e?.kind !== "spouse_of") continue;
+    const a = String(e?.a_id ?? "");
+    const b = String(e?.b_id ?? "");
+    if (!a || !b) continue;
+    out.add(a < b ? `${a}|${b}` : `${b}|${a}`);
+  }
+  return out;
+}
+
+function eligibleMotherCount(state: any, worldYear: number): number {
+  const spouseIds = spouseIdsFromState(state);
+  return Object.values((state?.people ?? {}) as Record<string, any>).filter((p: any) => {
+    if (!personIsAlive(p) || p?.sex !== "F") return false;
+    const age = readAge(p);
+    if (age === null || age < 16 || age > 44) return false;
+    const id = typeof p?.id === "string" ? p.id : null;
+    if (!id) return false;
+    if (!Boolean(p?.married) && !spouseIds.has(id)) return false;
+    const lastBirthYear = p?.last_birth_year;
+    if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && worldYear - Math.trunc(lastBirthYear) < 2) return false;
+    return true;
+  }).length;
+}
+
+function eligibleMarriageStats(state: any): { eligibleWomen: number; eligibleMen: number; marriedShareWomen: number } {
+  const spouseIds = spouseIdsFromState(state);
+  let womenTotal = 0;
+  let womenUnmarried = 0;
+  let menUnmarried = 0;
+  let womenMarried = 0;
+  for (const [id, p] of Object.entries((state?.people ?? {}) as Record<string, any>)) {
+    if (!personIsAlive(p)) continue;
+    const age = readAge(p);
+    if (age === null) continue;
+    const married = Boolean((p as any)?.married) || spouseIds.has(id);
+    if ((p as any)?.sex === "F" && age >= 16 && age <= 28 && !personIsVowedOrBlocked(p)) {
+      womenTotal += 1;
+      if (married) womenMarried += 1;
+      else womenUnmarried += 1;
+    }
+    if ((p as any)?.sex === "M" && age >= 18 && age <= 40) {
+      if (!married) menUnmarried += 1;
+    }
+  }
+  return { eligibleWomen: womenUnmarried, eligibleMen: menUnmarried, marriedShareWomen: ratio(womenMarried, womenTotal) };
+}
+
+function distributionCheckpointForState(state: any): { age_band_shares: Record<string, number>; sex_ratio_overall: number; sex_ratio_15_40: number; median_age: number } {
+  const counts = { "0-14": 0, "15-40": 0, "41-65": 0, "66+": 0 };
+  let m = 0;
+  let f = 0;
+  let m1540 = 0;
+  let f1540 = 0;
+  const ages: number[] = [];
+  for (const p of Object.values((state?.people ?? {}) as Record<string, any>)) {
+    if (!personIsAlive(p)) continue;
+    const age = readAge(p);
+    if (age === null) continue;
+    ages.push(age);
+    counts[ageBandForT0(age)] += 1;
+    if ((p as any)?.sex === "F") f += 1;
+    else m += 1;
+    if (age >= 15 && age <= 40) {
+      if ((p as any)?.sex === "F") f1540 += 1;
+      else m1540 += 1;
+    }
+  }
+  const total = ages.length;
+  return {
+    age_band_shares: {
+      "0-14": ratio(counts["0-14"], total),
+      "15-40": ratio(counts["15-40"], total),
+      "41-65": ratio(counts["41-65"], total),
+      "66+": ratio(counts["66+"], total),
+    },
+    sex_ratio_overall: ratio(m, Math.max(1, f)),
+    sex_ratio_15_40: ratio(m1540, Math.max(1, f1540)),
+    median_age: Number(median(ages).toFixed(3)),
+  };
 }
 
 
@@ -379,6 +494,15 @@ export function runDemographyBatch(
   let popEnd = 0;
   let t0EligibleWomen = 0;
   let t1MarriedFromT0EligibleWomen = 0;
+  const alivePeoplePerTurn = Array.from({ length: turns }, () => 0);
+  const netBirthsMinusDeathsPerTurn = Array.from({ length: turns }, () => 0);
+  const marriagesFormedPerTurn = Array.from({ length: turns }, () => 0);
+  const eligibleUnmarriedWomenPerTurn = Array.from({ length: turns }, () => 0);
+  const eligibleUnmarriedMenPerTurn = Array.from({ length: turns }, () => 0);
+  const marriedShareOfEligibleWomenPerTurn = Array.from({ length: turns }, () => 0);
+  const eligibleMothersPerTurn = Array.from({ length: turns }, () => 0);
+  const distributionCheckpoints: Record<string, { age_band_shares: Record<string, number>; sex_ratio_overall: number; sex_ratio_15_40: number; median_age: number }> = {};
+  const checkpointSet = new Set(checkpointTurns(turns));
 
   const t0AgeCounts = { "0-14": 0, "15-40": 0, "41-65": 0, "66+": 0 };
   const t0SexCounts = { M: 0, F: 0 };
@@ -505,6 +629,7 @@ export function runDemographyBatch(
       if (!state?.game_over) aliveTurnsCount += 1;
       const beforePeople = new Map<string, any>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, { ...(p as any) }]));
       const beforeAlive = new Map<string, boolean>(Object.entries((state as any).people ?? {}).map(([id, p]) => [id, Boolean((p as any)?.alive !== false)]));
+      const marriageEdgesBefore = marriageEdgeKeys(state);
 
       const ctx = proposeTurn(state as any);
       const next = ctx.preview_state as any;
@@ -585,6 +710,30 @@ export function runDemographyBatch(
       if (firstGameOverTurn === null && state?.game_over) {
         firstGameOverTurn = t;
         gameOverReason = String(state.game_over?.reason ?? "Unknown");
+      }
+
+      const marriageEdgesAfter = marriageEdgeKeys(state);
+      let formedThisTurn = 0;
+      for (const key of marriageEdgesAfter) if (!marriageEdgesBefore.has(key)) formedThisTurn += 1;
+      marriagesFormedPerTurn[t] += formedThisTurn;
+      alivePeoplePerTurn[t] += countAlivePeople(state);
+      netBirthsMinusDeathsPerTurn[t] += perTurn[t]!.births - perTurn[t]!.deaths;
+      const marriageStats = eligibleMarriageStats(state);
+      eligibleUnmarriedWomenPerTurn[t] += marriageStats.eligibleWomen;
+      eligibleUnmarriedMenPerTurn[t] += marriageStats.eligibleMen;
+      marriedShareOfEligibleWomenPerTurn[t] += marriageStats.marriedShareWomen;
+      eligibleMothersPerTurn[t] += eligibleMotherCount(state, state.turn_index * 3);
+      if (checkpointSet.has(t)) {
+        const key = String(t);
+        const snap = distributionCheckpointForState(state);
+        const prev = distributionCheckpoints[key];
+        if (!prev) distributionCheckpoints[key] = snap;
+        else {
+          for (const band of Object.keys(prev.age_band_shares)) prev.age_band_shares[band] += snap.age_band_shares[band] ?? 0;
+          prev.sex_ratio_overall += snap.sex_ratio_overall;
+          prev.sex_ratio_15_40 += snap.sex_ratio_15_40;
+          prev.median_age += snap.median_age;
+        }
       }
 
       const aliveAges: number[] = [];
@@ -669,6 +818,19 @@ export function runDemographyBatch(
 
   const years = Math.max(1, turns * 3);
   const populationGrowthTurn0ToN = popStart > 0 ? (popEnd - popStart) / popStart : 0;
+  const alivePeoplePerTurnAvg = alivePeoplePerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const netBirthsMinusDeathsPerTurnAvg = netBirthsMinusDeathsPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const marriagesFormedPerTurnAvg = marriagesFormedPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const eligibleUnmarriedWomenPerTurnAvg = eligibleUnmarriedWomenPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const eligibleUnmarriedMenPerTurnAvg = eligibleUnmarriedMenPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const marriedShareOfEligibleWomenPerTurnAvg = marriedShareOfEligibleWomenPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(6)));
+  const eligibleMothersPerTurnAvg = eligibleMothersPerTurn.map((x) => Number((x / Math.max(1, seeds.length)).toFixed(3)));
+  const distributionCheckpointsAvg = Object.fromEntries(Object.entries(distributionCheckpoints).map(([k, v]) => [k, {
+    age_band_shares: Object.fromEntries(Object.entries(v.age_band_shares).map(([band, val]) => [band, Number((val / Math.max(1, seeds.length)).toFixed(6))])),
+    sex_ratio_overall: Number((v.sex_ratio_overall / Math.max(1, seeds.length)).toFixed(6)),
+    sex_ratio_15_40: Number((v.sex_ratio_15_40 / Math.max(1, seeds.length)).toFixed(6)),
+    median_age: Number((v.median_age / Math.max(1, seeds.length)).toFixed(3)),
+  }]));
 
   const gameOverReasonCounts: Record<string, number> = {};
   for (const row of seedOutcomes) {
@@ -731,6 +893,15 @@ export function runDemographyBatch(
     t0_eligible_unmarried_women_count: t0EligibleWomen,
     t1_married_from_t0_eligible_women_count: t1MarriedFromT0EligibleWomen,
     t1_married_from_t0_eligible_women_share: t0EligibleWomen > 0 ? Number((t1MarriedFromT0EligibleWomen / t0EligibleWomen).toFixed(6)) : 1,
+    alive_people_per_turn: alivePeoplePerTurnAvg,
+    net_births_minus_deaths_per_turn: netBirthsMinusDeathsPerTurnAvg,
+    marriages_formed_per_turn: marriagesFormedPerTurnAvg,
+    eligible_unmarried_women_per_turn: eligibleUnmarriedWomenPerTurnAvg,
+    eligible_unmarried_men_per_turn: eligibleUnmarriedMenPerTurnAvg,
+    married_share_of_eligible_women_per_turn: marriedShareOfEligibleWomenPerTurnAvg,
+    eligible_mothers_per_turn: eligibleMothersPerTurnAvg,
+    births_per_turn: perTurn.map((row) => row.births),
+    distribution_checkpoints: distributionCheckpointsAvg,
     worldgen_t0_profile: {
       age_band_counts: t0AgeCounts,
       age_band_shares: {
@@ -764,30 +935,38 @@ export function runDemographyBatch(
   };
 }
 
-function parsePositiveInt(v: string | undefined): number | null {
-  if (!v) return null;
-  const n = Number(v);
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.floor(n);
-}
+function runCli(): void {
+  const modeArg = (process.argv[2] || "sim") as "cohort" | "sim";
+  const mode = modeArg === "cohort" ? "cohort" : "sim";
+  const seeds = mode === "cohort" ? Array.from({ length: 128 }, (_, i) => i + 1) : Array.from({ length: 64 }, (_, i) => i + 1);
+  const turns = mode === "cohort" ? 10 : 18;
+  const tuning: Tuning = {
+    fertilityScale: Number.isFinite(Number(process.env.TUNE_FERTILITY_SCALE)) ? Number(process.env.TUNE_FERTILITY_SCALE) : 1.0,
+    mortalityScaleChild: Number.isFinite(Number(process.env.TUNE_MORTALITY_CHILD)) ? Number(process.env.TUNE_MORTALITY_CHILD) : 1.0,
+    mortalityScaleAdult: Number.isFinite(Number(process.env.TUNE_MORTALITY_ADULT)) ? Number(process.env.TUNE_MORTALITY_ADULT) : 1.0,
+  };
 
-function getArgMode(argv: string[]): "cohort" | "sim" {
-  // Support:
-  //   tsx scripts/demographyBatch.ts cohort
-  //   tsx scripts/demographyBatch.ts sim
-  //   tsx scripts/demographyBatch.ts --mode cohort
-  // Defaults to "sim" if unspecified.
-  const a = argv.slice(2);
-  const idx = a.indexOf("--mode");
-  if (idx >= 0 && a[idx + 1] && (a[idx + 1] === "cohort" || a[idx + 1] === "sim")) return a[idx + 1] as any;
-  if (a.includes("cohort")) return "cohort";
-  if (a.includes("sim")) return "sim";
-  return "sim";
-}
+  const summary = runDemographyBatch(seeds, turns, tuning, mode);
 
-function buildSeeds(count: number): number[] {
-  return Array.from({ length: count }, (_, i) => i + 1);
-}
+  if (mode === "cohort") {
+    const t0: any = summary.worldgen_t0_profile ?? {};
+    const kidsShare = Number(t0?.age_band_shares?.["0-14"] ?? 0);
+    const eldersShare = Number(t0?.age_band_shares?.["66+"] ?? 0);
+    const band15to19 = Number(summary.births_by_maternal_age_band?.["15-19"] ?? 0);
+    const band20to24 = Number(summary.births_by_maternal_age_band?.["20-24"] ?? 0);
+    const band30to34 = Number(summary.births_by_maternal_age_band?.["30-34"] ?? 0);
+    const band45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
+    const teenShare = summary.total_births > 0 ? band15to19 / summary.total_births : 0;
+    const checks: string[] = [];
+    if (kidsShare < 0.25) checks.push(`T0 kids share too low: ${kidsShare.toFixed(4)}`);
+    if (eldersShare > 0.10) checks.push(`T0 66+ share too high: ${eldersShare.toFixed(4)}`);
+    if (band45 > 0) checks.push(`45+ births must be zero, got ${band45}`);
+    if (band20to24 < band30to34) checks.push(`20-24 births must be >= 30-34, got ${band20to24} < ${band30to34}`);
+    if (teenShare < 0.06) checks.push(`15-19 birth share too low: ${teenShare.toFixed(4)}`);
+    if (checks.length > 0) throw new Error(`cohort demography validation failed: ${checks.join("; ")}`);
+  }
+
+  const out = { ...summary, hash: stableHash(summary) };
 
 function writeBatchOutputs(mode: "cohort" | "sim", summary: any) {
   const dir = "qa_artifacts/demography_batch";
