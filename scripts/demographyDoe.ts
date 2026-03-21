@@ -19,7 +19,7 @@ function stableBucketString(buckets: AgeBucket[]): string {
   return buckets.map((b) => `${b.label}:${b.min}-${b.max}`).join(",");
 }
 
-const fertilityVals = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5];
+const fertilityVals = [1.65, 1.7, 1.75, 1.8];
 const mortalityVals = [0.9, 1.0, 1.1];
 const dir = "qa_artifacts/demography_batch";
 const seedsCount = envInt("DOE_SEEDS", 240);
