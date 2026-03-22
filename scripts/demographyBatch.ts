@@ -935,39 +935,6 @@ export function runDemographyBatch(
   };
 }
 
-function runCli(): void {
-  const modeArg = (process.argv[2] || "sim") as "cohort" | "sim";
-  const mode = modeArg === "cohort" ? "cohort" : "sim";
-  const seeds = mode === "cohort" ? Array.from({ length: 128 }, (_, i) => i + 1) : Array.from({ length: 64 }, (_, i) => i + 1);
-  const turns = mode === "cohort" ? 10 : 18;
-  const tuning: Tuning = {
-    fertilityScale: Number.isFinite(Number(process.env.TUNE_FERTILITY_SCALE)) ? Number(process.env.TUNE_FERTILITY_SCALE) : 1.0,
-    mortalityScaleChild: Number.isFinite(Number(process.env.TUNE_MORTALITY_CHILD)) ? Number(process.env.TUNE_MORTALITY_CHILD) : 1.0,
-    mortalityScaleAdult: Number.isFinite(Number(process.env.TUNE_MORTALITY_ADULT)) ? Number(process.env.TUNE_MORTALITY_ADULT) : 1.0,
-  };
-
-  const summary = runDemographyBatch(seeds, turns, tuning, mode);
-
-  if (mode === "cohort") {
-    const t0: any = summary.worldgen_t0_profile ?? {};
-    const kidsShare = Number(t0?.age_band_shares?.["0-14"] ?? 0);
-    const eldersShare = Number(t0?.age_band_shares?.["66+"] ?? 0);
-    const band15to19 = Number(summary.births_by_maternal_age_band?.["15-19"] ?? 0);
-    const band20to24 = Number(summary.births_by_maternal_age_band?.["20-24"] ?? 0);
-    const band30to34 = Number(summary.births_by_maternal_age_band?.["30-34"] ?? 0);
-    const band45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
-    const teenShare = summary.total_births > 0 ? band15to19 / summary.total_births : 0;
-    const checks: string[] = [];
-    if (kidsShare < 0.25) checks.push(`T0 kids share too low: ${kidsShare.toFixed(4)}`);
-    if (eldersShare > 0.10) checks.push(`T0 66+ share too high: ${eldersShare.toFixed(4)}`);
-    if (band45 > 0) checks.push(`45+ births must be zero, got ${band45}`);
-    if (band20to24 < band30to34) checks.push(`20-24 births must be >= 30-34, got ${band20to24} < ${band30to34}`);
-    if (teenShare < 0.06) checks.push(`15-19 birth share too low: ${teenShare.toFixed(4)}`);
-    if (checks.length > 0) throw new Error(`cohort demography validation failed: ${checks.join("; ")}`);
-  }
-
-  const out = { ...summary, hash: stableHash(summary) };
-
 function writeBatchOutputs(mode: "cohort" | "sim", summary: any) {
   const dir = "qa_artifacts/demography_batch";
   ensureDir(dir);
@@ -1012,6 +979,26 @@ function validateCohort(summary: any) {
       `worldgen_t0_profile.age_band_shares=${JSON.stringify(shares)}`
     );
   }
+}
+
+function parsePositiveInt(v: string | undefined): number | null {
+  if (!v) return null;
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.floor(n);
+}
+
+function getArgMode(argv: string[]): "cohort" | "sim" {
+  const a = argv.slice(2);
+  const idx = a.indexOf("--mode");
+  if (idx >= 0 && a[idx + 1] && (a[idx + 1] === "cohort" || a[idx + 1] === "sim")) return a[idx + 1] as any;
+  if (a.includes("cohort")) return "cohort";
+  if (a.includes("sim")) return "sim";
+  return "sim";
+}
+
+function buildSeeds(count: number): number[] {
+  return Array.from({ length: count }, (_, i) => i + 1);
 }
 
 function runCli() {
