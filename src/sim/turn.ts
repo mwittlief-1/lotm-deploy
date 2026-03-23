@@ -116,6 +116,106 @@ function stewardshipMultiplier(state: RunState): number {
   return 1 + (s - 3) * 0.02; // L1=-0.04 ... L5=+0.04
 }
 
+const SUCCESSION_MIN_AGE = 15;
+
+function playerHouseIdOf(state: RunState): string {
+  const anyState: any = state as any;
+  return typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+}
+
+function registryPersonFor(state: RunState, personId: string | null | undefined): Person | null {
+  if (!personId) return null;
+  const anyState: any = state as any;
+  const people: Record<string, Person> = (anyState.people ?? {}) as any;
+  const p = people?.[personId];
+  if (p && typeof p === "object") return p;
+  if (state.house.head?.id === personId) return state.house.head;
+  if (state.house.spouse?.id === personId) return state.house.spouse;
+  return state.house.children.find((c) => c.id === personId) ?? null;
+}
+
+function householdChildrenForHead(state: RunState, headId: string): Person[] {
+  const byPrimogeniture = (a: Person, b: Person) => {
+    if (b.age !== a.age) return b.age - a.age;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  };
+
+  return kinChildren(state as any, headId)
+    .map((id) => registryPersonFor(state, id))
+    .filter((p): p is Person => !!p)
+    .sort(byPrimogeniture);
+}
+
+function syncPlayerHouseSummaryFromRegistry(state: RunState): void {
+  const anyState: any = state as any;
+  const playerHouseId = playerHouseIdOf(state);
+  if (!anyState.houses || typeof anyState.houses !== "object") anyState.houses = {};
+  const houseRec: any = anyState.houses[playerHouseId] && typeof anyState.houses[playerHouseId] === "object"
+    ? anyState.houses[playerHouseId]
+    : (anyState.houses[playerHouseId] = { id: playerHouseId });
+
+  const headId = state.house.head?.id ?? null;
+  if (!headId) return;
+
+  const head = registryPersonFor(state, headId);
+  if (head) state.house.head = head;
+
+  const priorSpouseStatus = state.house.spouse_status;
+  const spouseId = spouseIdFromKinship(state, headId);
+  const spouse = spouseId ? registryPersonFor(state, spouseId) : null;
+  const livingSpouse = spouse && spouse.alive ? spouse : null;
+  state.house.spouse = livingSpouse ?? undefined;
+  state.house.spouse_status = livingSpouse ? "spouse" : priorSpouseStatus === "widow" ? "widow" : undefined;
+  state.house.head.married = Boolean(livingSpouse || state.house.spouse_status === "widow");
+  if (livingSpouse) livingSpouse.married = true;
+
+  const children = householdChildrenForHead(state, headId);
+  state.house.children = children;
+
+  const people: Record<string, any> = (anyState.people ?? {}) as any;
+  const memberIds = Object.values(people)
+    .filter((p: any) => p && typeof p.id === "string" && p.alive !== false && p.residence_house_id === playerHouseId)
+    .map((p: any) => p.id as string)
+    .sort((a, b) => a.localeCompare(b));
+  if (!memberIds.includes(headId)) memberIds.unshift(headId);
+  if (livingSpouse && !memberIds.includes(livingSpouse.id)) memberIds.push(livingSpouse.id);
+
+  houseRec.id = playerHouseId;
+  houseRec.head_id = headId;
+  houseRec.spouse_id = livingSpouse?.id ?? null;
+  houseRec.spouse_status = state.house.spouse_status ?? null;
+  houseRec.child_ids = children.map((c) => c.id);
+  houseRec.member_person_ids = memberIds;
+  houseRec.heir_id = state.house.heir_id ?? null;
+}
+
+function rebaseHeadRelationships(state: RunState, oldHeadId: string | null, newHeadId: string): void {
+  if (!oldHeadId || !newHeadId || oldHeadId === newHeadId) return;
+  const existing: any[] = Array.isArray(state.relationships) ? state.relationships : [];
+  const kept = new Map<string, any>();
+
+  for (const edge of existing) {
+    if (!edge || typeof edge.from_id !== "string" || typeof edge.to_id !== "string") continue;
+    if (edge.from_id === oldHeadId || edge.to_id === oldHeadId) continue;
+    const key = `${edge.from_id}->${edge.to_id}`;
+    if (!kept.has(key)) kept.set(key, { ...edge });
+  }
+
+  for (const edge of existing) {
+    if (!edge || typeof edge.from_id !== "string" || typeof edge.to_id !== "string") continue;
+    if (edge.from_id !== oldHeadId && edge.to_id !== oldHeadId) continue;
+    const fromId = edge.from_id === oldHeadId ? newHeadId : edge.from_id;
+    const toId = edge.to_id === oldHeadId ? newHeadId : edge.to_id;
+    if (fromId === toId) continue;
+    const key = `${fromId}->${toId}`;
+    if (!kept.has(key)) kept.set(key, { ...edge, from_id: fromId, to_id: toId });
+  }
+
+  state.relationships = [...kept.values()];
+}
+
 function yieldMultiplier(state: RunState): number {
   let m = 1.0;
   if (hasImprovement(state.manor.improvements, "field_rotation")) m *= YIELD_MULT_FIELD_ROTATION;
@@ -160,8 +260,6 @@ function weightedPick<T>(rng: Rng, items: Array<{ item: T; weight: number }>): {
 }
 
 function computeHeirId(state: RunState): string | null {
-  const anyState: any = state as any;
-  const people: Record<string, Person> = (anyState.people ?? {}) as any;
   const headId = state.house.head?.id;
 
   const byPrimogeniture = (a: Person, b: Person) => {
@@ -171,30 +269,22 @@ function computeHeirId(state: RunState): string | null {
     return 0;
   };
 
-  const personFor = (id: string): Person | null => {
-    const p = people?.[id];
-    if (p && typeof p === "object") return p;
-    if (state.house.head?.id === id) return state.house.head;
-    if (state.house.spouse?.id === id) return state.house.spouse;
-    return state.house.children.find((c) => c.id === id) ?? null;
-  };
-
   const alive = (id: string): boolean => {
-    const p = personFor(id);
+    const p = registryPersonFor(state, id);
     if (p) return !!p.alive;
     return kinIsAlive(state as any, id);
   };
 
   const malesByIds = (ids: string[]): Person[] =>
     ids
-      .map((id) => personFor(id))
-      .filter((p): p is Person => !!p && p.alive && p.sex === "M")
+      .map((id) => registryPersonFor(state, id))
+      .filter((p): p is Person => !!p && p.alive && p.sex === "M" && typeof p.age === "number" && p.age >= SUCCESSION_MIN_AGE)
       .sort(byPrimogeniture);
 
   const femalesByIds = (ids: string[]): Person[] =>
     ids
-      .map((id) => personFor(id))
-      .filter((p): p is Person => !!p && p.alive && p.sex === "F")
+      .map((id) => registryPersonFor(state, id))
+      .filter((p): p is Person => !!p && p.alive && p.sex === "F" && typeof p.age === "number" && p.age >= SUCCESSION_MIN_AGE)
       .sort(byPrimogeniture);
 
   // Default law: eldest living son -> eldest living daughter.
@@ -217,7 +307,7 @@ function computeHeirId(state: RunState): string | null {
 
     let maleAncestors = kinParents(state as any, headId)
       .filter((pid) => {
-        const p = personFor(pid);
+        const p = registryPersonFor(state, pid);
         return !!p && p.sex === "M";
       })
       .sort((a, b) => a.localeCompare(b));
@@ -242,7 +332,7 @@ function computeHeirId(state: RunState): string | null {
           const nextLayer: string[] = [];
           for (const id of layer) {
             seen.add(id);
-            const p = personFor(id);
+            const p = registryPersonFor(state, id);
             // Male-line descent only.
             if (!p || p.sex !== "M") continue;
             for (const kid of kinChildren(state as any, id)) {
@@ -254,7 +344,7 @@ function computeHeirId(state: RunState): string | null {
 
         // Next ancestor generation (male-only parents).
         for (const pid of kinParents(state as any, ancId)) {
-          const pp = personFor(pid);
+          const pp = registryPersonFor(state, pid);
           if (pp && pp.sex === "M") nextAncestors.push(pid);
         }
       }
@@ -598,11 +688,30 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
   if (state.house.spouse) push(state.house.spouse);
   for (const c of state.house.children) push(c);
 
-  // Court officers (People-First registry; back-compat no-op if registry missing).
+  // Court officers + all living player-house residents must age together.
   {
     const anyState: any = state as any;
     const reg: Record<string, Person> | undefined = anyState.people as any;
     if (reg) {
+      const playerHouseId = playerHouseIdOf(state);
+      const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
+      const residentIds = new Set<string>();
+
+      if (typeof houseRec?.head_id === "string" && houseRec.head_id) residentIds.add(houseRec.head_id);
+      if (typeof houseRec?.spouse_id === "string" && houseRec.spouse_id) residentIds.add(houseRec.spouse_id);
+      if (Array.isArray(houseRec?.member_person_ids)) {
+        for (const id of houseRec.member_person_ids) if (typeof id === "string" && id) residentIds.add(id);
+      }
+      for (const [id, person] of Object.entries(reg)) {
+        if (!person || typeof person !== "object") continue;
+        if ((person as any).residence_house_id === playerHouseId) residentIds.add(id);
+      }
+
+      for (const id of residentIds) {
+        const resident = reg[id];
+        if (resident) push(resident);
+      }
+
       for (const { person_id } of getCourtOfficerIds(state)) {
         const op = reg[person_id];
         if (op) push(op);
@@ -610,8 +719,8 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
     }
   }
 
-  // v0.2.9: household phase ages only the bounded player-facing set (household + court officers).
-  // Tier0/Tier1 world actors are aged in annual demography substeps earlier in proposeTurn.
+  // v0.2.9: household phase ages the player-facing resident set; world actors are aged in
+  // annual demography substeps earlier in proposeTurn.
   for (const p of people) {
     if (!p.alive) continue; // keep age-at-death stable
     p.age += TURN_YEARS;
@@ -1809,7 +1918,7 @@ export function proposeTurn(state: RunState): TurnContext {
   const prevHeir = working.house.heir_id ?? null;
   const nextHeir = computeHeirId(working);
   if (nextHeir && nextHeir !== prevHeir) {
-    const heirName = working.house.children.find((c) => c.id === nextHeir)?.name;
+    const heirName = registryPersonFor(working, nextHeir)?.name;
     if (heirName) houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
   }
 
@@ -1953,7 +2062,7 @@ export function proposeTurn(state: RunState): TurnContext {
     const prev = working.house.heir_id ?? null;
     const next = computeHeirId(working);
     if (next && next !== prev) {
-      const heirName = working.house.children.find((c) => c.id === next)?.name;
+      const heirName = registryPersonFor(working, next)?.name;
       if (heirName) houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
     }
   }
@@ -2500,7 +2609,7 @@ function ensureKinshipSpouseOf(state: RunState, aId: string, bId: string): void 
 
 function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
   const anyState: any = state as any;
-  const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const playerHouseId = playerHouseIdOf(state);
   const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
   const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
   const memberIds: string[] = Array.isArray(houseRec?.member_person_ids)
@@ -2510,7 +2619,7 @@ function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
     .map((id) => reg[id])
     .filter((p) => p && p.alive !== false)
     .filter((p) => typeof p.id === "string" && p.id !== state.house.head.id)
-    .filter((p) => typeof p.age === "number" && p.age >= 14)
+    .filter((p) => typeof p.age === "number" && p.age >= SUCCESSION_MIN_AGE)
     .sort((a, b) => Number(b.age ?? 0) - Number(a.age ?? 0) || String(a.id).localeCompare(String(b.id)));
   return candidates[0]?.id ?? null;
 }
@@ -2518,6 +2627,7 @@ function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
 function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[], reportNotes?: string[]): void {
   if (state.house.head.alive) return;
 
+  const priorHeadId = state.house.head?.id ?? null;
   let heirId = computeHeirId(state) ?? fallbackHeirIdFromHouseMembers(state);
   if (!heirId) {
     const anyState: any = state as any;
@@ -2561,8 +2671,6 @@ function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[
     state.game_over = { reason: "DeathNoHeir", turn_index: state.turn_index };
     return;
   }
-  heir.married = true;
-  state.house.head = heir;
 
   // v0.2.6.1 WP-12: married-out head is now in-court
   removeCourtExcludeId(state, heir.id);
@@ -2570,10 +2678,16 @@ function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[
   // Swap spouse to new HoH spouse (if any)
   const anyState: any = state as any;
   const reg: Record<string, Person> | undefined = anyState.people as any;
+  if (reg && heirId && reg[heirId]) heir = reg[heirId];
+  else if (reg && heirId) reg[heirId] = heir;
+
   const heirSpouseId = spouseIdFromKinship(state, heir.id);
+  heir.married = Boolean(heirSpouseId && reg?.[heirSpouseId] && reg[heirSpouseId]!.alive);
+  state.house.head = heir;
   if (heirSpouseId && reg?.[heirSpouseId]) {
     state.house.spouse = reg[heirSpouseId];
     state.house.spouse_status = "spouse";
+    state.house.spouse.married = true;
   } else {
     // No spouse known → clear active spouse slot
     state.house.spouse = undefined;
@@ -2585,15 +2699,19 @@ function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[
     addCourtExtraId(state, priorSpouseId);
   }
 
+  rebaseHeadRelationships(state, priorHeadId, heir.id);
+  syncPlayerHouseSummaryFromRegistry(state);
+
   houseLog.push({ kind: "succession", turn_index: state.turn_index, new_ruler_name: heir.name });
 
   // Recompute heir after succession (same turn)
   const prev = state.house.heir_id ?? null;
   const next = computeHeirId(state);
   if (next && next !== prev) {
-    const nm = state.house.children.find((c) => c.id === next)?.name;
+    const nm = registryPersonFor(state, next)?.name;
     if (nm) houseLog.push({ kind: "heir_selected", turn_index: state.turn_index, heir_name: nm });
   }
+  syncPlayerHouseSummaryFromRegistry(state);
 
   if (reportNotes) reportNotes.push("Succession resolved.");
 }
@@ -2632,6 +2750,7 @@ function closeTurn(state: RunState, reportNotes: string[], houseLog: HouseLogEve
   // v0.2.7.1 HOTFIX: succession semantics unified (HoH swap + spouse swap + dowager visibility).
   resolveSuccessionNow_v0_2_7_1(state, houseLog, reportNotes);
   if (state.game_over) return;
+  syncPlayerHouseSummaryFromRegistry(state);
 
   // game-over: dispossession rule
   if (state.manor.unrest >= 100) {
