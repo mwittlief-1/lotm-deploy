@@ -37,6 +37,11 @@ export const MORTALITY_MULT_WITH_PHYSICIAN = 0.6;
 export const BIRTH_CHANCE_BY_FERTILITY: readonly number[] = [0, 0.09, 0.17, 0.26, 0.34, 0.42] as const;
 export const BIRTH_FERTILE_AGE_MIN = 16;
 export const BIRTH_FERTILE_AGE_MAX = 44; // inclusive; 45+ hard-disabled (v0.2.9)
+export const DEFAULT_DEMOGRAPHY_TUNING = {
+  fertilityScale: 1.58,
+  mortalityScaleChild: 1.0,
+  mortalityScaleAdult: 1.0,
+} as const;
 
 // Mortality tuning (durability): base death odds per 3-year turn by age band
 export const MORTALITY_P_UNDER16 = 0.0035;

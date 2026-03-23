@@ -7,6 +7,7 @@ import { ensureEdge } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
 import { ensureCourtOfficers } from "./court";
+import { DEFAULT_DEMOGRAPHY_TUNING } from "./constants";
 
 function traitLevel(rng: Rng): number {
   const r = rng.next();
@@ -120,9 +121,9 @@ export function createNewRun(run_seed: string): RunState {
       // - fertility_mult, mortality_mult are persistent tuning knobs (see turn.ts tuningNumber).
       _tuning: {
         court_variant: "B",
-        fertilityScale: 1.0,
-        mortalityScaleChild: 1.0,
-        mortalityScaleAdult: 1.0
+        fertilityScale: DEFAULT_DEMOGRAPHY_TUNING.fertilityScale,
+        mortalityScaleChild: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleChild,
+        mortalityScaleAdult: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleAdult
       }
     },
     log: [],

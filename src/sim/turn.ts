@@ -770,7 +770,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
       if (age <= 37) return 0.45;
       if (age <= 40) return 0.20;
       if (age <= 43) return 0.06;
-      if (age <= 45) return 0.02;
+      if (age <= BIRTH_FERTILE_AGE_MAX) return 0.02;
       return 0.0;
     };
 

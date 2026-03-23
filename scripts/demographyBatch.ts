@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { createNewRun, applyDecisions, proposeTurn } from "../src/sim";
+import { BIRTH_FERTILE_AGE_MAX, BIRTH_FERTILE_AGE_MIN, DEFAULT_DEMOGRAPHY_TUNING } from "../src/sim/constants";
 
 function ensureDir(p: string) { fs.mkdirSync(p, { recursive: true }); }
 function stableHash(v: unknown) { return crypto.createHash("sha256").update(JSON.stringify(v)).digest("hex"); }
@@ -13,6 +14,28 @@ type BucketStability = {
   std_share: number;
   mean_age_in_bucket: number;
   std_age_in_bucket: number;
+};
+
+type MaritalRatesByAgeSex = Record<string, {
+  married_share: number;
+  unmarried_share: number;
+  widowed_share: number;
+  count: number;
+}>;
+
+type SpouseAgeStats = {
+  median: number;
+  pct_ge_35: number;
+  pct_ge_40: number;
+};
+
+type DistributionCheckpoint = {
+  age_band_shares: Record<string, number>;
+  sex_ratio_overall: number;
+  sex_ratio_15_40: number;
+  median_age: number;
+  marital_status_rates_by_age_sex: MaritalRatesByAgeSex;
+  spouse_age_stats: SpouseAgeStats;
 };
 
 export type Summary = {
@@ -71,12 +94,7 @@ export type Summary = {
   married_share_of_eligible_women_per_turn: number[];
   eligible_mothers_per_turn: number[];
   births_per_turn: number[];
-  distribution_checkpoints: Record<string, {
-    age_band_shares: Record<string, number>;
-    sex_ratio_overall: number;
-    sex_ratio_15_40: number;
-    median_age: number;
-  }>;
+  distribution_checkpoints: Record<string, DistributionCheckpoint>;
 };
 
 const MAT_BANDS: Array<[string, number, number]> = [["15-19", 15, 19], ["20-24", 20, 24], ["25-29", 25, 29], ["30-34", 30, 34], ["35-39", 35, 39], ["40-44", 40, 44], ["45+", 45, 999]];
@@ -108,6 +126,26 @@ function readAge(p: any): number | null {
   return typeof raw === "number" && Number.isFinite(raw) ? Math.trunc(raw) : null;
 }
 
+function inferMaternalAgeAtBirth(mom: any, child: any): number | null {
+  const motherBirthYear = readBirthYear(mom);
+  const childBirthYear = readBirthYear(child);
+  if (motherBirthYear !== null && childBirthYear !== null) {
+    return Math.max(0, childBirthYear - motherBirthYear);
+  }
+
+  const motherAge = readAge(mom);
+  const childAge = readAge(child);
+  if (motherAge !== null) {
+    return Math.max(0, motherAge - Math.max(0, childAge ?? 0));
+  }
+
+  return null;
+}
+
+function isEligibleMaternalAgeAtBirth(age: number | null): age is number {
+  return age !== null && age >= BIRTH_FERTILE_AGE_MIN && age <= BIRTH_FERTILE_AGE_MAX;
+}
+
 function personIsAlive(p: any): boolean {
   if (!p || typeof p !== "object") return false;
   if (p.alive === false || p.is_alive === false || p.is_dead === true) return false;
@@ -124,7 +162,9 @@ function hasSpouseEdge(state: any, personId: string): boolean {
   return edges.some((e) => {
     const k = String(e?.kind ?? "");
     if (k !== "spouse_of") return false;
-    return e?.a_id === personId || e?.b_id === personId;
+    if (e?.a_id === personId) return personIsAlive(state?.people?.[e?.b_id]);
+    if (e?.b_id === personId) return personIsAlive(state?.people?.[e?.a_id]);
+    return false;
   });
 }
 
@@ -233,10 +273,83 @@ function spouseIdsFromState(state: any): Set<string> {
   const edges: any[] = Array.isArray(state?.kinship_edges) ? state.kinship_edges : [];
   for (const e of edges) {
     if (e?.kind !== "spouse_of") continue;
-    if (typeof e?.a_id === "string") out.add(e.a_id);
-    if (typeof e?.b_id === "string") out.add(e.b_id);
+    const aId = typeof e?.a_id === "string" ? e.a_id : null;
+    const bId = typeof e?.b_id === "string" ? e.b_id : null;
+    if (!aId || !bId) continue;
+    if (!personIsAlive(state?.people?.[aId]) || !personIsAlive(state?.people?.[bId])) continue;
+    out.add(aId);
+    out.add(bId);
   }
   return out;
+}
+
+function maritalRatesTemplate(): MaritalRatesByAgeSex {
+  const out: MaritalRatesByAgeSex = {};
+  for (const sex of ["M", "F"]) {
+    for (const band of ["15-19", "20-24", "25-29", "30-34", "35-40", "41+"]) {
+      out[`${sex}:${band}`] = { married_share: 0, unmarried_share: 0, widowed_share: 0, count: 0 };
+    }
+  }
+  return out;
+}
+
+function maritalRatesForState(state: any): MaritalRatesByAgeSex {
+  const spouseIds = spouseIdsFromState(state);
+  const counts = Object.fromEntries(
+    Object.keys(maritalRatesTemplate()).map((key) => [key, { married: 0, unmarried: 0, widowed: 0, total: 0 }]),
+  ) as Record<string, { married: number; unmarried: number; widowed: number; total: number }>;
+
+  for (const [id, p] of Object.entries((state?.people ?? {}) as Record<string, any>)) {
+    if (!personIsAlive(p)) continue;
+    const age = readAge(p);
+    if (age === null || age < 15) continue;
+    const sex = p?.sex === "F" ? "F" : "M";
+    const band = maritalAgeBand(age);
+    const row = counts[`${sex}:${band}`];
+    row.total += 1;
+
+    const hasLivingSpouse = spouseIds.has(id);
+    const explicitWidowed = Boolean(p?.widowed === true || p?.widower === true || p?.spouse_status === "widow");
+    if (hasLivingSpouse) row.married += 1;
+    else if (explicitWidowed || Boolean(p?.married)) row.widowed += 1;
+    else row.unmarried += 1;
+  }
+
+  return Object.fromEntries(Object.entries(counts).map(([key, value]) => [key, {
+    married_share: ratio(value.married, value.total),
+    unmarried_share: ratio(value.unmarried, value.total),
+    widowed_share: ratio(value.widowed, value.total),
+    count: value.total,
+  }]));
+}
+
+function spouseAgeStatsForState(state: any): SpouseAgeStats {
+  const edges: any[] = Array.isArray(state?.kinship_edges) ? state.kinship_edges : [];
+  const seen = new Set<string>();
+  const spouseAges: number[] = [];
+
+  for (const e of edges) {
+    if (e?.kind !== "spouse_of") continue;
+    const a = String(e?.a_id ?? "");
+    const b = String(e?.b_id ?? "");
+    if (!a || !b) continue;
+    const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const pa: any = state?.people?.[a];
+    const pb: any = state?.people?.[b];
+    if (!personIsAlive(pa) || !personIsAlive(pb)) continue;
+    const female = pa?.sex === "F" ? pa : pb?.sex === "F" ? pb : null;
+    const femaleAge = readAge(female);
+    if (femaleAge !== null) spouseAges.push(femaleAge);
+  }
+
+  return {
+    median: Number(median(spouseAges).toFixed(3)),
+    pct_ge_35: ratio(spouseAges.filter((x) => x >= 35).length, spouseAges.length),
+    pct_ge_40: ratio(spouseAges.filter((x) => x >= 40).length, spouseAges.length),
+  };
 }
 
 function marriageEdgeKeys(state: any): Set<string> {
@@ -290,7 +403,7 @@ function eligibleMarriageStats(state: any): { eligibleWomen: number; eligibleMen
   return { eligibleWomen: womenUnmarried, eligibleMen: menUnmarried, marriedShareWomen: ratio(womenMarried, womenTotal) };
 }
 
-function distributionCheckpointForState(state: any): { age_band_shares: Record<string, number>; sex_ratio_overall: number; sex_ratio_15_40: number; median_age: number } {
+function distributionCheckpointForState(state: any): DistributionCheckpoint {
   const counts = { "0-14": 0, "15-40": 0, "41-65": 0, "66+": 0 };
   let m = 0;
   let f = 0;
@@ -321,6 +434,8 @@ function distributionCheckpointForState(state: any): { age_band_shares: Record<s
     sex_ratio_overall: ratio(m, Math.max(1, f)),
     sex_ratio_15_40: ratio(m1540, Math.max(1, f1540)),
     median_age: Number(median(ages).toFixed(3)),
+    marital_status_rates_by_age_sex: maritalRatesForState(state),
+    spouse_age_stats: spouseAgeStatsForState(state),
   };
 }
 
@@ -378,11 +493,10 @@ function selectMotherForChild(next: any, childId: string, child: any): any | nul
   if (childBirthYear !== null) {
     const scored = candidates
       .map((mom) => {
-        const by = readBirthYear(mom);
-        if (by === null) return null;
-        const ageAtBirth = childBirthYear - by;
+        const ageAtBirth = inferMaternalAgeAtBirth(mom, child);
+        if (ageAtBirth === null) return null;
         const plausible = ageAtBirth >= 12 && ageAtBirth <= 60;
-        const fertileWindow = ageAtBirth >= 15 && ageAtBirth <= 44;
+        const fertileWindow = isEligibleMaternalAgeAtBirth(ageAtBirth);
         return { mom, ageAtBirth, plausible, fertileWindow };
       })
       .filter((x): x is { mom: any; ageAtBirth: number; plausible: boolean; fertileWindow: boolean } => !!x)
@@ -393,7 +507,8 @@ function selectMotherForChild(next: any, childId: string, child: any): any | nul
         return String(a.mom?.id ?? "").localeCompare(String(b.mom?.id ?? ""));
       });
 
-    if (scored[0]) return scored[0].mom;
+    if (scored[0]?.fertileWindow) return scored[0].mom;
+    if (scored.length > 0) return null;
   }
 
   return candidates
@@ -501,7 +616,7 @@ export function runDemographyBatch(
   const eligibleUnmarriedMenPerTurn = Array.from({ length: turns }, () => 0);
   const marriedShareOfEligibleWomenPerTurn = Array.from({ length: turns }, () => 0);
   const eligibleMothersPerTurn = Array.from({ length: turns }, () => 0);
-  const distributionCheckpoints: Record<string, { age_band_shares: Record<string, number>; sex_ratio_overall: number; sex_ratio_15_40: number; median_age: number }> = {};
+  const distributionCheckpoints: Record<string, DistributionCheckpoint> = {};
   const checkpointSet = new Set(checkpointTurns(turns));
 
   const t0AgeCounts = { "0-14": 0, "15-40": 0, "41-65": 0, "66+": 0 };
@@ -545,6 +660,7 @@ export function runDemographyBatch(
     };
 
     const seedPeople = (state as any).people ?? {};
+    const t0SpouseIds = spouseIdsFromState(state);
     for (const [pid, p] of Object.entries(seedPeople as Record<string, any>)) {
       if (!personIsAlive(p)) continue;
       const age = readAge(p);
@@ -558,9 +674,10 @@ export function runDemographyBatch(
         const band = maritalAgeBand(age);
         const row = t0MaritalBySexAge[`${sex}:${band}`];
         row.total += 1;
-        const married = Boolean(p?.married) || hasSpouseEdge(state, pid);
-        if (married) row.married += 1;
-        else if (Boolean(p?.married) && !hasSpouseEdge(state, pid)) row.widowed += 1;
+        const hasLivingSpouse = t0SpouseIds.has(pid);
+        const explicitWidowed = Boolean(p?.widowed === true || p?.widower === true || p?.spouse_status === "widow");
+        if (hasLivingSpouse) row.married += 1;
+        else if (explicitWidowed || Boolean(p?.married)) row.widowed += 1;
         else row.unmarried += 1;
       }
     }
@@ -653,8 +770,10 @@ export function runDemographyBatch(
         const mom = selectMotherForChild(next, pid, child) as any;
         if (mom) {
           const motherId = typeof mom?.id === "string" ? mom.id : null;
+          const maternalAgeAtBirth = inferMaternalAgeAtBirth(mom, child);
+          const maternalAgeEligible = isEligibleMaternalAgeAtBirth(maternalAgeAtBirth);
           let motherHouseId: string | null = null;
-          if (motherId) {
+          if (maternalAgeEligible && motherId) {
             motherHouseId = resolveResidenceHouseId(next, motherId);
           }
           const playerHouseId = typeof (next as any).player_house_id === "string" ? String((next as any).player_house_id) : "h_player";
@@ -662,22 +781,13 @@ export function runDemographyBatch(
           else if (motherHouseId === playerHouseId) birthsByMotherResidency.player_house_resident += 1;
           else birthsByMotherResidency.non_player_house_resident += 1;
 
-          const motherBirthYear = readBirthYear(mom);
           const childBirthYear = readBirthYear(child);
-          const motherAge = readAge(mom);
-          const childAge = readAge(child);
-
-          let maternalAgeAtBirth: number | null = null;
-          if (motherBirthYear !== null && childBirthYear !== null) {
-            maternalAgeAtBirth = Math.max(0, childBirthYear - motherBirthYear);
-          } else if (motherAge !== null) {
-            maternalAgeAtBirth = Math.max(0, motherAge - Math.max(0, childAge ?? 0));
+          if (maternalAgeEligible) {
+            birthsByBand[pickBand(Math.trunc(maternalAgeAtBirth), MAT_BANDS)] += 1;
           }
-          const boundedMaternalAge = Math.max(0, Math.min(44, Math.trunc(maternalAgeAtBirth ?? 20)));
-          birthsByBand[pickBand(boundedMaternalAge, MAT_BANDS)] += 1;
 
           // Spacing integrity gate uses explicit birth years only to avoid false positives from inferred values.
-          if (childBirthYear !== null) {
+          if (maternalAgeEligible && childBirthYear !== null) {
             const arr = motherBirthYears.get(String(mom.id)) ?? [];
             arr.push(childBirthYear);
             motherBirthYears.set(String(mom.id), arr);
@@ -733,6 +843,17 @@ export function runDemographyBatch(
           prev.sex_ratio_overall += snap.sex_ratio_overall;
           prev.sex_ratio_15_40 += snap.sex_ratio_15_40;
           prev.median_age += snap.median_age;
+          for (const maritalKey of Object.keys(prev.marital_status_rates_by_age_sex)) {
+            const prevRow = prev.marital_status_rates_by_age_sex[maritalKey];
+            const snapRow = snap.marital_status_rates_by_age_sex[maritalKey];
+            prevRow.married_share += snapRow?.married_share ?? 0;
+            prevRow.unmarried_share += snapRow?.unmarried_share ?? 0;
+            prevRow.widowed_share += snapRow?.widowed_share ?? 0;
+            prevRow.count += snapRow?.count ?? 0;
+          }
+          prev.spouse_age_stats.median += snap.spouse_age_stats.median;
+          prev.spouse_age_stats.pct_ge_35 += snap.spouse_age_stats.pct_ge_35;
+          prev.spouse_age_stats.pct_ge_40 += snap.spouse_age_stats.pct_ge_40;
         }
       }
 
@@ -830,6 +951,17 @@ export function runDemographyBatch(
     sex_ratio_overall: Number((v.sex_ratio_overall / Math.max(1, seeds.length)).toFixed(6)),
     sex_ratio_15_40: Number((v.sex_ratio_15_40 / Math.max(1, seeds.length)).toFixed(6)),
     median_age: Number((v.median_age / Math.max(1, seeds.length)).toFixed(3)),
+    marital_status_rates_by_age_sex: Object.fromEntries(Object.entries(v.marital_status_rates_by_age_sex).map(([key, row]) => [key, {
+      married_share: Number((row.married_share / Math.max(1, seeds.length)).toFixed(6)),
+      unmarried_share: Number((row.unmarried_share / Math.max(1, seeds.length)).toFixed(6)),
+      widowed_share: Number((row.widowed_share / Math.max(1, seeds.length)).toFixed(6)),
+      count: Number((row.count / Math.max(1, seeds.length)).toFixed(3)),
+    }])),
+    spouse_age_stats: {
+      median: Number((v.spouse_age_stats.median / Math.max(1, seeds.length)).toFixed(3)),
+      pct_ge_35: Number((v.spouse_age_stats.pct_ge_35 / Math.max(1, seeds.length)).toFixed(6)),
+      pct_ge_40: Number((v.spouse_age_stats.pct_ge_40 / Math.max(1, seeds.length)).toFixed(6)),
+    },
   }]));
 
   const gameOverReasonCounts: Record<string, number> = {};
@@ -953,18 +1085,42 @@ function writeBatchOutputs(mode: "cohort" | "sim", summary: any) {
 function validateCohort(summary: any) {
   // These gates are intentionally strict; failures should still leave artifacts behind.
   const t0: any = summary.worldgen_t0_profile ?? {};
-  const kidsShare = Number(t0?.age_band_shares?.["0-14"] ?? 0);
-  const eldersShare = Number(t0?.age_band_shares?.["66+"] ?? 0);
+  const checkpoints = Object.entries(summary.distribution_checkpoints ?? {})
+    .map(([turn, row]) => ({ turn: Number(turn), row: row as DistributionCheckpoint }))
+    .filter(({ turn }) => Number.isFinite(turn) && turn >= 15)
+    .sort((a, b) => a.turn - b.turn);
+  const lateRows = checkpoints.map(({ row }) => row);
+  const lateMean = (pick: (row: DistributionCheckpoint) => number): number =>
+    lateRows.length > 0 ? mean(lateRows.map(pick)) : 0;
 
   const band15to19 = Number(summary.births_by_maternal_age_band?.["15-19"] ?? 0);
   const band20to24 = Number(summary.births_by_maternal_age_band?.["20-24"] ?? 0);
   const band30to34 = Number(summary.births_by_maternal_age_band?.["30-34"] ?? 0);
   const band45 = Number(summary.births_by_maternal_age_band?.["45+"] ?? 0);
   const teenShare = summary.total_births > 0 ? band15to19 / summary.total_births : 0;
+  const lateKidsShare = lateMean((row) => Number(row.age_band_shares?.["0-14"] ?? 0));
+  const latePrimeShare = lateMean((row) => Number(row.age_band_shares?.["15-40"] ?? 0));
+  const lateOlderShare = lateMean((row) => Number(row.age_band_shares?.["41-65"] ?? 0));
+  const lateEldersShare = lateMean((row) => Number(row.age_band_shares?.["66+"] ?? 0));
+  const lateSexRatio = lateMean((row) => Number(row.sex_ratio_overall ?? 0));
+  const latePrimeSexRatio = lateMean((row) => Number(row.sex_ratio_15_40 ?? 0));
+  const t0WidowedMen41 = Number(t0?.marital_status_rates_by_age_sex?.["M:41+"]?.widowed_share ?? 0);
+  const t0WidowedWomen41 = Number(t0?.marital_status_rates_by_age_sex?.["F:41+"]?.widowed_share ?? 0);
+  const lateWidowedMen41 = lateMean((row) => Number(row.marital_status_rates_by_age_sex?.["M:41+"]?.widowed_share ?? 0));
+  const lateWidowedWomen41 = lateMean((row) => Number(row.marital_status_rates_by_age_sex?.["F:41+"]?.widowed_share ?? 0));
 
   const checks: string[] = [];
-  if (kidsShare < 0.25) checks.push(`T0 kids share too low: ${kidsShare.toFixed(4)} (< 0.25)`);
-  if (eldersShare > 0.10) checks.push(`T0 66+ share too high: ${eldersShare.toFixed(4)} (> 0.10)`);
+  if (lateRows.length > 0) {
+    if (Math.abs(Number(t0?.age_band_shares?.["0-14"] ?? 0) - lateKidsShare) > 0.03) checks.push(`T0 0-14 share too far from equilibrium: ${Number(t0?.age_band_shares?.["0-14"] ?? 0).toFixed(4)} vs ${lateKidsShare.toFixed(4)}`);
+    if (Math.abs(Number(t0?.age_band_shares?.["15-40"] ?? 0) - latePrimeShare) > 0.03) checks.push(`T0 15-40 share too far from equilibrium: ${Number(t0?.age_band_shares?.["15-40"] ?? 0).toFixed(4)} vs ${latePrimeShare.toFixed(4)}`);
+    if (Math.abs(Number(t0?.age_band_shares?.["41-65"] ?? 0) - lateOlderShare) > 0.03) checks.push(`T0 41-65 share too far from equilibrium: ${Number(t0?.age_band_shares?.["41-65"] ?? 0).toFixed(4)} vs ${lateOlderShare.toFixed(4)}`);
+    if (Math.abs(Number(t0?.age_band_shares?.["66+"] ?? 0) - lateEldersShare) > 0.02) checks.push(`T0 66+ share too far from equilibrium: ${Number(t0?.age_band_shares?.["66+"] ?? 0).toFixed(4)} vs ${lateEldersShare.toFixed(4)}`);
+    if (Math.abs(Number(t0?.sex_ratio_overall_m_to_f ?? 0) - lateSexRatio) > 0.04) checks.push(`T0 overall sex ratio too far from equilibrium: ${Number(t0?.sex_ratio_overall_m_to_f ?? 0).toFixed(4)} vs ${lateSexRatio.toFixed(4)}`);
+    if (Math.abs(Number(t0?.sex_ratio_15_40_m_to_f ?? 0) - latePrimeSexRatio) > 0.08) checks.push(`T0 15-40 sex ratio too far from equilibrium: ${Number(t0?.sex_ratio_15_40_m_to_f ?? 0).toFixed(4)} vs ${latePrimeSexRatio.toFixed(4)}`);
+    if (Math.abs(t0WidowedMen41 - lateWidowedMen41) > 0.10) checks.push(`T0 male 41+ widowed share too far from equilibrium: ${t0WidowedMen41.toFixed(4)} vs ${lateWidowedMen41.toFixed(4)}`);
+    if (Math.abs(t0WidowedWomen41 - lateWidowedWomen41) > 0.15) checks.push(`T0 female 41+ widowed share too far from equilibrium: ${t0WidowedWomen41.toFixed(4)} vs ${lateWidowedWomen41.toFixed(4)}`);
+  }
+  if (t0WidowedMen41 <= 0 || t0WidowedWomen41 <= 0) checks.push(`T0 widowed share must be nonzero for both sexes at 41+ (got M=${t0WidowedMen41.toFixed(4)}, F=${t0WidowedWomen41.toFixed(4)})`);
   if (band45 > 0) checks.push(`45+ births must be zero, got ${band45}`);
   if (band20to24 < band30to34) checks.push(`20-24 births must be >= 30-34, got ${band20to24} < ${band30to34}`);
   if (teenShare < 0.06) checks.push(`15-19 birth share too low: ${teenShare.toFixed(4)} (< 0.06)`);
@@ -1017,7 +1173,11 @@ function runCli() {
   const seeds = buildSeeds(seedsCount);
 
   // Keep tuning fixed for batch mode; DOE grid handles tuning separately.
-  const tuning: Tuning = { fertilityScale: 1.0, mortalityScaleChild: 1.0, mortalityScaleAdult: 1.0 };
+  const tuning: Tuning = {
+    fertilityScale: DEFAULT_DEMOGRAPHY_TUNING.fertilityScale,
+    mortalityScaleChild: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleChild,
+    mortalityScaleAdult: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleAdult,
+  };
 
   const summary = runDemographyBatch(seeds, turns, tuning, mode);
 

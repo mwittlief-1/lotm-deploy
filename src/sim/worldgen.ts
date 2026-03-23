@@ -50,9 +50,16 @@ function genTraits(rng: Rng): Traits {
   };
 }
 
-function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, married: boolean): Person {
+function mkPerson(
+  rng: Rng,
+  id: string,
+  sex: Sex,
+  age: number,
+  surname: string,
+  opts: { married: boolean; widowed?: boolean }
+): Person {
   const a = clampAge(age);
-  return {
+  const person: Person & { widowed?: boolean; widower?: boolean } = {
     id,
     name: `${pickName(rng, sex)} ${surname}`,
     sex,
@@ -60,8 +67,13 @@ function mkPerson(rng: Rng, id: string, sex: Sex, age: number, surname: string, 
     birth_year: -a,
     alive: true,
     traits: genTraits(rng.fork(`traits:${id}`)),
-    married,
+    married: opts.married,
   };
+  if (opts.widowed) {
+    person.widowed = true;
+    if (sex === "M") person.widower = true;
+  }
+  return person;
 }
 
 function holdingsForTier(tier: HouseTier, rng: Rng): number {
@@ -121,7 +133,17 @@ function clampAge(n: number): number {
 }
 
 type HouseholdProfile = {
-  key: "growing" | "established" | "young_heir_core" | "widowed" | "second_marriage";
+  key:
+    | "young_family"
+    | "established_family"
+    | "mature_family"
+    | "empty_nest"
+    | "widowed_mother"
+    | "widowed_father"
+    | "single_woman"
+    | "single_man";
+  headSex: Sex;
+  maritalState: "married" | "widowed" | "unmarried";
   weight: number;
   headAgeMin: number;
   headAgeMax: number;
@@ -133,11 +155,14 @@ type HouseholdProfile = {
 };
 
 const HOUSEHOLD_PROFILES: HouseholdProfile[] = [
-  { key: "growing", weight: 0.35, headAgeMin: 25, headAgeMax: 34, spouseGapMin: 0, spouseGapMax: 6, childCountMin: 2, childCountMax: 4, spouseChance: 0.97 },
-  { key: "established", weight: 0.25, headAgeMin: 35, headAgeMax: 45, spouseGapMin: 1, spouseGapMax: 8, childCountMin: 3, childCountMax: 6, spouseChance: 0.96 },
-  { key: "young_heir_core", weight: 0.25, headAgeMin: 18, headAgeMax: 27, spouseGapMin: 0, spouseGapMax: 4, childCountMin: 0, childCountMax: 2, spouseChance: 0.94 },
-  { key: "widowed", weight: 0.1, headAgeMin: 40, headAgeMax: 55, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 1, childCountMax: 3, spouseChance: 0.08 },
-  { key: "second_marriage", weight: 0.05, headAgeMin: 45, headAgeMax: 60, spouseGapMin: 4, spouseGapMax: 18, childCountMin: 1, childCountMax: 4, spouseChance: 0.9 },
+  { key: "young_family", headSex: "M", maritalState: "married", weight: 0.13, headAgeMin: 26, headAgeMax: 34, spouseGapMin: 4, spouseGapMax: 8, childCountMin: 0, childCountMax: 2, spouseChance: 0.99 },
+  { key: "established_family", headSex: "M", maritalState: "married", weight: 0.2, headAgeMin: 35, headAgeMax: 45, spouseGapMin: 4, spouseGapMax: 9, childCountMin: 1, childCountMax: 3, spouseChance: 0.98 },
+  { key: "mature_family", headSex: "M", maritalState: "married", weight: 0.15, headAgeMin: 46, headAgeMax: 60, spouseGapMin: 3, spouseGapMax: 8, childCountMin: 1, childCountMax: 2, spouseChance: 0.97 },
+  { key: "empty_nest", headSex: "M", maritalState: "married", weight: 0.1, headAgeMin: 60, headAgeMax: 72, spouseGapMin: 2, spouseGapMax: 8, childCountMin: 0, childCountMax: 1, spouseChance: 0.9 },
+  { key: "widowed_mother", headSex: "F", maritalState: "widowed", weight: 0.21, headAgeMin: 46, headAgeMax: 76, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 0, childCountMax: 1, spouseChance: 0.0 },
+  { key: "widowed_father", headSex: "M", maritalState: "widowed", weight: 0.08, headAgeMin: 48, headAgeMax: 74, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 0, childCountMax: 1, spouseChance: 0.0 },
+  { key: "single_woman", headSex: "F", maritalState: "unmarried", weight: 0.04, headAgeMin: 20, headAgeMax: 38, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 0, childCountMax: 0, spouseChance: 0.0 },
+  { key: "single_man", headSex: "M", maritalState: "unmarried", weight: 0.09, headAgeMin: 20, headAgeMax: 42, spouseGapMin: 0, spouseGapMax: 0, childCountMin: 0, childCountMax: 0, spouseChance: 0.0 },
 ];
 
 function profileForHouseIndex(root: Rng, hid: string): HouseholdProfile {
@@ -330,31 +355,64 @@ function ensureFamilySnapshotForHouse(opts: {
   const spouseId: string = typeof prior.spouse_id === "string" && prior.spouse_id ? prior.spouse_id : extPersonId(houseIndex, "spouse");
 
   const profile = profileForHouseIndex(root, hid);
-  let sampledHeadAge = hRng.int(profile.headAgeMin, profile.headAgeMax);
-  if ((profile.key === "widowed" || profile.key === "second_marriage") && hRng.fork("elder_roll").bool(0.3)) {
-    sampledHeadAge = Math.max(sampledHeadAge, hRng.int(62, 78));
-  }
+  const headSex = profile.headSex;
+  const spouseSex: Sex = headSex === "F" ? "M" : "F";
+  const sampledHeadAge = hRng.int(profile.headAgeMin, profile.headAgeMax);
   const headAge: number = typeof people[headId]?.age === "number" ? people[headId].age : sampledHeadAge;
-  const spousePresent: boolean = typeof prior.spouse_id === "string" ? true : hRng.bool(profile.spouseChance);
+  const spousePresent: boolean =
+    profile.maritalState === "married"
+      ? (typeof prior.spouse_id === "string" ? true : hRng.bool(profile.spouseChance))
+      : false;
   const spouseAge: number = spousePresent
-    ? (typeof people[spouseId]?.age === "number" ? people[spouseId].age : Math.max(18, headAge - hRng.int(profile.spouseGapMin, profile.spouseGapMax)))
+    ? (typeof people[spouseId]?.age === "number"
+        ? people[spouseId].age
+        : headSex === "M"
+          ? Math.max(18, headAge - hRng.int(profile.spouseGapMin, profile.spouseGapMax))
+          : headAge + hRng.int(profile.spouseGapMin, profile.spouseGapMax))
     : 0;
+  const headIsWidowed = profile.maritalState === "widowed";
+  const headIsMarried = profile.maritalState !== "unmarried";
 
   // Upsert head/spouse persons.
-  if (!people[headId]) people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, "M", headAge, surname, spousePresent);
-  if (spousePresent && !people[spouseId]) people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, "F", spouseAge, surname, true);
+  if (!people[headId]) {
+    people[headId] = mkPerson(hRng.fork(`person:${headId}`), headId, headSex, headAge, surname, {
+      married: headIsMarried,
+      widowed: headIsWidowed,
+    });
+  } else {
+    people[headId].married = headIsMarried;
+    if (headIsWidowed) {
+      (people[headId] as any).widowed = true;
+      if (headSex === "M") (people[headId] as any).widower = true;
+    } else {
+      delete (people[headId] as any).widowed;
+      delete (people[headId] as any).widower;
+    }
+  }
+  if (spousePresent && !people[spouseId]) {
+    people[spouseId] = mkPerson(hRng.fork(`person:${spouseId}`), spouseId, spouseSex, spouseAge, surname, {
+      married: true,
+    });
+  }
   (people[headId] as any).residence_house_id = hid;
   (people[headId] as any).house_id = hid;
   if (spousePresent && people[spouseId]) {
     (people[spouseId] as any).residence_house_id = hid;
     (people[spouseId] as any).house_id = hid;
+    people[spouseId].married = true;
+    delete (people[spouseId] as any).widowed;
+    delete (people[spouseId] as any).widower;
   }
   if (typeof people[headId]?.age === "number") people[headId].birth_year = -clampAge(people[headId].age);
   if (spousePresent && typeof people[spouseId]?.age === "number") people[spouseId].birth_year = -clampAge(people[spouseId].age);
 
   // Child count + smoothed ages.
   const desiredChildCount = hRng.fork("child_count").int(profile.childCountMin, profile.childCountMax);
-  const motherAge = spousePresent ? spouseAge : Math.max(18, headAge - hRng.int(0, 18));
+  const motherAge = spousePresent
+    ? (headSex === "F" ? headAge : spouseAge)
+    : headSex === "F"
+      ? headAge
+      : Math.max(18, headAge - hRng.int(2, 14));
   const { ages_desc, late_child } = genChildAgesSmoothed(hRng.fork("children"), motherAge, headAge, desiredChildCount);
 
   // Preserve existing child IDs; append if needed.
@@ -372,8 +430,8 @@ function ensureFamilySnapshotForHouse(opts: {
     const cid = childIds[ci]!;
     const age = ages_desc[ci]!;
     if (!people[cid]) {
-      const sex: Sex = hRng.fork(`child_sex:${cid}`).bool(0.55) ? "M" : "F";
-      people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, false);
+      const sex: Sex = hRng.fork(`child_sex:${cid}`).bool(0.51) ? "M" : "F";
+      people[cid] = mkPerson(hRng.fork(`person:${cid}`), cid, sex, age, surname, { married: false });
     }
     (people[cid] as any).residence_house_id = hid;
     (people[cid] as any).house_id = hid;

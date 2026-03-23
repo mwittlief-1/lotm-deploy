@@ -3,7 +3,8 @@ import crypto from "node:crypto";
 import { evaluateLateHorizonActivity, parseBucketOverride, runDemographyBatch, type AgeBucket } from "./demographyBatch";
 
 function ensureDir(p: string) { fs.mkdirSync(p, { recursive: true }); }
-function sha(v: string) { return crypto.createHash("sha256").update(v).digest("hex"); }
+function shaBytes(v: string | Buffer) { return crypto.createHash("sha256").update(v).digest("hex"); }
+function shaPath(path: string) { return shaBytes(fs.readFileSync(path)); }
 function envInt(name: string, fallback: number): number {
   const raw = process.env[name];
   const n = Number(raw);
@@ -19,8 +20,8 @@ function stableBucketString(buckets: AgeBucket[]): string {
   return buckets.map((b) => `${b.label}:${b.min}-${b.max}`).join(",");
 }
 
-const fertilityVals = [1.65, 1.7, 1.75, 1.8];
-const mortalityVals = [0.9, 1.0, 1.1];
+const fertilityVals = [1.56, 1.57, 1.58, 1.59, 1.6];
+const mortalityVals = [1.0];
 const dir = "qa_artifacts/demography_batch";
 const seedsCount = envInt("DOE_SEEDS", 240);
 const turns = envInt("DOE_TURNS", 45);
@@ -202,15 +203,14 @@ const out: any = {
   ranked,
 };
 
-fs.writeFileSync(`${dir}/doe_ranked.json`, JSON.stringify(out, null, 2));
-
-const cohortTxt = fs.existsSync(`${dir}/cohort_summary.json`) ? fs.readFileSync(`${dir}/cohort_summary.json`, "utf8") : "";
-const simTxt = fs.existsSync(`${dir}/sim_summary.json`) ? fs.readFileSync(`${dir}/sim_summary.json`, "utf8") : "";
-const doeTxt = fs.readFileSync(`${dir}/doe_ranked.json`, "utf8");
+const doeRankedPath = `${dir}/doe_ranked.json`;
+fs.writeFileSync(doeRankedPath, JSON.stringify(out, null, 2));
 
 const hashes = {
-  cohort_summary: sha(cohortTxt),
-  sim_summary: sha(simTxt),
-  doe_ranked: sha(doeTxt),
+  "cohort_summary.json": fs.existsSync(`${dir}/cohort_summary.json`) ? shaPath(`${dir}/cohort_summary.json`) : "",
+  "sim_summary.json": fs.existsSync(`${dir}/sim_summary.json`) ? shaPath(`${dir}/sim_summary.json`) : "",
+  "doe_ranked.json": shaPath(doeRankedPath),
 };
-fs.writeFileSync(`${dir}/hashes.json`, JSON.stringify(hashes, null, 2));console.log(`wrote doe_ranked.json and hashes.json (${seedsCount} seeds x ${turns} turns x ${fertilityVals.length * mortalityVals.length * mortalityVals.length} combos)`);
+fs.writeFileSync(`${dir}/hashes.json`, JSON.stringify(hashes, null, 2));
+
+console.log(`wrote doe_ranked.json and hashes.json (${seedsCount} seeds x ${turns} turns x ${fertilityVals.length * mortalityVals.length * mortalityVals.length} combos)`);
