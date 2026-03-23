@@ -1,6 +1,8 @@
 import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState, ServiceRecord } from "./types";
 import { Rng } from "./rng";
 import { getChildren, getParents, getSiblings } from "./kinship";
+import { allHouseMemberIds, playerHouseIdOf, registryPersonFor } from "./actors";
+import { deriveHouseholdRoster } from "./householdView";
 
 // v0.2.4 Court + Household integration.
 // Tooling/QA note: Court officer generation must be deterministic and stream-isolated.
@@ -113,9 +115,13 @@ export function ensureCourtOfficers(state: RunState): void {
   // Back-compat: if a save already has clerk/marshal IDs, preserve them and ensure their Person records exist.
   const ensureRole = (role: CourtOfficerRole, createIfMissing: boolean) => {
     const cur = houseRec.court_officers?.[role];
+    if (typeof cur === "string" && cur.length > 0 && people[cur] && people[cur].alive === false) {
+      delete houseRec.court_officers[role];
+    }
     if (!createIfMissing && !(typeof cur === "string" && cur.length > 0)) return;
 
-    const id = typeof cur === "string" && cur.length > 0 ? cur : defaultOfficerId(role);
+    const nextCur = houseRec.court_officers?.[role];
+    const id = typeof nextCur === "string" && nextCur.length > 0 ? nextCur : defaultOfficerId(role);
     houseRec.court_officers[role] = id;
     if (!people[id]) {
       const r = base.fork(`role/${role}`);
@@ -149,6 +155,7 @@ export function ensureCourtOfficers(state: RunState): void {
 function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, roles: Record<CourtOfficerRole, string>): void {
   const anyState: any = state as any;
   const prior: ServiceRecord[] = Array.isArray(anyState.service_records) ? (anyState.service_records as ServiceRecord[]) : [];
+  const people: Record<string, Person> = anyState.people && typeof anyState.people === "object" ? (anyState.people as Record<string, Person>) : {};
 
   const byId = new Map<string, ServiceRecord>();
   for (const r of prior) {
@@ -162,9 +169,11 @@ function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, 
   const nowT = typeof (state as any).turn_index === "number" ? (state as any).turn_index : 0;
 
   const roleKeys = (Object.keys(roles) as CourtOfficerRole[]).sort((a, b) => String(a).localeCompare(String(b)));
+  const activeRoleIds = new Set(roleKeys.map((role) => `sr_${playerHouseId}_${role}`));
   for (const role of roleKeys) {
     const personId = roles[role];
     if (typeof personId !== "string" || !personId) continue;
+    if (people[personId] && people[personId].alive === false) continue;
 
     const id = `sr_${playerHouseId}_${role}`;
     const existing = byId.get(id);
@@ -186,6 +195,13 @@ function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, 
         end_turn_index: null,
       });
     }
+  }
+
+  for (const [id, record] of byId.entries()) {
+    if (!activeRoleIds.has(id)) continue;
+    const personId = record.person_id;
+    const person = typeof personId === "string" ? people[personId] : null;
+    if (!person || person.alive === false) record.end_turn_index = nowT;
   }
 
   anyState.service_records = [...byId.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
@@ -264,9 +280,10 @@ export function removeCourtExcludeId(state: RunState, personId: string): void {
 }
 
 export function deriveCourtMemberIds(state: RunState): string[] {
-  // Stable ordering: head, spouse, children (oldest->youngest, id tie-break), officers (fixed role order), extras (id asc).
+  // Stable ordering: current household roster, officers, extras.
   const anyState: any = state as any;
   const people: Record<string, Person> = (anyState.people ?? {}) as any;
+  const playerHouseId = playerHouseIdOf(state);
 
   const excluded = new Set(getCourtExcludeIds(state));
 
@@ -285,12 +302,11 @@ export function deriveCourtMemberIds(state: RunState): string[] {
 
   push(state.house.head?.id);
   push(state.house.spouse?.id ?? null);
-
-  const kids = [...(state.house.children ?? [])].sort((a, b) => {
-    if (b.age !== a.age) return b.age - a.age;
-    return String(a.id).localeCompare(String(b.id));
-  });
-  for (const c of kids) push(c.id);
+  for (const row of deriveHouseholdRoster(state as any, playerHouseId)) push(row.person_id);
+  for (const pid of allHouseMemberIds(state, playerHouseId)) {
+    const p = registryPersonFor(state, pid);
+    if (p && p.alive) push(pid);
+  }
 
   for (const { role, person_id } of getCourtOfficerIds(state)) {
     // ensure stable role ordering by iterating fixed role order in getCourtOfficerIds

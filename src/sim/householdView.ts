@@ -3,6 +3,7 @@
 // Hard rule: deterministic ordering and no side effects.
 
 import { getLivingSpouse, getParents, getSiblings, getChildren, isAlive } from "./kinship";
+import { resolveCurrentHouseHeadId } from "./actors";
 
 type AnyRecord = Record<string, any>;
 
@@ -90,7 +91,7 @@ function sortRoster(state: AnyRecord, rows: HouseholdRosterRow[]): HouseholdRost
 
 export function deriveHouseholdRoster(state: AnyRecord, house_id: string): HouseholdRosterRow[] {
   const house = state?.houses?.[house_id];
-  const headId: string | null = house?.head_id ?? house?.headId ?? null;
+  const headId: string | null = resolveCurrentHouseHeadId(state as any, house_id) ?? house?.head_id ?? house?.headId ?? null;
   if (!headId) return [];
 
   // If the current HoH is missing/deceased, return empty (the caller should have resolved succession).

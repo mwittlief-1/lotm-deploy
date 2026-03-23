@@ -1,5 +1,6 @@
 import type { RunState } from "./types";
 import { deriveCourtMemberIds } from "./court";
+import { allHouseMemberIds, houseIdForPerson, resolveCurrentHouseHeadId } from "./actors";
 
 /**
  * Tiering defaults (v0.2.8)
@@ -54,17 +55,7 @@ function getRegistries(state: RunState): {
 function indexPersonToHouseId(houses: Record<string, any>): Map<string, string> {
   const out = new Map<string, string>();
   for (const hid of Object.keys(houses).sort()) {
-    const h: any = houses[hid];
-    if (!h || typeof h !== "object") continue;
-
-    const candidates: string[] = [];
-    if (typeof h.head_id === "string" && h.head_id) candidates.push(h.head_id);
-    if (typeof h.spouse_id === "string" && h.spouse_id) candidates.push(h.spouse_id);
-    if (Array.isArray(h.child_ids)) {
-      for (const x of h.child_ids) if (typeof x === "string" && x) candidates.push(x);
-    }
-
-    for (const pid of candidates) {
+    for (const pid of allHouseMemberIds({ houses } as RunState, hid)) {
       // Deterministic tie-break: prefer lexicographically-smallest house id.
       const cur = out.get(pid);
       if (!cur || hid.localeCompare(cur) < 0) out.set(pid, hid);
@@ -150,6 +141,10 @@ export function computeTierSets(state: RunState): TierSets {
   addPerson(tier0, anyState.locals?.count?.id);
   addPerson(tier0, anyState.locals?.king?.id);
   for (const id of readIdList(anyState.locals?.liege_chain)) addPerson(tier0, id);
+  for (const pid of readIdList(anyState.locals?.liege_chain)) {
+    const hid = houseIdForPerson(state, pid);
+    if (hid) addPerson(tier0, resolveCurrentHouseHeadId(state, hid));
+  }
 
   // Diocese bishop snapshot (fallback behavior).
   addPerson(tier0, state.locals?.clergy?.id);
@@ -193,7 +188,7 @@ export function computeTierSets(state: RunState): TierSets {
   }
   for (const n of state.locals?.nobles ?? []) {
     const nid = (n as any)?.id;
-    const hid = typeof nid === "string" ? personToHouse.get(nid) : null;
+    const hid = typeof nid === "string" ? (personToHouse.get(nid) ?? houseIdForPerson(state, nid) ?? undefined) : null;
     if (hid && hid !== playerHouseId) priorityHouses.add(hid);
   }
 

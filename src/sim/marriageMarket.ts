@@ -21,6 +21,7 @@
  */
 
 import type { KinshipEdge, Person, RunState, Sex } from "./types";
+import { allHouseMemberIds, houseIdForPerson, resolveCurrentHouseHeadId } from "./actors";
 
 export type PersonId = string;
 
@@ -161,19 +162,12 @@ function getSubjectPerson(state: RunState, people: Record<string, Person>, subje
 function personToHouseMap(houses: Record<string, any>): Map<string, string> {
   const map = new Map<string, string>();
   for (const hid of Object.keys(houses).sort((a, b) => a.localeCompare(b))) {
-    const h: any = houses[hid];
-    if (!h || typeof h !== "object") continue;
     const add = (pid: any) => {
       if (typeof pid !== "string" || !pid) return;
       // Prefer earliest house_id in stable order.
       if (!map.has(pid)) map.set(pid, hid);
     };
-    add(h.head_id);
-    add(h.spouse_id);
-    const childIds: any = h.child_ids;
-    if (Array.isArray(childIds)) {
-      for (const cid of childIds) add(cid);
-    }
+    for (const pid of allHouseMemberIds({ houses } as RunState, hid)) add(pid);
   }
   return map;
 }
@@ -329,7 +323,7 @@ export function listEligibleCandidates(state: RunState, params: ListEligibleCand
   }));
 
   const p2h = personToHouseMap(houses);
-  const subjectHouseId = p2h.get(subjectId) ?? null;
+  const subjectHouseId = p2h.get(subjectId) ?? houseIdForPerson(state, subjectId) ?? null;
 
   const houseIds = resolveScopeHouseIds(houses, player_house_id, subjectHouseId, params.scope);
 
@@ -339,16 +333,7 @@ export function listEligibleCandidates(state: RunState, params: ListEligibleCand
   for (const hid of houseIds) {
     const h: any = houses[hid];
     if (!h || typeof h !== "object") continue;
-
-    const ids: string[] = [];
-    const headId = typeof h.head_id === "string" ? h.head_id : "";
-    if (headId) ids.push(headId);
-    const spouseId = typeof h.spouse_id === "string" ? h.spouse_id : "";
-    if (spouseId) ids.push(spouseId);
-    const childIds: any = h.child_ids;
-    if (Array.isArray(childIds)) {
-      for (const cid of childIds) if (typeof cid === "string" && cid) ids.push(cid);
-    }
+    const ids = allHouseMemberIds(state, hid);
 
     const { tier, prox } = tierProximityKey(h);
 
