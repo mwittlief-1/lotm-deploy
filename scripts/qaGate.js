@@ -3,6 +3,10 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 function ensureDir(p) { fs.mkdirSync(p, { recursive: true }); }
+function runOrExit(cmd, args) {
+  const res = spawnSync(cmd, args, { stdio: "inherit" });
+  if ((res.status ?? 1) !== 0) process.exit(res.status ?? 1);
+}
 
 const QA_ARTIFACTS = path.resolve("qa_artifacts");
 ensureDir(QA_ARTIFACTS);
@@ -25,11 +29,14 @@ if (fs.existsSync(vitestBin)) {
     } catch {}
   }
 
-  process.exit(res.status ?? 1);
+  if ((res.status ?? 1) !== 0) process.exit(res.status ?? 1);
+  runOrExit(process.execPath, [path.resolve("node_modules/tsx/dist/cli.mjs"), path.resolve("scripts/uatGate.ts")]);
+  process.exit(0);
 }
 
 console.warn("Vitest not found (node_modules missing). Running no-deps QA gate...");
 const node = process.execPath;
 const gate = path.resolve("scripts/qaNoDeps.mjs");
-const res = spawnSync(node, [gate], { stdio: "inherit" });
-process.exit(res.status ?? 1);
+runOrExit(node, [gate]);
+runOrExit(node, [path.resolve("node_modules/tsx/dist/cli.mjs"), path.resolve("scripts/uatGate.ts")]);
+process.exit(0);

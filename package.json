@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "qa": "node scripts/qaGate.js",
+    "uat:gate": "tsx scripts/uatGate.ts",
     "sim:batch": "tsx scripts/simBatch.ts",
     "matrices": "tsx scripts/generateMatrices.ts",
     "sim:batch:no-deps": "node scripts/simBatchNoDeps.mjs",
