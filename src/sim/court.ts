@@ -406,6 +406,12 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
   const extras = getCourtExtraIds(state).slice().sort((a, b) => a.localeCompare(b));
   for (const id of extras) pushRow(id, "married_in_spouse");
 
+  // Remaining resident kin/courtiers who are part of the current derived court scope.
+  for (const id of deriveCourtMemberIds(state)) {
+    if (seen.has(id)) continue;
+    pushRow(id, "resident");
+  }
+
   const headcount_alive = rows.reduce((acc, r) => (r.badges.includes("deceased") ? acc : acc + 1), 0);
 
   return {

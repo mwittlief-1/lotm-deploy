@@ -43,7 +43,7 @@ function pushPass(report: GateReport, note: string): void {
   report.notes.push(note);
 }
 
-function playerHouseId(state: RunState): string {
+function playerHouseIdForState(state: RunState): string {
   const anyState: any = state as any;
   return typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
 }
@@ -117,6 +117,77 @@ function checkSuccessionMarriageWindow(report: GateReport): void {
   pushPass(report, "succession_head_marriage_window");
 }
 
+function checkBranchDescendantHeir(report: GateReport): void {
+  const state = createNewRun("gate_branch_descendant");
+  const anyState: any = state as any;
+  const people: Record<string, any> = anyState.people;
+  const playerHouseId = playerHouseIdForState(state);
+  const houseRec: any = anyState.houses[playerHouseId];
+
+  people.p_child1.alive = false;
+  people.p_child2.alive = false;
+  const child1 = state.house.children.find((c) => c.id === "p_child1");
+  const child2 = state.house.children.find((c) => c.id === "p_child2");
+  if (child1) child1.alive = false;
+  if (child2) child2.alive = false;
+
+  const anne: Person = {
+    id: "p_branch_anne",
+    name: "Anne",
+    sex: "F",
+    age: 23,
+    birth_year: 4,
+    alive: true,
+    married: false,
+    traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+    house_id: playerHouseId,
+    residence_house_id: playerHouseId,
+  };
+  const robert: Person = {
+    id: "p_branch_robert",
+    name: "Robert",
+    sex: "M",
+    age: 20,
+    birth_year: 7,
+    alive: true,
+    married: false,
+    traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+    house_id: playerHouseId,
+    residence_house_id: playerHouseId,
+  };
+
+  people[anne.id] = anne;
+  people[robert.id] = robert;
+  if (!Array.isArray(houseRec.member_person_ids)) houseRec.member_person_ids = [];
+  if (!houseRec.member_person_ids.includes(anne.id)) houseRec.member_person_ids.push(anne.id);
+  if (!houseRec.member_person_ids.includes(robert.id)) houseRec.member_person_ids.push(robert.id);
+  anyState.kinship_edges.push({ kind: "parent_of", parent_id: "p_child2", child_id: anne.id });
+  anyState.kinship_edges.push({ kind: "parent_of", parent_id: "p_child2", child_id: robert.id });
+
+  const ctx = proposeTurn(state);
+  if (ctx.preview_state.house.heir_id !== anne.id) {
+    pushFailure(report, {
+      name: "branch_descendant_heir",
+      turn: 0,
+      detail: `expected heir ${anne.id}, got ${ctx.preview_state.house.heir_id ?? "null"}`,
+    });
+    return;
+  }
+
+  const courtIds = new Set((ctx.report.court_roster?.rows ?? []).map((row) => row.person_id));
+  if (!courtIds.has(anne.id)) {
+    pushFailure(report, {
+      name: "resident_heir_visible_at_court",
+      turn: 0,
+      detail: `expected resident heir ${anne.id} in court roster`,
+    });
+    return;
+  }
+
+  pushPass(report, "branch_descendant_heir");
+  pushPass(report, "resident_heir_visible_at_court");
+}
+
 function checkMultiSeedSmoke(report: GateReport): void {
   const seeds = ["gate_smoke_1", "gate_smoke_2", "gate_smoke_3", "gate_smoke_4", "gate_smoke_5", "gate_smoke_6"];
   const turns = 24;
@@ -151,7 +222,7 @@ function checkMultiSeedSmoke(report: GateReport): void {
       decisions.prospects = { kind: "prospects", actions: prospectActions };
       state = applyDecisions(state, decisions);
 
-      const pHouseId = playerHouseId(state);
+      const pHouseId = playerHouseIdForState(state);
       for (const hid of Object.keys(((state as any).houses ?? {}) as Record<string, unknown>).sort()) {
         const livingMembers = allHouseMemberIds(state, hid).filter((pid) => {
           const p = (state as any).people?.[pid];
@@ -255,6 +326,7 @@ function main(): void {
 
   checkFounderTurnZero(report);
   checkSuccessionMarriageWindow(report);
+  checkBranchDescendantHeir(report);
   checkMultiSeedSmoke(report);
 
   report.completed_at = nowIso();

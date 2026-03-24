@@ -278,17 +278,42 @@ function computeHeirIdInternal(state: RunState, minAge: number, persist = true):
       .filter((p): p is Person => !!p && p.alive && p.sex === "F" && typeof p.age === "number" && p.age >= minAge)
       .sort(byPrimogeniture);
 
-  // Default law: eldest living son -> eldest living daughter.
+  const childBranchOrder = (ids: string[], sex: "M" | "F"): string[] =>
+    ids
+      .map((id) => registryPersonFor(state, id))
+      .filter((p): p is Person => !!p && p.sex === sex)
+      .sort(byPrimogeniture)
+      .map((p) => p.id);
+
+  const firstEligibleInBranch = (branchRootId: string, seen: Set<string>): string | null => {
+    if (seen.has(branchRootId)) return null;
+    seen.add(branchRootId);
+
+    const root = registryPersonFor(state, branchRootId);
+    if (root && root.alive && typeof root.age === "number" && root.age >= minAge) return root.id;
+
+    const childIds = kinChildren(state as any, branchRootId)
+      .map((id) => registryPersonFor(state, id))
+      .filter((p): p is Person => !!p)
+      .sort(byPrimogeniture)
+      .map((p) => p.id);
+    for (const childId of childIds) {
+      const found = firstEligibleInBranch(childId, seen);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  // Default law: eldest son branch -> eldest daughter branch, with representation.
   const childIds = headId ? kinChildren(state as any, headId) : [];
-  const sons = malesByIds(childIds);
-  const daughters = femalesByIds(childIds);
-  if (sons[0]) {
-    if (persist) state.house.heir_id = sons[0].id;
-    return sons[0].id;
-  }
-  if (daughters[0]) {
-    if (persist) state.house.heir_id = daughters[0].id;
-    return daughters[0].id;
+  const sonBranches = childBranchOrder(childIds, "M");
+  const daughterBranches = childBranchOrder(childIds, "F");
+  for (const branchId of [...sonBranches, ...daughterBranches]) {
+    const found = firstEligibleInBranch(branchId, new Set<string>(headId ? [headId] : []));
+    if (found) {
+      if (persist) state.house.heir_id = found;
+      return found;
+    }
   }
 
   // Bounded nearest male-line relative fallback (paternal chain).

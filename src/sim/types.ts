@@ -369,7 +369,7 @@ export interface HouseholdRosterView {
 // --- Court (v0.2.4) ---
 
 export type CourtOfficerRole = "steward" | "clerk" | "marshal";
-export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse";
+export type CourtRosterRole = "head" | "spouse" | "child" | "officer" | "married_in_spouse" | "resident";
 
 export interface CourtRosterRow {
   person_id: string;
