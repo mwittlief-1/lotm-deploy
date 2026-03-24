@@ -751,6 +751,7 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
 
   function deathRoll(p: Person): boolean {
     if (!p.alive) return false;
+    if (state.turn_index === 0 && (p.id === state.house.head.id || p.id === state.house.spouse?.id)) return false;
 
     const age = typeof p.age === "number" && Number.isFinite(p.age) ? Math.trunc(p.age) : 0;
     const annualBase = mortalityAnnualProbabilityByAge(age);
@@ -1001,14 +1002,21 @@ function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: s
 }
 
 function buildMarriageWindow(state: RunState, tierSets?: TierSets | null): MarriageWindow | null {
-  // Trigger when any child >=15 and unmarried OR an offer flag exists.
+  // Trigger when any eligible household subject exists OR an offer flag exists.
   const anyFlags: any = state.flags;
   const forced = Boolean(anyFlags.MarriageOffer);
 
-  const eligibleAll = state.house.children.filter((c) => c.alive && !c.married && c.age >= 15);
+  const eligibleAll: Person[] = [];
+  const pushEligible = (person: Person | undefined | null) => {
+    if (!person || !person.alive || person.married || person.age < 15) return;
+    if (eligibleAll.some((p) => p.id === person.id)) return;
+    eligibleAll.push(person);
+  };
+  if (!state.house.spouse && state.house.spouse_status !== "widow") pushEligible(state.house.head);
+  for (const child of state.house.children) pushEligible(child);
   if (!forced && eligibleAll.length === 0) return null;
 
-  // v0.2.5: pick a single subject child (eldest eligible).
+  // v0.2.5: pick a single subject (eldest eligible).
   if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
 
   const subject = [...eligibleAll].sort((a, b) => {
@@ -2476,7 +2484,8 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
   }
 
   if (d.action === "accept") {
-    const child = state.house.children.find((c) => c.id === d.child_id);
+    const isHeadSubject = state.house.head.id === d.child_id;
+    const child = isHeadSubject ? state.house.head : state.house.children.find((c) => c.id === d.child_id);
     const offer = mw.offers[d.offer_index];
     if (!child || !offer) {
       reportNotes.push("Invalid marriage selection.");
@@ -2525,7 +2534,7 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
     // v0.2.8 HOTFIX: residency policy (patrilocal for player house)
     // - Daughters marry out (leave the household court).
     // - Sons stay in the household court; spouse joins.
-    const spouseJoinsCourt = child.sex === "M";
+    const spouseJoinsCourt = isHeadSubject ? true : child.sex === "M";
 
     if (spouseJoinsCourt) {
       addCourtExtraId(state, offer.house_person_id);
@@ -2540,7 +2549,17 @@ function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: Tur
           if (!h.member_person_ids.includes(offer.house_person_id)) h.member_person_ids.push(offer.house_person_id);
         }
       }
-      removeCourtExcludeId(state, child.id);
+      if (isHeadSubject) {
+        const anyState: any = state as any;
+        const spousePerson = anyState.people?.[offer.house_person_id] ?? null;
+        if (spousePerson) {
+          state.house.spouse = spousePerson;
+          state.house.spouse_status = "spouse";
+          spousePerson.married = true;
+        }
+      } else {
+        removeCourtExcludeId(state, child.id);
+      }
     } else {
       // Marriage-out affects court residency only; it must NOT remove from lineage.
       addCourtExcludeId(state, child.id);
