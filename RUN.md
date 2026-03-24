@@ -36,6 +36,24 @@ This runs:
 - determinism tests
 - invariants/clamps tests
 - golden-seed determinism checks
+- deterministic pre-UAT simulation gate
+
+## UAT gate
+```bash
+npm run uat:gate
+```
+
+This is the release-candidate sim smoke gate for v0.2 finalization. It checks:
+- founder survives turn 0 preview
+- succession to an unmarried head still yields marriage offers
+- no dead current head with living members
+- no player-house age drift
+- no married-without-spouse mismatch outside widowhood
+- no liege/clergy actor collapse
+- no missing heir apparent when living descendants exist
+- no repeated unchanged inheritance claim after rejection
+- infant ages include `1`/`2` in both player and world populations
+- resident branch heirs remain visible in the court surface
 
 ## Policy identifiers (canonical)
 - `prudent-builder` (baseline)
@@ -61,6 +79,7 @@ QA artifacts are written to `qa_artifacts/` (vitest.json + junit.xml when suppor
 
 `npm run qa` is authoritative.
 - If `node_modules/.bin/vitest` exists, it runs Vitest and writes `qa_artifacts/vitest.json`.
+- It then runs `npm run uat:gate` and writes `qa_artifacts/uat_gate.json`.
 - Otherwise it runs a no-deps gate against `dist_batch/` and writes `qa_artifacts/<APP_VERSION>_no_deps_gate.json`.
 
 

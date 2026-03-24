@@ -1,4 +1,4 @@
-# v0.1.0 Deployment Checklist (Vercel)
+# Deployment Checklist (Vercel)
 
 ## Preconditions
 - GitHub repo exists (deployment mirror repo)
@@ -6,6 +6,10 @@
 - Build uses Vite: npm run build => dist/
 
 ## Steps (each release)
+0) Engineering gate before push:
+   - `npm run build`
+   - `npm run qa`
+   - confirm `qa_artifacts/uat_gate.json` passes with `failed: 0`
 1) Download the release repo zip (e.g., lotm_v0.1.0_repo.zip)
 2) Unzip locally
 3) Copy files into your deployment mirror repo folder
