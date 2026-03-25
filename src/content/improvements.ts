@@ -76,6 +76,12 @@ export const IMPROVEMENTS: Record<string, ImprovementDef> = {
 
 export const IMPROVEMENT_IDS = Object.keys(IMPROVEMENTS);
 
+export const IMPROVEMENT_ALIASES: Record<string, string> = {
+  granary: "granary_upgrade"
+};
+
 export function hasImprovement(improvements: string[], id: string): boolean {
-  return improvements.includes(id);
+  const canonical = IMPROVEMENT_ALIASES[id] ?? id;
+  if (improvements.includes(id) || improvements.includes(canonical)) return true;
+  return Object.entries(IMPROVEMENT_ALIASES).some(([alias, target]) => target === id && improvements.includes(alias));
 }

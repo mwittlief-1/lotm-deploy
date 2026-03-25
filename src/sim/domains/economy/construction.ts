@@ -39,6 +39,7 @@ export function applyConstructionWork(state: RunState, addedProgress: number): {
   if (!state.manor.construction) return { progress_added: 0 };
 
   const project = state.manor.construction;
+  project.required = Math.max(1, asNonNegInt(project.required ?? 1));
   const progressAdded = Math.max(0, Math.trunc(addedProgress));
   const nextProgress = setConstructionProgress(state, project.progress + progressAdded);
   if (nextProgress < project.required) {
@@ -59,5 +60,5 @@ export function applyConstructionWork(state: RunState, addedProgress: number): {
 export function normalizeConstructionState(state: RunState): void {
   if (!state.manor.construction) return;
   state.manor.construction.progress = asNonNegInt(state.manor.construction.progress);
-  state.manor.construction.required = Math.max(1, asNonNegInt(state.manor.construction.required));
+  state.manor.construction.required = Math.max(1, asNonNegInt(state.manor.construction.required ?? 1));
 }

@@ -30,6 +30,14 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
 
   setTaxDueCoin(state, Math.max(1, Math.floor(state.manor.population / 25)));
   setTitheDueBushels(state, Math.floor(productionBushels * 0.05));
+
+  const currentDueUnpayable =
+    state.manor.coin < ob.tax_due_coin ||
+    state.manor.bushels_stored < ob.tithe_due_bushels;
+  if (currentDueUnpayable) {
+    state.manor.unrest = clampInt(state.manor.unrest + UNREST_ARREARS_PENALTY, 0, 100);
+    applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -1, threat: +1 }, "obligations_current_due_pressure");
+  }
 }
 
 export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {

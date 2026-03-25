@@ -122,7 +122,12 @@ function evidenceReceipts(events: EvidenceEventV0[]): PhaseReceiptV0[] {
   return events.map((event) => makePhaseReceipt(event.detail, "note"));
 }
 
+const LEGACY_IMPROVEMENT_ALIASES: Record<string, string> = {
+  granary: "granary_upgrade"
+};
+
 export function proposeTurn(state: RunState): TurnContext {
+  const headDeadEnteringTurn = !state.house.head.alive;
   // v0.2.1 migration/sync (must accept v0.1.0-shaped saves)
   // NOTE: proposeTurn must not mutate caller state; we do this on a working copy below.
   if (state.game_over) {
@@ -299,15 +304,18 @@ export function proposeTurn(state: RunState): TurnContext {
     }
   }
 
-  // v0.2.7.1 HOTFIX: If HoH died this processed turn, resolve succession now so Turn Report/preview never shows a dead ruler.
-  const houseLogBeforePreviewSuccession = houseLog.length;
-  resolveSuccessionPhase(working, houseLog, undefined, {
-    computeAdultSuccessorId,
-    computeHeirId,
-    rebaseHeadRelationships,
-    syncPlayerHouseSummaryFromRegistry
-  });
-  const previewSuccessionEvents = [...preResolveSuccessionEvents, ...houseLog.slice(houseLogBeforePreviewSuccession)];
+  let previewSuccessionEvents = [...preResolveSuccessionEvents];
+  if (headDeadEnteringTurn) {
+    const houseLogBeforePreviewSuccession = houseLog.length;
+    resolveSuccessionPhase(working, houseLog, undefined, {
+      computeAdultSuccessorId,
+      computeHeirId,
+      rebaseHeadRelationships,
+      syncPlayerHouseSummaryFromRegistry
+    });
+    previewSuccessionEvents = [...previewSuccessionEvents, ...houseLog.slice(houseLogBeforePreviewSuccession)];
+    syncHouseRegistryCurrentHeads(working);
+  }
   const previewSuccessionEvidence = houseLogEvidenceEvents(previewSuccessionEvents);
   previewPhaseResults.push(makePhaseResult({
     phase: "succession",
@@ -318,7 +326,6 @@ export function proposeTurn(state: RunState): TurnContext {
     evidence_events_v0: previewSuccessionEvidence,
     rng_keys_used: []
   }));
-  syncHouseRegistryCurrentHeads(working);
 
   // 7) court size/consumption (v0.2.4)
   const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS, houseLog);
@@ -477,12 +484,26 @@ export function proposeTurn(state: RunState): TurnContext {
     before: unrestBefore,
     after: unrestAfter,
     delta: unrestAfter - unrestBefore,
-    increased_by: unrestContribs.filter((c) => c.diff > 0).map((c) => ({ label: c.label, amount: c.diff })),
-    decreased_by: unrestContribs.filter((c) => c.diff < 0).map((c) => ({ label: c.label, amount: Math.abs(c.diff) }))
+    increased_by: (() => {
+      const rows = unrestContribs.filter((c) => c.diff > 0).map((c) => ({ label: c.label, amount: c.diff }));
+      const total = rows.reduce((sum, row) => sum + row.amount, 0);
+      const delta = unrestAfter - unrestBefore;
+      if (delta > total) rows.push({ label: "Adjustment", amount: delta - total });
+      if (delta < total && rows.length > 0) rows[rows.length - 1]!.amount = Math.max(0, rows[rows.length - 1]!.amount - (total - delta));
+      return rows.filter((row) => row.amount > 0);
+    })(),
+    decreased_by: (() => {
+      const rows = unrestContribs.filter((c) => c.diff < 0).map((c) => ({ label: c.label, amount: Math.abs(c.diff) }));
+      const total = rows.reduce((sum, row) => sum + row.amount, 0);
+      const delta = unrestBefore - unrestAfter;
+      if (delta > total) rows.push({ label: "Adjustment", amount: delta - total });
+      if (delta < total && rows.length > 0) rows[rows.length - 1]!.amount = Math.max(0, rows[rows.length - 1]!.amount - (total - delta));
+      return rows.filter((row) => row.amount > 0);
+    })()
   };
 
   // v0.2.3.2: construction option availability (built / in-progress / available).
-  report.construction.options = Object.keys(IMPROVEMENTS)
+  const constructionOptions = Object.keys(IMPROVEMENTS)
     .sort((a, b) => {
       if (a < b) return -1;
       if (a > b) return 1;
@@ -494,6 +515,14 @@ export function proposeTurn(state: RunState): TurnContext {
       const status = isBuilt ? "built" : isActive ? "active_project" : "available";
       return { improvement_id, status };
     });
+  for (const [legacyId, canonicalId] of Object.entries(LEGACY_IMPROVEMENT_ALIASES)) {
+    const canonical = constructionOptions.find((option) => option.improvement_id === canonicalId);
+    if (canonical) constructionOptions.push({ improvement_id: legacyId, status: canonical.status });
+  }
+  if (working.manor.construction?.improvement_id && !constructionOptions.some((option) => option.improvement_id === working.manor.construction?.improvement_id)) {
+    constructionOptions.push({ improvement_id: working.manor.construction.improvement_id, status: "active_project" });
+  }
+  report.construction.options = constructionOptions.sort((a, b) => a.improvement_id.localeCompare(b.improvement_id));
 
   const marriageWindow = buildMarriageWindowPhase(working, tierSets);
   const marriageEvidence = marriageOfferEvidenceEvents(marriageWindow?.offers ?? []);

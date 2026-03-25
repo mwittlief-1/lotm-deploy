@@ -422,14 +422,6 @@ export function buildCourtRoster_v0_2_4(state: RunState, houseLog?: HouseLogEven
   };
 }
 
-function ageConsumptionWeight(age: number): number {
-  if (age <= 2) return 0.35;
-  if (age <= 5) return 0.50;
-  if (age <= 12) return 0.70;
-  if (age <= 15) return 0.85;
-  return 1.0;
-}
-
 export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPersonPerYear: number, turnYears: number, houseLog?: HouseLogEvent[]): {
   court_headcount: number;
   court_consumption_bushels: number;
@@ -444,7 +436,12 @@ export function courtConsumptionBushels_v0_2_4(state: RunState, bushelsPerPerson
     if (row.badges.includes("deceased")) continue;
     const p = people[row.person_id];
     if (!p) continue;
-    weightedHeads += ageConsumptionWeight(Math.max(0, Math.trunc(p.age ?? 0)));
+    const age = Math.max(0, Math.trunc(p.age ?? 0));
+    if (age <= 2) weightedHeads += 0.35;
+    else if (age <= 5) weightedHeads += 0.5;
+    else if (age <= 12) weightedHeads += 0.7;
+    else if (age <= 15) weightedHeads += 0.85;
+    else weightedHeads += 1.0;
   }
   const courtConsumption = Math.max(0, Math.floor(weightedHeads * bushelsPerPersonPerYear * turnYears));
   return { court_headcount: headcount, court_consumption_bushels: courtConsumption, court_roster: roster };

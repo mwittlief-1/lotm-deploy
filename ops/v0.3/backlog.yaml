@@ -145,7 +145,7 @@ tasks:
 
   - id: V03-BL-001
     title: "Split kickoff worktree into reviewable baseline commit stack"
-    status: ready
+    status: done
     priority: 70
     tranche: 0
     target_release: "v0.3.0"
@@ -191,7 +191,7 @@ tasks:
 
   - id: V03-OP-002
     title: "Validate ops contract and run first unattended bootstrap pass"
-    status: todo
+    status: done
     priority: 65
     tranche: 0
     target_release: "v0.3.0"
@@ -214,7 +214,7 @@ tasks:
 
   - id: V03-R0-001
     title: "Determinism and receipts v1 hardening"
-    status: todo
+    status: ready
     priority: 60
     tranche: 1
     target_release: "v0.3.0"

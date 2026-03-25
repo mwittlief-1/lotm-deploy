@@ -1,23 +1,23 @@
 version: 1
 cursor:
-  current_task_id: "V03-BL-001"
-  last_completed_task_id: "V03-OP-001"
+  current_task_id: "V03-R0-001"
+  last_completed_task_id: "V03-OP-002"
 runtime:
   node_version: "v24.13.1"
   npm_version: "11.8.0"
   git_branch: "codex/v0.3-refactor-kickoff"
-  git_commit: "54afa855bbce95c4627bf0e26006174bb528cc8d"
+  git_commit: "00f3649b0dd51965c2f532ad5d576595a852876b"
   ci_env: ""
   vercel_env: ""
   pr_url: ""
   pr_status: ""
 last_run:
   gates:
-    qa: "fail"
+    qa: "pass"
     preflight: "pass"
     repo_duplicates: "pass"
     seed_replay_batch_twice: "pass"
   replay_hashes:
-    run1: "9aeae55095099567ecce82401f16c09e2d1b641354315ad4a17497da16e90e26"
-    run2: "9aeae55095099567ecce82401f16c09e2d1b641354315ad4a17497da16e90e26"
-notes: "Baseline branch state has been rebaselined into the backlog. Split the kickoff worktree into a reviewable commit stack before first unattended lane execution. QA is currently red on pre-existing kickoff-branch failures; see the latest run log."
+    run1: "d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2"
+    run2: "d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2"
+notes: "Kickoff baseline stack and ops bootstrap validation are complete. Branch gates are green, and the next ready task is V03-R0-001."

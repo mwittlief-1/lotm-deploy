@@ -788,9 +788,10 @@ export function runDemographyBatch(
 
           // Spacing integrity gate uses explicit birth years only to avoid false positives from inferred values.
           if (maternalAgeEligible && childBirthYear !== null) {
-            const arr = motherBirthYears.get(String(mom.id)) ?? [];
+            const motherKey = `${seed}:${String(mom.id)}`;
+            const arr = motherBirthYears.get(motherKey) ?? [];
             arr.push(childBirthYear);
-            motherBirthYears.set(String(mom.id), arr);
+            motherBirthYears.set(motherKey, arr);
           }
         } else {
           birthsByMotherResidency.unknown_mother_or_residency += 1;

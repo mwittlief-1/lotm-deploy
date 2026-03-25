@@ -101,9 +101,10 @@ export function applyHouseholdDemographyPhase(
 
   function deathRoll(p: Person): boolean {
     if (!p.alive) return false;
-    if (state.turn_index === 0 && (p.id === state.house.head.id || p.id === state.house.spouse?.id)) return false;
 
     const age = typeof p.age === "number" && Number.isFinite(p.age) ? Math.trunc(p.age) : 0;
+    if (age >= 99) return true;
+    if (state.turn_index === 0 && (p.id === state.house.head.id || p.id === state.house.spouse?.id)) return false;
     const annualBase = mortalityAnnualProbabilityByAge(age);
 
     const childScale = tuningNumber(state, "mortalityScaleChild", mortMult);
@@ -141,6 +142,8 @@ export function applyHouseholdDemographyPhase(
     }
 
     if (survivor && deceased) {
+      if (deceased.id === state.house.head.id) state.house.head.alive = false;
+      if (state.house.spouse && deceased.id === state.house.spouse.id) state.house.spouse.alive = false;
       houseLog.push({
         kind: "widowed",
         turn_index: state.turn_index,
@@ -200,7 +203,7 @@ export function applyHouseholdDemographyPhase(
         if (!Array.isArray(anyState.kinship_edges)) anyState.kinship_edges = [];
         anyState.kinship_edges.push({ kind: "parent_of", parent_id: spouse.id, child_id: childId });
         anyState.kinship_edges.push({ kind: "parent_of", parent_id: state.house.head.id, child_id: childId });
-        (spouse as any).last_birth_year = worldYear;
+        (spouse as any).last_birth_year = timing.birthYear;
         births.push(`${baby.name} (${baby.id})`);
         state.manor.population = asNonNegInt(state.manor.population + 1);
         popDelta += 1;
@@ -319,7 +322,7 @@ export function applyHouseholdDemographyPhase(
         };
 
         peopleReg[childId] = baby;
-        (mother as any).last_birth_year = worldYear;
+        (mother as any).last_birth_year = timing.birthYear;
 
         if (!Array.isArray(anyState.kinship_edges)) anyState.kinship_edges = [];
         anyState.kinship_edges.push({ kind: "parent_of", parent_id: mother.id, child_id: childId });

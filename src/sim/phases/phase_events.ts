@@ -1,9 +1,9 @@
 import { EVENT_DECK } from "../../content/events";
 import { EVENTS_PER_TURN_PROBS } from "../constants";
-import { playerHouseIdOf, registryPersonFor, resolveCurrentHouseHeadId } from "../actors";
+import { playerHouseIdOf } from "../actors";
 import { driftRelationshipsTowardBaseline } from "../domains/people/relationshipEngine";
 import { Rng } from "../rng";
-import type { EventResult, Person, RunState } from "../types";
+import type { EventResult, RunState } from "../types";
 
 function cooldownsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -134,24 +134,6 @@ export function syncLocalsFromRegistryPhase(state: RunState): void {
   if (!people || typeof people !== "object") return;
   const playerHouseId = playerHouseIdOf(state);
 
-  const pickReplacementLocal = (excludeIds: Set<string>): Person | null => {
-    const houses: Record<string, any> = anyState.houses && typeof anyState.houses === "object"
-      ? (anyState.houses as Record<string, any>)
-      : {};
-    const candidates = Object.keys(houses)
-      .filter((hid) => hid !== playerHouseId)
-      .map((hid) => resolveCurrentHouseHeadId(state, hid))
-      .filter((pid): pid is string => typeof pid === "string" && pid.length > 0)
-      .filter((pid) => !excludeIds.has(pid))
-      .map((pid) => registryPersonFor(state, pid))
-      .filter((p): p is Person => !!p && p.alive)
-      .sort((a, b) => {
-        if (a.age !== b.age) return b.age - a.age;
-        return a.id.localeCompare(b.id);
-      });
-    return candidates[0] ?? null;
-  };
-
   const syncOne = (p: any, vacantLabel: string): any => {
     const id = typeof p?.id === "string" ? p.id : null;
     if (!id) {
@@ -169,13 +151,6 @@ export function syncLocalsFromRegistryPhase(state: RunState): void {
       return { ...p, alive: false, name: `${p?.name ?? id} (Vacant)` };
     }
     if ((reg as any).alive === false) {
-      const replacement = pickReplacementLocal(new Set<string>([
-        id,
-        state.locals?.liege?.id ?? "",
-        state.locals?.clergy?.id ?? "",
-        ...(Array.isArray(state.locals?.nobles) ? state.locals.nobles.map((n) => n?.id ?? "") : []),
-      ].filter((x): x is string => typeof x === "string" && x.length > 0)));
-      if (replacement && replacement.alive) return { ...replacement };
       const nm = typeof (reg as any).name === "string" ? (reg as any).name : (p?.name ?? id);
       return { ...p, ...reg, name: String(nm).includes("(Deceased)") ? String(nm) : `${nm} (Deceased)` };
     }

@@ -179,11 +179,13 @@ export function applyConsumptionAndShortagePhase(state: RunState, court_consumpt
   (state.flags as any).Shortage = true;
   state.manor.unrest = clampInt(state.manor.unrest + UNREST_SHORTAGE_PENALTY_SAFE(), 0, 100);
 
+  const shortageRatio = consumption > 0 ? Math.max(0, Math.min(1, shortage / consumption)) : 0;
   const hRng = new Rng(state.run_seed, "household", state.turn_index, "shortage");
-  const lossFrac = 0.03 + hRng.next() * 0.08;
+  const jitter = hRng.next() * 0.02;
+  const lossFrac = Math.min(0.25, 0.03 + shortageRatio * 0.22 + jitter);
   const lost = Math.max(1, Math.floor(state.manor.population * lossFrac));
 
-  const sev01 = Math.max(0, Math.min(1, (lossFrac - 0.03) / 0.08));
+  const sev01 = Math.max(0, Math.min(1, (lossFrac - 0.03) / 0.22));
   const deathFrac = 0.3 + sev01 * 0.2;
   const deaths = Math.min(lost, Math.floor(lost * deathFrac));
   const runaways = Math.max(0, lost - deaths);

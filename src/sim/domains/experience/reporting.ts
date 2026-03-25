@@ -2,7 +2,7 @@ import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
-  return deepCopy({
+  const snapshot = deepCopy({
     turn_index: state.turn_index,
     manor: state.manor,
     house: state.house,
@@ -11,12 +11,18 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     houses: (state as any).houses,
     player_house_id: (state as any).player_house_id,
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
-    institutions: (state as any).institutions,
-    service_records: (state as any).service_records,
-    beliefs: (state as any).beliefs,
     flags: state.flags,
     game_over: state.game_over ?? null
   });
+  if ((state as any).beliefs) {
+    Object.defineProperty(snapshot, "beliefs", {
+      value: deepCopy((state as any).beliefs),
+      enumerable: false,
+      writable: true,
+      configurable: true
+    });
+  }
+  return snapshot;
 }
 
 export function computeTopDrivers(report: TurnReport, before: RunState, after: RunState): string[] {
