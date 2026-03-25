@@ -1,3 +1,6 @@
+import { setAvailableEnergy, setEnergyMax } from "./domains/court/energy";
+import { normalizeConstructionState } from "./domains/economy/construction";
+import { setArrearsBushels, setArrearsCoin, setBushelBalance, setCoinBalance, setTaxDueCoin, setTitheDueBushels } from "./domains/economy/ledger";
 import type { RunState } from "./types";
 import { asNonNegInt, clampInt } from "./util";
 
@@ -11,25 +14,21 @@ export function normalizeState(state: RunState): void {
     m.builders = Math.max(0, m.population - m.farmers);
   }
 
-  m.bushels_stored = asNonNegInt(m.bushels_stored);
-  m.coin = asNonNegInt(m.coin);
+  setBushelBalance(state, m.bushels_stored);
+  setCoinBalance(state, m.coin);
   m.unrest = clampInt(asNonNegInt(m.unrest), 0, 100);
 
   const ob = m.obligations;
-  ob.tax_due_coin = asNonNegInt(ob.tax_due_coin);
-  ob.tithe_due_bushels = asNonNegInt(ob.tithe_due_bushels);
-  ob.arrears.coin = asNonNegInt(ob.arrears.coin);
-  ob.arrears.bushels = asNonNegInt(ob.arrears.bushels);
+  setTaxDueCoin(state, ob.tax_due_coin);
+  setTitheDueBushels(state, ob.tithe_due_bushels);
+  setArrearsCoin(state, ob.arrears.coin);
+  setArrearsBushels(state, ob.arrears.bushels);
 
-  const cons = m.construction;
-  if (cons) {
-    cons.progress = asNonNegInt(cons.progress);
-    cons.required = Math.max(1, asNonNegInt(cons.required));
-  }
+  normalizeConstructionState(state);
 
   const h = state.house;
-  h.energy.max = asNonNegInt(h.energy.max);
-  h.energy.available = clampInt(asNonNegInt(h.energy.available), 0, h.energy.max);
+  setEnergyMax(state, h.energy.max);
+  setAvailableEnergy(state, h.energy.available);
 
   // relationship clamp
   for (const e of state.relationships) {
@@ -47,4 +46,10 @@ export function normalizeState(state: RunState): void {
   if (cv !== "A" && cv !== "B" && cv !== "C") t.court_variant = "B";
   if (!(typeof t.fertility_mult === "number" && Number.isFinite(t.fertility_mult))) t.fertility_mult = 2.0;
   if (!(typeof t.mortality_mult === "number" && Number.isFinite(t.mortality_mult))) t.mortality_mult = 0.8;
+  if (!(typeof t.ai_marriage_intel_bonus_scale === "number" && Number.isFinite(t.ai_marriage_intel_bonus_scale) && t.ai_marriage_intel_bonus_scale >= 0)) {
+    t.ai_marriage_intel_bonus_scale = 1.0;
+  }
+  if (!(typeof t.ai_prospect_intel_bonus_scale === "number" && Number.isFinite(t.ai_prospect_intel_bonus_scale) && t.ai_prospect_intel_bonus_scale >= 0)) {
+    t.ai_prospect_intel_bonus_scale = 1.0;
+  }
 }

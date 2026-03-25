@@ -1,6 +1,6 @@
 import type { ActorId, Institution, KinshipEdge, Person, RunState, Sex, Traits } from "./types";
 import { Rng } from "./rng";
-import { ensureEdge } from "./relationships";
+import { ensureRelationshipEdge } from "./domains/people/relationshipEngine";
 
 // --- Versioned flags/subkeys ---
 const WORLDGEN_FLAG_V0_2_2 = "_worldgen_external_houses_v0_2_2";
@@ -122,8 +122,8 @@ function ensureRelationshipEdgesToPlayerHead(state: RunState, extHouseIds: strin
         ? h.head_id
         : hid.replace(/^h_ext_/, "p_ext_") + "_head";
     if (!headId) continue;
-    ensureEdge(state, playerHeadId, headId);
-    ensureEdge(state, headId, playerHeadId);
+    ensureRelationshipEdge(state, playerHeadId, headId);
+    ensureRelationshipEdge(state, headId, playerHeadId);
   }
 }
 

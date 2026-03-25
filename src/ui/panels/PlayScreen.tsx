@@ -1,0 +1,700 @@
+import React, { useMemo } from "react";
+import { IMPROVEMENT_IDS, IMPROVEMENTS } from "../../content/improvements";
+import {
+  BUILD_RATE_PER_BUILDER_PER_TURN,
+  BUILDER_EXTRA_BUSHELS_PER_YEAR,
+  BUSHELS_PER_PERSON_PER_YEAR,
+  TURN_YEARS
+} from "../../sim/constants";
+import type { RunState, TurnContext, TurnDecisions } from "../../sim/types";
+import {
+  buildHouseIndexes,
+  buildParentsIndex,
+  fmtMult,
+  fmtSigned
+} from "../viewHelpers";
+import {
+  buildObligationTiming,
+  costsForProspect as getProspectCosts,
+  effectsSummary as summarizeProspectEffects,
+  fmtObAmount,
+  getEligibleMaidensLocalRaw,
+  getKnownHouses,
+  getProspectDecision as findProspectDecision,
+  getProspectsWindowState,
+  hasSufficientResourcesForCosts as prospectCostsSufficient,
+  houseLabel as resolveHouseLabel,
+  parsePopulationChangeBreakdown,
+  parseUnrestBreakdown,
+  personNameFromRegistry as resolvePersonNameFromRegistry,
+  prospectTypeLabel as labelProspectType,
+  readCourtRosterFromSnapshot,
+  rejectHasStandingRisk as prospectRejectHasStandingRisk,
+  requirementsMetForProspect as prospectRequirementsMet,
+  summarizePopulationChange,
+  uncertaintyLabel as labelUncertainty
+} from "../playViewModel";
+import {
+  PLAY_ANCHORS,
+  buildCouncilAgendaItems,
+  buildDiffLedgerItems
+} from "../playScreenModel";
+import { buildIntelSections } from "../intelModel";
+import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
+import { DecisionsPanel } from "./DecisionsPanel";
+import { DiffLedgerPanel } from "./DiffLedgerPanel";
+import { EventsPanel } from "./EventsPanel";
+import { IntelPanel } from "./IntelPanel";
+import { KnownHousesPanel } from "./KnownHousesPanel";
+import { ManorStatePanel } from "./ManorStatePanel";
+import { ProspectsPanel } from "./ProspectsPanel";
+import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
+import { TurnReportPanel } from "./TurnReportPanel";
+
+type ProspectDecisionAction = { prospect_id: string; action: "accept" | "reject" };
+type PlayDecisions = TurnDecisions & {
+  prospects?: { kind: "prospects"; actions: ProspectDecisionAction[] };
+};
+type ToastState = { kind: "ok" | "error"; message: string } | null;
+
+type PlayScreenProps = {
+  copy: any;
+  ctx: TurnContext;
+  decisions: PlayDecisions;
+  gameOverReasonCopy: Record<string, string>;
+  onAdvanceTurn: () => void;
+  onExportFullRunJson: () => void;
+  onExportRunSummary: () => void;
+  onOpenLog: () => void;
+  onOpenNewRun: () => void;
+  relationshipDrawerQuery: string;
+  relationshipDrawerTab: "house" | "person";
+  setDecisions: React.Dispatch<React.SetStateAction<any>>;
+  setRelationshipDrawerQuery: React.Dispatch<React.SetStateAction<string>>;
+  setRelationshipDrawerTab: React.Dispatch<React.SetStateAction<"house" | "person">>;
+  setShowAllKnownHouses: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowHouseholdDetails: React.Dispatch<React.SetStateAction<boolean>>;
+  setToast: React.Dispatch<React.SetStateAction<ToastState>>;
+  showAllKnownHouses: boolean;
+  showHouseholdDetails: boolean;
+  state: RunState;
+  toast: ToastState;
+};
+
+export function PlayScreen({
+  copy,
+  ctx,
+  decisions,
+  gameOverReasonCopy,
+  onAdvanceTurn,
+  onExportFullRunJson,
+  onExportRunSummary,
+  onOpenLog,
+  onOpenNewRun,
+  relationshipDrawerQuery,
+  relationshipDrawerTab,
+  setDecisions,
+  setRelationshipDrawerQuery,
+  setRelationshipDrawerTab,
+  setShowAllKnownHouses,
+  setShowHouseholdDetails,
+  setToast,
+  showAllKnownHouses,
+  showHouseholdDetails,
+  state,
+  toast
+}: PlayScreenProps) {
+  const m = ctx.preview_state.manor;
+  const ob = ctx.preview_state.manor.obligations;
+  const mw = ctx.marriage_window;
+
+  const pfStateAny: any = ctx.preview_state as any;
+  const pfPeopleRec: any = pfStateAny?.people && typeof pfStateAny.people === "object" ? pfStateAny.people : {};
+  const pfKinEdges: any[] = Array.isArray(pfStateAny?.kinship_edges)
+    ? pfStateAny.kinship_edges
+    : Array.isArray(pfStateAny?.kinship)
+      ? pfStateAny.kinship
+      : [];
+  const pfParentsByChild = buildParentsIndex(pfKinEdges);
+  const pfHouseIx = buildHouseIndexes(pfStateAny?.houses);
+
+  const eligibleMaidensLocalRaw = getEligibleMaidensLocalRaw(ctx, mw);
+  const beforeManor = state.manor;
+
+  const deltaPop = m.population - beforeManor.population;
+  const deltaBushels = m.bushels_stored - beforeManor.bushels_stored;
+  const deltaCoin = m.coin - beforeManor.coin;
+  const deltaUnrest = m.unrest - beforeManor.unrest;
+
+  const popChangeLines = parsePopulationChangeBreakdown(ctx.report as any, {
+    deaths: copy.populationChange_deaths,
+    runaways: copy.populationChange_runaways
+  });
+  const popChangeSummary = summarizePopulationChange(popChangeLines);
+
+  const unrestBreakdownRaw: any =
+    (ctx.report as any)?.unrest_breakdown ??
+    (ctx.report as any)?.unrest_delta_breakdown ??
+    (ctx.report as any)?.unrest_change_breakdown ??
+    (ctx.report as any)?.unrestBreakdown ??
+    null;
+  const unrestBreakdown = parseUnrestBreakdown(unrestBreakdownRaw);
+  const showUnrestBreakdown = Boolean(deltaUnrest !== 0 || (unrestBreakdown && (unrestBreakdown.increased.length || unrestBreakdown.decreased.length)));
+
+  const baselineConsPerTurn = BUSHELS_PER_PERSON_PER_YEAR * TURN_YEARS;
+  const builderExtraPerTurn = BUILDER_EXTRA_BUSHELS_PER_YEAR * TURN_YEARS;
+  const builderConsPerTurn = baselineConsPerTurn + builderExtraPerTurn;
+  const idle = Math.max(0, m.population - m.farmers - m.builders);
+
+  const knownHousesRaw: any =
+    (ctx.report as any)?.known_houses ??
+    (ctx.report as any)?.knownHouses ??
+    (ctx.preview_state as any)?.known_houses ??
+    (ctx.preview_state as any)?.knownHouses ??
+    (ctx.preview_state as any)?.house?.known_houses ??
+    (ctx.preview_state as any)?.house?.knownHouses ??
+    null;
+  const knownHouses: any[] = getKnownHouses(ctx.preview_state, knownHousesRaw);
+  const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
+  const hasMoreKnownHouses = knownHouses.length > 5;
+  const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
+
+  const prospectsWindowRaw: any =
+    (ctx as any).prospects_window ??
+    (ctx as any).prospectsWindow ??
+    (ctx.report as any)?.prospects_window ??
+    (ctx.report as any)?.prospectsWindow ??
+    null;
+
+  const {
+    prospectsAll,
+    prospectsShownIds,
+    prospectsHiddenIds,
+    prospectsShown,
+    prospectsTotalCount,
+    prospectsShownCount,
+    prospectsHiddenCount
+  } = getProspectsWindowState(prospectsWindowRaw);
+
+  const prospectLogLines: Array<{ turn_index: number; line: string }> = useMemo(() => {
+    const lines: Array<{ turn_index: number; line: string }> = [];
+    const reports: Array<{ turn_index: number; report: any }> = [
+      ...((state.log ?? []).map((turn: any) => ({
+        turn_index: typeof turn?.processed_turn_index === "number" ? turn.processed_turn_index : turn.turn_index,
+        report: turn.report
+      })) as any),
+      { turn_index: ctx.report.turn_index, report: ctx.report }
+    ];
+
+    const summaryById = new Map<string, string>();
+    for (const { report } of reports) {
+      const events: any[] | undefined = (report as any)?.prospects_log;
+      if (!Array.isArray(events)) continue;
+      for (const event of events) {
+        if (event && event.kind === "prospect_generated" && typeof event.prospect_id === "string" && event.prospect && typeof event.prospect === "object") {
+          const summary = (event.prospect as any).summary;
+          if (typeof summary === "string") summaryById.set(event.prospect_id, summary);
+        }
+      }
+    }
+
+    function formatProspectLog(event: any): string | null {
+      if (!event || typeof event !== "object") return null;
+      if (event.kind === "prospect_generated") {
+        const summary = typeof event.prospect?.summary === "string" ? event.prospect.summary : summaryById.get(event.prospect_id) ?? event.type;
+        return copy.prospectLog_generated(event.type, summary);
+      }
+      if (event.kind === "prospects_window_built") {
+        const shown = Array.isArray(event.shown_ids) ? event.shown_ids.length : 0;
+        const hidden = Array.isArray(event.hidden_ids) ? event.hidden_ids.length : 0;
+        return copy.prospectLog_windowBuilt(shown, hidden);
+      }
+      if (event.kind === "prospect_accepted") {
+        const summary = summaryById.get(event.prospect_id) ?? event.type;
+        const base = copy.prospectLog_accepted(event.type, summary);
+        const receipt = typeof event?.effects_applied?.receipt_line === "string" ? event.effects_applied.receipt_line : null;
+        return receipt ? `${base} — ${receipt}` : base;
+      }
+      if (event.kind === "prospect_rejected") {
+        const summary = summaryById.get(event.prospect_id) ?? event.type;
+        return copy.prospectLog_rejected(event.type, summary);
+      }
+      if (event.kind === "prospect_expired") {
+        const summary = summaryById.get(event.prospect_id) ?? event.type;
+        return copy.prospectLog_expired(event.type, summary);
+      }
+      return null;
+    }
+
+    const seen = new Set<string>();
+    const push = (turn_index: number, line: string) => {
+      const key = `${turn_index}|${line}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      lines.push({ turn_index, line });
+    };
+
+    for (const { turn_index, report } of reports) {
+      const events: any[] | undefined = (report as any)?.prospects_log;
+      if (!Array.isArray(events)) continue;
+      for (const event of events) {
+        const line = formatProspectLog(event);
+        if (line) push(turn_index, line);
+      }
+    }
+
+    lines.sort((a, b) => a.turn_index - b.turn_index);
+    return lines.slice(-24);
+  }, [copy, ctx, state]);
+
+  const hasProspectExpiredThisTurn = useMemo(() => {
+    const events: any[] | undefined = (ctx as any)?.report?.prospects_log;
+    if (!Array.isArray(events)) return false;
+    return events.some((event) => event && event.kind === "prospect_expired");
+  }, [ctx]);
+
+  const prospectActions: ProspectDecisionAction[] = Array.isArray((decisions as any).prospects?.actions)
+    ? ((decisions as any).prospects.actions as ProspectDecisionAction[])
+    : [];
+
+  const getProspectDecision = (id: string): "accept" | "reject" | null => findProspectDecision(prospectActions, id);
+  const houseLabel = (house_id: string | null | undefined): string => resolveHouseLabel(ctx.preview_state, house_id);
+  const personNameFromRegistry = (person_id: string | null | undefined): string | null => resolvePersonNameFromRegistry(ctx.preview_state, person_id);
+  const requirementsMetForProspect = (prospect: any): boolean => prospectRequirementsMet(ctx.preview_state, m, prospect);
+  const costsForProspect = (prospect: any): { coin: number; energy: number; bushels: number } => getProspectCosts(prospect);
+  const hasSufficientResourcesForCosts = (costs: { coin: number; energy: number; bushels: number }): boolean =>
+    prospectCostsSufficient(m, ctx.preview_state.house.energy.available, costs);
+  const prospectTypeLabel = (value: string | null | undefined): string => labelProspectType(copy, value);
+  const uncertaintyLabel = (value: string | null | undefined): string | null => labelUncertainty(copy, value);
+  const effectsSummary = (prospect: any): { coin?: number; rel?: string | null; flags?: string | null } => summarizeProspectEffects(prospect, fmtSigned);
+  const rejectHasStandingRisk = (prospect: any): boolean => prospectRejectHasStandingRisk(prospect);
+
+  function recordProspectDecision(prospect_id: string, action: "accept" | "reject") {
+    setDecisions((current: any) => {
+      const prior: any = current?.prospects;
+      const actions: ProspectDecisionAction[] = Array.isArray(prior?.actions) ? [...(prior.actions as ProspectDecisionAction[])] : [];
+      actions.push({ prospect_id, action });
+      return { ...current, prospects: { kind: "prospects", actions } };
+    });
+  }
+
+  function handleProspectAction(prospect: any, action: "accept" | "reject") {
+    const id = typeof prospect?.id === "string" ? prospect.id : "";
+    if (!id) {
+      setToast({ kind: "error", message: copy.prospectErr_actionUnavailable });
+      return;
+    }
+
+    const type = typeof prospect?.type === "string" ? prospect.type : null;
+    const expiresTurn = typeof prospect?.expires_turn === "number" ? prospect.expires_turn : null;
+    const nowTurn = ctx.report.turn_index;
+
+    if (expiresTurn !== null && nowTurn > expiresTurn) {
+      setToast({ kind: "error", message: copy.prospectErr_expired });
+      return;
+    }
+
+    if (getProspectDecision(id)) {
+      setToast({ kind: "error", message: copy.prospectErr_alreadyDecided });
+      return;
+    }
+
+    const allowedActions: any[] = Array.isArray(prospect?.actions) ? prospect.actions : [];
+    if (allowedActions.length > 0 && !allowedActions.includes(action)) {
+      setToast({ kind: "error", message: copy.prospectErr_actionUnavailable });
+      return;
+    }
+
+    if (action === "accept") {
+      if (!requirementsMetForProspect(prospect)) {
+        setToast({ kind: "error", message: copy.prospectErr_requirementsNotMet });
+        return;
+      }
+
+      const costs = costsForProspect(prospect);
+      const anyCost = costs.coin !== 0 || costs.energy !== 0 || costs.bushels !== 0;
+      if (!hasSufficientResourcesForCosts(costs)) {
+        setToast({ kind: "error", message: copy.prospectErr_insufficientResources });
+        return;
+      }
+
+      const predictedEffects: any = prospect?.predicted_effects;
+      const coinDelta = typeof predictedEffects?.coin_delta === "number" && Number.isFinite(predictedEffects.coin_delta) ? Math.trunc(predictedEffects.coin_delta) : null;
+
+      let confirmTitle = copy.prospectAcceptConfirmTitle;
+      let confirmBody = anyCost ? copy.prospectAcceptConfirmBody_withCosts : copy.prospectAcceptConfirmBody_noCosts;
+
+      if (type === "marriage") {
+        confirmTitle = copy.prospectAcceptConfirmTitle_marriage;
+        confirmBody = anyCost
+          ? copy.prospectAcceptConfirmBody_withCosts
+          : coinDelta !== null
+            ? copy.prospectAcceptConfirmBody_marriage_dowry(fmtSigned(coinDelta))
+            : copy.prospectAcceptConfirmBody_marriage_noCosts;
+      } else if (type === "grant") {
+        confirmTitle = copy.prospectAcceptConfirmTitle_grant;
+        confirmBody = anyCost ? copy.prospectAcceptConfirmBody_withCosts : copy.prospectAcceptConfirmBody_grant_noCosts;
+      } else if (type === "inheritance_claim") {
+        confirmTitle = copy.prospectAcceptConfirmTitle_inheritance_claim;
+        confirmBody = copy.prospectAcceptConfirmBody_inheritance_claim;
+      }
+
+      if (!window.confirm(`${confirmTitle}\n\n${confirmBody}`)) return;
+
+      recordProspectDecision(id, "accept");
+
+      const typeToken = prospectTypeLabel(type);
+      const shortEffectSummary =
+        coinDelta !== null && coinDelta !== 0
+          ? `Coin ${fmtSigned(coinDelta)}.`
+          : type === "inheritance_claim"
+            ? copy.prospectToastEffect_claimRecorded
+            : copy.prospectToastEffect_arrangementRecorded;
+      const acceptedMsg = copy.prospectToastAccepted(typeToken, shortEffectSummary);
+
+      if (type === "marriage") {
+        const childId: string | null =
+          typeof prospect?.subject_person_id === "string"
+            ? prospect.subject_person_id
+            : typeof prospect?.child_id === "string"
+              ? prospect.child_id
+              : typeof prospect?.person_id === "string"
+                ? prospect.person_id
+                : null;
+
+        const childName =
+          personNameFromRegistry(childId) ??
+          (typeof prospect?.subject_person_name === "string" ? prospect.subject_person_name : null);
+
+        const spouseName =
+          personNameFromRegistry(typeof prospect?.spouse_person_id === "string" ? prospect.spouse_person_id : null) ??
+          (typeof prospect?.spouse_name === "string" ? prospect.spouse_name : null) ??
+          (typeof prospect?.other_person_name === "string" ? prospect.other_person_name : null) ??
+          null;
+
+        const people: any = (ctx.preview_state as any).people;
+        const childRec: any = childId && people && typeof people === "object" ? people[childId] : null;
+        const childSex: "M" | "F" | null =
+          childRec && typeof childRec === "object" && (childRec.sex === "M" || childRec.sex === "F") ? childRec.sex : null;
+
+        if (childName) {
+          const line1 = copy.marriageToast_line1(childName);
+          const household: any = (ctx.preview_state as any)?.house;
+          const heirId: string | null = typeof household?.heir_id === "string" ? household.heir_id : null;
+          const kidsArr: any[] = Array.isArray(household?.children) ? household.children : [];
+          const eldestSonId: string | null = kidsArr
+            .filter((child) => child && typeof child === "object" && child.alive !== false && child.sex === "M" && typeof child.id === "string")
+            .sort((a, b) => (Number(b.age ?? 0) - Number(a.age ?? 0)) || String(a.id).localeCompare(String(b.id)))[0]?.id ?? null;
+
+          const spouseJoinsCourt = childSex === "M" && Boolean(childId) && (childId === heirId || childId === eldestSonId);
+
+          setToast({
+            kind: "ok",
+            message:
+              spouseJoinsCourt && spouseName
+                ? `${line1}\n${copy.marriageToast_line2_withSpouse(spouseName)}`
+                : `${line1}\n${copy.marriageToast_line2_childLeaves(childName)}`
+          });
+          return;
+        }
+      }
+
+      setToast({ kind: "ok", message: acceptedMsg });
+      return;
+    }
+
+    if (!window.confirm(`${copy.prospectRejectConfirmTitle}\n\n${copy.prospectRejectConfirmBody}`)) return;
+    recordProspectDecision(id, "reject");
+
+    const typeToken = prospectTypeLabel(type);
+    const baseMsg = copy.prospectToastDeclined(typeToken);
+    const rejectedMsg = rejectHasStandingRisk(prospect) ? `${baseMsg} ${copy.prospectToastStandingMayDecrease}` : baseMsg;
+    setToast({ kind: "ok", message: rejectedMsg });
+  }
+
+  const laborRequested =
+    Math.abs(decisions.labor.desired_farmers - m.farmers) +
+    Math.abs(decisions.labor.desired_builders - m.builders);
+  const laborLimitExceeded = laborRequested > ctx.max_labor_shift;
+  const plannedFarmers = Number.isFinite(decisions.labor.desired_farmers) ? decisions.labor.desired_farmers : 0;
+  const plannedBuilders = Number.isFinite(decisions.labor.desired_builders) ? decisions.labor.desired_builders : 0;
+  const laborAssignedNextTurn = plannedFarmers + plannedBuilders;
+  const laborAvailableNextTurn = m.population;
+  const laborOversubscribed = laborAssignedNextTurn > laborAvailableNextTurn;
+
+  const { dueEntering, accruedThisTurn, arrearsCarried, totalObligations } = buildObligationTiming(ctx.report, ob);
+
+  const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
+  const constructionRatePlannedNextTurn = decisions.labor.desired_builders * BUILD_RATE_PER_BUILDER_PER_TURN;
+  const constructionRemaining = m.construction ? Math.max(0, m.construction.required - m.construction.progress) : 0;
+  const constructionEtaTurns =
+    m.construction && constructionRateThisTurn > 0 ? Math.ceil(constructionRemaining / constructionRateThisTurn) : null;
+
+  const consFarmers = m.farmers * baselineConsPerTurn;
+  const consBuilders = m.builders * builderConsPerTurn;
+  const consIdle = idle * baselineConsPerTurn;
+
+  const peasantConsumptionBushels: number | null = (() => {
+    const value: any = (ctx.report as any)?.peasant_consumption_bushels;
+    return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
+  })();
+  const courtConsumptionBushels: number | null = (() => {
+    const value: any = (ctx.report as any)?.court_consumption_bushels;
+    return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
+  })();
+  const totalConsumptionBushels: number | null = (() => {
+    const value: any = (ctx.report as any)?.total_consumption_bushels;
+    if (typeof value === "number" && Number.isFinite(value)) return Math.trunc(value);
+    const legacy = (ctx.report as any)?.consumption_bushels;
+    if (typeof legacy === "number" && Number.isFinite(legacy)) return Math.trunc(legacy);
+    if (peasantConsumptionBushels !== null && courtConsumptionBushels !== null) return peasantConsumptionBushels + courtConsumptionBushels;
+    return null;
+  })();
+  const hasConsumptionSplit = peasantConsumptionBushels !== null && courtConsumptionBushels !== null && totalConsumptionBushels !== null;
+  const { entries: courtRosterEntries, court_size: courtSize } = readCourtRosterFromSnapshot(ctx);
+
+  function scrollToAnchor(anchorId: string) {
+    try {
+      const el = document.getElementById(anchorId);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      // no-op
+    }
+  }
+
+  const weatherMultiplier =
+    typeof ctx.report.weather_multiplier === "number" && Number.isFinite(ctx.report.weather_multiplier)
+      ? ctx.report.weather_multiplier
+      : 1;
+  const weatherMultText = fmtMult(weatherMultiplier);
+  const weatherHarmedHarvestWhy = weatherMultiplier < 0.999 ? copy.weatherHarmedHarvest(weatherMultText) : null;
+  const shortageBushels =
+    typeof ctx.report.shortage_bushels === "number" && Number.isFinite(ctx.report.shortage_bushels) ? ctx.report.shortage_bushels : 0;
+  const shouldSurfaceWeatherOnFood = Boolean(weatherHarmedHarvestWhy) && (shortageBushels > 0 || deltaBushels < 0);
+
+  const diffLedgerItems = buildDiffLedgerItems({
+    beforeManor,
+    copy,
+    deltaBushels,
+    deltaCoin,
+    deltaPop,
+    deltaUnrest,
+    fmtSigned,
+    personNameFromRegistry,
+    popChangeSummary,
+    previewState: ctx.preview_state,
+    report: ctx.report,
+    shouldSurfaceWeatherOnFood,
+    state,
+    weatherHarmedHarvestWhy
+  });
+
+  const councilAgendaItems = buildCouncilAgendaItems({
+    anchors: PLAY_ANCHORS,
+    arrearsCarried,
+    copy,
+    deltaBushels,
+    deltaUnrest,
+    dueEntering,
+    laborOversubscribed,
+    prospectsAll,
+    report: ctx.report,
+    shouldSurfaceWeatherOnFood,
+    weatherHarmedHarvestWhy
+  });
+
+  return (
+    <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <h2>Turn {ctx.report.turn_index}</h2>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={onOpenNewRun}>New Run</button>
+          <button onClick={onOpenLog}>Debug/Log</button>
+        </div>
+      </div>
+
+      {state.game_over ? (
+        <div style={{ padding: 12, border: "1px solid #f55", marginBottom: 12 }}>
+          <b>GAME OVER:</b> {gameOverReasonCopy[state.game_over.reason]} — Turn {state.game_over.turn_index}
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div
+          style={{
+            padding: 10,
+            border: toast.kind === "error" ? "1px solid #f55" : "1px solid #ccc",
+            background: toast.kind === "error" ? "#fff5f5" : "#fafafa",
+            whiteSpace: "pre-line",
+            marginBottom: 12
+          }}
+        >
+          {toast.message}
+        </div>
+      ) : null}
+
+      <DiffLedgerPanel copy={copy} items={diffLedgerItems} />
+      <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <ManorStatePanel
+          anchorUnrest={PLAY_ANCHORS.unrest}
+          buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
+          builderExtraPerTurn={builderExtraPerTurn}
+          constructionEtaTurns={constructionEtaTurns}
+          constructionRatePlannedNextTurn={constructionRatePlannedNextTurn}
+          constructionRateThisTurn={constructionRateThisTurn}
+          copy={copy}
+          deltaBushels={deltaBushels}
+          deltaCoin={deltaCoin}
+          deltaPop={deltaPop}
+          deltaUnrest={deltaUnrest}
+          desiredBuilders={decisions.labor.desired_builders}
+          fmtSigned={fmtSigned}
+          improvements={IMPROVEMENTS}
+          manor={m}
+          onAbandonProject={() => setDecisions((current: any) => ({ ...current, construction: { kind: "construction", action: "abandon", confirm: true } }))}
+          popChangeSummary={popChangeSummary}
+          report={ctx.report}
+          showUnrestBreakdown={showUnrestBreakdown}
+          turnYears={TURN_YEARS}
+          unrestBreakdown={unrestBreakdown}
+        />
+
+        <div>
+          <TurnReportPanel
+            accruedThisTurn={accruedThisTurn}
+            anchorFood={PLAY_ANCHORS.food}
+            anchorHousehold={PLAY_ANCHORS.household}
+            arrearsCarried={arrearsCarried}
+            baselineConsPerTurn={baselineConsPerTurn}
+            builderExtraPerTurn={builderExtraPerTurn}
+            consBuilders={consBuilders}
+            consFarmers={consFarmers}
+            consIdle={consIdle}
+            copy={copy}
+            courtConsumptionBushels={courtConsumptionBushels}
+            courtRosterEntries={courtRosterEntries}
+            courtSize={courtSize}
+            currentHouseLog={(ctx.report.house_log ?? []) as any[]}
+            deltaBushels={deltaBushels}
+            deltaCoin={deltaCoin}
+            deltaUnrest={deltaUnrest}
+            dueEntering={dueEntering}
+            fmtObAmount={fmtObAmount}
+            hasConsumptionSplit={hasConsumptionSplit}
+            idle={idle}
+            manor={m}
+            peasantConsumptionBushels={peasantConsumptionBushels}
+            previewState={ctx.preview_state}
+            report={ctx.report}
+            showHouseholdDetails={showHouseholdDetails}
+            state={state}
+            toggleHouseholdDetails={() => setShowHouseholdDetails((value) => !value)}
+            totalConsumptionBushels={totalConsumptionBushels}
+            totalObligations={totalObligations}
+            turnYears={TURN_YEARS}
+          />
+
+          <ProspectsPanel
+            anchorId={PLAY_ANCHORS.prospects}
+            copy={copy}
+            costsForProspect={costsForProspect}
+            effectsSummary={effectsSummary}
+            fmtSigned={fmtSigned}
+            getProspectDecision={getProspectDecision}
+            handleProspectAction={handleProspectAction}
+            hasProspectExpiredThisTurn={hasProspectExpiredThisTurn}
+            hiddenCount={prospectsHiddenCount}
+            hiddenIds={prospectsHiddenIds}
+            houseLabel={houseLabel}
+            personNameFromRegistry={personNameFromRegistry}
+            pfHouseLabelById={pfHouseIx.houseLabelById}
+            pfParentsByChild={pfParentsByChild}
+            pfPeopleRec={pfPeopleRec}
+            pfPersonHouseById={pfHouseIx.personHouseById}
+            previewState={ctx.preview_state}
+            prospectLogLines={prospectLogLines}
+            prospectTypeLabel={prospectTypeLabel}
+            prospectsShown={prospectsShown}
+            prospectsShownCount={prospectsShownCount}
+            prospectsTotalCount={prospectsTotalCount}
+            rejectHasStandingRisk={rejectHasStandingRisk}
+            reportTurnIndex={ctx.report.turn_index}
+            shownIds={prospectsShownIds}
+            uncertaintyLabel={uncertaintyLabel}
+          />
+
+          <KnownHousesPanel
+            copy={copy}
+            hasMoreKnownHouses={hasMoreKnownHouses}
+            knownHouses={knownHouses}
+            knownHousesMain={knownHousesMain}
+            onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
+            showAllKnownHouses={showAllKnownHouses}
+          />
+
+          <IntelPanel
+            copy={copy}
+            current={intelSections.current}
+            memory={intelSections.memory}
+          />
+
+          <RelationshipDrawerPanel
+            onQueryChange={setRelationshipDrawerQuery}
+            onTabChange={setRelationshipDrawerTab}
+            previewState={ctx.preview_state}
+            query={relationshipDrawerQuery}
+            tab={relationshipDrawerTab}
+          />
+
+          <EventsPanel
+            anchorId={PLAY_ANCHORS.events}
+            copy={copy}
+            events={ctx.report.events}
+          />
+        </div>
+      </div>
+
+      {!state.game_over ? (
+        <DecisionsPanel
+          accruedThisTurn={accruedThisTurn}
+          advanceTurn={onAdvanceTurn}
+          anchorLabor={PLAY_ANCHORS.labor}
+          anchorObligations={PLAY_ANCHORS.obligations}
+          buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
+          builderExtraPerTurn={builderExtraPerTurn}
+          copy={copy}
+          decisions={decisions}
+          dueEntering={dueEntering}
+          eligibleMaidensLocalRaw={eligibleMaidensLocalRaw}
+          fmtObAmount={fmtObAmount}
+          improvementIds={IMPROVEMENT_IDS}
+          improvements={IMPROVEMENTS}
+          laborAssignedNextTurn={laborAssignedNextTurn}
+          laborAvailableNextTurn={laborAvailableNextTurn}
+          laborLimitExceeded={laborLimitExceeded}
+          laborOversubscribed={laborOversubscribed}
+          laborRequested={laborRequested}
+          manor={m}
+          marriageWindow={mw}
+          maxLaborShift={ctx.max_labor_shift}
+          obligations={ob}
+          onExportFullRunJson={onExportFullRunJson}
+          onExportRunSummary={onExportRunSummary}
+          pfHouseLabelById={pfHouseIx.houseLabelById}
+          pfParentsByChild={pfParentsByChild}
+          pfPeopleRec={pfPeopleRec}
+          pfPersonHouseById={pfHouseIx.personHouseById}
+          previewState={ctx.preview_state}
+          prospectsTotalCount={prospectsTotalCount}
+          sellCapBushels={ctx.report.market.sell_cap_bushels}
+          setDecisions={setDecisions}
+          totalObligations={totalObligations}
+          turnYears={TURN_YEARS}
+          arrearsCarried={arrearsCarried}
+        />
+      ) : null}
+    </div>
+  );
+}

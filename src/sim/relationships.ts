@@ -1,20 +1,15 @@
+import {
+  applyRelationshipDelta,
+  ensureRelationshipEdge
+} from "./domains/people/relationshipEngine";
 import type { RelationshipEdge, RunState } from "./types";
-import { clampInt } from "./util";
 
 export function ensureEdge(state: RunState, fromId: string, toId: string): RelationshipEdge {
-  const edges = state.relationships;
-  const found = edges.find((e) => e.from_id === fromId && e.to_id === toId);
-  if (found) return found;
-  const e: RelationshipEdge = { from_id: fromId, to_id: toId, allegiance: 50, respect: 50, threat: 20 };
-  edges.push(e);
-  return e;
+  return ensureRelationshipEdge(state, fromId, toId);
 }
 
 export function adjustEdge(state: RunState, fromId: string, toId: string, delta: { allegiance?: number; respect?: number; threat?: number }): void {
-  const e = ensureEdge(state, fromId, toId);
-  if (delta.allegiance !== undefined) e.allegiance = clampInt(e.allegiance + delta.allegiance, 0, 100);
-  if (delta.respect !== undefined) e.respect = clampInt(e.respect + delta.respect, 0, 100);
-  if (delta.threat !== undefined) e.threat = clampInt(e.threat + delta.threat, 0, 100);
+  applyRelationshipDelta(state, fromId, toId, delta);
 }
 
 export function relationshipBounds(state: RunState): {

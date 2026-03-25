@@ -1,129 +1,61 @@
 import type {
+  EvidenceEventV0,
   RunState,
   TurnContext,
   TurnDecisions,
   TurnReport,
-  EventResult,
-  MarriageWindow,
-  MarriageOffer,
   Person,
-  RunSnapshot,
   HouseLogEvent,
-  HouseholdRoster,
   HouseholdRosterView,
-  ProspectsWindow,
-  Prospect,
-  ProspectType,
+  PhaseReceiptV0,
+  PhaseResultV0,
   ProspectsLogEvent
 } from "./types";
-import { Rng } from "./rng";
 import { deepCopy, clampInt, asNonNegInt } from "./util";
 import {
   TURN_YEARS,
-  BUSHELS_PER_FARMER_PER_YEAR,
   BUSHELS_PER_PERSON_PER_YEAR,
-  BASE_FERTILITY,
-  SPOILAGE_RATE_BASE,
-  SPOILAGE_RATE_GRANARY,
-  MARKET_PRICE_MIN,
-  MARKET_PRICE_MAX,
-  SELL_CAP_FACTOR_MIN,
-  SELL_CAP_FACTOR_MAX,
-  BUILD_RATE_PER_BUILDER_PER_TURN,
-  BUILDER_EXTRA_BUSHELS_PER_YEAR,
-  UNREST_SHORTAGE_PENALTY,
-  UNREST_ARREARS_PENALTY,
-  UNREST_BASELINE_DECAY_WHEN_STABLE,
-  EVENTS_PER_TURN_PROBS,
   maxLaborDeltaPerTurn,
-  MORTALITY_MULT_WITH_PHYSICIAN,
-  BIRTH_CHANCE_BY_FERTILITY,
-  BIRTH_FERTILE_AGE_MIN,
-  BIRTH_FERTILE_AGE_MAX,
-  MORTALITY_P_UNDER16,
-  MORTALITY_P_UNDER40,
-  MORTALITY_P_UNDER55,
-  MORTALITY_P_UNDER65,
-  MORTALITY_P_65PLUS,
-  YIELD_MULT_FIELD_ROTATION,
-  YIELD_MULT_DRAINAGE_DITCHES,
-  SELL_MULT_MILL_EFFICIENCY,
-  DRAINAGE_WEATHER_SOFTEN_BONUS,
-  VILLAGE_FEAST_UNREST_REDUCTION
 } from "./constants";
+import { refreshEnergy } from "./domains/court/energy";
 import { normalizeState } from "./normalize";
-import { EVENT_DECK } from "../content/events";
 import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
-import { adjustEdge, relationshipBounds } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
+import { makePhaseReceipt, makePhaseResult } from "./phases/phaseResult";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, getCourtExcludeIds, getCourtOfficerIds, getCourtExtraIds, removeCourtExcludeId } from "./court";
+import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, removeCourtExcludeId } from "./court";
 import { computeTierSets } from "./tiers";
-import type { TierSets } from "./tiers";
 import { deriveHouseholdRoster } from "./householdView";
-import { getChildren as kinChildren, getParents as kinParents, getSiblings as kinSiblings, isAlive as kinIsAlive } from "./kinship";
-import { processNobleFertility, processNobleMarriages, processNobleMortality } from "./demography";
-import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "./demographyCurves";
-import { listEligibleCandidates, reserveCandidate, clearReservation, gcExpiredReservations } from "./marriageMarket";
-import { allHouseMemberIds, houseIdForPerson, playerHouseIdOf, registryPersonFor, resolveCurrentHouseHeadId, syncHouseRegistryCurrentHeads } from "./actors";
-
-
-function modsObj(state: RunState): Record<string, number> {
-  const anyFlags: any = state.flags;
-  if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
-  return anyFlags._mods as Record<string, number>;
-}
-function cooldownsObj(state: RunState): Record<string, number> {
-  const anyFlags: any = state.flags;
-  if (!anyFlags._cooldowns || typeof anyFlags._cooldowns !== "object") anyFlags._cooldowns = {};
-  return anyFlags._cooldowns as Record<string, number>;
-}
-
-function consumeMod(state: RunState, key: string, defaultValue = 1): number {
-  const mods = modsObj(state);
-  const v = typeof mods[key] === "number" ? (mods[key] as number) : defaultValue;
-  delete mods[key];
-  return v;
-}
-
-// v0.2.6.2 DOE lane: tuning knobs are stored as persistent values (defaults 1.0).
-// No RNG streams; deterministic math only.
-function tuningObj(state: RunState): Record<string, unknown> {
-  const anyFlags: any = state.flags as any;
-  if (!anyFlags._tuning || typeof anyFlags._tuning !== "object") anyFlags._tuning = {};
-  return anyFlags._tuning as Record<string, unknown>;
-}
-
-function tuningNumber(state: RunState, key: string, defaultValue = 1.0): number {
-  const t: any = tuningObj(state);
-  const v = t?.[key];
-  return typeof v === "number" && Number.isFinite(v) ? v : defaultValue;
-}
-
-
-function annualProbabilityToTurnProbability(pAnnual: number): number {
-  const bounded = Math.max(0, Math.min(0.999, pAnnual));
-  return 1 - Math.pow(1 - bounded, TURN_YEARS);
-}
-
-function currentSpoilageRate(state: RunState): number {
-  if (hasImprovement(state.manor.improvements, "granary_upgrade")) return SPOILAGE_RATE_GRANARY;
-  return SPOILAGE_RATE_BASE;
-}
-
-function stewardshipMultiplier(state: RunState): number {
-  const s = state.house.head.traits.stewardship;
-  // small, legible
-  return 1 + (s - 3) * 0.02; // L1=-0.04 ... L5=+0.04
-}
-
-const SUCCESSION_MIN_AGE = 15;
-
-function sampledBirthTiming(rng: Rng, turnStartYear: number): { ageAtTurnEnd: number; birthYear: number } {
-  const ageAtTurnEnd = rng.int(0, Math.max(0, TURN_YEARS - 1));
-  const birthYear = turnStartYear + TURN_YEARS - ageAtTurnEnd;
-  return { ageAtTurnEnd, birthYear };
-}
+import {
+  appliedEventEvidenceEvents,
+  houseLogEvidenceEvents,
+  marriageOfferEvidenceEvents,
+  makeEvidenceEvent,
+  noteEvidenceEvents,
+  phaseLogEventsFromEvidence,
+  prospectsLogEvidenceEvents
+} from "./domains/ai/evidence";
+import { recordBeliefEvidence } from "./domains/ai/beliefs";
+import { buildHouseholdRoster } from "./domains/people/playerHousehold";
+import { boundedSnapshot, computeTopDrivers } from "./domains/experience/reporting";
+import { getChildren as kinChildren } from "./kinship";
+import { gcExpiredReservations } from "./marriageMarket";
+import { playerHouseIdOf, registryPersonFor, syncHouseRegistryCurrentHeads } from "./actors";
+import {
+  applyConstructionDecisionPhase,
+  applyConsumptionAndShortagePhase,
+  applyLaborDecisionPhase,
+  applyProductionAndConstructionPhase,
+  applySellDecisionPhase,
+  applySpoilagePhase,
+  computeWeatherMarketPhase
+} from "./phases/phase_consumption";
+import { applyHouseholdDemographyPhase, applyNobleDemographyPhase } from "./phases/phase_demography";
+import { applyEventsPhase, applyRelationshipDriftPhase, decrementEventCooldowns, syncLocalsFromRegistryPhase } from "./phases/phase_events";
+import { applyMarriageDecisionPhase, buildMarriageWindowPhase } from "./phases/phase_marriage";
+import { applyDecisionObligationsPhase, applyPreviewObligationsPhase } from "./phases/phase_obligations";
+import { applyProspectsDecisionPhase, buildProspectsWindowPhase } from "./phases/phase_prospects";
+import { closeTurnPhase, computeAdultSuccessorId, computeHeirId, rebaseHeadRelationships, resolveSuccessionPhase, spouseIdFromKinship } from "./phases/phase_succession";
 
 function householdChildrenForHead(state: RunState, headId: string): Person[] {
   const byPrimogeniture = (a: Person, b: Person) => {
@@ -182,1742 +114,12 @@ function syncPlayerHouseSummaryFromRegistry(state: RunState): void {
   houseRec.heir_id = state.house.heir_id ?? null;
 }
 
-function rebaseHeadRelationships(state: RunState, oldHeadId: string | null, newHeadId: string): void {
-  if (!oldHeadId || !newHeadId || oldHeadId === newHeadId) return;
-  const existing: any[] = Array.isArray(state.relationships) ? state.relationships : [];
-  const kept = new Map<string, any>();
-
-  for (const edge of existing) {
-    if (!edge || typeof edge.from_id !== "string" || typeof edge.to_id !== "string") continue;
-    if (edge.from_id === oldHeadId || edge.to_id === oldHeadId) continue;
-    const key = `${edge.from_id}->${edge.to_id}`;
-    if (!kept.has(key)) kept.set(key, { ...edge });
-  }
-
-  for (const edge of existing) {
-    if (!edge || typeof edge.from_id !== "string" || typeof edge.to_id !== "string") continue;
-    if (edge.from_id !== oldHeadId && edge.to_id !== oldHeadId) continue;
-    const fromId = edge.from_id === oldHeadId ? newHeadId : edge.from_id;
-    const toId = edge.to_id === oldHeadId ? newHeadId : edge.to_id;
-    if (fromId === toId) continue;
-    const key = `${fromId}->${toId}`;
-    if (!kept.has(key)) kept.set(key, { ...edge, from_id: fromId, to_id: toId });
-  }
-
-  state.relationships = [...kept.values()];
+function noteReceipts(lines: string[]): PhaseReceiptV0[] {
+  return lines.map((line) => makePhaseReceipt(line, "note"));
 }
 
-function yieldMultiplier(state: RunState): number {
-  let m = 1.0;
-  if (hasImprovement(state.manor.improvements, "field_rotation")) m *= YIELD_MULT_FIELD_ROTATION;
-  if (hasImprovement(state.manor.improvements, "drainage_ditches")) m *= YIELD_MULT_DRAINAGE_DITCHES;
-  return m;
-}
-
-function sellMultiplier(state: RunState): number {
-  let m = 1.0;
-  if (hasImprovement(state.manor.improvements, "mill_efficiency")) m *= SELL_MULT_MILL_EFFICIENCY;
-  return m;
-}
-
-function decrementCooldowns(state: RunState): void {
-  const cd = cooldownsObj(state);
-  for (const k of Object.keys(cd)) {
-    cd[k] = Math.max(0, Math.trunc((cd[k] ?? 0) - 1));
-    if (cd[k] === 0) delete cd[k];
-  }
-}
-
-function chooseEventCount(rng: Rng): 0 | 1 | 2 {
-  const r = rng.next();
-  let acc = 0;
-  for (const { k, p } of EVENTS_PER_TURN_PROBS) {
-    acc += p;
-    if (r < acc) return k;
-  }
-  return 1;
-}
-
-function weightedPick<T>(rng: Rng, items: Array<{ item: T; weight: number }>): { picked: T; roll: number; total: number } {
-  const total = items.reduce((s, it) => s + it.weight, 0);
-  if (total <= 0) throw new Error("weightedPick: total weight <= 0");
-  const x = rng.next() * total;
-  let acc = 0;
-  for (const it of items) {
-    acc += it.weight;
-    if (x <= acc) return { picked: it.item, roll: x / total, total };
-  }
-  return { picked: items[items.length - 1]!.item, roll: x / total, total };
-}
-
-function computeHeirIdInternal(state: RunState, minAge: number, persist = true): string | null {
-  const headId = state.house.head?.id;
-
-  const byPrimogeniture = (a: Person, b: Person) => {
-    if (b.age !== a.age) return b.age - a.age;
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-    return 0;
-  };
-
-  const alive = (id: string): boolean => {
-    const p = registryPersonFor(state, id);
-    if (p) return !!p.alive;
-    return kinIsAlive(state as any, id);
-  };
-
-  const malesByIds = (ids: string[]): Person[] =>
-    ids
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p && p.alive && p.sex === "M" && typeof p.age === "number" && p.age >= minAge)
-      .sort(byPrimogeniture);
-
-  const femalesByIds = (ids: string[]): Person[] =>
-    ids
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p && p.alive && p.sex === "F" && typeof p.age === "number" && p.age >= minAge)
-      .sort(byPrimogeniture);
-
-  const childBranchOrder = (ids: string[], sex: "M" | "F"): string[] =>
-    ids
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p && p.sex === sex)
-      .sort(byPrimogeniture)
-      .map((p) => p.id);
-
-  const firstEligibleInBranch = (branchRootId: string, seen: Set<string>): string | null => {
-    if (seen.has(branchRootId)) return null;
-    seen.add(branchRootId);
-
-    const root = registryPersonFor(state, branchRootId);
-    if (root && root.alive && typeof root.age === "number" && root.age >= minAge) return root.id;
-
-    const childIds = kinChildren(state as any, branchRootId)
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p)
-      .sort(byPrimogeniture)
-      .map((p) => p.id);
-    for (const childId of childIds) {
-      const found = firstEligibleInBranch(childId, seen);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  // Default law: eldest son branch -> eldest daughter branch, with representation.
-  const childIds = headId ? kinChildren(state as any, headId) : [];
-  const sonBranches = childBranchOrder(childIds, "M");
-  const daughterBranches = childBranchOrder(childIds, "F");
-  for (const branchId of [...sonBranches, ...daughterBranches]) {
-    const found = firstEligibleInBranch(branchId, new Set<string>(headId ? [headId] : []));
-    if (found) {
-      if (persist) state.house.heir_id = found;
-      return found;
-    }
-  }
-
-  // Bounded nearest male-line relative fallback (paternal chain).
-  // Order: nearest generation up, then nearest male-line down, then primogeniture.
-  if (headId) {
-    const seen = new Set<string>([headId]);
-
-    let maleAncestors = kinParents(state as any, headId)
-      .filter((pid) => {
-        const p = registryPersonFor(state, pid);
-        return !!p && p.sex === "M";
-      })
-      .sort((a, b) => a.localeCompare(b));
-
-    for (let up = 1; up <= 4 && maleAncestors.length > 0; up++) {
-      const nextAncestors: string[] = [];
-      for (const ancId of maleAncestors) {
-        seen.add(ancId);
-
-        // down=1 includes siblings/uncles relative to head depending on ancestor depth.
-        let layer = kinChildren(state as any, ancId)
-          .filter((cid) => !seen.has(cid))
-          .sort((a, b) => a.localeCompare(b));
-
-        for (let down = 1; down <= 4 && layer.length > 0; down++) {
-          const males = malesByIds(layer).filter((p) => p.id !== headId && alive(p.id));
-          if (males.length > 0) {
-            if (persist) state.house.heir_id = males[0].id;
-            return males[0].id;
-          }
-
-          const nextLayer: string[] = [];
-          for (const id of layer) {
-            seen.add(id);
-            const p = registryPersonFor(state, id);
-            // Male-line descent only.
-            if (!p || p.sex !== "M") continue;
-            for (const kid of kinChildren(state as any, id)) {
-              if (!seen.has(kid)) nextLayer.push(kid);
-            }
-          }
-          layer = nextLayer.sort((a, b) => a.localeCompare(b));
-        }
-
-        // Next ancestor generation (male-only parents).
-        for (const pid of kinParents(state as any, ancId)) {
-          const pp = registryPersonFor(state, pid);
-          if (pp && pp.sex === "M") nextAncestors.push(pid);
-        }
-      }
-      maleAncestors = Array.from(new Set(nextAncestors)).sort((a, b) => a.localeCompare(b));
-    }
-  }
-
-  if (persist) state.house.heir_id = null;
-  return null;
-}
-
-function computeHeirId(state: RunState): string | null {
-  return computeHeirIdInternal(state, 0, true);
-}
-
-function computeAdultSuccessorId(state: RunState): string | null {
-  return computeHeirIdInternal(state, SUCCESSION_MIN_AGE, false);
-}
-
-function buildHouseholdRoster_v0_2_3_2(state: RunState): HouseholdRoster {
-  const heirId = state.house.heir_id ?? null;
-  const spouse = state.house.spouse ?? null;
-
-  // Surviving spouse (if any) gets the widow/widower badge.
-  let widowedPersonId: string | null = null;
-  if (spouse) {
-    if (state.house.head.alive && !spouse.alive) widowedPersonId = state.house.head.id;
-    else if (!state.house.head.alive && spouse.alive) widowedPersonId = spouse.id;
-  }
-
-  const rows: HouseholdRoster["rows"] = [];
-  const seen = new Set<string>();
-
-  const pushRow = (person: Person, role: "head" | "spouse" | "child") => {
-    if (!person?.id) return;
-    if (seen.has(person.id)) return;
-    seen.add(person.id);
-
-    const badges: HouseholdRoster["rows"][number]["badges"] = [];
-    if (!person.alive) badges.push("deceased");
-    if (person.alive && widowedPersonId === person.id) badges.push(person.sex === "M" ? "widower" : "widow");
-    if (person.id === heirId) badges.push("heir");
-
-    rows.push({ person_id: person.id, role, badges });
-  };
-
-  pushRow(state.house.head, "head");
-  if (spouse) pushRow(spouse, "spouse");
-
-  const sortedKids = [...state.house.children].sort((a, b) => {
-    if (b.age !== a.age) return b.age - a.age;
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-    return 0;
-  });
-  for (const c of sortedKids) pushRow(c, "child");
-
-  return { schema_version: "household_roster_v1", turn_index: state.turn_index, rows };
-}
-
-
-function boundedSnapshot(state: RunState): RunSnapshot {
-  // LOCKED (v0.0.5 QA blocker fix): snapshots must never contain `log` (or nested history).
-  // Keep only the minimal state needed for debugging.
-  return deepCopy({
-    turn_index: state.turn_index,
-    manor: state.manor,
-    house: state.house,
-    relationships: state.relationships,
-    people: (state as any).people,
-    houses: (state as any).houses,
-    player_house_id: (state as any).player_house_id,
-    kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
-    institutions: (state as any).institutions,
-    service_records: (state as any).service_records,
-    flags: state.flags,
-    game_over: state.game_over ?? null
-  });
-}
-
-
-function applySpoilage(state: RunState): { rate: number; loss_bushels: number } {
-  const rateBase = currentSpoilageRate(state);
-  const mult = consumeMod(state, "spoilage_mult", 1);
-  const rate = Math.max(0, Math.min(0.25, rateBase * mult));
-  const before = state.manor.bushels_stored;
-  const after = asNonNegInt(Math.floor(before * (1 - rate)));
-  state.manor.bushels_stored = after;
-  return { rate, loss_bushels: before - after };
-}
-
-function computeWeatherMarket(state: RunState): { weather_multiplier: number; market: { price_per_bushel: number; sell_cap_bushels: number } } {
-  const t = state.turn_index;
-  const wRng = new Rng(state.run_seed, "weather", t, "macro");
-  const mRng = new Rng(state.run_seed, "market", t, "macro");
-  let weather = 0.6 + wRng.next() * (1.25 - 0.6);
-  // Apply one-turn mod
-  weather *= consumeMod(state, "weather_mult", 1);
-  if (hasImprovement(state.manor.improvements, "drainage_ditches") && weather < 1.0) {
-    weather = Math.min(1.25, weather + DRAINAGE_WEATHER_SOFTEN_BONUS);
-  }
-  weather = Math.max(0.6, Math.min(1.25, weather));
-
-  let price = MARKET_PRICE_MIN + mRng.next() * (MARKET_PRICE_MAX - MARKET_PRICE_MIN);
-  price *= consumeMod(state, "market_price_mult", 1);
-  price *= sellMultiplier(state);
-  price = Math.max(0.01, price);
-
-  const baseCap = Math.floor(state.manor.population * BUSHELS_PER_PERSON_PER_YEAR); // one year of local demand
-  const capFactor = (SELL_CAP_FACTOR_MIN + mRng.next() * (SELL_CAP_FACTOR_MAX - SELL_CAP_FACTOR_MIN)) * consumeMod(state, "sell_cap_mult", 1);
-  const sellCap = Math.max(0, Math.floor(baseCap * capFactor));
-
-  return { weather_multiplier: weather, market: { price_per_bushel: price, sell_cap_bushels: sellCap } };
-}
-
-function applyProductionAndConstruction(state: RunState, weather_multiplier: number): { production_bushels: number; construction_progress_added: number; completed_improvement_id?: string } {
-  // production uses current farmers (set last turn)
-  const farmerPenalty = Math.trunc(consumeMod(state, "farmer_penalty", 0));
-  const effectiveFarmers = Math.max(0, state.manor.farmers - farmerPenalty);
-
-  const baseProduction = effectiveFarmers * BUSHELS_PER_FARMER_PER_YEAR * TURN_YEARS;
-  const prodMult = weather_multiplier * BASE_FERTILITY * stewardshipMultiplier(state) * yieldMultiplier(state) * consumeMod(state, "production_mult", 1);
-  const production = Math.max(0, Math.floor(baseProduction * prodMult));
-  state.manor.bushels_stored = asNonNegInt(state.manor.bushels_stored + production);
-
-  // Construction progress uses current builders.
-  let progressAdded = 0;
-  let completed: string | undefined = undefined;
-  if (state.manor.construction) {
-    progressAdded = state.manor.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
-    state.manor.construction.progress = asNonNegInt(state.manor.construction.progress + progressAdded);
-    if (state.manor.construction.progress >= state.manor.construction.required) {
-      completed = state.manor.construction.improvement_id;
-      state.manor.improvements.push(completed);
-      state.manor.construction = null;
-
-      // Completion effects (existing mechanics; numeric only)
-      if (completed === "village_feast") {
-        state.manor.unrest = clampInt(state.manor.unrest - VILLAGE_FEAST_UNREST_REDUCTION, 0, 100);
-      }
-    }
-  }
-
-  return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
-}
-
-function applyConsumptionAndShortage(state: RunState, court_consumption_bushels: number): {
-  consumption_bushels: number;
-  peasant_consumption_bushels: number;
-  court_consumption_bushels: number;
-  total_consumption_bushels: number;
-  shortage_bushels: number;
-  population_delta: number;
-  // v0.2.5: population change visibility (labor pool): split shortage losses.
-  population_deaths: number;
-  population_runaways: number;
-  // v0.2.3.2: structured signal when labor is auto-clamped due to population loss.
-  labor_auto_clamped?: boolean;
-  labor_before?: { population: number; farmers: number; builders: number };
-  labor_after?: { population: number; farmers: number; builders: number };
-} {
-  const pop = state.manor.population;
-  const farmers = state.manor.farmers;
-  const builders = state.manor.builders;
-  const idle = Math.max(0, pop - farmers - builders);
-
-  const peasantConsumption = Math.floor(
-    (farmers * BUSHELS_PER_PERSON_PER_YEAR +
-      builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) +
-      idle * BUSHELS_PER_PERSON_PER_YEAR) *
-      TURN_YEARS
-  );
-  const courtConsumption = Math.max(0, Math.trunc(court_consumption_bushels));
-  const consumption = asNonNegInt(peasantConsumption + courtConsumption);
-  const before = state.manor.bushels_stored;
-  if (before >= consumption) {
-    state.manor.bushels_stored = asNonNegInt(before - consumption);
-    return {
-      consumption_bushels: consumption,
-      peasant_consumption_bushels: peasantConsumption,
-      court_consumption_bushels: courtConsumption,
-      total_consumption_bushels: consumption,
-      shortage_bushels: 0,
-      population_delta: 0,
-      population_deaths: 0,
-      population_runaways: 0
-    };
-  }
-
-  const shortage = consumption - before;
-  state.manor.bushels_stored = 0;
-
-  // shortage consequences
-  (state.flags as any).Shortage = true;
-  state.manor.unrest = clampInt(state.manor.unrest + UNREST_SHORTAGE_PENALALTY_SAFE(), 0, 100);
-
-  const hRng = new Rng(state.run_seed, "household", state.turn_index, "shortage");
-  const lossFrac = 0.03 + hRng.next() * 0.08; // 3%..11%
-  const lost = Math.max(1, Math.floor(state.manor.population * lossFrac));
-
-  // v0.2.5: split population loss into deaths vs runaways (deterministic; no new RNG).
-  const sev01 = Math.max(0, Math.min(1, (lossFrac - 0.03) / 0.08));
-  const deathFrac = 0.3 + sev01 * 0.2; // 30%..50%
-  const deaths = Math.min(lost, Math.floor(lost * deathFrac));
-  const runaways = Math.max(0, lost - deaths);
-
-  state.manor.population = asNonNegInt(state.manor.population - lost);
-  let labor_before: { population: number; farmers: number; builders: number } | undefined;
-  let labor_after: { population: number; farmers: number; builders: number } | undefined;
-  let labor_auto_clamped: boolean | undefined;
-  if (state.manor.farmers + state.manor.builders > state.manor.population) {
-    labor_before = {
-      population: asNonNegInt(state.manor.population),
-      farmers: asNonNegInt(state.manor.farmers),
-      builders: asNonNegInt(state.manor.builders)
-    };
-    // remove from builders first (construction labor tends to flee first)
-    const overflow = state.manor.farmers + state.manor.builders - state.manor.population;
-    const bCut = Math.min(state.manor.builders, overflow);
-    state.manor.builders -= bCut;
-    const rem = overflow - bCut;
-    if (rem > 0) state.manor.farmers = Math.max(0, state.manor.farmers - rem);
-
-    labor_after = {
-      population: asNonNegInt(state.manor.population),
-      farmers: asNonNegInt(state.manor.farmers),
-      builders: asNonNegInt(state.manor.builders)
-    };
-    labor_auto_clamped = labor_before.farmers !== labor_after.farmers || labor_before.builders !== labor_after.builders;
-  }
-
-  const res: {
-    consumption_bushels: number;
-    peasant_consumption_bushels: number;
-    court_consumption_bushels: number;
-    total_consumption_bushels: number;
-    shortage_bushels: number;
-    population_delta: number;
-    population_deaths: number;
-    population_runaways: number;
-    labor_auto_clamped?: boolean;
-    labor_before?: { population: number; farmers: number; builders: number };
-    labor_after?: { population: number; farmers: number; builders: number };
-  } = {
-    consumption_bushels: consumption,
-    peasant_consumption_bushels: peasantConsumption,
-    court_consumption_bushels: courtConsumption,
-    total_consumption_bushels: consumption,
-    shortage_bushels: shortage,
-    population_delta: -lost,
-    population_deaths: deaths,
-    population_runaways: runaways
-  };
-
-  if (labor_before && labor_after) {
-    res.labor_auto_clamped = labor_auto_clamped;
-    res.labor_before = labor_before;
-    res.labor_after = labor_after;
-  }
-  return res;
-}
-
-// small helper to keep constant name typo-proof in this file
-function UNREST_SHORTAGE_PENALALTY_SAFE(): number {
-  return UNREST_SHORTAGE_PENALTY;
-}
-
-function applyObligationsAndArrearsPenalty(state: RunState, production_bushels: number): void {
-  const ob = state.manor.obligations;
-
-  // penalties only on existing arrears (WP-02 lock)
-  if (ob.arrears.coin > 0 || ob.arrears.bushels > 0) {
-    state.manor.unrest = clampInt(state.manor.unrest + UNREST_ARREARS_PENALTY, 0, 100);
-    // liege reacts to arrears
-    adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: -2, threat: +2 });
-  }
-
-  // compute current dues (player can pay during decisions)
-  ob.tax_due_coin = Math.max(1, Math.floor(state.manor.population / 25));
-  ob.tithe_due_bushels = Math.floor(production_bushels * 0.05);
-}
-
-function relationshipDrift(state: RunState): void {
-  for (const e of state.relationships) {
-    // drift 1 point toward baseline
-    const baseA = 50, baseR = 50, baseT = 20;
-    e.allegiance += e.allegiance < baseA ? 1 : e.allegiance > baseA ? -1 : 0;
-    e.respect += e.respect < baseR ? 1 : e.respect > baseR ? -1 : 0;
-    e.threat += e.threat < baseT ? 1 : e.threat > baseT ? -1 : 0;
-    e.allegiance = clampInt(e.allegiance, 0, 100);
-    e.respect = clampInt(e.respect, 0, 100);
-    e.threat = clampInt(e.threat, 0, 100);
-  }
-}
-
-function syncLocalsFromRegistry(state: RunState): void {
-  const anyState: any = state as any;
-  const people: Record<string, Person> = (anyState.people ?? {}) as any;
-  if (!people || typeof people !== "object") return;
-  const playerHouseId = playerHouseIdOf(state);
-
-  const pickReplacementLocal = (excludeIds: Set<string>): Person | null => {
-    const houses: Record<string, any> = anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
-    const candidates = Object.keys(houses)
-      .filter((hid) => hid !== playerHouseId)
-      .map((hid) => resolveCurrentHouseHeadId(state, hid))
-      .filter((pid): pid is string => typeof pid === "string" && pid.length > 0)
-      .filter((pid) => !excludeIds.has(pid))
-      .map((pid) => registryPersonFor(state, pid))
-      .filter((p): p is Person => !!p && p.alive)
-      .sort((a, b) => {
-        if (a.age !== b.age) return b.age - a.age;
-        return a.id.localeCompare(b.id);
-      });
-    return candidates[0] ?? null;
-  };
-
-  const syncOne = (p: any, vacantLabel: string): any => {
-    const id = typeof p?.id === "string" ? p.id : null;
-    if (!id) {
-      return {
-        id: `${vacantLabel.toLowerCase()}_vacant`,
-        name: `${vacantLabel} (Vacant)`,
-        sex: "M",
-        age: 0,
-        alive: false,
-        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
-      } as Person;
-    }
-    const reg = people[id];
-    if (!reg || typeof (reg as any).alive !== "boolean") {
-      return { ...p, alive: false, name: `${p?.name ?? id} (Vacant)` };
-    }
-    if ((reg as any).alive === false) {
-      const replacement = pickReplacementLocal(new Set<string>([
-        id,
-        state.locals?.liege?.id ?? "",
-        state.locals?.clergy?.id ?? "",
-        ...(Array.isArray(state.locals?.nobles) ? state.locals.nobles.map((n) => n?.id ?? "") : []),
-      ].filter((x): x is string => typeof x === "string" && x.length > 0)));
-      if (replacement && replacement.alive) return { ...replacement };
-      const nm = typeof (reg as any).name === "string" ? (reg as any).name : (p?.name ?? id);
-      return { ...p, ...reg, name: String(nm).includes("(Deceased)") ? String(nm) : `${nm} (Deceased)` };
-    }
-    return { ...p, ...reg };
-  };
-
-  state.locals.liege = syncOne(state.locals.liege as any, "Liege");
-  state.locals.clergy = syncOne(state.locals.clergy as any, "Clergy");
-  state.locals.nobles = Array.isArray(state.locals.nobles)
-    ? state.locals.nobles.map((n: any, i: number) => syncOne(n, `Local ${i + 1}`))
-    : [];
-}
-
-function householdPhase(state: RunState, houseLog: HouseLogEvent[]): { births: string[]; deaths: string[]; population_delta: number } {
-  const births: string[] = [];
-  const deaths: string[] = [];
-  let popDelta = 0;
-
-  // Age household members by 3 years (turn = 3y).
-  // v0.2.5 LOCK: court officers must also age (prevents immortal stewards).
-  const people: Person[] = [];
-  const seenIds = new Set<string>();
-  const push = (p: Person | null | undefined) => {
-    if (!p || typeof p !== "object") return;
-    if (typeof p.id !== "string" || !p.id) return;
-    const canonical = registryPersonFor(state, p.id) ?? p;
-    if (seenIds.has(canonical.id)) return;
-    seenIds.add(canonical.id);
-    people.push(canonical);
-  };
-
-  push(state.house.head);
-  if (state.house.spouse) push(state.house.spouse);
-  for (const c of state.house.children) push(c);
-
-  // Court officers + all living player-house residents must age together.
-  {
-    const anyState: any = state as any;
-    const reg: Record<string, Person> | undefined = anyState.people as any;
-    if (reg) {
-      const playerHouseId = playerHouseIdOf(state);
-      const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
-      const residentIds = houseRec ? allHouseMemberIds(state, playerHouseId) : [];
-      for (const id of residentIds) {
-        const resident = reg[id];
-        if (resident) push(resident);
-      }
-
-      for (const { person_id } of getCourtOfficerIds(state)) {
-        const op = reg[person_id];
-        if (op) push(op);
-      }
-    }
-  }
-
-  // v0.2.9: household phase ages the player-facing resident set; world actors are aged in
-  // annual demography substeps earlier in proposeTurn.
-  for (const p of people) {
-    if (!p.alive) continue; // keep age-at-death stable
-    p.age += TURN_YEARS;
-  }
-  syncPlayerHouseSummaryFromRegistry(state);
-
-  // deaths (simple): older increases risk; physician reduces risk.
-  const hasPhysician = hasImprovement(state.manor.improvements, "physician");
-  const mult = hasPhysician ? MORTALITY_MULT_WITH_PHYSICIAN : 1.0;
-  const mortMult = tuningNumber(state, "mortality_mult", 1.0);
-  const r = new Rng(state.run_seed, "household", state.turn_index, "mortality");
-
-  const headWasAlive = state.house.head.alive;
-  const spouseWasAlive = state.house.spouse?.alive ?? false;
-
-  function deathRoll(p: Person): boolean {
-    if (!p.alive) return false;
-    if (state.turn_index === 0 && (p.id === state.house.head.id || p.id === state.house.spouse?.id)) return false;
-
-    const age = typeof p.age === "number" && Number.isFinite(p.age) ? Math.trunc(p.age) : 0;
-    const annualBase = mortalityAnnualProbabilityByAge(age);
-
-    const childScale = tuningNumber(state, "mortalityScaleChild", mortMult);
-    const adultScale = tuningNumber(state, "mortalityScaleAdult", mortMult);
-    const ageScale = age <= 14 ? childScale : adultScale;
-
-    // Convert annual hazard to 3-year turn hazard.
-    let pTurn = 1 - Math.pow(1 - Math.max(0, Math.min(0.999, annualBase * ageScale)), TURN_YEARS);
-
-    // discipline reduces risk slightly
-    pTurn *= 1 - (p.traits.discipline - 3) * 0.01;
-    pTurn *= mult;
-    pTurn = Math.max(0, Math.min(0.95, pTurn));
-    return r.fork(`d:${p.id}`).bool(pTurn);
-  }
-
-  for (const p of people) {
-    if (deathRoll(p)) {
-      p.alive = false;
-      deaths.push(`${p.name} (${p.id})`);
-    }
-  }
-
-  const headDiedThisTurn = headWasAlive && !state.house.head.alive;
-  const spouseDiedThisTurn = spouseWasAlive && Boolean(state.house.spouse) && state.house.spouse!.alive === false;
-
-  // v0.2.3.2 widow semantics:
-  // - Surviving spouse is Widow/Widower/Widowed.
-  // - Deceased spouse is Deceased.
-  // - Log only once, at the turn of death.
-  if ((headDiedThisTurn || spouseDiedThisTurn) && state.house.spouse) {
-    // Marriage ended; block further births.
-    state.house.spouse_status = "widow";
-
-    let survivor: Person | null = null;
-    let deceased: Person | null = null;
-    if (headDiedThisTurn && state.house.spouse.alive) {
-      survivor = state.house.spouse;
-      deceased = state.house.head;
-    } else if (spouseDiedThisTurn && state.house.head.alive) {
-      survivor = state.house.head;
-      deceased = state.house.spouse;
-    }
-
-    if (survivor && deceased) {
-      houseLog.push({
-        kind: "widowed",
-        turn_index: state.turn_index,
-        // Back-compat: spouse_name remains the deceased person's name.
-        spouse_name: deceased.name,
-        survivor_name: survivor.name,
-        survivor_id: survivor.id,
-        survivor_sex: survivor.sex,
-        deceased_name: deceased.name,
-        deceased_id: deceased.id,
-        deceased_age: deceased.age
-      });
-    }
-  }
-
-  const worldYear = state.turn_index * TURN_YEARS;
-  const anyState: any = state as any;
-  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-  const peopleRegHouse: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
-  const playerHouseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
-  const memberIdsHouse: string[] = playerHouseRec && Array.isArray(playerHouseRec.member_person_ids) ? playerHouseRec.member_person_ids : [];
-
-  // births: only if spouse exists + spouse_status is spouse
-  if (state.house.spouse && state.house.spouse.alive && state.house.spouse_status === "spouse" && state.house.head.alive) {
-    const spouse = state.house.spouse;
-    const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
-    const lastBirthYear = (spouse as any).last_birth_year;
-    const spacingOk = !(typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && (worldYear - Math.trunc(lastBirthYear) < 2));
-    if (fertileAge && spacingOk) {
-      const fert = clampInt(spouse.traits.fertility, 1, 5);
-      const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
-      const tableBase = fertilityAnnualProbabilityByAge(spouse.age);
-      const mods = (state.flags as any)._mods ?? {};
-      const bonus = typeof mods.birth_bonus === "number" ? mods.birth_bonus : 1;
-      const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chanceAnnual = Math.max(0, tableBase * traitAdj * bonus * fertScale);
-      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
-      const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth");
-      if (bRng.bool(chance)) {
-        const childId = `p_child_${state.turn_index}_${state.house.children.length + 1}`;
-        const sex = bRng.bool(0.52) ? "M" : "F";
-        const timing = sampledBirthTiming(bRng.fork(`timing:${childId}`), worldYear);
-        const baby: Person = {
-          id: childId,
-          name: sex === "M" ? "Thomas" : "Anne",
-          sex,
-          age: timing.ageAtTurnEnd,
-          birth_year: timing.birthYear,
-          alive: true,
-          traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
-          married: false,
-          house_id: playerHouseId,
-          residence_house_id: playerHouseId,
-        };
-        state.house.children.push(baby);
-        peopleRegHouse[childId] = baby;
-        if (playerHouseRec && Array.isArray(playerHouseRec.child_ids) && !playerHouseRec.child_ids.includes(childId)) playerHouseRec.child_ids.push(childId);
-        if (memberIdsHouse && !memberIdsHouse.includes(childId)) memberIdsHouse.push(childId);
-        if (!Array.isArray(anyState.kinship_edges)) anyState.kinship_edges = [];
-        anyState.kinship_edges.push({ kind: "parent_of", parent_id: spouse.id, child_id: childId });
-        anyState.kinship_edges.push({ kind: "parent_of", parent_id: state.house.head.id, child_id: childId });
-        (spouse as any).last_birth_year = worldYear;
-        births.push(`${baby.name} (${baby.id})`);
-        // population increases too (abstract)
-        state.manor.population = asNonNegInt(state.manor.population + 1);
-        popDelta += 1;
-      }
-    }
-  }
-
-  // v0.2.8.x P0: In-house married couples fertility (player house).
-  // Goal: enable Gen2 births in the player-visible slice (adult children can have children).
-  {
-    const peopleReg: Record<string, any> = peopleRegHouse;
-    const kinEdges: any[] = Array.isArray(anyState.kinship_edges) ? anyState.kinship_edges : [];
-
-    const spouseOf = new Map<string, string>();
-    for (const e of kinEdges) {
-      if (!e || typeof e !== "object") continue;
-      if (e.kind !== "spouse_of") continue;
-      const a = e.a_id;
-      const b = e.b_id;
-      if (typeof a !== "string" || typeof b !== "string" || !a || !b || a === b) continue;
-      if (!spouseOf.has(a)) spouseOf.set(a, b);
-      if (!spouseOf.has(b)) spouseOf.set(b, a);
-    }
-
-    const extras = new Set<string>(getCourtExtraIds(state));
-
-    const ageFactor = (age: number): number => {
-      if (age < 16) return 0;
-      if (age <= 30) return 1.0;
-      if (age <= 34) return 0.75;
-      if (age <= 37) return 0.45;
-      if (age <= 40) return 0.20;
-      if (age <= 43) return 0.06;
-      if (age <= BIRTH_FERTILE_AGE_MAX) return 0.02;
-      return 0.0;
-    };
-
-    const bRng = new Rng(state.run_seed, "household", state.turn_index, "birth_family");
-
-    const allocId = (): string => {
-      if (!state.flags || typeof state.flags !== "object") (state as any).flags = {};
-      const f: any = state.flags;
-      const pref = typeof f.demography_person_id_prefix === "string" ? f.demography_person_id_prefix : "p";
-      const joiner = typeof f.demography_person_id_joiner === "string" ? f.demography_person_id_joiner : "";
-      let seq = typeof f.demography_next_person_seq === "number" ? Math.trunc(f.demography_next_person_seq) : 1;
-      let id = `${pref}${joiner}${seq}`;
-      while (peopleReg[id]) {
-        seq += 1;
-        id = `${pref}${joiner}${seq}`;
-      }
-      f.demography_person_id_prefix = pref;
-      f.demography_person_id_joiner = joiner;
-      f.demography_next_person_seq = seq + 1;
-      return id;
-    };
-
-    const ensureMemberList = (): string[] => {
-      const houses: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses : null;
-      const h: any = houses ? houses[playerHouseId] : null;
-      if (!h || typeof h !== "object") return [];
-      if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
-      return h.member_person_ids as string[];
-    };
-
-    const memberIds = ensureMemberList();
-
-    for (const child of state.house.children) {
-      if (!child || !child.alive) continue;
-      if (!child.married) continue;
-
-      const spouseId = spouseOf.get(child.id);
-      if (!spouseId) continue;
-
-      const spouse = peopleReg[spouseId];
-      if (!spouse || typeof spouse !== "object") continue;
-      if (!spouse.alive) continue;
-
-      const spouseHouse = typeof spouse.house_id === "string" ? spouse.house_id : null;
-      if (spouseHouse !== playerHouseId && !extras.has(spouseId)) continue;
-
-      const childSex = child.sex;
-      const spouseSex = spouse.sex;
-      if (!((childSex === "M" && spouseSex === "F") || (childSex === "F" && spouseSex === "M"))) continue;
-      const mother = childSex === "F" ? child : spouse;
-      const father = childSex === "M" ? child : spouse;
-
-      const a = Number(mother.age);
-      if (!Number.isFinite(a)) continue;
-      const fertileAge = a >= BIRTH_FERTILE_AGE_MIN && a <= BIRTH_FERTILE_AGE_MAX;
-      if (!fertileAge) continue;
-
-      const lastBirthYear = (mother as any)?.last_birth_year;
-      if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && worldYear - Math.trunc(lastBirthYear) < 2) continue;
-
-      const fert = clampInt((mother.traits?.fertility ?? 3) as any, 1, 5);
-      const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
-      const tableBase = fertilityAnnualProbabilityByAge(a);
-      const fertScale = tuningNumber(state, "fertilityScale", tuningNumber(state, "fertility_mult", 1.0));
-      const chanceAnnual = Math.max(0, tableBase * ageFactor(a) * traitAdj * fertScale);
-      const chance = Math.min(0.95, Math.max(0, annualProbabilityToTurnProbability(chanceAnnual)));
-      if (chance <= 0) continue;
-
-      if (bRng.fork(`b:${father.id}:${mother.id}`).bool(chance)) {
-        const childId = allocId();
-        const sex = bRng.fork(`s:${childId}`).bool(0.52) ? "M" : "F";
-        const timing = sampledBirthTiming(bRng.fork(`t:${childId}`), worldYear);
-        const baby: any = {
-          id: childId,
-          name: sex === "M" ? "Thomas" : "Anne",
-          sex,
-          age: timing.ageAtTurnEnd,
-          birth_year: timing.birthYear,
-          alive: true,
-          married: false,
-          traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
-          house_id: playerHouseId,
-          residence_house_id: playerHouseId,
-        };
-
-        peopleReg[childId] = baby;
-        (mother as any).last_birth_year = worldYear;
-
-        if (!Array.isArray(anyState.kinship_edges)) anyState.kinship_edges = [];
-        anyState.kinship_edges.push({ kind: "parent_of", parent_id: mother.id, child_id: childId });
-        anyState.kinship_edges.push({ kind: "parent_of", parent_id: father.id, child_id: childId });
-
-        if (!memberIds.includes(childId)) memberIds.push(childId);
-
-        births.push(`${baby.name} (${baby.id})`);
-        state.manor.population = asNonNegInt(state.manor.population + 1);
-        popDelta += 1;
-      }
-    }
-  }
-
-
-  return { births, deaths, population_delta: popDelta };
-}
-
-function buildMarriageWindow(state: RunState, tierSets?: TierSets | null): MarriageWindow | null {
-  // Trigger when any eligible household subject exists OR an offer flag exists.
-  const anyFlags: any = state.flags;
-  const forced = Boolean(anyFlags.MarriageOffer);
-
-  const eligibleAll: Person[] = [];
-  const pushEligible = (person: Person | undefined | null) => {
-    if (!person || !person.alive || person.married || person.age < 15) return;
-    if (eligibleAll.some((p) => p.id === person.id)) return;
-    eligibleAll.push(person);
-  };
-  if (!state.house.spouse && state.house.spouse_status !== "widow") pushEligible(state.house.head);
-  for (const child of state.house.children) pushEligible(child);
-  if (!forced && eligibleAll.length === 0) return null;
-
-  // v0.2.5: pick a single subject (eldest eligible).
-  if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
-
-  const subject = [...eligibleAll].sort((a, b) => {
-    if (b.age !== a.age) return b.age - a.age; // older first
-    return a.id.localeCompare(b.id);
-  })[0]!;
-
-  const anyState: any = state as any;
-  const houses: Record<string, any> =
-    anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
-  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-
-  // v0.2.8: spouse candidates must come from the Tier1 eligible pool (People-First registries).
-  const tier1HouseIds = tierSets
-    ? [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseId).sort((a, b) => a.localeCompare(b))
-    : Object.keys(houses).filter((hid) => hid !== playerHouseId).sort((a, b) => a.localeCompare(b));
-
-  const poolIds = listEligibleCandidates(state, {
-    subject_person_id: subject.id,
-    scope: { kind: "house_ids", house_ids: tier1HouseIds },
-  });
-
-  // If no candidates exist, do not generate a same-sex marriage window.
-  if (poolIds.length === 0) {
-    if (forced) return { eligible_child_ids: [subject.id], offers: [] };
-    return null;
-  }
-
-  // Stable order before RNG picks; select WITHOUT replacement.
-  const pool = poolIds.slice();
-
-  const rng = new Rng(state.run_seed, "marriage", state.turn_index, "offers");
-  const offers: MarriageOffer[] = [];
-  const offerCount = 2 + (rng.bool(0.4) ? 1 : 0);
-
-  for (let i = 0; i < offerCount && pool.length > 0; i++) {
-    const idx = rng.int(0, Math.max(0, pool.length - 1));
-    const pid = pool.splice(idx, 1)[0]!;
-
-    const hid = houseIdForPerson(state, pid) ?? "";
-    const h: any = hid ? houses[hid] : null;
-    const houseName = typeof h?.name === "string" && h.name ? String(h.name) : hid ? String(hid) : "Unknown";
-    const quality = rng.next(); // 0..1
-    const dowry = Math.trunc(-4 + quality * 12) - (rng.bool(0.2) ? rng.int(0, 3) : 0); // -4..+8-ish
-
-    offers.push({
-      house_person_id: pid,
-      house_label: `House ${houseName}`,
-      dowry_coin_net: dowry,
-      relationship_delta: {
-        respect: Math.trunc(2 + quality * 6),
-        allegiance: Math.trunc(1 + quality * 4),
-        threat: Math.trunc(-1 - quality * 2),
-      },
-      liege_delta: rng.bool(0.35) ? { respect: 1, threat: -1 } : null,
-      risk_tags: [
-        quality > 0.75 ? "prestige" : quality < 0.25 ? "shady" : "plain",
-        dowry < 0 ? "costly" : "profitable",
-      ],
-    });
-  }
-
-  return { eligible_child_ids: [subject.id], offers };
-}
-
-// --- Prospects (v0.2.3) ---
-
-type ActiveProspectRef = { id: string; expires_turn: number };
-type ProspectResolution = { outcome: "accept" | "reject"; turn_index: number };
-
-function readActiveProspects(state: RunState): ActiveProspectRef[] {
-  const anyFlags: any = state.flags;
-  const raw = anyFlags._prospects_active_v1;
-  if (!Array.isArray(raw)) return [];
-  const out: ActiveProspectRef[] = [];
-  for (const r of raw) {
-    if (!r || typeof r !== "object") continue;
-    const id = (r as any).id;
-    const ex = (r as any).expires_turn;
-    if (typeof id === "string" && typeof ex === "number" && Number.isFinite(ex)) {
-      out.push({ id, expires_turn: Math.trunc(ex) });
-    }
-  }
-  return out.slice(0, 3);
-}
-
-function writeActiveProspects(state: RunState, refs: ActiveProspectRef[]): void {
-  const anyFlags: any = state.flags;
-  const bounded = refs.slice(0, 3).map((r) => ({ id: r.id, expires_turn: Math.trunc(r.expires_turn) }));
-  if (bounded.length === 0) {
-    delete anyFlags._prospects_active_v1;
-    return;
-  }
-  anyFlags._prospects_active_v1 = bounded;
-}
-
-function readResolvedProspectSignatures(state: RunState): Record<string, ProspectResolution> {
-  const anyFlags: any = state.flags as any;
-  const raw = anyFlags?._prospect_signatures_v1;
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-  return raw as Record<string, ProspectResolution>;
-}
-
-function writeResolvedProspectSignatures(state: RunState, map: Record<string, ProspectResolution>): void {
-  const anyFlags: any = state.flags as any;
-  const out: Record<string, ProspectResolution> = {};
-  for (const key of Object.keys(map).sort((a, b) => a.localeCompare(b)).slice(-64)) {
-    const row = map[key];
-    if (!row || typeof row !== "object") continue;
-    const outcome = row.outcome === "accept" ? "accept" : row.outcome === "reject" ? "reject" : null;
-    const turnIndex = typeof row.turn_index === "number" && Number.isFinite(row.turn_index) ? Math.trunc(row.turn_index) : null;
-    if (!outcome || turnIndex === null) continue;
-    out[key] = { outcome, turn_index: turnIndex };
-  }
-  if (Object.keys(out).length === 0) {
-    delete anyFlags._prospect_signatures_v1;
-    return;
-  }
-  anyFlags._prospect_signatures_v1 = out;
-}
-
-function inheritanceClaimSignature(state: RunState): string {
-  return `inheritance_claim:${state.house.head.id}`;
-}
-
-function prospectSignature(prospect: Prospect): string | null {
-  if (prospect.type === "inheritance_claim" && prospect.subject_person_id) {
-    return `inheritance_claim:${prospect.subject_person_id}`;
-  }
-  return null;
-}
-
-function isProspectSignatureSuppressed(state: RunState, signature: string): boolean {
-  const map = readResolvedProspectSignatures(state);
-  return Boolean(map[signature]);
-}
-
-function rememberResolvedProspect(state: RunState, prospect: Prospect, outcome: "accept" | "reject"): void {
-  const signature = prospectSignature(prospect);
-  if (!signature) return;
-  const map = readResolvedProspectSignatures(state);
-  map[signature] = { outcome, turn_index: state.turn_index };
-  writeResolvedProspectSignatures(state, map);
-}
-
-// v0.2.8 P0: clear marriage reservations tied to a prospect id (deterministic, bounded).
-function clearMarriageReservationsByProspectId(state: RunState, prospectId: string): void {
-  const anyFlags: any = state.flags as any;
-  const raw: any = anyFlags?.marriage_reservations;
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return;
-  const pid = String(prospectId ?? "");
-  if (!pid) return;
-  for (const k of Object.keys(raw).sort((a, b) => a.localeCompare(b))) {
-    const e: any = raw[k];
-    if (e && typeof e === "object" && String(e.prospect_id ?? "") === pid) {
-      delete raw[k];
-    }
-  }
-}
-
-function guessProspectTypeFromId(id: string): ProspectType {
-  if (id.includes("marriage")) return "marriage";
-  if (id.includes("inheritance")) return "inheritance_claim";
-  if (id.includes("grant")) return "grant";
-  return "grant";
-}
-
-function summaryForType(t: ProspectType): string {
-  if (t === "marriage") return "Marriage proposal";
-  if (t === "grant") return "Grant offer";
-  return "Inheritance claim";
-}
-
-function uncertaintyForType(t: ProspectType): "known" | "likely" | "possible" {
-  if (t === "marriage") return "known";
-  if (t === "grant") return "likely";
-  return "possible";
-}
-
-function lookupProspectFromHistory(state: RunState, prospectId: string): Prospect | null {
-  const log: any[] = (state.log ?? []) as any[];
-  for (let i = log.length - 1; i >= 0; i--) {
-    const rep: any = log[i]?.report;
-    const evs: any[] | undefined = rep?.prospects_log;
-    if (!Array.isArray(evs)) continue;
-    for (let j = evs.length - 1; j >= 0; j--) {
-      const ev: any = evs[j];
-      if (ev && ev.kind === "prospect_generated" && ev.prospect_id === prospectId && ev.prospect && typeof ev.prospect === "object") {
-        return ev.prospect as Prospect;
-      }
-    }
-  }
-  return null;
-}
-
-function pickSponsorHouseId(state: RunState): string {
-  const anyState: any = state as any;
-  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-  const houses: Record<string, any> = anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
-
-  const playerHeadId: string = resolveCurrentHouseHeadId(state, playerHouseId) ?? state.house.head.id;
-
-  let best: string | null = null;
-  let bestRespect = -1;
-
-  const ids = Object.keys(houses).filter((id) => id !== playerHouseId).sort(); // tie-break: house_id asc
-  for (const hid of ids) {
-    const headId = resolveCurrentHouseHeadId(state, hid);
-    if (typeof headId !== "string") continue;
-    const edge = state.relationships.find((e) => e.from_id === playerHeadId && e.to_id === headId);
-    if (!edge) continue;
-    if (edge.respect > bestRespect) {
-      bestRespect = edge.respect;
-      best = hid;
-    }
-  }
-
-  return best ?? playerHouseId;
-}
-
-function bestMarriageOfferIndex_v0_2_2_policy(state: RunState, mw: MarriageWindow): number | null {
-  let bestIdx: number | null = null;
-  let bestScore = -Infinity;
-  for (let i = 0; i < mw.offers.length; i++) {
-    const o = mw.offers[i]!;
-    const dowry = o.dowry_coin_net;
-    // same affordability filter as v0.2.2 prudent-builder marriage acceptance policy
-    if (dowry < 0 && state.manor.coin < Math.abs(dowry)) continue;
-    const score = dowry * 3 + o.relationship_delta.respect * 2 + o.relationship_delta.allegiance;
-    if (score > bestScore) {
-      bestScore = score;
-      bestIdx = i;
-    }
-  }
-  return bestIdx;
-}
-
-function buildProspectsWindow_v0_2_3(state: RunState, marriageWindow: MarriageWindow | null, prospectsLog: ProspectsLogEvent[]): ProspectsWindow {
-  const t = state.turn_index;
-  const anyState: any = state as any;
-  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-
-  const sponsorHouseId = pickSponsorHouseId(state);
-
-  // 1) Expire old prospects at start-of-turn (turn_index > expires_turn)
-  const active0 = readActiveProspects(state);
-  const active: ActiveProspectRef[] = [];
-  for (const ref of active0) {
-    if (t > ref.expires_turn) {
-      // Clear any marriage reservation tied to this prospect id (if present).
-      clearMarriageReservationsByProspectId(state, ref.id);
-      const p = lookupProspectFromHistory(state, ref.id);
-      // Also clear explicit spouse reservation when payload exists (belt + suspenders).
-      if (p && (p as any).type === "marriage") {
-        const spouseId: any = (p as any).spouse_person_id;
-        if (typeof spouseId === "string" && spouseId.length > 0) clearReservation(state, spouseId);
-      }
-      if (p) {
-        prospectsLog.push({
-          kind: "prospect_expired",
-          turn_index: t,
-          type: p.type,
-          from_house_id: p.from_house_id,
-          to_house_id: p.to_house_id,
-          subject_person_id: p.subject_person_id,
-          prospect_id: p.id,
-          effects_applied: {}
-        });
-      } else {
-        const tg = guessProspectTypeFromId(ref.id);
-        prospectsLog.push({
-          kind: "prospect_expired",
-          turn_index: t,
-          type: tg,
-          from_house_id: sponsorHouseId,
-          to_house_id: playerHouseId,
-          subject_person_id: null,
-          prospect_id: ref.id,
-          effects_applied: {}
-        });
-      }
-      continue;
-    }
-    active.push(ref);
-  }
-
-  // Keep flags bounded and accurate
-  writeActiveProspects(state, active);
-
-  const prospects: Prospect[] = [];
-
-  // 2) Rehydrate active prospects from history (do not store payloads in flags)
-  for (const ref of active) {
-    const p = lookupProspectFromHistory(state, ref.id);
-    if (p) {
-      prospects.push({ ...p, expires_turn: ref.expires_turn });
-    } else {
-      // Fallback minimal placeholder (should not happen in normal interactive runs)
-      const tg = guessProspectTypeFromId(ref.id);
-      prospects.push({
-        id: ref.id,
-        type: tg,
-        from_house_id: sponsorHouseId,
-        to_house_id: playerHouseId,
-        subject_person_id: null,
-        summary: summaryForType(tg),
-        requirements: [],
-        costs: {},
-        predicted_effects: {},
-        uncertainty: uncertaintyForType(tg),
-        expires_turn: ref.expires_turn,
-        actions: ["accept", "reject"]
-      });
-    }
-  }
-
-  const activeTypes = new Set<ProspectType>(prospects.map((p) => p.type));
-
-  // 3) Deterministic trigger-only generation (no random chances)
-  const idRng = new Rng(state.run_seed, "prospects", t, "id");
-  function makeId(pt: ProspectType, subject: string | null): string {
-    const n = idRng.fork(`id:${pt}:${sponsorHouseId}:${subject ?? "none"}`).int(0, 1_000_000_000);
-    return `pros_${pt}_${t}_${n.toString(36)}`;
-  }
-
-  function emitGenerated(p: Prospect): void {
-    prospectsLog.push({
-      kind: "prospect_generated",
-      turn_index: t,
-      type: p.type,
-      from_house_id: p.from_house_id,
-      to_house_id: p.to_house_id,
-      subject_person_id: p.subject_person_id,
-      prospect_id: p.id,
-      prospect: p
-    });
-  }
-
-  function addProspect(p: Prospect): void {
-    if (prospects.length >= 3) return;
-    prospects.push(p);
-    active.push({ id: p.id, expires_turn: p.expires_turn });
-    activeTypes.add(p.type);
-    emitGenerated(p);
-  }
-
-  // 3.1) marriage
-  if (prospects.length < 3 && !activeTypes.has("marriage") && marriageWindow && marriageWindow.eligible_child_ids.length > 0 && marriageWindow.offers.length > 0) {
-    const subjectId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0]!;
-    const bestIdx = bestMarriageOfferIndex_v0_2_2_policy(state, marriageWindow);
-    if (bestIdx !== null) {
-      const offer = marriageWindow.offers[bestIdx]!;
-      const spouseHouseId = houseIdForPerson(state, offer.house_person_id) ?? sponsorHouseId;
-      const relDeltas: any[] = [];
-      relDeltas.push({
-        scope: "person",
-        from_id: state.house.head.id,
-        to_id: offer.house_person_id,
-        allegiance_delta: offer.relationship_delta.allegiance,
-        respect_delta: offer.relationship_delta.respect,
-        threat_delta: offer.relationship_delta.threat
-      });
-
-      // v0.2.9 P0-A4: durable House↔House alliance deltas on accepted marriage prospects.
-      // Houses are actors in the canonical relationship model; we persist these as regular edges keyed by house ids.
-      const hhDelta = { allegiance: 6, respect: 4, threat: -3 };
-      if (spouseHouseId && playerHouseId && spouseHouseId !== playerHouseId) {
-        relDeltas.push({
-          scope: "house",
-          from_id: playerHouseId,
-          to_id: spouseHouseId,
-          allegiance_delta: hhDelta.allegiance,
-          respect_delta: hhDelta.respect,
-          threat_delta: hhDelta.threat
-        });
-        relDeltas.push({
-          scope: "house",
-          from_id: spouseHouseId,
-          to_id: playerHouseId,
-          allegiance_delta: hhDelta.allegiance,
-          respect_delta: hhDelta.respect,
-          threat_delta: hhDelta.threat
-        });
-      }
-      if (offer.liege_delta) {
-        relDeltas.push({
-          scope: "person",
-          from_id: state.house.head.id,
-          to_id: state.locals.liege.id,
-          allegiance_delta: 0,
-          respect_delta: offer.liege_delta.respect,
-          threat_delta: offer.liege_delta.threat
-        });
-      }
-
-      const p: Prospect = {
-        id: makeId("marriage", subjectId),
-        type: "marriage",
-        from_house_id: spouseHouseId,
-        to_house_id: playerHouseId,
-        subject_person_id: subjectId,
-        spouse_person_id: offer.house_person_id,
-        summary: "Marriage proposal",
-        requirements: [],
-        costs: {},
-        predicted_effects: {
-          coin_delta: offer.dowry_coin_net,
-          relationship_deltas: relDeltas,
-          flags_set: []
-        },
-        uncertainty: "known",
-        expires_turn: t + 2,
-        actions: ["accept", "reject"]
-      };
-      // v0.2.8 P0: reserve the spouse candidate until the prospect resolves/expires.
-      reserveCandidate(state, offer.house_person_id, p.id, p.expires_turn);
-      addProspect(p);
-    }
-  }
-
-  // 3.2) grant
-  const arrears = state.manor.obligations.arrears;
-  const hasArrears = (arrears?.coin ?? 0) > 0 || (arrears?.bushels ?? 0) > 0;
-  if (prospects.length < 3 && !activeTypes.has("grant") && hasArrears) {
-    // v0.2.3.4: minimal grant semantics (deterministic).
-    // Grant gives coin *now* (before obligation payments in applyDecisions), but increases liege leverage slightly.
-    const arrearsCoin = asNonNegInt(Math.trunc(arrears?.coin ?? 0));
-    const arrearsBushels = asNonNegInt(Math.trunc(arrears?.bushels ?? 0));
-    const pressure = arrearsCoin + Math.floor(arrearsBushels / 100);
-    const grantCoin = clampInt(2 + Math.floor(pressure * 0.5), 2, 12);
-
-    const relDeltas: any[] = [
-      {
-        scope: "person",
-        // Liege's view of the player (existing mechanics primarily use liege -> head).
-        from_id: state.locals.liege.id,
-        to_id: state.house.head.id,
-        allegiance_delta: +1,
-        respect_delta: -1,
-        threat_delta: +3
-      }
-    ];
-
-    const p: Prospect = {
-      id: makeId("grant", null),
-      type: "grant",
-      from_house_id: sponsorHouseId,
-      to_house_id: playerHouseId,
-      subject_person_id: null,
-      summary: "Grant offer",
-      requirements: [],
-      costs: {},
-      predicted_effects: {
-        coin_delta: grantCoin,
-        relationship_deltas: relDeltas,
-        flags_set: []
-      },
-      uncertainty: "likely",
-      expires_turn: t + 2,
-      actions: ["accept", "reject"]
-    };
-    addProspect(p);
-  }
-
-  // 3.3) inheritance_claim
-  const heir = state.house.heir_id ?? computeHeirId(state);
-  const inheritanceSignature = heir === null ? inheritanceClaimSignature(state) : null;
-  if (
-    prospects.length < 3 &&
-    !activeTypes.has("inheritance_claim") &&
-    heir === null &&
-    inheritanceSignature &&
-    !isProspectSignatureSuppressed(state, inheritanceSignature)
-  ) {
-    const p: Prospect = {
-      id: makeId("inheritance_claim", state.house.head.id),
-      type: "inheritance_claim",
-      from_house_id: sponsorHouseId,
-      to_house_id: playerHouseId,
-      subject_person_id: state.house.head.id,
-      summary: "Inheritance claim",
-      requirements: [],
-      costs: {},
-      predicted_effects: { flags_set: ["inheritance_claim_active"] },
-      uncertainty: "possible",
-      expires_turn: t + 2,
-      actions: ["accept", "reject"]
-    };
-    addProspect(p);
-  }
-
-  // Keep flags updated after any generation
-  writeActiveProspects(state, active);
-
-  // 4) Stable ordering
-  const order: Record<string, number> = { marriage: 0, grant: 1, inheritance_claim: 2 };
-  prospects.sort((a, b) => {
-    const da = order[a.type] ?? 99;
-    const db = order[b.type] ?? 99;
-    if (da != db) return da - db;
-    return a.id.localeCompare(b.id);
-  });
-
-  // 5) Presentation-only relevance filtering
-  const householdIds = new Set<string>();
-  householdIds.add(state.house.head.id);
-  if (state.house.spouse) householdIds.add(state.house.spouse.id);
-  for (const c of state.house.children) householdIds.add(c.id);
-
-  function sponsorRespectOk(fromHouseId: string): boolean {
-    const houses: Record<string, any> = anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
-    const playerHeadId: string = resolveCurrentHouseHeadId(state, playerHouseId) ?? state.house.head.id;
-    const sponsorHeadId: string | null = resolveCurrentHouseHeadId(state, fromHouseId);
-    if (!sponsorHeadId) return false;
-    const e = state.relationships.find((x) => x.from_id === playerHeadId && x.to_id === sponsorHeadId);
-    return Boolean(e && e.respect >= 55);
-  }
-
-  const shown_ids: string[] = [];
-  const hidden_ids: string[] = [];
-  for (const p of prospects) {
-    const involvesPlayer = p.subject_person_id ? householdIds.has(p.subject_person_id) : false;
-    const expiresThisTurn = p.expires_turn === t;
-    const sponsorOk = sponsorRespectOk(p.from_house_id);
-    const show = involvesPlayer || sponsorOk || expiresThisTurn;
-    if (show) shown_ids.push(p.id);
-    else hidden_ids.push(p.id);
-  }
-
-  if (prospects.length > 0) {
-    prospectsLog.push({ kind: "prospects_window_built", turn_index: t, shown_ids, hidden_ids });
-  }
-
-  return {
-    schema_version: "prospects_window_v1",
-    turn_index: t,
-    generated_at_turn_index: t,
-    prospects,
-    shown_ids,
-    hidden_ids
-  };
-}
-
-function applyProspectsDecision(state: RunState, ctx: TurnContext, decisions: TurnDecisions, prospectsLog: ProspectsLogEvent[]): void {
-  const anyDecisions: any = decisions as any;
-  const pd: any = anyDecisions.prospects;
-  if (!pd || typeof pd !== "object" || pd.kind !== "prospects") return;
-  const actions: any[] = Array.isArray(pd.actions) ? pd.actions : [];
-  if (actions.length === 0) return;
-
-  const active = readActiveProspects(state);
-  let activeList = active.slice();
-  const activeSet = new Set(activeList.map((r) => r.id));
-
-  const windowProspects = ctx.prospects_window?.prospects ?? [];
-  const byId = new Map(windowProspects.map((p) => [p.id, p] as const));
-
-  const processed = new Set<string>();
-
-  for (const a of actions) {
-    if (!a || typeof a !== "object") continue;
-    const pid = (a as any).prospect_id;
-    const act = (a as any).action;
-    if (typeof pid !== "string" || (act !== "accept" && act !== "reject")) continue;
-    if (processed.has(pid)) continue;
-    if (!activeSet.has(pid)) continue;
-
-    const prospect = byId.get(pid) ?? lookupProspectFromHistory(state, pid);
-    if (!prospect) continue;
-
-    let effectiveAct: "accept" | "reject" = act;
-
-    // v0.2.5 LOCK: same-sex marriage is disabled. Enforce at apply-time for safety/legacy states.
-    if (effectiveAct === "accept" && prospect.type === "marriage") {
-      const sid: any = (prospect as any).subject_person_id;
-      const spouseId: any = (prospect as any).spouse_person_id;
-      const anyState: any = state as any;
-      const reg: Record<string, Person> | undefined = anyState.people as any;
-      const subj = sid && reg ? reg[sid] : null;
-      const sp = spouseId && reg ? reg[spouseId] : null;
-      if (subj && sp && subj.sex === sp.sex) {
-        effectiveAct = "reject";
-      }
-    }
-
-    const applied: any = {};
-
-    function applyRelationshipDeltas(): void {
-      const rds: any[] | undefined = (prospect as any).predicted_effects?.relationship_deltas;
-      if (!Array.isArray(rds) || rds.length === 0) return;
-      for (const rd of rds) {
-        if (!rd || typeof rd !== "object") continue;
-        const from = (rd as any).from_id;
-        const to = (rd as any).to_id;
-        if (typeof from !== "string" || typeof to !== "string") continue;
-        adjustEdge(state, from, to, {
-          allegiance: Math.trunc((rd as any).allegiance_delta ?? 0),
-          respect: Math.trunc((rd as any).respect_delta ?? 0),
-          threat: Math.trunc((rd as any).threat_delta ?? 0)
-        });
-      }
-      applied.relationship_deltas = rds;
-    }
-
-    if (effectiveAct === "accept") {
-      const cd = (prospect as any).predicted_effects?.coin_delta;
-      if (typeof cd === "number" && Number.isFinite(cd)) {
-        const d = Math.trunc(cd);
-        if (d >= 0) state.manor.coin = asNonNegInt(state.manor.coin + d);
-        else state.manor.coin = asNonNegInt(state.manor.coin - Math.abs(d));
-        applied.coin_delta = d;
-      }
-
-      applyRelationshipDeltas();
-
-      if (prospect.type === "marriage") {
-        const rds: any[] = Array.isArray((prospect as any).predicted_effects?.relationship_deltas)
-          ? (prospect as any).predicted_effects.relationship_deltas
-          : [];
-        const playerHouseId: string | null = typeof (state as any)?.player_house_id === "string" ? String((state as any).player_house_id) : null;
-        const hh = rds.find((rd: any) => rd && rd.scope === "house" && typeof rd.from_id === "string" && typeof rd.to_id === "string" && (rd.from_id === playerHouseId || rd.to_id === playerHouseId));
-        if (hh) {
-          const otherHouseId = hh.from_id === playerHouseId ? hh.to_id : hh.from_id;
-          const houses: any = (state as any)?.houses;
-          const houseName = typeof houses?.[otherHouseId]?.name === "string" ? houses[otherHouseId].name : otherHouseId;
-          const a = Math.trunc(hh.allegiance_delta ?? 0);
-          const r = Math.trunc(hh.respect_delta ?? 0);
-          const t = Math.trunc(hh.threat_delta ?? 0);
-          applied.receipt_line = `Marriage alliance with House ${houseName}: A ${a >= 0 ? "+" : ""}${a}, R ${r >= 0 ? "+" : ""}${r}, T ${t >= 0 ? "+" : ""}${t}`;
-        }
-      }
-
-      const fs: any[] | undefined = (prospect as any).predicted_effects?.flags_set;
-      if (Array.isArray(fs) && fs.length > 0) {
-        const anyFlags: any = state.flags;
-        const appliedFlags: string[] = [];
-        for (const f of fs) {
-          if (typeof f === "string" && f.length > 0) {
-            anyFlags[f] = true;
-            appliedFlags.push(f);
-          }
-        }
-        if (appliedFlags.length > 0) applied.flags_set = appliedFlags;
-      }
-
-      if (prospect.type === "marriage" && prospect.subject_person_id) {
-        const sid = prospect.subject_person_id;
-        // People-First registry
-        const anyState: any = state as any;
-        if (anyState.people && anyState.people[sid]) {
-          anyState.people[sid].married = true;
-        }
-        // legacy household
-        if (state.house.head.id === sid) state.house.head.married = true;
-        if (state.house.spouse && state.house.spouse.id === sid) state.house.spouse.married = true;
-        for (const c of state.house.children) {
-          if (c.id === sid) c.married = true;
-        }
-
-        const spouseId: any = (prospect as any).spouse_person_id;
-        if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
-          if (anyState.people && anyState.people[spouseId]) {
-            anyState.people[spouseId].married = true;
-          }
-        }
-
-        // v0.2.7.1 HOTFIX: Wire spouse edge deterministically for later succession spouse swap.
-        if (typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
-          ensureKinshipSpouseOf(state, sid, spouseId);
-        }
-
-        // v0.2.8 HOTFIX: residency policy (patrilocal for player house)
-        // - Daughters marry out (leave the household court).
-        // - Sons stay in the household court; spouse joins.
-        const subjectChild = state.house.children.find((c) => c.id === sid) ?? null;
-        const spouseJoinsCourt = Boolean(subjectChild) && subjectChild!.sex === "M";
-
-        if (spouseJoinsCourt && typeof spouseId === "string" && spouseId.length > 0 && spouseId !== sid) {
-          addCourtExtraId(state, spouseId);
-          // Patrilocal: spouse joins player house residency.
-          {
-            const anyState: any = state as any;
-            const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-            if (anyState.people && anyState.people[spouseId]) anyState.people[spouseId].house_id = playerHouseId;
-            if (anyState.houses && anyState.houses[playerHouseId]) {
-              const h: any = anyState.houses[playerHouseId];
-              if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
-              if (!h.member_person_ids.includes(spouseId)) h.member_person_ids.push(spouseId);
-            }
-          }
-          removeCourtExcludeId(state, sid);
-        } else if (subjectChild && subjectChild.sex === "F") {
-          // Marriage-out affects court residency only; it must NOT remove from lineage.
-          addCourtExcludeId(state, sid);
-          // Residency transfer for married-out daughters: move to spouse's house roster when known.
-          {
-            const anyState: any = state as any;
-            const destHouseId = typeof prospect.from_house_id === "string" && prospect.from_house_id.length > 0 ? prospect.from_house_id : null;
-            if (anyState.people && anyState.people[sid] && destHouseId) anyState.people[sid].house_id = destHouseId;
-            const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-            const playerHouseRec: any = anyState.houses?.[playerHouseId];
-            if (playerHouseRec && Array.isArray(playerHouseRec.member_person_ids)) {
-              playerHouseRec.member_person_ids = playerHouseRec.member_person_ids.filter((x: any) => x !== sid);
-            }
-            const destHouseRec: any = destHouseId ? anyState.houses?.[destHouseId] : null;
-            if (destHouseRec) {
-              if (!Array.isArray(destHouseRec.member_person_ids)) destHouseRec.member_person_ids = [];
-              if (!destHouseRec.member_person_ids.includes(sid)) destHouseRec.member_person_ids.push(sid);
-            }
-          }
-        }
-      }
-
-      prospectsLog.push({
-        kind: "prospect_accepted",
-        turn_index: state.turn_index,
-        type: prospect.type,
-        from_house_id: prospect.from_house_id,
-        to_house_id: prospect.to_house_id,
-        subject_person_id: prospect.subject_person_id,
-        prospect_id: prospect.id,
-        effects_applied: applied
-      });
-      rememberResolvedProspect(state, prospect, "accept");
-    } else if (effectiveAct === "reject") {
-      // v0.2.3.4 correctness: predicted_effects are acceptance effects; rejecting is a no-op (unless a future
-      // prospect type models explicit rejection penalties).
-
-      prospectsLog.push({
-        kind: "prospect_rejected",
-        turn_index: state.turn_index,
-        type: prospect.type,
-        from_house_id: prospect.from_house_id,
-        to_house_id: prospect.to_house_id,
-        subject_person_id: prospect.subject_person_id,
-        prospect_id: prospect.id,
-        effects_applied: applied
-      });
-      rememberResolvedProspect(state, prospect, "reject");
-    }
-
-    // v0.2.8 P0: clear any marriage reservation once the prospect is decided (accept/reject).
-    if (prospect.type === "marriage") {
-      const spouseForReservation: any = (prospect as any).spouse_person_id;
-      if (typeof spouseForReservation === "string" && spouseForReservation.length > 0) {
-        clearReservation(state, spouseForReservation);
-      }
-    }
-
-    // remove from active list (decided)
-    activeList = activeList.filter((r) => r.id !== pid);
-    activeSet.delete(pid);
-    processed.add(pid);
-  }
-
-  writeActiveProspects(state, activeList);
-}
-
-function applyEvents(state: RunState): EventResult[] {
-  const t = state.turn_index;
-  const rng = new Rng(state.run_seed, "events", t, "select");
-  const cd = cooldownsObj(state);
-
-  const k = chooseEventCount(rng.fork("count"));
-  if (k === 0) return [];
-
-  const eligible: Array<{ def: typeof EVENT_DECK[number]; weight: number; notes: string[] }> = [];
-  for (const def of EVENT_DECK) {
-    if (cd[def.id]) continue;
-    const { weight, notes } = def.getWeight(state);
-    if (weight > 0) eligible.push({ def, weight, notes });
-  }
-  if (eligible.length === 0) return [];
-
-  const picked: typeof eligible = [];
-  const local = eligible.slice();
-  const results: EventResult[] = [];
-
-  for (let i = 0; i < k && local.length > 0; i++) {
-    const items = local.map((x) => ({ item: x, weight: x.weight }));
-    const pick = weightedPick(rng.fork(`pick${i}`), items);
-    const idx = local.findIndex((x) => x === pick.picked);
-    const chosen = local.splice(idx, 1)[0]!;
-    picked.push(chosen);
-
-    // Apply and log deltas
-    const before = {
-      bushels: state.manor.bushels_stored,
-      coin: state.manor.coin,
-      unrest: state.manor.unrest,
-      population: state.manor.population,
-      tax_due_coin: state.manor.obligations.tax_due_coin,
-      tithe_due_bushels: state.manor.obligations.tithe_due_bushels,
-      arrears_coin: state.manor.obligations.arrears.coin,
-      arrears_bushels: state.manor.obligations.arrears.bushels,
-      construction_progress: state.manor.construction ? state.manor.construction.progress : 0
-    };
-
-    const effects = chosen.def.apply(state, rng.fork(`apply:${chosen.def.id}`));
-
-    const after = {
-      bushels: state.manor.bushels_stored,
-      coin: state.manor.coin,
-      unrest: state.manor.unrest,
-      population: state.manor.population,
-      tax_due_coin: state.manor.obligations.tax_due_coin,
-      tithe_due_bushels: state.manor.obligations.tithe_due_bushels,
-      arrears_coin: state.manor.obligations.arrears.coin,
-      arrears_bushels: state.manor.obligations.arrears.bushels,
-      construction_progress: state.manor.construction ? state.manor.construction.progress : 0
-    };
-
-    const deltas = (Object.keys(before) as Array<keyof typeof before>).map((k2) => ({
-      key: k2 as any,
-      before: before[k2],
-      after: after[k2],
-      diff: after[k2] - before[k2]
-    })).filter((d) => d.diff !== 0);
-
-    // set cooldown
-    cd[chosen.def.id] = chosen.def.cooldown;
-
-    results.push({
-      id: chosen.def.id,
-      title: chosen.def.title,
-      category: chosen.def.category,
-      why: {
-        weight: chosen.weight,
-        roll: pick.roll,
-        notes: [
-          `Selected from ${eligible.length} eligible events (cap=2).`,
-          `Weight≈${chosen.weight.toFixed(2)} (relative p≈${(chosen.weight / pick.total).toFixed(2)}).`,
-          `State@trigger: bushels=${before.bushels}, coin=${before.coin}, unrest=${before.unrest}, pop=${before.population}, arrears_coin=${before.arrears_coin}, arrears_bushels=${before.arrears_bushels}.`,
-          `Cooldown: ${chosen.def.cooldown} turns.`,
-          ...chosen.notes
-        ]
-      },
-      effects,
-      deltas
-    });
-  }
-
-  return results;
-}
-
-function computeTopDrivers(report: TurnReport, before: RunState, after: RunState): string[] {
-  const drivers: Array<{ label: string; score: number; text: string }> = [];
-
-  const bushelDiff = after.manor.bushels_stored - before.manor.bushels_stored;
-  const unrestDiff = after.manor.unrest - before.manor.unrest;
-  const coinDiff = after.manor.coin - before.manor.coin;
-  const arrearsCoinDiff = after.manor.obligations.arrears.coin - before.manor.obligations.arrears.coin;
-  const arrearsBushelDiff = after.manor.obligations.arrears.bushels - before.manor.obligations.arrears.bushels;
-
-  drivers.push({
-    label: "Food",
-    score: Math.abs(bushelDiff),
-    text: `Food: prod +${report.production_bushels}, cons -${report.consumption_bushels}, spoil -${report.spoilage.loss_bushels}, net ${bushelDiff >= 0 ? "+" : ""}${bushelDiff}.`
-  });
-  drivers.push({
-    label: "Unrest",
-    score: Math.abs(unrestDiff),
-    text: `Unrest: net ${unrestDiff >= 0 ? "+" : ""}${unrestDiff} (threshold dispossession at 100).`
-  });
-  drivers.push({
-    label: "Obligations",
-    score: Math.abs(arrearsCoinDiff) * 20 + Math.abs(arrearsBushelDiff),
-    text: `Obligations: tax due ${report.obligations.tax_due_coin}, tithe due ${report.obligations.tithe_due_bushels}, arrears Δ coin ${arrearsCoinDiff >= 0 ? "+" : ""}${arrearsCoinDiff}, bushels ${arrearsBushelDiff >= 0 ? "+" : ""}${arrearsBushelDiff}.`
-  });
-  drivers.push({
-    label: "Coin",
-    score: Math.abs(coinDiff),
-    text: `Coin: net ${coinDiff >= 0 ? "+" : ""}${coinDiff}.`
-  });
-  drivers.sort((a, b) => b.score - a.score);
-  return drivers.slice(0, 3).map((d) => d.text);
+function evidenceReceipts(events: EvidenceEventV0[]): PhaseReceiptV0[] {
+  return events.map((event) => makePhaseReceipt(event.detail, "note"));
 }
 
 export function proposeTurn(state: RunState): TurnContext {
@@ -1949,10 +151,12 @@ export function proposeTurn(state: RunState): TurnContext {
         house_log: [],
         events: [],
         top_drivers: ["Game over."],
-        notes: []
+        notes: [],
+        phase_results_v0: []
       },
       marriage_window: null,
-      max_labor_shift: 0
+      max_labor_shift: 0,
+      phase_results_v0: []
     };
   }
 
@@ -1968,10 +172,10 @@ export function proposeTurn(state: RunState): TurnContext {
 
   // v0.2.8: compute tier sets once per turn (cached; deterministic).
   const tierSets = computeTierSets(working);
-  const anyWorking: any = working as any;
-  const playerHouseIdPF: string = typeof anyWorking.player_house_id === "string" ? anyWorking.player_house_id : "h_player";
 
   const houseLog: HouseLogEvent[] = [];
+  const previewPhaseResults: PhaseResultV0[] = [];
+  const preResolveSuccessionEvents: HouseLogEvent[] = [];
 
   // v0.2.3.2: structured delta trackers (UI support; no mechanics).
   const unrestBefore = working.manor.unrest;
@@ -2004,130 +208,81 @@ export function proposeTurn(state: RunState): TurnContext {
   }
 
   // 1) restore energy; compute heir
-  working.house.energy.available = working.house.energy.max;
+  refreshEnergy(working);
   const prevHeir = working.house.heir_id ?? null;
   const nextHeir = computeHeirId(working);
   if (nextHeir && nextHeir !== prevHeir) {
     const heirName = registryPersonFor(working, nextHeir)?.name;
-    if (heirName) houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
+    if (heirName) {
+      const heirEvent: HouseLogEvent = { kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName };
+      houseLog.push(heirEvent);
+      preResolveSuccessionEvents.push(heirEvent);
+    }
   }
 
   // 2) macro env shift
-  decrementCooldowns(working);
-  const spoil = applySpoilage(working);
-  const macro = computeWeatherMarket(working);
+  decrementEventCooldowns(working);
+  const spoil = applySpoilagePhase(working);
+  const macro = computeWeatherMarketPhase(working);
 
   // 3) production (+ construction progress)
-  const prod = applyProductionAndConstruction(working, macro.weather_multiplier);
+  const prod = applyProductionAndConstructionPhase(working, macro.weather_multiplier);
 
   // 4) obligations
   const unrestBeforeObl = working.manor.unrest;
-  applyObligationsAndArrearsPenalty(working, prod.production_bushels);
+  applyPreviewObligationsPhase(working, prod.production_bushels);
   {
     const diff = working.manor.unrest - unrestBeforeObl;
     if (diff !== 0) unrestContribs.push({ label: "Arrears", diff });
     unrestCursor = working.manor.unrest;
   }
+  const obligationsEvidence =
+    working.manor.obligations.arrears.coin > 0 || working.manor.obligations.arrears.bushels > 0
+      ? [makeEvidenceEvent({
+          kind: "arrears_pressure",
+          detail: "Preview obligations applied arrears pressure.",
+          category: "obligations"
+        })]
+      : [];
+  previewPhaseResults.push(makePhaseResult({
+    phase: "obligations",
+    receipts: [
+      makePhaseReceipt(`Tax due ${working.manor.obligations.tax_due_coin} coin; tithe due ${working.manor.obligations.tithe_due_bushels} bushels.`),
+      makePhaseReceipt(`Arrears coin ${working.manor.obligations.arrears.coin}; arrears bushels ${working.manor.obligations.arrears.bushels}.`)
+    ],
+    log_events: phaseLogEventsFromEvidence(obligationsEvidence),
+    evidence_events_v0: obligationsEvidence,
+    rng_keys_used: []
+  }));
 
   // 5) relationship drift
-  relationshipDrift(working);
+  applyRelationshipDriftPhase(working);
 
   // 5.5) noble demography (Tier0/1 only; excludes the player House to avoid double-processing with householdPhase).
-  {
-    const tier0HouseIds = [...tierSets.tier0.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
-    const tier1HouseIds = [...tierSets.tier1.houses].filter((hid) => hid !== playerHouseIdPF).sort((a, b) => a.localeCompare(b));
-
-    // Include Tier0/Tier1 person ids as well (locals, officers, institutions-as-people)
-    // so demography applies to on-screen actors. Exclude the player household to avoid double-processing.
-    const playerMemberIdsPF = new Set<string>(allHouseMemberIds(working, playerHouseIdPF));
-    const courtExcludedPF = new Set<string>(getCourtExcludeIds(working));
-    const playerPersonIds = new Set<string>([...playerMemberIdsPF].filter((pid) => !courtExcludedPF.has(pid)));
-    if (working.house?.head?.id) playerPersonIds.add(working.house.head.id);
-    if (working.house?.spouse?.id) playerPersonIds.add(working.house.spouse.id);
-
-    const tier0PersonIds = [...tierSets.tier0.people]
-      .filter((pid) => !playerPersonIds.has(pid))
-      .sort((a, b) => a.localeCompare(b));
-    const tier1PersonIds = [...tierSets.tier1.people]
-      .filter((pid) => !playerPersonIds.has(pid))
-      .sort((a, b) => a.localeCompare(b));
-
-    const tierArg = {
-      tier0_house_ids: tier0HouseIds,
-      tier1_house_ids: tier1HouseIds,
-      tier0_person_ids: tier0PersonIds,
-      tier1_person_ids: tier1PersonIds,
-    };
-
-    const baseYear = working.turn_index * TURN_YEARS;
-
-    // Option B: world marriages (Tier0/1) so Gen2 births are possible.
-    // Keep once-per-turn to avoid over-activating coupling rates while we annualize mortality/fertility/aging.
-    {
-      const marriageRng = new Rng(working.run_seed, "demography", working.turn_index, "marriage");
-      processNobleMarriages(working as any,
-        tierArg,
-        { float01: (label: string) => marriageRng.fork(label).next() },
-        { year: baseYear }
-      );
-    }
-
-    // v0.2.9 canonical annualization: for each of 3 years, run mortality -> fertility -> age+1.
-    let birthsThisTurn = 0;
-    const shouldAge = (pid: string): boolean => !playerPersonIds.has(pid);
-    const ageOneYear = () => {
-      const reg: Record<string, any> = ((working as any).people ?? {}) as any;
-      const aged = new Set<string>();
-      const bump = (pid: string) => {
-        if (!shouldAge(pid)) return;
-        if (aged.has(pid)) return;
-        const p = reg?.[pid];
-        if (!p || typeof p !== "object") return;
-        if (p.alive === false || p.is_alive === false || p.is_dead === true) return;
-        if (typeof p.age === "number" && Number.isFinite(p.age)) p.age += 1;
-        aged.add(pid);
-      };
-      for (const pid of tier0PersonIds) bump(pid);
-      for (const pid of tier1PersonIds) bump(pid);
-      for (const hid of tier0HouseIds) {
-        const h: any = (working as any).houses?.[hid];
-        if (!h || typeof h !== "object") continue;
-        const ids = allHouseMemberIds(working, hid);
-        for (const pid of ids) bump(pid);
-      }
-      for (const hid of tier1HouseIds) {
-        const ids = allHouseMemberIds(working, hid);
-        for (const pid of ids) bump(pid);
-      }
-    };
-
-    for (let yi = 0; yi < TURN_YEARS; yi++) {
-      const year = baseYear + yi;
-      const mortalityRng = new Rng(working.run_seed, "demography", working.turn_index, `mortality:y${yi}`);
-      const fertilityRng = new Rng(working.run_seed, "demography", working.turn_index, `fertility:y${yi}`);
-
-      processNobleMortality(working as any,
-        tierArg,
-        { float01: (label: string) => mortalityRng.fork(label).next() },
-        { year }
-      );
-
-      const demog = processNobleFertility(working as any,
-        tierArg,
-        { float01: (label: string) => fertilityRng.fork(label).next() },
-        { year }
-      );
-
-      if (demog && Array.isArray((demog as any).births)) birthsThisTurn += (demog as any).births.length;
-      ageOneYear();
-    }
-
-    // Optional (debug-only) counter in flags; does not affect mechanics.
-    (working.flags as any)._demography_births_last_turn = birthsThisTurn;
-  }
+  applyNobleDemographyPhase(working, tierSets);
 
   // 6) household (births/deaths)
-  const hh = householdPhase(working, houseLog);
+  const houseLogBeforeDemography = houseLog.length;
+  const hh = applyHouseholdDemographyPhase(working, houseLog, {
+    syncPlayerHouseSummaryFromRegistry
+  });
+  const demographyHouseLog = houseLog.slice(houseLogBeforeDemography);
+  const demographyHouseEvidence = houseLogEvidenceEvents(demographyHouseLog);
+  const demographyEvidence = [
+    ...hh.births.map((birth) => makeEvidenceEvent({ kind: "birth", detail: birth, category: "household" })),
+    ...hh.deaths.map((death) => makeEvidenceEvent({ kind: "death", detail: death, category: "household" })),
+    ...demographyHouseEvidence
+  ];
+  previewPhaseResults.push(makePhaseResult({
+    phase: "demography",
+    receipts: [
+      makePhaseReceipt(`Household births ${hh.births.length}; deaths ${hh.deaths.length}; population delta ${hh.population_delta}.`),
+      ...evidenceReceipts(demographyHouseEvidence)
+    ],
+    log_events: phaseLogEventsFromEvidence(demographyEvidence),
+    evidence_events_v0: demographyEvidence,
+    rng_keys_used: ["household:mortality", "household:birth", "household:birth_family", "demography:marriage", "demography:mortality", "demography:fertility"]
+  }));
   syncHouseRegistryCurrentHeads(working);
 
   // v0.2.3.4: Recompute heir after births/deaths so the report/roster never points at a deceased heir.
@@ -2136,19 +291,68 @@ export function proposeTurn(state: RunState): TurnContext {
     const next = computeHeirId(working);
     if (next && next !== prev) {
       const heirName = registryPersonFor(working, next)?.name;
-      if (heirName) houseLog.push({ kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName });
+      if (heirName) {
+        const heirEvent: HouseLogEvent = { kind: "heir_selected", turn_index: working.turn_index, heir_name: heirName };
+        houseLog.push(heirEvent);
+        preResolveSuccessionEvents.push(heirEvent);
+      }
     }
   }
 
   // v0.2.7.1 HOTFIX: If HoH died this processed turn, resolve succession now so Turn Report/preview never shows a dead ruler.
-  resolveSuccessionNow_v0_2_7_1(working, houseLog);
+  const houseLogBeforePreviewSuccession = houseLog.length;
+  resolveSuccessionPhase(working, houseLog, undefined, {
+    computeAdultSuccessorId,
+    computeHeirId,
+    rebaseHeadRelationships,
+    syncPlayerHouseSummaryFromRegistry
+  });
+  const previewSuccessionEvents = [...preResolveSuccessionEvents, ...houseLog.slice(houseLogBeforePreviewSuccession)];
+  const previewSuccessionEvidence = houseLogEvidenceEvents(previewSuccessionEvents);
+  previewPhaseResults.push(makePhaseResult({
+    phase: "succession",
+    receipts: previewSuccessionEvidence.length
+      ? evidenceReceipts(previewSuccessionEvidence)
+      : [makePhaseReceipt(`Heir ${working.house.heir_id ?? "none"}; head ${working.house.head.id}.`)],
+    log_events: phaseLogEventsFromEvidence(previewSuccessionEvidence),
+    evidence_events_v0: previewSuccessionEvidence,
+    rng_keys_used: []
+  }));
   syncHouseRegistryCurrentHeads(working);
 
   // 7) court size/consumption (v0.2.4)
   const court = courtConsumptionBushels_v0_2_4(working, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS, houseLog);
 
   // 8) consumption (peasants + court)
-  const cons = applyConsumptionAndShortage(working, court.court_consumption_bushels);
+  const cons = applyConsumptionAndShortagePhase(working, court.court_consumption_bushels);
+  const consumptionEvidence = [
+    ...(prod.completed_improvement_id
+      ? [makeEvidenceEvent({
+          kind: "construction_completed",
+          detail: prod.completed_improvement_id,
+          category: "construction"
+        })]
+      : []),
+    ...(cons.shortage_bushels > 0
+      ? [makeEvidenceEvent({
+          kind: "shortage",
+          detail: `Shortage ${cons.shortage_bushels} bushels.`,
+          category: "economy"
+        })]
+      : [])
+  ];
+  previewPhaseResults.push(makePhaseResult({
+    phase: "consumption",
+    receipts: [
+      makePhaseReceipt(`Weather ${macro.weather_multiplier.toFixed(2)}; market ${macro.market.price_per_bushel.toFixed(2)} coin/bushel; sell cap ${macro.market.sell_cap_bushels}.`),
+      makePhaseReceipt(`Spoilage -${spoil.loss_bushels}; production +${prod.production_bushels}; consumption -${cons.total_consumption_bushels}.`),
+      ...(prod.completed_improvement_id ? [makePhaseReceipt(`Construction completed: ${prod.completed_improvement_id}.`, "note")] : []),
+      ...(cons.shortage_bushels > 0 ? [makePhaseReceipt(`Shortage ${cons.shortage_bushels} bushels; population ${cons.population_delta}.`, "note")] : [])
+    ],
+    log_events: phaseLogEventsFromEvidence(consumptionEvidence),
+    evidence_events_v0: consumptionEvidence,
+    rng_keys_used: ["weather:macro", "market:macro", "household:shortage"]
+  }));
 
   // Unrest contributor: shortage.
   {
@@ -2164,7 +368,15 @@ export function proposeTurn(state: RunState): TurnContext {
   }
 
   // 9) event engine (independent)
-  const events = applyEvents(working);
+  const events = applyEventsPhase(working);
+  const eventsEvidence = appliedEventEvidenceEvents(events);
+  previewPhaseResults.push(makePhaseResult({
+    phase: "events",
+    receipts: [makePhaseReceipt(`${events.length} event${events.length === 1 ? "" : "s"} applied.`)],
+    log_events: phaseLogEventsFromEvidence(eventsEvidence),
+    evidence_events_v0: eventsEvidence,
+    rng_keys_used: ["events:select"]
+  }));
 
   // Unrest contributors: events.
   for (const ev of events) {
@@ -2190,7 +402,7 @@ export function proposeTurn(state: RunState): TurnContext {
     laborSignalAfter = laborAfterNorm;
   }
 
-  syncLocalsFromRegistry(working);
+  syncLocalsFromRegistryPhase(working);
 
   const report: TurnReport = {
     turn_index: state.turn_index,
@@ -2283,11 +495,32 @@ export function proposeTurn(state: RunState): TurnContext {
       return { improvement_id, status };
     });
 
-  const marriageWindow = buildMarriageWindow(working, tierSets);
+  const marriageWindow = buildMarriageWindowPhase(working, tierSets);
+  const marriageEvidence = marriageOfferEvidenceEvents(marriageWindow?.offers ?? []);
+  previewPhaseResults.push(makePhaseResult({
+    phase: "marriage",
+    receipts: [makePhaseReceipt(`Marriage window eligible ${marriageWindow?.eligible_child_ids.length ?? 0}; offers ${marriageWindow?.offers.length ?? 0}.`)],
+    log_events: phaseLogEventsFromEvidence(marriageEvidence),
+    evidence_events_v0: marriageEvidence,
+    rng_keys_used: ["marriage:offers"]
+  }));
 
   // Prospects window + engine log (v0.2.3)
   const prospectsLog: ProspectsLogEvent[] = [];
-  const prospectsWindow = buildProspectsWindow_v0_2_3(working, marriageWindow, prospectsLog);
+  const prospectsWindow = buildProspectsWindowPhase(working, marriageWindow, prospectsLog, {
+    computeHeirId
+  });
+  const prospectsEvidence = prospectsLogEvidenceEvents(prospectsLog);
+  previewPhaseResults.push(makePhaseResult({
+    phase: "prospects",
+    receipts: [
+      makePhaseReceipt(`Prospects shown ${prospectsWindow.shown_ids.length}; hidden ${prospectsWindow.hidden_ids.length}; total ${prospectsWindow.prospects.length}.`),
+      ...evidenceReceipts(prospectsEvidence)
+    ],
+    log_events: phaseLogEventsFromEvidence(prospectsEvidence),
+    evidence_events_v0: prospectsEvidence,
+    rng_keys_used: ["prospects:id"]
+  }));
   if (prospectsLog.length) report.prospects_log = prospectsLog;
 
   const maxShift = maxLaborDeltaPerTurn(working.manor.population);
@@ -2296,11 +529,11 @@ export function proposeTurn(state: RunState): TurnContext {
   ensurePeopleFirst(working);
 
   // v0.2.3.4: embed canonical household roster (schema unchanged).
-  const roster = buildHouseholdRoster_v0_2_3_2(working);
+  const roster = buildHouseholdRoster(working);
   report.household_roster = roster;
 
   // v0.2.8: derived household roster view (roles relative to current HoH; view-only).
-  const derived = deriveHouseholdRoster(working as any, playerHouseIdPF);
+  const derived = deriveHouseholdRoster(working as any, playerHouseIdOf(working));
   const heirId = working.house.heir_id ?? null;
 
   // Widow/widower badge (same rule as household_roster_v1).
@@ -2331,6 +564,7 @@ export function proposeTurn(state: RunState): TurnContext {
   // v0.2.4: embed court roster + headcount into report for history-safe rendering.
   report.court_roster = court.court_roster;
   report.court_headcount = court.court_headcount;
+  report.phase_results_v0 = previewPhaseResults;
 
   return {
     preview_state: working,
@@ -2338,515 +572,12 @@ export function proposeTurn(state: RunState): TurnContext {
     marriage_window: marriageWindow,
     prospects_window: prospectsWindow,
     max_labor_shift: maxShift,
+    phase_results_v0: previewPhaseResults,
     household_roster: roster,
     household_roster_view: rosterView,
     court_roster: court.court_roster
   };
 }
-
-function payCoin(state: RunState, amount: number): number {
-  const pay = Math.min(state.manor.coin, Math.max(0, Math.trunc(amount)));
-  state.manor.coin = asNonNegInt(state.manor.coin - pay);
-  return pay;
-}
-function payBushels(state: RunState, amount: number): number {
-  const pay = Math.min(state.manor.bushels_stored, Math.max(0, Math.trunc(amount)));
-  state.manor.bushels_stored = asNonNegInt(state.manor.bushels_stored - pay);
-  return pay;
-}
-
-function applyObligationPaymentsAndPenalties(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
-  const ob = state.manor.obligations;
-
-  // Pay arrears first
-  let coinPay = payCoin(state, decisions.obligations.pay_coin);
-  let bushelPay = payBushels(state, decisions.obligations.pay_bushels);
-
-  // Apply to arrears
-  const arrearsCoinBefore = ob.arrears.coin;
-  const arrearsBushelsBefore = ob.arrears.bushels;
-  const toArrearsCoin = Math.min(ob.arrears.coin, coinPay);
-  ob.arrears.coin = asNonNegInt(ob.arrears.coin - toArrearsCoin);
-  coinPay = asNonNegInt(coinPay - toArrearsCoin);
-
-  const toArrearsBushels = Math.min(ob.arrears.bushels, bushelPay);
-  ob.arrears.bushels = asNonNegInt(ob.arrears.bushels - toArrearsBushels);
-  bushelPay = asNonNegInt(bushelPay - toArrearsBushels);
-
-  // Then apply to current dues (any remaining pay after arrears)
-  const toTax = Math.min(ob.tax_due_coin, coinPay);
-  ob.tax_due_coin = asNonNegInt(ob.tax_due_coin - toTax);
-  coinPay = asNonNegInt(coinPay - toTax);
-
-  const toTithe = Math.min(ob.tithe_due_bushels, bushelPay);
-  ob.tithe_due_bushels = asNonNegInt(ob.tithe_due_bushels - toTithe);
-  bushelPay = asNonNegInt(bushelPay - toTithe);
-
-  if (arrearsCoinBefore > 0 || arrearsBushelsBefore > 0) {
-    reportNotes.push(`Paid arrears: coin -${toArrearsCoin}, bushels -${toArrearsBushels}.`);
-  }
-  if (toTax > 0 || toTithe > 0) {
-    reportNotes.push(`Paid current dues: tax -${toTax} coin, tithe -${toTithe} bushels.`);
-  }
-
-  // War levy handling (WP-07 auto fallback)
-  if (ob.war_levy_due && ob.war_levy_due.kind === "men_or_coin") {
-    const levy = ob.war_levy_due;
-    const choice = decisions.obligations.war_levy_choice ?? "ignore";
-    if (choice === "men") {
-      // men reduces farmers next turn
-      const mods = modsObj(state);
-      mods["farmer_penalty"] = (mods["farmer_penalty"] ?? 0) + levy.men;
-      ob.war_levy_due = null;
-      adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: +2, threat: -2 });
-      reportNotes.push(`War levy answered with men: -${levy.men} effective farmers next turn.`);
-    } else if (choice === "coin") {
-      const paid = payCoin(state, levy.coin);
-      const remaining = levy.coin - paid;
-      if (remaining <= 0) {
-        ob.war_levy_due = null;
-        adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: +2, threat: -2 });
-        reportNotes.push(`War levy paid in coin: -${levy.coin} coin.`);
-      } else {
-        // fallback to men proportional to remaining coin
-        const menNeeded = Math.ceil(levy.men * (remaining / levy.coin));
-        const availableMen = Math.max(0, state.manor.farmers); // simplistic availability
-        if (availableMen >= menNeeded) {
-          const mods = modsObj(state);
-          mods["farmer_penalty"] = (mods["farmer_penalty"] ?? 0) + menNeeded;
-          ob.war_levy_due = null;
-          adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: +1, threat: -1 });
-          reportNotes.push(`War levy coin shortfall: paid ${paid}/${levy.coin} coin; covered remainder with men (-${menNeeded} effective farmers next turn).`);
-        } else {
-          // refusal
-          adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: -4, threat: +6 });
-          reportNotes.push(`War levy NOT met: paid ${paid}/${levy.coin} coin; insufficient men. Liege anger rises.`);
-        }
-      }
-    } else {
-      // ignore => refusal
-      adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: -3, threat: +5 });
-      reportNotes.push("War levy ignored; liege displeased.");
-    }
-  }
-}
-
-function applyConstructionDecision(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
-  const d = decisions.construction;
-  if (d.action === "none") return;
-
-  if (d.action === "abandon") {
-    if (!state.manor.construction) return;
-    if (!d.confirm) {
-      reportNotes.push("Abandon project canceled.");
-      return;
-    }
-    // WP-06: abandon is lossy; progress lost; coin not refunded.
-    state.manor.construction = null;
-    reportNotes.push("Project abandoned; progress lost and coin not refunded.");
-    return;
-  }
-
-  if (d.action === "start") {
-    // disallow selecting a new project if one is active (WP-06)
-    if (state.manor.construction) {
-      reportNotes.push("Cannot start a new project while construction is active. Abandon first.");
-      return;
-    }
-    const def = IMPROVEMENTS[d.improvement_id];
-    if (!def) {
-      reportNotes.push("Invalid improvement selection.");
-      return;
-    }
-    if (state.manor.improvements.includes(def.id)) {
-      reportNotes.push("Improvement already completed.");
-      return;
-    }
-    if (state.manor.coin < def.coin_cost) {
-      reportNotes.push("Insufficient coin to start project.");
-      return;
-    }
-    if (state.house.energy.available < def.energy_cost) {
-      reportNotes.push("Insufficient energy to start project.");
-      return;
-    }
-    state.manor.coin = asNonNegInt(state.manor.coin - def.coin_cost);
-    state.house.energy.available = clampInt(state.house.energy.available - def.energy_cost, 0, state.house.energy.max);
-    state.manor.construction = { improvement_id: def.id, progress: 0, required: def.required };
-    reportNotes.push(`Started construction: ${def.name} (cost ${def.coin_cost} coin).`);
-  }
-}
-
-function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: TurnDecisions, reportNotes: string[]): void {
-  const mw = ctx.marriage_window;
-  const d = decisions.marriage;
-  if (!mw) return;
-  if (d.action === "none") return;
-
-  // energy cost (simple)
-  if (state.house.energy.available <= 0) {
-    reportNotes.push("No energy for marriage action.");
-    return;
-  }
-
-  if (d.action === "scout") {
-    state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
-    // small coin cost for scouting
-    if (state.manor.coin > 0) state.manor.coin -= 1;
-    // set a flag to slightly improve next offer quality (implemented as mod)
-    const mods = modsObj(state);
-    mods["marriage_quality"] = (mods["marriage_quality"] ?? 1) * 1.05;
-    reportNotes.push("Scouted prospects; next marriage window slightly improved.");
-    return;
-  }
-
-  if (d.action === "reject_all") {
-    state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
-    // small social penalty: unrest +1
-    state.manor.unrest = clampInt(state.manor.unrest + 1, 0, 100);
-    reportNotes.push("Rejected all offers; slight social friction (+1 unrest).");
-    return;
-  }
-
-  if (d.action === "accept") {
-    const isHeadSubject = state.house.head.id === d.child_id;
-    const child = isHeadSubject ? state.house.head : state.house.children.find((c) => c.id === d.child_id);
-    const offer = mw.offers[d.offer_index];
-    if (!child || !offer) {
-      reportNotes.push("Invalid marriage selection.");
-      return;
-    }
-
-    // v0.2.5 LOCK: same-sex marriage is disabled.
-    // Offers are generated to avoid this, but enforce at accept-time for safety/legacy states.
-    {
-      const anyState: any = state as any;
-      const reg: Record<string, Person> | undefined = anyState.people as any;
-      const spousePerson = reg ? reg[offer.house_person_id] : null;
-      if (spousePerson && spousePerson.sex === child.sex) {
-        reportNotes.push("Cannot accept: same-sex marriage is disallowed.");
-        return;
-      }
-    }
-
-    const dowry = offer.dowry_coin_net;
-
-    // Must-fix: negative dowry requires sufficient coin; do not silently proceed.
-    if (dowry < 0 && state.manor.coin < Math.abs(dowry)) {
-      reportNotes.push("Cannot accept: insufficient coin for negative dowry.");
-      return;
-    }
-
-    state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
-
-    // Apply dowry
-    if (dowry >= 0) state.manor.coin = asNonNegInt(state.manor.coin + dowry);
-    else state.manor.coin = asNonNegInt(state.manor.coin - Math.abs(dowry));
-
-    // Mark married
-    child.married = true;
-
-    // People-First registry mirror (prevents later sync overwrites in hybrid runs).
-    {
-      const anyState: any = state as any;
-      if (anyState.people && anyState.people[child.id]) anyState.people[child.id].married = true;
-      if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
-    }
-
-    // v0.2.7.1 HOTFIX: Wire spouse edge deterministically for later succession spouse swap.
-    ensureKinshipSpouseOf(state, child.id, offer.house_person_id);
-
-    // v0.2.8 HOTFIX: residency policy (patrilocal for player house)
-    // - Daughters marry out (leave the household court).
-    // - Sons stay in the household court; spouse joins.
-    const spouseJoinsCourt = isHeadSubject ? true : child.sex === "M";
-
-    if (spouseJoinsCourt) {
-      addCourtExtraId(state, offer.house_person_id);
-      // Patrilocal: spouse joins player house residency.
-      {
-        const anyState: any = state as any;
-        const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
-        if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].house_id = playerHouseId;
-        if (anyState.houses && anyState.houses[playerHouseId]) {
-          const h: any = anyState.houses[playerHouseId];
-          if (!Array.isArray(h.member_person_ids)) h.member_person_ids = [];
-          if (!h.member_person_ids.includes(offer.house_person_id)) h.member_person_ids.push(offer.house_person_id);
-        }
-      }
-      if (isHeadSubject) {
-        const anyState: any = state as any;
-        const spousePerson = anyState.people?.[offer.house_person_id] ?? null;
-        if (spousePerson) {
-          state.house.spouse = spousePerson;
-          state.house.spouse_status = "spouse";
-          spousePerson.married = true;
-        }
-      } else {
-        removeCourtExcludeId(state, child.id);
-      }
-    } else {
-      // Marriage-out affects court residency only; it must NOT remove from lineage.
-      addCourtExcludeId(state, child.id);
-    }
-
-    // Relationship deltas (to offering house + sometimes liege)
-    adjustEdge(state, state.house.head.id, offer.house_person_id, offer.relationship_delta);
-    if (offer.liege_delta) {
-      adjustEdge(state, state.house.head.id, state.locals.liege.id, { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat });
-    }
-
-    // Set flag increasing birth chance slightly
-    const mods = modsObj(state);
-    mods["birth_bonus"] = (mods["birth_bonus"] ?? 1) * 1.03;
-
-    reportNotes.push(`Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`);
-  }
-}
-
-function applyLaborDecision(state: RunState, decisions: TurnDecisions, maxShift: number, reportNotes: string[]): void {
-  const desiredFarmers = Math.max(0, Math.trunc(decisions.labor.desired_farmers));
-  const desiredBuilders = Math.max(0, Math.trunc(decisions.labor.desired_builders));
-
-  if (desiredFarmers + desiredBuilders > state.manor.population) {
-    reportNotes.push("Labor plan invalid (exceeds population); no change applied.");
-    return;
-  }
-
-  const curF = state.manor.farmers;
-  const curB = state.manor.builders;
-
-  const dF = Math.abs(desiredFarmers - curF);
-  const dB = Math.abs(desiredBuilders - curB);
-  const totalShift = dF + dB;
-
-  // v0.2.3.2: If the current state is oversubscribed (legacy save / earlier bug),
-  // allow rebalancing without being blocked by the per-turn labor delta cap.
-  const oversubscribedNow = curF + curB > state.manor.population;
-
-  if (!oversubscribedNow && totalShift > maxShift) {
-    reportNotes.push(`Labor change exceeds cap (max ${maxShift}); no change applied.`);
-    return;
-  }
-  // Intentionally no note: the UI can show structured labor warnings via report.labor_signal.
-
-  // energy cost if any change
-  if (totalShift > 0) {
-    if (state.house.energy.available <= 0) {
-      reportNotes.push("No energy for labor plan; no change applied.");
-      return;
-    }
-    state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
-  }
-
-  state.manor.farmers = clampInt(desiredFarmers, 0, state.manor.population);
-  state.manor.builders = clampInt(desiredBuilders, 0, state.manor.population);
-  reportNotes.push(`Labor plan set (takes effect next turn's production): farmers ${state.manor.farmers}, builders ${state.manor.builders}.`);
-}
-
-function applySellDecision(state: RunState, ctx: TurnContext, decisions: TurnDecisions, reportNotes: string[]): void {
-  const sell = Math.max(0, Math.trunc(decisions.sell.sell_bushels));
-  if (sell <= 0) return;
-  if (state.house.energy.available <= 0) {
-    reportNotes.push("No energy to sell.");
-    return;
-  }
-  const cap = ctx.report.market.sell_cap_bushels;
-  const allowed = Math.min(cap, sell);
-  const sold = Math.min(state.manor.bushels_stored, allowed);
-  state.manor.bushels_stored = asNonNegInt(state.manor.bushels_stored - sold);
-  const earned = Math.floor(sold * ctx.report.market.price_per_bushel);
-  state.manor.coin = asNonNegInt(state.manor.coin + earned);
-  state.house.energy.available = clampInt(state.house.energy.available - 1, 0, state.house.energy.max);
-
-  reportNotes.push(`Sold ${sold} bushels (cap ${cap}) for +${earned} coin at ${ctx.report.market.price_per_bushel.toFixed(2)}/bushel.`);
-  if (sell > allowed) reportNotes.push("Sell amount trimmed to market cap.");
-}
-
-function spouseIdFromKinship(state: RunState, personId: string): string | null {
-  const anyState: any = state as any;
-  const edges = (anyState.kinship_edges ?? []) as any[];
-
-  const matches = new Set<string>();
-  for (const e of edges) {
-    if (!e || e.kind !== "spouse_of") continue;
-    if (e.a_id === personId && typeof e.b_id === "string") matches.add(e.b_id);
-    else if (e.b_id === personId && typeof e.a_id === "string") matches.add(e.a_id);
-  }
-
-  const sorted = [...matches].sort((a, b) => a.localeCompare(b));
-  return sorted[0] ?? null;
-}
-
-function ensureKinshipSpouseOf(state: RunState, aId: string, bId: string): void {
-  if (!aId || !bId || aId === bId) return;
-  const anyState: any = state as any;
-  anyState.kinship_edges = (anyState.kinship_edges ?? []) as any[];
-  const edges = anyState.kinship_edges as any[];
-  const exists = edges.some(
-    (e) =>
-      e?.kind === "spouse_of" &&
-      ((e.a_id === aId && e.b_id === bId) || (e.a_id === bId && e.b_id === aId))
-  );
-  if (!exists) edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
-}
-
-
-function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
-  const anyState: any = state as any;
-  const playerHouseId = playerHouseIdOf(state);
-  const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
-  const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
-  const memberIds: string[] = Array.isArray(houseRec?.member_person_ids)
-    ? houseRec.member_person_ids.filter((x: any): x is string => typeof x === "string" && x.length > 0)
-    : [];
-  const candidates = memberIds
-    .map((id) => reg[id])
-    .filter((p) => p && p.alive !== false)
-    .filter((p) => typeof p.id === "string" && p.id !== state.house.head.id)
-    .filter((p) => typeof p.age === "number" && p.age >= SUCCESSION_MIN_AGE)
-    .sort((a, b) => Number(b.age ?? 0) - Number(a.age ?? 0) || String(a.id).localeCompare(String(b.id)));
-  return candidates[0]?.id ?? null;
-}
-
-function resolveSuccessionNow_v0_2_7_1(state: RunState, houseLog: HouseLogEvent[], reportNotes?: string[]): void {
-  if (state.house.head.alive) return;
-
-  const priorHeadId = state.house.head?.id ?? null;
-  let heirId = computeAdultSuccessorId(state) ?? fallbackHeirIdFromHouseMembers(state);
-  if (!heirId) {
-    const anyState: any = state as any;
-    const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
-    const dynId = `p_dyn_heir_${state.turn_index}`;
-    if (!reg[dynId]) {
-      const spouse = state.house.spouse;
-      const sex: "M" | "F" = spouse?.sex === "F" ? "M" : "F";
-      reg[dynId] = {
-        id: dynId,
-        name: sex === "M" ? "Edmund" : "Matilda",
-        sex,
-        age: 16,
-        birth_year: state.turn_index * TURN_YEARS - 16,
-        alive: true,
-        married: false,
-        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
-        house_id: anyState.player_house_id ?? "h_player",
-        residence_house_id: anyState.player_house_id ?? "h_player",
-      };
-      state.house.children.push(reg[dynId]);
-      const houseRec: any = anyState.houses?.[anyState.player_house_id ?? "h_player"];
-      if (houseRec && Array.isArray(houseRec.child_ids) && !houseRec.child_ids.includes(dynId)) houseRec.child_ids.push(dynId);
-      if (houseRec && Array.isArray(houseRec.member_person_ids) && !houseRec.member_person_ids.includes(dynId)) houseRec.member_person_ids.push(dynId);
-    }
-    heirId = dynId;
-    reportNotes?.push("Emergency succession: a cadet heir was elevated to prevent line extinction.");
-  }
-
-  const priorSpouseId = state.house.spouse?.id ?? null;
-
-  // Promote heir (can be in-house child OR external registry relative).
-  const idx = state.house.children.findIndex((c) => c.id === heirId);
-  let heir: Person | null = idx >= 0 ? state.house.children.splice(idx, 1)[0]! : null;
-  if (!heir) {
-    const anyState: any = state as any;
-    const reg: Record<string, Person> | undefined = anyState.people as any;
-    heir = reg?.[heirId] ?? null;
-  }
-  if (!heir) {
-    state.game_over = { reason: "DeathNoHeir", turn_index: state.turn_index };
-    return;
-  }
-
-  // v0.2.6.1 WP-12: married-out head is now in-court
-  removeCourtExcludeId(state, heir.id);
-
-  // Swap spouse to new HoH spouse (if any)
-  const anyState: any = state as any;
-  const reg: Record<string, Person> | undefined = anyState.people as any;
-  if (reg && heirId && reg[heirId]) heir = reg[heirId];
-  else if (reg && heirId) reg[heirId] = heir;
-
-  const heirSpouseId = spouseIdFromKinship(state, heir.id);
-  heir.married = Boolean(heirSpouseId && reg?.[heirSpouseId] && reg[heirSpouseId]!.alive);
-  state.house.head = heir;
-  if (heirSpouseId && reg?.[heirSpouseId]) {
-    state.house.spouse = reg[heirSpouseId];
-    state.house.spouse_status = "spouse";
-    state.house.spouse.married = true;
-  } else {
-    // No spouse known → clear active spouse slot
-    state.house.spouse = undefined;
-    state.house.spouse_status = undefined;
-  }
-
-  // Prior HoH spouse becomes dowager: keep visible via court extras; widow badge comes from houseLog widowed.survivor_id
-  if (priorSpouseId && priorSpouseId !== state.house.spouse?.id) {
-    addCourtExtraId(state, priorSpouseId);
-  }
-
-  rebaseHeadRelationships(state, priorHeadId, heir.id);
-  syncPlayerHouseSummaryFromRegistry(state);
-
-  houseLog.push({ kind: "succession", turn_index: state.turn_index, new_ruler_name: heir.name });
-
-  // Recompute heir after succession (same turn)
-  const prev = state.house.heir_id ?? null;
-  const next = computeHeirId(state);
-  if (next && next !== prev) {
-    const nm = registryPersonFor(state, next)?.name;
-    if (nm) houseLog.push({ kind: "heir_selected", turn_index: state.turn_index, heir_name: nm });
-  }
-  syncPlayerHouseSummaryFromRegistry(state);
-
-  if (reportNotes) reportNotes.push("Succession resolved.");
-}
-
-function closeTurn(state: RunState, reportNotes: string[], houseLog: HouseLogEvent[]): void {
-  const ob = state.manor.obligations;
-
-  // move any unpaid due into arrears (end-of-turn)
-  if (ob.tax_due_coin > 0) ob.arrears.coin = asNonNegInt(ob.arrears.coin + ob.tax_due_coin);
-  if (ob.tithe_due_bushels > 0) ob.arrears.bushels = asNonNegInt(ob.arrears.bushels + ob.tithe_due_bushels);
-  ob.tax_due_coin = 0;
-  ob.tithe_due_bushels = 0;
-
-  // relationship reaction to compliance
-  if (ob.arrears.coin === 0) {
-    adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: +1, threat: -1 });
-  } else {
-    adjustEdge(state, state.locals.liege.id, state.house.head.id, { respect: -1, threat: +1 });
-  }
-  if (ob.arrears.bushels === 0) {
-    adjustEdge(state, state.locals.clergy.id, state.house.head.id, { respect: +1 });
-  } else {
-    adjustEdge(state, state.locals.clergy.id, state.house.head.id, { respect: -1, threat: +1 });
-  }
-
-  // mild unrest decay when stable
-  const shortage = Boolean((state.flags as any).Shortage);
-  if (!shortage && ob.arrears.coin === 0 && ob.arrears.bushels === 0) {
-    state.manor.unrest = clampInt(state.manor.unrest - UNREST_BASELINE_DECAY_WHEN_STABLE, 0, 100);
-  }
-
-  // clear transient flags
-  delete (state.flags as any).Shortage;
-  delete (state.flags as any).MarriageOffer;
-
-  // v0.2.7.1 HOTFIX: succession semantics unified (HoH swap + spouse swap + dowager visibility).
-  resolveSuccessionNow_v0_2_7_1(state, houseLog, reportNotes);
-  if (state.game_over) return;
-  syncPlayerHouseSummaryFromRegistry(state);
-
-  // game-over: dispossession rule
-  if (state.manor.unrest >= 100) {
-    state.game_over = { reason: "Dispossessed", turn_index: state.turn_index, details: { unrest: state.manor.unrest } };
-    return;
-  }
-
-  // advance turn
-  state.turn_index += 1;
-}
-
 
 export function createDefaultDecisions(state?: RunState): TurnDecisions {
   const farmers = state?.manor?.farmers ?? 75;
@@ -2890,14 +621,97 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
   const maxShift = ctx.max_labor_shift;
 
   const prospectsLog: ProspectsLogEvent[] = [...(ctx.report.prospects_log ?? [])];
+  const resolutionPhaseResults: PhaseResultV0[] = [];
+  let notesCursor = 0;
+  let prospectsLogCursor = prospectsLog.length;
 
   // 10) apply decisions
-  applyLaborDecision(working, decisions, maxShift, notes);
-  applySellDecision(working, ctx, decisions, notes);
-  applyConstructionDecision(working, decisions, notes);
-  applyMarriageDecision(working, ctx, decisions, notes);
-  applyProspectsDecision(working, ctx, decisions, prospectsLog);
-  applyObligationPaymentsAndPenalties(working, decisions, notes);
+  applyLaborDecisionPhase(working, decisions, maxShift, notes);
+  const laborNotes = notes.slice(notesCursor);
+  const laborEvidence = noteEvidenceEvents("labor", laborNotes);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "labor",
+    receipts: [
+      makePhaseReceipt(`Labor desired farmers ${decisions.labor.desired_farmers}; builders ${decisions.labor.desired_builders}.`),
+      ...noteReceipts(laborNotes)
+    ],
+    log_events: phaseLogEventsFromEvidence(laborEvidence),
+    evidence_events_v0: laborEvidence,
+    rng_keys_used: []
+  }));
+  notesCursor = notes.length;
+  applySellDecisionPhase(working, ctx, decisions, notes);
+  const sellNotes = notes.slice(notesCursor);
+  const sellEvidence = noteEvidenceEvents("sell", sellNotes);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "sell",
+    receipts: [
+      makePhaseReceipt(`Sell requested ${decisions.sell.sell_bushels} bushels.`),
+      ...noteReceipts(sellNotes)
+    ],
+    log_events: phaseLogEventsFromEvidence(sellEvidence),
+    evidence_events_v0: sellEvidence,
+    rng_keys_used: []
+  }));
+  notesCursor = notes.length;
+  applyConstructionDecisionPhase(working, decisions, notes);
+  const constructionNotes = notes.slice(notesCursor);
+  const constructionEvidence = noteEvidenceEvents("construction", constructionNotes);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "construction",
+    receipts: [
+      makePhaseReceipt(`Construction action ${decisions.construction.action}.`),
+      ...noteReceipts(constructionNotes)
+    ],
+    log_events: phaseLogEventsFromEvidence(constructionEvidence),
+    evidence_events_v0: constructionEvidence,
+    rng_keys_used: []
+  }));
+  notesCursor = notes.length;
+  applyMarriageDecisionPhase(working, ctx, decisions, notes);
+  const marriageNotes = notes.slice(notesCursor);
+  const marriageResolutionEvidence = noteEvidenceEvents("marriage", marriageNotes);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "marriage",
+    receipts: [
+      makePhaseReceipt(`Marriage action ${decisions.marriage.action}.`),
+      ...noteReceipts(marriageNotes)
+    ],
+    log_events: phaseLogEventsFromEvidence(marriageResolutionEvidence),
+    evidence_events_v0: marriageResolutionEvidence,
+    rng_keys_used: []
+  }));
+  notesCursor = notes.length;
+  applyProspectsDecisionPhase(working, ctx, decisions, prospectsLog);
+  const prospectsResolutionLog = prospectsLog.slice(prospectsLogCursor);
+  const prospectsResolutionEvidence = prospectsLogEvidenceEvents(prospectsResolutionLog);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "prospects",
+    receipts: [
+      makePhaseReceipt(`Prospect decisions queued ${(decisions.prospects?.actions ?? []).length}.`),
+      ...evidenceReceipts(prospectsResolutionEvidence)
+    ],
+    log_events: phaseLogEventsFromEvidence(prospectsResolutionEvidence),
+    evidence_events_v0: prospectsResolutionEvidence,
+    rng_keys_used: []
+  }));
+  prospectsLogCursor = prospectsLog.length;
+  applyDecisionObligationsPhase(working, decisions, notes);
+  const obligationsNotes = notes.slice(notesCursor);
+  const obligationsResolutionEvidence = noteEvidenceEvents("obligations", obligationsNotes);
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "obligations",
+    receipts: [
+      makePhaseReceipt(
+        `Obligation payments coin ${decisions.obligations.pay_coin}; bushels ${decisions.obligations.pay_bushels}; levy ${decisions.obligations.war_levy_choice ?? "ignore"}.`
+      ),
+      ...noteReceipts(obligationsNotes)
+    ],
+    log_events: phaseLogEventsFromEvidence(obligationsResolutionEvidence),
+    evidence_events_v0: obligationsResolutionEvidence,
+    rng_keys_used: []
+  }));
+  notesCursor = notes.length;
 
   // 11) minimal AI/world reactions handled via relationship adjustments above.
 
@@ -2906,7 +720,33 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
   // Carry over any People-First preview events (e.g., spouse death widowhood) from proposeTurn.
   for (const e of ctx.report.house_log ?? []) lifeLog.push(e);
 
-  closeTurn(working, notes, lifeLog);
+  const closeNotesBefore = notes.length;
+  const closeHouseLogBefore = lifeLog.length;
+  closeTurnPhase(working, notes, lifeLog, {
+    computeAdultSuccessorId,
+    computeHeirId,
+    rebaseHeadRelationships,
+    syncPlayerHouseSummaryFromRegistry
+  });
+  const closeTurnNotes = notes.slice(closeNotesBefore);
+  const closeTurnNoteEvidence = noteEvidenceEvents("succession", closeTurnNotes);
+  const closeTurnHouseEvidence = houseLogEvidenceEvents(lifeLog.slice(closeHouseLogBefore));
+  const closeTurnEvidence = [...closeTurnNoteEvidence, ...closeTurnHouseEvidence];
+  resolutionPhaseResults.push(makePhaseResult({
+    phase: "succession",
+    receipts: [
+      makePhaseReceipt("Close turn phase applied."),
+      ...noteReceipts(closeTurnNotes),
+      ...evidenceReceipts(closeTurnHouseEvidence)
+    ],
+    log_events: phaseLogEventsFromEvidence(closeTurnEvidence),
+    evidence_events_v0: closeTurnEvidence,
+    rng_keys_used: []
+  }));
+
+  for (const phaseResult of [...(ctx.phase_results_v0 ?? []), ...resolutionPhaseResults]) {
+    recordBeliefEvidence(working, phaseResult.phase, ctx.report.turn_index, phaseResult.evidence_events_v0);
+  }
 
   normalizeState(working);
 
@@ -2939,7 +779,13 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
     processed_turn_index: ctx.report.turn_index,
     summary,
     // Order rule: if succession + heir_selected occur same turn, show Succession first.
-    report: { ...ctx.report, house_log: orderedHouseLog, notes: [...ctx.report.notes, ...notes], prospects_log: prospectsLog.length ? prospectsLog : undefined },
+    report: {
+      ...ctx.report,
+      house_log: orderedHouseLog,
+      notes: [...ctx.report.notes, ...notes],
+      prospects_log: prospectsLog.length ? prospectsLog : undefined,
+      resolution_phase_results_v0: resolutionPhaseResults
+    },
     decisions,
     snapshot_before: snapshotBefore,
     snapshot_after: snapshotAfter,

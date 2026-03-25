@@ -1,9 +1,9 @@
 import { APP_VERSION } from "../version";
 import { SIM_VERSION } from "./version";
 import type { Person, RunState, Sex, Traits } from "./types";
+import { ensureRelationshipEdge } from "./domains/people/relationshipEngine";
 import { Rng } from "./rng";
 import { normalizeState } from "./normalize";
-import { ensureEdge } from "./relationships";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
 import { ensureCourtOfficers } from "./court";
@@ -123,7 +123,9 @@ export function createNewRun(run_seed: string): RunState {
         court_variant: "B",
         fertilityScale: DEFAULT_DEMOGRAPHY_TUNING.fertilityScale,
         mortalityScaleChild: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleChild,
-        mortalityScaleAdult: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleAdult
+        mortalityScaleAdult: DEFAULT_DEMOGRAPHY_TUNING.mortalityScaleAdult,
+        ai_marriage_intel_bonus_scale: 1.0,
+        ai_prospect_intel_bonus_scale: 1.0
       }
     },
     log: [],
@@ -131,13 +133,13 @@ export function createNewRun(run_seed: string): RunState {
   };
 
   // baseline relationships (directed)
-  ensureEdge(state, head.id, liege.id);
-  ensureEdge(state, liege.id, head.id);
-  ensureEdge(state, head.id, clergy.id);
-  ensureEdge(state, clergy.id, head.id);
+  ensureRelationshipEdge(state, head.id, liege.id);
+  ensureRelationshipEdge(state, liege.id, head.id);
+  ensureRelationshipEdge(state, head.id, clergy.id);
+  ensureRelationshipEdge(state, clergy.id, head.id);
   for (const n of nobles) {
-    ensureEdge(state, head.id, n.id);
-    ensureEdge(state, n.id, head.id);
+    ensureRelationshipEdge(state, head.id, n.id);
+    ensureRelationshipEdge(state, n.id, head.id);
   }
 
   normalizeState(state);

@@ -1,6 +1,8 @@
 import type { RunState, EventCategory } from "../sim/types";
 import type { Rng } from "../sim/rng";
 import { clampInt, asNonNegInt } from "../sim/util";
+import { applyConstructionProgressDelta } from "../sim/domains/economy/construction";
+import { applyBushelDelta, applyCoinDelta, applyTaxDueCoinDelta, applyTitheDueBushelsDelta, setWarLevyDue } from "../sim/domains/economy/ledger";
 import { hasImprovement } from "./improvements";
 
 export interface ContentEventDef {
@@ -24,10 +26,10 @@ function addMod(state: RunState, key: string, value: number): void {
 }
 
 function addBushels(state: RunState, delta: number): void {
-  state.manor.bushels_stored = asNonNegInt(state.manor.bushels_stored + Math.trunc(delta));
+  applyBushelDelta(state, delta);
 }
 function addCoin(state: RunState, delta: number): void {
-  state.manor.coin = asNonNegInt(state.manor.coin + Math.trunc(delta));
+  applyCoinDelta(state, delta);
 }
 function addUnrest(state: RunState, delta: number): void {
   state.manor.unrest = clampInt(state.manor.unrest + Math.trunc(delta), 0, 100);
@@ -348,7 +350,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.5 + (s.manor.obligations.arrears.bushels > 0 ? 0.2 : 0), [s.manor.obligations.arrears.bushels > 0 ? "Clergy pressures existing arrears." : "Routine collection."]),
     apply: (s, rng) => {
       const extra = rng.int(0, 12);
-      s.manor.obligations.tithe_due_bushels = asNonNegInt(s.manor.obligations.tithe_due_bushels + extra);
+      applyTitheDueBushelsDelta(s, extra);
       return [extra ? `Extra tithe demanded: +${extra} bushels due.` : "Routine tithe reminder (no extra due)."];
     }
   },
@@ -385,7 +387,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.35, ["The liege tightens his hand."]),
     apply: (s, rng) => {
       const extra = rng.int(1, 3);
-      s.manor.obligations.tax_due_coin = asNonNegInt(s.manor.obligations.tax_due_coin + extra);
+      applyTaxDueCoinDelta(s, extra);
       addUnrest(s, 1);
       return [`Extra tax demanded: +${extra} coin due.`, "+1 unrest."];
     }
@@ -398,7 +400,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.20, ["A rare mercy."]),
     apply: (s, rng) => {
       const relief = rng.int(1, 3);
-      s.manor.obligations.tax_due_coin = asNonNegInt(Math.max(0, s.manor.obligations.tax_due_coin - relief));
+      applyTaxDueCoinDelta(s, -relief);
       addUnrest(s, -1);
       return [`Tax eased: -${relief} coin due.`, "-1 unrest."];
     }
@@ -426,7 +428,7 @@ export const EVENT_DECK: ContentEventDef[] = [
       if (s.manor.obligations.war_levy_due) return ["A levy is already outstanding."];
       const men = rng.int(3, 8);
       const coin = rng.int(4, 10);
-      s.manor.obligations.war_levy_due = { kind: "men_or_coin", men, coin, created_turn: s.turn_index };
+      setWarLevyDue(s, { kind: "men_or_coin", men, coin, created_turn: s.turn_index });
       return [`The liege demands service: provide ${men} men OR pay ${coin} coin.`];
     }
   },
@@ -471,7 +473,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     apply: (s, rng) => {
       if (!s.manor.construction) return ["No active works; the mason moves on."];
       const bonus = rng.int(6, 16);
-      s.manor.construction.progress = asNonNegInt(s.manor.construction.progress + bonus);
+      applyConstructionProgressDelta(s, bonus);
       return [`Work accelerates: +${bonus} construction progress.`];
     }
   },
@@ -484,7 +486,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     apply: (s, rng) => {
       if (!s.manor.construction) return ["No active works are affected."];
       const penalty = rng.int(5, 14);
-      s.manor.construction.progress = asNonNegInt(Math.max(0, s.manor.construction.progress - penalty));
+      applyConstructionProgressDelta(s, -penalty);
       return [`Materials run short: -${penalty} construction progress.`];
     }
   }
@@ -502,13 +504,13 @@ const FLAVOR: Array<{ id: string; title: string; category: EventCategory; cooldo
   { id: "evt_clergy_rebuke", title: "Clergy Rebuke", category: "religious", cooldown: 9, w: 0.15, apply: (s, r) => { addUnrest(s,2); return ["Public rebuke: +2 unrest."]; } },
   { id: "evt_muddy_roads", title: "Muddy Roads", category: "economic", cooldown: 6, w: 0.20, apply: (s, r) => { addMod(s,"sell_cap_mult",0.9); return ["Trade slows: sell cap lower next turn."]; } },
   { id: "evt_clear_roads", title: "Clear Roads", category: "economic", cooldown: 6, w: 0.20, apply: (s, r) => { addMod(s,"sell_cap_mult",1.1); return ["Trade flows: sell cap higher next turn."]; } },
-  { id: "evt_local_scribe", title: "Local Scribe", category: "political", cooldown: 10, w: 0.12, apply: (s, r) => { const relief = r.int(1,2); s.manor.obligations.tax_due_coin = asNonNegInt(Math.max(0, s.manor.obligations.tax_due_coin - relief)); return [`A scribe finds an exemption: -${relief} coin tax due.`]; } },
+  { id: "evt_local_scribe", title: "Local Scribe", category: "political", cooldown: 10, w: 0.12, apply: (s, r) => { const relief = r.int(1,2); applyTaxDueCoinDelta(s, -relief); return [`A scribe finds an exemption: -${relief} coin tax due.`]; } },
   { id: "evt_ale_shortage", title: "Ale Shortage", category: "social", cooldown: 9, w: 0.18, apply: (s, r) => { addUnrest(s,2); return ["Ale runs thin: +2 unrest."]; } },
   { id: "evt_ale_plenty", title: "Ale Plenty", category: "social", cooldown: 9, w: 0.18, apply: (s, r) => { addUnrest(s,-2); return ["Ale flows: -2 unrest."]; } },
   { id: "evt_muster_practice", title: "Muster Practice", category: "military", cooldown: 10, w: 0.14, apply: (s, r) => { addUnrest(s,1); return ["Muster drills disrupt work: +1 unrest."]; } },
   { id: "evt_truce_news", title: "Truce News", category: "political", cooldown: 10, w: 0.14, apply: (s, r) => { addUnrest(s,-1); return ["Good tidings: -1 unrest."]; } },
-  { id: "evt_small_theft_tools", title: "Tools Misplaced", category: "construction", cooldown: 7, w: 0.16, apply: (s, r) => { if (!s.manor.construction) return ["Nothing is misplaced."]; const pen=r.int(3,8); s.manor.construction.progress = asNonNegInt(Math.max(0,s.manor.construction.progress-pen)); return [`Delays at the works: -${pen} progress.`]; } },
-  { id: "evt_extra_hands", title: "Extra Hands Volunteer", category: "construction", cooldown: 7, w: 0.16, apply: (s, r) => { if (!s.manor.construction) return ["No active works; hands disperse."]; const bon=r.int(3,10); s.manor.construction.progress = asNonNegInt(s.manor.construction.progress+bon); return [`Work quickens: +${bon} progress.`]; } },
+  { id: "evt_small_theft_tools", title: "Tools Misplaced", category: "construction", cooldown: 7, w: 0.16, apply: (s, r) => { if (!s.manor.construction) return ["Nothing is misplaced."]; const pen=r.int(3,8); applyConstructionProgressDelta(s, -pen); return [`Delays at the works: -${pen} progress.`]; } },
+  { id: "evt_extra_hands", title: "Extra Hands Volunteer", category: "construction", cooldown: 7, w: 0.16, apply: (s, r) => { if (!s.manor.construction) return ["No active works; hands disperse."]; const bon=r.int(3,10); applyConstructionProgressDelta(s, bon); return [`Work quickens: +${bon} progress.`]; } },
   { id: "evt_wolf_scare", title: "Wolf Scare", category: "security", cooldown: 10, w: 0.12, apply: (s, r) => { addUnrest(s,1); return ["Wolves near the pastures: +1 unrest."]; } },
   { id: "evt_craft_fair", title: "Craft Fair", category: "economic", cooldown: 10, w: 0.12, apply: (s, r) => { const c=r.int(1,4); addCoin(s,c); return [`A fair brings coin: +${c} coin.`]; } },
   { id: "evt_miller_dispute", title: "Miller Dispute", category: "social", cooldown: 10, w: 0.12, apply: (s, r) => { addUnrest(s,2); return ["A dispute at the mill: +2 unrest."]; } },

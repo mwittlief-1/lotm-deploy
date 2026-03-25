@@ -78,6 +78,20 @@ export function houseIdForPerson(state: RunState, personId: string): string | nu
   return null;
 }
 
+export function structuredHouseIdForPerson(state: RunState, personId: string): string | null {
+  if (!personId) return null;
+  const houses = housesMap(state);
+  for (const hid of Object.keys(houses).sort((a, b) => a.localeCompare(b))) {
+    const house = houses[hid];
+    if (!house || typeof house !== "object") continue;
+    if (house.head_id === personId) return hid;
+    if (house.spouse_id === personId) return hid;
+    if (Array.isArray(house.child_ids) && house.child_ids.includes(personId)) return hid;
+    if (Array.isArray(house.member_person_ids) && house.member_person_ids.includes(personId)) return hid;
+  }
+  return null;
+}
+
 function byHeadPriority(state: RunState, aId: string, bId: string): number {
   const a = registryPersonFor(state, aId);
   const b = registryPersonFor(state, bId);

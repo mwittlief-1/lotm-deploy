@@ -180,6 +180,7 @@ export interface RunState {
   // v0.2.8 graph registries (additive; wired later)
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
+  beliefs?: BeliefRegistryV0;
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
@@ -207,6 +208,7 @@ export interface RunSnapshot {
   // v0.2.8 graph registries (bounded snapshot; debug + UI scaffolding)
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
+  beliefs?: BeliefRegistryV0;
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }
@@ -331,6 +333,8 @@ export interface TurnReport {
   court_roster?: CourtRoster;
   court_headcount?: number;
   prospects_log?: ProspectsLogEvent[];
+  phase_results_v0?: PhaseResultV0[];
+  resolution_phase_results_v0?: PhaseResultV0[];
 }
 
 // v0.2.3.2+: a UI-ready household roster (deduped; heir is a badge).
@@ -485,6 +489,77 @@ export type ProspectsLogEvent =
 export type ProspectsDecisionAction = { prospect_id: string; action: ProspectAction };
 export type ProspectsDecision = { kind: "prospects"; actions: ProspectsDecisionAction[] };
 
+export type PhaseNameV0 =
+  | "consumption"
+  | "demography"
+  | "events"
+  | "obligations"
+  | "marriage"
+  | "prospects"
+  | "succession"
+  | "labor"
+  | "sell"
+  | "construction";
+
+export type PhaseReceiptKindV0 = "summary" | "note";
+
+export interface PhaseReceiptV0 {
+  kind: PhaseReceiptKindV0;
+  line: string;
+}
+
+export interface PhaseLogEventV0 {
+  kind: string;
+  detail: string;
+}
+
+export type EvidenceConfidenceV0 = "known" | "likely" | "possible";
+
+export type EvidenceCategoryV0 =
+  | EventCategory
+  | "construction"
+  | "court"
+  | "economy"
+  | "events"
+  | "household"
+  | "labor"
+  | "marriage"
+  | "obligations"
+  | "prospects"
+  | "succession";
+
+export interface EvidenceEventV0 {
+  kind: string;
+  detail: string;
+  category: EvidenceCategoryV0;
+  confidence: EvidenceConfidenceV0;
+  subject_ids?: string[];
+}
+
+export interface BeliefObservationV0 {
+  subject_id: string;
+  phase: PhaseNameV0;
+  turn_index: number;
+  kind: string;
+  detail: string;
+  category: EvidenceCategoryV0;
+  confidence: EvidenceConfidenceV0;
+}
+
+export interface BeliefRegistryV0 {
+  schema_version: "belief_registry_v0";
+  by_subject: Record<string, BeliefObservationV0[]>;
+}
+
+export interface PhaseResultV0 {
+  phase: PhaseNameV0;
+  receipts: PhaseReceiptV0[];
+  log_events: PhaseLogEventV0[];
+  evidence_events_v0: EvidenceEventV0[];
+  rng_keys_used: string[];
+  patch?: null;
+}
+
 export type LaborDecision = { kind: "labor"; desired_farmers: number; desired_builders: number };
 export type SellDecision = { kind: "sell"; sell_bushels: number };
 export type ObligationsDecision = {
@@ -519,6 +594,7 @@ export interface TurnContext {
   marriage_window: MarriageWindow | null;
   max_labor_shift: number;
   prospects_window?: ProspectsWindow | null;
+  phase_results_v0?: PhaseResultV0[];
   // v0.2.3.2+: deduped roster view for UI.
   household_roster?: HouseholdRoster;
   // v0.2.8: derived household roles view for UI/debug.
