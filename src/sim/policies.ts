@@ -1,5 +1,6 @@
 import type { RunState, TurnContext, TurnDecisions } from "./types";
 import { IMPROVEMENTS } from "../content/improvements";
+import { buildPolicyIntelMap, npcPolicyScore } from "./domains/ai/policy";
 
 /**
  * v0.0.7 Policy Registry (LOCKED IDs + alias mapping)
@@ -204,13 +205,19 @@ export function decide(policy: PolicyId, state: RunState, ctx: TurnContext): Tur
     let marriageAction: TurnDecisions["marriage"] = { kind: "marriage", action: "none" };
     if (ctx.marriage_window && ctx.marriage_window.eligible_child_ids.length > 0) {
       const offers = ctx.marriage_window.offers;
+      const offerIntel = buildPolicyIntelMap(s, offers.map((offer) => offer.house_person_id));
       let bestIdx = -1;
       let bestScore = -1e9;
       for (let i = 0; i < offers.length; i++) {
         const o = offers[i]!;
         // conservative: avoid negative dowry unless affordable
         if (o.dowry_coin_net < 0 && s.manor.coin < Math.abs(o.dowry_coin_net)) continue;
-        const score = o.dowry_coin_net * 3 + o.relationship_delta.respect * 2 + o.relationship_delta.allegiance;
+        const score = npcPolicyScore({
+          hook: "marriage_offer",
+          base_score: o.dowry_coin_net * 3 + o.relationship_delta.respect * 2 + o.relationship_delta.allegiance,
+          intel: offerIntel[o.house_person_id] ?? null,
+          subject_id: o.house_person_id
+        });
         if (score > bestScore) {
           bestScore = score;
           bestIdx = i;
@@ -264,12 +271,18 @@ export function decide(policy: PolicyId, state: RunState, ctx: TurnContext): Tur
     let marriageAction: TurnDecisions["marriage"] = { kind: "marriage", action: "none" };
     if (ctx.marriage_window && ctx.marriage_window.eligible_child_ids.length > 0) {
       const offers = ctx.marriage_window.offers;
+      const offerIntel = buildPolicyIntelMap(s, offers.map((offer) => offer.house_person_id));
       let bestIdx = 0;
       let bestScore = -1e9;
       for (let i = 0; i < offers.length; i++) {
         const o = offers[i]!;
         if (o.dowry_coin_net < 0 && s.manor.coin < Math.abs(o.dowry_coin_net)) continue;
-        const score = o.dowry_coin_net * 4 + o.relationship_delta.respect;
+        const score = npcPolicyScore({
+          hook: "marriage_offer",
+          base_score: o.dowry_coin_net * 4 + o.relationship_delta.respect,
+          intel: offerIntel[o.house_person_id] ?? null,
+          subject_id: o.house_person_id
+        });
         if (score > bestScore) { bestScore = score; bestIdx = i; }
       }
       marriageAction = { kind: "marriage", action: "accept", child_id: ctx.marriage_window.eligible_child_ids[0]!, offer_index: bestIdx };
@@ -320,12 +333,18 @@ export function decide(policy: PolicyId, state: RunState, ctx: TurnContext): Tur
     let marriageAction: TurnDecisions["marriage"] = { kind: "marriage", action: "none" };
     if (ctx.marriage_window && ctx.marriage_window.eligible_child_ids.length > 0) {
       const offers = ctx.marriage_window.offers;
+      const offerIntel = buildPolicyIntelMap(s, offers.map((offer) => offer.house_person_id));
       let bestIdx = 0;
       let bestScore = -1e9;
       for (let i = 0; i < offers.length; i++) {
         const o = offers[i]!;
         if (o.dowry_coin_net < 0 && s.manor.coin < Math.abs(o.dowry_coin_net)) continue;
-        const score = o.dowry_coin_net * 4 + o.relationship_delta.respect;
+        const score = npcPolicyScore({
+          hook: "marriage_offer",
+          base_score: o.dowry_coin_net * 4 + o.relationship_delta.respect,
+          intel: offerIntel[o.house_person_id] ?? null,
+          subject_id: o.house_person_id
+        });
         if (score > bestScore) { bestScore = score; bestIdx = i; }
       }
       marriageAction = { kind: "marriage", action: "accept", child_id: ctx.marriage_window.eligible_child_ids[0]!, offer_index: bestIdx };
