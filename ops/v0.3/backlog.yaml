@@ -1972,7 +1972,7 @@ tasks:
   title: Audit current court decision surfaces and budget-consuming actions
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 100
   tranche: 1
   change_type: refactor
@@ -2289,7 +2289,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Audit gameplay screen field homes and produce dedupe map
-  status: ready
+  status: done
   priority: 99
   tranche: 1
   change_type: refactor

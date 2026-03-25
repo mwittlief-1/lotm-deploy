@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-001-T01
-  last_completed_task_id: V03-R0-006-T01
+  last_completed_task_id: V03-R0-003-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 4a0a070ec61301cc22d7954b108b71b6e32cc563
+  git_commit: bbe7d3d47c9e65bf4b870b5e4d516a4c8d8b2043
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,10 @@ last_run:
   replay_hashes:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to V03-R0-001-T01. No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
+notes: >-
+  Pre-kickoff reconciliation accepted V03-R0-004-T01 and V03-R0-003-T01 from
+  artifact evidence on the validated kickoff baseline. Lane-parallel
+  scheduling is active with current_task_id set to V03-R0-001-T01. No active
+  lane claims are currently recorded. World/topology automation remains
+  blocked behind V03-XMAP-001.
 active_claims: {}
