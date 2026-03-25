@@ -1,0 +1,33 @@
+version: 1
+run_id: V03-R0-006-T01-20260325T144147-0400
+task_id: V03-R0-006-T01
+status: done
+date: 2026-03-25
+branch: codex/v0.3-lane-economy-fiscal
+commit: a42afe88653f86ae28909052aef02552d7aab763
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  audit_doc: docs/releases/v0.3.0_ECONOMY_PRODUCTION_AUDIT.md
+findings:
+  - Grain and coin mutations in active runtime paths are already centralized through src/sim/domains/economy/ledger.ts, but receipt ownership still lives in phase-summary prose rather than per-delta receipt rows.
+  - The fiscal packet's food_stores concept currently maps to manor.bushels_stored, which preserves replay but does not yet expose an asset-aware ledger contract.
+  - Repo runtime code has no implemented hunting or meat-store surfaces; those follow-on tasks are net-new deterministic production/accounting work.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-006-T02
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: fail
+  reason: Pre-existing imported control-plane schema and ownership-map mismatches are outside V03-R0-006-T01 and still prevent a clean validator pass.

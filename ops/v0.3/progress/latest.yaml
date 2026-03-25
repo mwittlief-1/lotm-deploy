@@ -1,23 +1,24 @@
-version: 1
+version: 2
 cursor:
-  current_task_id: "V03-R0-001"
-  last_completed_task_id: "V03-OP-002"
+  current_task_id: V03-R0-006-T02
+  last_completed_task_id: V03-R0-006-T01
 runtime:
-  node_version: "v24.13.1"
-  npm_version: "11.8.0"
-  git_branch: "codex/v0.3-refactor-kickoff"
-  git_commit: "00f3649b0dd51965c2f532ad5d576595a852876b"
-  ci_env: ""
-  vercel_env: ""
-  pr_url: ""
-  pr_status: ""
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: a42afe88653f86ae28909052aef02552d7aab763
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
 last_run:
   gates:
-    qa: "pass"
-    preflight: "pass"
-    repo_duplicates: "pass"
-    seed_replay_batch_twice: "pass"
+    qa: pass
+    preflight: pass
+    repo_duplicates: pass
+    seed_replay_batch_twice: pass
   replay_hashes:
-    run1: "d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2"
-    run2: "d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2"
-notes: "Kickoff baseline stack and ops bootstrap validation are complete. Branch gates are green, and the next ready task is V03-R0-001."
+    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+notes: Completed V03-R0-006-T01 with docs/releases/v0.3.0_ECONOMY_PRODUCTION_AUDIT.md. No further scheduler-eligible economy/fiscal task is available: V03-R0-006-T02 remains todo and depends on V03-R0-001-T02. ops:v0.3:validate still fails on pre-existing imported control-plane schema and ownership-map issues outside this lane task.
+active_claims: {}
