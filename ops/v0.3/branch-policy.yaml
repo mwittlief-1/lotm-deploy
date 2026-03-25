@@ -4,6 +4,15 @@ rules:
   main_updates: "PR_merge_only"
   integration_branch: "codex/v0.3-refactor-kickoff"
   lane_branch_pattern: "codex/v0.3-lane-*"
+  canonical_lane_branches:
+    - "codex/v0.3-refactor-kickoff"
+    - "codex/v0.3-lane-tooling-qa"
+    - "codex/v0.3-lane-social-mechanics"
+    - "codex/v0.3-lane-engine-core"
+    - "codex/v0.3-lane-ui-experience"
+    - "codex/v0.3-lane-economy-fiscal"
+    - "codex/v0.3-lane-world-topology"
+  lane_branch_bootstrap_source: "codex/v0.3-refactor-kickoff"
   lane_handoff:
     commit_required: true
     push_required: true

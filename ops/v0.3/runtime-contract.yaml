@@ -7,6 +7,25 @@ toolchain:
 environment_rules:
   ci_vercel_mismatch: "E1_stop_and_report"
   fix_forward_without_note: false
+control_plane_rules:
+  backlog_version: 2
+  executable_queue: "tasks_only"
+  default_claim_ttl_hours: 4
+  scheduler_mode: "lane_parallel"
+  progress_active_claims_field: "active_claims"
+  non_checkpoint_tasks_require_parent_epic: true
+  external_checkpoint_parent_epic_optional: true
+  current_task_must_reference_task_id: true
+  current_task_semantics: "first_globally_claimable_ready_task"
+  repo_truth_path_rewrites:
+    - "src/sim/relationshipEngine.ts -> src/sim/domains/people/relationshipEngine.ts"
+    - "src/components/** -> src/App.tsx + src/ui/**"
+    - "docs/ui/** -> docs/ux/**"
+  reclaim_note_required: true
+  reclaim_note_fields:
+    - prior_claimed_by
+    - prior_claim_expires_at
+    - reclaiming_run_id
 run_logging_required:
   - node_version
   - npm_version

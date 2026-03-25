@@ -1,5 +1,14 @@
 version: 1
 gates:
+  ops_v03_scheduler_dry_run:
+    cmd: "npm run ops:v0.3:scheduler-dry-run"
+    verify: "exit_code==0"
+  ops_v03_rebase_dry_run:
+    cmd: "npm run ops:v0.3:rebase-dry-run"
+    verify: "exit_code==0"
+  ops_v03_validate:
+    cmd: "npm run ops:v0.3:validate"
+    verify: "exit_code==0"
   qa:
     cmd: "npm run qa"
     verify: "exit_code==0"

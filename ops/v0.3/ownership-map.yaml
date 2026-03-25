@@ -44,6 +44,9 @@ ownership:
     allowed_paths:
       - "src/App.tsx"
       - "src/ui/**"
+      - "src/content/**"
+      - "src/sim/domains/experience/**"
+      - "docs/ux/**"
       - "tests/**"
   Tooling:
     allowed_paths:

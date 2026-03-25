@@ -26,3 +26,6 @@
 
 ## Notes
 - 
+- reclaim_event: prior_claimed_by= ; prior_claim_expires_at= ; reclaiming_run_id=
+- status_rebase: task_id= ; evidence= ; rebased_by=
+- cross_lane_override: lanes= ; reason= ; recorded_by=
