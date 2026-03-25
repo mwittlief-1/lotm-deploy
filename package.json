@@ -19,7 +19,10 @@
     "demography:batch:sim": "tsx scripts/demographyBatch.ts sim",
     "demography:doe": "tsx scripts/demographyDoe.ts",
     "preflight:update-baselines": "UPDATE_BASELINES=1 node scripts/preflightNoDeps.mjs",
-    "demography:audit": "tsx scripts/demographyAudit.ts"
+    "demography:audit": "tsx scripts/demographyAudit.ts",
+    "repo:duplicates": "node scripts/repoDuplicateAudit.mjs",
+    "seed:replay": "tsx scripts/seedReplay.ts --mode=single",
+    "seed:replay:batch": "tsx scripts/seedReplay.ts --mode=batch"
   },
   "dependencies": {
     "react": "^18.3.1",
