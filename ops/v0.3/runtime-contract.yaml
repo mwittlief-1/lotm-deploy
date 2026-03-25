@@ -1,0 +1,23 @@
+version: 1
+toolchain:
+  node_source_of_truth: "package.json#engines.node"
+  package_manager: "npm"
+  package_manager_source_of_truth: "package.json#packageManager"
+  lockfile: "package-lock.json"
+environment_rules:
+  ci_vercel_mismatch: "E1_stop_and_report"
+  fix_forward_without_note: false
+run_logging_required:
+  - node_version
+  - npm_version
+  - git_branch
+  - git_commit
+  - ci_env
+  - vercel_env
+  - gate_results
+  - replay_hashes
+  - pr_url
+  - pr_status
+budgets:
+  snapshot_cap_bytes_per_turn: 204800
+  turn_time_soft_ceiling_ms_per_seed: 250

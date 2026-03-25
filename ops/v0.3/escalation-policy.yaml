@@ -1,0 +1,23 @@
+version: 1
+tiers:
+  E0_auto_fix:
+    - type_errors
+    - formatting
+    - single_failing_test_with_clear_local_cause
+  E1_stop_and_report:
+    - any_golden_diff_unless_task_allows
+    - migration_changes
+    - new_cross_domain_public_api
+    - orchestrator_edit_without_requires_integrator
+    - ci_vercel_environment_mismatch
+    - missing_required_gate_command
+  E2_stop_immediately:
+    - replay_hash_mismatch
+    - rng_key_or_stream_change_unless_task_allows
+    - non_perturbation_failure
+global_rules:
+  golden_diff_policy: "stop unless requires_golden_change=true"
+  turn_ts_forbidden_unless_integrator: true
+  relationship_writes_must_use: "src/sim/domains/people/relationshipEngine.ts#applyRelationshipDelta"
+  coin_mutation_forbidden_outside_ledger: true
+  archive_quarantine_root: "_archive/duplicates"

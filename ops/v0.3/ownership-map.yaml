@@ -1,0 +1,55 @@
+version: 1
+defaults:
+  forbidden_paths_global:
+    - "src/sim/turn.ts"
+  archive_quarantine_root: "_archive/duplicates"
+ownership:
+  SimCore:
+    allowed_paths:
+      - "src/sim/turn.ts"
+      - "src/sim/phases/**"
+      - "src/sim/index.ts"
+      - "src/sim/state.ts"
+      - "src/sim/types.ts"
+      - "tests/**"
+      - "scripts/**"
+    integrator_required_paths:
+      - "src/sim/turn.ts"
+      - "src/sim/phases/**"
+  People:
+    allowed_paths:
+      - "src/sim/domains/people/**"
+      - "tests/**"
+  Economy:
+    allowed_paths:
+      - "src/sim/domains/economy/**"
+      - "tests/**"
+  Court:
+    allowed_paths:
+      - "src/sim/domains/court/**"
+      - "tests/**"
+  World:
+    allowed_paths:
+      - "src/sim/domains/world/**"
+      - "tests/**"
+  Realm:
+    allowed_paths:
+      - "src/sim/domains/realm/**"
+      - "tests/**"
+  AI:
+    allowed_paths:
+      - "src/sim/domains/ai/**"
+      - "tests/**"
+  Experience/UI:
+    allowed_paths:
+      - "src/App.tsx"
+      - "src/ui/**"
+      - "tests/**"
+  Tooling:
+    allowed_paths:
+      - "ops/v0.3/**"
+      - "scripts/**"
+      - "docs/releases/**"
+      - "docs/CODEMAP.md"
+      - "AGENTS.md"
+      - "_archive/**"

@@ -1,0 +1,17 @@
+version: 1
+gates:
+  qa:
+    cmd: "npm run qa"
+    verify: "exit_code==0"
+  preflight:
+    cmd: "npm run preflight"
+    verify: "exit_code==0"
+  seed_replay_batch:
+    cmd: "npm run seed:replay:batch"
+    verify: "exit_code==0 && summary_hash_present==true"
+  seed_replay_batch_twice:
+    cmd: "npm run seed:replay:batch && npm run seed:replay:batch"
+    verify: "exit_code==0 && replay_hash_1==replay_hash_2"
+  repo_duplicates:
+    cmd: "npm run repo:duplicates -- --json"
+    verify: "exit_code==0"

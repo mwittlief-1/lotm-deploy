@@ -1,0 +1,465 @@
+version: 1
+defaults:
+  required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+  merge_target: "codex/v0.3-refactor-kickoff"
+  auto_merge_to_main: false
+status_values: ["todo", "ready", "in_progress", "blocked", "done", "escalated"]
+selection_rule: "pick first ready with deps all done; no replanning"
+
+tasks:
+  - id: V03-K0-001
+    title: "Kickoff docs bundle and codemap guidance established"
+    status: done
+    priority: 100
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: []
+    requires_integrator: true
+    allowed_paths: ["AGENTS.md", "docs/CODEMAP.md", "docs/arch/**", "docs/releases/v0.3.0_*"]
+    forbidden_paths: []
+    requires_golden_change: false
+    done_conditions:
+      - "kickoff charter and v0.3 plan docs exist"
+      - "codemap guidance exists for canonical surfaces"
+      - "repo guardrails are in-tree"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-001.md"
+
+  - id: V03-K0-002
+    title: "Duplicate-file quarantine moved numbered artifacts into _archive"
+    status: done
+    priority: 95
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: []
+    requires_integrator: true
+    allowed_paths: ["_archive/**", "scripts/repoDuplicateAudit.mjs", "docs/CODEMAP.md", "AGENTS.md"]
+    forbidden_paths: []
+    required_gates: ["repo_duplicates"]
+    requires_golden_change: false
+    done_conditions:
+      - "_archive/duplicates/2026-03-24 exists"
+      - "duplicate audit ignores _archive as quarantine"
+      - "numbered duplicates are removed from active workspace"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-002.md"
+
+  - id: V03-K0-003
+    title: "Seed replay harness and hashable artifacts established"
+    status: done
+    priority: 90
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: []
+    requires_integrator: false
+    allowed_paths: ["scripts/seedReplay.ts", "scripts/seed_replay/**", "package.json", "qa_artifacts/seed_replay/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "npm run seed:replay:batch exists"
+      - "seed replay artifacts write deterministic summary hashes"
+      - "replay can be run twice and compared"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-003.md"
+
+  - id: V03-K0-004
+    title: "Phase and domain seam baseline extracted"
+    status: done
+    priority: 85
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: SimCore
+    phase: demography
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-K0-001"]
+    requires_integrator: true
+    allowed_paths: ["src/sim/turn.ts", "src/sim/phases/**", "src/sim/domains/**", "tests/**"]
+    forbidden_paths: []
+    requires_golden_change: false
+    determinism_contract:
+      rng_keys_may_change: false
+      stable_order_required: true
+      replay_hash_must_match: true
+    done_conditions:
+      - "src/sim/phases exists with fixed-order wrappers"
+      - "src/sim/domains exists as bounded-context destination"
+      - "turn orchestration remains on the integrator branch"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-004.md"
+
+  - id: V03-K0-005
+    title: "UI panel decomposition baseline established"
+    status: done
+    priority: 80
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: "Experience/UI"
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-K0-001"]
+    requires_integrator: false
+    allowed_paths: ["src/App.tsx", "src/ui/**", "tests/ui/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    requires_golden_change: false
+    done_conditions:
+      - "src/ui/panels exists as the decomposition target"
+      - "UI baseline is split across view-model and panel surfaces"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-005.md"
+
+  - id: V03-K0-006
+    title: "AI and intel rails baseline established"
+    status: done
+    priority: 75
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: AI
+    phase: events
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-K0-004"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/ai/**", "tests/sim/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    requires_golden_change: false
+    done_conditions:
+      - "belief, evidence, and policy rail modules exist"
+      - "AI lane groundwork is covered by focused tests"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-K0-006.md"
+
+  - id: V03-BL-001
+    title: "Split kickoff worktree into reviewable baseline commit stack"
+    status: ready
+    priority: 70
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-K0-001", "V03-K0-002", "V03-K0-003", "V03-K0-004", "V03-K0-005", "V03-K0-006"]
+    requires_integrator: true
+    allowed_paths: ["AGENTS.md", "docs/**", "scripts/**", "src/**", "tests/**", "_archive/**", "package.json"]
+    forbidden_paths: []
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice", "repo_duplicates"]
+    requires_golden_change: false
+    done_conditions:
+      - "kickoff branch is split into reviewable baseline commits or PR slices"
+      - "refactor baseline, archive cleanup, tooling, AI rails, and docs are separable"
+      - "ops pack will land as a top-layer change after the baseline split"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-BL-001.md"
+
+  - id: V03-OP-001
+    title: "Land canonical ops pack and locked v0.3 scope docs"
+    status: done
+    priority: 68
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: Tooling
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: []
+    requires_integrator: true
+    allowed_paths: ["ops/v0.3/**", "docs/releases/v0.3_SCOPE_LOCK.md", "docs/releases/v0.3_FISCAL_SPINE_PACKET.md", "docs/releases/v0.3.0_*", "docs/CODEMAP.md", "AGENTS.md"]
+    forbidden_paths: []
+    required_gates: ["qa", "preflight"]
+    requires_golden_change: false
+    done_conditions:
+      - "ops/v0.3 is the canonical automation control plane"
+      - "scope lock and fiscal packet exist in docs/releases"
+      - "older v0.3 docs defer to the new scope lock on conflict"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-OP-001.md"
+
+  - id: V03-OP-002
+    title: "Validate ops contract and run first unattended bootstrap pass"
+    status: todo
+    priority: 65
+    tranche: 0
+    target_release: "v0.3.0"
+    change_type: refactor
+    category: Tooling
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-BL-001", "V03-OP-001"]
+    requires_integrator: true
+    allowed_paths: ["ops/v0.3/**", "qa_artifacts/seed_replay/**"]
+    forbidden_paths: ["src/**", "tests/**"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice", "repo_duplicates"]
+    requires_golden_change: false
+    done_conditions:
+      - "all referenced gate commands exist and execute"
+      - "progress/latest.yaml records runtime, hashes, and PR metadata"
+      - "first unattended bootstrap run log is written"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-OP-002.md"
+
+  - id: V03-R0-001
+    title: "Determinism and receipts v1 hardening"
+    status: todo
+    priority: 60
+    tranche: 1
+    target_release: "v0.3.0"
+    change_type: behavior_change
+    category: Economy
+    phase: obligations
+    branch: codex/v0.3-lane-tooling-qa
+    deps: ["V03-OP-002"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/economy/**", "src/sim/domains/experience/**", "tests/**", "docs/qa/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "ledger receipts are the canonical economic audit trail"
+      - "receipt snapshots are deterministic"
+      - "perf and receipt regressions are covered by tests"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R0-001.md"
+
+  - id: V03-R0-002
+    title: "Marriage v1 bounded offers and household concurrency"
+    status: todo
+    priority: 58
+    tranche: 1
+    target_release: "v0.3.0"
+    change_type: behavior_change
+    category: People
+    phase: marriage
+    branch: codex/v0.3-lane-social-mechanics
+    deps: ["V03-OP-002"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/people/**", "tests/**", "docs/releases/v0.3_SCOPE_LOCK.md"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "inbound and outbound marriage offers are bounded in one context"
+      - "multiple household members may hold offers in the same turn"
+      - "one pending offer per candidate and 3-turn reject stickiness are enforced"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R0-002.md"
+
+  - id: V03-R0-003
+    title: "Court pacing scaffold v0 with decision budget"
+    status: todo
+    priority: 56
+    tranche: 1
+    target_release: "v0.3.0"
+    change_type: behavior_change
+    category: Court
+    phase: events
+    branch: codex/v0.3-lane-engine-core
+    deps: ["V03-OP-002"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/court/**", "src/ui/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "decision budget of 6 exists per 3-year turn"
+      - "gifts and offerings consume budget"
+      - "external marriage scouting costs more than inbound acceptance"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R0-003.md"
+
+  - id: V03-R1-001
+    title: "Map topology contract and numeric distance baseline"
+    status: todo
+    priority: 54
+    tranche: 2
+    target_release: "v0.3.1"
+    change_type: behavior_change
+    category: World
+    phase: none
+    branch: codex/v0.3-lane-engine-core
+    deps: ["V03-R0-003"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/world/**", "src/ui/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "Topology v1 exposes deterministic adjacency and numeric distance"
+      - "far-distance threshold is tunable and debug-visible"
+      - "map contract lands no later than v0.3.1"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R1-001.md"
+
+  - id: V03-R1-002
+    title: "Versioned state schema and migration scaffold"
+    status: todo
+    priority: 52
+    tranche: 2
+    target_release: "v0.3.1"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-lane-tooling-qa
+    deps: ["V03-OP-002"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/**", "tests/**", "docs/arch/**"]
+    forbidden_paths: []
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "state schema versioning exists for new registries"
+      - "migration scaffold handles economy and portfolio additions"
+      - "migration changes escalate if they create unexpected drift"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R1-002.md"
+
+  - id: V03-R1-003
+    title: "Obligations enforcement and finance legibility"
+    status: todo
+    priority: 50
+    tranche: 2
+    target_release: "v0.3.1"
+    change_type: behavior_change
+    category: Economy
+    phase: obligations
+    branch: codex/v0.3-lane-social-mechanics
+    deps: ["V03-R0-001"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/economy/**", "src/ui/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "church and liege settlements use arrears and enforcement ladder rules"
+      - "finance surfaces explain obligations and enforcement legibly"
+      - "forced store payment and seizure are bounded and deterministic"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R1-003.md"
+
+  - id: V03-R2-001
+    title: "Multi-manor portfolio accounting baseline"
+    status: todo
+    priority: 48
+    tranche: 3
+    target_release: "v0.3.2"
+    change_type: behavior_change
+    category: Economy
+    phase: obligations
+    branch: codex/v0.3-lane-social-mechanics
+    deps: ["V03-R1-001", "V03-R1-002", "V03-R1-003"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/economy/**", "src/sim/domains/people/**", "src/ui/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "portfolio totals equal summed manor totals for tracked assets and categories"
+      - "multi-manor baseline lands in v0.3.2"
+      - "portfolio outputs include rollups and outliers"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R2-001.md"
+
+  - id: V03-R2-002
+    title: "Tier scope caps and deterministic debug outputs"
+    status: todo
+    priority: 46
+    tranche: 3
+    target_release: "v0.3.2"
+    change_type: behavior_change
+    category: World
+    phase: none
+    branch: codex/v0.3-lane-engine-core
+    deps: ["V03-R1-001"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/world/**", "src/ui/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "tier scope caps are deterministic"
+      - "distance and scope debug outputs exist for v0.3.2"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R2-002.md"
+
+  - id: V03-R3-001
+    title: "Replay hardening and reliability quota"
+    status: todo
+    priority: 44
+    tranche: 4
+    target_release: "v0.3.3"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-lane-tooling-qa
+    deps: ["V03-R2-001"]
+    requires_integrator: false
+    allowed_paths: ["scripts/**", "tests/**", "docs/qa/**", "ops/v0.3/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "seed replay harness command is treated as mandatory and stable"
+      - "release adds at least two new invariants tests"
+      - "reliability regressions are surfaced in qa docs"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R3-001.md"
+
+  - id: V03-R3-002
+    title: "Clergy placement and institution holder baseline"
+    status: todo
+    priority: 42
+    tranche: 4
+    target_release: "v0.3.3"
+    change_type: behavior_change
+    category: People
+    phase: succession
+    branch: codex/v0.3-lane-social-mechanics
+    deps: ["V03-R0-002"]
+    requires_integrator: false
+    allowed_paths: ["src/sim/domains/people/**", "src/sim/domains/realm/**", "tests/**"]
+    forbidden_paths: ["src/sim/turn.ts"]
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice"]
+    requires_golden_change: false
+    done_conditions:
+      - "persons can be placed into clergy tracks"
+      - "minimal institution holder support exists"
+      - "placements persist as persons age"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R3-002.md"
+
+  - id: V03-R4-001
+    title: "v0.3.4 hardening and docs refresh"
+    status: todo
+    priority: 40
+    tranche: 5
+    target_release: "v0.3.4"
+    change_type: refactor
+    category: SimCore
+    phase: none
+    branch: codex/v0.3-refactor-kickoff
+    deps: ["V03-R2-001", "V03-R2-002", "V03-R3-001", "V03-R3-002"]
+    requires_integrator: true
+    allowed_paths: ["src/**", "tests/**", "docs/**", "ops/v0.3/**"]
+    forbidden_paths: []
+    required_gates: ["qa", "preflight", "seed_replay_batch_twice", "repo_duplicates"]
+    requires_golden_change: false
+    done_conditions:
+      - "widowhood, remarriage, multiple heirs, and orphaned-edge bugs are scrubbed"
+      - "v0.3 docs and playtest instructions are refreshed"
+      - "hotspots are simplified without changing intended outcomes"
+    handoff:
+      report_path: "ops/v0.3/progress/runs/V03-R4-001.md"

@@ -1,0 +1,17 @@
+version: 1
+rules:
+  auto_merge_to_main: false
+  main_updates: "PR_merge_only"
+  integration_branch: "codex/v0.3-refactor-kickoff"
+  lane_branch_pattern: "codex/v0.3-lane-*"
+  lane_handoff:
+    commit_required: true
+    push_required: true
+    pr_target: "codex/v0.3-refactor-kickoff"
+    pr_action: "open_or_update_after_passing_gates"
+  integrator_handoff:
+    merge_target: "codex/v0.3-refactor-kickoff"
+    merge_policy: "integrator_only"
+  integrator_only_paths:
+    - "src/sim/turn.ts"
+    - "src/sim/phases/**"
