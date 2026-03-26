@@ -18,9 +18,6 @@ type TurnReportPanelProps = {
   courtRosterEntries: any[];
   courtSize: number | null;
   currentHouseLog: any[];
-  deltaBushels: number;
-  deltaCoin: number;
-  deltaUnrest: number;
   dueEntering: any;
   fmtObAmount: (value: any) => string;
   hasConsumptionSplit: boolean;
@@ -52,9 +49,6 @@ export function TurnReportPanel({
   courtRosterEntries,
   courtSize,
   currentHouseLog,
-  deltaBushels,
-  deltaCoin,
-  deltaUnrest,
   dueEntering,
   fmtObAmount,
   hasConsumptionSplit,
@@ -75,26 +69,6 @@ export function TurnReportPanel({
       <h3>
         Turn Report <span style={{ fontSize: 12, opacity: 0.7 }}>(before decisions)</span>
       </h3>
-
-      <div style={{ padding: 8, border: "1px solid #eee", background: "#fafafa", marginBottom: 10 }}>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>At a glance</div>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", fontSize: 12 }}>
-          <div>
-            Bushels: <b>{deltaBushels > 0 ? `+${deltaBushels}` : String(deltaBushels)}</b> (now {manor.bushels_stored})
-          </div>
-          <div>
-            Coin: <b>{deltaCoin > 0 ? `+${deltaCoin}` : String(deltaCoin)}</b> (now {manor.coin})
-          </div>
-          <div>
-            Unrest: <b>{deltaUnrest > 0 ? `+${deltaUnrest}` : String(deltaUnrest)}</b> (now {manor.unrest}/100)
-          </div>
-          {report.shortage_bushels > 0 ? (
-            <div>
-              <b>Shortage:</b> {report.shortage_bushels} bushels
-            </div>
-          ) : null}
-        </div>
-      </div>
 
       <HouseholdPanel
         anchorId={anchorHousehold}

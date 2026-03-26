@@ -1,0 +1,35 @@
+version: 1
+run_id: V03-R0-004-T02-20260326T101616-0400
+task_id: V03-R0-004-T02
+status: done
+date: 2026-03-26
+branch: codex/v0.3-lane-ui-experience
+commit: 06c195c7753fe53f35ce0a206611efd0bc155fed
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  layout_helper: src/ui/playScreenLayout.ts
+  sticky_chips_component: src/ui/panels/StickyResourceChips.tsx
+  ui_test: tests/ui/playScreenLayout.test.ts
+findings:
+  - Gameplay now renders in a fixed single-column order that matches the audited hierarchy and keeps the relationship drawer as a secondary debug surface at the bottom.
+  - Sticky headline chips centralize food, coin, and unrest totals so the body panels no longer repeat the same top-line resource facts.
+  - The layout change stayed presentation-only; qa, preflight, and both replay batches passed with matching summary hashes.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-004-T03
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: Backlog task state, claim mirror, and progress cursor validate cleanly after closing V03-R0-004-T02, but the next UI task remains todo rather than ready.

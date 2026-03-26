@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-002-T02
+  last_completed_task_id: V03-R0-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 0d91217751b58883ce52e0cf20429eed04fefaa7
+  git_commit: 53c58c54ed6bda1040f616ea1d6b34d2102e5c03
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,11 +21,11 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Tooling/qa completed V03-R0-001-T02 and Social completed V03-R0-002-T02;
-  both handoffs are accepted into kickoff. Engine Core and UI still have
-  lane-local progress being reconciled. There is currently no globally
-  claimable ready task while that reconciliation is in flight. World/topology
-  automation remains blocked behind V03-XMAP-001.
+  Tooling/qa completed V03-R0-001-T02, Social completed V03-R0-002-T02, and UI
+  completed V03-R0-004-T02; all three handoffs are accepted into kickoff.
+  Engine Core still has lane-local progress being reconciled. There is
+  currently no globally claimable ready task while that reconciliation is in
+  flight. World/topology automation remains blocked behind V03-XMAP-001.
 active_claims:
   codex/v0.3-lane-engine-core:
     task_id: V03-R0-003-T02
@@ -33,9 +33,3 @@ active_claims:
     claimed_at: '2026-03-26T10:58:45-0400'
     claim_expires_at: '2026-03-26T14:58:45-0400'
     run_id: V03-R0-003-T02-20260326T105845-0400
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R0-004-T02
-    claimed_by: codex-ui-experience
-    claimed_at: '2026-03-26T10:58:45-0400'
-    claim_expires_at: '2026-03-26T14:58:45-0400'
-    run_id: V03-R0-004-T02-20260326T105845-0400
