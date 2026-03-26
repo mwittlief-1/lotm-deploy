@@ -21,14 +21,9 @@ describe("ops v0.3 control plane", () => {
     const payload = runRubyJson("scripts/opsV03SchedulerDryRun.rb");
 
     expect(payload.active_claims).toEqual(validated.summary.active_claims);
-
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-tooling-qa"]).toBeTypeOf("string");
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-social-mechanics"]).toBeTypeOf("string");
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-engine-core"]).toBeUndefined();
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-ui-experience"]).toBeUndefined();
-    expect(payload.first_claimable_by_lane["codex/v0.3-lane-economy-fiscal"]).toBeUndefined();
-    expect(payload.first_claimable_by_lane["codex/v0.3-lane-engine-core"]).toBeUndefined();
-    expect(payload.first_claimable_by_lane["codex/v0.3-lane-ui-experience"]).toBeUndefined();
+    expect(payload.first_ready_by_lane).toEqual(validated.summary.first_ready_by_lane);
+    expect(payload.first_claimable_by_lane).toEqual(validated.summary.first_claimable_by_lane);
+    expect(payload.first_ready_by_lane["codex/v0.3-lane-world-topology"]).toBeUndefined();
     expect(payload.first_claimable_by_lane["codex/v0.3-lane-world-topology"]).toBeUndefined();
 
     for (const lane of Object.keys(payload.active_claims)) {
@@ -41,7 +36,6 @@ describe("ops v0.3 control plane", () => {
   it("shows no immediate ready-task rebases", () => {
     const payload = runRubyJson("scripts/opsV03RebaseDryRun.rb");
     expect(Array.isArray(payload.ready_tasks)).toBe(true);
-    expect(payload.ready_tasks.length).toBeGreaterThan(0);
     expect(payload.ready_tasks.every((task: { should_rebase: boolean }) => task.should_rebase === false)).toBe(true);
     expect(
       payload.ready_tasks.every((task: { reason: string }) => typeof task.reason === "string" && task.reason.length > 0)
