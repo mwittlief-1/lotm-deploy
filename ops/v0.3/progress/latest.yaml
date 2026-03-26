@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R0-001-T02
   last_completed_task_id: V03-R0-005-T01
 runtime:
   node_version: v24.13.1
@@ -22,7 +22,9 @@ last_run:
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
   Tooling/qa completed V03-R0-001-T01 and Social completed V03-R0-002-T01 plus
-  V03-R0-005-T01; all accepted handoffs are now synced into kickoff. There is
-  currently no globally claimable ready task. World/topology automation remains
-  blocked behind V03-XMAP-001.
+  V03-R0-005-T01; the next tranche is now queued with one ready task per
+  eligible lane: V03-R0-001-T02, V03-R0-002-T02, V03-R0-003-T02, and
+  V03-R0-004-T02. Later same-lane tasks remain todo until the promoted lane
+  frontiers move. World/topology automation remains blocked behind
+  V03-XMAP-001.
 active_claims: {}
