@@ -1,5 +1,44 @@
-import type { RunState, WarLevyDue } from "../../types";
+import type { PhaseNameV0, RunState, WarLevyDue } from "../../types";
 import { asNonNegInt } from "../../util";
+import {
+  buildFiscalReceiptSnapshot,
+  makeFiscalReceipt,
+  type FiscalReceiptAssetV1,
+  type FiscalReceiptCounterpartyKindV1,
+  type FiscalReceiptSnapshotV1,
+  type FiscalReceiptV1
+} from "./receipts";
+
+type CoinLedgerReceiptAssetV1 = Extract<FiscalReceiptAssetV1, "coin" | "tax_due_coin" | "arrears_coin">;
+type StoreLedgerReceiptAssetV1 = Extract<FiscalReceiptAssetV1, "food_stores" | "meat_stores" | "tithe_due_bushels" | "arrears_bushels">;
+type LedgerReceiptAssetV1 = CoinLedgerReceiptAssetV1 | StoreLedgerReceiptAssetV1;
+export type TrackedStoreAsset = "food_stores" | "meat_stores";
+
+export interface LedgerReceiptContextV1 {
+  receipt_id?: string;
+  phase: PhaseNameV0;
+  phase_sequence: number;
+  category: string;
+  counterparty_kind?: FiscalReceiptCounterpartyKindV1;
+  counterparty_id?: string;
+  counterparty_label?: string;
+  summary: string;
+  rule_id: string;
+  related_actor_ids?: readonly string[];
+}
+
+export interface LedgerTransferReceiptContextV1 {
+  debit: LedgerReceiptContextV1;
+  credit: LedgerReceiptContextV1;
+}
+
+interface LedgerReceiptJournalV1 {
+  next_ordinal: number;
+  receipts: FiscalReceiptV1[];
+}
+
+// Keep receipt emission lane-local until integrator wiring decides how to surface it.
+const ledgerReceiptJournalByState = new WeakMap<RunState, LedgerReceiptJournalV1>();
 
 function normalizedAmount(amount: number): number {
   return Math.max(0, Math.trunc(amount));
@@ -9,8 +48,89 @@ function obligations(state: RunState) {
   return state.manor.obligations;
 }
 
+function manorAny(state: RunState): Record<string, unknown> {
+  return state.manor as unknown as Record<string, unknown>;
+}
+
+function ledgerReceiptJournal(state: RunState): LedgerReceiptJournalV1 {
+  const existing = ledgerReceiptJournalByState.get(state);
+  if (existing) return existing;
+
+  const created: LedgerReceiptJournalV1 = { next_ordinal: 1, receipts: [] };
+  ledgerReceiptJournalByState.set(state, created);
+  return created;
+}
+
+function ledgerReceiptId(state: RunState, asset: LedgerReceiptAssetV1, context: LedgerReceiptContextV1, journal: LedgerReceiptJournalV1): string {
+  const ordinal = journal.next_ordinal++;
+  if (context.receipt_id) return context.receipt_id;
+  return ["ledger", `t${Math.trunc(state.turn_index)}`, context.phase, `p${Math.trunc(context.phase_sequence)}`, asset, String(ordinal).padStart(4, "0")].join(":");
+}
+
+function appendLedgerReceipt(
+  state: RunState,
+  asset: LedgerReceiptAssetV1,
+  delta: number,
+  balanceAfter: number,
+  context?: LedgerReceiptContextV1
+): void {
+  if (!context || delta === 0) return;
+
+  const journal = ledgerReceiptJournal(state);
+  journal.receipts.push(
+    makeFiscalReceipt({
+      receipt_id: ledgerReceiptId(state, asset, context, journal),
+      turn: state.turn_index,
+      phase: context.phase,
+      phase_sequence: context.phase_sequence,
+      category: context.category,
+      counterparty_kind: context.counterparty_kind ?? "unknown",
+      counterparty_id: context.counterparty_id ?? "",
+      counterparty_label: context.counterparty_label ?? "",
+      asset,
+      delta,
+      balance_after: balanceAfter,
+      summary: context.summary,
+      rule_id: context.rule_id,
+      related_actor_ids: [...(context.related_actor_ids ?? [])]
+    })
+  );
+}
+
+function finalizeLedgerDelta(
+  state: RunState,
+  asset: LedgerReceiptAssetV1,
+  before: number,
+  after: number,
+  context?: LedgerReceiptContextV1
+): number {
+  const applied = after - before;
+  appendLedgerReceipt(state, asset, applied, after, context);
+  return applied;
+}
+
+export function readLedgerReceiptSnapshots(state: RunState): FiscalReceiptSnapshotV1[] {
+  return buildFiscalReceiptSnapshot(ledgerReceiptJournalByState.get(state)?.receipts ?? []);
+}
+
+export function clearLedgerReceiptJournal(state: RunState): void {
+  ledgerReceiptJournalByState.delete(state);
+}
+
 export function bushelBalance(state: RunState): number {
   return asNonNegInt(state.manor.bushels_stored);
+}
+
+export function foodStoreBalance(state: RunState): number {
+  return bushelBalance(state);
+}
+
+export function meatStoreBalance(state: RunState): number {
+  return asNonNegInt(Number(manorAny(state).meat_stores ?? 0));
+}
+
+export function trackedStoreBalance(state: RunState, asset: TrackedStoreAsset): number {
+  return asset === "food_stores" ? foodStoreBalance(state) : meatStoreBalance(state);
 }
 
 export function setBushelBalance(state: RunState, amount: number): number {
@@ -19,16 +139,73 @@ export function setBushelBalance(state: RunState, amount: number): number {
   return next;
 }
 
-export function applyBushelDelta(state: RunState, delta: number): number {
-  const before = bushelBalance(state);
-  const after = setBushelBalance(state, before + Math.trunc(delta));
-  return after - before;
+export function setFoodStoreBalance(state: RunState, amount: number): number {
+  return setBushelBalance(state, amount);
 }
 
-export function spendBushels(state: RunState, amount: number): number {
+export function setMeatStoreBalance(state: RunState, amount: number): number {
+  const next = normalizedAmount(amount);
+  manorAny(state).meat_stores = next;
+  return next;
+}
+
+export function setTrackedStoreBalance(state: RunState, asset: TrackedStoreAsset, amount: number): number {
+  return asset === "food_stores" ? setFoodStoreBalance(state, amount) : setMeatStoreBalance(state, amount);
+}
+
+export function applyBushelDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
+  const before = foodStoreBalance(state);
+  const after = setFoodStoreBalance(state, before + Math.trunc(delta));
+  return finalizeLedgerDelta(state, "food_stores", before, after, receiptContext);
+}
+
+export function applyFoodStoreDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
+  return applyBushelDelta(state, delta, receiptContext);
+}
+
+export function applyMeatStoreDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
+  const before = meatStoreBalance(state);
+  const after = setMeatStoreBalance(state, before + Math.trunc(delta));
+  return finalizeLedgerDelta(state, "meat_stores", before, after, receiptContext);
+}
+
+export function applyTrackedStoreDelta(
+  state: RunState,
+  asset: TrackedStoreAsset,
+  delta: number,
+  receiptContext?: LedgerReceiptContextV1
+): number {
+  return asset === "food_stores"
+    ? applyFoodStoreDelta(state, delta, receiptContext)
+    : applyMeatStoreDelta(state, delta, receiptContext);
+}
+
+export function spendBushels(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(bushelBalance(state), normalizedAmount(amount));
-  applyBushelDelta(state, -pay);
+  applyBushelDelta(state, -pay, receiptContext);
   return pay;
+}
+
+export function spendFoodStores(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
+  return spendBushels(state, amount, receiptContext);
+}
+
+export function spendMeatStores(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
+  const pay = Math.min(meatStoreBalance(state), normalizedAmount(amount));
+  if (pay <= 0) return 0;
+  applyMeatStoreDelta(state, -pay, receiptContext);
+  return pay;
+}
+
+export function spendTrackedStores(
+  state: RunState,
+  asset: TrackedStoreAsset,
+  amount: number,
+  receiptContext?: LedgerReceiptContextV1
+): number {
+  return asset === "food_stores"
+    ? spendFoodStores(state, amount, receiptContext)
+    : spendMeatStores(state, amount, receiptContext);
 }
 
 export function coinBalance(state: RunState): number {
@@ -45,15 +222,15 @@ export function canAffordCoin(state: RunState, amount: number): boolean {
   return coinBalance(state) >= normalizedAmount(amount);
 }
 
-export function applyCoinDelta(state: RunState, delta: number): number {
+export function applyCoinDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
   const before = coinBalance(state);
   const after = setCoinBalance(state, before + Math.trunc(delta));
-  return after - before;
+  return finalizeLedgerDelta(state, "coin", before, after, receiptContext);
 }
 
-export function spendCoin(state: RunState, amount: number): number {
+export function spendCoin(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(coinBalance(state), normalizedAmount(amount));
-  applyCoinDelta(state, -pay);
+  applyCoinDelta(state, -pay, receiptContext);
   return pay;
 }
 
@@ -77,30 +254,29 @@ export function setTitheDueBushels(state: RunState, amount: number): number {
   return next;
 }
 
-export function applyTaxDueCoinDelta(state: RunState, delta: number): number {
+export function applyTaxDueCoinDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
   const before = taxDueCoin(state);
-  const after = asNonNegInt(before + Math.trunc(delta));
-  obligations(state).tax_due_coin = after;
-  return after - before;
+  const after = setTaxDueCoin(state, before + Math.trunc(delta));
+  return finalizeLedgerDelta(state, "tax_due_coin", before, after, receiptContext);
 }
 
-export function applyTitheDueBushelsDelta(state: RunState, delta: number): number {
+export function applyTitheDueBushelsDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
   const before = titheDueBushels(state);
   const after = setTitheDueBushels(state, before + Math.trunc(delta));
-  return after - before;
+  return finalizeLedgerDelta(state, "tithe_due_bushels", before, after, receiptContext);
 }
 
-export function spendTaxDueCoin(state: RunState, amount: number): number {
+export function spendTaxDueCoin(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(taxDueCoin(state), normalizedAmount(amount));
   if (pay <= 0) return 0;
-  applyTaxDueCoinDelta(state, -pay);
+  applyTaxDueCoinDelta(state, -pay, receiptContext);
   return pay;
 }
 
-export function spendTitheDueBushels(state: RunState, amount: number): number {
+export function spendTitheDueBushels(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(titheDueBushels(state), normalizedAmount(amount));
   if (pay <= 0) return 0;
-  applyTitheDueBushelsDelta(state, -pay);
+  applyTitheDueBushelsDelta(state, -pay, receiptContext);
   return pay;
 }
 
@@ -124,43 +300,51 @@ export function setArrearsBushels(state: RunState, amount: number): number {
   return next;
 }
 
-export function applyArrearsCoinDelta(state: RunState, delta: number): number {
+export function applyArrearsCoinDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
   const before = arrearsCoin(state);
   const after = setArrearsCoin(state, before + Math.trunc(delta));
-  return after - before;
+  return finalizeLedgerDelta(state, "arrears_coin", before, after, receiptContext);
 }
 
-export function applyArrearsBushelsDelta(state: RunState, delta: number): number {
+export function applyArrearsBushelsDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
   const before = arrearsBushels(state);
   const after = setArrearsBushels(state, before + Math.trunc(delta));
-  return after - before;
+  return finalizeLedgerDelta(state, "arrears_bushels", before, after, receiptContext);
 }
 
-export function spendArrearsCoin(state: RunState, amount: number): number {
+export function spendArrearsCoin(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(arrearsCoin(state), normalizedAmount(amount));
   if (pay <= 0) return 0;
-  applyArrearsCoinDelta(state, -pay);
+  applyArrearsCoinDelta(state, -pay, receiptContext);
   return pay;
 }
 
-export function spendArrearsBushels(state: RunState, amount: number): number {
+export function spendArrearsBushels(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(arrearsBushels(state), normalizedAmount(amount));
   if (pay <= 0) return 0;
-  applyArrearsBushelsDelta(state, -pay);
+  applyArrearsBushelsDelta(state, -pay, receiptContext);
   return pay;
 }
 
-export function rollTaxDueCoinIntoArrears(state: RunState): number {
+export function rollTaxDueCoinIntoArrears(state: RunState, receiptContext?: LedgerTransferReceiptContextV1): number {
   const due = taxDueCoin(state);
-  if (due > 0) applyArrearsCoinDelta(state, due);
-  setTaxDueCoin(state, 0);
+  if (due > 0) {
+    applyArrearsCoinDelta(state, due, receiptContext?.credit);
+    spendTaxDueCoin(state, due, receiptContext?.debit);
+  } else {
+    setTaxDueCoin(state, 0);
+  }
   return due;
 }
 
-export function rollTitheDueBushelsIntoArrears(state: RunState): number {
+export function rollTitheDueBushelsIntoArrears(state: RunState, receiptContext?: LedgerTransferReceiptContextV1): number {
   const due = titheDueBushels(state);
-  if (due > 0) applyArrearsBushelsDelta(state, due);
-  setTitheDueBushels(state, 0);
+  if (due > 0) {
+    applyArrearsBushelsDelta(state, due, receiptContext?.credit);
+    spendTitheDueBushels(state, due, receiptContext?.debit);
+  } else {
+    setTitheDueBushels(state, 0);
+  }
   return due;
 }
 

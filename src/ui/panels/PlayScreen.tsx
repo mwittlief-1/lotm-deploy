@@ -40,12 +40,13 @@ import {
   buildDiffLedgerItems
 } from "../playScreenModel";
 import {
-  PLAY_SCREEN_CARD_ORDER,
-  type PlayScreenCardId,
-  buildStickyResourceChips
-} from "../playScreenLayout";
+  PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
+  PLAY_SCREEN_DEBUG_SURFACES
+} from "../playScreenChrome";
+import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, buildStickyResourceChips } from "../playScreenLayout";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
+import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
 import { EventsPanel } from "./EventsPanel";
@@ -659,13 +660,29 @@ export function PlayScreen({
       />
     ) : null,
     debug_relationships: (
-      <RelationshipDrawerPanel
-        onQueryChange={setRelationshipDrawerQuery}
-        onTabChange={setRelationshipDrawerTab}
-        previewState={ctx.preview_state}
-        query={relationshipDrawerQuery}
-        tab={relationshipDrawerTab}
-      />
+      <DebugAccordion summary={PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY} title="Debug surfaces">
+        <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
+          <div style={{ fontWeight: 700 }}>{PLAY_SCREEN_DEBUG_SURFACES[0].title}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{PLAY_SCREEN_DEBUG_SURFACES[0].description}</div>
+          <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+            <button onClick={onOpenLog}>Open Run Log</button>
+            <button onClick={onExportRunSummary}>Export Run Summary</button>
+            <button onClick={onExportFullRunJson}>Export Full Run JSON</button>
+          </div>
+        </div>
+
+        <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
+          <div style={{ fontWeight: 700 }}>{PLAY_SCREEN_DEBUG_SURFACES[1].title}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{PLAY_SCREEN_DEBUG_SURFACES[1].description}</div>
+          <RelationshipDrawerPanel
+            onQueryChange={setRelationshipDrawerQuery}
+            onTabChange={setRelationshipDrawerTab}
+            previewState={ctx.preview_state}
+            query={relationshipDrawerQuery}
+            tab={relationshipDrawerTab}
+          />
+        </div>
+      </DebugAccordion>
     )
   };
 
@@ -679,7 +696,7 @@ export function PlayScreen({
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={onOpenLog}>Debug/Log</button>
-          <button onClick={onOpenNewRun}>New Run</button>
+            <button onClick={onOpenNewRun}>New Run</button>
           </div>
         </div>
         <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>
