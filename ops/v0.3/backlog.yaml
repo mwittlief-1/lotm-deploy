@@ -1333,7 +1333,7 @@ tasks:
   title: Define stable receipt schema and ordering contract
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -1608,7 +1608,7 @@ tasks:
   title: Audit marriage offer lifecycle and candidate identity surfaces
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 100
   tranche: 1
   change_type: refactor
@@ -1654,7 +1654,7 @@ tasks:
   title: Define bounded offer registry schema and deterministic candidate keys
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2019,7 +2019,7 @@ tasks:
   title: Define decision budget registry and deterministic decrement rules
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2330,7 +2330,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Implement sticky resource chips and single-column card hierarchy shell
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: behavior_change
@@ -2536,7 +2536,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Audit world-init relationship seeds and known-house baselines
-  status: ready
+  status: done
   priority: 99
   tranche: 1
   change_type: refactor
