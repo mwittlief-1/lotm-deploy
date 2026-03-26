@@ -1792,7 +1792,7 @@ tasks:
   title: Implement member-level bounded offer ownership for household concurrency
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 92
   tranche: 1
   change_type: behavior_change

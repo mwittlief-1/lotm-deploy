@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-001-T07
-  last_completed_task_id: V03-R0-006-T05
+  last_completed_task_id: V03-R0-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6e5c3247626d0f4516b89ec62e63f255ec86e17b
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: cf3af74074a4dd3b1c2129c90e5e5e38ef9df87b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,20 +15,17 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Accepted Tooling V03-R0-001-T06, UI V03-R0-004-T05, and Economy V03-R0-006-T05
-  from their lane branches after each lane closed with passing gates and stable
-  replay hashes. Social V03-R0-002-T05 was re-scoped to a domain-only
-  member-ownership seam after lane escalation evidence showed the old contract
-  incorrectly required integrator-owned phase and shared-type edits; the
-  phase-wrapper integration remains explicitly deferred to V03-R0-002-T07. The
-  current unclaimed ready queue is Tooling V03-R0-001-T07, Social
-  V03-R0-002-T05, UI V03-R0-004-T06, and Economy V03-R0-006-T06. Engine Core
-  V03-R0-003-T02 remains E2 escalated, and world/topology automation remains
-  blocked behind V03-XMAP-001.
+  Social completed the re-scoped V03-R0-002-T05 by adding member-level bounded
+  offer ownership APIs to the marriage offer registry and proving concurrent
+  per-subject offer ownership in tests without touching phase integration. The
+  other ready frontiers remain Tooling V03-R0-001-T07, UI V03-R0-004-T06, and
+  Economy V03-R0-006-T06; the next social task V03-R0-002-T06 is still todo.
+  Engine Core V03-R0-003-T02 remains E2 escalated, and world/topology
+  automation remains blocked behind V03-XMAP-001.
 active_claims: {}
