@@ -2901,7 +2901,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Route food and meat deltas through receipt writers and settlement scaffolds
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
