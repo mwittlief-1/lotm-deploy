@@ -1,11 +1,13 @@
 # Marriage Offer Registry Contract v0.3.0
 
-Task: `V03-R0-002-T02`  
+Last updated: `2026-03-26`  
+Origin task: `V03-R0-002-T02`  
+Refreshed by: `V03-R0-002-T06`, `V03-R0-002-T08`  
 Date: `2026-03-26`
 
 ## Goal
 
-Define a bounded marriage-offer registry contract inside the people domain without changing the live phase wiring yet.
+This document originated as the `T02` seam carve and now records the accepted bounded marriage-offer contract after the later `T06` and `T07` follow-ups.
 
 This task locks the schema, identity keys, and state model that later tasks will use for:
 
@@ -79,18 +81,21 @@ Transition rule for `v0.3.0` contract:
 - `pending` may move only to itself or a terminal state
 - terminal states are final and may only repeat idempotently as the same terminal state
 
-## Current seam
+## Registry seam and accepted integration
 
-The current runtime still builds transient `MarriageWindow.offers` and later collapses one best offer into the prospect system. This task does not change that behavior.
+The current runtime still builds transient `MarriageWindow.offers` and later collapses one best offer into the prospect system.
 
-Instead, it adds:
+The accepted bounded-offer seam now provides:
 
 - a behavior-preserving registry helper for current inbound offers
 - deterministic key helpers
 - state-transition assertions
 - test coverage proving the schema and keys are stable
+- state reconstruction from generated prospect history plus active refs
+- member-level ownership indexes for concurrent household offer state
+- prospects-wrapper integration so the generated marriage prospect is sourced from a bounded registry entry instead of being rebuilt ad hoc from `MarriageWindow`
 
-That keeps `T02` seam-carving only, while `T03` through `T05` can wire actual pending, reject-stickiness, and concurrency behavior onto the same registry contract.
+That means the same registry contract now spans the shipped `T02` through `T07` behavior without changing the canonical key model introduced at `T02`.
 
 ## Bounded policy fixtures
 
@@ -105,12 +110,18 @@ The canonical deterministic fixtures now live in `tests/sim/marriage_offer_regis
 - cooldown behavior:
   rejected pairings stay cooling down for turns `+1` through `+3` and re-enter eligibility on turn `+4`
 - household concurrency:
-  `buildMarriageOfferOwnershipIndex(...)` and `buildMarriageOfferOwnershipIndexFromState(...)` must be able to show two household members holding concurrent active offers before `T07` phase integration
+  `buildMarriageOfferOwnershipIndex(...)` and `buildMarriageOfferOwnershipIndexFromState(...)` must be able to show two household members holding concurrent active offers inside the bounded registry state
 
 The fixed fixture state continues to use `run_seed: "seed"` so coverage stays deterministic even where the current preview path still depends on seeded offer generation.
 
-## Deferred integration boundary
+## Remaining boundary
 
-This contract now intentionally stops at the people-domain registry seam.
+This contract intentionally stops short of a broader product redesign.
 
-It does **not** claim that the phase wrappers already materialize multiple same-turn marriage prospects. That integrator-owned step remains deferred to `V03-R0-002-T07`.
+It does **not** claim that:
+
+- the preview path now surfaces multiple same-turn marriage subjects in `MarriageWindow`
+- the prospects phase now materializes more than one marriage prospect at a time
+- raw marriage-window accept / reject resolution has been fully unified with prospect resolution
+
+The concurrency requirement accepted in this epic closes at the registry ownership layer: bounded offer state can represent multiple household members holding active offers concurrently, while the current preview and prospect-capacity policies remain intentionally unchanged.

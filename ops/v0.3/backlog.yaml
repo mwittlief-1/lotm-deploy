@@ -377,7 +377,7 @@ epics:
 - id: V03-R0-002
   title: Marriage v1 bounded offers and household concurrency
   release: v0.3.0
-  status: ready
+  status: done
   priority: 58
   tranche: 1
   change_type: behavior_change
@@ -1932,7 +1932,7 @@ tasks:
   title: Close epic and refresh marriage lane docs
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 86
   tranche: 1
   change_type: refactor
