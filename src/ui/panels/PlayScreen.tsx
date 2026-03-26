@@ -55,6 +55,16 @@ import {
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
 import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, type StickyResourceChip, buildStickyResourceChips } from "../playScreenLayout";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_EYEBROW_STYLE,
+  PLAY_SCREEN_HEADER_HELPER_STYLE,
+  PLAY_SCREEN_PAGE_STYLE,
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE,
+  PLAY_SCREEN_SIGIL_STYLE,
+  PLAY_SCREEN_THEME,
+  PLAY_SCREEN_TIMING_PILL_STYLE
+} from "../playScreenTheme";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
 import { DebugAccordion } from "./DebugAccordion";
@@ -731,20 +741,27 @@ export function PlayScreen({
   };
 
   return (
-    <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 960, margin: "0 auto" }}>
+    <div style={PLAY_SCREEN_PAGE_STYLE}>
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", opacity: 0.65 }}>Gameplay Overview</div>
-            <h2 style={{ margin: "4px 0 0" }}>Turn {ctx.report.turn_index}</h2>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={PLAY_SCREEN_SIGIL_STYLE}>HC</span>
+              <span style={PLAY_SCREEN_TIMING_PILL_STYLE}>{copy.turnSummary_last3Years}</span>
+              <span style={PLAY_SCREEN_TIMING_PILL_STYLE}>{copy.turnSummary_nowChoose}</span>
+            </div>
+            <div style={{ ...PLAY_SCREEN_EYEBROW_STYLE, marginTop: 8, color: PLAY_SCREEN_THEME.ink }}>
+              {copy.gameplayOverviewEyebrow ?? "Gameplay Chronicle"}
+            </div>
+            <h2 style={{ margin: "6px 0 0", fontFamily: PLAY_SCREEN_THEME.bodyFont, fontSize: 32 }}>Turn {ctx.report.turn_index}</h2>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={onOpenLog}>Debug/Log</button>
-            <button onClick={onOpenNewRun}>New Run</button>
+            <button onClick={onOpenLog} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Debug/Log</button>
+            <button onClick={onOpenNewRun} style={PLAY_SCREEN_ACTION_BUTTON_STYLE}>New Run</button>
           </div>
         </div>
-        <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>
-          Top to bottom: priorities, changes, state, then next-turn choices.
+        <div style={PLAY_SCREEN_HEADER_HELPER_STYLE}>
+          {copy.gameplayOverviewHelper ?? "Resolved above: the last 3 years. Choose below: the next turn's response."}
         </div>
       </div>
 
@@ -768,7 +785,12 @@ export function PlayScreen({
         </div>
       ) : null}
 
-      <StickyResourceChips chips={resourceChips} onOpenChipDetails={openChipDetails} />
+      <StickyResourceChips
+        chips={resourceChips}
+        helperText={copy.resourceChipHelper ?? "Open a chip to follow the deeper ledger without leaving the gameplay shell."}
+        onOpenChipDetails={openChipDetails}
+        timingLabel={copy.turnSummary_last3Years}
+      />
 
       <div style={{ display: "grid", gap: 12 }}>
         {PLAY_SCREEN_CARD_ORDER.map((sectionId) =>

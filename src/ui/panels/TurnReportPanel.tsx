@@ -1,10 +1,12 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
 import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
+import { PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
 import { HouseholdDetailsPanel } from "./HouseholdDetailsPanel";
 import { HouseholdPanel } from "./HouseholdPanel";
 import { ModalSheet } from "./ModalSheet";
+import { SectionHeading } from "./SectionHeading";
 
 type TurnReportPanelProps = {
   accruedThisTurn: any;
@@ -68,10 +70,13 @@ export function TurnReportPanel({
   turnYears
 }: TurnReportPanelProps) {
   return (
-    <div style={{ padding: 12, border: "1px solid #ccc" }}>
-      <h3>
-        Turn Report <span style={{ fontSize: 12, opacity: 0.7 }}>(before decisions)</span>
-      </h3>
+    <div style={PLAY_SCREEN_PANEL_STYLE}>
+      <SectionHeading
+        helper={copy.turnReportTimingHelper ?? "These figures explain what already resolved over the last turn before you set new orders below."}
+        sigil={PLAY_SCREEN_SECTION_SIGILS.report}
+        timingLabel={copy.turnSummary_last3Years}
+        title="Turn Report"
+      />
 
       <HouseholdPanel
         anchorId={anchorHousehold}

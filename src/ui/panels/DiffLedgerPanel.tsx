@@ -1,4 +1,6 @@
 import React from "react";
+import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_ACCENT_STYLE, PLAY_SCREEN_SECTION_SIGILS, PLAY_SCREEN_SUBCARD_STYLE } from "../playScreenTheme";
+import { SectionHeading } from "./SectionHeading";
 
 type DiffLedgerItem = {
   id: string;
@@ -15,22 +17,24 @@ type DiffLedgerPanelProps = {
 
 export function DiffLedgerPanel({ copy, items, onOpenExplainChanges }: DiffLedgerPanelProps) {
   return (
-    <div style={{ padding: 12, border: "1px solid #ccc", background: "#fafafa", marginBottom: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
-        <div>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>{copy.diffLedgerTitle}</div>
-          <div style={{ fontSize: 12, opacity: 0.8 }}>{copy.diffLedgerHelper}</div>
-        </div>
-        {onOpenExplainChanges ? (
-          <button data-open-explain-changes onClick={onOpenExplainChanges} type="button">
-            {copy.diffLedgerExplainChanges ?? "Explain Changes"}
-          </button>
-        ) : null}
-      </div>
+    <div style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginBottom: 12 }}>
+      <SectionHeading
+        action={
+          onOpenExplainChanges ? (
+            <button data-open-explain-changes onClick={onOpenExplainChanges} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+              {copy.diffLedgerExplainChanges ?? "Explain Changes"}
+            </button>
+          ) : null
+        }
+        helper={copy.diffLedgerHelper}
+        sigil={PLAY_SCREEN_SECTION_SIGILS.ledger}
+        timingLabel={copy.turnSummary_last3Years}
+        title={copy.diffLedgerTitle}
+      />
 
       <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
         {items.map((it) => (
-          <div key={it.id} style={{ padding: 10, border: "1px solid #ddd", background: "#fff" }}>
+          <div key={it.id} style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
               <div style={{ fontWeight: 700 }}>{it.primary}</div>
               <span
@@ -38,9 +42,9 @@ export function DiffLedgerPanel({ copy, items, onOpenExplainChanges }: DiffLedge
                 style={{
                   fontSize: 12,
                   padding: "2px 8px",
-                  border: "1px solid #ddd",
+                  border: "1px solid rgba(172, 143, 100, 0.32)",
                   borderRadius: 999,
-                  background: "#fafafa",
+                  background: "#f8f0df",
                   whiteSpace: "nowrap"
                 }}
               >
