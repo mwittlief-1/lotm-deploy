@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R0-004-T03
+  current_task_id: V03-R0-001-T05
+  last_completed_task_id: V03-R0-001-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 1f91ace52214a744394e7fc6eca6da0bdcb390cf
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 4c097bade7c9b4cf2654177f8db1fa7e099bf792
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,32 +15,18 @@ last_run:
   gates:
     qa: pass
     preflight: pass
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  UI completed V03-R0-004-T03 on codex/v0.3-lane-ui-experience after qa,
-  preflight, and matching replay batches on the merged lane head. Tooling/qa,
-  Social, and Economy frontiers remain actively claimed, so there is still no
-  globally claimable ready task. World/topology automation remains blocked
-  behind V03-XMAP-001.
-active_claims:
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R0-001-T03
-    claimed_by: codex-tooling-qa
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-001-T03-20260326T113213-0400
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-002-T03
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-002-T03-20260326T113213-0400
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R0-006-T02
-    claimed_by: codex-economy-fiscal
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-006-T02-20260326T113213-0400
+  Accepted completed lane work for Tooling T03/T04, Social T03, UI T03, and
+  Economy T02/T03, then cleared the stale dispatched claims from kickoff.
+  Tooling T04 and Economy T03 were status-rebased to done from lane evidence
+  plus run logs because the worktrees had advanced beyond the earlier kickoff
+  dispatch point. The next unclaimed ready frontier is Tooling T05, with
+  Social T04, UI T04, and Economy T04 also ready. Engine Core V03-R0-003-T02
+  remains E2 escalated, and world/topology automation remains blocked behind
+  V03-XMAP-001.
+active_claims: {}
