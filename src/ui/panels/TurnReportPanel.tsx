@@ -1,7 +1,10 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
 import { Tip } from "../viewHelpers";
+import { HouseholdDetailsPanel } from "./HouseholdDetailsPanel";
 import { HouseholdPanel } from "./HouseholdPanel";
+import { ModalSheet } from "./ModalSheet";
 
 type TurnReportPanelProps = {
   accruedThisTurn: any;
@@ -73,8 +76,6 @@ export function TurnReportPanel({
       <HouseholdPanel
         anchorId={anchorHousehold}
         copy={copy}
-        currentHouseLog={currentHouseLog}
-        courtRosterEntries={courtRosterEntries}
         courtSize={courtSize}
         previewState={previewState}
         state={state}
@@ -182,6 +183,22 @@ export function TurnReportPanel({
         </li>
       </ul>
       <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.obligationsHelper}</div>
+
+      <ModalSheet
+        onClose={toggleHouseholdDetails}
+        open={showHouseholdDetails}
+        subtitle="Court roster, household log, and succession context stay accessible here without crowding the main card."
+        title={PLAY_SCREEN_MODAL_TITLES.household}
+      >
+        <HouseholdDetailsPanel
+          copy={copy}
+          currentHouseLog={currentHouseLog}
+          courtRosterEntries={courtRosterEntries}
+          courtSize={courtSize}
+          previewState={previewState}
+          state={state}
+        />
+      </ModalSheet>
     </div>
   );
 }

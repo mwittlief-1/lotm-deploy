@@ -10,8 +10,9 @@ import {
 } from "./receipts";
 
 type CoinLedgerReceiptAssetV1 = Extract<FiscalReceiptAssetV1, "coin" | "tax_due_coin" | "arrears_coin">;
-type StoreLedgerReceiptAssetV1 = Extract<FiscalReceiptAssetV1, "food_stores" | "tithe_due_bushels" | "arrears_bushels">;
+type StoreLedgerReceiptAssetV1 = Extract<FiscalReceiptAssetV1, "food_stores" | "meat_stores" | "tithe_due_bushels" | "arrears_bushels">;
 type LedgerReceiptAssetV1 = CoinLedgerReceiptAssetV1 | StoreLedgerReceiptAssetV1;
+export type TrackedStoreAsset = "food_stores" | "meat_stores";
 
 export interface LedgerReceiptContextV1 {
   receipt_id?: string;
@@ -45,6 +46,10 @@ function normalizedAmount(amount: number): number {
 
 function obligations(state: RunState) {
   return state.manor.obligations;
+}
+
+function manorAny(state: RunState): Record<string, unknown> {
+  return state.manor as unknown as Record<string, unknown>;
 }
 
 function ledgerReceiptJournal(state: RunState): LedgerReceiptJournalV1 {
@@ -116,22 +121,91 @@ export function bushelBalance(state: RunState): number {
   return asNonNegInt(state.manor.bushels_stored);
 }
 
+export function foodStoreBalance(state: RunState): number {
+  return bushelBalance(state);
+}
+
+export function meatStoreBalance(state: RunState): number {
+  return asNonNegInt(Number(manorAny(state).meat_stores ?? 0));
+}
+
+export function trackedStoreBalance(state: RunState, asset: TrackedStoreAsset): number {
+  return asset === "food_stores" ? foodStoreBalance(state) : meatStoreBalance(state);
+}
+
 export function setBushelBalance(state: RunState, amount: number): number {
   const next = normalizedAmount(amount);
   state.manor.bushels_stored = next;
   return next;
 }
 
+export function setFoodStoreBalance(state: RunState, amount: number): number {
+  return setBushelBalance(state, amount);
+}
+
+export function setMeatStoreBalance(state: RunState, amount: number): number {
+  const next = normalizedAmount(amount);
+  manorAny(state).meat_stores = next;
+  return next;
+}
+
+export function setTrackedStoreBalance(state: RunState, asset: TrackedStoreAsset, amount: number): number {
+  return asset === "food_stores" ? setFoodStoreBalance(state, amount) : setMeatStoreBalance(state, amount);
+}
+
 export function applyBushelDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
-  const before = bushelBalance(state);
-  const after = setBushelBalance(state, before + Math.trunc(delta));
+  const before = foodStoreBalance(state);
+  const after = setFoodStoreBalance(state, before + Math.trunc(delta));
   return finalizeLedgerDelta(state, "food_stores", before, after, receiptContext);
+}
+
+export function applyFoodStoreDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
+  return applyBushelDelta(state, delta, receiptContext);
+}
+
+export function applyMeatStoreDelta(state: RunState, delta: number, receiptContext?: LedgerReceiptContextV1): number {
+  const before = meatStoreBalance(state);
+  const after = setMeatStoreBalance(state, before + Math.trunc(delta));
+  return finalizeLedgerDelta(state, "meat_stores", before, after, receiptContext);
+}
+
+export function applyTrackedStoreDelta(
+  state: RunState,
+  asset: TrackedStoreAsset,
+  delta: number,
+  receiptContext?: LedgerReceiptContextV1
+): number {
+  return asset === "food_stores"
+    ? applyFoodStoreDelta(state, delta, receiptContext)
+    : applyMeatStoreDelta(state, delta, receiptContext);
 }
 
 export function spendBushels(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
   const pay = Math.min(bushelBalance(state), normalizedAmount(amount));
   applyBushelDelta(state, -pay, receiptContext);
   return pay;
+}
+
+export function spendFoodStores(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
+  return spendBushels(state, amount, receiptContext);
+}
+
+export function spendMeatStores(state: RunState, amount: number, receiptContext?: LedgerReceiptContextV1): number {
+  const pay = Math.min(meatStoreBalance(state), normalizedAmount(amount));
+  if (pay <= 0) return 0;
+  applyMeatStoreDelta(state, -pay, receiptContext);
+  return pay;
+}
+
+export function spendTrackedStores(
+  state: RunState,
+  asset: TrackedStoreAsset,
+  amount: number,
+  receiptContext?: LedgerReceiptContextV1
+): number {
+  return asset === "food_stores"
+    ? spendFoodStores(state, amount, receiptContext)
+    : spendMeatStores(state, amount, receiptContext);
 }
 
 export function coinBalance(state: RunState): number {

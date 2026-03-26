@@ -1,5 +1,5 @@
 import { structuredHouseIdForPerson } from "../../actors";
-import type { MarriageOffer, RunState } from "../../types";
+import type { MarriageOffer, Prospect, RunState } from "../../types";
 
 export const MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION = "marriage_offer_registry_v0" as const;
 
@@ -236,4 +236,214 @@ export function buildMarriageOfferRegistryFromOffers(
       risk_tags: offer.risk_tags,
     }))
   );
+}
+
+type ActiveProspectRef = { id: string; expires_turn: number };
+
+function readActiveProspects(state: RunState): ActiveProspectRef[] {
+  const anyFlags: any = state.flags as any;
+  const raw = anyFlags?._prospects_active_v1;
+  if (!Array.isArray(raw)) return [];
+
+  const out: ActiveProspectRef[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== "object") continue;
+    const id = typeof (row as any).id === "string" ? String((row as any).id) : "";
+    const expiresTurn = (row as any).expires_turn;
+    if (!id || typeof expiresTurn !== "number" || !Number.isFinite(expiresTurn)) continue;
+    out.push({ id, expires_turn: Math.trunc(expiresTurn) });
+  }
+
+  return out;
+}
+
+function inferCandidateHouseLabel(state: RunState, candidateHouseId: string | null): string {
+  if (!candidateHouseId) return "Unknown";
+  const houses: Record<string, any> =
+    (state as any)?.houses && typeof (state as any).houses === "object"
+      ? ((state as any).houses as Record<string, any>)
+      : {};
+  const house = houses[candidateHouseId];
+  const name = typeof house?.name === "string" && house.name ? String(house.name) : candidateHouseId;
+  return name.startsWith("House ") ? name : `House ${name}`;
+}
+
+function relationshipDeltaFromProspect(state: RunState, prospect: Prospect): {
+  respect: number;
+  allegiance: number;
+  threat: number;
+} {
+  const candidateId = typeof prospect.spouse_person_id === "string" ? prospect.spouse_person_id : "";
+  const relDeltas = Array.isArray((prospect as any)?.predicted_effects?.relationship_deltas)
+    ? ((prospect as any).predicted_effects.relationship_deltas as any[])
+    : [];
+  const row = relDeltas.find(
+    (delta) =>
+      delta &&
+      typeof delta === "object" &&
+      delta.scope === "person" &&
+      typeof delta.to_id === "string" &&
+      delta.to_id === candidateId
+  );
+
+  return {
+    respect: Math.trunc((row as any)?.respect_delta ?? 0),
+    allegiance: Math.trunc((row as any)?.allegiance_delta ?? 0),
+    threat: Math.trunc((row as any)?.threat_delta ?? 0),
+  };
+}
+
+function liegeDeltaFromProspect(state: RunState, prospect: Prospect): { respect: number; threat: number } | null {
+  const liegeId = state.locals?.liege?.id;
+  if (typeof liegeId !== "string" || !liegeId) return null;
+
+  const relDeltas = Array.isArray((prospect as any)?.predicted_effects?.relationship_deltas)
+    ? ((prospect as any).predicted_effects.relationship_deltas as any[])
+    : [];
+  const row = relDeltas.find(
+    (delta) =>
+      delta &&
+      typeof delta === "object" &&
+      delta.scope === "person" &&
+      typeof delta.to_id === "string" &&
+      delta.to_id === liegeId
+  );
+  if (!row) return null;
+
+  return {
+    respect: Math.trunc((row as any)?.respect_delta ?? 0),
+    threat: Math.trunc((row as any)?.threat_delta ?? 0),
+  };
+}
+
+function draftFromProspect(
+  state: RunState,
+  prospect: Prospect,
+  createdTurn: number
+): MarriageOfferRegistryEntryDraft | null {
+  const subjectPersonId = typeof prospect.subject_person_id === "string" ? prospect.subject_person_id : "";
+  const candidatePersonId =
+    typeof prospect.spouse_person_id === "string" && prospect.spouse_person_id.length > 0
+      ? prospect.spouse_person_id
+      : "";
+  if (!subjectPersonId || !candidatePersonId) return null;
+
+  const subjectHouseId = structuredHouseIdForPerson(state, subjectPersonId);
+  const candidateHouseId =
+    typeof prospect.from_house_id === "string" && prospect.from_house_id.length > 0
+      ? prospect.from_house_id
+      : structuredHouseIdForPerson(state, candidatePersonId);
+
+  return {
+    direction: "inbound",
+    state: "generated",
+    subject_person_id: subjectPersonId,
+    subject_house_id: subjectHouseId,
+    candidate_person_id: candidatePersonId,
+    candidate_house_id: candidateHouseId,
+    candidate_house_label: inferCandidateHouseLabel(state, candidateHouseId),
+    created_turn: Math.trunc(createdTurn),
+    last_state_change_turn: Math.trunc(createdTurn),
+    offer_rank: 0,
+    dowry_coin_net: Math.trunc((prospect as any)?.predicted_effects?.coin_delta ?? 0),
+    relationship_delta: relationshipDeltaFromProspect(state, prospect),
+    liege_delta: liegeDeltaFromProspect(state, prospect),
+    risk_tags: [],
+  };
+}
+
+function comparePendingPrecedence(a: MarriageOfferRegistryEntry, b: MarriageOfferRegistryEntry): number {
+  if (a.created_turn !== b.created_turn) return a.created_turn - b.created_turn;
+  if (a.last_state_change_turn !== b.last_state_change_turn) {
+    return a.last_state_change_turn - b.last_state_change_turn;
+  }
+  return a.offer_key.localeCompare(b.offer_key);
+}
+
+function updatedEntryState(
+  entry: MarriageOfferRegistryEntry,
+  nextState: MarriageOfferState,
+  turnIndex: number
+): MarriageOfferRegistryEntry {
+  assertMarriageOfferStateTransition(entry.state, nextState);
+  return {
+    ...entry,
+    state: nextState,
+    last_state_change_turn: Math.trunc(turnIndex),
+  };
+}
+
+export function buildMarriageOfferRegistryFromState(state: RunState): MarriageOfferRegistry {
+  const entriesByKey = new Map<string, MarriageOfferRegistryEntry>();
+  const prospectKeyById = new Map<string, string>();
+
+  const log: any[] = Array.isArray(state.log) ? (state.log as any[]) : [];
+  for (const turnEntry of log) {
+    const report = turnEntry?.report;
+    const events: any[] = Array.isArray(report?.prospects_log) ? report.prospects_log : [];
+
+    for (const event of events) {
+      if (!event || typeof event !== "object") continue;
+      if (event.type !== "marriage") continue;
+
+      if (event.kind === "prospect_generated" && event.prospect && typeof event.prospect === "object") {
+        const draft = draftFromProspect(state, event.prospect as Prospect, Math.trunc(event.turn_index ?? 0));
+        if (!draft) continue;
+        const entry = createMarriageOfferRegistryEntry(draft);
+        entriesByKey.set(entry.offer_key, entry);
+        prospectKeyById.set(String(event.prospect_id ?? ""), entry.offer_key);
+        continue;
+      }
+
+      if (
+        event.kind === "prospect_accepted" ||
+        event.kind === "prospect_rejected" ||
+        event.kind === "prospect_expired"
+      ) {
+        const prospectId = String(event.prospect_id ?? "");
+        const offerKey = prospectKeyById.get(prospectId);
+        if (!offerKey) continue;
+        const entry = entriesByKey.get(offerKey);
+        if (!entry) continue;
+
+        const nextState: MarriageOfferState =
+          event.kind === "prospect_accepted"
+            ? "accepted"
+            : event.kind === "prospect_rejected"
+              ? "rejected"
+              : "expired";
+
+        entriesByKey.set(offerKey, updatedEntryState(entry, nextState, Math.trunc(event.turn_index ?? 0)));
+      }
+    }
+  }
+
+  for (const ref of readActiveProspects(state)) {
+    const offerKey = prospectKeyById.get(ref.id);
+    if (!offerKey) continue;
+    const entry = entriesByKey.get(offerKey);
+    if (!entry) continue;
+    if (isMarriageOfferTerminalState(entry.state)) continue;
+    entriesByKey.set(offerKey, updatedEntryState(entry, "pending", entry.created_turn));
+  }
+
+  const pendingByCandidate = new Map<string, MarriageOfferRegistryEntry[]>();
+  for (const entry of entriesByKey.values()) {
+    if (entry.state !== "pending") continue;
+    const rows = pendingByCandidate.get(entry.candidate_key) ?? [];
+    rows.push(entry);
+    pendingByCandidate.set(entry.candidate_key, rows);
+  }
+
+  for (const rows of pendingByCandidate.values()) {
+    if (rows.length <= 1) continue;
+    const sorted = [...rows].sort(comparePendingPrecedence);
+    const keep = sorted[0]?.offer_key;
+    for (const row of sorted) {
+      if (row.offer_key === keep) continue;
+      entriesByKey.set(row.offer_key, updatedEntryState(row, "withdrawn", state.turn_index));
+    }
+  }
+
+  return buildMarriageOfferRegistry([...entriesByKey.values()]);
 }

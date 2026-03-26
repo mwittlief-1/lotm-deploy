@@ -1,0 +1,32 @@
+version: 1
+run_id: V03-R0-006-T02-20260326T111735-0400
+task_id: V03-R0-006-T02
+status: done
+date: 2026-03-26
+branch: codex/v0.3-lane-economy-fiscal
+commit: 1f4ab134e459e4edb1dba1c1767efc08fe785156
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  schema_module: src/sim/domains/economy/schema.ts
+  receipt_contract: src/sim/domains/economy/receipts.ts
+  schema_tests: tests/sim/fiscal_schema_contract.test.ts
+findings:
+  - A shared fiscal schema now defines the canonical multi-asset ledger table for coin, food_stores, meat_stores, and a service_placeholder hook without changing active simulation balances.
+  - Accepted payment modes are now explicit and deterministic for church_due, liege_due, extraordinary_levy, church_offering, and liege_gift.
+  - Receipt runtime asset mappings now source their coin, food_stores, and meat_stores paths from the shared fiscal schema rather than a duplicated local table.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-006-T03
+next_task_ready: false

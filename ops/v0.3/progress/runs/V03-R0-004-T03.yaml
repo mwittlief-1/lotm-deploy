@@ -1,0 +1,37 @@
+version: 1
+run_id: V03-R0-004-T03-20260326T111638-0400
+task_id: V03-R0-004-T03
+status: done
+date: 2026-03-26
+branch: codex/v0.3-lane-ui-experience
+commit: 77e517cc7f4d419ddb96f35b0a890359f01eb6fc
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  modal_shell: src/ui/panels/ModalSheet.tsx
+  debug_accordion: src/ui/panels/DebugAccordion.tsx
+  household_details_modal: src/ui/panels/HouseholdDetailsPanel.tsx
+  chrome_contract: src/ui/playScreenChrome.ts
+  ui_test: tests/ui/playScreenChrome.test.ts
+findings:
+  - Household roster and house-log detail now open in a reusable modal sheet, which keeps dense reference content available without stretching the main Turn Report card.
+  - Relationship diagnostics and raw run-log/export entry points now live under a dedicated debug accordion at the bottom of the play screen instead of competing with the primary gameplay cards.
+  - The implementation stayed UI-only; qa, preflight, and both replay batches passed with matching summary hashes.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-004-T04
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: Backlog task state, claim mirror, and progress cursor validate cleanly after closing V03-R0-004-T03, but the next UI task remains todo rather than ready.
