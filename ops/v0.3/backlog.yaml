@@ -1792,7 +1792,7 @@ tasks:
   title: Implement household concurrency for multiple active offer holders
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: escalated
   priority: 92
   tranche: 1
   change_type: behavior_change
@@ -1804,7 +1804,7 @@ tasks:
   - V03-R0-002-T02
   - V03-R0-002-T03
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: 'E1 orchestrator_edit_without_requires_integrator: true same-turn household concurrency requires integrator-owned phase and shared type edits in src/sim/phases/phase_prospects.ts and src/sim/types.ts beyond this task''s allowed paths.'
   allowed_paths:
   - src/sim/domains/people/**
   - tests/**

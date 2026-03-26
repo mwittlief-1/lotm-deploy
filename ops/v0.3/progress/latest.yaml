@@ -5,28 +5,29 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: b0a6222df5c0d8e705e85592c34fd68a039d4bf3
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: f7e232cd07d91c7e85e9afdf544300912d41c253
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: pass
-    preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    qa: not_run
+    preflight: not_run
+    repo_duplicates: not_run
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run1: not_run
+    run2: not_run
 notes: >-
-  Accepted Social V03-R0-002-T04 from the lane branch after the deterministic
-  reject-cooldown handoff landed cleanly with passing gates and stable replay
-  hashes. Social is not escalation-blocked; it was only waiting for kickoff to
-  record the closeout and expose the next frontier. The current unclaimed ready
-  queue is Tooling V03-R0-001-T05, Social V03-R0-002-T05, UI V03-R0-004-T04,
-  and Economy V03-R0-006-T04. Engine Core V03-R0-003-T02 remains E2
+  Social claimed V03-R0-002-T05, then stopped on an E1 integrator-boundary
+  mismatch before implementation. The task's done conditions require same-turn
+  household marriage concurrency, but the current single-marriage prospect path
+  is still hard-coded in src/sim/phases/phase_prospects.ts and depends on the
+  narrow shared MarriageWindow shape in src/sim/types.ts, both outside this
+  lane task's allowed paths. Tooling V03-R0-001-T05, UI V03-R0-004-T04, and
+  Economy V03-R0-006-T04 remain ready; Engine Core V03-R0-003-T02 remains E2
   escalated, and world/topology automation remains blocked behind
   V03-XMAP-001.
 active_claims: {}
