@@ -2942,7 +2942,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Retune grain and meat consumption and add equilibrium fixtures
-  status: ready
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
