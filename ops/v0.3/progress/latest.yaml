@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-001-T01
+  last_completed_task_id: V03-R0-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 8867f3ee8d5f9b415ab19b70f3c9fb6b8cfc2f95
+  git_commit: ccf2bb18390fcbcae72727d883233ba00773a170
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,14 +21,8 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Tooling/qa completed V03-R0-001-T01 and its handoff has been accepted into
-  kickoff. codex/v0.3-lane-social-mechanics has V03-R0-002-T01 claimed through
-  2026-03-26T12:29:36-0400, so there is currently no globally claimable ready
-  task. World/topology automation remains blocked behind V03-XMAP-001.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-002-T01
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T08:29:36-0400'
-    claim_expires_at: '2026-03-26T12:29:36-0400'
-    run_id: V03-R0-002-T01-20260326T082936-0400
+  Tooling/qa completed V03-R0-001-T01 and Social completed V03-R0-002-T01 plus
+  V03-R0-005-T01; all accepted handoffs are now synced into kickoff. There is
+  currently no globally claimable ready task. World/topology automation remains
+  blocked behind V03-XMAP-001.
+active_claims: {}

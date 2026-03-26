@@ -1608,7 +1608,7 @@ tasks:
   title: Audit marriage offer lifecycle and candidate identity surfaces
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 100
   tranche: 1
   change_type: refactor
@@ -1631,11 +1631,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T08:29:36-0400'
-    claim_expires_at: '2026-03-26T12:29:36-0400'
-    run_id: V03-R0-002-T01-20260326T082936-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - current offer lifecycle is documented from creation through accept/reject/expiry
   - candidate identity and uniqueness surfaces are enumerated
@@ -2536,7 +2536,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Audit world-init relationship seeds and known-house baselines
-  status: ready
+  status: done
   priority: 99
   tranche: 1
   change_type: refactor
