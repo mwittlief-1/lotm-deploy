@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-001-T01
-  last_completed_task_id: V03-R0-003-T01
+  current_task_id: V03-R0-002-T01
+  last_completed_task_id: V03-R0-001-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: bbe7d3d47c9e65bf4b870b5e4d516a4c8d8b2043
+  git_branch: codex/v0.3-lane-tooling-qa
+  git_commit: 1fc3d7bc25518ced26831d47e83a8984489ebaca
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,15 +15,10 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    repo_duplicates: ''
+    seed_replay_batch_twice: ''
   replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-notes: >-
-  Pre-kickoff reconciliation accepted V03-R0-004-T01 and V03-R0-003-T01 from
-  artifact evidence on the validated kickoff baseline. Lane-parallel
-  scheduling is active with current_task_id set to V03-R0-001-T01. No active
-  lane claims are currently recorded. World/topology automation remains
-  blocked behind V03-XMAP-001.
+    run1: ''
+    run2: ''
+notes: Tooling/qa lane completed V03-R0-001-T01 and wrote docs/qa/receipt_path_audit_v0.3.0.md. The next globally claimable ready task is V03-R0-002-T01 on codex/v0.3-lane-social-mechanics. No tooling/qa follow-on task is ready yet because V03-R0-001-T02 remains todo.
 active_claims: {}

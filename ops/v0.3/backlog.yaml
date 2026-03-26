@@ -1286,7 +1286,7 @@ tasks:
   title: Audit economy mutation paths against ledger receipt ownership
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 100
   tranche: 1
   change_type: refactor
