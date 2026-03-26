@@ -9,9 +9,12 @@ import {
   MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION,
   MARRIAGE_OFFER_TERMINAL_STATES,
   assertMarriageOfferStateTransition,
+  buildMarriageOfferOwnershipIndex,
+  buildMarriageOfferOwnershipIndexFromState,
   buildMarriageRejectCooldownsFromState,
   buildMarriageOfferRegistryFromState,
   buildMarriageOfferRegistryFromOffers,
+  buildMarriageOfferRegistryFromSubjectOffers,
   canTransitionMarriageOfferState,
   createMarriageOfferRegistryEntry,
   getMarriageRejectCooldown,
@@ -356,6 +359,65 @@ describe("marriage offer registry contract", () => {
     expect(terminal.last_state_change_turn).toBe(9);
   });
 
+  it("builds member-level ownership for multiple household subjects before phase integration", () => {
+    const state = mkBaseState();
+
+    const secondChild = mkPerson("p_child_2", "M", 17);
+    state.house.children.push(secondChild);
+    state.people![secondChild.id] = secondChild;
+    (state.houses!.h_player as any).child_ids.push(secondChild.id);
+
+    const registry = buildMarriageOfferRegistryFromSubjectOffers(state, [
+      {
+        subject_person_id: "p_child_1",
+        offers: [
+          {
+            house_person_id: "p_cand_a",
+            house_label: "House Ashford",
+            dowry_coin_net: 3,
+            relationship_delta: { respect: 5, allegiance: 2, threat: -1 },
+            liege_delta: null,
+            risk_tags: ["plain", "profitable"],
+          },
+        ],
+        state: "pending",
+        created_turn: 6,
+      },
+      {
+        subject_person_id: "p_child_2",
+        offers: [
+          {
+            house_person_id: "p_cand_b",
+            house_label: "House Bramwell",
+            dowry_coin_net: 1,
+            relationship_delta: { respect: 4, allegiance: 3, threat: -1 },
+            liege_delta: null,
+            risk_tags: ["plain", "profitable"],
+          },
+        ],
+        state: "pending",
+        created_turn: 6,
+      },
+    ]);
+
+    const ownership = buildMarriageOfferOwnershipIndex(registry);
+
+    expect(registry.subject_keys).toEqual(["subject:p_child_1", "subject:p_child_2"]);
+    expect(ownership.active_subject_keys).toEqual(["subject:p_child_1", "subject:p_child_2"]);
+    expect(ownership.subjects_by_key["subject:p_child_1"]).toMatchObject({
+      subject_person_id: "p_child_1",
+      offer_keys: ["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a"],
+      active_offer_keys: ["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a"],
+      candidate_keys: ["candidate:p_cand_a"],
+    });
+    expect(ownership.subjects_by_key["subject:p_child_2"]).toMatchObject({
+      subject_person_id: "p_child_2",
+      offer_keys: ["marriage_offer:inbound:subject:p_child_2:candidate:p_cand_b"],
+      active_offer_keys: ["marriage_offer:inbound:subject:p_child_2:candidate:p_cand_b"],
+      candidate_keys: ["candidate:p_cand_b"],
+    });
+  });
+
   it("reconstructs pending offer state from generated history plus active prospect refs", () => {
     const state = mkBaseState();
     appendProspectGenerated(state, {
@@ -480,6 +542,56 @@ describe("marriage offer registry contract", () => {
       .map((key) => registry.offers_by_key[key])
       .filter((entry) => entry.state === "pending");
     expect(pendingStates).toHaveLength(0);
+  });
+
+  it("reconstructs concurrent pending ownership from state history for two household members", () => {
+    const state = mkBaseState();
+
+    const secondChild = mkPerson("p_child_2", "M", 17);
+    state.house.children.push(secondChild);
+    state.people![secondChild.id] = secondChild;
+    (state.houses!.h_player as any).child_ids.push(secondChild.id);
+
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_child_1",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+      coin_delta: 3,
+    });
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_child_2",
+      subject_person_id: "p_child_2",
+      spouse_person_id: "p_cand_b",
+      from_house_id: "h_ext_02",
+      coin_delta: 2,
+    });
+
+    (state.flags as any)._prospects_active_v1 = [
+      { id: "pros_marriage_child_1", expires_turn: 6 },
+      { id: "pros_marriage_child_2", expires_turn: 6 },
+    ];
+    state.turn_index = 5;
+
+    const registry = buildMarriageOfferRegistryFromState(state);
+    const ownership = buildMarriageOfferOwnershipIndexFromState(state);
+
+    expect(registry.subject_keys).toEqual(["subject:p_child_1", "subject:p_child_2"]);
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a"].state
+    ).toBe("pending");
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_2:candidate:p_cand_b"].state
+    ).toBe("pending");
+    expect(ownership.active_subject_keys).toEqual(["subject:p_child_1", "subject:p_child_2"]);
+    expect(ownership.subjects_by_key["subject:p_child_1"].active_offer_keys).toEqual([
+      "marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a",
+    ]);
+    expect(ownership.subjects_by_key["subject:p_child_2"].active_offer_keys).toEqual([
+      "marriage_offer:inbound:subject:p_child_2:candidate:p_cand_b",
+    ]);
   });
 
   it("tracks rejected pairings with a deterministic three-turn cooldown", () => {
