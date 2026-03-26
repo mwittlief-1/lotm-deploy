@@ -2536,7 +2536,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Audit world-init relationship seeds and known-house baselines
-  status: ready
+  status: done
   priority: 99
   tranche: 1
   change_type: refactor

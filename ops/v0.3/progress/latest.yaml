@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-001-T01
-  last_completed_task_id: V03-R0-002-T01
+  last_completed_task_id: V03-R0-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: 1fc3d7bc25518ced26831d47e83a8984489ebaca
+  git_commit: 36c0bb23855b7988be4340197a7bb8a9e21527ae
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -23,6 +23,8 @@ last_run:
 notes: >-
   Imported canonical backlog has been normalized to repo-truth paths and
   canonical claims. Lane-parallel scheduling is active with current_task_id
-  set to V03-R0-001-T01. No active lane claims are currently recorded.
-  World/topology automation remains blocked behind V03-XMAP-001.
+  set to V03-R0-001-T01. V03-R0-005-T01 completed on
+  codex/v0.3-lane-social-mechanics with gates passing and no new claim opened
+  because the next social task is not yet ready. World/topology automation
+  remains blocked behind V03-XMAP-001.
 active_claims: {}
