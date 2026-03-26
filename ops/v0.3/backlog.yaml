@@ -1405,11 +1405,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Receipt lines and replay artifacts may shift where direct coin writes are replaced by canonical ledger writes.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-tooling-qa
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-001-T03-20260326T113213-0400
   done_conditions:
   - active direct coin mutations in scoped surfaces are removed
   - ledger receipts are emitted for those coin deltas
@@ -1726,11 +1726,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Marriage offer snapshots and replay artifacts may change where pending-offer uniqueness is enforced.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-social-mechanics
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-002-T03-20260326T113213-0400
   done_conditions:
   - no candidate may hold more than one pending offer simultaneously
   - accept and reject both clear or finalize the pending offer deterministically
@@ -2403,11 +2403,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-004-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-ui-experience
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-004-T03-20260326T113213-0400
 - id: V03-R0-004-T04
   parent_epic: V03-R0-004
   release: v0.3.0
@@ -2852,11 +2852,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-006-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-economy-fiscal
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-006-T02-20260326T113213-0400
 - id: V03-R0-006-T03
   parent_epic: V03-R0-006
   release: v0.3.0
