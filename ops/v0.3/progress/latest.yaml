@@ -1,33 +1,31 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-001-T07
+  current_task_id: V03-R0-002-T06
   last_completed_task_id: V03-R0-006-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: 762ae47e19e7a9bfadecbf9f039e36606ca79896
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 298fa083967da85f1cc42c0dbfba79ee7894e215
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    ops_v03_validate: pass
-    ops_v03_scheduler_dry_run: pass
-    ops_v03_rebase_dry_run: pass
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
-    seed_replay_batch_twice: not_run
+    repo_duplicates: pass
+    seed_replay_batch_twice: pass
   replay_hashes:
-    run1: not_run
-    run2: not_run
+    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Economy/fiscal completed V03-R0-006-T06 and refreshed the fiscal packet plus
-  production audit closeout for downstream obligations and pricing work. There
-  are no active lane claims recorded. Tooling V03-R0-001-T07 remains the first
-  globally claimable ready task, with Social V03-R0-002-T05 and UI
-  V03-R0-004-T06 also ready. Engine Core V03-R0-003-T02 remains E2 escalated,
-  and world/topology automation remains blocked behind V03-XMAP-001.
+  Accepted Tooling V03-R0-001-T07, Social V03-R0-002-T05, UI V03-R0-004-T06,
+  and Economy V03-R0-006-T06 from their lane branches. Tooling, UI, and Economy
+  are now at the end of their currently decomposed ready queues. Social
+  completed the member-level bounded offer ownership seam and the next unclaimed
+  ready frontier is now V03-R0-002-T06 for deterministic bounded-offer policy
+  coverage. Engine Core V03-R0-003-T02 remains E2 escalated, and world/topology
+  automation remains blocked behind V03-XMAP-001.
 active_claims: {}

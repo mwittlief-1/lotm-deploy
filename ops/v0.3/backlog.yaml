@@ -1566,7 +1566,7 @@ tasks:
   title: Close epic and refresh receipt QA docs
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 88
   tranche: 1
   change_type: refactor
@@ -1792,7 +1792,7 @@ tasks:
   title: Implement member-level bounded offer ownership for household concurrency
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 92
   tranche: 1
   change_type: behavior_change
@@ -1837,7 +1837,7 @@ tasks:
   title: Add deterministic bounded-offer selection policy coverage
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 90
   tranche: 1
   change_type: refactor
@@ -2496,7 +2496,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Close epic and refresh gameplay UX docs
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor

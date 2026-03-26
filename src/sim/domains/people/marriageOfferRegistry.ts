@@ -46,6 +46,31 @@ export type MarriageOfferRegistry = {
   candidate_offer_keys: Record<string, string[]>;
 };
 
+export type MarriageOfferRegistrySubjectDraft = {
+  subject_person_id: string;
+  offers: MarriageOffer[];
+  direction?: MarriageOfferDirection;
+  state?: MarriageOfferState;
+  created_turn?: number;
+};
+
+export type MarriageOfferSubjectOwnership = {
+  subject_key: string;
+  subject_person_id: string;
+  subject_house_id: string | null;
+  offer_keys: string[];
+  active_offer_keys: string[];
+  terminal_offer_keys: string[];
+  candidate_keys: string[];
+};
+
+export type MarriageOfferOwnershipIndex = {
+  schema_version: typeof MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION;
+  subject_keys: string[];
+  active_subject_keys: string[];
+  subjects_by_key: Record<string, MarriageOfferSubjectOwnership>;
+};
+
 export type MarriageRejectCooldownEntry = {
   pairing_key: string;
   offer_key: string;
@@ -220,44 +245,95 @@ export function buildMarriageOfferRegistry(
   };
 }
 
+export function buildMarriageOfferRegistryFromSubjectOffers(
+  state: RunState,
+  subjectDrafts: MarriageOfferRegistrySubjectDraft[]
+): MarriageOfferRegistry {
+  return buildMarriageOfferRegistry(
+    subjectDrafts.flatMap((subjectDraft) => {
+      const subjectHouseId = structuredHouseIdForPerson(state, subjectDraft.subject_person_id);
+      const direction = subjectDraft.direction ?? "inbound";
+      const offerState = normalizeState(subjectDraft.state);
+      const createdTurn = Math.trunc(subjectDraft.created_turn ?? state.turn_index);
+
+      return subjectDraft.offers.map((offer, index) => ({
+        direction,
+        state: offerState,
+        subject_person_id: subjectDraft.subject_person_id,
+        subject_house_id: subjectHouseId,
+        candidate_person_id: offer.house_person_id,
+        candidate_house_id: structuredHouseIdForPerson(state, offer.house_person_id),
+        candidate_house_label: offer.house_label,
+        created_turn: createdTurn,
+        offer_rank: index,
+        dowry_coin_net: offer.dowry_coin_net,
+        relationship_delta: {
+          respect: offer.relationship_delta.respect,
+          allegiance: offer.relationship_delta.allegiance,
+          threat: offer.relationship_delta.threat,
+        },
+        liege_delta: offer.liege_delta
+          ? { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat }
+          : null,
+        risk_tags: offer.risk_tags,
+      }));
+    })
+  );
+}
+
 export function buildMarriageOfferRegistryFromOffers(
   state: RunState,
-  opts: {
-    subject_person_id: string;
-    offers: MarriageOffer[];
-    direction?: MarriageOfferDirection;
-    state?: MarriageOfferState;
-    created_turn?: number;
-  }
+  opts: MarriageOfferRegistrySubjectDraft
 ): MarriageOfferRegistry {
-  const subjectHouseId = structuredHouseIdForPerson(state, opts.subject_person_id);
-  const direction = opts.direction ?? "inbound";
-  const offerState = normalizeState(opts.state);
-  const createdTurn = Math.trunc(opts.created_turn ?? state.turn_index);
+  return buildMarriageOfferRegistryFromSubjectOffers(state, [opts]);
+}
 
-  return buildMarriageOfferRegistry(
-    opts.offers.map((offer, index) => ({
-      direction,
-      state: offerState,
-      subject_person_id: opts.subject_person_id,
-      subject_house_id: subjectHouseId,
-      candidate_person_id: offer.house_person_id,
-      candidate_house_id: structuredHouseIdForPerson(state, offer.house_person_id),
-      candidate_house_label: offer.house_label,
-      created_turn: createdTurn,
-      offer_rank: index,
-      dowry_coin_net: offer.dowry_coin_net,
-      relationship_delta: {
-        respect: offer.relationship_delta.respect,
-        allegiance: offer.relationship_delta.allegiance,
-        threat: offer.relationship_delta.threat,
-      },
-      liege_delta: offer.liege_delta
-        ? { respect: offer.liege_delta.respect, threat: offer.liege_delta.threat }
-        : null,
-      risk_tags: offer.risk_tags,
-    }))
-  );
+export function buildMarriageOfferOwnershipIndex(
+  registry: MarriageOfferRegistry
+): MarriageOfferOwnershipIndex {
+  const subjectsByKey: Record<string, MarriageOfferSubjectOwnership> = {};
+  const activeSubjectKeys: string[] = [];
+
+  for (const subjectKey of registry.subject_keys) {
+    const offerKeys = registry.subject_offer_keys[subjectKey] ?? [];
+    const entries = offerKeys
+      .map((offerKey) => registry.offers_by_key[offerKey])
+      .filter((entry): entry is MarriageOfferRegistryEntry => Boolean(entry));
+    if (entries.length === 0) continue;
+
+    const firstEntry = entries[0]!;
+    const activeOfferKeys = entries
+      .filter((entry) => isMarriageOfferNonTerminalState(entry.state))
+      .map((entry) => entry.offer_key);
+    const terminalOfferKeys = entries
+      .filter((entry) => isMarriageOfferTerminalState(entry.state))
+      .map((entry) => entry.offer_key);
+
+    if (activeOfferKeys.length > 0) activeSubjectKeys.push(subjectKey);
+
+    subjectsByKey[subjectKey] = {
+      subject_key: subjectKey,
+      subject_person_id: firstEntry.subject_person_id,
+      subject_house_id: firstEntry.subject_house_id,
+      offer_keys: offerKeys,
+      active_offer_keys: activeOfferKeys,
+      terminal_offer_keys: terminalOfferKeys,
+      candidate_keys: sortUniqueStrings(entries.map((entry) => entry.candidate_key)),
+    };
+  }
+
+  return {
+    schema_version: MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION,
+    subject_keys: [...registry.subject_keys],
+    active_subject_keys: activeSubjectKeys,
+    subjects_by_key: subjectsByKey,
+  };
+}
+
+export function buildMarriageOfferOwnershipIndexFromState(
+  state: RunState
+): MarriageOfferOwnershipIndex {
+  return buildMarriageOfferOwnershipIndex(buildMarriageOfferRegistryFromState(state));
 }
 
 type ActiveProspectRef = { id: string; expires_turn: number };
