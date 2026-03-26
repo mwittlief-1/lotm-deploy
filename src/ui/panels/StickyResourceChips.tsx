@@ -4,6 +4,7 @@ import type { StickyResourceChip } from "../playScreenLayout";
 
 type StickyResourceChipsProps = {
   chips: StickyResourceChip[];
+  onOpenChipDetails?: (chipId: StickyResourceChip["id"]) => void;
 };
 
 const CHIP_TONE_STYLE: Record<StickyResourceChip["tone"], React.CSSProperties> = {
@@ -24,7 +25,7 @@ const CHIP_TONE_STYLE: Record<StickyResourceChip["tone"], React.CSSProperties> =
   }
 };
 
-export function StickyResourceChips({ chips }: StickyResourceChipsProps) {
+export function StickyResourceChips({ chips, onOpenChipDetails }: StickyResourceChipsProps) {
   return (
     <div
       style={{
@@ -40,22 +41,44 @@ export function StickyResourceChips({ chips }: StickyResourceChipsProps) {
       }}
     >
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        {chips.map((chip) => (
-          <div
-            key={chip.id}
-            data-resource-chip={chip.id}
-            style={{
-              minWidth: 140,
-              padding: "10px 12px",
-              borderRadius: 10,
-              ...CHIP_TONE_STYLE[chip.tone]
-            }}
-          >
-            <div style={{ fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", opacity: 0.72 }}>{chip.label}</div>
-            <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{chip.value}</div>
-            {chip.delta ? <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>{chip.delta}</div> : null}
-          </div>
-        ))}
+        {chips.map((chip) =>
+          onOpenChipDetails ? (
+            <button
+              data-resource-chip={chip.id}
+              key={chip.id}
+              onClick={() => onOpenChipDetails(chip.id)}
+              style={{
+                minWidth: 140,
+                padding: "10px 12px",
+                borderRadius: 10,
+                textAlign: "left",
+                cursor: "pointer",
+                ...CHIP_TONE_STYLE[chip.tone]
+              }}
+              title={`Open ${chip.label.toLowerCase()} details`}
+              type="button"
+            >
+              <div style={{ fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", opacity: 0.72 }}>{chip.label}</div>
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{chip.value}</div>
+              {chip.delta ? <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>{chip.delta}</div> : null}
+            </button>
+          ) : (
+            <div
+              data-resource-chip={chip.id}
+              key={chip.id}
+              style={{
+                minWidth: 140,
+                padding: "10px 12px",
+                borderRadius: 10,
+                ...CHIP_TONE_STYLE[chip.tone]
+              }}
+            >
+              <div style={{ fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", opacity: 0.72 }}>{chip.label}</div>
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{chip.value}</div>
+              {chip.delta ? <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>{chip.delta}</div> : null}
+            </div>
+          )
+        )}
       </div>
     </div>
   );
