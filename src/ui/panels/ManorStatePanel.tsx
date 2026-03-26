@@ -1,5 +1,7 @@
 import React from "react";
+import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
+import { SectionHeading } from "./SectionHeading";
 
 type ManorStatePanelProps = {
   anchorUnrest: string;
@@ -49,14 +51,13 @@ export function ManorStatePanel({
   unrestBreakdown
 }: ManorStatePanelProps) {
   return (
-    <div style={{ padding: 12, border: "1px solid #ccc" }}>
-      <h3>
-        Manor State <span style={{ fontSize: 12, opacity: 0.7 }}>(before decisions)</span>
-      </h3>
-      <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-        Turn = {turnYears} years. This includes harvest/spoilage/events that already happened this turn; your choices below still
-        affect the end-of-turn outcome.
-      </div>
+    <div style={PLAY_SCREEN_PANEL_STYLE}>
+      <SectionHeading
+        helper={copy.manorStateTimingHelper ?? `Turn = ${turnYears} years. This snapshot is already resolved above; plans below only shape the next turn.`}
+        sigil={PLAY_SCREEN_SECTION_SIGILS.state}
+        timingLabel={copy.turnSummary_last3Years}
+        title="Manor State"
+      />
 
       <ul>
         <li>
@@ -162,7 +163,7 @@ export function ManorStatePanel({
           <button
             onClick={onAbandonProject}
             title="Abandon loses all progress; coin is not refunded."
-            style={{ marginTop: 8 }}
+            style={{ ...PLAY_SCREEN_ACTION_BUTTON_STYLE, marginTop: 8 }}
           >
             Abandon Project (lossy)
           </button>

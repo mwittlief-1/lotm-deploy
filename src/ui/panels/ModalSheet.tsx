@@ -1,4 +1,8 @@
 import React, { useEffect } from "react";
+import {
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE,
+  PLAY_SCREEN_THEME
+} from "../playScreenTheme";
 
 type ModalSheetProps = {
   children: React.ReactNode;
@@ -50,8 +54,10 @@ export function ModalSheet({ children, onClose, open, subtitle, title }: ModalSh
           maxHeight: "min(82vh, 920px)",
           overflow: "auto",
           borderRadius: 18,
-          border: "1px solid rgba(15, 23, 42, 0.16)",
-          background: "#fcfaf5",
+          border: `1px solid ${PLAY_SCREEN_THEME.border}`,
+          background: PLAY_SCREEN_THEME.surfaceRaised,
+          color: PLAY_SCREEN_THEME.ink,
+          fontFamily: PLAY_SCREEN_THEME.bodyFont,
           boxShadow: "0 24px 60px rgba(15, 23, 42, 0.28)"
         }}
       >
@@ -66,16 +72,16 @@ export function ModalSheet({ children, onClose, open, subtitle, title }: ModalSh
             alignItems: "flex-start",
             padding: "16px 18px 12px",
             borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
-            background: "rgba(252, 250, 245, 0.96)",
+            background: "rgba(255, 250, 241, 0.96)",
             backdropFilter: "blur(8px)"
           }}
         >
           <div>
             <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", opacity: 0.6 }}>Detail sheet</div>
-            <h3 style={{ margin: "4px 0 0" }}>{title}</h3>
+            <h3 style={{ margin: "4px 0 0", fontFamily: PLAY_SCREEN_THEME.bodyFont }}>{title}</h3>
             {subtitle ? <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>{subtitle}</div> : null}
           </div>
-          <button onClick={onClose} style={{ whiteSpace: "nowrap" }}>
+          <button onClick={onClose} style={{ ...PLAY_SCREEN_SECONDARY_BUTTON_STYLE, whiteSpace: "nowrap" }}>
             Close
           </button>
         </div>

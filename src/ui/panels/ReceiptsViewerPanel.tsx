@@ -5,6 +5,12 @@ import type {
   RawReceiptPhase,
   ReceiptViewerMode
 } from "../playScreenReceipts";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE,
+  PLAY_SCREEN_SUBCARD_STYLE,
+  PLAY_SCREEN_THEME
+} from "../playScreenTheme";
 
 type ReceiptsViewerPanelProps = {
   groupedSections: GroupedReceiptSection[];
@@ -34,10 +40,7 @@ const SOURCE_TONE_STYLE: Record<string, React.CSSProperties> = {
 
 function modeButtonStyle(active: boolean): React.CSSProperties {
   return {
-    padding: "8px 12px",
-    borderRadius: 999,
-    border: active ? "1px solid #4f6b8a" : "1px solid #d7d0c2",
-    background: active ? "#eef4fb" : "#fff",
+    ...(active ? PLAY_SCREEN_ACTION_BUTTON_STYLE : PLAY_SCREEN_SECONDARY_BUTTON_STYLE),
     fontWeight: active ? 700 : 500
   };
 }
@@ -67,9 +70,9 @@ export function ReceiptsViewerPanel({
               key={section.id}
               style={{
                 padding: 14,
-                border: "1px solid #ddd7cb",
                 borderRadius: 14,
-                background: "#fff"
+                color: PLAY_SCREEN_THEME.ink,
+                ...PLAY_SCREEN_SUBCARD_STYLE
               }}
             >
               <div style={{ fontWeight: 700 }}>{section.title}</div>
@@ -82,9 +85,9 @@ export function ReceiptsViewerPanel({
                       key={highlight.id}
                       style={{
                         padding: 10,
-                        border: "1px solid #e3dccf",
                         borderRadius: 12,
-                        background: "#fcfaf5"
+                        background: "#fcfaf5",
+                        border: "1px solid rgba(172, 143, 100, 0.24)"
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
@@ -117,7 +120,7 @@ export function ReceiptsViewerPanel({
                       style={{
                         padding: "10px 12px",
                         borderRadius: 12,
-                        border: "1px solid #ebe4d6",
+                        border: "1px solid rgba(172, 143, 100, 0.24)",
                         background: "#fdfbf7"
                       }}
                     >
@@ -146,9 +149,9 @@ export function ReceiptsViewerPanel({
               key={phase.phase}
               style={{
                 padding: 14,
-                border: "1px solid #ddd7cb",
                 borderRadius: 14,
-                background: "#fff"
+                color: PLAY_SCREEN_THEME.ink,
+                ...PLAY_SCREEN_SUBCARD_STYLE
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
@@ -164,7 +167,7 @@ export function ReceiptsViewerPanel({
                     style={{
                       padding: "10px 12px",
                       borderRadius: 12,
-                      border: "1px solid #ebe4d6",
+                      border: "1px solid rgba(172, 143, 100, 0.24)",
                       background: "#fdfbf7"
                     }}
                   >
@@ -177,7 +180,7 @@ export function ReceiptsViewerPanel({
           ))}
         </div>
       ) : (
-        <div style={{ padding: 14, border: "1px solid #ddd7cb", borderRadius: 14, background: "#fff" }}>
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
           No raw receipt lines matched this focus yet.
         </div>
       )}

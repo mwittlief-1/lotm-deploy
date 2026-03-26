@@ -1,6 +1,13 @@
 import React from "react";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_PANEL_ACCENT_STYLE,
+  PLAY_SCREEN_SECTION_SIGILS,
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE
+} from "../playScreenTheme";
 import { Tip, formatParentsLine, formatPersonWithAgeAndHouse } from "../viewHelpers";
+import { SectionHeading } from "./SectionHeading";
 
 type OblAmount = { coin: number; bushels: number };
 
@@ -225,8 +232,13 @@ export function DecisionsPanel({
   const bushelsShortfall = Math.max(0, Math.max(0, dueEntering.bushels) - bushelsToDue);
 
   return (
-    <div style={{ marginTop: 12, padding: 12, border: "1px solid #ccc" }}>
-      <h3>Decisions (3–5)</h3>
+    <div style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginTop: 12 }}>
+      <SectionHeading
+        helper={copy.decisionsTimingHelper ?? "These controls set the next turn. They do not rewrite the resolved chronicle above."}
+        sigil={PLAY_SCREEN_SECTION_SIGILS.decisions}
+        timingLabel={copy.turnSummary_nowChoose}
+        title="Decisions"
+      />
       <div style={{ opacity: 0.8, fontSize: 12, lineHeight: 1.4 }}>
         <div>
           Energy available: {previewState.house.energy.available}/{previewState.house.energy.max}.
@@ -397,7 +409,9 @@ export function DecisionsPanel({
               </option>
             ))}
           </select>
-          <button onClick={() => setDecisions((d) => ({ ...d, construction: { kind: "construction", action: "none" } }))}>Clear</button>
+          <button onClick={() => setDecisions((d) => ({ ...d, construction: { kind: "construction", action: "none" } }))} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>
+            Clear
+          </button>
         </div>
         <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
           Construction is <b>not instant</b>. Progress each turn = builders × {buildRatePerBuilderPerTurn}. Builders also consume +{builderExtraPerTurn} extra bushels this turn ({turnYears}y) each.
@@ -419,9 +433,9 @@ export function DecisionsPanel({
       ) : null}
 
       <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-        <button onClick={advanceTurn} disabled={laborLimitExceeded}>Advance Turn</button>
-        <button onClick={onExportRunSummary}>Export Run Summary</button>
-        <button onClick={onExportFullRunJson}>Export Full Run JSON</button>
+        <button onClick={advanceTurn} disabled={laborLimitExceeded} style={PLAY_SCREEN_ACTION_BUTTON_STYLE}>Advance Turn</button>
+        <button onClick={onExportRunSummary} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Run Summary</button>
+        <button onClick={onExportFullRunJson} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Full Run JSON</button>
       </div>
     </div>
   );
