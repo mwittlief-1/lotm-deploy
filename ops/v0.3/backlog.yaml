@@ -1333,7 +1333,7 @@ tasks:
   title: Define stable receipt schema and ordering contract
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
