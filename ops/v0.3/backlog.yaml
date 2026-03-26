@@ -1472,7 +1472,7 @@ tasks:
   title: Add deterministic receipt snapshot coverage
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 92
   tranche: 1
   change_type: refactor
@@ -1520,7 +1520,7 @@ tasks:
   title: Add perf and regression guards for receipt-heavy flows
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: ready
   priority: 90
   tranche: 1
   change_type: refactor
@@ -1747,7 +1747,7 @@ tasks:
   title: Implement three-turn reject stickiness for repeated pairings
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: behavior_change
@@ -1792,7 +1792,7 @@ tasks:
   title: Implement household concurrency for multiple active offer holders
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 92
   tranche: 1
   change_type: behavior_change
@@ -2454,7 +2454,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Apply minimal manuscript tokens, iconography, and timing microcopy
-  status: todo
+  status: ready
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2901,7 +2901,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Route food and meat deltas through receipt writers and settlement scaffolds
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2942,7 +2942,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Retune grain and meat consumption and add equilibrium fixtures
-  status: todo
+  status: ready
   priority: 95
   tranche: 1
   change_type: behavior_change

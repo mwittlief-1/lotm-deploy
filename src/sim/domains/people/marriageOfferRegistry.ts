@@ -2,6 +2,7 @@ import { structuredHouseIdForPerson } from "../../actors";
 import type { MarriageOffer, Prospect, RunState } from "../../types";
 
 export const MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION = "marriage_offer_registry_v0" as const;
+export const MARRIAGE_REJECT_COOLDOWN_TURNS = 3 as const;
 
 export const MARRIAGE_OFFER_DIRECTIONS = ["inbound", "outbound"] as const;
 export type MarriageOfferDirection = (typeof MARRIAGE_OFFER_DIRECTIONS)[number];
@@ -43,6 +44,18 @@ export type MarriageOfferRegistry = {
   offers_by_key: Record<string, MarriageOfferRegistryEntry>;
   subject_offer_keys: Record<string, string[]>;
   candidate_offer_keys: Record<string, string[]>;
+};
+
+export type MarriageRejectCooldownEntry = {
+  pairing_key: string;
+  offer_key: string;
+  subject_key: string;
+  subject_person_id: string;
+  candidate_key: string;
+  candidate_person_id: string;
+  rejected_turn: number;
+  expires_turn: number;
+  remaining_turns: number;
 };
 
 export type MarriageOfferRegistryEntryDraft = {
@@ -91,6 +104,15 @@ export function makeMarriageOfferKey(input: {
   const subjectKey = makeMarriageOfferSubjectKey(input.subject_person_id);
   const candidateKey = makeMarriageOfferCandidateKey(input.candidate_person_id);
   return `marriage_offer:${direction}:${subjectKey}:${candidateKey}`;
+}
+
+export function makeMarriageOfferPairingKey(input: {
+  subject_person_id: string;
+  candidate_person_id: string;
+}): string {
+  const subjectKey = makeMarriageOfferSubjectKey(input.subject_person_id);
+  const candidateKey = makeMarriageOfferCandidateKey(input.candidate_person_id);
+  return `marriage_pairing:${subjectKey}:${candidateKey}`;
 }
 
 export function isMarriageOfferTerminalState(state: MarriageOfferState): boolean {
@@ -371,6 +393,75 @@ function updatedEntryState(
     state: nextState,
     last_state_change_turn: Math.trunc(turnIndex),
   };
+}
+
+export function buildMarriageRejectCooldowns(
+  registry: MarriageOfferRegistry,
+  currentTurn: number
+): Record<string, MarriageRejectCooldownEntry> {
+  const currentTurnIndex = Math.trunc(currentTurn);
+  const cooldowns = new Map<string, MarriageRejectCooldownEntry>();
+
+  for (const offerKey of registry.offer_keys) {
+    const entry = registry.offers_by_key[offerKey];
+    if (!entry || entry.state !== "rejected") continue;
+
+    const rejectedTurn = Math.trunc(entry.last_state_change_turn);
+    const expiresTurn = rejectedTurn + MARRIAGE_REJECT_COOLDOWN_TURNS;
+    const remainingTurns = expiresTurn - currentTurnIndex + 1;
+    if (remainingTurns <= 0) continue;
+
+    const pairingKey = makeMarriageOfferPairingKey({
+      subject_person_id: entry.subject_person_id,
+      candidate_person_id: entry.candidate_person_id,
+    });
+    const current = cooldowns.get(pairingKey);
+    if (current && current.rejected_turn > rejectedTurn) continue;
+
+    cooldowns.set(pairingKey, {
+      pairing_key: pairingKey,
+      offer_key: entry.offer_key,
+      subject_key: entry.subject_key,
+      subject_person_id: entry.subject_person_id,
+      candidate_key: entry.candidate_key,
+      candidate_person_id: entry.candidate_person_id,
+      rejected_turn: rejectedTurn,
+      expires_turn: expiresTurn,
+      remaining_turns: remainingTurns,
+    });
+  }
+
+  return Object.fromEntries(
+    sortStrings(cooldowns.keys()).map((pairingKey) => [pairingKey, cooldowns.get(pairingKey)!])
+  );
+}
+
+export function buildMarriageRejectCooldownsFromState(
+  state: RunState
+): Record<string, MarriageRejectCooldownEntry> {
+  return buildMarriageRejectCooldowns(buildMarriageOfferRegistryFromState(state), state.turn_index);
+}
+
+export function getMarriageRejectCooldown(
+  state: RunState,
+  subjectPersonId: string,
+  candidatePersonId: string
+): MarriageRejectCooldownEntry | null {
+  const pairingKey = makeMarriageOfferPairingKey({
+    subject_person_id: subjectPersonId,
+    candidate_person_id: candidatePersonId,
+  });
+  return buildMarriageRejectCooldownsFromState(state)[pairingKey] ?? null;
+}
+
+export function isMarriagePairCoolingDown(
+  state: RunState,
+  subjectPersonId: string,
+  candidatePersonId: string
+): boolean {
+  return (
+    getMarriageRejectCooldown(state, subjectPersonId, candidatePersonId) !== null
+  );
 }
 
 export function buildMarriageOfferRegistryFromState(state: RunState): MarriageOfferRegistry {
