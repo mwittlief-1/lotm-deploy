@@ -5,8 +5,8 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: 168a5049a1ae1672f7d965cba63879cde0d4108a
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: b0a6222df5c0d8e705e85592c34fd68a039d4bf3
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,16 +15,18 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Social completed V03-R0-002-T04 by adding deterministic three-turn reject
-  cooldown reconstruction in the marriage offer registry and filtering marriage
-  offer generation against cooling-down pairings without changing phase-owned
-  wiring. The required gates passed with matching replay hashes, and no active
-  social claim remains; the next social task V03-R0-002-T05 is still todo
-  while the current global ready frontier remains V03-R0-001-T05.
+  Accepted Social V03-R0-002-T04 from the lane branch after the deterministic
+  reject-cooldown handoff landed cleanly with passing gates and stable replay
+  hashes. Social is not escalation-blocked; it was only waiting for kickoff to
+  record the closeout and expose the next frontier. The current unclaimed ready
+  queue is Tooling V03-R0-001-T05, Social V03-R0-002-T05, UI V03-R0-004-T04,
+  and Economy V03-R0-006-T04. Engine Core V03-R0-003-T02 remains E2
+  escalated, and world/topology automation remains blocked behind
+  V03-XMAP-001.
 active_claims: {}

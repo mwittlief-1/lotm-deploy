@@ -1792,7 +1792,7 @@ tasks:
   title: Implement household concurrency for multiple active offer holders
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 92
   tranche: 1
   change_type: behavior_change
