@@ -1654,7 +1654,7 @@ tasks:
   title: Define bounded offer registry schema and deterministic candidate keys
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
