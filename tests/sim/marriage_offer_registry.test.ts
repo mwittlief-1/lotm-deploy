@@ -7,6 +7,7 @@ import {
   MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION,
   MARRIAGE_OFFER_TERMINAL_STATES,
   assertMarriageOfferStateTransition,
+  buildMarriageOfferRegistryFromState,
   buildMarriageOfferRegistryFromOffers,
   canTransitionMarriageOfferState,
   createMarriageOfferRegistryEntry,
@@ -120,6 +121,92 @@ function mkBaseState(): RunState {
       { kind: "parent_of", parent_id: spouse.id, child_id: child.id },
     ],
   };
+}
+
+function appendProspectGenerated(state: RunState, opts: {
+  turn_index: number;
+  prospect_id: string;
+  subject_person_id: string;
+  spouse_person_id: string;
+  from_house_id: string;
+  coin_delta?: number;
+}): void {
+  const prospect = {
+    id: opts.prospect_id,
+    type: "marriage" as const,
+    from_house_id: opts.from_house_id,
+    to_house_id: "h_player",
+    subject_person_id: opts.subject_person_id,
+    spouse_person_id: opts.spouse_person_id,
+    summary: "Marriage proposal",
+    requirements: [],
+    costs: {},
+    predicted_effects: {
+      coin_delta: opts.coin_delta ?? 0,
+      relationship_deltas: [
+        {
+          scope: "person",
+          from_id: "p_head",
+          to_id: opts.spouse_person_id,
+          allegiance_delta: 3,
+          respect_delta: 5,
+          threat_delta: -2,
+        },
+      ],
+      flags_set: [],
+    },
+    uncertainty: "known" as const,
+    expires_turn: opts.turn_index + 2,
+    actions: ["accept", "reject"] as const,
+  };
+
+  state.log.push({
+    turn_index: opts.turn_index,
+    report: {
+      notes: [],
+      key_flags: [],
+      prospects_log: [
+        {
+          kind: "prospect_generated" as const,
+          turn_index: opts.turn_index,
+          type: "marriage" as const,
+          from_house_id: opts.from_house_id,
+          to_house_id: "h_player",
+          subject_person_id: opts.subject_person_id,
+          prospect_id: opts.prospect_id,
+          prospect,
+        },
+      ],
+    },
+  } as any);
+}
+
+function appendProspectResolution(state: RunState, opts: {
+  turn_index: number;
+  kind: "prospect_accepted" | "prospect_rejected" | "prospect_expired";
+  prospect_id: string;
+  subject_person_id: string;
+  from_house_id: string;
+}): void {
+  state.log.push({
+    turn_index: opts.turn_index,
+    report: {
+      notes: [],
+      key_flags: [],
+      prospects_log: [
+        {
+          kind: opts.kind,
+          turn_index: opts.turn_index,
+          type: "marriage" as const,
+          from_house_id: opts.from_house_id,
+          to_house_id: "h_player",
+          subject_person_id: opts.subject_person_id,
+          prospect_id: opts.prospect_id,
+          effects_applied: {},
+        },
+      ],
+    },
+  } as any);
 }
 
 describe("marriage offer registry contract", () => {
@@ -261,5 +348,131 @@ describe("marriage offer registry contract", () => {
     expect(pending.state).toBe("pending");
     expect(terminal.state).toBe("accepted");
     expect(terminal.last_state_change_turn).toBe(9);
+  });
+
+  it("reconstructs pending offer state from generated history plus active prospect refs", () => {
+    const state = mkBaseState();
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_pending",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+      coin_delta: 3,
+    });
+    (state.flags as any)._prospects_active_v1 = [{ id: "pros_marriage_pending", expires_turn: 6 }];
+
+    const registry = buildMarriageOfferRegistryFromState(state);
+    const key = "marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a";
+    const entry = registry.offers_by_key[key];
+
+    expect(entry).toBeTruthy();
+    expect(entry.state).toBe("pending");
+    expect(entry.created_turn).toBe(4);
+    expect(entry.subject_house_id).toBe("h_player");
+    expect(entry.candidate_house_id).toBe("h_ext_01");
+  });
+
+  it("keeps at most one pending offer per candidate and deterministically withdraws duplicates", () => {
+    const state = mkBaseState();
+
+    const secondChild = mkPerson("p_child_2", "M", 17);
+    state.house.children.push(secondChild);
+    state.people![secondChild.id] = secondChild;
+    (state.houses!.h_player as any).child_ids.push(secondChild.id);
+
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_a",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+      coin_delta: 3,
+    });
+    appendProspectGenerated(state, {
+      turn_index: 5,
+      prospect_id: "pros_marriage_b",
+      subject_person_id: "p_child_2",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+      coin_delta: 2,
+    });
+
+    (state.flags as any)._prospects_active_v1 = [
+      { id: "pros_marriage_a", expires_turn: 6 },
+      { id: "pros_marriage_b", expires_turn: 7 },
+    ];
+    state.turn_index = 7;
+
+    const registry = buildMarriageOfferRegistryFromState(state);
+    const candidateKeys = registry.candidate_offer_keys["candidate:p_cand_a"];
+
+    expect(candidateKeys).toEqual([
+      "marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a",
+      "marriage_offer:inbound:subject:p_child_2:candidate:p_cand_a",
+    ]);
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a"].state
+    ).toBe("pending");
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_2:candidate:p_cand_a"].state
+    ).toBe("withdrawn");
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_2:candidate:p_cand_a"].last_state_change_turn
+    ).toBe(7);
+  });
+
+  it("finalizes pending offers on accept and reject even if stale active refs remain", () => {
+    const state = mkBaseState();
+
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_accept",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+    });
+    appendProspectGenerated(state, {
+      turn_index: 5,
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_b",
+      from_house_id: "h_ext_02",
+    });
+    appendProspectResolution(state, {
+      turn_index: 6,
+      kind: "prospect_accepted",
+      prospect_id: "pros_marriage_accept",
+      subject_person_id: "p_child_1",
+      from_house_id: "h_ext_01",
+    });
+    appendProspectResolution(state, {
+      turn_index: 7,
+      kind: "prospect_rejected",
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      from_house_id: "h_ext_02",
+    });
+
+    // Leave stale active refs to prove terminal outcomes still win in the canonical registry view.
+    (state.flags as any)._prospects_active_v1 = [
+      { id: "pros_marriage_accept", expires_turn: 8 },
+      { id: "pros_marriage_reject", expires_turn: 8 },
+    ];
+    state.turn_index = 8;
+
+    const registry = buildMarriageOfferRegistryFromState(state);
+
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a"].state
+    ).toBe("accepted");
+    expect(
+      registry.offers_by_key["marriage_offer:inbound:subject:p_child_1:candidate:p_cand_b"].state
+    ).toBe("rejected");
+
+    const pendingStates = registry.offer_keys
+      .map((key) => registry.offers_by_key[key])
+      .filter((entry) => entry.state === "pending");
+    expect(pendingStates).toHaveLength(0);
   });
 });
