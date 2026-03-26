@@ -2330,7 +2330,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Implement sticky resource chips and single-column card hierarchy shell
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: behavior_change

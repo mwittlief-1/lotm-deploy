@@ -39,6 +39,11 @@ import {
   buildCouncilAgendaItems,
   buildDiffLedgerItems
 } from "../playScreenModel";
+import {
+  PLAY_SCREEN_CARD_ORDER,
+  type PlayScreenCardId,
+  buildStickyResourceChips
+} from "../playScreenLayout";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
 import { DecisionsPanel } from "./DecisionsPanel";
@@ -49,6 +54,7 @@ import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
+import { StickyResourceChips } from "./StickyResourceChips";
 import { TurnReportPanel } from "./TurnReportPanel";
 
 type ProspectDecisionAction = { prospect_id: string; action: "accept" | "reject" };
@@ -503,13 +509,181 @@ export function PlayScreen({
     weatherHarmedHarvestWhy
   });
 
+  const resourceChips = buildStickyResourceChips({
+    manor: m,
+    deltaBushels,
+    deltaCoin,
+    deltaUnrest,
+    fmtSigned
+  });
+
+  const playSections: Record<PlayScreenCardId, React.ReactNode> = {
+    council_agenda: <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />,
+    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} />,
+    manor_state: (
+      <ManorStatePanel
+        anchorUnrest={PLAY_ANCHORS.unrest}
+        buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
+        builderExtraPerTurn={builderExtraPerTurn}
+        constructionEtaTurns={constructionEtaTurns}
+        constructionRatePlannedNextTurn={constructionRatePlannedNextTurn}
+        constructionRateThisTurn={constructionRateThisTurn}
+        copy={copy}
+        deltaBushels={deltaBushels}
+        deltaCoin={deltaCoin}
+        deltaPop={deltaPop}
+        deltaUnrest={deltaUnrest}
+        desiredBuilders={decisions.labor.desired_builders}
+        fmtSigned={fmtSigned}
+        improvements={IMPROVEMENTS}
+        manor={m}
+        onAbandonProject={() => setDecisions((current: any) => ({ ...current, construction: { kind: "construction", action: "abandon", confirm: true } }))}
+        popChangeSummary={popChangeSummary}
+        report={ctx.report}
+        showUnrestBreakdown={showUnrestBreakdown}
+        turnYears={TURN_YEARS}
+        unrestBreakdown={unrestBreakdown}
+      />
+    ),
+    turn_report: (
+      <TurnReportPanel
+        accruedThisTurn={accruedThisTurn}
+        anchorFood={PLAY_ANCHORS.food}
+        anchorHousehold={PLAY_ANCHORS.household}
+        arrearsCarried={arrearsCarried}
+        baselineConsPerTurn={baselineConsPerTurn}
+        builderExtraPerTurn={builderExtraPerTurn}
+        consBuilders={consBuilders}
+        consFarmers={consFarmers}
+        consIdle={consIdle}
+        copy={copy}
+        courtConsumptionBushels={courtConsumptionBushels}
+        courtRosterEntries={courtRosterEntries}
+        courtSize={courtSize}
+        currentHouseLog={(ctx.report.house_log ?? []) as any[]}
+        dueEntering={dueEntering}
+        fmtObAmount={fmtObAmount}
+        hasConsumptionSplit={hasConsumptionSplit}
+        idle={idle}
+        manor={m}
+        peasantConsumptionBushels={peasantConsumptionBushels}
+        previewState={ctx.preview_state}
+        report={ctx.report}
+        showHouseholdDetails={showHouseholdDetails}
+        state={state}
+        toggleHouseholdDetails={() => setShowHouseholdDetails((value) => !value)}
+        totalConsumptionBushels={totalConsumptionBushels}
+        totalObligations={totalObligations}
+        turnYears={TURN_YEARS}
+      />
+    ),
+    prospects: (
+      <ProspectsPanel
+        anchorId={PLAY_ANCHORS.prospects}
+        copy={copy}
+        costsForProspect={costsForProspect}
+        effectsSummary={effectsSummary}
+        fmtSigned={fmtSigned}
+        getProspectDecision={getProspectDecision}
+        handleProspectAction={handleProspectAction}
+        hasProspectExpiredThisTurn={hasProspectExpiredThisTurn}
+        hiddenCount={prospectsHiddenCount}
+        hiddenIds={prospectsHiddenIds}
+        houseLabel={houseLabel}
+        personNameFromRegistry={personNameFromRegistry}
+        pfHouseLabelById={pfHouseIx.houseLabelById}
+        pfParentsByChild={pfParentsByChild}
+        pfPeopleRec={pfPeopleRec}
+        pfPersonHouseById={pfHouseIx.personHouseById}
+        previewState={ctx.preview_state}
+        prospectLogLines={prospectLogLines}
+        prospectTypeLabel={prospectTypeLabel}
+        prospectsShown={prospectsShown}
+        prospectsShownCount={prospectsShownCount}
+        prospectsTotalCount={prospectsTotalCount}
+        rejectHasStandingRisk={rejectHasStandingRisk}
+        reportTurnIndex={ctx.report.turn_index}
+        shownIds={prospectsShownIds}
+        uncertaintyLabel={uncertaintyLabel}
+      />
+    ),
+    known_houses: (
+      <KnownHousesPanel
+        copy={copy}
+        hasMoreKnownHouses={hasMoreKnownHouses}
+        knownHouses={knownHouses}
+        knownHousesMain={knownHousesMain}
+        onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
+        showAllKnownHouses={showAllKnownHouses}
+      />
+    ),
+    intel: <IntelPanel copy={copy} current={intelSections.current} memory={intelSections.memory} />,
+    events: <EventsPanel anchorId={PLAY_ANCHORS.events} copy={copy} events={ctx.report.events} />,
+    decisions: !state.game_over ? (
+      <DecisionsPanel
+        accruedThisTurn={accruedThisTurn}
+        advanceTurn={onAdvanceTurn}
+        anchorLabor={PLAY_ANCHORS.labor}
+        anchorObligations={PLAY_ANCHORS.obligations}
+        buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
+        builderExtraPerTurn={builderExtraPerTurn}
+        copy={copy}
+        decisions={decisions}
+        dueEntering={dueEntering}
+        eligibleMaidensLocalRaw={eligibleMaidensLocalRaw}
+        fmtObAmount={fmtObAmount}
+        improvementIds={IMPROVEMENT_IDS}
+        improvements={IMPROVEMENTS}
+        laborAssignedNextTurn={laborAssignedNextTurn}
+        laborAvailableNextTurn={laborAvailableNextTurn}
+        laborLimitExceeded={laborLimitExceeded}
+        laborOversubscribed={laborOversubscribed}
+        laborRequested={laborRequested}
+        manor={m}
+        marriageWindow={mw}
+        maxLaborShift={ctx.max_labor_shift}
+        obligations={ob}
+        onExportFullRunJson={onExportFullRunJson}
+        onExportRunSummary={onExportRunSummary}
+        pfHouseLabelById={pfHouseIx.houseLabelById}
+        pfParentsByChild={pfParentsByChild}
+        pfPeopleRec={pfPeopleRec}
+        pfPersonHouseById={pfHouseIx.personHouseById}
+        previewState={ctx.preview_state}
+        prospectsTotalCount={prospectsTotalCount}
+        sellCapBushels={ctx.report.market.sell_cap_bushels}
+        setDecisions={setDecisions}
+        totalObligations={totalObligations}
+        turnYears={TURN_YEARS}
+        arrearsCarried={arrearsCarried}
+      />
+    ) : null,
+    debug_relationships: (
+      <RelationshipDrawerPanel
+        onQueryChange={setRelationshipDrawerQuery}
+        onTabChange={setRelationshipDrawerTab}
+        previewState={ctx.preview_state}
+        query={relationshipDrawerQuery}
+        tab={relationshipDrawerTab}
+      />
+    )
+  };
+
   return (
-    <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2>Turn {ctx.report.turn_index}</h2>
-        <div style={{ display: "flex", gap: 8 }}>
+    <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 960, margin: "0 auto" }}>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", opacity: 0.65 }}>Gameplay Overview</div>
+            <h2 style={{ margin: "4px 0 0" }}>Turn {ctx.report.turn_index}</h2>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={onOpenLog}>Debug/Log</button>
           <button onClick={onOpenNewRun}>New Run</button>
-          <button onClick={onOpenLog}>Debug/Log</button>
+          </div>
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>
+          Top to bottom: priorities, changes, state, then next-turn choices.
         </div>
       </div>
 
@@ -533,168 +707,17 @@ export function PlayScreen({
         </div>
       ) : null}
 
-      <DiffLedgerPanel copy={copy} items={diffLedgerItems} />
-      <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />
+      <StickyResourceChips chips={resourceChips} />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        <ManorStatePanel
-          anchorUnrest={PLAY_ANCHORS.unrest}
-          buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
-          builderExtraPerTurn={builderExtraPerTurn}
-          constructionEtaTurns={constructionEtaTurns}
-          constructionRatePlannedNextTurn={constructionRatePlannedNextTurn}
-          constructionRateThisTurn={constructionRateThisTurn}
-          copy={copy}
-          deltaBushels={deltaBushels}
-          deltaCoin={deltaCoin}
-          deltaPop={deltaPop}
-          deltaUnrest={deltaUnrest}
-          desiredBuilders={decisions.labor.desired_builders}
-          fmtSigned={fmtSigned}
-          improvements={IMPROVEMENTS}
-          manor={m}
-          onAbandonProject={() => setDecisions((current: any) => ({ ...current, construction: { kind: "construction", action: "abandon", confirm: true } }))}
-          popChangeSummary={popChangeSummary}
-          report={ctx.report}
-          showUnrestBreakdown={showUnrestBreakdown}
-          turnYears={TURN_YEARS}
-          unrestBreakdown={unrestBreakdown}
-        />
-
-        <div>
-          <TurnReportPanel
-            accruedThisTurn={accruedThisTurn}
-            anchorFood={PLAY_ANCHORS.food}
-            anchorHousehold={PLAY_ANCHORS.household}
-            arrearsCarried={arrearsCarried}
-            baselineConsPerTurn={baselineConsPerTurn}
-            builderExtraPerTurn={builderExtraPerTurn}
-            consBuilders={consBuilders}
-            consFarmers={consFarmers}
-            consIdle={consIdle}
-            copy={copy}
-            courtConsumptionBushels={courtConsumptionBushels}
-            courtRosterEntries={courtRosterEntries}
-            courtSize={courtSize}
-            currentHouseLog={(ctx.report.house_log ?? []) as any[]}
-            deltaBushels={deltaBushels}
-            deltaCoin={deltaCoin}
-            deltaUnrest={deltaUnrest}
-            dueEntering={dueEntering}
-            fmtObAmount={fmtObAmount}
-            hasConsumptionSplit={hasConsumptionSplit}
-            idle={idle}
-            manor={m}
-            peasantConsumptionBushels={peasantConsumptionBushels}
-            previewState={ctx.preview_state}
-            report={ctx.report}
-            showHouseholdDetails={showHouseholdDetails}
-            state={state}
-            toggleHouseholdDetails={() => setShowHouseholdDetails((value) => !value)}
-            totalConsumptionBushels={totalConsumptionBushels}
-            totalObligations={totalObligations}
-            turnYears={TURN_YEARS}
-          />
-
-          <ProspectsPanel
-            anchorId={PLAY_ANCHORS.prospects}
-            copy={copy}
-            costsForProspect={costsForProspect}
-            effectsSummary={effectsSummary}
-            fmtSigned={fmtSigned}
-            getProspectDecision={getProspectDecision}
-            handleProspectAction={handleProspectAction}
-            hasProspectExpiredThisTurn={hasProspectExpiredThisTurn}
-            hiddenCount={prospectsHiddenCount}
-            hiddenIds={prospectsHiddenIds}
-            houseLabel={houseLabel}
-            personNameFromRegistry={personNameFromRegistry}
-            pfHouseLabelById={pfHouseIx.houseLabelById}
-            pfParentsByChild={pfParentsByChild}
-            pfPeopleRec={pfPeopleRec}
-            pfPersonHouseById={pfHouseIx.personHouseById}
-            previewState={ctx.preview_state}
-            prospectLogLines={prospectLogLines}
-            prospectTypeLabel={prospectTypeLabel}
-            prospectsShown={prospectsShown}
-            prospectsShownCount={prospectsShownCount}
-            prospectsTotalCount={prospectsTotalCount}
-            rejectHasStandingRisk={rejectHasStandingRisk}
-            reportTurnIndex={ctx.report.turn_index}
-            shownIds={prospectsShownIds}
-            uncertaintyLabel={uncertaintyLabel}
-          />
-
-          <KnownHousesPanel
-            copy={copy}
-            hasMoreKnownHouses={hasMoreKnownHouses}
-            knownHouses={knownHouses}
-            knownHousesMain={knownHousesMain}
-            onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
-            showAllKnownHouses={showAllKnownHouses}
-          />
-
-          <IntelPanel
-            copy={copy}
-            current={intelSections.current}
-            memory={intelSections.memory}
-          />
-
-          <RelationshipDrawerPanel
-            onQueryChange={setRelationshipDrawerQuery}
-            onTabChange={setRelationshipDrawerTab}
-            previewState={ctx.preview_state}
-            query={relationshipDrawerQuery}
-            tab={relationshipDrawerTab}
-          />
-
-          <EventsPanel
-            anchorId={PLAY_ANCHORS.events}
-            copy={copy}
-            events={ctx.report.events}
-          />
-        </div>
+      <div style={{ display: "grid", gap: 12 }}>
+        {PLAY_SCREEN_CARD_ORDER.map((sectionId) =>
+          playSections[sectionId] ? (
+            <div key={sectionId} data-play-card={sectionId}>
+              {playSections[sectionId]}
+            </div>
+          ) : null
+        )}
       </div>
-
-      {!state.game_over ? (
-        <DecisionsPanel
-          accruedThisTurn={accruedThisTurn}
-          advanceTurn={onAdvanceTurn}
-          anchorLabor={PLAY_ANCHORS.labor}
-          anchorObligations={PLAY_ANCHORS.obligations}
-          buildRatePerBuilderPerTurn={BUILD_RATE_PER_BUILDER_PER_TURN}
-          builderExtraPerTurn={builderExtraPerTurn}
-          copy={copy}
-          decisions={decisions}
-          dueEntering={dueEntering}
-          eligibleMaidensLocalRaw={eligibleMaidensLocalRaw}
-          fmtObAmount={fmtObAmount}
-          improvementIds={IMPROVEMENT_IDS}
-          improvements={IMPROVEMENTS}
-          laborAssignedNextTurn={laborAssignedNextTurn}
-          laborAvailableNextTurn={laborAvailableNextTurn}
-          laborLimitExceeded={laborLimitExceeded}
-          laborOversubscribed={laborOversubscribed}
-          laborRequested={laborRequested}
-          manor={m}
-          marriageWindow={mw}
-          maxLaborShift={ctx.max_labor_shift}
-          obligations={ob}
-          onExportFullRunJson={onExportFullRunJson}
-          onExportRunSummary={onExportRunSummary}
-          pfHouseLabelById={pfHouseIx.houseLabelById}
-          pfParentsByChild={pfParentsByChild}
-          pfPeopleRec={pfPeopleRec}
-          pfPersonHouseById={pfHouseIx.personHouseById}
-          previewState={ctx.preview_state}
-          prospectsTotalCount={prospectsTotalCount}
-          sellCapBushels={ctx.report.market.sell_cap_bushels}
-          setDecisions={setDecisions}
-          totalObligations={totalObligations}
-          turnYears={TURN_YEARS}
-          arrearsCarried={arrearsCarried}
-        />
-      ) : null}
     </div>
   );
 }
