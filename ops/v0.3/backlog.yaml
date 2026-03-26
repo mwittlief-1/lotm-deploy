@@ -1608,7 +1608,7 @@ tasks:
   title: Audit marriage offer lifecycle and candidate identity surfaces
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 100
   tranche: 1
   change_type: refactor
