@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-001-T03
-  last_completed_task_id: V03-R0-006-T02
+  current_task_id: ''
+  last_completed_task_id: V03-R0-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: 1f4ab134e459e4edb1dba1c1767efc08fe785156
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: b3a4e28ed9560bc874f5cb72d75d8e26ebbc9c52
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,11 +21,34 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Economy/fiscal completed V03-R0-006-T02 and added the shared fiscal schema
-  plus accepted payment-mode contract in src/sim/domains/economy/schema.ts,
-  with receipt asset runtime mappings now reading from the shared table.
-  The first globally claimable ready task remains V03-R0-001-T03, and no
-  further economy/fiscal task is scheduler-eligible yet because V03-R0-006-T03
-  is still todo.
-  World/topology automation remains blocked behind V03-XMAP-001.
-active_claims: {}
+  Tooling/qa, Social, UI, and Economy have now been explicitly dispatched on
+  V03-R0-001-T03, V03-R0-002-T03, V03-R0-004-T03, and V03-R0-006-T02. Engine
+  Core V03-R0-003-T02 remains E2 escalated with code parked off branch. There
+  is currently no globally claimable ready task because all active lane
+  frontiers are claimed. World/topology automation remains blocked behind
+  V03-XMAP-001.
+active_claims:
+  codex/v0.3-lane-tooling-qa:
+    task_id: V03-R0-001-T03
+    claimed_by: codex-tooling-qa
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-001-T03-20260326T113213-0400
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R0-002-T03
+    claimed_by: codex-social-mechanics
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-002-T03-20260326T113213-0400
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R0-004-T03
+    claimed_by: codex-ui-experience
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-004-T03-20260326T113213-0400
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R0-006-T02
+    claimed_by: codex-economy-fiscal
+    claimed_at: '2026-03-26T11:32:13-0400'
+    claim_expires_at: '2026-03-26T15:32:13-0400'
+    run_id: V03-R0-006-T02-20260326T113213-0400
