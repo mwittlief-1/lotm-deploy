@@ -1359,11 +1359,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-tooling-qa
+    claimed_at: '2026-03-26T10:58:45-0400'
+    claim_expires_at: '2026-03-26T14:58:45-0400'
+    run_id: V03-R0-001-T02-20260326T105845-0400
   done_conditions:
   - canonical receipt fields are explicit and stable
   - receipt ordering and sort keys are explicit and stable
@@ -1679,11 +1679,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-social-mechanics
+    claimed_at: '2026-03-26T10:58:45-0400'
+    claim_expires_at: '2026-03-26T14:58:45-0400'
+    run_id: V03-R0-002-T02-20260326T105845-0400
   done_conditions:
   - offer registry fields are explicit and stable
   - candidate identity keys are deterministic and test-covered
@@ -2044,11 +2044,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-engine-core
+    claimed_at: '2026-03-26T10:58:45-0400'
+    claim_expires_at: '2026-03-26T14:58:45-0400'
+    run_id: V03-R0-003-T02-20260326T105845-0400
   done_conditions:
   - decision-budget registry fields are explicit and stable
   - budget reset cadence is defined at one reset per three-year turn
@@ -2362,11 +2362,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-004-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-ui-experience
+    claimed_at: '2026-03-26T10:58:45-0400'
+    claim_expires_at: '2026-03-26T14:58:45-0400'
+    run_id: V03-R0-004-T02-20260326T105845-0400
 - id: V03-R0-004-T03
   parent_epic: V03-R0-004
   release: v0.3.0
