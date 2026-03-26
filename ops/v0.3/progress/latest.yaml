@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-001-T05
-  last_completed_task_id: V03-R0-001-T04
+  last_completed_task_id: V03-R0-002-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 4c097bade7c9b4cf2654177f8db1fa7e099bf792
+  git_commit: b0a6222df5c0d8e705e85592c34fd68a039d4bf3
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,12 +21,12 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Accepted completed lane work for Tooling T03/T04, Social T03, UI T03, and
-  Economy T02/T03, then cleared the stale dispatched claims from kickoff.
-  Tooling T04 and Economy T03 were status-rebased to done from lane evidence
-  plus run logs because the worktrees had advanced beyond the earlier kickoff
-  dispatch point. The next unclaimed ready frontier is Tooling T05, with
-  Social T04, UI T04, and Economy T04 also ready. Engine Core V03-R0-003-T02
-  remains E2 escalated, and world/topology automation remains blocked behind
+  Accepted Social V03-R0-002-T04 from the lane branch after the deterministic
+  reject-cooldown handoff landed cleanly with passing gates and stable replay
+  hashes. Social is not escalation-blocked; it was only waiting for kickoff to
+  record the closeout and expose the next frontier. The current unclaimed ready
+  queue is Tooling V03-R0-001-T05, Social V03-R0-002-T05, UI V03-R0-004-T04,
+  and Economy V03-R0-006-T04. Engine Core V03-R0-003-T02 remains E2
+  escalated, and world/topology automation remains blocked behind
   V03-XMAP-001.
 active_claims: {}
