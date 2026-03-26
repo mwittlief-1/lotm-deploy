@@ -1884,7 +1884,7 @@ tasks:
   title: Integrate marriage phase wrappers with bounded offer registry
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: done
   priority: 88
   tranche: 1
   change_type: behavior_change
@@ -1932,7 +1932,7 @@ tasks:
   title: Close epic and refresh marriage lane docs
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 86
   tranche: 1
   change_type: refactor
