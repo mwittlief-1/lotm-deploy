@@ -1380,7 +1380,7 @@ tasks:
   title: Route non-canonical coin mutations through ledger receipt writers
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -1405,11 +1405,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Receipt lines and replay artifacts may shift where direct coin writes are replaced by canonical ledger writes.
   claim:
-    status: claimed
-    claimed_by: codex-tooling-qa
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-001-T03-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - active direct coin mutations in scoped surfaces are removed
   - ledger receipts are emitted for those coin deltas
@@ -1426,7 +1426,7 @@ tasks:
   title: Route non-canonical stores mutations through ledger receipt writers
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: done
   priority: 94
   tranche: 1
   change_type: behavior_change
@@ -1472,7 +1472,7 @@ tasks:
   title: Add deterministic receipt snapshot coverage
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: ready
   priority: 92
   tranche: 1
   change_type: refactor
@@ -1700,7 +1700,7 @@ tasks:
   title: Enforce one pending offer per candidate and terminal accept/reject
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -1726,11 +1726,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Marriage offer snapshots and replay artifacts may change where pending-offer uniqueness is enforced.
   claim:
-    status: claimed
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-002-T03-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - no candidate may hold more than one pending offer simultaneously
   - accept and reject both clear or finalize the pending offer deterministically
@@ -1747,7 +1747,7 @@ tasks:
   title: Implement three-turn reject stickiness for repeated pairings
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: behavior_change
@@ -2371,7 +2371,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Implement reusable modal sheet and debug accordion shell
-  status: ready
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2403,16 +2403,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-004-T03.yaml
   claim:
-    status: claimed
-    claimed_by: codex-ui-experience
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-004-T03-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-004-T04
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Wire receipts viewer grouped/raw modes and intuitive chip-to-modal routing
-  status: todo
+  status: ready
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2820,7 +2820,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Define multi-asset ledger schema and accepted payment-mode contract
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2852,16 +2852,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-006-T02.yaml
   claim:
-    status: claimed
-    claimed_by: codex-economy-fiscal
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-006-T02-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-006-T03
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Implement hunting and meat-store registries in economy outputs
-  status: todo
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2901,7 +2901,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Route food and meat deltas through receipt writers and settlement scaffolds
-  status: todo
+  status: ready
   priority: 96
   tranche: 1
   change_type: behavior_change

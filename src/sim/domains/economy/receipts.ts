@@ -1,4 +1,5 @@
 import type { PhaseNameV0 } from "../../types";
+import { FISCAL_LEDGER_RUNTIME_ASSET_PATHS } from "./schema";
 
 export const FISCAL_RECEIPT_SCHEMA_VERSION = "fiscal_receipt_v1" as const;
 
@@ -43,9 +44,9 @@ export const FISCAL_RECEIPT_ASSETS = [
 ] as const;
 
 export const FISCAL_RECEIPT_RUNTIME_ASSET_PATHS = {
-  coin: "manor.coin",
-  food_stores: "manor.bushels_stored",
-  meat_stores: "manor.meat_stores",
+  coin: FISCAL_LEDGER_RUNTIME_ASSET_PATHS.coin,
+  food_stores: FISCAL_LEDGER_RUNTIME_ASSET_PATHS.food_stores,
+  meat_stores: FISCAL_LEDGER_RUNTIME_ASSET_PATHS.meat_stores,
   tax_due_coin: "manor.obligations.tax_due_coin",
   tithe_due_bushels: "manor.obligations.tithe_due_bushels",
   arrears_coin: "manor.obligations.arrears.coin",
