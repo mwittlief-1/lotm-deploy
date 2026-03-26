@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-001-T02
-  last_completed_task_id: V03-R0-002-T02
+  current_task_id: V03-R0-001-T03
+  last_completed_task_id: V03-R0-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: fdf40ed5a80950b180ab613a8efcd09d9a03cde7
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: b3a4e28ed9560bc874f5cb72d75d8e26ebbc9c52
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,12 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Tooling/qa completed V03-R0-001-T01 and Social completed V03-R0-002-T01,
-  V03-R0-005-T01, and V03-R0-002-T02. The tranche-1 frontiers remain
-  V03-R0-001-T02, V03-R0-003-T02, and V03-R0-004-T02, while the next social
-  tasks stay todo until T03 is promoted. World/topology automation remains
+  Tooling/qa completed V03-R0-001-T02, Social completed V03-R0-002-T02, and UI
+  completed V03-R0-004-T02; all three handoffs are accepted into kickoff and
+  the merged state has revalidated on kickoff.
+  Engine Core V03-R0-003-T02 is now recorded as E2 escalated with its report
+  and QA note synced into kickoff, but its implementation remains parked off
+  branch. The next ready lane frontiers are V03-R0-001-T03, V03-R0-002-T03,
+  V03-R0-004-T03, and V03-R0-006-T02. World/topology automation remains
   blocked behind V03-XMAP-001.
 active_claims: {}
