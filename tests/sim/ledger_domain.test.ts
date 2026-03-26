@@ -272,11 +272,149 @@ describe("economy ledger domain", () => {
     ]);
   });
 
+  it("emits canonical food store receipt rows with deterministic truncation", () => {
+    const state = mkState();
+
+    expect(
+      applyBushelDelta(state, 4.8, {
+        phase: "consumption",
+        phase_sequence: 5,
+        category: "stores.granary",
+        counterparty_kind: "household",
+        counterparty_id: "manor:stores",
+        counterparty_label: "Granary",
+        summary: "Stored the week harvest surplus.",
+        rule_id: "consumption.store_surplus"
+      })
+    ).toBe(4);
+    expect(
+      spendBushels(state, 7.9, {
+        phase: "sell",
+        phase_sequence: 6,
+        category: "stores.market_sale",
+        counterparty_kind: "market",
+        counterparty_id: "market:town",
+        counterparty_label: "Town Market",
+        summary: "Sold grain stores at market.",
+        rule_id: "sell.market_grain"
+      })
+    ).toBe(7);
+
+    const receipts = readLedgerReceiptSnapshots(state);
+    expect(receipts.map((receipt) => ({
+      receipt_id: receipt.receipt_id,
+      asset: receipt.asset,
+      delta: receipt.delta,
+      balance_after: receipt.balance_after
+    }))).toEqual([
+      {
+        receipt_id: "ledger:t1:consumption:p5:food_stores:0001",
+        asset: "food_stores",
+        delta: 4,
+        balance_after: 54
+      },
+      {
+        receipt_id: "ledger:t1:sell:p6:food_stores:0002",
+        asset: "food_stores",
+        delta: -7,
+        balance_after: 47
+      }
+    ]);
+  });
+
+  it("emits deterministic bushel obligation receipts, including tithe carry into arrears", () => {
+    const state = mkState();
+
+    expect(
+      applyTitheDueBushelsDelta(state, 5.6, {
+        phase: "obligations",
+        phase_sequence: 4,
+        category: "obligation.church_settlement",
+        counterparty_kind: "church",
+        counterparty_id: "parish:st-cuthbert",
+        counterparty_label: "St. Cuthbert",
+        summary: "Assessed the tithe due in grain.",
+        rule_id: "obligations.assess_tithe"
+      })
+    ).toBe(5);
+    expect(
+      spendTitheDueBushels(state, 2.3, {
+        phase: "obligations",
+        phase_sequence: 5,
+        category: "obligation.church_settlement",
+        counterparty_kind: "church",
+        counterparty_id: "parish:st-cuthbert",
+        counterparty_label: "St. Cuthbert",
+        summary: "Delivered part of the tithe in grain.",
+        rule_id: "obligations.pay_tithe"
+      })
+    ).toBe(2);
+    expect(
+      rollTitheDueBushelsIntoArrears(state, {
+        debit: {
+          phase: "succession",
+          phase_sequence: 7,
+          category: "obligation.arrears_carry",
+          counterparty_kind: "system",
+          counterparty_id: "turn-close",
+          counterparty_label: "Turn Close",
+          summary: "Moved unpaid tithe due out of the current bushel slot.",
+          rule_id: "obligations.tithe_to_arrears.debit"
+        },
+        credit: {
+          phase: "succession",
+          phase_sequence: 7,
+          category: "obligation.arrears_carry",
+          counterparty_kind: "system",
+          counterparty_id: "turn-close",
+          counterparty_label: "Turn Close",
+          summary: "Moved unpaid tithe due into bushel arrears.",
+          rule_id: "obligations.tithe_to_arrears.credit"
+        }
+      })
+    ).toBe(3);
+
+    const receipts = readLedgerReceiptSnapshots(state);
+    expect(receipts.map((receipt) => ({
+      asset: receipt.asset,
+      delta: receipt.delta,
+      balance_after: receipt.balance_after,
+      rule_id: receipt.rule_id
+    }))).toEqual([
+      {
+        asset: "tithe_due_bushels",
+        delta: 5,
+        balance_after: 5,
+        rule_id: "obligations.assess_tithe"
+      },
+      {
+        asset: "tithe_due_bushels",
+        delta: -2,
+        balance_after: 3,
+        rule_id: "obligations.pay_tithe"
+      },
+      {
+        asset: "arrears_bushels",
+        delta: 3,
+        balance_after: 3,
+        rule_id: "obligations.tithe_to_arrears.credit"
+      },
+      {
+        asset: "tithe_due_bushels",
+        delta: -3,
+        balance_after: 0,
+        rule_id: "obligations.tithe_to_arrears.debit"
+      }
+    ]);
+  });
+
   it("preserves legacy semantics when no receipt metadata is supplied", () => {
     const state = mkState();
 
     expect(applyCoinDelta(state, 5)).toBe(5);
     expect(spendCoin(state, 2)).toBe(2);
+    expect(applyBushelDelta(state, 3)).toBe(3);
+    expect(spendBushels(state, 1)).toBe(1);
     expect(readLedgerReceiptSnapshots(state)).toEqual([]);
 
     clearLedgerReceiptJournal(state);
