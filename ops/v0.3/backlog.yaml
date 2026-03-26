@@ -2496,7 +2496,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Close epic and refresh gameplay UX docs
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor

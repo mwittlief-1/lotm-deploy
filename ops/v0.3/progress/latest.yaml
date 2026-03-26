@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-001-T07
-  last_completed_task_id: V03-R0-006-T05
+  last_completed_task_id: V03-R0-004-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6e5c3247626d0f4516b89ec62e63f255ec86e17b
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: f9d1132d2bd9e829228e5b4b391628ba26ab48b9
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,20 +15,13 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
-  replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  replay_hashes: {}
 notes: >-
-  Accepted Tooling V03-R0-001-T06, UI V03-R0-004-T05, and Economy V03-R0-006-T05
-  from their lane branches after each lane closed with passing gates and stable
-  replay hashes. Social V03-R0-002-T05 was re-scoped to a domain-only
-  member-ownership seam after lane escalation evidence showed the old contract
-  incorrectly required integrator-owned phase and shared-type edits; the
-  phase-wrapper integration remains explicitly deferred to V03-R0-002-T07. The
-  current unclaimed ready queue is Tooling V03-R0-001-T07, Social
-  V03-R0-002-T05, UI V03-R0-004-T06, and Economy V03-R0-006-T06. Engine Core
-  V03-R0-003-T02 remains E2 escalated, and world/topology automation remains
-  blocked behind V03-XMAP-001.
+  Completed V03-R0-004-T06 on codex/v0.3-lane-ui-experience after qa and
+  preflight. The gameplay shell epic now has refreshed implementation notes,
+  shipped-versus-deferred guidance, and playtest alignment notes in docs/ux.
+  Lane-parallel scheduling remains active with current_task_id set to
+  V03-R0-001-T07. No active lane claims are currently recorded, and there is no
+  next ready UI lane task. World/topology automation remains blocked behind
+  V03-XMAP-001.
 active_claims: {}
