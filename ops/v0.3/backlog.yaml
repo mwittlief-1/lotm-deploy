@@ -1654,7 +1654,7 @@ tasks:
   title: Define bounded offer registry schema and deterministic candidate keys
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -1679,11 +1679,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T10:58:45-0400'
-    claim_expires_at: '2026-03-26T14:58:45-0400'
-    run_id: V03-R0-002-T02-20260326T105845-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - offer registry fields are explicit and stable
   - candidate identity keys are deterministic and test-covered
