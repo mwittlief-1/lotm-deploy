@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-005-T01
+  last_completed_task_id: V03-R0-001-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 06c195c1d174ad32fe154cdf8891fd2311a8baf2
+  git_commit: f909cb1fb20b9275118c844980bd2614604e12e3
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,24 +15,18 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run1: 663853f67e0120ae41050092907799ff78e39dc29678d2efab4e54a9944c6a0f
+    run2: 663853f67e0120ae41050092907799ff78e39dc29678d2efab4e54a9944c6a0f
 notes: >-
-  Tooling/qa, Social, Engine Core, and UI have now been explicitly dispatched
-  on V03-R0-001-T02, V03-R0-002-T02, V03-R0-003-T02, and V03-R0-004-T02. There
-  is currently no globally claimable ready task because all active lane
-  frontiers are claimed. World/topology automation remains blocked behind
+  Tooling/qa completed V03-R0-001-T02 and its handoff is accepted into kickoff.
+  Social, Engine Core, and UI still have lane-local progress that is being
+  reconciled. There is currently no globally claimable ready task while that
+  reconciliation is in flight. World/topology automation remains blocked behind
   V03-XMAP-001.
 active_claims:
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R0-001-T02
-    claimed_by: codex-tooling-qa
-    claimed_at: '2026-03-26T10:58:45-0400'
-    claim_expires_at: '2026-03-26T14:58:45-0400'
-    run_id: V03-R0-001-T02-20260326T105845-0400
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-002-T02
     claimed_by: codex-social-mechanics
