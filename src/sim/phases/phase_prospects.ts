@@ -2,6 +2,10 @@ import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../cou
 import { buildPolicyIntelMap, npcPolicyScore } from "../domains/ai/policy";
 import { applyCoinDelta } from "../domains/economy/ledger";
 import { bestMarriageOfferIndexPolicy, ensureMarriageKinshipEdge } from "../domains/people/marriage";
+import {
+  getMarriageOfferRegistryEntryForWindowOffer,
+  type MarriageOfferRegistryEntry,
+} from "../domains/people/marriageOfferRegistry";
 import { clearReservation, reserveCandidate } from "../marriageMarket";
 import { Rng } from "../rng";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
@@ -141,6 +145,78 @@ function uncertaintyForType(t: ProspectType): "known" | "likely" | "possible" {
   if (t === "marriage") return "known";
   if (t === "grant") return "likely";
   return "possible";
+}
+
+function buildMarriageProspectFromRegistryEntry(
+  state: RunState,
+  entry: MarriageOfferRegistryEntry,
+  prospectId: string,
+  playerHouseId: string,
+  sponsorHouseId: string,
+  expiresTurn: number
+): Prospect {
+  const spouseHouseId = entry.candidate_house_id ?? sponsorHouseId;
+  const relDeltas: any[] = [
+    {
+      scope: "person",
+      from_id: state.house.head.id,
+      to_id: entry.candidate_person_id,
+      allegiance_delta: entry.relationship_delta.allegiance,
+      respect_delta: entry.relationship_delta.respect,
+      threat_delta: entry.relationship_delta.threat,
+    },
+  ];
+
+  const hhDelta = { allegiance: 6, respect: 4, threat: -3 };
+  if (spouseHouseId && playerHouseId && spouseHouseId !== playerHouseId) {
+    relDeltas.push({
+      scope: "house",
+      from_id: playerHouseId,
+      to_id: spouseHouseId,
+      allegiance_delta: hhDelta.allegiance,
+      respect_delta: hhDelta.respect,
+      threat_delta: hhDelta.threat,
+    });
+    relDeltas.push({
+      scope: "house",
+      from_id: spouseHouseId,
+      to_id: playerHouseId,
+      allegiance_delta: hhDelta.allegiance,
+      respect_delta: hhDelta.respect,
+      threat_delta: hhDelta.threat,
+    });
+  }
+
+  if (entry.liege_delta) {
+    relDeltas.push({
+      scope: "person",
+      from_id: state.house.head.id,
+      to_id: state.locals.liege.id,
+      allegiance_delta: 0,
+      respect_delta: entry.liege_delta.respect,
+      threat_delta: entry.liege_delta.threat,
+    });
+  }
+
+  return {
+    id: prospectId,
+    type: "marriage",
+    from_house_id: spouseHouseId,
+    to_house_id: playerHouseId,
+    subject_person_id: entry.subject_person_id,
+    spouse_person_id: entry.candidate_person_id,
+    summary: "Marriage proposal",
+    requirements: [],
+    costs: {},
+    predicted_effects: {
+      coin_delta: entry.dowry_coin_net,
+      relationship_deltas: relDeltas,
+      flags_set: [],
+    },
+    uncertainty: "known",
+    expires_turn: expiresTurn,
+    actions: ["accept", "reject"],
+  };
 }
 
 function lookupProspectFromHistory(state: RunState, prospectId: string): Prospect | null {
@@ -293,68 +369,19 @@ export function buildProspectsWindowPhase(
     const subjectId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0]!;
     const bestIdx = bestMarriageOfferIndexPolicy(state, marriageWindow);
     if (bestIdx !== null) {
-      const offer = marriageWindow.offers[bestIdx]!;
-      const spouseHouseId = structuredHouseIdForPerson(state, offer.house_person_id) ?? sponsorHouseId;
-      const relDeltas: any[] = [{
-        scope: "person",
-        from_id: state.house.head.id,
-        to_id: offer.house_person_id,
-        allegiance_delta: offer.relationship_delta.allegiance,
-        respect_delta: offer.relationship_delta.respect,
-        threat_delta: offer.relationship_delta.threat
-      }];
-
-      const hhDelta = { allegiance: 6, respect: 4, threat: -3 };
-      if (spouseHouseId && playerHouseId && spouseHouseId !== playerHouseId) {
-        relDeltas.push({
-          scope: "house",
-          from_id: playerHouseId,
-          to_id: spouseHouseId,
-          allegiance_delta: hhDelta.allegiance,
-          respect_delta: hhDelta.respect,
-          threat_delta: hhDelta.threat
-        });
-        relDeltas.push({
-          scope: "house",
-          from_id: spouseHouseId,
-          to_id: playerHouseId,
-          allegiance_delta: hhDelta.allegiance,
-          respect_delta: hhDelta.respect,
-          threat_delta: hhDelta.threat
-        });
+      const entry = getMarriageOfferRegistryEntryForWindowOffer(state, marriageWindow, bestIdx);
+      if (entry) {
+        const p = buildMarriageProspectFromRegistryEntry(
+          state,
+          entry,
+          makeId("marriage", subjectId),
+          playerHouseId,
+          sponsorHouseId,
+          t + 2
+        );
+        reserveCandidate(state, entry.candidate_person_id, p.id, p.expires_turn);
+        addProspect(p);
       }
-      if (offer.liege_delta) {
-        relDeltas.push({
-          scope: "person",
-          from_id: state.house.head.id,
-          to_id: state.locals.liege.id,
-          allegiance_delta: 0,
-          respect_delta: offer.liege_delta.respect,
-          threat_delta: offer.liege_delta.threat
-        });
-      }
-
-      const p: Prospect = {
-        id: makeId("marriage", subjectId),
-        type: "marriage",
-        from_house_id: spouseHouseId,
-        to_house_id: playerHouseId,
-        subject_person_id: subjectId,
-        spouse_person_id: offer.house_person_id,
-        summary: "Marriage proposal",
-        requirements: [],
-        costs: {},
-        predicted_effects: {
-          coin_delta: offer.dowry_coin_net,
-          relationship_deltas: relDeltas,
-          flags_set: []
-        },
-        uncertainty: "known",
-        expires_turn: t + 2,
-        actions: ["accept", "reject"]
-      };
-      reserveCandidate(state, offer.house_person_id, p.id, p.expires_turn);
-      addProspect(p);
     }
   }
 
