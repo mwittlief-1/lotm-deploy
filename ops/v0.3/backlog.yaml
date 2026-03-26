@@ -1837,7 +1837,7 @@ tasks:
   title: Add deterministic bounded-offer selection policy coverage
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 90
   tranche: 1
   change_type: refactor
