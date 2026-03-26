@@ -1380,7 +1380,7 @@ tasks:
   title: Route non-canonical coin mutations through ledger receipt writers
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change

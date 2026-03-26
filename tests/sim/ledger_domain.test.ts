@@ -10,7 +10,9 @@ import {
   applyTaxDueCoinDelta,
   applyTitheDueBushelsDelta,
   canAffordCoin,
+  clearLedgerReceiptJournal,
   clearWarLevyDue,
+  readLedgerReceiptSnapshots,
   rollTitheDueBushelsIntoArrears,
   rollTaxDueCoinIntoArrears,
   setBushelBalance,
@@ -141,5 +143,143 @@ describe("economy ledger domain", () => {
     expect(rollTitheDueBushelsIntoArrears(state)).toBe(2);
     expect(state.manor.obligations.tithe_due_bushels).toBe(0);
     expect(state.manor.obligations.arrears.bushels).toBe(5);
+  });
+
+  it("emits canonical coin receipt rows when receipt metadata is provided", () => {
+    const state = mkState();
+
+    expect(
+      applyCoinDelta(state, 4, {
+        phase: "events",
+        phase_sequence: 7,
+        category: "income.justice_fees",
+        counterparty_kind: "event",
+        counterparty_id: "event:market-day",
+        counterparty_label: "Market Day",
+        summary: "Collected market dues.",
+        rule_id: "events.market_dues",
+        related_actor_ids: ["p_liege", "p_head"]
+      })
+    ).toBe(4);
+    expect(
+      spendCoin(state, 3, {
+        phase: "construction",
+        phase_sequence: 2,
+        category: "expense.project_capex",
+        counterparty_kind: "project",
+        counterparty_id: "improvement:mill",
+        counterparty_label: "Mill",
+        summary: "Paid the mill survey fee.",
+        rule_id: "construction.survey",
+        related_actor_ids: ["p_head"]
+      })
+    ).toBe(3);
+
+    const receipts = readLedgerReceiptSnapshots(state);
+    expect(receipts).toHaveLength(2);
+    expect(receipts.map((receipt) => receipt.receipt_id)).toEqual([
+      "ledger:t1:construction:p2:coin:0002",
+      "ledger:t1:events:p7:coin:0001"
+    ]);
+    expect(receipts.map((receipt) => receipt.balance_after)).toEqual([11, 14]);
+    expect(receipts.map((receipt) => receipt.delta)).toEqual([-3, 4]);
+    expect(receipts[1]?.related_actor_ids).toEqual(["p_head", "p_liege"]);
+  });
+
+  it("emits deterministic obligation coin receipts, including tax carry into arrears", () => {
+    const state = mkState();
+
+    expect(
+      applyTaxDueCoinDelta(state, 6, {
+        phase: "obligations",
+        phase_sequence: 1,
+        category: "obligation.liege_settlement",
+        counterparty_kind: "liege",
+        counterparty_id: "house:liege",
+        counterparty_label: "House Liege",
+        summary: "Assessed new liege tax due.",
+        rule_id: "obligations.assess_tax"
+      })
+    ).toBe(6);
+    expect(
+      spendTaxDueCoin(state, 2, {
+        phase: "obligations",
+        phase_sequence: 3,
+        category: "obligation.liege_settlement",
+        counterparty_kind: "liege",
+        counterparty_id: "house:liege",
+        counterparty_label: "House Liege",
+        summary: "Paid part of the liege tax due.",
+        rule_id: "obligations.pay_tax"
+      })
+    ).toBe(2);
+    expect(
+      rollTaxDueCoinIntoArrears(state, {
+        debit: {
+          phase: "succession",
+          phase_sequence: 9,
+          category: "obligation.arrears_carry",
+          counterparty_kind: "system",
+          counterparty_id: "turn-close",
+          counterparty_label: "Turn Close",
+          summary: "Moved unpaid tax due out of the current ledger slot.",
+          rule_id: "obligations.tax_to_arrears.debit"
+        },
+        credit: {
+          phase: "succession",
+          phase_sequence: 9,
+          category: "obligation.arrears_carry",
+          counterparty_kind: "system",
+          counterparty_id: "turn-close",
+          counterparty_label: "Turn Close",
+          summary: "Moved unpaid tax due into coin arrears.",
+          rule_id: "obligations.tax_to_arrears.credit"
+        }
+      })
+    ).toBe(4);
+
+    const receipts = readLedgerReceiptSnapshots(state);
+    expect(receipts.map((receipt) => ({
+      asset: receipt.asset,
+      delta: receipt.delta,
+      balance_after: receipt.balance_after,
+      rule_id: receipt.rule_id
+    }))).toEqual([
+      {
+        asset: "tax_due_coin",
+        delta: 6,
+        balance_after: 6,
+        rule_id: "obligations.assess_tax"
+      },
+      {
+        asset: "tax_due_coin",
+        delta: -2,
+        balance_after: 4,
+        rule_id: "obligations.pay_tax"
+      },
+      {
+        asset: "arrears_coin",
+        delta: 4,
+        balance_after: 4,
+        rule_id: "obligations.tax_to_arrears.credit"
+      },
+      {
+        asset: "tax_due_coin",
+        delta: -4,
+        balance_after: 0,
+        rule_id: "obligations.tax_to_arrears.debit"
+      }
+    ]);
+  });
+
+  it("preserves legacy semantics when no receipt metadata is supplied", () => {
+    const state = mkState();
+
+    expect(applyCoinDelta(state, 5)).toBe(5);
+    expect(spendCoin(state, 2)).toBe(2);
+    expect(readLedgerReceiptSnapshots(state)).toEqual([]);
+
+    clearLedgerReceiptJournal(state);
+    expect(readLedgerReceiptSnapshots(state)).toEqual([]);
   });
 });
