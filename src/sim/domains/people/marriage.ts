@@ -8,6 +8,7 @@ import type { TierSets } from "../../tiers";
 import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
 import { clampInt } from "../../util";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
+import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
 import { applyRelationshipDelta } from "./relationshipEngine";
 
 function modsObj(state: RunState): Record<string, number> {
@@ -80,9 +81,16 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
     ? [...tierSets.tier1.houses].filter((houseId) => houseId !== playerHouseId).sort((a, b) => a.localeCompare(b))
     : Object.keys(houses).filter((houseId) => houseId !== playerHouseId).sort((a, b) => a.localeCompare(b));
 
+  const rejectCooldowns = buildMarriageRejectCooldownsFromState(state);
   const poolIds = listEligibleCandidates(state, {
     subject_person_id: subject.id,
     scope: { kind: "house_ids", house_ids: tier1HouseIds }
+  }).filter((candidatePersonId) => {
+    const pairingKey = makeMarriageOfferPairingKey({
+      subject_person_id: subject.id,
+      candidate_person_id: candidatePersonId,
+    });
+    return !rejectCooldowns[pairingKey];
   });
 
   if (poolIds.length === 0) {

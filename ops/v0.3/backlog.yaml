@@ -1747,7 +1747,7 @@ tasks:
   title: Implement three-turn reject stickiness for repeated pairings
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: behavior_change
