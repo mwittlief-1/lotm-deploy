@@ -2852,16 +2852,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-006-T02.yaml
   claim:
-    status: claimed
-    claimed_by: codex-economy-fiscal
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-006-T02-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-006-T03
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Implement hunting and meat-store registries in economy outputs
-  status: todo
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change

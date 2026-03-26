@@ -9,8 +9,26 @@ function obligations(state: RunState) {
   return state.manor.obligations;
 }
 
+export type TrackedStoreAsset = "food_stores" | "meat_stores";
+
+function manorAny(state: RunState): Record<string, unknown> {
+  return state.manor as unknown as Record<string, unknown>;
+}
+
 export function bushelBalance(state: RunState): number {
   return asNonNegInt(state.manor.bushels_stored);
+}
+
+export function foodStoreBalance(state: RunState): number {
+  return bushelBalance(state);
+}
+
+export function meatStoreBalance(state: RunState): number {
+  return asNonNegInt(Number(manorAny(state).meat_stores ?? 0));
+}
+
+export function trackedStoreBalance(state: RunState, asset: TrackedStoreAsset): number {
+  return asset === "food_stores" ? foodStoreBalance(state) : meatStoreBalance(state);
 }
 
 export function setBushelBalance(state: RunState, amount: number): number {
@@ -19,16 +37,58 @@ export function setBushelBalance(state: RunState, amount: number): number {
   return next;
 }
 
+export function setFoodStoreBalance(state: RunState, amount: number): number {
+  return setBushelBalance(state, amount);
+}
+
+export function setMeatStoreBalance(state: RunState, amount: number): number {
+  const next = normalizedAmount(amount);
+  manorAny(state).meat_stores = next;
+  return next;
+}
+
+export function setTrackedStoreBalance(state: RunState, asset: TrackedStoreAsset, amount: number): number {
+  return asset === "food_stores" ? setFoodStoreBalance(state, amount) : setMeatStoreBalance(state, amount);
+}
+
 export function applyBushelDelta(state: RunState, delta: number): number {
   const before = bushelBalance(state);
   const after = setBushelBalance(state, before + Math.trunc(delta));
   return after - before;
 }
 
+export function applyFoodStoreDelta(state: RunState, delta: number): number {
+  return applyBushelDelta(state, delta);
+}
+
+export function applyMeatStoreDelta(state: RunState, delta: number): number {
+  const before = meatStoreBalance(state);
+  const after = setMeatStoreBalance(state, before + Math.trunc(delta));
+  return after - before;
+}
+
+export function applyTrackedStoreDelta(state: RunState, asset: TrackedStoreAsset, delta: number): number {
+  return asset === "food_stores" ? applyFoodStoreDelta(state, delta) : applyMeatStoreDelta(state, delta);
+}
+
 export function spendBushels(state: RunState, amount: number): number {
   const pay = Math.min(bushelBalance(state), normalizedAmount(amount));
   applyBushelDelta(state, -pay);
   return pay;
+}
+
+export function spendFoodStores(state: RunState, amount: number): number {
+  return spendBushels(state, amount);
+}
+
+export function spendMeatStores(state: RunState, amount: number): number {
+  const pay = Math.min(meatStoreBalance(state), normalizedAmount(amount));
+  applyMeatStoreDelta(state, -pay);
+  return pay;
+}
+
+export function spendTrackedStores(state: RunState, asset: TrackedStoreAsset, amount: number): number {
+  return asset === "food_stores" ? spendFoodStores(state, amount) : spendMeatStores(state, amount);
 }
 
 export function coinBalance(state: RunState): number {

@@ -7,13 +7,16 @@ import {
   applyArrearsCoinDelta,
   applyBushelDelta,
   applyCoinDelta,
+  applyMeatStoreDelta,
   applyTaxDueCoinDelta,
   applyTitheDueBushelsDelta,
   canAffordCoin,
   clearWarLevyDue,
+  meatStoreBalance,
   rollTitheDueBushelsIntoArrears,
   rollTaxDueCoinIntoArrears,
   setBushelBalance,
+  setMeatStoreBalance,
   setTaxDueCoin,
   setTitheDueBushels,
   setWarLevyDue,
@@ -21,6 +24,7 @@ import {
   spendArrearsCoin,
   spendBushels,
   spendCoin,
+  spendMeatStores,
   spendTitheDueBushels,
   spendTaxDueCoin
 } from "../../src/sim/domains/economy/ledger";
@@ -53,6 +57,7 @@ function mkState(): RunState {
       farmers: 10,
       builders: 2,
       bushels_stored: 50,
+      meat_stores: 6,
       coin: 10,
       unrest: 0,
       improvements: [],
@@ -63,7 +68,7 @@ function mkState(): RunState {
         arrears: { coin: 0, bushels: 0 },
         war_levy_due: null
       }
-    },
+    } as any,
     house: {
       head,
       spouse,
@@ -141,5 +146,16 @@ describe("economy ledger domain", () => {
     expect(rollTitheDueBushelsIntoArrears(state)).toBe(2);
     expect(state.manor.obligations.tithe_due_bushels).toBe(0);
     expect(state.manor.obligations.arrears.bushels).toBe(5);
+  });
+
+  it("tracks meat stores separately from grain with the same clamped semantics", () => {
+    const state = mkState();
+
+    expect(meatStoreBalance(state)).toBe(6);
+    expect(setMeatStoreBalance(state, 9)).toBe(9);
+    expect(applyMeatStoreDelta(state, -4)).toBe(-4);
+    expect(spendMeatStores(state, 3)).toBe(3);
+    expect(meatStoreBalance(state)).toBe(2);
+    expect(state.manor.bushels_stored).toBe(50);
   });
 });
