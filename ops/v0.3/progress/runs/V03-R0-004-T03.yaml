@@ -1,10 +1,10 @@
 version: 1
-run_id: V03-R0-004-T03-20260326T111638-0400
+run_id: V03-R0-004-T03-20260326T113213-0400
 task_id: V03-R0-004-T03
 status: done
 date: 2026-03-26
 branch: codex/v0.3-lane-ui-experience
-commit: 77e517cc7f4d419ddb96f35b0a890359f01eb6fc
+commit: 1f91ace52214a744394e7fc6eca6da0bdcb390cf
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -28,7 +28,7 @@ artifacts:
 findings:
   - Household roster and house-log detail now open in a reusable modal sheet, which keeps dense reference content available without stretching the main Turn Report card.
   - Relationship diagnostics and raw run-log/export entry points now live under a dedicated debug accordion at the bottom of the play screen instead of competing with the primary gameplay cards.
-  - The implementation stayed UI-only; qa, preflight, and both replay batches passed with matching summary hashes.
+  - The implementation stayed UI-only; qa, preflight, and both replay batches passed again on the merged lane head with matching summary hashes.
 stop_reason: no_eligible_task
 next_task_cursor: V03-R0-004-T04
 next_task_ready: false
