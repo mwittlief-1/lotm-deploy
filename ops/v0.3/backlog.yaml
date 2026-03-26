@@ -1631,11 +1631,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: codex-social-mechanics
+    claimed_at: '2026-03-26T08:29:36-0400'
+    claim_expires_at: '2026-03-26T12:29:36-0400'
+    run_id: V03-R0-002-T01-20260326T082936-0400
   done_conditions:
   - current offer lifecycle is documented from creation through accept/reject/expiry
   - candidate identity and uniqueness surfaces are enumerated

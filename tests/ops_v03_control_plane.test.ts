@@ -12,22 +12,32 @@ describe("ops v0.3 control plane", () => {
     const payload = runRubyJson("scripts/opsV03Validate.rb");
 
     expect(payload.ok).toBe(true);
-    expect(payload.summary.current_task_id).toBe("V03-R0-001-T01");
-    expect(payload.summary.active_claims).toEqual({});
+    expect(payload.summary.current_task_id).toBe("");
+    expect(payload.summary.active_claims).toEqual({
+      "codex/v0.3-lane-social-mechanics": {
+        task_id: "V03-R0-002-T01",
+        claimed_by: "codex-social-mechanics",
+        claimed_at: "2026-03-26T08:29:36-0400",
+        claim_expires_at: "2026-03-26T12:29:36-0400",
+        run_id: "V03-R0-002-T01-20260326T082936-0400"
+      }
+    });
   });
 
   it("reports lane-parallel scheduler dry-run state", () => {
     const payload = runRubyJson("scripts/opsV03SchedulerDryRun.rb");
 
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-tooling-qa"]).toBe("V03-R0-001-T01");
+    expect(payload.first_ready_by_lane["codex/v0.3-lane-tooling-qa"]).toBeUndefined();
     expect(payload.first_ready_by_lane["codex/v0.3-lane-social-mechanics"]).toBe("V03-R0-002-T01");
     expect(payload.first_ready_by_lane["codex/v0.3-lane-engine-core"]).toBeUndefined();
     expect(payload.first_ready_by_lane["codex/v0.3-lane-ui-experience"]).toBeUndefined();
+    expect(payload.first_claimable_by_lane["codex/v0.3-lane-tooling-qa"]).toBeUndefined();
+    expect(payload.first_claimable_by_lane["codex/v0.3-lane-social-mechanics"]).toBeUndefined();
     expect(payload.first_claimable_by_lane["codex/v0.3-lane-economy-fiscal"]).toBeUndefined();
     expect(payload.first_claimable_by_lane["codex/v0.3-lane-engine-core"]).toBeUndefined();
     expect(payload.first_claimable_by_lane["codex/v0.3-lane-ui-experience"]).toBeUndefined();
     expect(payload.first_claimable_by_lane["codex/v0.3-lane-world-topology"]).toBeUndefined();
-    expect(payload.current_task_id_expected).toBe("V03-R0-001-T01");
+    expect(payload.current_task_id_expected).toBe("");
   });
 
   it("shows no immediate ready-task rebases", () => {
@@ -35,14 +45,12 @@ describe("ops v0.3 control plane", () => {
 
     const immediate = payload.ready_tasks.filter((task: { task_id: string }) =>
       [
-        "V03-R0-001-T01",
         "V03-R0-002-T01",
         "V03-R0-005-T01"
       ].includes(task.task_id)
     );
 
     expect(immediate.map((task: { task_id: string }) => task.task_id)).toEqual([
-      "V03-R0-001-T01",
       "V03-R0-002-T01",
       "V03-R0-005-T01"
     ]);
