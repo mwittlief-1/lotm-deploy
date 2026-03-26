@@ -77,11 +77,11 @@ const COPY = {
   unrestBreakdownDecreasedBy: "Decreased by",
   unrestBreakdownNone: "No breakdown available.",
   // Labor timing helper text + delta cap validation
-  laborTimingProduction: "Labor changes affect next turn’s production.",
-  laborTimingBuilders: "Builders contribute to construction progress this turn.",
+  laborTimingProduction: "Labor assignments below change next turn's harvest and upkeep. They do not rewrite the resolved ledger above.",
+  laborTimingBuilders: "Construction progress shown above is already resolved. The builder count below only changes the next turn.",
   laborDeltaCapError: (max: number, requested: number) =>
     `Labor change limit exceeded. Max ${max} this turn; requested ${requested}.`,
-  laborDeltaCapClarifier: "Labor change limit applies to total changes across roles.",
+  laborDeltaCapClarifier: "The labor change limit applies to the new plan below, not the chronicle above.",
 
   // v0.2.3.x addendum: Labor oversubscription warning
   laborOversubscribedTitle: "Labor oversubscribed",
@@ -229,12 +229,19 @@ const COPY = {
   marriageToast_line2_childLeaves: (child_name: string) => `${child_name} leaves your court. Court size decreased.`,
 
   // Turn Summary top block
-  turnSummary_last3Years: "Last 3 years",
-  turnSummary_nowChoose: "Now choose",
+  turnSummary_last3Years: "Resolved last 3 years",
+  turnSummary_nowChoose: "Set next turn",
+  gameplayOverviewEyebrow: "Gameplay Chronicle",
+  gameplayOverviewHelper: "Resolved above: the last 3 years. Choose below: the next turn's response.",
+  resourceChipHelper: "Open a chip to trace the deeper ledger or its focused detail sheet.",
+  manorStateTimingHelper: "This snapshot already includes the resolved harvest, market, and event pressure from the last turn.",
+  turnReportTimingHelper: "Use this card to read what already happened before you set new orders below.",
+  decisionsTimingHelper: "These controls set the next turn. They do not rewrite the chronicle above.",
 
   // v0.2.7 binding copy (docs/ux/v0.2.7_copy.md)
   diffLedgerTitle: "Diff Ledger",
-  diffLedgerHelper: "Biggest changes from the last 3 years, with a one-line why.",
+  diffLedgerHelper: "Biggest changes from the resolved last 3 years, with a one-line why.",
+  diffLedgerExplainChanges: "Explain Changes",
   diffLedgerWhyLabel: "Why:",
   diffLedgerMultipleCauses: "Multiple causes this turn.",
   // v0.2.7.1 hotfix: surface weather shocks + relation drift attribution

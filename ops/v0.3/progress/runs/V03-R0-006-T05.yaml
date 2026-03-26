@@ -1,0 +1,33 @@
+version: 1
+run_id: V03-R0-006-T05-20260326T124304-0400
+task_id: V03-R0-006-T05
+status: done
+date: 2026-03-26
+branch: codex/v0.3-lane-economy-fiscal
+commit: 4850632114452cd2ab4a78f168bd23d9e285329b
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  consumption_module: src/sim/domains/economy/consumption.ts
+  consumption_tests: tests/sim/economy_consumption.test.ts
+  equilibrium_fixture: qa_artifacts/economy_equilibrium/v0.3.0_food_meat_equilibrium_fixture.json
+findings:
+  - Grain demand now keeps the legacy peasant and court bushel baselines while meat consumption is an explicit, bounded supplement with deterministic fallback substitution.
+  - Consumption application now drains food and meat stores through receipt-backed economy-owned helpers rather than leaving multi-asset consumption semantics implicit.
+  - The fixed-seed equilibrium fixture pack now covers a balanced turn, a hunting-reserve turn, and a scarcity fallback turn so food and meat trend regressions have a reviewable artifact.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-006-T06
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
