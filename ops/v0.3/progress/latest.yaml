@@ -6,7 +6,7 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: ccf2bb18390fcbcae72727d883233ba00773a170
+  git_commit: 3434b1118f903a17d48bc55cdc8c57b4d6317c2d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
