@@ -344,7 +344,7 @@ epics:
 - id: V03-R0-001
   title: Determinism and receipts v1 hardening
   release: v0.3.0
-  status: ready
+  status: done
   priority: 60
   tranche: 1
   change_type: behavior_change
@@ -1566,7 +1566,7 @@ tasks:
   title: Close epic and refresh receipt QA docs
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 88
   tranche: 1
   change_type: refactor
