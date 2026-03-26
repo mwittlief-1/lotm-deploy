@@ -2371,7 +2371,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Implement reusable modal sheet and debug accordion shell
-  status: ready
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change
