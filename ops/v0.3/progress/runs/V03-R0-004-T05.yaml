@@ -1,0 +1,39 @@
+version: 1
+run_id: V03-R0-004-T05-20260326T124232-0400
+task_id: V03-R0-004-T05
+status: done
+date: 2026-03-26
+branch: codex/v0.3-lane-ui-experience
+commit: df561a90898fc99acf983f4d5f28382336081968
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+  run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+artifacts:
+  copy_surface: src/App.tsx
+  section_heading: src/ui/panels/SectionHeading.tsx
+  gameplay_theme: src/ui/playScreenTheme.ts
+  play_screen_shell: src/ui/panels/PlayScreen.tsx
+  sticky_resource_chips: src/ui/panels/StickyResourceChips.tsx
+  decisions_panel: src/ui/panels/DecisionsPanel.tsx
+  ui_test: tests/ui/playScreenTheme.test.ts
+findings:
+  - The gameplay shell now uses a lightweight manuscript treatment with shared parchment tokens, serif typography, and deterministic two-letter sigils instead of adding assets or dependencies.
+  - Timing microcopy now separates the resolved chronicle above from the next-turn planning surface below, especially across the frame header, Manor State, Turn Report, and Decisions.
+  - Sticky resource chips, receipts detail, and modal chrome now share the same visual language, which makes the top-of-screen explanation surfaces feel like one intentional system.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-004-T06
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: Backlog task state, claim mirror, and progress cursor validate cleanly after closing V03-R0-004-T05, and no next ready UI lane task is currently available.

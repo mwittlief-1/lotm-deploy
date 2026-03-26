@@ -1,33 +1,34 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-001-T05
-  last_completed_task_id: V03-R0-002-T04
+  current_task_id: V03-R0-001-T07
+  last_completed_task_id: V03-R0-006-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: f7e232cd07d91c7e85e9afdf544300912d41c253
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 6e5c3247626d0f4516b89ec62e63f255ec86e17b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: not_run
-    preflight: not_run
-    repo_duplicates: not_run
-    seed_replay_batch_twice: not_run
+    qa: pass
+    preflight: pass
+    repo_duplicates: pass
+    seed_replay_batch_twice: pass
   replay_hashes:
-    run1: not_run
-    run2: not_run
+    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Social claimed V03-R0-002-T05, then stopped on an E1 integrator-boundary
-  mismatch before implementation. The task's done conditions require same-turn
-  household marriage concurrency, but the current single-marriage prospect path
-  is still hard-coded in src/sim/phases/phase_prospects.ts and depends on the
-  narrow shared MarriageWindow shape in src/sim/types.ts, both outside this
-  lane task's allowed paths. Tooling V03-R0-001-T05, UI V03-R0-004-T04, and
-  Economy V03-R0-006-T04 remain ready; Engine Core V03-R0-003-T02 remains E2
-  escalated, and world/topology automation remains blocked behind
-  V03-XMAP-001.
+  Accepted Tooling V03-R0-001-T06, UI V03-R0-004-T05, and Economy V03-R0-006-T05
+  from their lane branches after each lane closed with passing gates and stable
+  replay hashes. Social V03-R0-002-T05 was re-scoped to a domain-only
+  member-ownership seam after lane escalation evidence showed the old contract
+  incorrectly required integrator-owned phase and shared-type edits; the
+  phase-wrapper integration remains explicitly deferred to V03-R0-002-T07. The
+  current unclaimed ready queue is Tooling V03-R0-001-T07, Social
+  V03-R0-002-T05, UI V03-R0-004-T06, and Economy V03-R0-006-T06. Engine Core
+  V03-R0-003-T02 remains E2 escalated, and world/topology automation remains
+  blocked behind V03-XMAP-001.
 active_claims: {}

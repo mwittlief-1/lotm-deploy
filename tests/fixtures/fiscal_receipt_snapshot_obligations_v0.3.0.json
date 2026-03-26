@@ -1,0 +1,162 @@
+[
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:obligations:p1:tax_due_coin:0001",
+    "turn": 7,
+    "phase": "obligations",
+    "phase_sequence": 1,
+    "category": "obligations.liege_tax",
+    "counterparty_kind": "liege",
+    "counterparty_id": "p_liege",
+    "counterparty_label": "Geoffrey",
+    "asset": "tax_due_coin",
+    "delta": 6,
+    "balance_after": 6,
+    "summary": "Assessed liege tax due in coin.",
+    "rule_id": "obligations.assess_tax",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:obligations:p2:tax_due_coin:0002",
+    "turn": 7,
+    "phase": "obligations",
+    "phase_sequence": 2,
+    "category": "obligations.liege_tax",
+    "counterparty_kind": "liege",
+    "counterparty_id": "p_liege",
+    "counterparty_label": "Geoffrey",
+    "asset": "tax_due_coin",
+    "delta": -2,
+    "balance_after": 4,
+    "summary": "Paid part of the liege tax due in coin.",
+    "rule_id": "obligations.pay_tax",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:obligations:p3:tithe_due_bushels:0003",
+    "turn": 7,
+    "phase": "obligations",
+    "phase_sequence": 3,
+    "category": "obligations.church_tithe",
+    "counterparty_kind": "church",
+    "counterparty_id": "p_clergy",
+    "counterparty_label": "Simon",
+    "asset": "tithe_due_bushels",
+    "delta": 5,
+    "balance_after": 5,
+    "summary": "Assessed church tithe due in grain.",
+    "rule_id": "obligations.assess_tithe",
+    "related_actor_ids": [
+      "p_clergy",
+      "p_head"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:obligations:p4:tithe_due_bushels:0004",
+    "turn": 7,
+    "phase": "obligations",
+    "phase_sequence": 4,
+    "category": "obligations.church_tithe",
+    "counterparty_kind": "church",
+    "counterparty_id": "p_clergy",
+    "counterparty_label": "Simon",
+    "asset": "tithe_due_bushels",
+    "delta": -2,
+    "balance_after": 3,
+    "summary": "Delivered part of the church tithe in grain.",
+    "rule_id": "obligations.pay_tithe",
+    "related_actor_ids": [
+      "p_clergy",
+      "p_head"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:succession:p8:arrears_coin:0005",
+    "turn": 7,
+    "phase": "succession",
+    "phase_sequence": 8,
+    "category": "obligations.tax_to_arrears",
+    "counterparty_kind": "system",
+    "counterparty_id": "turn-close",
+    "counterparty_label": "Turn Close",
+    "asset": "arrears_coin",
+    "delta": 4,
+    "balance_after": 4,
+    "summary": "Moved unpaid liege tax into arrears coin.",
+    "rule_id": "obligations.tax_to_arrears.credit",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:succession:p8:tax_due_coin:0006",
+    "turn": 7,
+    "phase": "succession",
+    "phase_sequence": 8,
+    "category": "obligations.tax_to_arrears",
+    "counterparty_kind": "system",
+    "counterparty_id": "turn-close",
+    "counterparty_label": "Turn Close",
+    "asset": "tax_due_coin",
+    "delta": -4,
+    "balance_after": 0,
+    "summary": "Moved unpaid liege tax out of the current due slot.",
+    "rule_id": "obligations.tax_to_arrears.debit",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:succession:p9:arrears_bushels:0007",
+    "turn": 7,
+    "phase": "succession",
+    "phase_sequence": 9,
+    "category": "obligations.tithe_to_arrears",
+    "counterparty_kind": "system",
+    "counterparty_id": "turn-close",
+    "counterparty_label": "Turn Close",
+    "asset": "arrears_bushels",
+    "delta": 3,
+    "balance_after": 3,
+    "summary": "Moved unpaid church tithe into arrears grain.",
+    "rule_id": "obligations.tithe_to_arrears.credit",
+    "related_actor_ids": [
+      "p_clergy",
+      "p_head"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:succession:p9:tithe_due_bushels:0008",
+    "turn": 7,
+    "phase": "succession",
+    "phase_sequence": 9,
+    "category": "obligations.tithe_to_arrears",
+    "counterparty_kind": "system",
+    "counterparty_id": "turn-close",
+    "counterparty_label": "Turn Close",
+    "asset": "tithe_due_bushels",
+    "delta": -3,
+    "balance_after": 0,
+    "summary": "Moved unpaid church tithe out of the current due slot.",
+    "rule_id": "obligations.tithe_to_arrears.debit",
+    "related_actor_ids": [
+      "p_clergy",
+      "p_head"
+    ]
+  }
+]

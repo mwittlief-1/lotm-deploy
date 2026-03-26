@@ -1472,7 +1472,7 @@ tasks:
   title: Add deterministic receipt snapshot coverage
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: ready
+  status: done
   priority: 92
   tranche: 1
   change_type: refactor
@@ -1520,7 +1520,7 @@ tasks:
   title: Add perf and regression guards for receipt-heavy flows
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: done
   priority: 90
   tranche: 1
   change_type: refactor
@@ -1566,7 +1566,7 @@ tasks:
   title: Close epic and refresh receipt QA docs
   release: v0.3.0
   parent_epic: V03-R0-001
-  status: todo
+  status: ready
   priority: 88
   tranche: 1
   change_type: refactor
@@ -1789,22 +1789,22 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-002-T04.md
 - id: V03-R0-002-T05
-  title: Implement household concurrency for multiple active offer holders
+  title: Implement member-level bounded offer ownership for household concurrency
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: escalated
+  status: ready
   priority: 92
   tranche: 1
   change_type: behavior_change
   category: People
   phase: marriage
   lane_branch: codex/v0.3-lane-social-mechanics
-  goal: Allow multiple household members to hold offers in the same turn without collapsing to a single household-wide slot.
+  goal: Represent marriage offer state per household member inside the bounded offer registry so same-household concurrency can be integrated later without phase-local ad hoc state.
   deps:
   - V03-R0-002-T02
   - V03-R0-002-T03
   requires_integrator: false
-  blocked_reason: 'E1 orchestrator_edit_without_requires_integrator: true same-turn household concurrency requires integrator-owned phase and shared type edits in src/sim/phases/phase_prospects.ts and src/sim/types.ts beyond this task''s allowed paths.'
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - tests/**
@@ -1824,7 +1824,7 @@ tasks:
     run_id: ''
   done_conditions:
   - offer state is tracked per household member rather than a single household slot
-  - multiple household members can hold offers in the same turn
+  - bounded registry APIs can represent multiple household members holding offers concurrently before phase-wrapper integration
   - tests cover parallel offer ownership within one household
   escalation_triggers:
   - any_golden_diff_unless_task_allows
@@ -2412,7 +2412,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Wire receipts viewer grouped/raw modes and intuitive chip-to-modal routing
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2454,7 +2454,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Apply minimal manuscript tokens, iconography, and timing microcopy
-  status: todo
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2496,7 +2496,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Close epic and refresh gameplay UX docs
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: refactor
@@ -2901,7 +2901,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Route food and meat deltas through receipt writers and settlement scaffolds
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2942,7 +2942,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Retune grain and meat consumption and add equilibrium fixtures
-  status: todo
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2983,7 +2983,7 @@ tasks:
   parent_epic: V03-R0-006
   release: v0.3.0
   title: Close epic and refresh multi-asset fiscal docs
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: refactor

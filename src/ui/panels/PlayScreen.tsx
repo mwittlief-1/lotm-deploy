@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { IMPROVEMENT_IDS, IMPROVEMENTS } from "../../content/improvements";
 import {
   BUILD_RATE_PER_BUILDER_PER_TURN,
@@ -40,10 +40,31 @@ import {
   buildDiffLedgerItems
 } from "../playScreenModel";
 import {
+  buildReceiptViewerData,
+  createExplainChangesRoute,
+  createResourceChipRoute,
+  receiptViewerSubtitle,
+  receiptViewerTitle,
+  selectGroupedReceiptSections,
+  selectRawReceiptPhases,
+  type ReceiptViewerMode,
+  type ReceiptViewerRoute
+} from "../playScreenReceipts";
+import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
-import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, buildStickyResourceChips } from "../playScreenLayout";
+import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, type StickyResourceChip, buildStickyResourceChips } from "../playScreenLayout";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_EYEBROW_STYLE,
+  PLAY_SCREEN_HEADER_HELPER_STYLE,
+  PLAY_SCREEN_PAGE_STYLE,
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE,
+  PLAY_SCREEN_SIGIL_STYLE,
+  PLAY_SCREEN_THEME,
+  PLAY_SCREEN_TIMING_PILL_STYLE
+} from "../playScreenTheme";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
 import { DebugAccordion } from "./DebugAccordion";
@@ -53,7 +74,9 @@ import { EventsPanel } from "./EventsPanel";
 import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
+import { ModalSheet } from "./ModalSheet";
 import { ProspectsPanel } from "./ProspectsPanel";
+import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
 import { StickyResourceChips } from "./StickyResourceChips";
 import { TurnReportPanel } from "./TurnReportPanel";
@@ -111,6 +134,7 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
+  const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
   const mw = ctx.marriage_window;
@@ -517,10 +541,40 @@ export function PlayScreen({
     deltaUnrest,
     fmtSigned
   });
+  const receiptsViewerData = useMemo(
+    () =>
+      buildReceiptViewerData({
+        diffLedgerItems,
+        phaseResults: ctx.phase_results_v0
+      }),
+    [ctx.phase_results_v0, diffLedgerItems]
+  );
+  const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
+  const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
+  const receiptsViewerTitleText = receiptViewerTitle(activeReceiptViewerFocus);
+  const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
+  const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
+  const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
+
+  function openExplainChanges() {
+    setReceiptViewerRoute(createExplainChangesRoute());
+  }
+
+  function openChipDetails(chipId: StickyResourceChip["id"]) {
+    setReceiptViewerRoute(createResourceChipRoute(chipId));
+  }
+
+  function closeReceiptViewer() {
+    setReceiptViewerRoute(null);
+  }
+
+  function handleReceiptViewerModeChange(mode: ReceiptViewerMode) {
+    setReceiptViewerRoute((current) => (current ? { ...current, mode } : current));
+  }
 
   const playSections: Record<PlayScreenCardId, React.ReactNode> = {
     council_agenda: <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />,
-    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} />,
+    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} onOpenExplainChanges={openExplainChanges} />,
     manor_state: (
       <ManorStatePanel
         anchorUnrest={PLAY_ANCHORS.unrest}
@@ -687,20 +741,27 @@ export function PlayScreen({
   };
 
   return (
-    <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 960, margin: "0 auto" }}>
+    <div style={PLAY_SCREEN_PAGE_STYLE}>
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
           <div>
-            <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", opacity: 0.65 }}>Gameplay Overview</div>
-            <h2 style={{ margin: "4px 0 0" }}>Turn {ctx.report.turn_index}</h2>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={PLAY_SCREEN_SIGIL_STYLE}>HC</span>
+              <span style={PLAY_SCREEN_TIMING_PILL_STYLE}>{copy.turnSummary_last3Years}</span>
+              <span style={PLAY_SCREEN_TIMING_PILL_STYLE}>{copy.turnSummary_nowChoose}</span>
+            </div>
+            <div style={{ ...PLAY_SCREEN_EYEBROW_STYLE, marginTop: 8, color: PLAY_SCREEN_THEME.ink }}>
+              {copy.gameplayOverviewEyebrow ?? "Gameplay Chronicle"}
+            </div>
+            <h2 style={{ margin: "6px 0 0", fontFamily: PLAY_SCREEN_THEME.bodyFont, fontSize: 32 }}>Turn {ctx.report.turn_index}</h2>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={onOpenLog}>Debug/Log</button>
-            <button onClick={onOpenNewRun}>New Run</button>
+            <button onClick={onOpenLog} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Debug/Log</button>
+            <button onClick={onOpenNewRun} style={PLAY_SCREEN_ACTION_BUTTON_STYLE}>New Run</button>
           </div>
         </div>
-        <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>
-          Top to bottom: priorities, changes, state, then next-turn choices.
+        <div style={PLAY_SCREEN_HEADER_HELPER_STYLE}>
+          {copy.gameplayOverviewHelper ?? "Resolved above: the last 3 years. Choose below: the next turn's response."}
         </div>
       </div>
 
@@ -724,7 +785,12 @@ export function PlayScreen({
         </div>
       ) : null}
 
-      <StickyResourceChips chips={resourceChips} />
+      <StickyResourceChips
+        chips={resourceChips}
+        helperText={copy.resourceChipHelper ?? "Open a chip to follow the deeper ledger without leaving the gameplay shell."}
+        onOpenChipDetails={openChipDetails}
+        timingLabel={copy.turnSummary_last3Years}
+      />
 
       <div style={{ display: "grid", gap: 12 }}>
         {PLAY_SCREEN_CARD_ORDER.map((sectionId) =>
@@ -735,6 +801,15 @@ export function PlayScreen({
           ) : null
         )}
       </div>
+
+      <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
+        <ReceiptsViewerPanel
+          groupedSections={visibleGroupedReceiptSections}
+          mode={receiptsViewerMode}
+          onModeChange={handleReceiptViewerModeChange}
+          rawPhases={visibleRawReceiptPhases}
+        />
+      </ModalSheet>
     </div>
   );
 }

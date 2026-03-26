@@ -1,0 +1,120 @@
+[
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:consumption:p2:food_stores:0002",
+    "turn": 7,
+    "phase": "consumption",
+    "phase_sequence": 2,
+    "category": "consumption.household_rations",
+    "counterparty_kind": "household",
+    "counterparty_id": "p_head",
+    "counterparty_label": "Walter",
+    "asset": "food_stores",
+    "delta": -6,
+    "balance_after": 74,
+    "summary": "Consumed grain stores to cover household rations.",
+    "rule_id": "consumption.household_rations",
+    "related_actor_ids": [
+      "p_head",
+      "p_spouse"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:events:p4:coin:0001",
+    "turn": 7,
+    "phase": "events",
+    "phase_sequence": 4,
+    "category": "events.market_dues",
+    "counterparty_kind": "event",
+    "counterparty_id": "event:market-day",
+    "counterparty_label": "Market Day",
+    "asset": "coin",
+    "delta": 4,
+    "balance_after": 34,
+    "summary": "Collected market dues from a favorable event draw.",
+    "rule_id": "events.market_dues",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:marriage:p3:coin:0005",
+    "turn": 7,
+    "phase": "marriage",
+    "phase_sequence": 3,
+    "category": "marriage.dowry_settlement",
+    "counterparty_kind": "household",
+    "counterparty_id": "p_spouse",
+    "counterparty_label": "Matilda",
+    "asset": "coin",
+    "delta": -5,
+    "balance_after": 41,
+    "summary": "Settled a marriage dowry payment.",
+    "rule_id": "marriage.dowry_settlement",
+    "related_actor_ids": [
+      "p_head",
+      "p_spouse"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:prospects:p5:coin:0006",
+    "turn": 7,
+    "phase": "prospects",
+    "phase_sequence": 5,
+    "category": "prospects.grant_acceptance",
+    "counterparty_kind": "household",
+    "counterparty_id": "p_head",
+    "counterparty_label": "Walter",
+    "asset": "coin",
+    "delta": 3,
+    "balance_after": 44,
+    "summary": "Accepted a prospect grant with coin support.",
+    "rule_id": "prospects.grant_acceptance",
+    "related_actor_ids": [
+      "p_head",
+      "p_liege"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:sell:p1:coin:0004",
+    "turn": 7,
+    "phase": "sell",
+    "phase_sequence": 1,
+    "category": "sell.market_grain",
+    "counterparty_kind": "market",
+    "counterparty_id": "market:village-square",
+    "counterparty_label": "Village Market",
+    "asset": "coin",
+    "delta": 12,
+    "balance_after": 46,
+    "summary": "Recorded coin proceeds from the grain sale.",
+    "rule_id": "sell.market_grain.proceeds",
+    "related_actor_ids": [
+      "p_head"
+    ]
+  },
+  {
+    "schema_version": "fiscal_receipt_v1",
+    "receipt_id": "ledger:t7:sell:p1:food_stores:0003",
+    "turn": 7,
+    "phase": "sell",
+    "phase_sequence": 1,
+    "category": "sell.market_grain",
+    "counterparty_kind": "market",
+    "counterparty_id": "market:village-square",
+    "counterparty_label": "Village Market",
+    "asset": "food_stores",
+    "delta": -8,
+    "balance_after": 66,
+    "summary": "Sold grain stores at the village market.",
+    "rule_id": "sell.market_grain",
+    "related_actor_ids": [
+      "p_head"
+    ]
+  }
+]
