@@ -1,5 +1,5 @@
 import { structuredHouseIdForPerson } from "../../actors";
-import type { MarriageOffer, Prospect, RunState } from "../../types";
+import type { MarriageOffer, MarriageWindow, Prospect, RunState } from "../../types";
 
 export const MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION = "marriage_offer_registry_v0" as const;
 export const MARRIAGE_REJECT_COOLDOWN_TURNS = 3 as const;
@@ -286,6 +286,49 @@ export function buildMarriageOfferRegistryFromOffers(
   opts: MarriageOfferRegistrySubjectDraft
 ): MarriageOfferRegistry {
   return buildMarriageOfferRegistryFromSubjectOffers(state, [opts]);
+}
+
+export function buildMarriageOfferRegistryFromWindow(
+  state: RunState,
+  marriageWindow: MarriageWindow | null
+): MarriageOfferRegistry | null {
+  if (!marriageWindow || marriageWindow.eligible_child_ids.length === 0 || marriageWindow.offers.length === 0) {
+    return null;
+  }
+
+  const subjectPersonId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0];
+  if (!subjectPersonId) return null;
+
+  return buildMarriageOfferRegistryFromOffers(state, {
+    subject_person_id: subjectPersonId,
+    offers: marriageWindow.offers,
+    direction: "inbound",
+    state: "generated",
+    created_turn: state.turn_index,
+  });
+}
+
+export function getMarriageOfferRegistryEntryForWindowOffer(
+  state: RunState,
+  marriageWindow: MarriageWindow | null,
+  offerIndex: number
+): MarriageOfferRegistryEntry | null {
+  if (!marriageWindow || offerIndex < 0 || offerIndex >= marriageWindow.offers.length) return null;
+
+  const registry = buildMarriageOfferRegistryFromWindow(state, marriageWindow);
+  if (!registry) return null;
+
+  const subjectPersonId = [...marriageWindow.eligible_child_ids].sort((a, b) => a.localeCompare(b))[0];
+  const offer = marriageWindow.offers[offerIndex];
+  if (!subjectPersonId || !offer) return null;
+
+  const offerKey = makeMarriageOfferKey({
+    direction: "inbound",
+    subject_person_id: subjectPersonId,
+    candidate_person_id: offer.house_person_id,
+  });
+
+  return registry.offers_by_key[offerKey] ?? null;
 }
 
 export function buildMarriageOfferOwnershipIndex(
