@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-002-T05
-  last_completed_task_id: V03-R0-001-T06
+  current_task_id: V03-R0-001-T07
+  last_completed_task_id: V03-R0-006-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: 78c1e1eeb2c3b7ff5b9d7ad850e376dfa5cbadc7
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 6e5c3247626d0f4516b89ec62e63f255ec86e17b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,10 +15,20 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
-    run2: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
-notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to V03-R0-002-T05. codex/v0.3-lane-tooling-qa completed V03-R0-001-T06 and has no next claim because V03-R0-001-T07 remains todo. No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
+    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+notes: >-
+  Accepted Tooling V03-R0-001-T06, UI V03-R0-004-T05, and Economy V03-R0-006-T05
+  from their lane branches after each lane closed with passing gates and stable
+  replay hashes. Social V03-R0-002-T05 was re-scoped to a domain-only
+  member-ownership seam after lane escalation evidence showed the old contract
+  incorrectly required integrator-owned phase and shared-type edits; the
+  phase-wrapper integration remains explicitly deferred to V03-R0-002-T07. The
+  current unclaimed ready queue is Tooling V03-R0-001-T07, Social
+  V03-R0-002-T05, UI V03-R0-004-T06, and Economy V03-R0-006-T06. Engine Core
+  V03-R0-003-T02 remains E2 escalated, and world/topology automation remains
+  blocked behind V03-XMAP-001.
 active_claims: {}
