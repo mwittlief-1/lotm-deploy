@@ -91,3 +91,26 @@ Instead, it adds:
 - test coverage proving the schema and keys are stable
 
 That keeps `T02` seam-carving only, while `T03` through `T05` can wire actual pending, reject-stickiness, and concurrency behavior onto the same registry contract.
+
+## Bounded policy fixtures
+
+`T06` extends the contract coverage without changing phase wiring.
+
+The canonical deterministic fixtures now live in `tests/sim/marriage_offer_registry.test.ts` and lock these bounded-policy expectations:
+
+- inbound boundedness:
+  one household subject may hold multiple inbound offers, with deterministic `offer_keys` ordered by canonical key
+- outbound boundedness:
+  outbound offers reuse the same schema and remain direction-scoped, so the same subject/candidate pair may exist as distinct inbound and outbound offer keys
+- cooldown behavior:
+  rejected pairings stay cooling down for turns `+1` through `+3` and re-enter eligibility on turn `+4`
+- household concurrency:
+  `buildMarriageOfferOwnershipIndex(...)` and `buildMarriageOfferOwnershipIndexFromState(...)` must be able to show two household members holding concurrent active offers before `T07` phase integration
+
+The fixed fixture state continues to use `run_seed: "seed"` so coverage stays deterministic even where the current preview path still depends on seeded offer generation.
+
+## Deferred integration boundary
+
+This contract now intentionally stops at the people-domain registry seam.
+
+It does **not** claim that the phase wrappers already materialize multiple same-turn marriage prospects. That integrator-owned step remains deferred to `V03-R0-002-T07`.
