@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-002-T06
-  last_completed_task_id: V03-R0-006-T06
+  current_task_id: V03-R0-002-T08
+  last_completed_task_id: V03-R0-002-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 298fa083967da85f1cc42c0dbfba79ee7894e215
+  git_commit: 2d112e511638830a10f50d5f4bfd9c2b7527ee8b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,11 +21,10 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Accepted Tooling V03-R0-001-T07, Social V03-R0-002-T05, UI V03-R0-004-T06,
-  and Economy V03-R0-006-T06 from their lane branches. Tooling, UI, and Economy
-  are now at the end of their currently decomposed ready queues. Social
-  completed the member-level bounded offer ownership seam and the next unclaimed
-  ready frontier is now V03-R0-002-T06 for deterministic bounded-offer policy
-  coverage. Engine Core V03-R0-003-T02 remains E2 escalated, and world/topology
-  automation remains blocked behind V03-XMAP-001.
+  Accepted Social V03-R0-002-T06 and completed integrator-owned
+  V03-R0-002-T07 on kickoff. The marriage prospects phase now builds its
+  generated proposal from bounded offer registry entries, and the next unclaimed
+  ready frontier is Social V03-R0-002-T08 for epic closeout. Engine Core
+  V03-R0-003-T02 remains E2 escalated, and world/topology automation remains
+  blocked behind V03-XMAP-001.
 active_claims: {}
