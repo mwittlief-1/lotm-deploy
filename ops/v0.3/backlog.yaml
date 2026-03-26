@@ -2412,7 +2412,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Wire receipts viewer grouped/raw modes and intuitive chip-to-modal routing
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
