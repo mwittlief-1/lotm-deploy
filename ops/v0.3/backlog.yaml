@@ -2454,7 +2454,7 @@ tasks:
   parent_epic: V03-R0-004
   release: v0.3.0
   title: Apply minimal manuscript tokens, iconography, and timing microcopy
-  status: ready
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
