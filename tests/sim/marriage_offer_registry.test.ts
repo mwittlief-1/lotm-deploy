@@ -2,17 +2,23 @@ import { describe, expect, it } from "vitest";
 
 import { SIM_VERSION } from "../../src/sim/version";
 import type { MarriageOffer, Person, RunState } from "../../src/sim/types";
+import { buildMarriageWindow } from "../../src/sim/domains/people/marriage";
 import {
+  MARRIAGE_REJECT_COOLDOWN_TURNS,
   MARRIAGE_OFFER_NON_TERMINAL_STATES,
   MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION,
   MARRIAGE_OFFER_TERMINAL_STATES,
   assertMarriageOfferStateTransition,
+  buildMarriageRejectCooldownsFromState,
   buildMarriageOfferRegistryFromState,
   buildMarriageOfferRegistryFromOffers,
   canTransitionMarriageOfferState,
   createMarriageOfferRegistryEntry,
+  getMarriageRejectCooldown,
+  isMarriagePairCoolingDown,
   makeMarriageOfferCandidateKey,
   makeMarriageOfferKey,
+  makeMarriageOfferPairingKey,
   makeMarriageOfferSubjectKey,
 } from "../../src/sim/domains/people/marriageOfferRegistry";
 
@@ -474,5 +480,85 @@ describe("marriage offer registry contract", () => {
       .map((key) => registry.offers_by_key[key])
       .filter((entry) => entry.state === "pending");
     expect(pendingStates).toHaveLength(0);
+  });
+
+  it("tracks rejected pairings with a deterministic three-turn cooldown", () => {
+    const state = mkBaseState();
+
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+    });
+    appendProspectResolution(state, {
+      turn_index: 7,
+      kind: "prospect_rejected",
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      from_house_id: "h_ext_01",
+    });
+
+    state.turn_index = 8;
+
+    const pairingKey = makeMarriageOfferPairingKey({
+      subject_person_id: "p_child_1",
+      candidate_person_id: "p_cand_a",
+    });
+    const cooldowns = buildMarriageRejectCooldownsFromState(state);
+
+    expect(MARRIAGE_REJECT_COOLDOWN_TURNS).toBe(3);
+    expect(cooldowns[pairingKey]).toMatchObject({
+      pairing_key: pairingKey,
+      offer_key: "marriage_offer:inbound:subject:p_child_1:candidate:p_cand_a",
+      rejected_turn: 7,
+      expires_turn: 10,
+      remaining_turns: 3,
+    });
+    expect(getMarriageRejectCooldown(state, "p_child_1", "p_cand_a")?.remaining_turns).toBe(3);
+    expect(isMarriagePairCoolingDown(state, "p_child_1", "p_cand_a")).toBe(true);
+
+    state.turn_index = 10;
+    expect(getMarriageRejectCooldown(state, "p_child_1", "p_cand_a")?.remaining_turns).toBe(1);
+    expect(isMarriagePairCoolingDown(state, "p_child_1", "p_cand_a")).toBe(true);
+
+    state.turn_index = 11;
+    expect(getMarriageRejectCooldown(state, "p_child_1", "p_cand_a")).toBeNull();
+    expect(isMarriagePairCoolingDown(state, "p_child_1", "p_cand_a")).toBe(false);
+  });
+
+  it("excludes cooling-down pairings from marriage offers and restores them after three turns", () => {
+    const state = mkBaseState();
+
+    appendProspectGenerated(state, {
+      turn_index: 4,
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      spouse_person_id: "p_cand_a",
+      from_house_id: "h_ext_01",
+    });
+    appendProspectResolution(state, {
+      turn_index: 7,
+      kind: "prospect_rejected",
+      prospect_id: "pros_marriage_reject",
+      subject_person_id: "p_child_1",
+      from_house_id: "h_ext_01",
+    });
+
+    state.turn_index = 8;
+
+    const coolingDownWindow = buildMarriageWindow(state);
+    expect(coolingDownWindow?.eligible_child_ids).toEqual(["p_child_1"]);
+    expect(coolingDownWindow?.offers.map((offer) => offer.house_person_id)).toEqual(["p_cand_b"]);
+
+    state.turn_index = 11;
+
+    const restoredWindow = buildMarriageWindow(state);
+    expect(restoredWindow?.eligible_child_ids).toEqual(["p_child_1"]);
+    expect(restoredWindow?.offers.map((offer) => offer.house_person_id).sort((a, b) => a.localeCompare(b))).toEqual([
+      "p_cand_a",
+      "p_cand_b",
+    ]);
   });
 });

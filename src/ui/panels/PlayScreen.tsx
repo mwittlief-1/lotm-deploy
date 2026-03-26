@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { IMPROVEMENT_IDS, IMPROVEMENTS } from "../../content/improvements";
 import {
   BUILD_RATE_PER_BUILDER_PER_TURN,
@@ -40,10 +40,21 @@ import {
   buildDiffLedgerItems
 } from "../playScreenModel";
 import {
+  buildReceiptViewerData,
+  createExplainChangesRoute,
+  createResourceChipRoute,
+  receiptViewerSubtitle,
+  receiptViewerTitle,
+  selectGroupedReceiptSections,
+  selectRawReceiptPhases,
+  type ReceiptViewerMode,
+  type ReceiptViewerRoute
+} from "../playScreenReceipts";
+import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
-import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, buildStickyResourceChips } from "../playScreenLayout";
+import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, type StickyResourceChip, buildStickyResourceChips } from "../playScreenLayout";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
 import { DebugAccordion } from "./DebugAccordion";
@@ -53,7 +64,9 @@ import { EventsPanel } from "./EventsPanel";
 import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
+import { ModalSheet } from "./ModalSheet";
 import { ProspectsPanel } from "./ProspectsPanel";
+import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
 import { StickyResourceChips } from "./StickyResourceChips";
 import { TurnReportPanel } from "./TurnReportPanel";
@@ -111,6 +124,7 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
+  const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
   const mw = ctx.marriage_window;
@@ -517,10 +531,40 @@ export function PlayScreen({
     deltaUnrest,
     fmtSigned
   });
+  const receiptsViewerData = useMemo(
+    () =>
+      buildReceiptViewerData({
+        diffLedgerItems,
+        phaseResults: ctx.phase_results_v0
+      }),
+    [ctx.phase_results_v0, diffLedgerItems]
+  );
+  const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
+  const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
+  const receiptsViewerTitleText = receiptViewerTitle(activeReceiptViewerFocus);
+  const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
+  const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
+  const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
+
+  function openExplainChanges() {
+    setReceiptViewerRoute(createExplainChangesRoute());
+  }
+
+  function openChipDetails(chipId: StickyResourceChip["id"]) {
+    setReceiptViewerRoute(createResourceChipRoute(chipId));
+  }
+
+  function closeReceiptViewer() {
+    setReceiptViewerRoute(null);
+  }
+
+  function handleReceiptViewerModeChange(mode: ReceiptViewerMode) {
+    setReceiptViewerRoute((current) => (current ? { ...current, mode } : current));
+  }
 
   const playSections: Record<PlayScreenCardId, React.ReactNode> = {
     council_agenda: <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />,
-    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} />,
+    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} onOpenExplainChanges={openExplainChanges} />,
     manor_state: (
       <ManorStatePanel
         anchorUnrest={PLAY_ANCHORS.unrest}
@@ -724,7 +768,7 @@ export function PlayScreen({
         </div>
       ) : null}
 
-      <StickyResourceChips chips={resourceChips} />
+      <StickyResourceChips chips={resourceChips} onOpenChipDetails={openChipDetails} />
 
       <div style={{ display: "grid", gap: 12 }}>
         {PLAY_SCREEN_CARD_ORDER.map((sectionId) =>
@@ -735,6 +779,15 @@ export function PlayScreen({
           ) : null
         )}
       </div>
+
+      <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
+        <ReceiptsViewerPanel
+          groupedSections={visibleGroupedReceiptSections}
+          mode={receiptsViewerMode}
+          onModeChange={handleReceiptViewerModeChange}
+          rawPhases={visibleRawReceiptPhases}
+        />
+      </ModalSheet>
     </div>
   );
 }

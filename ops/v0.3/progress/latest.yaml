@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-002-T04
-  last_completed_task_id: V03-R0-001-T05
+  current_task_id: V03-R0-001-T06
+  last_completed_task_id: V03-R0-006-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: 44104bf9468ba4420b1d193edc5fc02b54257bb3
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 03c52f18aa65e32cfd2a00e13ccfd0fa43d33178
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,10 +15,16 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
-    run2: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
-notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to V03-R0-002-T04. codex/v0.3-lane-tooling-qa completed V03-R0-001-T05 and has no next claim because V03-R0-001-T06 remains todo. No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
+    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+notes: >-
+  Accepted Tooling V03-R0-001-T05, UI V03-R0-004-T04, and Economy V03-R0-006-T04
+  from their lane branches after each lane closed with passing gates and stable
+  replay hashes. The next unclaimed ready frontier is now Tooling
+  V03-R0-001-T06, with Social V03-R0-002-T05, UI V03-R0-004-T05, and Economy
+  V03-R0-006-T05 also ready. Engine Core V03-R0-003-T02 remains E2 escalated,
+  and world/topology automation remains blocked behind V03-XMAP-001.
 active_claims: {}
