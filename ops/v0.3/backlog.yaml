@@ -1726,11 +1726,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Marriage offer snapshots and replay artifacts may change where pending-offer uniqueness is enforced.
   claim:
-    status: claimed
-    claimed_by: codex-social-mechanics
-    claimed_at: '2026-03-26T11:32:13-0400'
-    claim_expires_at: '2026-03-26T15:32:13-0400'
-    run_id: V03-R0-002-T03-20260326T113213-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - no candidate may hold more than one pending offer simultaneously
   - accept and reject both clear or finalize the pending offer deterministically
