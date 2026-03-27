@@ -377,7 +377,7 @@ epics:
 - id: V03-R0-002
   title: Marriage v1 bounded offers and household concurrency
   release: v0.3.0
-  status: ready
+  status: done
   priority: 58
   tranche: 1
   change_type: behavior_change
@@ -1932,7 +1932,7 @@ tasks:
   title: Close epic and refresh marriage lane docs
   release: v0.3.0
   parent_epic: V03-R0-002
-  status: ready
+  status: done
   priority: 86
   tranche: 1
   change_type: refactor
@@ -2019,7 +2019,7 @@ tasks:
   title: Define decision budget registry and deterministic decrement rules
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: escalated
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2030,7 +2030,7 @@ tasks:
   deps:
   - V03-R0-003-T01
   requires_integrator: false
-  blocked_reason: 'E2 non_perturbation_failure: qa failed on bounded snapshot checks with snapshot_before forbidden key institutions.'
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/court/**
   - tests/**
@@ -2065,7 +2065,7 @@ tasks:
   title: Charge gifts and offerings against decision budget
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2112,7 +2112,7 @@ tasks:
   title: Charge external marriage scouting above inbound acceptance
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: behavior_change
@@ -2138,11 +2138,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Court budget and marriage-action outputs may change where outbound scouting receives a higher budget cost than inbound acceptance.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_engine_t04_dispatch
   done_conditions:
   - outbound marriage scouting has an explicit higher budget cost
   - inbound acceptance or processing has a lower explicit budget cost
@@ -3377,7 +3377,7 @@ tasks:
   title: Audit current state registries and migration-sensitive load paths
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
@@ -3423,7 +3423,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3447,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_tooling_t02_dispatch
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
@@ -3646,7 +3646,7 @@ tasks:
   title: Audit church and liege settlement paths against fiscal packet
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor

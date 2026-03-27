@@ -1,9 +1,12 @@
 import type { PhaseNameV0, RunState } from "../../types";
+import { chargeCourtDecisionBudget, type CourtDecisionBudgetAction } from "../court/decisionBudget";
 import type { EconomyProductionRegistryEntryV1 } from "./productionRegistry";
 import {
   applyTrackedStoreDelta,
+  coinBalance,
   spendCoin,
   spendTrackedStores,
+  trackedStoreBalance,
   type LedgerReceiptContextV1,
   type TrackedStoreAsset
 } from "./ledger";
@@ -165,6 +168,33 @@ function isTrackedStorePaymentMode(mode: FiscalPaymentModeV1): mode is TrackedSt
   return mode === "food_stores" || mode === "meat_stores";
 }
 
+function decisionBudgetActionForContract(contractId: FiscalPaymentContractIdV1): CourtDecisionBudgetAction | null {
+  switch (contractId) {
+    case "church_offering":
+      return "offering_church";
+    case "liege_gift":
+      return "gift_liege";
+    default:
+      return null;
+  }
+}
+
+function canApplyPositiveSettlementAmount(state: RunState, scaffold: FiscalSettlementScaffoldV1): boolean {
+  if (scaffold.amount <= 0) return false;
+  if (scaffold.selected_payment_mode === "coin") return coinBalance(state) > 0;
+  if (isTrackedStorePaymentMode(scaffold.selected_payment_mode)) {
+    return trackedStoreBalance(state, scaffold.selected_payment_mode) > 0;
+  }
+  return false;
+}
+
+function reserveCourtDecisionBudgetForSettlement(state: RunState, scaffold: FiscalSettlementScaffoldV1): boolean {
+  const action = decisionBudgetActionForContract(scaffold.contract_id);
+  if (!action) return true;
+  if (!canApplyPositiveSettlementAmount(state, scaffold)) return false;
+  return chargeCourtDecisionBudget(state, action, 1).applied;
+}
+
 function productionSourceLabel(entry: EconomyProductionRegistryEntryV1): string {
   return entry.source_kind === "hunting" ? "Hunting" : "Demesne grain";
 }
@@ -316,6 +346,8 @@ export function applyFiscalSettlementScaffold(
   scaffold: FiscalSettlementScaffoldV1
 ): number {
   const snapshot = toFiscalSettlementScaffoldSnapshot(scaffold);
+  if (snapshot.amount <= 0) return 0;
+  if (!reserveCourtDecisionBudgetForSettlement(state, snapshot)) return 0;
 
   if (snapshot.selected_payment_mode === "coin") {
     return spendCoin(state, snapshot.amount, {

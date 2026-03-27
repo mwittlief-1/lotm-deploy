@@ -35,7 +35,6 @@ describe("ops v0.3 control plane", () => {
 
   it("shows no immediate ready-task rebases", () => {
     const payload = runRubyJson("scripts/opsV03RebaseDryRun.rb");
-
     expect(Array.isArray(payload.ready_tasks)).toBe(true);
     expect(payload.ready_tasks.every((task: { should_rebase: boolean }) => task.should_rebase === false)).toBe(true);
     expect(
