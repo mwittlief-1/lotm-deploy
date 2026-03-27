@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-003-T01
+  last_completed_task_id: V03-R0-003-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: ab6c2f7c1ce4d9059f641453b8d3a0560e191441
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: cbcbffa65ab5b94e4d86b3265e17defaf4605ad4
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -24,24 +24,26 @@ last_run:
     run1: not_run
     run2: not_run
 notes: >-
-  Accepted Social V03-R0-002-T08 and closed epic V03-R0-002 on kickoff, then
-  accepted Engine Core V03-R0-003-T02 with the court decision-budget registry
-  scaffold and matching replay hashes. Engine Core now has V03-R0-003-T03
-  claimed through 2026-03-27T01:14:17-0400, Tooling/QA still has V03-R1-002-T01
-  claimed through 2026-03-27T00:44:53-0400, and Economy/Fiscal reconciled the
-  dispatch reopen of V03-R1-003-T01 back to the already-landed audit artifact
-  and closed it again. World/topology automation remains blocked behind
+  Accepted Engine Core V03-R0-003-T03, Tooling/QA V03-R1-002-T01, and
+  Economy/Fiscal V03-R1-003-T01 on kickoff. Engine now has V03-R0-003-T04
+  claimed through 2026-03-27T01:50:40-0400, Tooling/QA now has V03-R1-002-T02
+  claimed through 2026-03-27T01:50:40-0400. Integrator validation, scheduler
+  dry-run, rebase dry-run, qa, preflight, replay twice, and duplicate audit all
+  passed on kickoff with matching replay hash
+  d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2.
+  Economy/Fiscal is idle until V03-R1-002-T06 completes, UI remains parked
+  behind V03-R0-003-T05, and world/topology automation remains blocked behind
   V03-XMAP-001.
 active_claims:
   codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T03
+    task_id: V03-R0-003-T04
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:14:17-0400'
-    claim_expires_at: '2026-03-27T01:14:17-0400'
-    run_id: 2026-03-26_engine_t03_dispatch
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_engine_t04_dispatch
   codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T01
+    task_id: V03-R1-002-T02
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T20:44:53-0400'
-    claim_expires_at: '2026-03-27T00:44:53-0400'
-    run_id: 2026-03-26_frontier_claim_dispatch_round3
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_tooling_t02_dispatch
