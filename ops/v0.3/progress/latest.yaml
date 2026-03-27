@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-002-T07
+  last_completed_task_id: V03-R0-003-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 2d112e511638830a10f50d5f4bfd9c2b7527ee8b
+  git_branch: codex/v0.3-lane-engine-core
+  git_commit: 3240789af9e1a6f62e7eb0b274b66aa10bffb5f0
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,28 +15,21 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Lane dispatch is active with no unclaimed global frontier. Social has
-  V03-R0-002-T08 claimed, Engine Core has V03-R0-003-T02 claimed, Tooling/QA
-  has V03-R1-002-T01 claimed, and Economy/Fiscal has V03-R1-003-T01 claimed
-  through 2026-03-27T00:44:53-0400. UI remains parked behind the court-budget
-  chain because V03-R0-003-T06 still depends on integrator-owned
-  V03-R0-003-T05. World/topology automation remains blocked behind
+  Engine/core completed V03-R0-003-T02 on codex/v0.3-lane-engine-core. The
+  court decision-budget registry scaffold and focused tests are in-tree, qa and
+  preflight passed with installed dependencies, replay hashes matched across two
+  seed batch runs, and no next engine-core task is currently promoted to ready
+  in backlog state. World/topology automation remains blocked behind
   V03-XMAP-001.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-002-T08
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T20:44:53-0400'
-    claim_expires_at: '2026-03-27T00:44:53-0400'
-    run_id: 2026-03-26_frontier_claim_dispatch_round3
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T02
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-26T20:44:53-0400'
     claim_expires_at: '2026-03-27T00:44:53-0400'

@@ -2019,7 +2019,7 @@ tasks:
   title: Define decision budget registry and deterministic decrement rules
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2044,11 +2044,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T20:44:53-0400'
-    claim_expires_at: '2026-03-27T00:44:53-0400'
-    run_id: 2026-03-26_frontier_claim_dispatch_round3
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - decision-budget registry fields are explicit and stable
   - budget reset cadence is defined at one reset per three-year turn
