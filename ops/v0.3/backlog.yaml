@@ -3377,7 +3377,7 @@ tasks:
   title: Audit current state registries and migration-sensitive load paths
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor

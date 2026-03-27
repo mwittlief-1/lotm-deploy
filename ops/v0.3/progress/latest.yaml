@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-002-T08
-  last_completed_task_id: V03-R0-002-T07
+  last_completed_task_id: V03-R1-002-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 2d112e511638830a10f50d5f4bfd9c2b7527ee8b
+  git_branch: codex/v0.3-lane-tooling-qa
+  git_commit: 4428c214680f2f17968b70795f83f29da51c72f4
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,18 +15,10 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-notes: >-
-  Re-ran kickoff validation, qa, preflight, and seed replay batch twice while
-  reviewing the parked lanes. Engine Core V03-R0-003-T02 is no longer blocked:
-  the shared QA baseline is green again, so its stale E2 escalation was cleared
-  and the task is back to ready. Tooling V03-R1-002-T01 and Economy
-  V03-R1-003-T01 were promoted to ready for lane resumption. UI remains parked
-  behind the court-budget chain because V03-R0-003-T06 still depends on
-  integrator-owned V03-R0-003-T05. World/topology automation remains blocked
-  behind V03-XMAP-001.
+    run1: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
+    run2: f8d6dc86edae51acb2784a6f4a1e7f8c8cf8072b1a4b14ab6f2d4b2186e32071
+notes: codex/v0.3-lane-tooling-qa completed V03-R1-002-T01 by auditing state registries, save/load entrypoints, and migration-sensitive seams. Lane-parallel scheduling remains active with current_task_id set to V03-R0-002-T08. No additional tooling/qa task is claimable yet because V03-R1-002-T02 remains todo. World/topology automation remains blocked behind V03-XMAP-001.
 active_claims: {}
