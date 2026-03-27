@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T03
+  last_completed_task_id: V03-R0-003-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cbcbffa65ab5b94e4d86b3265e17defaf4605ad4
+  git_commit: 3fda964d8cb5882b6d20d7f4f7996338caf753b2
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,29 +21,27 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: not_run
-    run2: not_run
+    run1: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
+    run2: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
 notes: >-
-  Accepted Engine Core V03-R0-003-T03, Tooling/QA V03-R1-002-T01, and
-  Economy/Fiscal V03-R1-003-T01 on kickoff. Engine now has V03-R0-003-T04
-  claimed through 2026-03-27T01:50:40-0400, Tooling/QA now has V03-R1-002-T02
-  claimed through 2026-03-27T01:50:40-0400. Integrator validation, scheduler
-  dry-run, rebase dry-run, qa, preflight, replay twice, and duplicate audit all
-  passed on kickoff with matching replay hash
-  d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2.
-  Economy/Fiscal is idle until V03-R1-002-T06 completes, UI remains parked
-  behind V03-R0-003-T05, and world/topology automation remains blocked behind
-  V03-XMAP-001.
+  Accepted Engine Core V03-R0-003-T04 and completed integrator-owned
+  V03-R0-003-T05 on kickoff. Tooling/QA still has V03-R1-002-T02 claimed
+  through 2026-03-27T01:50:40-0400, UI now has V03-R0-003-T06 claimed through
+  2026-03-27T02:19:30-0400, Economy/Fiscal remains idle until V03-R1-002-T06
+  completes, and world/topology automation remains blocked behind V03-XMAP-001.
+  Integrator validation, scheduler dry-run, rebase dry-run, qa, preflight,
+  replay twice, and duplicate audit all passed on kickoff with matching replay
+  hash e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511.
 active_claims:
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:50:40-0400'
-    claim_expires_at: '2026-03-27T01:50:40-0400'
-    run_id: 2026-03-26_engine_t04_dispatch
   codex/v0.3-lane-tooling-qa:
     task_id: V03-R1-002-T02
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-26T21:50:40-0400'
     claim_expires_at: '2026-03-27T01:50:40-0400'
     run_id: 2026-03-26_tooling_t02_dispatch
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R0-003-T06
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T22:19:30-0400'
+    claim_expires_at: '2026-03-27T02:19:30-0400'
+    run_id: 2026-03-26_ui_t06_dispatch
