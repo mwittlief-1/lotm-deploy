@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-002-T08
+  current_task_id: ''
   last_completed_task_id: V03-R0-002-T07
 runtime:
   node_version: v24.13.1
@@ -21,12 +21,35 @@ last_run:
     run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
     run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
 notes: >-
-  Re-ran kickoff validation, qa, preflight, and seed replay batch twice while
-  reviewing the parked lanes. Engine Core V03-R0-003-T02 is no longer blocked:
-  the shared QA baseline is green again, so its stale E2 escalation was cleared
-  and the task is back to ready. Tooling V03-R1-002-T01 and Economy
-  V03-R1-003-T01 were promoted to ready for lane resumption. UI remains parked
-  behind the court-budget chain because V03-R0-003-T06 still depends on
-  integrator-owned V03-R0-003-T05. World/topology automation remains blocked
-  behind V03-XMAP-001.
-active_claims: {}
+  Lane dispatch is active with no unclaimed global frontier. Social has
+  V03-R0-002-T08 claimed, Engine Core has V03-R0-003-T02 claimed, Tooling/QA
+  has V03-R1-002-T01 claimed, and Economy/Fiscal has V03-R1-003-T01 claimed
+  through 2026-03-27T00:44:53-0400. UI remains parked behind the court-budget
+  chain because V03-R0-003-T06 still depends on integrator-owned
+  V03-R0-003-T05. World/topology automation remains blocked behind
+  V03-XMAP-001.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R0-002-T08
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T20:44:53-0400'
+    claim_expires_at: '2026-03-27T00:44:53-0400'
+    run_id: 2026-03-26_frontier_claim_dispatch_round3
+  codex/v0.3-lane-engine-core:
+    task_id: V03-R0-003-T02
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T20:44:53-0400'
+    claim_expires_at: '2026-03-27T00:44:53-0400'
+    run_id: 2026-03-26_frontier_claim_dispatch_round3
+  codex/v0.3-lane-tooling-qa:
+    task_id: V03-R1-002-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T20:44:53-0400'
+    claim_expires_at: '2026-03-27T00:44:53-0400'
+    run_id: 2026-03-26_frontier_claim_dispatch_round3
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R1-003-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T20:44:53-0400'
+    claim_expires_at: '2026-03-27T00:44:53-0400'
+    run_id: 2026-03-26_frontier_claim_dispatch_round3
