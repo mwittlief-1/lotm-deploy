@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T04
+  last_completed_task_id: V03-R0-003-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-engine-core
-  git_commit: a625c47316b4bf0ebc6db6f57295dea5d8699357
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 3fda964d8cb5882b6d20d7f4f7996338caf753b2
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,17 +18,17 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 2c6a9fefc3def41b100e319bd5b087d8d47ca54f2b9179b4a4bbab449b2222e4
-    run2: 2c6a9fefc3def41b100e319bd5b087d8d47ca54f2b9179b4a4bbab449b2222e4
+    run1: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
+    run2: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
 notes: >-
-  Engine Core completed V03-R0-003-T04 on
-  codex/v0.3-lane-engine-core by charging two court decisions for outbound
-  marriage scouting and one for inbound marriage handling inside the marriage
-  decision domain, with focused direct tests and a stable new replay hash.
-  No additional engine-core task is currently eligible because
-  V03-R0-003-T05 is integrator-only and still todo. Tooling/QA still has
-  V03-R1-002-T02 claimed through 2026-03-27T01:50:40-0400, and
-  world/topology automation remains blocked behind V03-XMAP-001.
+  Accepted Engine Core V03-R0-003-T04 and completed integrator-owned
+  V03-R0-003-T05 on kickoff. Tooling/QA still has V03-R1-002-T02 claimed
+  through 2026-03-27T01:50:40-0400, UI now has V03-R0-003-T06 claimed through
+  2026-03-27T02:19:30-0400, Economy/Fiscal remains idle until V03-R1-002-T06
+  completes, and world/topology automation remains blocked behind V03-XMAP-001.
+  Integrator validation, scheduler dry-run, rebase dry-run, qa, preflight,
+  replay twice, and duplicate audit all passed on kickoff with matching replay
+  hash e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511.
 active_claims:
   codex/v0.3-lane-tooling-qa:
     task_id: V03-R1-002-T02
@@ -36,3 +36,9 @@ active_claims:
     claimed_at: '2026-03-26T21:50:40-0400'
     claim_expires_at: '2026-03-27T01:50:40-0400'
     run_id: 2026-03-26_tooling_t02_dispatch
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R0-003-T06
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T22:19:30-0400'
+    claim_expires_at: '2026-03-27T02:19:30-0400'
+    run_id: 2026-03-26_ui_t06_dispatch

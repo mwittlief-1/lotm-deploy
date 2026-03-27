@@ -2159,7 +2159,7 @@ tasks:
   title: Expose decision budget state through court phase outputs
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: done
   priority: 92
   tranche: 1
   change_type: behavior_change
@@ -2205,7 +2205,7 @@ tasks:
   title: Render court decision budget in UI surfaces
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: ready
   priority: 90
   tranche: 1
   change_type: refactor
@@ -2229,11 +2229,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T22:19:30-0400'
+    claim_expires_at: '2026-03-27T02:19:30-0400'
+    run_id: 2026-03-26_ui_t06_dispatch
   done_conditions:
   - UI shows remaining decision budget
   - UI shows at least the budget costs for gifts, offerings, and marriage actions
