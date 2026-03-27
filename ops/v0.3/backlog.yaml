@@ -2065,7 +2065,7 @@ tasks:
   title: Charge gifts and offerings against decision budget
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2091,11 +2091,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Court-action and finance outputs may change as gifts and offerings now consume decision budget.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:14:17-0400'
-    claim_expires_at: '2026-03-27T01:14:17-0400'
-    run_id: 2026-03-26_engine_t03_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - liege gifts consume decision budget deterministically
   - church offerings consume decision budget deterministically
