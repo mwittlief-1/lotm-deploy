@@ -4,8 +4,10 @@ import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_PANEL_ACCENT_STYLE,
   PLAY_SCREEN_SECTION_SIGILS,
+  PLAY_SCREEN_SUBCARD_STYLE,
   PLAY_SCREEN_SECONDARY_BUTTON_STYLE
 } from "../playScreenTheme";
+import type { CourtDecisionBudgetSurface } from "../playScreenCourtBudget";
 import { Tip, formatParentsLine, formatPersonWithAgeAndHouse } from "../viewHelpers";
 import { SectionHeading } from "./SectionHeading";
 
@@ -31,6 +33,7 @@ type DecisionsPanelProps = {
   laborOversubscribed: boolean;
   laborRequested: number;
   manor: any;
+  courtDecisionBudget: CourtDecisionBudgetSurface | null;
   marriageWindow: MarriageWindow | null;
   maxLaborShift: number;
   obligations: any;
@@ -201,6 +204,7 @@ export function DecisionsPanel({
   laborOversubscribed,
   laborRequested,
   manor,
+  courtDecisionBudget,
   marriageWindow,
   maxLaborShift,
   obligations,
@@ -255,6 +259,56 @@ export function DecisionsPanel({
           </div>
         ) : null}
       </div>
+
+      {courtDecisionBudget ? (
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, marginTop: 12, padding: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75, textTransform: "uppercase" }}>
+                Court decision budget
+              </div>
+              <div style={{ marginTop: 4, fontSize: 24, fontWeight: 700 }}>
+                {courtDecisionBudget.remaining} remaining
+                <span style={{ marginLeft: 6, fontSize: 12, fontWeight: 500, opacity: 0.75 }}>of {courtDecisionBudget.limit}</span>
+              </div>
+            </div>
+            <div style={{ fontSize: 12, opacity: 0.85 }}>
+              Spent {courtDecisionBudget.spent}
+              {courtDecisionBudget.exhausted ? " • No court budget remains." : ""}
+            </div>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 12, opacity: 0.8, lineHeight: 1.45 }}>
+            Gifts, church offerings, and marriage handling all draw from the same court attention this turn.
+          </div>
+          <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+            {courtDecisionBudget.entries.map((entry) => (
+              <div
+                key={entry.action}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(0, 1fr) auto auto",
+                  gap: 10,
+                  alignItems: "baseline",
+                  padding: "8px 10px",
+                  border: "1px solid rgba(172, 143, 100, 0.28)",
+                  borderRadius: 12,
+                  background: entry.spent > 0 ? "rgba(236, 224, 201, 0.45)" : "rgba(255, 250, 241, 0.78)"
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700 }}>
+                    {entry.label}
+                    {entry.isHighestCost ? <span style={{ marginLeft: 8, fontSize: 11, opacity: 0.7 }}>Highest cost</span> : null}
+                  </div>
+                  <div style={{ marginTop: 2, fontSize: 12, opacity: 0.72 }}>{entry.detail}</div>
+                </div>
+                <div style={{ fontSize: 12, whiteSpace: "nowrap" }}>Cost {entry.cost}</div>
+                <div style={{ fontSize: 12, whiteSpace: "nowrap", fontWeight: entry.spent > 0 ? 700 : 500 }}>Used {entry.spent}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {laborOversubscribed ? (
         <div style={{ padding: 10, border: "1px solid #f55", background: "#fff5f5", marginTop: 10, marginBottom: 10 }}>
