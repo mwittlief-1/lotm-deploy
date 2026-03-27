@@ -2019,7 +2019,7 @@ tasks:
   title: Define decision budget registry and deterministic decrement rules
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: escalated
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2030,7 +2030,7 @@ tasks:
   deps:
   - V03-R0-003-T01
   requires_integrator: false
-  blocked_reason: 'E2 non_perturbation_failure: qa failed on bounded snapshot checks with snapshot_before forbidden key institutions.'
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/court/**
   - tests/**
@@ -3377,7 +3377,7 @@ tasks:
   title: Audit current state registries and migration-sensitive load paths
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 84
   tranche: 2
   change_type: refactor
@@ -3646,7 +3646,7 @@ tasks:
   title: Audit church and liege settlement paths against fiscal packet
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
