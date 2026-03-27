@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  chargeCourtDecisionBudget,
+  ensureCourtDecisionBudgetRegistry
+} from "../../src/sim/domains/court/decisionBudget";
+import {
+  coinBalance,
   foodStoreBalance,
   meatStoreBalance,
   readLedgerReceiptSnapshots
@@ -233,5 +238,131 @@ describe("store receipt writers", () => {
         related_actor_ids: ["p_head", "p_liege"]
       })
     ]);
+  });
+
+  it("charges court decision budget when liege gifts and church offerings execute", () => {
+    const state = mkState();
+    const giftScaffold = makeFiscalSettlementScaffold({
+      phase: "events",
+      phase_sequence: 2,
+      contract_id: "liege_gift",
+      counterparty_id: "house:liege",
+      counterparty_label: "House Liege",
+      selected_payment_mode: "coin",
+      amount: 3.7,
+      rule_id: "events.liege_gift",
+      related_actor_ids: ["p_liege", "p_head"]
+    });
+    const offeringScaffold = makeFiscalSettlementScaffold({
+      phase: "events",
+      phase_sequence: 3,
+      contract_id: "church_offering",
+      counterparty_id: state.locals.clergy.id,
+      counterparty_label: state.locals.clergy.name,
+      selected_payment_mode: "food_stores",
+      amount: 4.2,
+      rule_id: "events.church_offering",
+      related_actor_ids: ["p_head", "p_clergy"]
+    });
+
+    expect(applyFiscalSettlementScaffold(state, giftScaffold)).toBe(3);
+    expect(applyFiscalSettlementScaffold(state, offeringScaffold)).toBe(4);
+
+    expect(coinBalance(state)).toBe(7);
+    expect(foodStoreBalance(state)).toBe(46);
+    expect(ensureCourtDecisionBudgetRegistry(state)).toEqual({
+      schema_version: "court_decision_budget_v0",
+      turn_years: 3,
+      limit: 6,
+      spent: 2,
+      remaining: 4,
+      exhausted: false,
+      spent_by_action: {
+        gift_liege: 1,
+        offering_church: 1,
+        marriage_inbound: 0,
+        marriage_scout: 0
+      }
+    });
+
+    expect(readLedgerReceiptSnapshots(state)).toEqual([
+      expect.objectContaining({
+        receipt_id: "ledger:t1:events:p2:coin:0001",
+        category: "gift.liege",
+        counterparty_kind: "liege",
+        counterparty_id: "house:liege",
+        counterparty_label: "House Liege",
+        asset: "coin",
+        delta: -3,
+        balance_after: 7,
+        summary: "Settlement paid in coin to House Liege.",
+        rule_id: "events.liege_gift",
+        related_actor_ids: ["p_head", "p_liege"]
+      }),
+      expect.objectContaining({
+        receipt_id: "ledger:t1:events:p3:food_stores:0002",
+        category: "offering.church",
+        counterparty_kind: "church",
+        counterparty_id: "p_clergy",
+        counterparty_label: "p_clergy",
+        asset: "food_stores",
+        delta: -4,
+        balance_after: 46,
+        summary: "Settlement drew down food stores for p_clergy.",
+        rule_id: "events.church_offering",
+        related_actor_ids: ["p_clergy", "p_head"]
+      })
+    ]);
+  });
+
+  it("blocks liege gifts and offerings when the court decision budget is exhausted", () => {
+    const state = mkState();
+    chargeCourtDecisionBudget(state, "marriage_scout", 6);
+
+    const coinBefore = coinBalance(state);
+    const storesBefore = foodStoreBalance(state);
+    const giftScaffold = makeFiscalSettlementScaffold({
+      phase: "events",
+      phase_sequence: 2,
+      contract_id: "liege_gift",
+      counterparty_id: "house:liege",
+      counterparty_label: "House Liege",
+      selected_payment_mode: "coin",
+      amount: 2,
+      rule_id: "events.liege_gift",
+      related_actor_ids: ["p_head", "p_liege"]
+    });
+    const offeringScaffold = makeFiscalSettlementScaffold({
+      phase: "events",
+      phase_sequence: 3,
+      contract_id: "church_offering",
+      counterparty_id: state.locals.clergy.id,
+      counterparty_label: state.locals.clergy.name,
+      selected_payment_mode: "food_stores",
+      amount: 2,
+      rule_id: "events.church_offering",
+      related_actor_ids: ["p_head", "p_clergy"]
+    });
+
+    expect(applyFiscalSettlementScaffold(state, giftScaffold)).toBe(0);
+    expect(applyFiscalSettlementScaffold(state, offeringScaffold)).toBe(0);
+
+    expect(coinBalance(state)).toBe(coinBefore);
+    expect(foodStoreBalance(state)).toBe(storesBefore);
+    expect(ensureCourtDecisionBudgetRegistry(state)).toEqual({
+      schema_version: "court_decision_budget_v0",
+      turn_years: 3,
+      limit: 6,
+      spent: 6,
+      remaining: 0,
+      exhausted: true,
+      spent_by_action: {
+        gift_liege: 0,
+        offering_church: 0,
+        marriage_inbound: 0,
+        marriage_scout: 6
+      }
+    });
+    expect(readLedgerReceiptSnapshots(state)).toEqual([]);
   });
 });
