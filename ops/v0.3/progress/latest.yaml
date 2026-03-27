@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T03
+  last_completed_task_id: V03-R0-003-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cbcbffa65ab5b94e4d86b3265e17defaf4605ad4
+  git_branch: codex/v0.3-lane-engine-core
+  git_commit: a625c47316b4bf0ebc6db6f57295dea5d8699357
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,26 +18,18 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
-    run2: d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2
+    run1: 2c6a9fefc3def41b100e319bd5b087d8d47ca54f2b9179b4a4bbab449b2222e4
+    run2: 2c6a9fefc3def41b100e319bd5b087d8d47ca54f2b9179b4a4bbab449b2222e4
 notes: >-
-  Accepted Engine Core V03-R0-003-T03, Tooling/QA V03-R1-002-T01, and
-  Economy/Fiscal V03-R1-003-T01 on kickoff. Engine now has V03-R0-003-T04
-  claimed through 2026-03-27T01:50:40-0400, Tooling/QA now has V03-R1-002-T02
-  claimed through 2026-03-27T01:50:40-0400. Integrator validation, scheduler
-  dry-run, rebase dry-run, qa, preflight, replay twice, and duplicate audit all
-  passed on kickoff with matching replay hash
-  d3e003863f3721bd17786848ebab252a71d551e184cbbf8ee3470906fda1e1a2.
-  Economy/Fiscal is idle until V03-R1-002-T06 completes, UI remains parked
-  behind V03-R0-003-T05, and world/topology automation remains blocked behind
-  V03-XMAP-001.
+  Engine Core completed V03-R0-003-T04 on
+  codex/v0.3-lane-engine-core by charging two court decisions for outbound
+  marriage scouting and one for inbound marriage handling inside the marriage
+  decision domain, with focused direct tests and a stable new replay hash.
+  No additional engine-core task is currently eligible because
+  V03-R0-003-T05 is integrator-only and still todo. Tooling/QA still has
+  V03-R1-002-T02 claimed through 2026-03-27T01:50:40-0400, and
+  world/topology automation remains blocked behind V03-XMAP-001.
 active_claims:
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:50:40-0400'
-    claim_expires_at: '2026-03-27T01:50:40-0400'
-    run_id: 2026-03-26_engine_t04_dispatch
   codex/v0.3-lane-tooling-qa:
     task_id: V03-R1-002-T02
     claimed_by: integrator.dispatch
