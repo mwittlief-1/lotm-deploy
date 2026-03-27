@@ -2112,7 +2112,7 @@ tasks:
   title: Charge external marriage scouting above inbound acceptance
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: behavior_change
@@ -2138,11 +2138,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Court budget and marriage-action outputs may change where outbound scouting receives a higher budget cost than inbound acceptance.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_engine_t04_dispatch
   done_conditions:
   - outbound marriage scouting has an explicit higher budget cost
   - inbound acceptance or processing has a lower explicit budget cost
@@ -3377,7 +3377,7 @@ tasks:
   title: Audit current state registries and migration-sensitive load paths
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
@@ -3400,11 +3400,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T20:44:53-0400'
-    claim_expires_at: '2026-03-27T00:44:53-0400'
-    run_id: 2026-03-26_frontier_claim_dispatch_round3
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - state registries and load/save surfaces are enumerated
   - migration-sensitive registries are identified
@@ -3423,7 +3423,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3447,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-26T21:50:40-0400'
+    claim_expires_at: '2026-03-27T01:50:40-0400'
+    run_id: 2026-03-26_tooling_t02_dispatch
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
@@ -3646,7 +3646,7 @@ tasks:
   title: Audit church and liege settlement paths against fiscal packet
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
@@ -3670,11 +3670,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T20:44:53-0400'
-    claim_expires_at: '2026-03-27T00:44:53-0400'
-    run_id: 2026-03-26_frontier_claim_dispatch_round3
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - church and liege settlement paths are enumerated
   - gaps versus the fiscal packet are identified
