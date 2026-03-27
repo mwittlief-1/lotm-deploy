@@ -2,6 +2,7 @@ import type { RunState } from "../../types";
 import { asNonNegInt, clampInt } from "../../util";
 
 export const COURT_DECISION_BUDGET_SCHEMA_VERSION = "court_decision_budget_v0";
+export const COURT_DECISION_BUDGET_VIEW_SCHEMA_VERSION = "court_decision_budget_view_v0";
 export const COURT_DECISION_BUDGET_TURN_YEARS = 3;
 export const COURT_DECISION_BUDGET_LIMIT = 6;
 
@@ -13,6 +14,13 @@ export const COURT_DECISION_BUDGET_ACTIONS = [
 ] as const;
 
 export type CourtDecisionBudgetAction = typeof COURT_DECISION_BUDGET_ACTIONS[number];
+
+export const COURT_DECISION_BUDGET_ACTION_COSTS: Record<CourtDecisionBudgetAction, number> = {
+  gift_liege: 1,
+  offering_church: 1,
+  marriage_inbound: 1,
+  marriage_scout: 2
+};
 
 export type CourtDecisionBudgetSpentByActionV0 = {
   gift_liege: number;
@@ -31,6 +39,21 @@ export type CourtDecisionBudgetRegistryV0 = {
   spent_by_action: CourtDecisionBudgetSpentByActionV0;
 };
 
+export type CourtDecisionBudgetActionViewV0 = {
+  action: CourtDecisionBudgetAction;
+  cost: number;
+  spent: number;
+};
+
+export type CourtDecisionBudgetViewV0 = {
+  schema_version: typeof COURT_DECISION_BUDGET_VIEW_SCHEMA_VERSION;
+  limit: number;
+  spent: number;
+  remaining: number;
+  exhausted: boolean;
+  actions: CourtDecisionBudgetActionViewV0[];
+};
+
 export type CourtDecisionBudgetChargeResult = {
   action: CourtDecisionBudgetAction;
   requested: number;
@@ -39,6 +62,10 @@ export type CourtDecisionBudgetChargeResult = {
   reason: "applied" | "insufficient_budget" | "non_positive_cost";
   registry: CourtDecisionBudgetRegistryV0;
 };
+
+function budgetRegistryFrom(value: CourtDecisionBudgetRegistryV0 | RunState): CourtDecisionBudgetRegistryV0 {
+  return "run_seed" in value ? ensureCourtDecisionBudgetRegistry(value) : normalizeCourtDecisionBudgetRegistry(value);
+}
 
 function normalizeCharge(amount: number): number {
   return Math.max(0, Math.trunc(amount));
@@ -104,6 +131,28 @@ export function ensureCourtDecisionBudgetRegistry(state: RunState): CourtDecisio
 
 export function availableCourtDecisionBudget(registry: CourtDecisionBudgetRegistryV0): number {
   return clampInt(asNonNegInt(registry.remaining), 0, COURT_DECISION_BUDGET_LIMIT);
+}
+
+export function buildCourtDecisionBudgetView(value: CourtDecisionBudgetRegistryV0 | RunState): CourtDecisionBudgetViewV0 {
+  const registry = budgetRegistryFrom(value);
+  return {
+    schema_version: COURT_DECISION_BUDGET_VIEW_SCHEMA_VERSION,
+    limit: registry.limit,
+    spent: registry.spent,
+    remaining: registry.remaining,
+    exhausted: registry.exhausted,
+    actions: COURT_DECISION_BUDGET_ACTIONS.map((action) => ({
+      action,
+      cost: COURT_DECISION_BUDGET_ACTION_COSTS[action],
+      spent: registry.spent_by_action[action]
+    }))
+  };
+}
+
+export function formatCourtDecisionBudgetReceiptLine(value: CourtDecisionBudgetRegistryV0 | RunState): string {
+  const view = buildCourtDecisionBudgetView(value);
+  const actions = view.actions.map((entry) => `${entry.action} ${entry.spent}`).join(", ");
+  return `Court budget remaining ${view.remaining}/${view.limit}; spent ${view.spent}; actions ${actions}.`;
 }
 
 export function canChargeCourtDecisionBudget(registry: CourtDecisionBudgetRegistryV0, amount: number): boolean {
