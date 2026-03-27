@@ -1,5 +1,6 @@
 import { structuredHouseIdForPerson } from "../../actors";
 import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../../court";
+import { chargeCourtDecisionBudget } from "../court/decisionBudget";
 import { canSpendEnergy, spendEnergy } from "../court/energy";
 import { applyCoinDelta, canAffordCoin, spendCoin } from "../economy/ledger";
 import { listEligibleCandidates } from "../../marriageMarket";
@@ -11,10 +12,19 @@ import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
 import { applyRelationshipDelta } from "./relationshipEngine";
 
+const MARRIAGE_INBOUND_DECISION_COST = 1;
+const MARRIAGE_SCOUT_DECISION_COST = 2;
+
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
   if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
   return anyFlags._mods as Record<string, number>;
+}
+
+function reserveMarriageDecisionBudget(state: RunState, action: "scout" | "inbound"): boolean {
+  return action === "scout"
+    ? chargeCourtDecisionBudget(state, "marriage_scout", MARRIAGE_SCOUT_DECISION_COST).applied
+    : chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
 }
 
 export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: string): void {
@@ -143,6 +153,10 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   }
 
   if (decision.action === "scout") {
+    if (!reserveMarriageDecisionBudget(state, "scout")) {
+      reportNotes.push("No court budget for marriage scouting.");
+      return;
+    }
     spendEnergy(state, 1);
     spendCoin(state, 1);
     const mods = modsObj(state);
@@ -152,6 +166,10 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   }
 
   if (decision.action === "reject_all") {
+    if (!reserveMarriageDecisionBudget(state, "inbound")) {
+      reportNotes.push("No court budget for inbound marriage handling.");
+      return;
+    }
     spendEnergy(state, 1);
     state.manor.unrest = clampInt(state.manor.unrest + 1, 0, 100);
     reportNotes.push("Rejected all offers; slight social friction (+1 unrest).");
@@ -181,6 +199,11 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   const dowry = offer.dowry_coin_net;
   if (dowry < 0 && !canAffordCoin(state, Math.abs(dowry))) {
     reportNotes.push("Cannot accept: insufficient coin for negative dowry.");
+    return;
+  }
+
+  if (!reserveMarriageDecisionBudget(state, "inbound")) {
+    reportNotes.push("No court budget for inbound marriage handling.");
     return;
   }
 
