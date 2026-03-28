@@ -50,6 +50,7 @@ import {
   type ReceiptViewerMode,
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
+import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
 import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
@@ -454,6 +455,7 @@ export function PlayScreen({
   const laborOversubscribed = laborAssignedNextTurn > laborAvailableNextTurn;
 
   const { dueEntering, accruedThisTurn, arrearsCarried, totalObligations } = buildObligationTiming(ctx.report, ob);
+  const courtDecisionBudget = buildCourtDecisionBudgetSurface(ctx.report, mw);
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
   const constructionRatePlannedNextTurn = decisions.labor.desired_builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -695,6 +697,7 @@ export function PlayScreen({
         laborOversubscribed={laborOversubscribed}
         laborRequested={laborRequested}
         manor={m}
+        courtDecisionBudget={courtDecisionBudget}
         marriageWindow={mw}
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
