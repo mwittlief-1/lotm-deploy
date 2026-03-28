@@ -2249,7 +2249,7 @@ tasks:
   title: Close epic and refresh court pacing docs
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: ready
   priority: 88
   tranche: 1
   change_type: refactor
@@ -2273,11 +2273,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-27T20:43:55-0400'
+    claim_expires_at: '2026-03-28T00:43:55-0400'
+    run_id: 2026-03-27_engine_t07_dispatch
   done_conditions:
   - epic report is written
   - court pacing docs reflect the decision-budget contract
@@ -3449,9 +3449,9 @@ tasks:
   claim:
     status: claimed
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:50:40-0400'
-    claim_expires_at: '2026-03-27T01:50:40-0400'
-    run_id: 2026-03-26_tooling_t02_dispatch
+    claimed_at: '2026-03-27T20:43:55-0400'
+    claim_expires_at: '2026-03-28T00:43:55-0400'
+    run_id: 2026-03-27_tooling_t02_reclaim_dispatch
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
