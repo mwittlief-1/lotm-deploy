@@ -27,6 +27,36 @@ export interface StateMigrationRunResultV1 {
   executed_step_ids: string[];
 }
 
+export class StateMigrationError extends Error {
+  readonly plan_id: string;
+  readonly step_id: string;
+  readonly step_index: number;
+  readonly executed_step_ids: string[];
+  readonly cause_value: unknown;
+
+  constructor(
+    plan: StateMigrationPlanV1,
+    step: StateMigrationStepV1,
+    step_index: number,
+    executed_step_ids: readonly string[],
+    cause_value: unknown
+  ) {
+    const cause_message =
+      cause_value instanceof Error
+        ? cause_value.message
+        : typeof cause_value === "string"
+          ? cause_value
+          : JSON.stringify(cause_value);
+    super(`State migration failed in plan ${plan.plan_id} at step ${step.step_id}: ${cause_message}`);
+    this.name = "StateMigrationError";
+    this.plan_id = plan.plan_id;
+    this.step_id = step.step_id;
+    this.step_index = step_index;
+    this.executed_step_ids = [...executed_step_ids];
+    this.cause_value = cause_value;
+  }
+}
+
 function defineStateMigrationStep(
   step_id: string,
   description: string,
@@ -157,9 +187,13 @@ export const LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN = defineStateMigrationPlan(
 
 export function runStateMigrationPlan(state: RunState, plan: StateMigrationPlanV1): StateMigrationRunResultV1 {
   const executed_step_ids: string[] = [];
-  for (const step of plan.steps) {
-    step.apply(state);
-    executed_step_ids.push(step.step_id);
+  for (const [step_index, step] of plan.steps.entries()) {
+    try {
+      step.apply(state);
+      executed_step_ids.push(step.step_id);
+    } catch (error) {
+      throw new StateMigrationError(plan, step, step_index, executed_step_ids, error);
+    }
   }
   return {
     schema_version: STATE_MIGRATION_PLAN_SCHEMA_VERSION,

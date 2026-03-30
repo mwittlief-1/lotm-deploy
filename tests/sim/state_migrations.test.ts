@@ -10,6 +10,7 @@ import {
   NO_OP_STATE_MIGRATION_STEP,
   PORTFOLIO_PLACEHOLDER_MIGRATION_STEP,
   PREVIEW_LOAD_STATE_MIGRATION_PLAN,
+  StateMigrationError,
   STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
   STATE_MIGRATION_PLAN_SCHEMA_VERSION,
   type StateMigrationPlanV1,
@@ -98,6 +99,83 @@ describe("state migration runner", () => {
 
     expect(result.executed_step_ids).toEqual([NO_OP_STATE_MIGRATION_STEP.step_id]);
     expect(stableStringify(state)).toBe(before);
+  });
+
+  it("wraps migration failures with plan and step context", () => {
+    const malformed = { manor: null, flags: {}, log: [] } as unknown as RunState;
+    const failurePlan: StateMigrationPlanV1 = {
+      schema_version: STATE_MIGRATION_PLAN_SCHEMA_VERSION,
+      plan_id: "malformed_economy_state_v1",
+      description: "Trigger a placeholder migration failure on malformed state.",
+      steps: [ECONOMY_PLACEHOLDER_MIGRATION_STEP, PORTFOLIO_PLACEHOLDER_MIGRATION_STEP]
+    };
+
+    let thrown: unknown;
+    try {
+      runStateMigrationPlan(malformed, failurePlan);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(StateMigrationError);
+    expect(thrown).toMatchObject({
+      plan_id: failurePlan.plan_id,
+      step_id: ECONOMY_PLACEHOLDER_MIGRATION_STEP.step_id,
+      step_index: 0,
+      executed_step_ids: []
+    });
+    expect((thrown as Error).message).toContain(failurePlan.plan_id);
+    expect((thrown as Error).message).toContain(ECONOMY_PLACEHOLDER_MIGRATION_STEP.step_id);
+  });
+
+  it("stops the plan after the first failing migration step", () => {
+    const state = createNewRun("state_migration_failure_stop_v031");
+    const anyState = state as RunState & { flags: Record<string, unknown> };
+    const failurePlan: StateMigrationPlanV1 = {
+      schema_version: STATE_MIGRATION_PLAN_SCHEMA_VERSION,
+      plan_id: "stop_after_failure_v1",
+      description: "Verify later steps do not run after a migration failure.",
+      steps: [
+        {
+          step_id: "append_before_failure",
+          description: "Mark the state before the failure step.",
+          apply: (draft) => {
+            draft.flags.before_failure = true;
+          }
+        },
+        {
+          step_id: "throw_failure",
+          description: "Raise a synthetic migration failure.",
+          apply: () => {
+            throw new Error("synthetic migration failure");
+          }
+        },
+        {
+          step_id: "append_after_failure",
+          description: "Would mark the state after failure if execution continued.",
+          apply: (draft) => {
+            draft.flags.after_failure = true;
+          }
+        }
+      ]
+    };
+
+    let thrown: unknown;
+    try {
+      runStateMigrationPlan(anyState, failurePlan);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(StateMigrationError);
+    expect(thrown).toMatchObject({
+      plan_id: failurePlan.plan_id,
+      step_id: "throw_failure",
+      step_index: 1,
+      executed_step_ids: ["append_before_failure"]
+    });
+    expect(anyState.flags.before_failure).toBe(true);
+    expect(anyState.flags.after_failure).toBeUndefined();
   });
 
   it("applies the preview-load migration plan deterministically to legacy fixtures", () => {
