@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-003-T03
+  last_completed_task_id: V03-R1-003-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cdd10a14170ea33c231723d3e9c5180a89771baf
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: 92707a930bbe4abf7c6bd9a08a725a97dcf11a2d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,24 +15,18 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Accepted Economy/Fiscal V03-R1-003-T03 on kickoff and opened
-  Economy/Fiscal V03-R1-003-T04 under run log
-  2026-03-30_economy_t03_acceptance_and_t04_dispatch. Tooling, UI, Engine,
-  and Social are idle, and world/topology automation remains blocked behind
-  V03-XMAP-001. Integrator verification passed for validate, scheduler
-  dry-run, rebase dry-run, the focused obligation enforcement spec, qa,
-  preflight, replay batch twice, and repo duplicate audit with stable replay
-  hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
-active_claims:
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R1-003-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T18:15:15-0400'
-    claim_expires_at: '2026-03-30T22:15:15-0400'
-    run_id: 2026-03-30_economy_t04_dispatch
+  Economy/Fiscal completed V03-R1-003-T04 under run id
+  V03-R1-003-T04-20260330T182410-0400. Explicit stage-two tangible-bite
+  helpers now cap seizure and forced food-store payment per counterparty per
+  turn with canonical enforcement receipt taxonomy, and required gates
+  remained stable at hash
+  7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
+  V03-R1-003-T05 remains integrator-owned on codex/v0.3-refactor-kickoff, so
+  there is no scheduler-claimable follow-on economy task on this lane branch.
+active_claims: {}
