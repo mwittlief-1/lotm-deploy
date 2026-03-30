@@ -162,10 +162,30 @@ export interface GameOverState {
   details?: Record<string, unknown>;
 }
 
+export type RunStateSchemaVersion = "run_state_schema_v0.3.1";
+export type BoundedRegistryManifestSchemaVersion = "bounded_registry_manifest_v1";
+export type BoundedRegistryManifestEntryKind = "edge_list" | "pointer" | "record";
+
+export interface BoundedRegistryManifestEntry {
+  registry_id: string;
+  state_path: string;
+  entry_kind: BoundedRegistryManifestEntryKind;
+  migration_tracked: boolean;
+  registry_schema_version: string | null;
+  legacy_paths?: string[];
+}
+
+export interface BoundedRegistryManifest {
+  schema_version: BoundedRegistryManifestSchemaVersion;
+  entries: BoundedRegistryManifestEntry[];
+}
+
 export interface RunState {
   version: SimVersion;
   app_version: string;
   run_seed: string;
+  state_schema_version?: RunStateSchemaVersion;
+  bounded_registry_manifest?: BoundedRegistryManifest;
   turn_index: number;
   manor: ManorState;
   house: HouseState;
@@ -195,6 +215,8 @@ export type HouseSummary = Pick<HouseState, "head" | "spouse" | "spouse_status" 
  * (Fix for v0.0.5 QA blocker: runaway log growth / OOM.)
  */
 export interface RunSnapshot {
+  state_schema_version: RunStateSchemaVersion;
+  bounded_registry_manifest: BoundedRegistryManifest;
   turn_index: number;
   manor: ManorState;
   house: HouseSummary;
@@ -617,6 +639,8 @@ export interface RunSummaryExport {
   seed: string;
   app_version: string;
   sim_version: SimVersion;
+  state_schema_version: RunStateSchemaVersion;
+  bounded_registry_manifest: BoundedRegistryManifest;
   turns_played: number;
   game_over_reason: string | null;
   ending_resources: { bushels: number; coin: number; unrest: number; arrears_coin: number; arrears_bushels: number };
