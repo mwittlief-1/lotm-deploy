@@ -7,6 +7,11 @@ import { createNewRun, proposeTurn } from "../../src/sim";
 import { boundedSnapshot } from "../../src/sim/domains/experience/reporting";
 import { buildRunSummary } from "../../src/sim/exports";
 import {
+  ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+  MANOR_ECONOMY_TRACKED_STATE_PATHS,
+  PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION
+} from "../../src/sim/stateRegistryPlaceholders";
+import {
   BOUNDED_REGISTRY_MANIFEST_ENTRY_IDS,
   BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION,
   RUN_STATE_SCHEMA_VERSION,
@@ -25,6 +30,15 @@ describe("state schema scaffold", () => {
     expect(state.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
     expect(state.bounded_registry_manifest).toEqual(buildBoundedRegistryManifest());
     expect(state.bounded_registry_manifest?.entries.map((entry) => entry.registry_id)).toEqual([...BOUNDED_REGISTRY_MANIFEST_ENTRY_IDS]);
+    expect(state.manor.meat_stores).toBe(0);
+    expect(state.economy).toMatchObject({
+      schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      tracked_state_paths: [...MANOR_ECONOMY_TRACKED_STATE_PATHS]
+    });
+    expect(state.portfolio).toEqual({
+      schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      positions: []
+    });
 
     const summary = buildRunSummary(state);
     expect(summary.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
@@ -38,6 +52,15 @@ describe("state schema scaffold", () => {
     expect(ctxA.preview_state.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
     expect(ctxA.preview_state.bounded_registry_manifest).toEqual(buildBoundedRegistryManifest());
     expect(ctxA.preview_state.bounded_registry_manifest).toEqual(ctxB.preview_state.bounded_registry_manifest);
+    expect(ctxA.preview_state.manor.meat_stores).toBe(0);
+    expect(ctxA.preview_state.economy).toMatchObject({
+      schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      tracked_state_paths: [...MANOR_ECONOMY_TRACKED_STATE_PATHS]
+    });
+    expect(ctxA.preview_state.portfolio).toEqual({
+      schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      positions: []
+    });
     expect(
       ctxA.preview_state.bounded_registry_manifest?.entries.find((entry) => entry.registry_id === "kinship_edges")?.legacy_paths
     ).toEqual(["kinship"]);
@@ -51,5 +74,7 @@ describe("state schema scaffold", () => {
     expect(snapshot.bounded_registry_manifest.schema_version).toBe(BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION);
     expect(snapshot.bounded_registry_manifest.entries.map((entry) => entry.registry_id)).toEqual([...BOUNDED_REGISTRY_MANIFEST_ENTRY_IDS]);
     expect(snapshot.bounded_registry_manifest).toEqual(state.bounded_registry_manifest);
+    expect(snapshot.economy).toEqual(state.economy);
+    expect(snapshot.portfolio).toEqual(state.portfolio);
   });
 });

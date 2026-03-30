@@ -1,18 +1,31 @@
 import type { BoundedRegistryManifest, BoundedRegistryManifestEntry, RunState, RunStateSchemaVersion } from "./types";
+import {
+  ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+  PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION
+} from "./stateRegistryPlaceholders";
 
 export const RUN_STATE_SCHEMA_VERSION = "run_state_schema_v0.3.1" as const satisfies RunStateSchemaVersion;
 export const BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION = "bounded_registry_manifest_v1" as const;
 
 export const BOUNDED_REGISTRY_MANIFEST_ENTRY_IDS = [
+  "economy",
   "flags",
   "houses",
   "kinship_edges",
   "people",
   "player_house_id",
+  "portfolio",
   "relationships"
 ] as const;
 
 const BOUNDED_REGISTRY_MANIFEST_ENTRIES = [
+  {
+    registry_id: "economy",
+    state_path: "economy",
+    entry_kind: "record",
+    migration_tracked: true,
+    registry_schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION
+  },
   {
     registry_id: "flags",
     state_path: "flags",
@@ -48,6 +61,13 @@ const BOUNDED_REGISTRY_MANIFEST_ENTRIES = [
     entry_kind: "pointer",
     migration_tracked: true,
     registry_schema_version: null
+  },
+  {
+    registry_id: "portfolio",
+    state_path: "portfolio",
+    entry_kind: "record",
+    migration_tracked: true,
+    registry_schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION
   },
   {
     registry_id: "relationships",

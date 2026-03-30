@@ -13,6 +13,8 @@ const ALLOWED_KEYS = new Set([
   "relationships",
   "flags",
   "game_over",
+  "economy",
+  "portfolio",
   "people",
   "houses",
   "player_house_id",

@@ -1,0 +1,82 @@
+{
+  "version": "mvp_v0_1",
+  "app_version": "v0.2.9",
+  "run_seed": "fixture_state_scaffold_v031",
+  "state_schema_version": "run_state_schema_v0.3.1",
+  "bounded_registry_manifest": {
+    "schema_version": "bounded_registry_manifest_v1",
+    "entries": [
+      {
+        "registry_id": "flags",
+        "state_path": "flags",
+        "entry_kind": "record",
+        "migration_tracked": true,
+        "registry_schema_version": null
+      },
+      {
+        "registry_id": "houses",
+        "state_path": "houses",
+        "entry_kind": "record",
+        "migration_tracked": true,
+        "registry_schema_version": null
+      },
+      {
+        "registry_id": "kinship_edges",
+        "state_path": "kinship_edges",
+        "entry_kind": "edge_list",
+        "migration_tracked": true,
+        "registry_schema_version": null,
+        "legacy_paths": [
+          "kinship"
+        ]
+      },
+      {
+        "registry_id": "people",
+        "state_path": "people",
+        "entry_kind": "record",
+        "migration_tracked": true,
+        "registry_schema_version": null
+      },
+      {
+        "registry_id": "player_house_id",
+        "state_path": "player_house_id",
+        "entry_kind": "pointer",
+        "migration_tracked": true,
+        "registry_schema_version": null
+      },
+      {
+        "registry_id": "relationships",
+        "state_path": "relationships",
+        "entry_kind": "edge_list",
+        "migration_tracked": true,
+        "registry_schema_version": null
+      }
+    ]
+  },
+  "turn_index": 0,
+  "manor": {
+    "population": 45,
+    "farmers": 45,
+    "builders": 0,
+    "bushels_stored": 900,
+    "coin": 10,
+    "unrest": 10,
+    "improvements": [],
+    "construction": null,
+    "obligations": {
+      "tax_due_coin": 0,
+      "tithe_due_bushels": 0,
+      "arrears": {
+        "coin": 0,
+        "bushels": 0
+      },
+      "war_levy_due": null
+    }
+  },
+  "flags": {
+    "_tuning": {
+      "court_variant": "B"
+    }
+  },
+  "log": []
+}

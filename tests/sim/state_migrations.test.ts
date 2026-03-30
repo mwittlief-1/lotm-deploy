@@ -5,13 +5,21 @@ import { describe, expect, it } from "vitest";
 
 import { createNewRun } from "../../src/sim";
 import {
+  ECONOMY_PLACEHOLDER_MIGRATION_STEP,
   NO_OP_STATE_MIGRATION_PLAN,
   NO_OP_STATE_MIGRATION_STEP,
+  PORTFOLIO_PLACEHOLDER_MIGRATION_STEP,
   PREVIEW_LOAD_STATE_MIGRATION_PLAN,
+  STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
   STATE_MIGRATION_PLAN_SCHEMA_VERSION,
   type StateMigrationPlanV1,
   runStateMigrationPlan
 } from "../../src/sim/migrations";
+import {
+  ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+  MANOR_ECONOMY_TRACKED_STATE_PATHS,
+  PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION
+} from "../../src/sim/stateRegistryPlaceholders";
 import { RUN_STATE_SCHEMA_VERSION } from "../../src/sim/stateSchema";
 import type { RunState } from "../../src/sim/types";
 
@@ -20,8 +28,9 @@ function loadLegacyFixture(): any {
   return JSON.parse(fs.readFileSync(fixturePath, "utf8"));
 }
 
-function clone<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value));
+function loadScaffoldFixture(): any {
+  const fixturePath = path.resolve("tests/fixtures/v0.3.1_state_scaffold_fixture.json");
+  return JSON.parse(fs.readFileSync(fixturePath, "utf8"));
 }
 
 function stableStringify(value: unknown): string {
@@ -103,6 +112,17 @@ describe("state migration runner", () => {
     );
     expect(rightResult.executed_step_ids).toEqual(leftResult.executed_step_ids);
     expect((left as any).state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
+    expect((left as any).manor.meat_stores).toBe(0);
+    expect((left as any).economy).toEqual({
+      schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      surface_id: "manor_economy_surface",
+      surface_schema_version: "manor_economy_surface_v1",
+      tracked_state_paths: [...MANOR_ECONOMY_TRACKED_STATE_PATHS]
+    });
+    expect((left as any).portfolio).toEqual({
+      schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      positions: []
+    });
     expect((left as any).people && typeof (left as any).people === "object").toBe(true);
     expect((left as any).houses && typeof (left as any).houses === "object").toBe(true);
     expect(typeof (left as any).player_house_id).toBe("string");
@@ -110,6 +130,8 @@ describe("state migration runner", () => {
     const picked = (value: any) => ({
       state_schema_version: value.state_schema_version,
       bounded_registry_manifest: value.bounded_registry_manifest,
+      economy: value.economy,
+      portfolio: value.portfolio,
       people: value.people,
       houses: value.houses,
       player_house_id: value.player_house_id,
@@ -119,5 +141,69 @@ describe("state migration runner", () => {
     });
 
     expect(stableStringify(picked(left))).toBe(stableStringify(picked(right)));
+  });
+
+  it("upgrades pre-T04 scaffold fixtures with ordered placeholder steps and no unrelated mutations", () => {
+    const left = loadScaffoldFixture();
+    const right = loadScaffoldFixture();
+
+    const placeholderOnlyPlan: StateMigrationPlanV1 = {
+      schema_version: STATE_MIGRATION_PLAN_SCHEMA_VERSION,
+      plan_id: "placeholder_only_v1",
+      description: "Refresh the schema scaffold and apply the additive placeholder registries only.",
+      steps: [
+        STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
+        ECONOMY_PLACEHOLDER_MIGRATION_STEP,
+        PORTFOLIO_PLACEHOLDER_MIGRATION_STEP
+      ]
+    };
+
+    const before = stableStringify({
+      turn_index: left.turn_index,
+      manor: left.manor,
+      flags: left.flags,
+      log: left.log
+    });
+
+    const leftResult = runStateMigrationPlan(left as RunState, placeholderOnlyPlan);
+    const rightResult = runStateMigrationPlan(right as RunState, placeholderOnlyPlan);
+
+    expect(leftResult.executed_step_ids).toEqual([
+      STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP.step_id,
+      ECONOMY_PLACEHOLDER_MIGRATION_STEP.step_id,
+      PORTFOLIO_PLACEHOLDER_MIGRATION_STEP.step_id
+    ]);
+    expect(rightResult.executed_step_ids).toEqual(leftResult.executed_step_ids);
+    expect(left.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
+    expect(left.manor.meat_stores).toBe(0);
+    expect(left.economy).toEqual({
+      schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      surface_id: "manor_economy_surface",
+      surface_schema_version: "manor_economy_surface_v1",
+      tracked_state_paths: [...MANOR_ECONOMY_TRACKED_STATE_PATHS]
+    });
+    expect(left.portfolio).toEqual({
+      schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
+      positions: []
+    });
+    expect(
+      stableStringify({
+        turn_index: left.turn_index,
+        flags: left.flags,
+        log: left.log,
+        manor: {
+          population: left.manor.population,
+          farmers: left.manor.farmers,
+          builders: left.manor.builders,
+          bushels_stored: left.manor.bushels_stored,
+          coin: left.manor.coin,
+          unrest: left.manor.unrest,
+          improvements: left.manor.improvements,
+          construction: left.manor.construction,
+          obligations: left.manor.obligations
+        }
+      })
+    ).toBe(before);
+    expect(stableStringify(left)).toBe(stableStringify(right));
   });
 });
