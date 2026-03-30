@@ -5,37 +5,34 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: 3e7b5b877d746e24d96041ed9b06c03dc4d2843d
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: cdd10a14170ea33c231723d3e9c5180a89771baf
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    ops_v03_validate: pass
-    ops_v03_scheduler_dry_run: pass
-    ops_v03_rebase_dry_run: pass
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Economy/Fiscal completed V03-R1-003-T03 under run id
-  V03-R1-003-T03-20260330T180343-0400 and cleared the active claim. Added
-  `src/sim/domains/economy/obligationEnforcement.ts` to package turn-close
-  arrears carry and bounded stage-one enforcement in the economy domain, using
-  canonical `obligation.arrears_carry` receipts plus `enforcement.penalty`
-  taxonomy records without touching succession orchestration. Added
-  `tests/sim/obligation_enforcement.test.ts` to cover canonical carry receipt
-  lines, bounded per-counterparty pressure, and shortage-gated unrest relief.
-  Engineering gates passed for qa, preflight, and replay batch twice with
-  stable hash
-  7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
-  Closed-state control-plane validation also passed for validate, scheduler
-  dry-run, and rebase dry-run. There is no scheduler-claimable next
-  Economy/Fiscal task yet because V03-R1-003-T04 remains `todo`.
-active_claims: {}
+  Accepted Economy/Fiscal V03-R1-003-T03 on kickoff and opened
+  Economy/Fiscal V03-R1-003-T04 under run log
+  2026-03-30_economy_t03_acceptance_and_t04_dispatch. Tooling, UI, Engine,
+  and Social are idle, and world/topology automation remains blocked behind
+  V03-XMAP-001. Integrator verification passed for validate, scheduler
+  dry-run, rebase dry-run, the focused obligation enforcement spec, qa,
+  preflight, replay batch twice, and repo duplicate audit with stable replay
+  hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
+active_claims:
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R1-003-T04
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T18:15:15-0400'
+    claim_expires_at: '2026-03-30T22:15:15-0400'
+    run_id: 2026-03-30_economy_t04_dispatch
