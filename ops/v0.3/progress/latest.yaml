@@ -5,36 +5,34 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: 64afe04fa81c720ef7a66448e1d2ed7dcc797029
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 4a1e48fafb35313768856e7ee8cf64df76fd18d2
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    ops_v03_validate: pass
-    ops_v03_scheduler_dry_run: pass
-    ops_v03_rebase_dry_run: pass
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Economy/Fiscal completed V03-R1-003-T02 under run id
-  V03-R1-003-T02-20260330T144317-0400 and cleared the active claim. Added
-  `src/sim/domains/economy/obligationRegistry.ts` to expose per-counterparty
-  church and liege arrears snapshots, native-mode settlement scaffolds, and
-  deterministic carry helpers backed by the existing ledger receipt APIs.
-  Added `tests/sim/obligation_registry.test.ts` to cover registry snapshots,
-  once-per-turn settlement cadence per counterparty, and short-coin arrears
-  carry. Engineering gates passed for qa, preflight, and replay batch twice
-  with stable hash
-  7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
-  Closed-state control-plane validation also passed for validate, scheduler
-  dry-run, and rebase dry-run. There is no scheduler-claimable next
-  Economy/Fiscal task yet because V03-R1-003-T03 remains `todo`.
-active_claims: {}
+  Accepted Economy/Fiscal V03-R1-003-T02 on kickoff and opened
+  Economy/Fiscal V03-R1-003-T03 under run log
+  2026-03-30_economy_t02_acceptance_and_t03_dispatch. Tooling, UI, Engine,
+  and Social are idle, and world/topology automation remains blocked behind
+  V03-XMAP-001. Integrator verification passed for validate, scheduler
+  dry-run, rebase dry-run, the focused obligation registry spec, qa,
+  preflight, replay batch twice, and repo duplicate audit with stable replay
+  hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
+active_claims:
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R1-003-T03
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T17:56:47-0400'
+    claim_expires_at: '2026-03-30T21:56:47-0400'
+    run_id: 2026-03-30_economy_t03_dispatch
