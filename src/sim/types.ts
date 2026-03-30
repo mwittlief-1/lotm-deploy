@@ -134,6 +134,7 @@ export interface ManorState {
   farmers: number;
   builders: number;
   bushels_stored: number;
+  meat_stores?: number;
   coin: number;
   unrest: number; // 0..100
   improvements: string[];
@@ -165,6 +166,9 @@ export interface GameOverState {
 export type RunStateSchemaVersion = "run_state_schema_v0.3.1";
 export type BoundedRegistryManifestSchemaVersion = "bounded_registry_manifest_v1";
 export type BoundedRegistryManifestEntryKind = "edge_list" | "pointer" | "record";
+export type EconomyRegistryPlaceholderSchemaVersion = "economy_registry_placeholder_v1";
+export type ManorEconomySurfaceSchemaVersion = "manor_economy_surface_v1";
+export type PortfolioRegistryPlaceholderSchemaVersion = "portfolio_registry_placeholder_v1";
 
 export interface BoundedRegistryManifestEntry {
   registry_id: string;
@@ -178,6 +182,18 @@ export interface BoundedRegistryManifestEntry {
 export interface BoundedRegistryManifest {
   schema_version: BoundedRegistryManifestSchemaVersion;
   entries: BoundedRegistryManifestEntry[];
+}
+
+export interface EconomyRegistryPlaceholderV1 {
+  schema_version: EconomyRegistryPlaceholderSchemaVersion;
+  surface_id: "manor_economy_surface";
+  surface_schema_version: ManorEconomySurfaceSchemaVersion;
+  tracked_state_paths: string[];
+}
+
+export interface PortfolioRegistryPlaceholderV1 {
+  schema_version: PortfolioRegistryPlaceholderSchemaVersion;
+  positions: string[];
 }
 
 export interface RunState {
@@ -201,6 +217,8 @@ export interface RunState {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  portfolio?: PortfolioRegistryPlaceholderV1;
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
@@ -231,6 +249,8 @@ export interface RunSnapshot {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  portfolio?: PortfolioRegistryPlaceholderV1;
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }

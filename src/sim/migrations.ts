@@ -2,6 +2,7 @@ import { syncHouseRegistryCurrentHeads } from "./actors";
 import { ensureCourtOfficers } from "./court";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { ensureStateSchemaScaffold } from "./stateSchema";
+import { ensureEconomyRegistryPlaceholder, ensurePortfolioRegistryPlaceholder } from "./stateRegistryPlaceholders";
 import type { RunState } from "./types";
 import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
 
@@ -69,6 +70,22 @@ export const PEOPLE_FIRST_MIGRATION_STEP = defineStateMigrationStep(
   }
 );
 
+export const ECONOMY_PLACEHOLDER_MIGRATION_STEP = defineStateMigrationStep(
+  "economy_placeholder_v0_3_1",
+  "Ensure the tracked manor economy surface and placeholder registry scaffold exist.",
+  (state) => {
+    ensureEconomyRegistryPlaceholder(state);
+  }
+);
+
+export const PORTFOLIO_PLACEHOLDER_MIGRATION_STEP = defineStateMigrationStep(
+  "portfolio_placeholder_v0_3_1",
+  "Ensure the additive empty portfolio registry scaffold exists.",
+  (state) => {
+    ensurePortfolioRegistryPlaceholder(state);
+  }
+);
+
 export const EXTERNAL_HOUSES_MIGRATION_STEP = defineStateMigrationStep(
   "external_houses_v0_2_2",
   "Seed or refresh the deterministic external-house registries.",
@@ -104,6 +121,8 @@ export const CREATE_NEW_RUN_STATE_MIGRATION_PLAN = defineStateMigrationPlan(
   "Apply the additive post-construction registry scaffolds for freshly created runs.",
   [
     STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
+    ECONOMY_PLACEHOLDER_MIGRATION_STEP,
+    PORTFOLIO_PLACEHOLDER_MIGRATION_STEP,
     PEOPLE_FIRST_MIGRATION_STEP,
     EXTERNAL_HOUSES_MIGRATION_STEP,
     COURT_OFFICERS_MIGRATION_STEP,
@@ -116,6 +135,8 @@ export const PREVIEW_LOAD_STATE_MIGRATION_PLAN = defineStateMigrationPlan(
   "Apply additive registry migrations before turn preview generation.",
   [
     STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
+    ECONOMY_PLACEHOLDER_MIGRATION_STEP,
+    PORTFOLIO_PLACEHOLDER_MIGRATION_STEP,
     PEOPLE_FIRST_MIGRATION_STEP,
     EXTERNAL_HOUSES_MIGRATION_STEP,
     HOUSE_REGISTRY_HEADS_MIGRATION_STEP,
@@ -128,6 +149,8 @@ export const LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN = defineStateMigrationPlan(
   "Apply the minimum additive migration set needed before legacy states can be snapshotted for applyDecisions().",
   [
     STATE_SCHEMA_SCAFFOLD_MIGRATION_STEP,
+    ECONOMY_PLACEHOLDER_MIGRATION_STEP,
+    PORTFOLIO_PLACEHOLDER_MIGRATION_STEP,
     PEOPLE_FIRST_MIGRATION_STEP
   ]
 );

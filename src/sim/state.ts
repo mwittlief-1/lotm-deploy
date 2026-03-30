@@ -86,6 +86,7 @@ export function createNewRun(run_seed: string): RunState {
       farmers: 45, // v0.2.9: default 100% farmers until player changes labor
       builders: 0,
       bushels_stored: 900,
+      meat_stores: 0,
       coin: 10,
       unrest: 10,
       improvements: [],
