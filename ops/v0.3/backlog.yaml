@@ -409,7 +409,7 @@ epics:
 - id: V03-R0-003
   title: Court pacing scaffold v0 with decision budget
   release: v0.3.0
-  status: ready
+  status: done
   priority: 56
   tranche: 1
   change_type: behavior_change
@@ -2249,7 +2249,7 @@ tasks:
   title: Close epic and refresh court pacing docs
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 88
   tranche: 1
   change_type: refactor
@@ -2273,11 +2273,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_engine_t07_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - epic report is written
   - court pacing docs reflect the decision-budget contract
@@ -3423,7 +3423,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3447,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_tooling_t02_reclaim_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
@@ -3468,7 +3468,7 @@ tasks:
   title: Add migration runner and no-op step contract
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 80
   tranche: 2
   change_type: refactor
@@ -3492,11 +3492,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T08:58:43-0400'
+    claim_expires_at: '2026-03-30T12:58:43-0400'
+    run_id: 2026-03-30_tooling_t03_dispatch
   done_conditions:
   - migration runner can execute ordered migration steps
   - no-op migration path is test-covered and deterministic
