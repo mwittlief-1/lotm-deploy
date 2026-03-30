@@ -1,0 +1,21 @@
+{
+  "total_hexes": 78961,
+  "kingdom_land_hexes": 9136,
+  "assignable_hexes": 8085,
+  "pre_reserved_hexes": 432,
+  "elite_direct_domain_hexes": 619,
+  "residual_hexes": 882,
+  "royal_forest_hexes": 0,
+  "total_manor_count": 407,
+  "rural_manor_count": 286,
+  "elite_complex_count": 121,
+  "ordinary_manor_count": 263,
+  "strategic_manor_count": 23,
+  "county_count": 15,
+  "bishopric_count": 8,
+  "abbey_count": 45,
+  "market_town_count": 15,
+  "baronial_seat_count": 60,
+  "mean_hexes_per_manor": 20.2801,
+  "median_hexes_per_manor": 12
+}

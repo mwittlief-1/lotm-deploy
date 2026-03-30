@@ -1,0 +1,10 @@
+sweep,variant,seed,generation_ok,validation_ok,failure_stage,abbey_site_count,baronial_seat_count,abbey_count,baronial_seat_count_result,elite_overlap_count,weak_manor_repairs,residual_share,market_town_count,settlement_registry_count,route_edge_count
+B,elite_conservative,PLAY_A_001,true,true,,30,45,30,45,15,1006,0.124132,15,68,1061
+B,elite_conservative,PLAY_B_001,true,true,,30,45,30,45,15,2178,0.256967,15,80,1129
+B,elite_conservative,PLAY_C_001,true,true,,30,45,30,45,15,641,0.113288,15,64,1104
+B,elite_balanced,PLAY_A_001,true,true,,45,60,45,60,15,428,0.123589,15,68,996
+B,elite_balanced,PLAY_B_001,true,true,,45,60,45,60,15,2098,0.26565,15,80,1128
+B,elite_balanced,PLAY_C_001,true,true,,45,60,45,60,15,177,0.096541,15,64,1066
+B,elite_dense,PLAY_A_001,true,false,validate,60,75,56,64,15,256,0.122396,15,68,961
+B,elite_dense,PLAY_B_001,true,true,,60,75,60,75,15,2082,0.252524,15,80,1086
+B,elite_dense,PLAY_C_001,true,true,,60,75,57,63,15,148,0.092929,15,64,1036
