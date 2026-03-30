@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T06
+  last_completed_task_id: V03-R0-003-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 5f2bbf051f6b87fb00b3227e9be4dde3965c2982
+  git_branch: codex/v0.3-lane-engine-core
+  git_commit: 4fe42227a5934c6a1a96d6db6f0c9fc43e167555
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -16,27 +16,23 @@ last_run:
     qa: pass
     preflight: pass
     repo_duplicates: not_run
-    seed_replay_batch_twice: pass
+    seed_replay_batch_twice: not_run
   replay_hashes:
     run1: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
     run2: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
 notes: >-
-  Accepted UI/Experience V03-R0-003-T06 on kickoff, reclaimed the expired
-  Tooling/QA claim for V03-R1-002-T02 under run log
-  2026-03-27_ui_acceptance_tooling_reclaim_and_engine_t07_dispatch, and
-  opened Engine Core V03-R0-003-T07 plus a fresh Tooling/QA dispatch window.
-  UI is now idle, Economy/Fiscal remains blocked behind V03-R1-002-T06, and
-  world/topology automation remains blocked behind V03-XMAP-001. Integrator
-  validation, scheduler dry-run, rebase dry-run, focused UI coverage, qa,
-  preflight, replay twice, and duplicate audit all passed on kickoff with
-  matching replay hash e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511.
+  Engine Core reclaimed the stale T07 dispatch from integrator.dispatch on
+  2026-03-30 under run id 2026-03-30_engine_t07_resume, completed
+  V03-R0-003-T07, refreshed the canonical court-pacing docs in
+  docs/qa/court_pacing_v1_contract.md, and wrote the epic handoff report at
+  ops/v0.3/progress/runs/V03-R0-003.md. `npm run qa` and `npm run preflight`
+  passed; replay was not rerun because T07 does not require golden changes, so
+  the accepted baseline remains
+  e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511. No
+  additional engine-core task is currently eligible; Economy/Fiscal remains
+  blocked behind V03-R1-002-T06 and world/topology remains blocked behind
+  V03-XMAP-001.
 active_claims:
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T07
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_engine_t07_dispatch
   codex/v0.3-lane-tooling-qa:
     task_id: V03-R1-002-T02
     claimed_by: integrator.dispatch

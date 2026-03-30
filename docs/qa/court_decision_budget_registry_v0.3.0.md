@@ -39,3 +39,7 @@ These keys are locked now so `T03` and `T04` can wire charges without changing t
 - deterministic decrement across explicit action keys
 - exhaustion and blocked overspend behavior
 - reset back to a fresh 6-decision, 3-year-turn registry
+
+## Epic closeout note
+
+The consolidated court-pacing closeout for the full `V03-R0-003` epic now lives in `docs/qa/court_pacing_v1_contract.md`.
