@@ -134,6 +134,7 @@ export interface ManorState {
   farmers: number;
   builders: number;
   bushels_stored: number;
+  meat_stores?: number;
   coin: number;
   unrest: number; // 0..100
   improvements: string[];
@@ -162,10 +163,45 @@ export interface GameOverState {
   details?: Record<string, unknown>;
 }
 
+export type RunStateSchemaVersion = "run_state_schema_v0.3.1";
+export type BoundedRegistryManifestSchemaVersion = "bounded_registry_manifest_v1";
+export type BoundedRegistryManifestEntryKind = "edge_list" | "pointer" | "record";
+export type EconomyRegistryPlaceholderSchemaVersion = "economy_registry_placeholder_v1";
+export type ManorEconomySurfaceSchemaVersion = "manor_economy_surface_v1";
+export type PortfolioRegistryPlaceholderSchemaVersion = "portfolio_registry_placeholder_v1";
+
+export interface BoundedRegistryManifestEntry {
+  registry_id: string;
+  state_path: string;
+  entry_kind: BoundedRegistryManifestEntryKind;
+  migration_tracked: boolean;
+  registry_schema_version: string | null;
+  legacy_paths?: string[];
+}
+
+export interface BoundedRegistryManifest {
+  schema_version: BoundedRegistryManifestSchemaVersion;
+  entries: BoundedRegistryManifestEntry[];
+}
+
+export interface EconomyRegistryPlaceholderV1 {
+  schema_version: EconomyRegistryPlaceholderSchemaVersion;
+  surface_id: "manor_economy_surface";
+  surface_schema_version: ManorEconomySurfaceSchemaVersion;
+  tracked_state_paths: string[];
+}
+
+export interface PortfolioRegistryPlaceholderV1 {
+  schema_version: PortfolioRegistryPlaceholderSchemaVersion;
+  positions: string[];
+}
+
 export interface RunState {
   version: SimVersion;
   app_version: string;
   run_seed: string;
+  state_schema_version?: RunStateSchemaVersion;
+  bounded_registry_manifest?: BoundedRegistryManifest;
   turn_index: number;
   manor: ManorState;
   house: HouseState;
@@ -181,6 +217,8 @@ export interface RunState {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  portfolio?: PortfolioRegistryPlaceholderV1;
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
@@ -195,6 +233,8 @@ export type HouseSummary = Pick<HouseState, "head" | "spouse" | "spouse_status" 
  * (Fix for v0.0.5 QA blocker: runaway log growth / OOM.)
  */
 export interface RunSnapshot {
+  state_schema_version: RunStateSchemaVersion;
+  bounded_registry_manifest: BoundedRegistryManifest;
   turn_index: number;
   manor: ManorState;
   house: HouseSummary;
@@ -209,6 +249,8 @@ export interface RunSnapshot {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  portfolio?: PortfolioRegistryPlaceholderV1;
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }
@@ -617,6 +659,8 @@ export interface RunSummaryExport {
   seed: string;
   app_version: string;
   sim_version: SimVersion;
+  state_schema_version: RunStateSchemaVersion;
+  bounded_registry_manifest: BoundedRegistryManifest;
   turns_played: number;
   game_over_reason: string | null;
   ending_resources: { bushels: number; coin: number; unrest: number; arrears_coin: number; arrears_bushels: number };

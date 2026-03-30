@@ -24,6 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
+  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
@@ -409,7 +410,7 @@ epics:
 - id: V03-R0-003
   title: Court pacing scaffold v0 with decision budget
   release: v0.3.0
-  status: ready
+  status: done
   priority: 56
   tranche: 1
   change_type: behavior_change
@@ -573,7 +574,7 @@ epics:
 - id: V03-R1-002
   title: Versioned state schema and migration scaffold
   release: v0.3.1
-  status: todo
+  status: done
   priority: 52
   tranche: 2
   change_type: refactor
@@ -2205,7 +2206,7 @@ tasks:
   title: Render court decision budget in UI surfaces
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 90
   tranche: 1
   change_type: refactor
@@ -2229,11 +2230,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T22:19:30-0400'
-    claim_expires_at: '2026-03-27T02:19:30-0400'
-    run_id: 2026-03-26_ui_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - UI shows remaining decision budget
   - UI shows at least the budget costs for gifts, offerings, and marriage actions
@@ -2249,7 +2250,7 @@ tasks:
   title: Close epic and refresh court pacing docs
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: todo
+  status: done
   priority: 88
   tranche: 1
   change_type: refactor
@@ -3423,7 +3424,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3448,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-26T21:50:40-0400'
-    claim_expires_at: '2026-03-27T01:50:40-0400'
-    run_id: 2026-03-26_tooling_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
@@ -3468,7 +3469,7 @@ tasks:
   title: Add migration runner and no-op step contract
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 80
   tranche: 2
   change_type: refactor
@@ -3513,7 +3514,7 @@ tasks:
   title: Add economy and portfolio placeholder migrations through the scaffold
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 78
   tranche: 2
   change_type: refactor
@@ -3558,7 +3559,7 @@ tasks:
   title: Add bounded snapshot and migration failure coverage
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3605,7 +3606,7 @@ tasks:
   title: Close epic and refresh state-architecture docs
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3693,7 +3694,7 @@ tasks:
   title: Add arrears registry and per-counterparty settlement scaffold
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: ready
   priority: 82
   tranche: 2
   change_type: behavior_change
@@ -3718,11 +3719,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Economy and replay artifacts may gain arrears registry state and separate church/liege settlement lines.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T14:38:38-0400'
+    claim_expires_at: '2026-03-30T18:38:38-0400'
+    run_id: 2026-03-30_economy_t02_dispatch
   done_conditions:
   - arrears registry exists per counterparty
   - no negative coin path rolls unpaid amounts into arrears deterministically

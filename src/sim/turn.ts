@@ -18,12 +18,12 @@ import {
   maxLaborDeltaPerTurn,
 } from "./constants";
 import { refreshEnergy } from "./domains/court/energy";
+import { LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN, PREVIEW_LOAD_STATE_MIGRATION_PLAN, runStateMigrationPlan } from "./migrations";
 import { normalizeState } from "./normalize";
 import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
 import { ensurePeopleFirst } from "./peopleFirst";
 import { makePhaseReceipt, makePhaseResult } from "./phases/phaseResult";
-import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, ensureCourtOfficers, removeCourtExcludeId } from "./court";
+import { addCourtExcludeId, addCourtExtraId, courtConsumptionBushels_v0_2_4, removeCourtExcludeId } from "./court";
 import { computeTierSets } from "./tiers";
 import { deriveHouseholdRoster } from "./householdView";
 import {
@@ -166,11 +166,7 @@ export function proposeTurn(state: RunState): TurnContext {
   }
 
   const working = deepCopy(state as any) as RunState;
-  ensurePeopleFirst(working);
-  ensureExternalHousesSeed_v0_2_2(working);
-  syncHouseRegistryCurrentHeads(working);
-  // v0.2.4: deterministic court officers (idempotent; stream-isolated).
-  ensureCourtOfficers(working);
+  runStateMigrationPlan(working, PREVIEW_LOAD_STATE_MIGRATION_PLAN);
 
   // v0.2.8 P0: GC expired marriage reservations (once per turn) before building any offer windows.
   gcExpiredReservations(working, working.turn_index);
@@ -629,7 +625,7 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
   const anyState: any = state as any;
   const needsMigration = !(anyState && anyState.people && anyState.houses && anyState.player_house_id);
   const base: RunState = needsMigration ? (deepCopy(state as any) as RunState) : state;
-  if (needsMigration) ensurePeopleFirst(base);
+  if (needsMigration) runStateMigrationPlan(base, LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN);
 
   const snapshotBefore = boundedSnapshot(base);
 

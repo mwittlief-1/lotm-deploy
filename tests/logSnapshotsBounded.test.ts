@@ -2,8 +2,25 @@
 import { describe, it, expect } from "vitest";
 import { createNewRun, proposeTurn, applyDecisions } from "../src/sim";
 import { decide } from "../src/sim/policies";
+import { BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION, RUN_STATE_SCHEMA_VERSION } from "../src/sim/stateSchema";
 
-const ALLOWED_KEYS = new Set(["turn_index", "manor", "house", "relationships", "flags", "game_over", "people", "houses", "player_house_id", "kinship", "kinship_edges"]);
+const ALLOWED_KEYS = new Set([
+  "state_schema_version",
+  "bounded_registry_manifest",
+  "turn_index",
+  "manor",
+  "house",
+  "relationships",
+  "flags",
+  "game_over",
+  "economy",
+  "portfolio",
+  "people",
+  "houses",
+  "player_house_id",
+  "kinship",
+  "kinship_edges"
+]);
 
 describe("TurnLogEntry snapshots", () => {
   it("snapshot_before/after are bounded and never include log history", () => {
@@ -19,6 +36,10 @@ describe("TurnLogEntry snapshots", () => {
 
         expect(before.log).toBeUndefined();
         expect(after.log).toBeUndefined();
+        expect(before.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
+        expect(after.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
+        expect(before.bounded_registry_manifest?.schema_version).toBe(BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION);
+        expect(after.bounded_registry_manifest?.schema_version).toBe(BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION);
 
         for (const k of Object.keys(before)) expect(ALLOWED_KEYS.has(k)).toBe(true);
         for (const k of Object.keys(after)) expect(ALLOWED_KEYS.has(k)).toBe(true);

@@ -1,6 +1,6 @@
 # ops/v0.3 — Automation Execution Contract (Canonical)
 
-**Last Updated:** 2026-03-25
+**Last Updated:** 2026-03-30
 **Scope:** v0.3 unattended execution and backlog rebaseline.
 **Source of Truth:** This folder is canonical for automation state and rules.
 
@@ -19,7 +19,8 @@
 12. Run the task's `required_gates` from `gates.yaml`.
 13. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
 14. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
-15. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+15. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
+16. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
 
 ## Backlog model
 - `releases[]` define the roadmap containers.
@@ -52,6 +53,7 @@
 - Canonical lanes are `codex/v0.3-refactor-kickoff`, `codex/v0.3-lane-tooling-qa`, `codex/v0.3-lane-social-mechanics`, `codex/v0.3-lane-engine-core`, `codex/v0.3-lane-ui-experience`, `codex/v0.3-lane-economy-fiscal`, and `codex/v0.3-lane-world-topology`.
 - Bootstrap local lane branches from `codex/v0.3-refactor-kickoff` before dispatch.
 - `progress/latest.yaml.active_claims` is the source of truth for in-flight lane work.
+- Same-lane task chains should continue without an extra operator pause once the integrator accepts the prior task and no explicit checkpoint rule applies.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
 
 ## Claim Policy
