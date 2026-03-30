@@ -2,11 +2,9 @@ import { APP_VERSION } from "../version";
 import { SIM_VERSION } from "./version";
 import type { Person, RunState, Sex, Traits } from "./types";
 import { ensureRelationshipEdge } from "./domains/people/relationshipEngine";
+import { CREATE_NEW_RUN_STATE_MIGRATION_PLAN, runStateMigrationPlan } from "./migrations";
 import { Rng } from "./rng";
 import { normalizeState } from "./normalize";
-import { ensurePeopleFirst } from "./peopleFirst";
-import { ensureExternalHousesSeed_v0_2_2 } from "./worldgen";
-import { ensureCourtOfficers } from "./court";
 import { DEFAULT_DEMOGRAPHY_TUNING } from "./constants";
 
 function traitLevel(rng: Rng): number {
@@ -143,10 +141,6 @@ export function createNewRun(run_seed: string): RunState {
   }
 
   normalizeState(state);
-  ensurePeopleFirst(state);
-  ensureExternalHousesSeed_v0_2_2(state);
-  // v0.2.4: deterministic court officers (idempotent; stream-isolated).
-  ensureCourtOfficers(state);
-  ensurePeopleFirst(state);
+  runStateMigrationPlan(state, CREATE_NEW_RUN_STATE_MIGRATION_PLAN);
   return state;
 }

@@ -1,39 +1,27 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-002-T02
+  last_completed_task_id: V03-R1-002-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: bb7bdd8532093fbf315e0522bb69cf4f0d377156
+  git_branch: codex/v0.3-lane-tooling-qa
+  git_commit: b38523776854f77937b63e670af8ddf70de8b46d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
+    ops_v03_validate: pass
+    ops_v03_scheduler_dry_run: pass
+    ops_v03_rebase_dry_run: pass
     qa: pass
     preflight: pass
-    repo_duplicates: pass
     seed_replay_batch_twice: pass
+    repo_duplicates: not_run
   replay_hashes:
     run1: 2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0
     run2: 2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0
-notes: >-
-  Accepted Engine Core V03-R0-003-T07 and Tooling/QA V03-R1-002-T02 on
-  kickoff, closed epic V03-R0-003, and opened Tooling/QA V03-R1-002-T03 under
-  run log 2026-03-30_engine_t07_and_tooling_t02_acceptance. UI and Social are
-  idle, Economy/Fiscal remains blocked behind V03-R1-002-T06, and
-  world/topology automation remains blocked behind V03-XMAP-001. Integrator
-  validation, scheduler dry-run, rebase dry-run, focused schema coverage, qa,
-  preflight, replay twice, and duplicate audit all passed on kickoff. The new
-  accepted replay hash is
-  2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0.
-active_claims:
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T08:58:43-0400'
-    claim_expires_at: '2026-03-30T12:58:43-0400'
-    run_id: 2026-03-30_tooling_t03_dispatch
+notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to (none). No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
+active_claims: {}
