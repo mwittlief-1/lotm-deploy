@@ -3740,7 +3740,7 @@ tasks:
   title: Implement bounded penalty stage and arrears-carry receipts
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
@@ -3764,11 +3764,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Finance outputs may change as arrears carry and bounded penalties become explicit receipt lines.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T17:56:47-0400'
-    claim_expires_at: '2026-03-30T21:56:47-0400'
-    run_id: 2026-03-30_economy_t03_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - arrears carry emits canonical receipt lines
   - bounded penalty stage applies deterministic relationship or unrest effects
