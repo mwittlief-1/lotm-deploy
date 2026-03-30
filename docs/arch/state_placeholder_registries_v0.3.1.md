@@ -1,7 +1,7 @@
 # State Placeholder Registries v0.3.1
 
 Last updated: 2026-03-30  
-Task: `V03-R1-002-T04`
+Task: `V03-R1-002-T06`
 
 ## Scope
 
@@ -51,6 +51,19 @@ Migration behavior:
 - legacy and scaffold-only states receive an additive empty portfolio container
 - the migration does not infer totals, manor rollups, or holdings from current runtime state
 
+## Bounded snapshot and export boundary
+
+The placeholder registries are part of the bounded snapshot contract and may appear in turn-log snapshots when present on state.
+
+Current closeout boundary:
+
+- bounded snapshots include `state_schema_version`, `bounded_registry_manifest`, `economy`, and `portfolio`
+- bounded snapshots still omit `institutions` and `service_records`
+- `beliefs` remains non-enumerable on the snapshot object and must not serialize into JSON
+- exported run summaries carry the manifest and state schema version, but still do not embed the full placeholder registry payloads
+
+The QA stop conditions for this boundary are tracked in `docs/qa/state_migration_failure_qa_v0.3.1.md`.
+
 ## Plan ordering
 
 The production migration plans now insert the new steps immediately after `state_schema_scaffold_v0_3_1`:
@@ -77,3 +90,12 @@ They must not:
 - infer portfolio totals
 - persist process-local receipt journals
 - alter replay ordering or RNG usage
+
+## Epic closeout status
+
+By the end of `V03-R1-002`:
+
+- the state schema scaffold is explicit
+- the migration runner carries the placeholder steps through all current entrypoints
+- failure escalation is wrapped through `StateMigrationError`
+- replay remains on the accepted deterministic hash after the placeholder additions
