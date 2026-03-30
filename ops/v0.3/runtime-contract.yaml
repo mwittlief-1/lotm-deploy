@@ -13,6 +13,7 @@ control_plane_rules:
   default_claim_ttl_hours: 4
   scheduler_mode: "lane_parallel"
   progress_active_claims_field: "active_claims"
+  same_lane_continuation: "integrator_chains_safe_same_lane_follow_ons_in_same_reconciliation_pass"
   non_checkpoint_tasks_require_parent_epic: true
   external_checkpoint_parent_epic_optional: true
   current_task_must_reference_task_id: true

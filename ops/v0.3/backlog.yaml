@@ -24,6 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
+  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
@@ -3605,7 +3606,7 @@ tasks:
   title: Close epic and refresh state-architecture docs
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3630,11 +3631,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T13:43:08-0400'
+    claim_expires_at: '2026-03-30T17:43:08-0400'
+    run_id: 2026-03-30_tooling_t06_dispatch
   done_conditions:
   - epic report is written
   - architecture docs reflect state-version and migration scaffolds
