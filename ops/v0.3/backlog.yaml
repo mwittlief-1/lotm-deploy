@@ -3513,7 +3513,7 @@ tasks:
   title: Add economy and portfolio placeholder migrations through the scaffold
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 78
   tranche: 2
   change_type: refactor
@@ -3537,11 +3537,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Migration fixtures and accepted schema-version artifacts may be added or refreshed.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T12:02:01-0400'
-    claim_expires_at: '2026-03-30T16:02:01-0400'
-    run_id: 2026-03-30_tooling_t04_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - economy placeholder migration path exists and is test-covered
   - portfolio placeholder migration path exists and is test-covered
