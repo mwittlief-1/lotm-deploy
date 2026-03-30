@@ -574,7 +574,7 @@ epics:
 - id: V03-R1-002
   title: Versioned state schema and migration scaffold
   release: v0.3.1
-  status: todo
+  status: done
   priority: 52
   tranche: 2
   change_type: refactor
@@ -3606,7 +3606,7 @@ tasks:
   title: Close epic and refresh state-architecture docs
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3631,11 +3631,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T13:43:08-0400'
-    claim_expires_at: '2026-03-30T17:43:08-0400'
-    run_id: 2026-03-30_tooling_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - epic report is written
   - architecture docs reflect state-version and migration scaffolds
