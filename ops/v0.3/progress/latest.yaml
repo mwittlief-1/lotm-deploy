@@ -1,35 +1,29 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T06
+  last_completed_task_id: V03-R1-002-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 5f2bbf051f6b87fb00b3227e9be4dde3965c2982
+  git_branch: codex/v0.3-lane-tooling-qa
+  git_commit: dbc2d6e58e6982aa6409bffb8a50b56c3d33d700
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
+    ops_v03_validate: pass
+    ops_v03_scheduler_dry_run: pass
+    ops_v03_rebase_dry_run: pass
     qa: pass
     preflight: pass
-    repo_duplicates: pass
     seed_replay_batch_twice: pass
+    repo_duplicates: not_run
   replay_hashes:
-    run1: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
-    run2: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
-notes: >-
-  Accepted UI/Experience V03-R0-003-T06 on kickoff, reclaimed the expired
-  Tooling/QA claim for V03-R1-002-T02 under run log
-  2026-03-27_ui_acceptance_tooling_reclaim_and_engine_t07_dispatch, and
-  opened Engine Core V03-R0-003-T07 plus a fresh Tooling/QA dispatch window.
-  UI is now idle, Economy/Fiscal remains blocked behind V03-R1-002-T06, and
-  world/topology automation remains blocked behind V03-XMAP-001. Integrator
-  validation, scheduler dry-run, rebase dry-run, focused UI coverage, qa,
-  preflight, replay twice, and duplicate audit all passed on kickoff with
-  matching replay hash e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511.
+    run1: 6a6509e6b575d5f3566a3a27ceefbf70570c998277232ff155a720a90619962e
+    run2: 6a6509e6b575d5f3566a3a27ceefbf70570c998277232ff155a720a90619962e
+notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to (none). codex/v0.3-lane-engine-core has V03-R0-003-T07 claimed through 2026-03-28T00:43:55-0400 World/topology automation remains blocked behind V03-XMAP-001.
 active_claims:
   codex/v0.3-lane-engine-core:
     task_id: V03-R0-003-T07
@@ -37,9 +31,3 @@ active_claims:
     claimed_at: '2026-03-27T20:43:55-0400'
     claim_expires_at: '2026-03-28T00:43:55-0400'
     run_id: 2026-03-27_engine_t07_dispatch
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T02
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_tooling_t02_reclaim_dispatch

@@ -1,8 +1,11 @@
+import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../stateSchema";
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const snapshot = deepCopy({
+    state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
+    bounded_registry_manifest: buildBoundedRegistryManifest(),
     turn_index: state.turn_index,
     manor: state.manor,
     house: state.house,

@@ -1,3 +1,4 @@
+import { ensureStateSchemaScaffold } from "./stateSchema";
 import type { KinshipEdge, Person, RunState } from "./types";
 
 function hasPeopleFirstFields(state: any): boolean {
@@ -66,7 +67,8 @@ export function ensurePeopleFirst(state: RunState): RunState {
     migratePeopleFirstFromLegacy(state);
   }
   // Keep registries in sync with legacy fields (authoritative sim still uses legacy structures).
-  return syncPeopleFirstFromLegacyUpsert(state);
+  syncPeopleFirstFromLegacyUpsert(state);
+  return ensureStateSchemaScaffold(state);
 }
 
 function migratePeopleFirstFromLegacy(state: RunState): RunState {

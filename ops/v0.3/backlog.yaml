@@ -3423,7 +3423,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3447,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_tooling_t02_reclaim_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
