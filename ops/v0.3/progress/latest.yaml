@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-002-T04
+  last_completed_task_id: V03-R1-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 0a4b9aa3cee73b4754ad020d8ed24b6f3d9bafcb
+  git_commit: 4a4a91337b66f5f9df73e38e324e30282a65f0fb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,19 +21,20 @@ last_run:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Accepted Tooling/QA V03-R1-002-T04 on kickoff and opened Tooling/QA
-  V03-R1-002-T05 under run log
-  2026-03-30_tooling_t04_acceptance_and_t05_dispatch. UI and Social are idle,
+  Accepted Tooling/QA V03-R1-002-T05 on kickoff and opened Tooling/QA
+  V03-R1-002-T06 under run log
+  2026-03-30_tooling_t05_acceptance_and_t06_dispatch. UI and Social are idle,
   Economy/Fiscal remains blocked behind V03-R1-002-T06, and world/topology
-  automation remains blocked behind V03-XMAP-001. Integrator verification
+  automation remains blocked behind V03-XMAP-001. Same-lane continuation is
+  now the standing policy for safe follow-on tasks. Integrator verification
   passed for validate, scheduler dry-run, rebase dry-run, focused migration
   tests, qa, preflight, replay batch twice, and repo duplicate audit with
   stable replay hash
   7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
 active_claims:
   codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T05
+    task_id: V03-R1-002-T06
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T13:08:10-0400'
-    claim_expires_at: '2026-03-30T17:08:10-0400'
-    run_id: 2026-03-30_tooling_t05_dispatch
+    claimed_at: '2026-03-30T13:43:08-0400'
+    claim_expires_at: '2026-03-30T17:43:08-0400'
+    run_id: 2026-03-30_tooling_t06_dispatch
