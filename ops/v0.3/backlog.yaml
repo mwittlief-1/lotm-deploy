@@ -3558,7 +3558,7 @@ tasks:
   title: Add bounded snapshot and migration failure coverage
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: ready
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3584,11 +3584,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-30T13:08:10-0400'
+    claim_expires_at: '2026-03-30T17:08:10-0400'
+    run_id: 2026-03-30_tooling_t05_dispatch
   done_conditions:
   - tests cover bounded snapshots including version metadata
   - tests cover migration failure escalation paths
