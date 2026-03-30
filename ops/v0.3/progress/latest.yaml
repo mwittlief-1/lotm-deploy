@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-002-T06
+  last_completed_task_id: V03-R1-003-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6c120375a0e1998569926de709fc3359ab03674b
+  git_commit: 4a1e48fafb35313768856e7ee8cf64df76fd18d2
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,18 +21,18 @@ last_run:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Accepted Tooling/QA V03-R1-002-T06 on kickoff, closed epic V03-R1-002,
-  and opened Economy/Fiscal V03-R1-003-T02 under run log
-  2026-03-30_tooling_t06_acceptance_and_economy_t02_dispatch. Tooling, UI,
-  Engine, and Social are idle, and world/topology automation remains blocked
-  behind V03-XMAP-001. Integrator verification passed for validate, scheduler
-  dry-run, rebase dry-run, qa, preflight, replay batch twice, and repo
-  duplicate audit with stable replay hash
-  7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
+  Accepted Economy/Fiscal V03-R1-003-T02 on kickoff and opened
+  Economy/Fiscal V03-R1-003-T03 under run log
+  2026-03-30_economy_t02_acceptance_and_t03_dispatch. Tooling, UI, Engine,
+  and Social are idle, and world/topology automation remains blocked behind
+  V03-XMAP-001. Integrator verification passed for validate, scheduler
+  dry-run, rebase dry-run, the focused obligation registry spec, qa,
+  preflight, replay batch twice, and repo duplicate audit with stable replay
+  hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R1-003-T02
+    task_id: V03-R1-003-T03
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T14:38:38-0400'
-    claim_expires_at: '2026-03-30T18:38:38-0400'
-    run_id: 2026-03-30_economy_t02_dispatch
+    claimed_at: '2026-03-30T17:56:47-0400'
+    claim_expires_at: '2026-03-30T21:56:47-0400'
+    run_id: 2026-03-30_economy_t03_dispatch
