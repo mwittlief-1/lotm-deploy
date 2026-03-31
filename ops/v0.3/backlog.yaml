@@ -2735,7 +2735,7 @@ tasks:
     status: claimed
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:28:50-0400'
-    claim_expires_at: '2026-03-31T14:28:50-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_social_t05_dispatch
 - id: V03-R0-005-T06
   parent_epic: V03-R0-005
@@ -3365,7 +3365,7 @@ tasks:
     status: claimed
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_world_t07_dispatch
   done_conditions:
   - epic report is written
@@ -4288,7 +4288,7 @@ tasks:
     status: claimed
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_ui_t02_dispatch
 - id: V03-R1-005-T03
   parent_epic: V03-R1-005
@@ -7063,7 +7063,7 @@ tasks:
     status: claimed
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_economy_t04_dispatch
 - id: V03-R3-004-T05
   parent_epic: V03-R3-004

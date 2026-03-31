@@ -5,53 +5,44 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: d8c269965d52d7c8d4c48e46637ed523e05a650a
+  git_branch: codex/tmp-v0.3-integrator-20260331
+  git_commit: 4cf5ad0c9435d3a970ed7c45c8e779b70a2f4855
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: pass
-    preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    qa: not_run
+    preflight: not_run
+    repo_duplicates: not_run
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
-    run2: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
-notes: >-
-  Accepted Social V03-R0-005-T04 onto kickoff, excluding the lane-local
-  backlog/latest edits from the lane commit; dispatched Social
-  V03-R0-005-T05 as the next safe same-lane continuation; and kept UI
-  V03-R1-005-T02, Economy V03-R3-004-T04, and World V03-R1-001-T07 as
-  the continuing in-flight lane claims. The `npm run qa` wrapper hit a
-  sandbox-local `tsx` IPC permission error after the full Vitest suite
-  wrote its report, so this pass accepted the equivalent full Vitest
-  run plus direct `node --import tsx scripts/uatGate.ts` as the
-  documented gate exception.
+    run1: not_run
+    run2: not_run
+notes: Reconciled the active lane claims without accepting new handoffs. `ops:v0.3:validate`, `ops:v0.3:scheduler-dry-run`, and `ops:v0.3:rebase-dry-run` passed on the integrator worktree, but all four ready claimed tasks (`V03-R0-005-T05`, `V03-R1-005-T02`, `V03-R3-004-T04`, `V03-R1-001-T07`) still lacked handoff artifact evidence, so this pass refreshed their claim TTLs only. UI and Economy already contained the current kickoff tree, and World was fast-forwarded to kickoff `4cf5ad0`. Social remains on the accepted `V03-R0-005-T04` lane commit with dirty QA artifacts and no `V03-R0-005-T05` handoff yet. Tooling and Engine remain without claimable work this pass.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T04
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_economy_t04_dispatch
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T05
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:28:50-0400'
-    claim_expires_at: '2026-03-31T14:28:50-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_social_t05_dispatch
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T02
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_ui_t02_dispatch
   codex/v0.3-lane-world-topology:
     task_id: V03-R1-001-T07
     claimed_by: integrator.dispatch
     claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
     run_id: 2026-03-31_world_t07_dispatch
