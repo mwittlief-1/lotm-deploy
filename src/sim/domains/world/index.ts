@@ -1,5 +1,6 @@
 export * from "./types";
 export {
+  buildBoundedWorldTopologyView,
   classifyTravelDistance,
   createWorldDomain,
   getArchbishopricById,

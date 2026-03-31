@@ -21,6 +21,13 @@ describe("bounded snapshot contract", () => {
       schema_version: "economy_obligations_view_v1",
       counterparty_order: ["liege", "church"]
     });
+    expect(serialized.world_topology_view).toMatchObject({
+      schema_version: "world_topology_snapshot_v1",
+      anchor_manor_id: "manor_hx_26597",
+      far_threshold: null,
+      distance_sample_limit: 8,
+      distance_sample_total: 387
+    });
     expect(serialized.portfolio).toEqual(state.portfolio);
     expect(serialized.log).toBeUndefined();
     expect(serialized.institutions).toBeUndefined();
