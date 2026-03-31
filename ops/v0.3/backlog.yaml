@@ -2732,11 +2732,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:27:38-0400'
-    claim_expires_at: '2026-03-31T14:27:38-0400'
-    run_id: 2026-03-31_social_t04_acceptance_and_t05_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-005-T06
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -3362,11 +3362,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_world_t07_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - epic report is written
   - world-domain docs reflect the merged topology contract
@@ -4285,11 +4285,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T02.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_ui_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-005-T03
   parent_epic: V03-R1-005
   release: v0.3.1
@@ -7060,11 +7060,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T04.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_economy_t04_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T05
   parent_epic: V03-R3-004
   release: v0.3.3
