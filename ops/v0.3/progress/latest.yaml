@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R1-001-T04
-  last_completed_task_id: V03-R1-001-T03
+  last_completed_task_id: V03-R1-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cf5dd49fb5aae292525aba3e12186e318f435eb7
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: 7c3b49d07f1d45d4c33b526bca03b44151f003cb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,17 +15,18 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
     run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted Social V03-R0-005-T02, UI V03-R1-003-T06, Economy
-  V03-R3-004-T01, and World V03-R1-001-T03 onto kickoff; reopened
-  Social V03-R0-005-T03, UI V03-R1-005-T01, and Economy V03-R3-004-T02 for
-  continued lane execution; and unblocked integrator-owned V03-R1-001-T04
-  after the world far-threshold work landed cleanly on kickoff.
+  Completed UI V03-R1-005-T01 with a gameplay obligations surface audit in
+  docs/ux/v0.3.1_obligations_surface_audit.md; documented liege/church
+  counterparty gaps across Turn Report, Decisions, and receipts; and confirmed
+  economy_obligations_view is the canonical seam for follow-on UI work while
+  integrator-owned V03-R1-001-T04 remains the current kickoff task and the
+  Social V03-R0-005-T03 and Economy V03-R3-004-T02 lane claims stay open.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T02
@@ -39,9 +40,3 @@ active_claims:
     claimed_at: '2026-03-31T08:56:51-0400'
     claim_expires_at: '2026-03-31T12:56:51-0400'
     run_id: 2026-03-31_social_t03_dispatch
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-005-T01
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_ui_r1_005_t01_dispatch
