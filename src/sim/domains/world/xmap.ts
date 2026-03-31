@@ -10,12 +10,15 @@ import {
   MANOR_UNITS_SCHEMA_VERSION,
   ROUTE_HOP_DISTANCE_METRIC,
   WORLD_DOMAIN_SCHEMA_VERSION,
+  WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SCHEMA_VERSION,
   XMAP_ALPHA_MANIFEST_SCHEMA_VERSION,
   type WorldDistanceBandOptionsV1,
   type WorldDistanceBandV1,
   type WorldDomainV1,
   type WorldNumericDistanceV1,
+  type WorldTopologySnapshotDistanceSampleV1,
+  type WorldTopologySnapshotV1,
   type XMapAlphaManifestV1,
   type XMapArchbishopricOverlayV1,
   type XMapBishopricOverlayV1,
@@ -44,6 +47,7 @@ const BUNDLED_IMPORT_SURFACE = {
 const EMPTY_TERRITORIAL_NEIGHBORS: readonly XMapTerritorialNeighborV1[] = [];
 const EMPTY_ROUTE_NEIGHBORS: readonly XMapRouteNeighborV1[] = [];
 const DISTANCE_SCALE = 1000;
+const WORLD_TOPOLOGY_DISTANCE_SAMPLE_LIMIT = 8;
 
 let bundledWorldDomain: WorldDomainV1 | undefined;
 
@@ -92,6 +96,19 @@ function toDistanceMilli(value: number): number {
 
 function fromDistanceMilli(value: number): number {
   return value / DISTANCE_SCALE;
+}
+
+function compareDistanceSamples(
+  left: WorldTopologySnapshotDistanceSampleV1,
+  right: WorldTopologySnapshotDistanceSampleV1
+): number {
+  if (left.travel_cost_distance !== right.travel_cost_distance) {
+    return left.travel_cost_distance - right.travel_cost_distance;
+  }
+  if (left.route_hop_distance !== right.route_hop_distance) {
+    return left.route_hop_distance - right.route_hop_distance;
+  }
+  return compareStrings(left.to_manor_id, right.to_manor_id);
 }
 
 function normalizeFarThreshold(value: number | null | undefined, label: string): number | null {
@@ -563,6 +580,39 @@ export function classifyTravelDistance(
   }
 
   return travelCostDistance >= farThreshold ? "far" : "near";
+}
+
+export function buildBoundedWorldTopologyView(domain: WorldDomainV1 = loadBundledWorldDomain()): WorldTopologySnapshotV1 {
+  const anchorRow = domain.world_topology.distance_preview_rows[0];
+  assertWorld(anchorRow, "distance preview rows missing anchor manor");
+
+  const anchorManor = getManorById(domain, anchorRow.manor_id);
+  assertWorld(anchorManor, `anchor manor ${anchorRow.manor_id} missing from world domain`);
+
+  const distanceSamples = anchorRow.distances
+    .map<WorldTopologySnapshotDistanceSampleV1>((entry) => ({
+      to_manor_id: entry.to_manor_id,
+      travel_cost_distance: entry.travel_cost_distance,
+      route_hop_distance: entry.route_hop_distance,
+      distance_band: classifyTravelDistance(domain, anchorRow.manor_id, entry.to_manor_id)
+    }))
+    .sort(compareDistanceSamples)
+    .slice(0, WORLD_TOPOLOGY_DISTANCE_SAMPLE_LIMIT);
+
+  return {
+    schema_version: WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION,
+    anchor_manor_id: anchorRow.manor_id,
+    anchor_holding_id: anchorManor.holding_id,
+    anchor_county_id: anchorManor.county_id,
+    canonical_numeric_distance: domain.world_topology.distance_metrics.canonical_numeric_distance,
+    companion_metric: domain.world_topology.distance_metrics.companion_metric,
+    far_threshold: getFarThresholdDefault(domain),
+    distance_sample_limit: WORLD_TOPOLOGY_DISTANCE_SAMPLE_LIMIT,
+    distance_sample_total: anchorRow.distances.length,
+    territorial_neighbors: [...(getTerritorialAdjacency(domain, anchorRow.manor_id) ?? EMPTY_TERRITORIAL_NEIGHBORS)],
+    route_neighbors: [...(getRouteAdjacency(domain, anchorRow.manor_id) ?? EMPTY_ROUTE_NEIGHBORS)],
+    distance_samples: distanceSamples
+  };
 }
 
 export function getRouteEdgeById(domain: WorldDomainV1, edgeId: string): XMapWeightedRouteEdgeV1 | null {

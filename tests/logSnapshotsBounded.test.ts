@@ -19,6 +19,7 @@ const ALLOWED_KEYS = new Set([
   "people",
   "houses",
   "player_house_id",
+  "world_topology_view",
   "kinship",
   "kinship_edges"
 ]);
@@ -41,6 +42,10 @@ describe("TurnLogEntry snapshots", () => {
         expect(after.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
         expect(before.bounded_registry_manifest?.schema_version).toBe(BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION);
         expect(after.bounded_registry_manifest?.schema_version).toBe(BOUNDED_REGISTRY_MANIFEST_SCHEMA_VERSION);
+        expect(before.world_topology_view?.schema_version).toBe("world_topology_snapshot_v1");
+        expect(after.world_topology_view?.schema_version).toBe("world_topology_snapshot_v1");
+        expect(before.world_topology_view?.anchor_manor_id).toBe("manor_hx_26597");
+        expect(after.world_topology_view?.anchor_manor_id).toBe("manor_hx_26597");
 
         for (const k of Object.keys(before)) expect(ALLOWED_KEYS.has(k)).toBe(true);
         for (const k of Object.keys(after)) expect(ALLOWED_KEYS.has(k)).toBe(true);

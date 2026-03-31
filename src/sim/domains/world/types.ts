@@ -6,6 +6,7 @@ export const HOLDING_FABRIC_LEGAL_RULE_VERSION = "holding_fabric_legal_rules_v0_
 export const WORLD_DOMAIN_SCHEMA_VERSION = "xmap_world_domain_v1" as const;
 export const CANONICAL_NUMERIC_DISTANCE_METRIC = "travel_cost_distance" as const;
 export const ROUTE_HOP_DISTANCE_METRIC = "route_hop_distance" as const;
+export const WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION = "world_topology_snapshot_v1" as const;
 
 export type XMapFranchiseBundleV1 = {
   market_right: string;
@@ -299,6 +300,26 @@ export type WorldDistanceBandV1 = "near" | "far";
 
 export interface WorldDistanceBandOptionsV1 {
   far_threshold?: number | null;
+}
+
+export interface WorldTopologySnapshotDistanceSampleV1 extends WorldNumericDistanceV1 {
+  to_manor_id: string;
+  distance_band: WorldDistanceBandV1 | null;
+}
+
+export interface WorldTopologySnapshotV1 {
+  schema_version: typeof WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION;
+  anchor_manor_id: string;
+  anchor_holding_id: string;
+  anchor_county_id: string;
+  canonical_numeric_distance: typeof CANONICAL_NUMERIC_DISTANCE_METRIC;
+  companion_metric: typeof ROUTE_HOP_DISTANCE_METRIC;
+  far_threshold: number | null;
+  distance_sample_limit: number;
+  distance_sample_total: number;
+  territorial_neighbors: XMapTerritorialNeighborV1[];
+  route_neighbors: XMapRouteNeighborV1[];
+  distance_samples: WorldTopologySnapshotDistanceSampleV1[];
 }
 
 export interface WorldDomainV1 {

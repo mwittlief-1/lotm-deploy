@@ -1,4 +1,5 @@
 import { SIM_VERSION } from "./version";
+import type { WorldTopologySnapshotV1 } from "./domains/world/types";
 
 export type SimVersion = typeof SIM_VERSION;
 
@@ -250,7 +251,9 @@ export interface RunSnapshot {
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
   economy?: EconomyRegistryPlaceholderV1;
+  economy_obligations_view?: { schema_version: string; [key: string]: unknown };
   portfolio?: PortfolioRegistryPlaceholderV1;
+  world_topology_view?: WorldTopologySnapshotV1;
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }

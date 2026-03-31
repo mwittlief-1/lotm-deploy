@@ -3195,7 +3195,7 @@ tasks:
   title: Expose topology selectors and bounded world snapshot fields
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: ready
+  status: done
   priority: 78
   tranche: 2
   change_type: behavior_change
@@ -3242,7 +3242,7 @@ tasks:
   title: Render topology distance and threshold debug surfaces
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: ready
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3254,7 +3254,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for integrator-owned V03-R1-001-T04 snapshot wiring.
+  blocked_reason: ''
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -3267,11 +3267,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_ui_t05_dispatch
   done_conditions:
   - ui shows raw numeric distance where world debug surfaces are enabled
   - ui shows the current far-threshold value
@@ -3287,7 +3287,7 @@ tasks:
   title: Add topology determinism fixtures and contract coverage
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: ready
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3301,7 +3301,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-R1-001-T04 completion on codex/v0.3-refactor-kickoff.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3315,11 +3315,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Accepted world/topology fixtures and debug artifacts will be added after merge.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T09:31:09-0400'
+    claim_expires_at: '2026-03-31T13:31:09-0400'
+    run_id: 2026-03-31_world_t06_dispatch
   done_conditions:
   - deterministic topology fixtures exist
   - tests cover adjacency, numeric distance, and far-threshold behavior
@@ -4251,7 +4251,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: todo
+  status: ready
   priority: 98
   tranche: 2
   change_type: refactor
@@ -6948,7 +6948,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Define minimal price table and typed price reference contract
-  status: ready
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6979,16 +6979,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T02.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_economy_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T03
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Implement fixed pricing constants for key goods and labor placeholders
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7019,11 +7019,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_economy_t03_dispatch
 - id: V03-R3-004-T04
   parent_epic: V03-R3-004
   release: v0.3.3
