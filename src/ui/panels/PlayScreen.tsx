@@ -56,6 +56,7 @@ import {
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
 import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, type StickyResourceChip, buildStickyResourceChips } from "../playScreenLayout";
+import { buildTopologyDebugSurface } from "../playScreenTopology";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_EYEBROW_STYLE,
@@ -80,6 +81,7 @@ import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
 import { StickyResourceChips } from "./StickyResourceChips";
+import { TopologyDebugPanel } from "./TopologyDebugPanel";
 import { TurnReportPanel } from "./TurnReportPanel";
 
 type ProspectDecisionAction = { prospect_id: string; action: "accept" | "reject" };
@@ -456,6 +458,7 @@ export function PlayScreen({
 
   const { dueEntering, accruedThisTurn, arrearsCarried, totalObligations } = buildObligationTiming(ctx.report, ob);
   const courtDecisionBudget = buildCourtDecisionBudgetSurface(ctx.report, mw);
+  const topologyDebugSurface = buildTopologyDebugSurface(ctx.preview_state);
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
   const constructionRatePlannedNextTurn = decisions.labor.desired_builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -557,6 +560,7 @@ export function PlayScreen({
   const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
   const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
   const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
+  const [runLogDebugSurface, relationshipDebugSurface, topologyDebugSurfaceMeta] = PLAY_SCREEN_DEBUG_SURFACES;
 
   function openExplainChanges() {
     setReceiptViewerRoute(createExplainChangesRoute());
@@ -719,8 +723,8 @@ export function PlayScreen({
     debug_relationships: (
       <DebugAccordion summary={PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY} title="Debug surfaces">
         <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
-          <div style={{ fontWeight: 700 }}>{PLAY_SCREEN_DEBUG_SURFACES[0].title}</div>
-          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{PLAY_SCREEN_DEBUG_SURFACES[0].description}</div>
+          <div style={{ fontWeight: 700 }}>{runLogDebugSurface.title}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{runLogDebugSurface.description}</div>
           <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
             <button onClick={onOpenLog}>Open Run Log</button>
             <button onClick={onExportRunSummary}>Export Run Summary</button>
@@ -729,8 +733,8 @@ export function PlayScreen({
         </div>
 
         <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
-          <div style={{ fontWeight: 700 }}>{PLAY_SCREEN_DEBUG_SURFACES[1].title}</div>
-          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{PLAY_SCREEN_DEBUG_SURFACES[1].description}</div>
+          <div style={{ fontWeight: 700 }}>{relationshipDebugSurface.title}</div>
+          <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{relationshipDebugSurface.description}</div>
           <RelationshipDrawerPanel
             onQueryChange={setRelationshipDrawerQuery}
             onTabChange={setRelationshipDrawerTab}
@@ -739,6 +743,12 @@ export function PlayScreen({
             tab={relationshipDrawerTab}
           />
         </div>
+
+        <TopologyDebugPanel
+          description={topologyDebugSurfaceMeta.description}
+          surface={topologyDebugSurface}
+          title={topologyDebugSurfaceMeta.title}
+        />
       </DebugAccordion>
     )
   };
