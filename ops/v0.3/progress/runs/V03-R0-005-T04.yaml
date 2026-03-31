@@ -4,7 +4,7 @@ task_id: V03-R0-005-T04
 status: done
 date: 2026-03-31
 branch: codex/v0.3-lane-social-mechanics
-commit: e88e31d2ccfe6e7c28023ad33efcbefcd9cadaeb
+commit: 7f9a4e43e611fca73e153c0dcf7f4696292f7e0c
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -34,4 +34,5 @@ control_plane_notes:
   ops_v0_3_validate: pass
   ops_v0_3_scheduler_dry_run: pass
   ops_v0_3_rebase_dry_run: pass
+  intake_exception: corrected_handoff_commit_metadata_from_pre_task_merge_sync_to_task_commit
   reason: T04 is closed on the lane branch; the next social task remains unready until kickoff promotes it.
