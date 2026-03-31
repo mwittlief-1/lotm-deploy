@@ -5,6 +5,8 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+  WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION,
+  buildBoundedWorldTopologyView,
   CANONICAL_NUMERIC_DISTANCE_METRIC,
   HOLDING_FABRIC_LEGAL_RULE_VERSION,
   ROUTE_HOP_DISTANCE_METRIC,
@@ -184,5 +186,38 @@ describe("xmap world domain", () => {
       travel_cost_distance: 134.378,
       route_hop_distance: 5
     });
+  });
+
+  it("builds a bounded topology snapshot view from a deterministic anchor manor", () => {
+    const world = createWorldFixtureWithFarThreshold(50);
+    const snapshot = buildBoundedWorldTopologyView(world);
+
+    expect(snapshot.schema_version).toBe(WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION);
+    expect(snapshot.anchor_manor_id).toBe("manor_hx_26597");
+    expect(snapshot.anchor_holding_id).toBe("church_fief_hx_28841");
+    expect(snapshot.anchor_county_id).toBe("c_2");
+    expect(snapshot.canonical_numeric_distance).toBe(CANONICAL_NUMERIC_DISTANCE_METRIC);
+    expect(snapshot.companion_metric).toBe(ROUTE_HOP_DISTANCE_METRIC);
+    expect(snapshot.far_threshold).toBe(50);
+    expect(snapshot.distance_sample_limit).toBe(8);
+    expect(snapshot.distance_sample_total).toBe(387);
+    expect(snapshot.territorial_neighbors).toEqual([
+      { manor_id: "manor_hx_28840", shared_border_sides: 12 },
+      { manor_id: "manor_hx_28841", shared_border_sides: 15 },
+      { manor_id: "manor_hx_29126", shared_border_sides: 5 },
+      { manor_id: "manor_hx_30535", shared_border_sides: 9 },
+      { manor_id: "manor_hx_30811", shared_border_sides: 12 },
+      { manor_id: "manor_hx_32209", shared_border_sides: 10 }
+    ]);
+    expect(snapshot.distance_samples).toEqual([
+      { to_manor_id: "manor_hx_26597", travel_cost_distance: 0, route_hop_distance: 0, distance_band: "near" },
+      { to_manor_id: "manor_hx_28840", travel_cost_distance: 17.66, route_hop_distance: 1, distance_band: "near" },
+      { to_manor_id: "manor_hx_28841", travel_cost_distance: 18.2, route_hop_distance: 1, distance_band: "near" },
+      { to_manor_id: "manor_hx_29126", travel_cost_distance: 33.73, route_hop_distance: 1, distance_band: "near" },
+      { to_manor_id: "manor_hx_30811", travel_cost_distance: 46.992, route_hop_distance: 1, distance_band: "near" },
+      { to_manor_id: "manor_hx_31093", travel_cost_distance: 49.76, route_hop_distance: 2, distance_band: "near" },
+      { to_manor_id: "manor_hx_30535", travel_cost_distance: 50.064, route_hop_distance: 1, distance_band: "far" },
+      { to_manor_id: "manor_hx_32209", travel_cost_distance: 50.596, route_hop_distance: 1, distance_band: "far" }
+    ]);
   });
 });

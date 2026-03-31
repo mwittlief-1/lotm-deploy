@@ -75,6 +75,10 @@ describe("state schema scaffold", () => {
     expect(snapshot.bounded_registry_manifest.entries.map((entry) => entry.registry_id)).toEqual([...BOUNDED_REGISTRY_MANIFEST_ENTRY_IDS]);
     expect(snapshot.bounded_registry_manifest).toEqual(state.bounded_registry_manifest);
     expect(snapshot.economy).toEqual(state.economy);
+    expect(snapshot.world_topology_view).toMatchObject({
+      schema_version: "world_topology_snapshot_v1",
+      anchor_manor_id: "manor_hx_26597"
+    });
     expect(snapshot.portfolio).toEqual(state.portfolio);
   });
 });
