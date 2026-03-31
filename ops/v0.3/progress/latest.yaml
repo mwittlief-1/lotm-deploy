@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-004-T03
+  last_completed_task_id: V03-R0-005-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 93a73f2e1c29ff9eae9711a7df7349174b05d801
+  git_commit: d8c269965d52d7c8d4c48e46637ed523e05a650a
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,10 +21,15 @@ last_run:
     run1: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
     run2: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
 notes: >-
-  Accepted UI V03-R1-001-T05 and Economy V03-R3-004-T03 onto kickoff;
-  dispatched UI V03-R1-005-T02, Economy V03-R3-004-T04, and World
-  V03-R1-001-T07; and left Social V03-R0-005-T04 as the continuing
-  in-flight lane claim.
+  Accepted Social V03-R0-005-T04 onto kickoff, excluding the lane-local
+  backlog/latest edits from the lane commit; dispatched Social
+  V03-R0-005-T05 as the next safe same-lane continuation; and kept UI
+  V03-R1-005-T02, Economy V03-R3-004-T04, and World V03-R1-001-T07 as
+  the continuing in-flight lane claims. The `npm run qa` wrapper hit a
+  sandbox-local `tsx` IPC permission error after the full Vitest suite
+  wrote its report, so this pass accepted the equivalent full Vitest
+  run plus direct `node --import tsx scripts/uatGate.ts` as the
+  documented gate exception.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T04
@@ -33,11 +38,11 @@ active_claims:
     claim_expires_at: '2026-03-31T14:06:01-0400'
     run_id: 2026-03-31_economy_t04_dispatch
   codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-005-T04
+    task_id: V03-R0-005-T05
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:54:41-0400'
-    claim_expires_at: '2026-03-31T13:54:41-0400'
-    run_id: 2026-03-31_social_t04_dispatch
+    claimed_at: '2026-03-31T10:28:50-0400'
+    claim_expires_at: '2026-03-31T14:28:50-0400'
+    run_id: 2026-03-31_social_t05_dispatch
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T02
     claimed_by: integrator.dispatch
