@@ -2619,7 +2619,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Implement seeded relationship edges for player, liege, church, and local houses
-  status: ready
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2651,11 +2651,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T03.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_social_t03_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-005-T04
   parent_epic: V03-R0-005
   release: v0.3.0
