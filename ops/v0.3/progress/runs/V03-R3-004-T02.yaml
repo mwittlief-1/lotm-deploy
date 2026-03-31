@@ -1,0 +1,41 @@
+version: 1
+run_id: 2026-03-31_economy_t02_dispatch
+task_id: V03-R3-004-T02
+status: done
+date: 2026-03-31
+branch: codex/v0.3-lane-economy-fiscal
+commit: 49a65a8fbc071935f4af26d37c5722416de317ec
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+  run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+artifacts:
+  pricing_module: src/sim/domains/economy/pricing.ts
+  pricing_tests: tests/sim/pricing_contract.test.ts
+findings:
+  - The new pricing table is economy-owned, versioned, and deterministic, with fixed integer ratios instead of float quotes so future wiring can avoid drift.
+  - The typed price reference snapshot gives later runtime and UI tasks a read-only contract for food-store sale, meat-sale placeholders, and labor placeholders without changing current replay behavior.
+  - The contract keeps `service_placeholder` out of pricing and treats labor pricing as explicit placeholder space rather than overloading fiscal payment-mode scaffolding.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R3-004-T03
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T02 closed cleanly on the lane branch, but T03 remains todo and has not yet been scheduler-promoted for economy execution.

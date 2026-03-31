@@ -3267,11 +3267,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_ui_t05_dispatch
   done_conditions:
   - ui shows raw numeric distance where world debug surfaces are enabled
   - ui shows the current far-threshold value
@@ -4208,7 +4208,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Audit obligations, arrears, and counterparty surfaces on gameplay screens
-  status: ready
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4242,16 +4242,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_ui_r1_005_t01_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-005-T02
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: todo
+  status: ready
   priority: 98
   tranche: 2
   change_type: refactor
@@ -6948,7 +6948,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Define minimal price table and typed price reference contract
-  status: ready
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6979,16 +6979,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T02.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_economy_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T03
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Implement fixed pricing constants for key goods and labor placeholders
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7019,11 +7019,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_economy_t03_dispatch
 - id: V03-R3-004-T04
   parent_epic: V03-R3-004
   release: v0.3.3

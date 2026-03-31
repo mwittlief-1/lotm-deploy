@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-001-T04
+  last_completed_task_id: V03-R3-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 3c6bba4f5a3a7c5a44dcf6272b08f905e5d15c68
+  git_commit: 6d2f259e2ef1b332964bcb76bb4191b82a5b97ce
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,17 +21,17 @@ last_run:
     run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
     run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted integrator-owned V03-R1-001-T04 onto kickoff; unblocked UI
-  V03-R1-001-T05 as ready; and dispatched World V03-R1-001-T06 while
-  Social V03-R0-005-T03, UI V03-R1-005-T01, and Economy V03-R3-004-T02
-  remain the active lane claims.
+  Accepted UI V03-R1-005-T01 and Economy V03-R3-004-T02 onto kickoff;
+  reopened UI V03-R1-005-T02 as ready; dispatched UI V03-R1-001-T05 and
+  Economy V03-R3-004-T03; and left Social V03-R0-005-T03 plus World
+  V03-R1-001-T06 as the continuing active lane claims.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T02
+    task_id: V03-R3-004-T03
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_economy_t02_dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_economy_t03_dispatch
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T03
     claimed_by: integrator.dispatch
@@ -39,11 +39,11 @@ active_claims:
     claim_expires_at: '2026-03-31T12:56:51-0400'
     run_id: 2026-03-31_social_t03_dispatch
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-005-T01
+    task_id: V03-R1-001-T05
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:56:51-0400'
-    claim_expires_at: '2026-03-31T12:56:51-0400'
-    run_id: 2026-03-31_ui_r1_005_t01_dispatch
+    claimed_at: '2026-03-31T09:42:26-0400'
+    claim_expires_at: '2026-03-31T13:42:26-0400'
+    run_id: 2026-03-31_ui_t05_dispatch
   codex/v0.3-lane-world-topology:
     task_id: V03-R1-001-T06
     claimed_by: integrator.dispatch
