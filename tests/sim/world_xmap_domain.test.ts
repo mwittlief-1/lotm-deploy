@@ -9,10 +9,14 @@ import {
   HOLDING_FABRIC_LEGAL_RULE_VERSION,
   ROUTE_HOP_DISTANCE_METRIC,
   WORLD_DOMAIN_SCHEMA_VERSION,
+  classifyTravelDistance,
+  createWorldDomain,
   getArchbishopricForManor,
   getBishopricForManor,
   getBundledWorldImportSurface,
   getCountyForManor,
+  getFarThreshold,
+  getFarThresholdDefault,
   getHoldingById,
   getHoldingImmediateLordActorId,
   getHoldingSuperiorLordActorId,
@@ -32,6 +36,13 @@ function sha256ForFile(filePath: string): string {
   return createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
+function createWorldFixtureWithFarThreshold(farThreshold: number | null) {
+  const importSurface = structuredClone(getBundledWorldImportSurface());
+  importSurface.manifest.distance_metrics.far_threshold_default = farThreshold;
+  importSurface.world_topology.distance_metrics.far_threshold_default = farThreshold;
+  return createWorldDomain(importSurface);
+}
+
 describe("xmap world domain", () => {
   it("loads the frozen xmap snapshot with the expected current-world counts", () => {
     const world = loadBundledWorldDomain();
@@ -46,6 +57,7 @@ describe("xmap world domain", () => {
     expect(world.world_topology.manor_ids).toHaveLength(387);
     expect(world.world_topology.distance_metrics.canonical_numeric_distance).toBe(CANONICAL_NUMERIC_DISTANCE_METRIC);
     expect(world.world_topology.distance_metrics.companion_metric).toBe(ROUTE_HOP_DISTANCE_METRIC);
+    expect(getFarThresholdDefault(world)).toBeNull();
     expect(world.holding_fabric.legal_rule_version).toBe(HOLDING_FABRIC_LEGAL_RULE_VERSION);
   });
 
@@ -146,5 +158,31 @@ describe("xmap world domain", () => {
         });
       }
     }
+  });
+
+  it("classifies near and far travel from the fixed world fixture using an override threshold", () => {
+    const world = loadBundledWorldDomain();
+
+    expect(getFarThreshold(world)).toBeNull();
+    expect(getFarThreshold(world, { far_threshold: 50 })).toBe(50);
+    expect(getFarThreshold(world, { far_threshold: null })).toBeNull();
+    expect(classifyTravelDistance(world, "manor_hx_26597", "manor_hx_28840")).toBeNull();
+    expect(classifyTravelDistance(world, "manor_hx_26597", "manor_hx_28840", { far_threshold: 50 })).toBe("near");
+    expect(classifyTravelDistance(world, "manor_hx_26597", "manor_hx_27972", { far_threshold: 50 })).toBe("far");
+    expect(getTravelCostDistance(world, "manor_hx_26597", "manor_hx_28840")).toBe(17.66);
+    expect(getTravelCostDistance(world, "manor_hx_26597", "manor_hx_27972")).toBe(134.378);
+  });
+
+  it("uses a configured default far-threshold from a fixed world fixture clone", () => {
+    const world = createWorldFixtureWithFarThreshold(100);
+
+    expect(getFarThresholdDefault(world)).toBe(100);
+    expect(getFarThreshold(world)).toBe(100);
+    expect(classifyTravelDistance(world, "manor_hx_26597", "manor_hx_28840")).toBe("near");
+    expect(classifyTravelDistance(world, "manor_hx_26597", "manor_hx_27972")).toBe("far");
+    expect(getNumericDistanceMetrics(world, "manor_hx_26597", "manor_hx_27972")).toEqual({
+      travel_cost_distance: 134.378,
+      route_hop_distance: 5
+    });
   });
 });

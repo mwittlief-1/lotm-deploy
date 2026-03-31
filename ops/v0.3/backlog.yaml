@@ -2619,7 +2619,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Implement seeded relationship edges for player, liege, church, and local houses
-  status: todo
+  status: ready
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2651,11 +2651,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_social_t03_dispatch
 - id: V03-R0-005-T04
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -3024,7 +3024,7 @@ tasks:
   title: Declare map alpha complete and merged into lotm_deploy
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 999
   tranche: 2
   change_type: external_checkpoint
@@ -3033,7 +3033,7 @@ tasks:
   lane_branch: codex/v0.3-lane-world-topology
   deps: []
   requires_integrator: true
-  blocked_reason: Waiting for the external mapgen alpha checklist and approved integration checkpoint.
+  blocked_reason: ''
   allowed_paths:
   - ops/v0.3/**
   forbidden_paths:
@@ -3058,18 +3058,18 @@ tasks:
   title: Define merged topology contract surface and fixture import plan
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: After merge checkpoint, lock the merged world-domain contract surface, imported fixture shape, and deterministic ownership boundaries for topology data.
+  goal: After the merge checkpoint clears, rebase the merged world-domain contract and fixture import plan against the already-imported xmap_alpha_v1 surface instead of performing a fresh import pass.
   deps:
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3105,19 +3105,19 @@ tasks:
   title: Implement deterministic manor adjacency registry
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 82
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Expose deterministic adjacency between manors as a stable registry with ordering and lookup guarantees.
+  goal: Rebase deterministic manor adjacency work against the imported territorial and route adjacency surface already present in src/sim/domains/world/**, preserving stable ordering and lookup guarantees.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3150,19 +3150,19 @@ tasks:
   title: Implement numeric distance baseline and tunable far threshold
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Add numeric manor distance with a tunable far-threshold surface that can be reused by relevance and scope logic.
+  goal: "Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline."
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3195,20 +3195,20 @@ tasks:
   title: Expose topology selectors and bounded world snapshot fields
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: ready
   priority: 78
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-refactor-kickoff
-  goal: Wire merged adjacency and distance selectors into bounded world snapshot fields without reopening world-generation design decisions.
+  goal: After T03, integrator wires the rebased adjacency/distance selectors into bounded world snapshot fields without reopening the frozen xmap_alpha_v1 import contract or world-generation design decisions.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   - V03-R1-001-T03
   requires_integrator: true
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/phases/**
   - src/sim/domains/world/**
@@ -3254,7 +3254,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for integrator-owned V03-R1-001-T04 snapshot wiring.
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -3301,7 +3301,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-R1-001-T04 completion on codex/v0.3-refactor-kickoff.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3348,7 +3348,7 @@ tasks:
   - V03-R1-001-T05
   - V03-R1-001-T06
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-R1-001-T05 and V03-R1-001-T06 completion.
   allowed_paths:
   - docs/qa/**
   - docs/arch/**
@@ -3877,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3903,11 +3903,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_ui_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - settlement and enforcement outputs are available as canonical snapshot/view-model fields
   - counterparty summaries are deterministic and replay-stable
@@ -4208,7 +4208,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Audit obligations, arrears, and counterparty surfaces on gameplay screens
-  status: todo
+  status: ready
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4242,11 +4242,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_ui_r1_005_t01_dispatch
 - id: V03-R1-005-T02
   parent_epic: V03-R1-005
   release: v0.3.1
@@ -6906,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6939,16 +6939,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_economy_pricing_t01_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T02
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Define minimal price table and typed price reference contract
-  status: todo
+  status: ready
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6979,11 +6979,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_economy_t02_dispatch
 - id: V03-R3-004-T03
   parent_epic: V03-R3-004
   release: v0.3.3

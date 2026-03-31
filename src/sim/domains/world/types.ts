@@ -295,6 +295,12 @@ export interface WorldNumericDistanceV1 {
   route_hop_distance: number;
 }
 
+export type WorldDistanceBandV1 = "near" | "far";
+
+export interface WorldDistanceBandOptionsV1 {
+  far_threshold?: number | null;
+}
+
 export interface WorldDomainV1 {
   schema_version: typeof WORLD_DOMAIN_SCHEMA_VERSION;
   manifest: XMapAlphaManifestV1;
