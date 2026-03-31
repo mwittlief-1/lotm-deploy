@@ -1,3 +1,4 @@
+import { playerHouseIdOf, structuredHouseIdForPerson } from "../../actors";
 import type { RelationshipEdge, RunState } from "../../types";
 import { clampInt } from "../../util";
 
@@ -209,9 +210,133 @@ export function listRelationshipSeedProfiles(): RelationshipSeedProfile[] {
   return RELATIONSHIP_SEED_PROFILE_KEYS.map((profileKey) => getRelationshipSeedProfile(profileKey));
 }
 
+function parishInstitutionIdOf(state: RunState): string | null {
+  const anyState: any = state as any;
+  const localsParishId =
+    typeof anyState?.locals?.parish_institution_id === "string" && anyState.locals.parish_institution_id.length > 0
+      ? String(anyState.locals.parish_institution_id)
+      : null;
+  if (localsParishId) return localsParishId;
+
+  const manorParishId =
+    typeof anyState?.manor?.parish_institution_id === "string" && anyState.manor.parish_institution_id.length > 0
+      ? String(anyState.manor.parish_institution_id)
+      : null;
+  return manorParishId;
+}
+
+function isChurchCounterpartyId(state: RunState, actorId: string): boolean {
+  if (!actorId) return false;
+  if (actorId === state.locals?.clergy?.id) return true;
+
+  const anyState: any = state as any;
+  const parishId = parishInstitutionIdOf(state);
+  if (parishId && actorId === parishId) return true;
+
+  const institution: any = anyState?.institutions?.[actorId];
+  return Boolean(institution && typeof institution === "object" && institution.type === "parish");
+}
+
+function isLocalNobleId(actorId: string): boolean {
+  return /^p_noble\d+$/.test(actorId);
+}
+
+function stableOrdinalFromId(actorId: string): number {
+  const match = actorId.match(/(\d+)(?!.*\d)/);
+  if (match) {
+    const parsed = Number.parseInt(match[1] ?? "", 10);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+
+  let acc = 0;
+  for (const ch of actorId) acc = (acc + ch.charCodeAt(0)) % 997;
+  return acc;
+}
+
+function localHouseStanceForCounterparty(state: RunState, actorId: string): RelationshipSeedLocalStance {
+  const structuredHouseId = structuredHouseIdForPerson(state, actorId);
+  const stableId = structuredHouseId ?? actorId;
+  return stableOrdinalFromId(stableId) % 2 === 0 ? "favored" : "strained";
+}
+
+function isLocalHouseCounterpartyId(state: RunState, actorId: string): boolean {
+  if (!actorId) return false;
+  if (actorId === state.house?.head?.id) return false;
+  if (actorId === state.locals?.liege?.id) return false;
+  if (isChurchCounterpartyId(state, actorId)) return false;
+  if (isLocalNobleId(actorId)) return true;
+
+  const playerHouseId = playerHouseIdOf(state);
+  const houseId = structuredHouseIdForPerson(state, actorId);
+  if (!houseId || houseId === playerHouseId) return false;
+
+  const anyState: any = state as any;
+  const house: any = anyState?.houses?.[houseId];
+  return Boolean(house && typeof house === "object" && house.head_id === actorId);
+}
+
+export function resolveRelationshipSeedProfileForIds(
+  state: RunState,
+  fromId: string,
+  toId: string
+): RelationshipSeedProfile | null {
+  if (Math.trunc(state.turn_index) !== 0) return null;
+
+  const playerHeadId = state.house?.head?.id ?? "";
+  if (!playerHeadId) return null;
+  if (fromId !== playerHeadId && toId !== playerHeadId) return null;
+
+  const direction: RelationshipSeedDirection =
+    fromId === playerHeadId ? "player_to_counterparty" : "counterparty_to_player";
+  const counterpartyId = fromId === playerHeadId ? toId : fromId;
+
+  if (counterpartyId === state.locals?.liege?.id) {
+    return getRelationshipSeedProfile(
+      getRelationshipSeedProfileKey({
+        family: "liege",
+        direction,
+      })
+    );
+  }
+
+  if (isChurchCounterpartyId(state, counterpartyId)) {
+    return getRelationshipSeedProfile(
+      getRelationshipSeedProfileKey({
+        family: "church",
+        direction,
+      })
+    );
+  }
+
+  if (isLocalHouseCounterpartyId(state, counterpartyId)) {
+    return getRelationshipSeedProfile(
+      getRelationshipSeedProfileKey({
+        family: "local_house",
+        direction,
+        local_stance: localHouseStanceForCounterparty(state, counterpartyId),
+      })
+    );
+  }
+
+  return null;
+}
+
 export function ensureRelationshipEdge(state: RunState, fromId: string, toId: string): RelationshipEdge {
   const found = state.relationships.find((edge) => edge.from_id === fromId && edge.to_id === toId);
   if (found) return found;
+
+  const seededProfile = resolveRelationshipSeedProfileForIds(state, fromId, toId);
+  if (seededProfile) {
+    const edge: RelationshipEdge = {
+      from_id: fromId,
+      to_id: toId,
+      allegiance: seededProfile.target.allegiance,
+      respect: seededProfile.target.respect,
+      threat: seededProfile.target.threat,
+    };
+    state.relationships.push(edge);
+    return edge;
+  }
 
   const edge: RelationshipEdge = {
     from_id: fromId,
