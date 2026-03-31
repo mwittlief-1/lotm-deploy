@@ -1,8 +1,11 @@
+import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../stateSchema";
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const snapshot = deepCopy({
+    state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
+    bounded_registry_manifest: buildBoundedRegistryManifest(),
     turn_index: state.turn_index,
     manor: state.manor,
     house: state.house,
@@ -11,6 +14,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     houses: (state as any).houses,
     player_house_id: (state as any).player_house_id,
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
+    economy: (state as any).economy,
+    portfolio: (state as any).portfolio,
     flags: state.flags,
     game_over: state.game_over ?? null
   });

@@ -1,0 +1,5953 @@
+{
+  "config_sha256": "328996c6ed32de6fa9ee396be6f7a66aca9d382490b52851c319d73fb7a00484",
+  "corridor_edges": [
+    {
+      "corridor_strength": 0.1175,
+      "edge_id": "corridor_node_hx_22358__node_hx_23203",
+      "from_node_id": "node_hx_22358",
+      "path_hex_ids": [
+        "hx_22358",
+        "hx_22639",
+        "hx_22640",
+        "hx_22921",
+        "hx_23202",
+        "hx_23203"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_23203",
+      "travel_cost": 15.022
+    },
+    {
+      "corridor_strength": 0.0439,
+      "edge_id": "corridor_node_hx_23203__node_hx_27972",
+      "from_node_id": "node_hx_23203",
+      "path_hex_ids": [
+        "hx_23203",
+        "hx_23483",
+        "hx_23763",
+        "hx_24043",
+        "hx_24324",
+        "hx_24605",
+        "hx_24886",
+        "hx_25166",
+        "hx_25446",
+        "hx_25727",
+        "hx_26007",
+        "hx_26288",
+        "hx_26568",
+        "hx_26849",
+        "hx_27130",
+        "hx_27411",
+        "hx_27692",
+        "hx_27972"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_27972",
+      "travel_cost": 43.377
+    },
+    {
+      "corridor_strength": 0.037,
+      "edge_id": "corridor_node_hx_23203__node_hx_28247",
+      "from_node_id": "node_hx_23203",
+      "path_hex_ids": [
+        "hx_23203",
+        "hx_23483",
+        "hx_23763",
+        "hx_24043",
+        "hx_24323",
+        "hx_24603",
+        "hx_24883",
+        "hx_25163",
+        "hx_25443",
+        "hx_25723",
+        "hx_26003",
+        "hx_26283",
+        "hx_26563",
+        "hx_26843",
+        "hx_27123",
+        "hx_27404",
+        "hx_27685",
+        "hx_27966",
+        "hx_28247"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_28247",
+      "travel_cost": 50.039
+    },
+    {
+      "corridor_strength": 0.1438,
+      "edge_id": "corridor_node_hx_25194__node_hx_26317",
+      "from_node_id": "node_hx_25194",
+      "path_hex_ids": [
+        "hx_25194",
+        "hx_25474",
+        "hx_25755",
+        "hx_26036",
+        "hx_26317"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_26317",
+      "travel_cost": 12.558
+    },
+    {
+      "corridor_strength": 0.061,
+      "edge_id": "corridor_node_hx_25194__node_hx_28841",
+      "from_node_id": "node_hx_25194",
+      "path_hex_ids": [
+        "hx_25194",
+        "hx_25474",
+        "hx_25754",
+        "hx_26035",
+        "hx_26316",
+        "hx_26597",
+        "hx_26877",
+        "hx_27157",
+        "hx_27437",
+        "hx_27718",
+        "hx_27998",
+        "hx_28279",
+        "hx_28560",
+        "hx_28841"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_28841",
+      "travel_cost": 31.331
+    },
+    {
+      "corridor_strength": 0.0601,
+      "edge_id": "corridor_node_hx_25194__node_hx_29119",
+      "from_node_id": "node_hx_25194",
+      "path_hex_ids": [
+        "hx_25194",
+        "hx_25474",
+        "hx_25754",
+        "hx_26035",
+        "hx_26316",
+        "hx_26597",
+        "hx_26877",
+        "hx_27157",
+        "hx_27437",
+        "hx_27718",
+        "hx_27998",
+        "hx_28278",
+        "hx_28558",
+        "hx_28838",
+        "hx_29119"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29119",
+      "travel_cost": 34.237
+    },
+    {
+      "corridor_strength": 0.0888,
+      "edge_id": "corridor_node_hx_26317__node_hx_28841",
+      "from_node_id": "node_hx_26317",
+      "path_hex_ids": [
+        "hx_26317",
+        "hx_26597",
+        "hx_26877",
+        "hx_27157",
+        "hx_27437",
+        "hx_27718",
+        "hx_27998",
+        "hx_28279",
+        "hx_28560",
+        "hx_28841"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_28841",
+      "travel_cost": 21.475
+    },
+    {
+      "corridor_strength": 0.0845,
+      "edge_id": "corridor_node_hx_26317__node_hx_29119",
+      "from_node_id": "node_hx_26317",
+      "path_hex_ids": [
+        "hx_26317",
+        "hx_26597",
+        "hx_26877",
+        "hx_27157",
+        "hx_27437",
+        "hx_27718",
+        "hx_27998",
+        "hx_28278",
+        "hx_28558",
+        "hx_28838",
+        "hx_29119"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29119",
+      "travel_cost": 24.381
+    },
+    {
+      "corridor_strength": 0.206,
+      "edge_id": "corridor_node_hx_27972__node_hx_28247",
+      "from_node_id": "node_hx_27972",
+      "path_hex_ids": [
+        "hx_27972",
+        "hx_28252",
+        "hx_28251",
+        "hx_28250",
+        "hx_28249",
+        "hx_28248",
+        "hx_28247"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_28247",
+      "travel_cost": 8.844
+    },
+    {
+      "corridor_strength": 0.2938,
+      "edge_id": "corridor_node_hx_27972__node_hx_29372",
+      "from_node_id": "node_hx_27972",
+      "path_hex_ids": [
+        "hx_27972",
+        "hx_28252",
+        "hx_28532",
+        "hx_28812",
+        "hx_29092",
+        "hx_29372"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29372",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2679,
+      "edge_id": "corridor_node_hx_28247__node_hx_29372",
+      "from_node_id": "node_hx_28247",
+      "path_hex_ids": [
+        "hx_28247",
+        "hx_28248",
+        "hx_28529",
+        "hx_28810",
+        "hx_29091",
+        "hx_29372"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29372",
+      "travel_cost": 7.46
+    },
+    {
+      "corridor_strength": 0.1407,
+      "edge_id": "corridor_node_hx_28569__node_hx_29126",
+      "from_node_id": "node_hx_28569",
+      "path_hex_ids": [
+        "hx_28569",
+        "hx_28849",
+        "hx_28848",
+        "hx_28847",
+        "hx_29127",
+        "hx_29126"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29126",
+      "travel_cost": 15.58
+    },
+    {
+      "corridor_strength": 0.1266,
+      "edge_id": "corridor_node_hx_28569__node_hx_29133",
+      "from_node_id": "node_hx_28569",
+      "path_hex_ids": [
+        "hx_28569",
+        "hx_28850",
+        "hx_29131",
+        "hx_29412",
+        "hx_29413",
+        "hx_29133"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29133",
+      "travel_cost": 16.459
+    },
+    {
+      "corridor_strength": 0.1909,
+      "edge_id": "corridor_node_hx_28569__node_hx_29691",
+      "from_node_id": "node_hx_28569",
+      "path_hex_ids": [
+        "hx_28569",
+        "hx_28849",
+        "hx_29129",
+        "hx_29410",
+        "hx_29691"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29691",
+      "travel_cost": 10.946
+    },
+    {
+      "corridor_strength": 0.2233,
+      "edge_id": "corridor_node_hx_28841__node_hx_29119",
+      "from_node_id": "node_hx_28841",
+      "path_hex_ids": [
+        "hx_28841",
+        "hx_28840",
+        "hx_28839",
+        "hx_29119"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29119",
+      "travel_cost": 8.698
+    },
+    {
+      "corridor_strength": 0.0871,
+      "edge_id": "corridor_node_hx_28841__node_hx_29126",
+      "from_node_id": "node_hx_28841",
+      "path_hex_ids": [
+        "hx_28841",
+        "hx_28842",
+        "hx_28843",
+        "hx_28844",
+        "hx_28845",
+        "hx_29126"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29126",
+      "travel_cost": 24.09
+    },
+    {
+      "corridor_strength": 0.1447,
+      "edge_id": "corridor_node_hx_28841__node_hx_29403",
+      "from_node_id": "node_hx_28841",
+      "path_hex_ids": [
+        "hx_28841",
+        "hx_29122",
+        "hx_29403"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29403",
+      "travel_cost": 13.239
+    },
+    {
+      "corridor_strength": 0.068,
+      "edge_id": "corridor_node_hx_28841__node_hx_30238",
+      "from_node_id": "node_hx_28841",
+      "path_hex_ids": [
+        "hx_30238",
+        "hx_29957",
+        "hx_29676",
+        "hx_29396",
+        "hx_29116",
+        "hx_28836",
+        "hx_28837",
+        "hx_28838",
+        "hx_28839",
+        "hx_28840",
+        "hx_28841"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_30238",
+      "travel_cost": 30.728
+    },
+    {
+      "corridor_strength": 0.0963,
+      "edge_id": "corridor_node_hx_29119__node_hx_29403",
+      "from_node_id": "node_hx_29119",
+      "path_hex_ids": [
+        "hx_29119",
+        "hx_28839",
+        "hx_28840",
+        "hx_28841",
+        "hx_29122",
+        "hx_29403"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29403",
+      "travel_cost": 21.937
+    },
+    {
+      "corridor_strength": 0.0885,
+      "edge_id": "corridor_node_hx_29119__node_hx_30238",
+      "from_node_id": "node_hx_29119",
+      "path_hex_ids": [
+        "hx_29119",
+        "hx_29400",
+        "hx_29680",
+        "hx_29960",
+        "hx_30240",
+        "hx_30239",
+        "hx_30238"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_30238",
+      "travel_cost": 25.034
+    },
+    {
+      "corridor_strength": 0.114,
+      "edge_id": "corridor_node_hx_29126__node_hx_29403",
+      "from_node_id": "node_hx_29126",
+      "path_hex_ids": [
+        "hx_29126",
+        "hx_29406",
+        "hx_29686",
+        "hx_29685",
+        "hx_29684",
+        "hx_29403"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_29403",
+      "travel_cost": 18.547
+    },
+    {
+      "corridor_strength": 0.1726,
+      "edge_id": "corridor_node_hx_29126__node_hx_29691",
+      "from_node_id": "node_hx_29126",
+      "path_hex_ids": [
+        "hx_29691",
+        "hx_29690",
+        "hx_29409",
+        "hx_29128",
+        "hx_29127",
+        "hx_29126"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29691",
+      "travel_cost": 12.33
+    },
+    {
+      "corridor_strength": 0.1659,
+      "edge_id": "corridor_node_hx_29133__node_hx_29691",
+      "from_node_id": "node_hx_29133",
+      "path_hex_ids": [
+        "hx_29133",
+        "hx_29413",
+        "hx_29693",
+        "hx_29973",
+        "hx_29972",
+        "hx_29691"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29691",
+      "travel_cost": 12.129
+    },
+    {
+      "corridor_strength": 0.0954,
+      "edge_id": "corridor_node_hx_29133__node_hx_29698",
+      "from_node_id": "node_hx_29133",
+      "path_hex_ids": [
+        "hx_29133",
+        "hx_29414",
+        "hx_29694",
+        "hx_29975",
+        "hx_29976",
+        "hx_29977",
+        "hx_29978",
+        "hx_29698"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_29698",
+      "travel_cost": 22.251
+    },
+    {
+      "corridor_strength": 0.0868,
+      "edge_id": "corridor_node_hx_29133__node_hx_30260",
+      "from_node_id": "node_hx_29133",
+      "path_hex_ids": [
+        "hx_30260",
+        "hx_30259",
+        "hx_30258",
+        "hx_30538",
+        "hx_30537",
+        "hx_30536",
+        "hx_30255",
+        "hx_29974",
+        "hx_29693",
+        "hx_29413",
+        "hx_29133"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_30260",
+      "travel_cost": 23.369
+    },
+    {
+      "corridor_strength": 0.0615,
+      "edge_id": "corridor_node_hx_29133__node_hx_30262",
+      "from_node_id": "node_hx_29133",
+      "path_hex_ids": [
+        "hx_30262",
+        "hx_30261",
+        "hx_30260",
+        "hx_30259",
+        "hx_30258",
+        "hx_30538",
+        "hx_30537",
+        "hx_30536",
+        "hx_30255",
+        "hx_29974",
+        "hx_29693",
+        "hx_29413",
+        "hx_29133"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_30262",
+      "travel_cost": 37.335
+    },
+    {
+      "corridor_strength": 0.1462,
+      "edge_id": "corridor_node_hx_29133__node_hx_31094",
+      "from_node_id": "node_hx_29133",
+      "path_hex_ids": [
+        "hx_31094",
+        "hx_30813",
+        "hx_30533",
+        "hx_30253",
+        "hx_29973",
+        "hx_29693",
+        "hx_29413",
+        "hx_29133"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_31094",
+      "travel_cost": 14.897
+    },
+    {
+      "corridor_strength": 0.083,
+      "edge_id": "corridor_node_hx_29372__node_hx_32747",
+      "from_node_id": "node_hx_29372",
+      "path_hex_ids": [
+        "hx_29372",
+        "hx_29373",
+        "hx_29374",
+        "hx_29375",
+        "hx_29656",
+        "hx_29937",
+        "hx_30218",
+        "hx_30499",
+        "hx_30780",
+        "hx_31061",
+        "hx_31342",
+        "hx_31623",
+        "hx_31904",
+        "hx_32185",
+        "hx_32466",
+        "hx_32747"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_32747",
+      "travel_cost": 27.049
+    },
+    {
+      "corridor_strength": 0.0847,
+      "edge_id": "corridor_node_hx_29403__node_hx_31648",
+      "from_node_id": "node_hx_29403",
+      "path_hex_ids": [
+        "hx_31648",
+        "hx_31367",
+        "hx_31086",
+        "hx_30806",
+        "hx_30526",
+        "hx_30245",
+        "hx_29964",
+        "hx_29684",
+        "hx_29403"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_31648",
+      "travel_cost": 23.697
+    },
+    {
+      "corridor_strength": 0.3023,
+      "edge_id": "corridor_node_hx_29691__node_hx_31094",
+      "from_node_id": "node_hx_29691",
+      "path_hex_ids": [
+        "hx_31094",
+        "hx_30813",
+        "hx_30532",
+        "hx_30251",
+        "hx_29971",
+        "hx_29691"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_31094",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2294,
+      "edge_id": "corridor_node_hx_29698__node_hx_30260",
+      "from_node_id": "node_hx_29698",
+      "path_hex_ids": [
+        "hx_29698",
+        "hx_29978",
+        "hx_30259",
+        "hx_30260"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_30260",
+      "travel_cost": 8.698
+    },
+    {
+      "corridor_strength": 0.1043,
+      "edge_id": "corridor_node_hx_29698__node_hx_30262",
+      "from_node_id": "node_hx_29698",
+      "path_hex_ids": [
+        "hx_29698",
+        "hx_29978",
+        "hx_30259",
+        "hx_30260",
+        "hx_30261",
+        "hx_30262"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_30262",
+      "travel_cost": 22.664
+    },
+    {
+      "corridor_strength": 0.0708,
+      "edge_id": "corridor_node_hx_30238__node_hx_31636",
+      "from_node_id": "node_hx_30238",
+      "path_hex_ids": [
+        "hx_30238",
+        "hx_30518",
+        "hx_30798",
+        "hx_31079",
+        "hx_31359",
+        "hx_31639",
+        "hx_31638",
+        "hx_31637",
+        "hx_31636"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_31636",
+      "travel_cost": 29.947
+    },
+    {
+      "corridor_strength": 0.1581,
+      "edge_id": "corridor_node_hx_30260__node_hx_30262",
+      "from_node_id": "node_hx_30260",
+      "path_hex_ids": [
+        "hx_30260",
+        "hx_30261",
+        "hx_30262"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_30262",
+      "travel_cost": 13.966
+    },
+    {
+      "corridor_strength": 0.1572,
+      "edge_id": "corridor_node_hx_30260__node_hx_32219",
+      "from_node_id": "node_hx_30260",
+      "path_hex_ids": [
+        "hx_32219",
+        "hx_31939",
+        "hx_31659",
+        "hx_31379",
+        "hx_31099",
+        "hx_30819",
+        "hx_30820",
+        "hx_30540",
+        "hx_30260"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32219",
+      "travel_cost": 13.88
+    },
+    {
+      "corridor_strength": 0.04,
+      "edge_id": "corridor_node_hx_30262__node_hx_34487",
+      "from_node_id": "node_hx_30262",
+      "path_hex_ids": [
+        "hx_30262",
+        "hx_30542",
+        "hx_30822",
+        "hx_31103",
+        "hx_31384",
+        "hx_31665",
+        "hx_31945",
+        "hx_32226",
+        "hx_32507",
+        "hx_32508",
+        "hx_32789",
+        "hx_33070",
+        "hx_33071",
+        "hx_33352",
+        "hx_33633",
+        "hx_33914",
+        "hx_33915",
+        "hx_33916",
+        "hx_34197",
+        "hx_34198",
+        "hx_34479",
+        "hx_34480",
+        "hx_34481",
+        "hx_34482",
+        "hx_34483",
+        "hx_34484",
+        "hx_34485",
+        "hx_34486",
+        "hx_34487"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34487",
+      "travel_cost": 63.99
+    },
+    {
+      "corridor_strength": 0.0445,
+      "edge_id": "corridor_node_hx_30262__node_hx_35602",
+      "from_node_id": "node_hx_30262",
+      "path_hex_ids": [
+        "hx_30262",
+        "hx_30542",
+        "hx_30822",
+        "hx_31103",
+        "hx_31384",
+        "hx_31665",
+        "hx_31945",
+        "hx_32226",
+        "hx_32507",
+        "hx_32508",
+        "hx_32789",
+        "hx_33070",
+        "hx_33071",
+        "hx_33352",
+        "hx_33633",
+        "hx_33914",
+        "hx_33915",
+        "hx_33916",
+        "hx_34197",
+        "hx_34478",
+        "hx_34759",
+        "hx_35040",
+        "hx_35321",
+        "hx_35602"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35602",
+      "travel_cost": 57.592
+    },
+    {
+      "corridor_strength": 0.3218,
+      "edge_id": "corridor_node_hx_31094__node_hx_32219",
+      "from_node_id": "node_hx_31094",
+      "path_hex_ids": [
+        "hx_31094",
+        "hx_31095",
+        "hx_31376",
+        "hx_31657",
+        "hx_31938",
+        "hx_32219"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32219",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.172,
+      "edge_id": "corridor_node_hx_31094__node_hx_33900",
+      "from_node_id": "node_hx_31094",
+      "path_hex_ids": [
+        "hx_33900",
+        "hx_33619",
+        "hx_33338",
+        "hx_33057",
+        "hx_32776",
+        "hx_32495",
+        "hx_32214",
+        "hx_31934",
+        "hx_31654",
+        "hx_31374",
+        "hx_31094"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33900",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.1087,
+      "edge_id": "corridor_node_hx_31636__node_hx_32475",
+      "from_node_id": "node_hx_31636",
+      "path_hex_ids": [
+        "hx_31636",
+        "hx_31917",
+        "hx_32197",
+        "hx_32477",
+        "hx_32757",
+        "hx_32756",
+        "hx_32475"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_32475",
+      "travel_cost": 19.355
+    },
+    {
+      "corridor_strength": 0.1532,
+      "edge_id": "corridor_node_hx_31636__node_hx_32760",
+      "from_node_id": "node_hx_31636",
+      "path_hex_ids": [
+        "hx_31636",
+        "hx_31917",
+        "hx_32198",
+        "hx_32479",
+        "hx_32760"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32760",
+      "travel_cost": 12.365
+    },
+    {
+      "corridor_strength": 0.2019,
+      "edge_id": "corridor_node_hx_31648__node_hx_32485",
+      "from_node_id": "node_hx_31648",
+      "path_hex_ids": [
+        "hx_31648",
+        "hx_31647",
+        "hx_31927",
+        "hx_31926",
+        "hx_32206",
+        "hx_32486",
+        "hx_32485"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32485",
+      "travel_cost": 9.924
+    },
+    {
+      "corridor_strength": 0.2728,
+      "edge_id": "corridor_node_hx_31648__node_hx_33050",
+      "from_node_id": "node_hx_31648",
+      "path_hex_ids": [
+        "hx_31648",
+        "hx_31929",
+        "hx_32209",
+        "hx_32489",
+        "hx_32769",
+        "hx_33050"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33050",
+      "travel_cost": 7.46
+    },
+    {
+      "corridor_strength": 0.2752,
+      "edge_id": "corridor_node_hx_32219__node_hx_33900",
+      "from_node_id": "node_hx_32219",
+      "path_hex_ids": [
+        "hx_32219",
+        "hx_32499",
+        "hx_32779",
+        "hx_33059",
+        "hx_33339",
+        "hx_33619",
+        "hx_33900"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33900",
+      "travel_cost": 8.304
+    },
+    {
+      "corridor_strength": 0.1411,
+      "edge_id": "corridor_node_hx_32475__node_hx_32760",
+      "from_node_id": "node_hx_32475",
+      "path_hex_ids": [
+        "hx_32475",
+        "hx_32756",
+        "hx_32757",
+        "hx_32758",
+        "hx_32759",
+        "hx_32760"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32760",
+      "travel_cost": 14.382
+    },
+    {
+      "corridor_strength": 0.1522,
+      "edge_id": "corridor_node_hx_32475__node_hx_33033",
+      "from_node_id": "node_hx_32475",
+      "path_hex_ids": [
+        "hx_32475",
+        "hx_32474",
+        "hx_32754",
+        "hx_32753",
+        "hx_33033"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33033",
+      "travel_cost": 13.563
+    },
+    {
+      "corridor_strength": 0.1458,
+      "edge_id": "corridor_node_hx_32475__node_hx_34157",
+      "from_node_id": "node_hx_32475",
+      "path_hex_ids": [
+        "hx_34157",
+        "hx_33877",
+        "hx_33596",
+        "hx_33316",
+        "hx_33035",
+        "hx_32755",
+        "hx_32475"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_34157",
+      "travel_cost": 14.794
+    },
+    {
+      "corridor_strength": 0.1984,
+      "edge_id": "corridor_node_hx_32485__node_hx_32760",
+      "from_node_id": "node_hx_32485",
+      "path_hex_ids": [
+        "hx_32760",
+        "hx_32761",
+        "hx_32762",
+        "hx_32763",
+        "hx_32764",
+        "hx_32484",
+        "hx_32485"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_32760",
+      "travel_cost": 9.924
+    },
+    {
+      "corridor_strength": 0.3072,
+      "edge_id": "corridor_node_hx_32485__node_hx_33050",
+      "from_node_id": "node_hx_32485",
+      "path_hex_ids": [
+        "hx_32485",
+        "hx_32486",
+        "hx_32487",
+        "hx_32488",
+        "hx_32769",
+        "hx_33050"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33050",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.307,
+      "edge_id": "corridor_node_hx_32485__node_hx_33886",
+      "from_node_id": "node_hx_32485",
+      "path_hex_ids": [
+        "hx_32485",
+        "hx_32765",
+        "hx_33045",
+        "hx_33325",
+        "hx_33605",
+        "hx_33886"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33886",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1137,
+      "edge_id": "corridor_node_hx_32747__node_hx_33867",
+      "from_node_id": "node_hx_32747",
+      "path_hex_ids": [
+        "hx_32747",
+        "hx_32746",
+        "hx_33026",
+        "hx_33306",
+        "hx_33586",
+        "hx_33867"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33867",
+      "travel_cost": 17.338
+    },
+    {
+      "corridor_strength": 0.0809,
+      "edge_id": "corridor_node_hx_32747__node_hx_34144",
+      "from_node_id": "node_hx_32747",
+      "path_hex_ids": [
+        "hx_32747",
+        "hx_32746",
+        "hx_32745",
+        "hx_32744",
+        "hx_33024",
+        "hx_33304",
+        "hx_33584",
+        "hx_33864",
+        "hx_34144"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_34144",
+      "travel_cost": 24.73
+    },
+    {
+      "corridor_strength": 0.2077,
+      "edge_id": "corridor_node_hx_32760__node_hx_33886",
+      "from_node_id": "node_hx_32760",
+      "path_hex_ids": [
+        "hx_33886",
+        "hx_33605",
+        "hx_33324",
+        "hx_33043",
+        "hx_32762",
+        "hx_32761",
+        "hx_32760"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33886",
+      "travel_cost": 9.924
+    },
+    {
+      "corridor_strength": 0.166,
+      "edge_id": "corridor_node_hx_32760__node_hx_35003",
+      "from_node_id": "node_hx_32760",
+      "path_hex_ids": [
+        "hx_35003",
+        "hx_34722",
+        "hx_34442",
+        "hx_34162",
+        "hx_33882",
+        "hx_33602",
+        "hx_33322",
+        "hx_33041",
+        "hx_32760"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35003",
+      "travel_cost": 12.692
+    },
+    {
+      "corridor_strength": 0.0863,
+      "edge_id": "corridor_node_hx_32800__node_hx_33077",
+      "from_node_id": "node_hx_32800",
+      "path_hex_ids": [
+        "hx_32800",
+        "hx_33080",
+        "hx_33360",
+        "hx_33359",
+        "hx_33078",
+        "hx_33077"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33077",
+      "travel_cost": 24.09
+    },
+    {
+      "corridor_strength": 0.1863,
+      "edge_id": "corridor_node_hx_32800__node_hx_33083",
+      "from_node_id": "node_hx_32800",
+      "path_hex_ids": [
+        "hx_32800",
+        "hx_33081",
+        "hx_33082",
+        "hx_33083"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33083",
+      "travel_cost": 10.434
+    },
+    {
+      "corridor_strength": 0.1527,
+      "edge_id": "corridor_node_hx_32800__node_hx_34201",
+      "from_node_id": "node_hx_32800",
+      "path_hex_ids": [
+        "hx_32800",
+        "hx_33080",
+        "hx_33360",
+        "hx_33641",
+        "hx_33921",
+        "hx_34201"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34201",
+      "travel_cost": 13.634
+    },
+    {
+      "corridor_strength": 0.2628,
+      "edge_id": "corridor_node_hx_33002__node_hx_34404",
+      "from_node_id": "node_hx_33002",
+      "path_hex_ids": [
+        "hx_33002",
+        "hx_33282",
+        "hx_33562",
+        "hx_33842",
+        "hx_34123",
+        "hx_34404"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34404",
+      "travel_cost": 7.46
+    },
+    {
+      "corridor_strength": 0.1458,
+      "edge_id": "corridor_node_hx_33002__node_hx_35807",
+      "from_node_id": "node_hx_33002",
+      "path_hex_ids": [
+        "hx_33002",
+        "hx_33282",
+        "hx_33562",
+        "hx_33842",
+        "hx_34122",
+        "hx_34402",
+        "hx_34683",
+        "hx_34964",
+        "hx_35245",
+        "hx_35526",
+        "hx_35807"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_35807",
+      "travel_cost": 14.38
+    },
+    {
+      "corridor_strength": 0.0575,
+      "edge_id": "corridor_node_hx_33002__node_hx_36098",
+      "from_node_id": "node_hx_33002",
+      "path_hex_ids": [
+        "hx_33002",
+        "hx_33283",
+        "hx_33564",
+        "hx_33845",
+        "hx_34126",
+        "hx_34407",
+        "hx_34687",
+        "hx_34968",
+        "hx_35249",
+        "hx_35530",
+        "hx_35811",
+        "hx_35812",
+        "hx_35813",
+        "hx_35814",
+        "hx_35815",
+        "hx_35816",
+        "hx_35817",
+        "hx_36098"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36098",
+      "travel_cost": 34.029
+    },
+    {
+      "corridor_strength": 0.062,
+      "edge_id": "corridor_node_hx_33033__node_hx_33867",
+      "from_node_id": "node_hx_33033",
+      "path_hex_ids": [
+        "hx_33867",
+        "hx_34148",
+        "hx_34149",
+        "hx_34150",
+        "hx_34151",
+        "hx_34152",
+        "hx_34153",
+        "hx_33873",
+        "hx_33593",
+        "hx_33313",
+        "hx_33033"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33867",
+      "travel_cost": 32.712
+    },
+    {
+      "corridor_strength": 0.1703,
+      "edge_id": "corridor_node_hx_33033__node_hx_34157",
+      "from_node_id": "node_hx_33033",
+      "path_hex_ids": [
+        "hx_33033",
+        "hx_33314",
+        "hx_33595",
+        "hx_33876",
+        "hx_34157"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_34157",
+      "travel_cost": 11.825
+    },
+    {
+      "corridor_strength": 0.2371,
+      "edge_id": "corridor_node_hx_33050__node_hx_33886",
+      "from_node_id": "node_hx_33050",
+      "path_hex_ids": [
+        "hx_33050",
+        "hx_33049",
+        "hx_33048",
+        "hx_33047",
+        "hx_33046",
+        "hx_33326",
+        "hx_33606",
+        "hx_33886"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33886",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.1718,
+      "edge_id": "corridor_node_hx_33050__node_hx_33900",
+      "from_node_id": "node_hx_33050",
+      "path_hex_ids": [
+        "hx_33900",
+        "hx_33619",
+        "hx_33338",
+        "hx_33057",
+        "hx_33056",
+        "hx_33055",
+        "hx_33054",
+        "hx_33053",
+        "hx_33052",
+        "hx_33051",
+        "hx_33050"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_33900",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.1001,
+      "edge_id": "corridor_node_hx_33077__node_hx_34196",
+      "from_node_id": "node_hx_33077",
+      "path_hex_ids": [
+        "hx_33077",
+        "hx_33076",
+        "hx_33356",
+        "hx_33636",
+        "hx_33916",
+        "hx_34196"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34196",
+      "travel_cost": 21.466
+    },
+    {
+      "corridor_strength": 0.1156,
+      "edge_id": "corridor_node_hx_33077__node_hx_34201",
+      "from_node_id": "node_hx_33077",
+      "path_hex_ids": [
+        "hx_33077",
+        "hx_33078",
+        "hx_33359",
+        "hx_33640",
+        "hx_33921",
+        "hx_34201"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34201",
+      "travel_cost": 19.32
+    },
+    {
+      "corridor_strength": 0.0879,
+      "edge_id": "corridor_node_hx_33077__node_hx_35602",
+      "from_node_id": "node_hx_33077",
+      "path_hex_ids": [
+        "hx_35602",
+        "hx_35321",
+        "hx_35041",
+        "hx_34761",
+        "hx_34481",
+        "hx_34201",
+        "hx_33921",
+        "hx_33640",
+        "hx_33359",
+        "hx_33078",
+        "hx_33077"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35602",
+      "travel_cost": 26.762
+    },
+    {
+      "corridor_strength": 0.1241,
+      "edge_id": "corridor_node_hx_33083__node_hx_33088",
+      "from_node_id": "node_hx_33083",
+      "path_hex_ids": [
+        "hx_33083",
+        "hx_33084",
+        "hx_33085",
+        "hx_33366",
+        "hx_33647",
+        "hx_33648",
+        "hx_33368",
+        "hx_33088"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_33088",
+      "travel_cost": 14.897
+    },
+    {
+      "corridor_strength": 0.3029,
+      "edge_id": "corridor_node_hx_33083__node_hx_34487",
+      "from_node_id": "node_hx_33083",
+      "path_hex_ids": [
+        "hx_33083",
+        "hx_33363",
+        "hx_33644",
+        "hx_33925",
+        "hx_34206",
+        "hx_34487"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34487",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1491,
+      "edge_id": "corridor_node_hx_33088__node_hx_34487",
+      "from_node_id": "node_hx_33088",
+      "path_hex_ids": [
+        "hx_33088",
+        "hx_33368",
+        "hx_33648",
+        "hx_33647",
+        "hx_33927",
+        "hx_34207",
+        "hx_34487"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34487",
+      "travel_cost": 13.513
+    },
+    {
+      "corridor_strength": 0.1171,
+      "edge_id": "corridor_node_hx_33088__node_hx_34491",
+      "from_node_id": "node_hx_33088",
+      "path_hex_ids": [
+        "hx_33088",
+        "hx_33368",
+        "hx_33648",
+        "hx_33929",
+        "hx_34210",
+        "hx_34491"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_34491",
+      "travel_cost": 16.459
+    },
+    {
+      "corridor_strength": 0.1345,
+      "edge_id": "corridor_node_hx_33867__node_hx_34144",
+      "from_node_id": "node_hx_33867",
+      "path_hex_ids": [
+        "hx_33867",
+        "hx_33866",
+        "hx_33865",
+        "hx_33864",
+        "hx_34144"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_34144",
+      "travel_cost": 14.442
+    },
+    {
+      "corridor_strength": 0.0683,
+      "edge_id": "corridor_node_hx_33867__node_hx_36396",
+      "from_node_id": "node_hx_33867",
+      "path_hex_ids": [
+        "hx_36396",
+        "hx_36115",
+        "hx_35834",
+        "hx_35553",
+        "hx_35272",
+        "hx_34991",
+        "hx_34710",
+        "hx_34429",
+        "hx_34148",
+        "hx_33867"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36396",
+      "travel_cost": 28.531
+    },
+    {
+      "corridor_strength": 0.2374,
+      "edge_id": "corridor_node_hx_33886__node_hx_35003",
+      "from_node_id": "node_hx_33886",
+      "path_hex_ids": [
+        "hx_35003",
+        "hx_34723",
+        "hx_34443",
+        "hx_34163",
+        "hx_33883",
+        "hx_33884",
+        "hx_33885",
+        "hx_33886"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35003",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.1583,
+      "edge_id": "corridor_node_hx_33900__node_hx_36989",
+      "from_node_id": "node_hx_33900",
+      "path_hex_ids": [
+        "hx_36989",
+        "hx_36708",
+        "hx_36427",
+        "hx_36146",
+        "hx_35865",
+        "hx_35584",
+        "hx_35303",
+        "hx_35022",
+        "hx_34741",
+        "hx_34460",
+        "hx_34180",
+        "hx_33900"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36989",
+      "travel_cost": 15.224
+    },
+    {
+      "corridor_strength": 0.2585,
+      "edge_id": "corridor_node_hx_34157__node_hx_35003",
+      "from_node_id": "node_hx_34157",
+      "path_hex_ids": [
+        "hx_34157",
+        "hx_34158",
+        "hx_34159",
+        "hx_34160",
+        "hx_34441",
+        "hx_34722",
+        "hx_35003"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35003",
+      "travel_cost": 8.304
+    },
+    {
+      "corridor_strength": 0.2576,
+      "edge_id": "corridor_node_hx_34196__node_hx_34201",
+      "from_node_id": "node_hx_34196",
+      "path_hex_ids": [
+        "hx_34196",
+        "hx_34197",
+        "hx_34198",
+        "hx_34199",
+        "hx_34200",
+        "hx_34201"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34201",
+      "travel_cost": 8
+    },
+    {
+      "corridor_strength": 0.2452,
+      "edge_id": "corridor_node_hx_34196__node_hx_35602",
+      "from_node_id": "node_hx_34196",
+      "path_hex_ids": [
+        "hx_34196",
+        "hx_34197",
+        "hx_34478",
+        "hx_34759",
+        "hx_35040",
+        "hx_35321",
+        "hx_35602"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35602",
+      "travel_cost": 8.826
+    },
+    {
+      "corridor_strength": 0.139,
+      "edge_id": "corridor_node_hx_34196__node_hx_36998",
+      "from_node_id": "node_hx_34196",
+      "path_hex_ids": [
+        "hx_36998",
+        "hx_36718",
+        "hx_36438",
+        "hx_36439",
+        "hx_36159",
+        "hx_35879",
+        "hx_35598",
+        "hx_35318",
+        "hx_35038",
+        "hx_34757",
+        "hx_34476",
+        "hx_34196"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36998",
+      "travel_cost": 16.268
+    },
+    {
+      "corridor_strength": 0.2972,
+      "edge_id": "corridor_node_hx_34201__node_hx_35602",
+      "from_node_id": "node_hx_34201",
+      "path_hex_ids": [
+        "hx_35602",
+        "hx_35321",
+        "hx_35041",
+        "hx_34761",
+        "hx_34481",
+        "hx_34201"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35602",
+      "travel_cost": 7.442
+    },
+    {
+      "corridor_strength": 0.3176,
+      "edge_id": "corridor_node_hx_34404__node_hx_35807",
+      "from_node_id": "node_hx_34404",
+      "path_hex_ids": [
+        "hx_34404",
+        "hx_34684",
+        "hx_34964",
+        "hx_35245",
+        "hx_35526",
+        "hx_35807"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35807",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1003,
+      "edge_id": "corridor_node_hx_34404__node_hx_37497",
+      "from_node_id": "node_hx_34404",
+      "path_hex_ids": [
+        "hx_34404",
+        "hx_34685",
+        "hx_34966",
+        "hx_35247",
+        "hx_35528",
+        "hx_35809",
+        "hx_36090",
+        "hx_36371",
+        "hx_36652",
+        "hx_36933",
+        "hx_37214",
+        "hx_37495",
+        "hx_37496",
+        "hx_37497"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37497",
+      "travel_cost": 22.121
+    },
+    {
+      "corridor_strength": 0.2523,
+      "edge_id": "corridor_node_hx_34487__node_hx_34491",
+      "from_node_id": "node_hx_34487",
+      "path_hex_ids": [
+        "hx_34487",
+        "hx_34488",
+        "hx_34489",
+        "hx_34490",
+        "hx_34491"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_34491",
+      "travel_cost": 8.786
+    },
+    {
+      "corridor_strength": 0.1856,
+      "edge_id": "corridor_node_hx_34487__node_hx_35602",
+      "from_node_id": "node_hx_34487",
+      "path_hex_ids": [
+        "hx_34487",
+        "hx_34486",
+        "hx_34485",
+        "hx_34484",
+        "hx_34483",
+        "hx_34482",
+        "hx_34762",
+        "hx_35042",
+        "hx_35322",
+        "hx_35602"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35602",
+      "travel_cost": 12.978
+    },
+    {
+      "corridor_strength": 0.1061,
+      "edge_id": "corridor_node_hx_34487__node_hx_39260",
+      "from_node_id": "node_hx_34487",
+      "path_hex_ids": [
+        "hx_34487",
+        "hx_34767",
+        "hx_35047",
+        "hx_35327",
+        "hx_35607",
+        "hx_35888",
+        "hx_36169",
+        "hx_36450",
+        "hx_36731",
+        "hx_37012",
+        "hx_37293",
+        "hx_37574",
+        "hx_37855",
+        "hx_38136",
+        "hx_38417",
+        "hx_38698",
+        "hx_38979",
+        "hx_39260"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39260",
+      "travel_cost": 23.528
+    },
+    {
+      "corridor_strength": 0.0904,
+      "edge_id": "corridor_node_hx_34491__node_hx_36178",
+      "from_node_id": "node_hx_34491",
+      "path_hex_ids": [
+        "hx_34491",
+        "hx_34771",
+        "hx_35051",
+        "hx_35332",
+        "hx_35613",
+        "hx_35894",
+        "hx_36175",
+        "hx_36456",
+        "hx_36457",
+        "hx_36458",
+        "hx_36178"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36178",
+      "travel_cost": 22.437
+    },
+    {
+      "corridor_strength": 0.1334,
+      "edge_id": "corridor_node_hx_35003__node_hx_37816",
+      "from_node_id": "node_hx_35003",
+      "path_hex_ids": [
+        "hx_37816",
+        "hx_37535",
+        "hx_37254",
+        "hx_36973",
+        "hx_36692",
+        "hx_36411",
+        "hx_36130",
+        "hx_35849",
+        "hx_35568",
+        "hx_35287",
+        "hx_35006",
+        "hx_35005",
+        "hx_35004",
+        "hx_35003"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37816",
+      "travel_cost": 17.992
+    },
+    {
+      "corridor_strength": 0.1557,
+      "edge_id": "corridor_node_hx_35003__node_hx_38085",
+      "from_node_id": "node_hx_35003",
+      "path_hex_ids": [
+        "hx_38085",
+        "hx_37804",
+        "hx_37523",
+        "hx_37243",
+        "hx_36963",
+        "hx_36683",
+        "hx_36403",
+        "hx_36123",
+        "hx_35843",
+        "hx_35563",
+        "hx_35283",
+        "hx_35003"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38085",
+      "travel_cost": 15.224
+    },
+    {
+      "corridor_strength": 0.0867,
+      "edge_id": "corridor_node_hx_35544__node_hx_35821",
+      "from_node_id": "node_hx_35544",
+      "path_hex_ids": [
+        "hx_35544",
+        "hx_35825",
+        "hx_36105",
+        "hx_36104",
+        "hx_36103",
+        "hx_36102",
+        "hx_35821"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_35821",
+      "travel_cost": 22.167
+    },
+    {
+      "corridor_strength": 0.1073,
+      "edge_id": "corridor_node_hx_35544__node_hx_36102",
+      "from_node_id": "node_hx_35544",
+      "path_hex_ids": [
+        "hx_35544",
+        "hx_35825",
+        "hx_36105",
+        "hx_36104",
+        "hx_36103",
+        "hx_36102"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36102",
+      "travel_cost": 18.382
+    },
+    {
+      "corridor_strength": 0.1725,
+      "edge_id": "corridor_node_hx_35602__node_hx_36998",
+      "from_node_id": "node_hx_35602",
+      "path_hex_ids": [
+        "hx_36998",
+        "hx_36718",
+        "hx_36438",
+        "hx_36439",
+        "hx_36159",
+        "hx_36160",
+        "hx_36161",
+        "hx_36162",
+        "hx_35882",
+        "hx_35602"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36998",
+      "travel_cost": 14.022
+    },
+    {
+      "corridor_strength": 0.0938,
+      "edge_id": "corridor_node_hx_35602__node_hx_39260",
+      "from_node_id": "node_hx_35602",
+      "path_hex_ids": [
+        "hx_35602",
+        "hx_35322",
+        "hx_35323",
+        "hx_35324",
+        "hx_35325",
+        "hx_35326",
+        "hx_35607",
+        "hx_35888",
+        "hx_36169",
+        "hx_36450",
+        "hx_36731",
+        "hx_37012",
+        "hx_37293",
+        "hx_37574",
+        "hx_37855",
+        "hx_38136",
+        "hx_38417",
+        "hx_38698",
+        "hx_38979",
+        "hx_39260"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39260",
+      "travel_cost": 26.818
+    },
+    {
+      "corridor_strength": 0.1233,
+      "edge_id": "corridor_node_hx_35807__node_hx_37497",
+      "from_node_id": "node_hx_35807",
+      "path_hex_ids": [
+        "hx_35807",
+        "hx_35808",
+        "hx_35809",
+        "hx_36090",
+        "hx_36371",
+        "hx_36652",
+        "hx_36933",
+        "hx_37214",
+        "hx_37495",
+        "hx_37496",
+        "hx_37497"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37497",
+      "travel_cost": 17.969
+    },
+    {
+      "corridor_strength": 0.0992,
+      "edge_id": "corridor_node_hx_35821__node_hx_36098",
+      "from_node_id": "node_hx_35821",
+      "path_hex_ids": [
+        "hx_35821",
+        "hx_35540",
+        "hx_35539",
+        "hx_35538",
+        "hx_35818",
+        "hx_36098"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36098",
+      "travel_cost": 19.273
+    },
+    {
+      "corridor_strength": 0.4212,
+      "edge_id": "corridor_node_hx_35821__node_hx_36102",
+      "from_node_id": "node_hx_35821",
+      "path_hex_ids": [
+        "hx_35821",
+        "hx_36102"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36102",
+      "travel_cost": 3.785
+    },
+    {
+      "corridor_strength": 0.1287,
+      "edge_id": "corridor_node_hx_35901__node_hx_36178",
+      "from_node_id": "node_hx_35901",
+      "path_hex_ids": [
+        "hx_35901",
+        "hx_36181",
+        "hx_36461",
+        "hx_36460",
+        "hx_36459",
+        "hx_36178"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36178",
+      "travel_cost": 14.143
+    },
+    {
+      "corridor_strength": 0.1088,
+      "edge_id": "corridor_node_hx_35901__node_hx_36745",
+      "from_node_id": "node_hx_35901",
+      "path_hex_ids": [
+        "hx_35901",
+        "hx_36182",
+        "hx_36463",
+        "hx_36464",
+        "hx_36745"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36745",
+      "travel_cost": 18.272
+    },
+    {
+      "corridor_strength": 0.1143,
+      "edge_id": "corridor_node_hx_35901__node_hx_37305",
+      "from_node_id": "node_hx_35901",
+      "path_hex_ids": [
+        "hx_35901",
+        "hx_36181",
+        "hx_36462",
+        "hx_36742",
+        "hx_37023",
+        "hx_37304",
+        "hx_37305"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_37305",
+      "travel_cost": 17.364
+    },
+    {
+      "corridor_strength": 0.0865,
+      "edge_id": "corridor_node_hx_36098__node_hx_36102",
+      "from_node_id": "node_hx_36098",
+      "path_hex_ids": [
+        "hx_36098",
+        "hx_35818",
+        "hx_35819",
+        "hx_35539",
+        "hx_35540",
+        "hx_35821",
+        "hx_36102"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_36102",
+      "travel_cost": 23.058
+    },
+    {
+      "corridor_strength": 0.0705,
+      "edge_id": "corridor_node_hx_36098__node_hx_37497",
+      "from_node_id": "node_hx_36098",
+      "path_hex_ids": [
+        "hx_36098",
+        "hx_35817",
+        "hx_35816",
+        "hx_36096",
+        "hx_36095",
+        "hx_36375",
+        "hx_36655",
+        "hx_36935",
+        "hx_37216",
+        "hx_37497"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37497",
+      "travel_cost": 28.922
+    },
+    {
+      "corridor_strength": 0.0874,
+      "edge_id": "corridor_node_hx_36178__node_hx_36745",
+      "from_node_id": "node_hx_36178",
+      "path_hex_ids": [
+        "hx_36745",
+        "hx_37025",
+        "hx_37024",
+        "hx_37023",
+        "hx_37022",
+        "hx_37021",
+        "hx_36740",
+        "hx_36459",
+        "hx_36178"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36745",
+      "travel_cost": 22.273
+    },
+    {
+      "corridor_strength": 0.1664,
+      "edge_id": "corridor_node_hx_36178__node_hx_37858",
+      "from_node_id": "node_hx_36178",
+      "path_hex_ids": [
+        "hx_36178",
+        "hx_36458",
+        "hx_36738",
+        "hx_37018",
+        "hx_37298",
+        "hx_37578",
+        "hx_37858"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_37858",
+      "travel_cost": 12.355
+    },
+    {
+      "corridor_strength": 0.1912,
+      "edge_id": "corridor_node_hx_36396__node_hx_37233",
+      "from_node_id": "node_hx_36396",
+      "path_hex_ids": [
+        "hx_36396",
+        "hx_36676",
+        "hx_36956",
+        "hx_37236",
+        "hx_37235",
+        "hx_37234",
+        "hx_37233"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37233",
+      "travel_cost": 9.924
+    },
+    {
+      "corridor_strength": 0.2335,
+      "edge_id": "corridor_node_hx_36396__node_hx_37798",
+      "from_node_id": "node_hx_36396",
+      "path_hex_ids": [
+        "hx_36396",
+        "hx_36676",
+        "hx_36956",
+        "hx_37236",
+        "hx_37517",
+        "hx_37798"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37798",
+      "travel_cost": 8.54
+    },
+    {
+      "corridor_strength": 0.1482,
+      "edge_id": "corridor_node_hx_36396__node_hx_38085",
+      "from_node_id": "node_hx_36396",
+      "path_hex_ids": [
+        "hx_38085",
+        "hx_37804",
+        "hx_37523",
+        "hx_37522",
+        "hx_37241",
+        "hx_37240",
+        "hx_37239",
+        "hx_36958",
+        "hx_36677",
+        "hx_36396"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38085",
+      "travel_cost": 14.076
+    },
+    {
+      "corridor_strength": 0.2423,
+      "edge_id": "corridor_node_hx_36745__node_hx_37305",
+      "from_node_id": "node_hx_36745",
+      "path_hex_ids": [
+        "hx_36745",
+        "hx_37025",
+        "hx_37305"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_37305",
+      "travel_cost": 8.014
+    },
+    {
+      "corridor_strength": 0.0761,
+      "edge_id": "corridor_node_hx_36745__node_hx_38705",
+      "from_node_id": "node_hx_36745",
+      "path_hex_ids": [
+        "hx_38705",
+        "hx_38424",
+        "hx_38144",
+        "hx_37863",
+        "hx_37583",
+        "hx_37584",
+        "hx_37304",
+        "hx_37024",
+        "hx_37025",
+        "hx_36745"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_38705",
+      "travel_cost": 25.662
+    },
+    {
+      "corridor_strength": 0.1915,
+      "edge_id": "corridor_node_hx_36989__node_hx_36998",
+      "from_node_id": "node_hx_36989",
+      "path_hex_ids": [
+        "hx_36989",
+        "hx_36990",
+        "hx_36991",
+        "hx_36992",
+        "hx_36993",
+        "hx_36994",
+        "hx_36995",
+        "hx_36996",
+        "hx_36997",
+        "hx_36998"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_36998",
+      "travel_cost": 12.456
+    },
+    {
+      "corridor_strength": 0.1101,
+      "edge_id": "corridor_node_hx_36989__node_hx_37816",
+      "from_node_id": "node_hx_36989",
+      "path_hex_ids": [
+        "hx_36989",
+        "hx_36988",
+        "hx_36987",
+        "hx_36986",
+        "hx_36985",
+        "hx_36984",
+        "hx_36983",
+        "hx_36982",
+        "hx_36981",
+        "hx_36980",
+        "hx_36979",
+        "hx_36978",
+        "hx_36977",
+        "hx_36976",
+        "hx_37256",
+        "hx_37536",
+        "hx_37816"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_37816",
+      "travel_cost": 22.144
+    },
+    {
+      "corridor_strength": 0.111,
+      "edge_id": "corridor_node_hx_36989__node_hx_39221",
+      "from_node_id": "node_hx_36989",
+      "path_hex_ids": [
+        "hx_39221",
+        "hx_38941",
+        "hx_38661",
+        "hx_38381",
+        "hx_38101",
+        "hx_37821",
+        "hx_37541",
+        "hx_37261",
+        "hx_36981",
+        "hx_36982",
+        "hx_36983",
+        "hx_36984",
+        "hx_36985",
+        "hx_36986",
+        "hx_36987",
+        "hx_36988",
+        "hx_36989"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_39221",
+      "travel_cost": 22.144
+    },
+    {
+      "corridor_strength": 0.2981,
+      "edge_id": "corridor_node_hx_37233__node_hx_37798",
+      "from_node_id": "node_hx_37233",
+      "path_hex_ids": [
+        "hx_37233",
+        "hx_37234",
+        "hx_37235",
+        "hx_37236",
+        "hx_37517",
+        "hx_37798"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_37798",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2568,
+      "edge_id": "corridor_node_hx_37233__node_hx_38917",
+      "from_node_id": "node_hx_37233",
+      "path_hex_ids": [
+        "hx_37233",
+        "hx_37513",
+        "hx_37793",
+        "hx_38074",
+        "hx_38355",
+        "hx_38636",
+        "hx_38917"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38917",
+      "travel_cost": 8.304
+    },
+    {
+      "corridor_strength": 0.0963,
+      "edge_id": "corridor_node_hx_37305__node_hx_38705",
+      "from_node_id": "node_hx_37305",
+      "path_hex_ids": [
+        "hx_37305",
+        "hx_37304",
+        "hx_37584",
+        "hx_37583",
+        "hx_37863",
+        "hx_38144",
+        "hx_38424",
+        "hx_38705"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_38705",
+      "travel_cost": 20.112
+    },
+    {
+      "corridor_strength": 0.087,
+      "edge_id": "corridor_node_hx_37497__node_hx_38340",
+      "from_node_id": "node_hx_37497",
+      "path_hex_ids": [
+        "hx_37497",
+        "hx_37778",
+        "hx_38059",
+        "hx_38340"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38340",
+      "travel_cost": 23.875
+    },
+    {
+      "corridor_strength": 0.1481,
+      "edge_id": "corridor_node_hx_37497__node_hx_38616",
+      "from_node_id": "node_hx_37497",
+      "path_hex_ids": [
+        "hx_37497",
+        "hx_37496",
+        "hx_37776",
+        "hx_38056",
+        "hx_38336",
+        "hx_38616"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38616",
+      "travel_cost": 14.299
+    },
+    {
+      "corridor_strength": 0.0945,
+      "edge_id": "corridor_node_hx_37497__node_hx_38620",
+      "from_node_id": "node_hx_37497",
+      "path_hex_ids": [
+        "hx_37497",
+        "hx_37777",
+        "hx_38058",
+        "hx_38339",
+        "hx_38620"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38620",
+      "travel_cost": 23.163
+    },
+    {
+      "corridor_strength": 0.0758,
+      "edge_id": "corridor_node_hx_37497__node_hx_39744",
+      "from_node_id": "node_hx_37497",
+      "path_hex_ids": [
+        "hx_39744",
+        "hx_39463",
+        "hx_39183",
+        "hx_38903",
+        "hx_38623",
+        "hx_38342",
+        "hx_38061",
+        "hx_37780",
+        "hx_37499",
+        "hx_37498",
+        "hx_37497"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39744",
+      "travel_cost": 30.143
+    },
+    {
+      "corridor_strength": 0.2345,
+      "edge_id": "corridor_node_hx_37798__node_hx_38085",
+      "from_node_id": "node_hx_37798",
+      "path_hex_ids": [
+        "hx_38085",
+        "hx_37804",
+        "hx_37803",
+        "hx_37802",
+        "hx_37801",
+        "hx_37800",
+        "hx_37799",
+        "hx_37798"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38085",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.3193,
+      "edge_id": "corridor_node_hx_37798__node_hx_38917",
+      "from_node_id": "node_hx_37798",
+      "path_hex_ids": [
+        "hx_37798",
+        "hx_37797",
+        "hx_38077",
+        "hx_38357",
+        "hx_38637",
+        "hx_38917"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38917",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.143,
+      "edge_id": "corridor_node_hx_37816__node_hx_38085",
+      "from_node_id": "node_hx_37816",
+      "path_hex_ids": [
+        "hx_37816",
+        "hx_37815",
+        "hx_37814",
+        "hx_37813",
+        "hx_37812",
+        "hx_37811",
+        "hx_37810",
+        "hx_37809",
+        "hx_37808",
+        "hx_37807",
+        "hx_37806",
+        "hx_37805",
+        "hx_38085"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38085",
+      "travel_cost": 16.608
+    },
+    {
+      "corridor_strength": 0.3213,
+      "edge_id": "corridor_node_hx_37816__node_hx_39221",
+      "from_node_id": "node_hx_37816",
+      "path_hex_ids": [
+        "hx_37816",
+        "hx_38097",
+        "hx_38378",
+        "hx_38659",
+        "hx_38940",
+        "hx_39221"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_39221",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1291,
+      "edge_id": "corridor_node_hx_37858__node_hx_38705",
+      "from_node_id": "node_hx_37858",
+      "path_hex_ids": [
+        "hx_37858",
+        "hx_37859",
+        "hx_37860",
+        "hx_37861",
+        "hx_37862",
+        "hx_38143",
+        "hx_38424",
+        "hx_38705"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_38705",
+      "travel_cost": 16.182
+    },
+    {
+      "corridor_strength": 0.3268,
+      "edge_id": "corridor_node_hx_37858__node_hx_39260",
+      "from_node_id": "node_hx_37858",
+      "path_hex_ids": [
+        "hx_37858",
+        "hx_38138",
+        "hx_38418",
+        "hx_38698",
+        "hx_38979",
+        "hx_39260"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39260",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1097,
+      "edge_id": "corridor_node_hx_38085__node_hx_39221",
+      "from_node_id": "node_hx_38085",
+      "path_hex_ids": [
+        "hx_39221",
+        "hx_38940",
+        "hx_38659",
+        "hx_38378",
+        "hx_38097",
+        "hx_38096",
+        "hx_38095",
+        "hx_38094",
+        "hx_38093",
+        "hx_38092",
+        "hx_38091",
+        "hx_38090",
+        "hx_38089",
+        "hx_38088",
+        "hx_38087",
+        "hx_38086",
+        "hx_38085"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39221",
+      "travel_cost": 22.144
+    },
+    {
+      "corridor_strength": 0.0884,
+      "edge_id": "corridor_node_hx_38340__node_hx_38616",
+      "from_node_id": "node_hx_38340",
+      "path_hex_ids": [
+        "hx_38340",
+        "hx_38339",
+        "hx_38338",
+        "hx_38337",
+        "hx_38336",
+        "hx_38616"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38616",
+      "travel_cost": 24.87
+    },
+    {
+      "corridor_strength": 0.337,
+      "edge_id": "corridor_node_hx_38340__node_hx_38620",
+      "from_node_id": "node_hx_38340",
+      "path_hex_ids": [
+        "hx_38340",
+        "hx_38620"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38620",
+      "travel_cost": 5.846
+    },
+    {
+      "corridor_strength": 0.1997,
+      "edge_id": "corridor_node_hx_38340__node_hx_39744",
+      "from_node_id": "node_hx_38340",
+      "path_hex_ids": [
+        "hx_39744",
+        "hx_39463",
+        "hx_39183",
+        "hx_38902",
+        "hx_38621",
+        "hx_38340"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39744",
+      "travel_cost": 10.94
+    },
+    {
+      "corridor_strength": 0.0851,
+      "edge_id": "corridor_node_hx_38606__node_hx_38893",
+      "from_node_id": "node_hx_38606",
+      "path_hex_ids": [
+        "hx_38606",
+        "hx_38607",
+        "hx_38608",
+        "hx_38609",
+        "hx_38610",
+        "hx_38611",
+        "hx_38612",
+        "hx_38893"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_38893",
+      "travel_cost": 23.339
+    },
+    {
+      "corridor_strength": 0.1349,
+      "edge_id": "corridor_node_hx_38606__node_hx_39450",
+      "from_node_id": "node_hx_38606",
+      "path_hex_ids": [
+        "hx_38606",
+        "hx_38607",
+        "hx_38888",
+        "hx_39169",
+        "hx_39450"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_39450",
+      "travel_cost": 14.442
+    },
+    {
+      "corridor_strength": 0.1002,
+      "edge_id": "corridor_node_hx_38616__node_hx_38620",
+      "from_node_id": "node_hx_38616",
+      "path_hex_ids": [
+        "hx_38616",
+        "hx_38336",
+        "hx_38337",
+        "hx_38338",
+        "hx_38339",
+        "hx_38620"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38620",
+      "travel_cost": 23.02
+    },
+    {
+      "corridor_strength": 0.1138,
+      "edge_id": "corridor_node_hx_38616__node_hx_38893",
+      "from_node_id": "node_hx_38616",
+      "path_hex_ids": [
+        "hx_38616",
+        "hx_38615",
+        "hx_38614",
+        "hx_38613",
+        "hx_38893"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_38893",
+      "travel_cost": 18.54
+    },
+    {
+      "corridor_strength": 0.0757,
+      "edge_id": "corridor_node_hx_38616__node_hx_40014",
+      "from_node_id": "node_hx_38616",
+      "path_hex_ids": [
+        "hx_40014",
+        "hx_40015",
+        "hx_40016",
+        "hx_39736",
+        "hx_39456",
+        "hx_39457",
+        "hx_39177",
+        "hx_38897",
+        "hx_38616"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_40014",
+      "travel_cost": 30.112
+    },
+    {
+      "corridor_strength": 0.2876,
+      "edge_id": "corridor_node_hx_38620__node_hx_39744",
+      "from_node_id": "node_hx_38620",
+      "path_hex_ids": [
+        "hx_39744",
+        "hx_39463",
+        "hx_39182",
+        "hx_38901",
+        "hx_38620"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39744",
+      "travel_cost": 7.706
+    },
+    {
+      "corridor_strength": 0.1211,
+      "edge_id": "corridor_node_hx_38705__node_hx_39260",
+      "from_node_id": "node_hx_38705",
+      "path_hex_ids": [
+        "hx_39260",
+        "hx_38980",
+        "hx_38700",
+        "hx_38701",
+        "hx_38702",
+        "hx_38422",
+        "hx_38423",
+        "hx_38424",
+        "hx_38705"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39260",
+      "travel_cost": 17.566
+    },
+    {
+      "corridor_strength": 0.0996,
+      "edge_id": "corridor_node_hx_38705__node_hx_40104",
+      "from_node_id": "node_hx_38705",
+      "path_hex_ids": [
+        "hx_38705",
+        "hx_38424",
+        "hx_38423",
+        "hx_38422",
+        "hx_38702",
+        "hx_38982",
+        "hx_39262",
+        "hx_39542",
+        "hx_39823",
+        "hx_40104"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40104",
+      "travel_cost": 19.71
+    },
+    {
+      "corridor_strength": 0.1068,
+      "edge_id": "corridor_node_hx_38893__node_hx_39450",
+      "from_node_id": "node_hx_38893",
+      "path_hex_ids": [
+        "hx_38893",
+        "hx_38892",
+        "hx_38891",
+        "hx_38890",
+        "hx_39170",
+        "hx_39450"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_39450",
+      "travel_cost": 18.411
+    },
+    {
+      "corridor_strength": 0.0873,
+      "edge_id": "corridor_node_hx_38893__node_hx_40014",
+      "from_node_id": "node_hx_38893",
+      "path_hex_ids": [
+        "hx_38893",
+        "hx_39173",
+        "hx_39172",
+        "hx_39452",
+        "hx_39733",
+        "hx_40014"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_40014",
+      "travel_cost": 24.09
+    },
+    {
+      "corridor_strength": 0.2275,
+      "edge_id": "corridor_node_hx_38910__node_hx_38917",
+      "from_node_id": "node_hx_38910",
+      "path_hex_ids": [
+        "hx_38910",
+        "hx_38911",
+        "hx_38912",
+        "hx_38913",
+        "hx_38914",
+        "hx_38915",
+        "hx_38916",
+        "hx_38917"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_38917",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.3087,
+      "edge_id": "corridor_node_hx_38910__node_hx_39755",
+      "from_node_id": "node_hx_38910",
+      "path_hex_ids": [
+        "hx_38910",
+        "hx_38911",
+        "hx_38912",
+        "hx_39193",
+        "hx_39474",
+        "hx_39755"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39755",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2586,
+      "edge_id": "corridor_node_hx_38910__node_hx_40312",
+      "from_node_id": "node_hx_38910",
+      "path_hex_ids": [
+        "hx_38910",
+        "hx_39190",
+        "hx_39471",
+        "hx_39752",
+        "hx_40032",
+        "hx_40312"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40312",
+      "travel_cost": 8.486
+    },
+    {
+      "corridor_strength": 0.3245,
+      "edge_id": "corridor_node_hx_38917__node_hx_39755",
+      "from_node_id": "node_hx_38917",
+      "path_hex_ids": [
+        "hx_38917",
+        "hx_38916",
+        "hx_38915",
+        "hx_39195",
+        "hx_39475",
+        "hx_39755"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39755",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.099,
+      "edge_id": "corridor_node_hx_39221__node_hx_44263",
+      "from_node_id": "node_hx_39221",
+      "path_hex_ids": [
+        "hx_44263",
+        "hx_43982",
+        "hx_43701",
+        "hx_43421",
+        "hx_43141",
+        "hx_42861",
+        "hx_42581",
+        "hx_42301",
+        "hx_42021",
+        "hx_41741",
+        "hx_41461",
+        "hx_41181",
+        "hx_40901",
+        "hx_40621",
+        "hx_40341",
+        "hx_40061",
+        "hx_39781",
+        "hx_39501",
+        "hx_39221"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_44263",
+      "travel_cost": 24.912
+    },
+    {
+      "corridor_strength": 0.3335,
+      "edge_id": "corridor_node_hx_39260__node_hx_40104",
+      "from_node_id": "node_hx_39260",
+      "path_hex_ids": [
+        "hx_39260",
+        "hx_39261",
+        "hx_39542",
+        "hx_39823",
+        "hx_40104"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40104",
+      "travel_cost": 6.296
+    },
+    {
+      "corridor_strength": 0.2424,
+      "edge_id": "corridor_node_hx_39260__node_hx_40658",
+      "from_node_id": "node_hx_39260",
+      "path_hex_ids": [
+        "hx_40658",
+        "hx_40378",
+        "hx_40098",
+        "hx_39818",
+        "hx_39538",
+        "hx_39258",
+        "hx_39259",
+        "hx_39260"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40658",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.1285,
+      "edge_id": "corridor_node_hx_39260__node_hx_42899",
+      "from_node_id": "node_hx_39260",
+      "path_hex_ids": [
+        "hx_39260",
+        "hx_39259",
+        "hx_39539",
+        "hx_39819",
+        "hx_40099",
+        "hx_40379",
+        "hx_40659",
+        "hx_40939",
+        "hx_41219",
+        "hx_41499",
+        "hx_41779",
+        "hx_42059",
+        "hx_42339",
+        "hx_42619",
+        "hx_42899"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_42899",
+      "travel_cost": 19.376
+    },
+    {
+      "corridor_strength": 0.0535,
+      "edge_id": "corridor_node_hx_39442__node_hx_40014",
+      "from_node_id": "node_hx_39442",
+      "path_hex_ids": [
+        "hx_39442",
+        "hx_39723",
+        "hx_40004",
+        "hx_40285",
+        "hx_40286",
+        "hx_40287",
+        "hx_40288",
+        "hx_40289",
+        "hx_40290",
+        "hx_40291",
+        "hx_40292",
+        "hx_40293",
+        "hx_40294",
+        "hx_40014"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_40014",
+      "travel_cost": 42.588
+    },
+    {
+      "corridor_strength": 0.0918,
+      "edge_id": "corridor_node_hx_39450__node_hx_40014",
+      "from_node_id": "node_hx_39450",
+      "path_hex_ids": [
+        "hx_39450",
+        "hx_39170",
+        "hx_39171",
+        "hx_39452",
+        "hx_39733",
+        "hx_40014"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_40014",
+      "travel_cost": 23.017
+    },
+    {
+      "corridor_strength": 0.141,
+      "edge_id": "corridor_node_hx_39744__node_hx_39755",
+      "from_node_id": "node_hx_39744",
+      "path_hex_ids": [
+        "hx_39744",
+        "hx_39745",
+        "hx_39746",
+        "hx_39747",
+        "hx_39748",
+        "hx_39749",
+        "hx_39750",
+        "hx_39751",
+        "hx_39752",
+        "hx_39753",
+        "hx_39754",
+        "hx_39755"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_39755",
+      "travel_cost": 17.312
+    },
+    {
+      "corridor_strength": 0.2057,
+      "edge_id": "corridor_node_hx_39744__node_hx_40312",
+      "from_node_id": "node_hx_39744",
+      "path_hex_ids": [
+        "hx_40312",
+        "hx_40311",
+        "hx_40030",
+        "hx_39749",
+        "hx_39748",
+        "hx_39747",
+        "hx_39746",
+        "hx_39745",
+        "hx_39744"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40312",
+      "travel_cost": 11.594
+    },
+    {
+      "corridor_strength": 0.2732,
+      "edge_id": "corridor_node_hx_39755__node_hx_40312",
+      "from_node_id": "node_hx_39755",
+      "path_hex_ids": [
+        "hx_39755",
+        "hx_39754",
+        "hx_39753",
+        "hx_39752",
+        "hx_40032",
+        "hx_40312"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40312",
+      "travel_cost": 8.486
+    },
+    {
+      "corridor_strength": 0.1876,
+      "edge_id": "corridor_node_hx_40104__node_hx_40658",
+      "from_node_id": "node_hx_40104",
+      "path_hex_ids": [
+        "hx_40658",
+        "hx_40378",
+        "hx_40098",
+        "hx_40099",
+        "hx_40100",
+        "hx_40101",
+        "hx_40102",
+        "hx_40103",
+        "hx_40104"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_40658",
+      "travel_cost": 11.832
+    },
+    {
+      "corridor_strength": 0.1658,
+      "edge_id": "corridor_node_hx_40104__node_hx_41504",
+      "from_node_id": "node_hx_40104",
+      "path_hex_ids": [
+        "hx_40104",
+        "hx_40103",
+        "hx_40383",
+        "hx_40663",
+        "hx_40943",
+        "hx_41223",
+        "hx_41504"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_41504",
+      "travel_cost": 12.72
+    },
+    {
+      "corridor_strength": 0.1877,
+      "edge_id": "corridor_node_hx_40658__node_hx_41504",
+      "from_node_id": "node_hx_40658",
+      "path_hex_ids": [
+        "hx_40658",
+        "hx_40659",
+        "hx_40660",
+        "hx_40661",
+        "hx_40942",
+        "hx_41223",
+        "hx_41504"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_41504",
+      "travel_cost": 11.96
+    },
+    {
+      "corridor_strength": 0.2147,
+      "edge_id": "corridor_node_hx_40658__node_hx_42899",
+      "from_node_id": "node_hx_40658",
+      "path_hex_ids": [
+        "hx_42899",
+        "hx_42618",
+        "hx_42338",
+        "hx_42058",
+        "hx_41778",
+        "hx_41498",
+        "hx_41218",
+        "hx_40938",
+        "hx_40658"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_42899",
+      "travel_cost": 11.072
+    },
+    {
+      "corridor_strength": 0.1088,
+      "edge_id": "corridor_node_hx_41504__node_hx_42904",
+      "from_node_id": "node_hx_41504",
+      "path_hex_ids": [
+        "hx_41504",
+        "hx_41503",
+        "hx_41502",
+        "hx_41782",
+        "hx_42062",
+        "hx_42342",
+        "hx_42622",
+        "hx_42903",
+        "hx_42904"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_42904",
+      "travel_cost": 18.384
+    },
+    {
+      "corridor_strength": 0.1959,
+      "edge_id": "corridor_node_hx_42899__node_hx_42904",
+      "from_node_id": "node_hx_42899",
+      "path_hex_ids": [
+        "hx_42899",
+        "hx_42900",
+        "hx_42901",
+        "hx_42902",
+        "hx_42903",
+        "hx_42904"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_42904",
+      "travel_cost": 10.576
+    },
+    {
+      "corridor_strength": 0.1463,
+      "edge_id": "corridor_node_hx_42899__node_hx_43168",
+      "from_node_id": "node_hx_42899",
+      "path_hex_ids": [
+        "hx_43168",
+        "hx_42888",
+        "hx_42889",
+        "hx_42890",
+        "hx_42891",
+        "hx_42892",
+        "hx_42893",
+        "hx_42894",
+        "hx_42895",
+        "hx_42896",
+        "hx_42897",
+        "hx_42898",
+        "hx_42899"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_43168",
+      "travel_cost": 16.608
+    },
+    {
+      "corridor_strength": 0.3342,
+      "edge_id": "corridor_node_hx_42899__node_hx_44023",
+      "from_node_id": "node_hx_42899",
+      "path_hex_ids": [
+        "hx_42899",
+        "hx_43180",
+        "hx_43461",
+        "hx_43742",
+        "hx_44023"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_44023",
+      "travel_cost": 6.296
+    },
+    {
+      "corridor_strength": 0.1448,
+      "edge_id": "corridor_node_hx_42899__node_hx_45424",
+      "from_node_id": "node_hx_42899",
+      "path_hex_ids": [
+        "hx_45424",
+        "hx_45143",
+        "hx_44862",
+        "hx_44581",
+        "hx_44300",
+        "hx_44019",
+        "hx_43739",
+        "hx_43459",
+        "hx_43179",
+        "hx_42899"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_45424",
+      "travel_cost": 16.112
+    },
+    {
+      "corridor_strength": 0.1011,
+      "edge_id": "corridor_node_hx_42899__node_hx_47662",
+      "from_node_id": "node_hx_42899",
+      "path_hex_ids": [
+        "hx_42899",
+        "hx_43179",
+        "hx_43459",
+        "hx_43739",
+        "hx_44019",
+        "hx_44299",
+        "hx_44579",
+        "hx_44859",
+        "hx_45140",
+        "hx_45421",
+        "hx_45702",
+        "hx_45983",
+        "hx_46263",
+        "hx_46543",
+        "hx_46542",
+        "hx_46822",
+        "hx_47102",
+        "hx_47382",
+        "hx_47662"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_47662",
+      "travel_cost": 24.912
+    },
+    {
+      "corridor_strength": 0.1522,
+      "edge_id": "corridor_node_hx_42904__node_hx_44023",
+      "from_node_id": "node_hx_42904",
+      "path_hex_ids": [
+        "hx_42904",
+        "hx_42903",
+        "hx_42902",
+        "hx_43182",
+        "hx_43462",
+        "hx_43742",
+        "hx_44023"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_44023",
+      "travel_cost": 12.72
+    },
+    {
+      "corridor_strength": 0.3223,
+      "edge_id": "corridor_node_hx_43168__node_hx_44573",
+      "from_node_id": "node_hx_43168",
+      "path_hex_ids": [
+        "hx_43168",
+        "hx_43449",
+        "hx_43730",
+        "hx_44011",
+        "hx_44292",
+        "hx_44573"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_44573",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1723,
+      "edge_id": "corridor_node_hx_43168__node_hx_45974",
+      "from_node_id": "node_hx_43168",
+      "path_hex_ids": [
+        "hx_43168",
+        "hx_43448",
+        "hx_43728",
+        "hx_44008",
+        "hx_44288",
+        "hx_44569",
+        "hx_44850",
+        "hx_45131",
+        "hx_45412",
+        "hx_45693",
+        "hx_45974"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_45974",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.1675,
+      "edge_id": "corridor_node_hx_44023__node_hx_45424",
+      "from_node_id": "node_hx_44023",
+      "path_hex_ids": [
+        "hx_44023",
+        "hx_44022",
+        "hx_44302",
+        "hx_44582",
+        "hx_44862",
+        "hx_45143",
+        "hx_45424"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_45424",
+      "travel_cost": 12.72
+    },
+    {
+      "corridor_strength": 0.1235,
+      "edge_id": "corridor_node_hx_44573__node_hx_45424",
+      "from_node_id": "node_hx_44573",
+      "path_hex_ids": [
+        "hx_44573",
+        "hx_44574",
+        "hx_44575",
+        "hx_44576",
+        "hx_44577",
+        "hx_44578",
+        "hx_44579",
+        "hx_44580",
+        "hx_44581",
+        "hx_44862",
+        "hx_45143",
+        "hx_45424"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_45424",
+      "travel_cost": 18.88
+    },
+    {
+      "corridor_strength": 0.3254,
+      "edge_id": "corridor_node_hx_44573__node_hx_45974",
+      "from_node_id": "node_hx_44573",
+      "path_hex_ids": [
+        "hx_44573",
+        "hx_44853",
+        "hx_45133",
+        "hx_45413",
+        "hx_45693",
+        "hx_45974"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_45974",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1314,
+      "edge_id": "corridor_node_hx_45424__node_hx_47666",
+      "from_node_id": "node_hx_45424",
+      "path_hex_ids": [
+        "hx_45424",
+        "hx_45704",
+        "hx_45984",
+        "hx_46264",
+        "hx_46544",
+        "hx_46824",
+        "hx_47104",
+        "hx_47384",
+        "hx_47665",
+        "hx_47666"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_47666",
+      "travel_cost": 16.872
+    },
+    {
+      "corridor_strength": 0.2131,
+      "edge_id": "corridor_node_hx_45974__node_hx_47652",
+      "from_node_id": "node_hx_45974",
+      "path_hex_ids": [
+        "hx_45974",
+        "hx_45973",
+        "hx_45972",
+        "hx_46252",
+        "hx_46532",
+        "hx_46812",
+        "hx_47092",
+        "hx_47372",
+        "hx_47652"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_47652",
+      "travel_cost": 11.072
+    },
+    {
+      "corridor_strength": 0.2154,
+      "edge_id": "corridor_node_hx_45974__node_hx_47662",
+      "from_node_id": "node_hx_45974",
+      "path_hex_ids": [
+        "hx_45974",
+        "hx_45975",
+        "hx_45976",
+        "hx_46257",
+        "hx_46538",
+        "hx_46819",
+        "hx_47100",
+        "hx_47381",
+        "hx_47662"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_47662",
+      "travel_cost": 11.072
+    },
+    {
+      "corridor_strength": 0.1747,
+      "edge_id": "corridor_node_hx_47652__node_hx_47662",
+      "from_node_id": "node_hx_47652",
+      "path_hex_ids": [
+        "hx_47652",
+        "hx_47653",
+        "hx_47654",
+        "hx_47655",
+        "hx_47656",
+        "hx_47657",
+        "hx_47658",
+        "hx_47659",
+        "hx_47660",
+        "hx_47661",
+        "hx_47662"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_47662",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.1609,
+      "edge_id": "corridor_node_hx_47652__node_hx_49063",
+      "from_node_id": "node_hx_47652",
+      "path_hex_ids": [
+        "hx_47652",
+        "hx_47653",
+        "hx_47654",
+        "hx_47655",
+        "hx_47656",
+        "hx_47657",
+        "hx_47658",
+        "hx_47939",
+        "hx_48220",
+        "hx_48501",
+        "hx_48782",
+        "hx_49063"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49063",
+      "travel_cost": 15.224
+    },
+    {
+      "corridor_strength": 0.3414,
+      "edge_id": "corridor_node_hx_47662__node_hx_47666",
+      "from_node_id": "node_hx_47662",
+      "path_hex_ids": [
+        "hx_47662",
+        "hx_47663",
+        "hx_47664",
+        "hx_47665",
+        "hx_47666"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_47666",
+      "travel_cost": 6.296
+    },
+    {
+      "corridor_strength": 0.3331,
+      "edge_id": "corridor_node_hx_47662__node_hx_49063",
+      "from_node_id": "node_hx_47662",
+      "path_hex_ids": [
+        "hx_47662",
+        "hx_47942",
+        "hx_48222",
+        "hx_48502",
+        "hx_48782",
+        "hx_49063"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_49063",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2963,
+      "edge_id": "corridor_node_hx_47662__node_hx_49066",
+      "from_node_id": "node_hx_47662",
+      "path_hex_ids": [
+        "hx_47662",
+        "hx_47942",
+        "hx_48223",
+        "hx_48504",
+        "hx_48785",
+        "hx_49066"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49066",
+      "travel_cost": 7.68
+    },
+    {
+      "corridor_strength": 0.162,
+      "edge_id": "corridor_node_hx_47662__node_hx_50742",
+      "from_node_id": "node_hx_47662",
+      "path_hex_ids": [
+        "hx_47662",
+        "hx_47942",
+        "hx_48222",
+        "hx_48502",
+        "hx_48782",
+        "hx_49062",
+        "hx_49342",
+        "hx_49622",
+        "hx_49902",
+        "hx_50182",
+        "hx_50462",
+        "hx_50742"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_50742",
+      "travel_cost": 15.224
+    },
+    {
+      "corridor_strength": 0.2256,
+      "edge_id": "corridor_node_hx_47666__node_hx_49066",
+      "from_node_id": "node_hx_47666",
+      "path_hex_ids": [
+        "hx_47666",
+        "hx_47665",
+        "hx_47945",
+        "hx_48225",
+        "hx_48505",
+        "hx_48785",
+        "hx_49066"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49066",
+      "travel_cost": 9.824
+    },
+    {
+      "corridor_strength": 0.1063,
+      "edge_id": "corridor_node_hx_47880__node_hx_48176",
+      "from_node_id": "node_hx_47880",
+      "path_hex_ids": [
+        "hx_47880",
+        "hx_47881",
+        "hx_47882",
+        "hx_47883",
+        "hx_47884",
+        "hx_47885",
+        "hx_47886",
+        "hx_47887",
+        "hx_47888",
+        "hx_47889",
+        "hx_47890",
+        "hx_47891",
+        "hx_47892",
+        "hx_47893",
+        "hx_47894",
+        "hx_47895",
+        "hx_48176"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48176",
+      "travel_cost": 22.144
+    },
+    {
+      "corridor_strength": 0.1649,
+      "edge_id": "corridor_node_hx_47880__node_hx_48450",
+      "from_node_id": "node_hx_47880",
+      "path_hex_ids": [
+        "hx_47880",
+        "hx_47881",
+        "hx_47882",
+        "hx_47883",
+        "hx_47884",
+        "hx_47885",
+        "hx_47886",
+        "hx_47887",
+        "hx_47888",
+        "hx_48169",
+        "hx_48450"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48450",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.3099,
+      "edge_id": "corridor_node_hx_47880__node_hx_48725",
+      "from_node_id": "node_hx_47880",
+      "path_hex_ids": [
+        "hx_47880",
+        "hx_47881",
+        "hx_47882",
+        "hx_48163",
+        "hx_48444",
+        "hx_48725"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48725",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2349,
+      "edge_id": "corridor_node_hx_48176__node_hx_48450",
+      "from_node_id": "node_hx_48176",
+      "path_hex_ids": [
+        "hx_48176",
+        "hx_48175",
+        "hx_48174",
+        "hx_48173",
+        "hx_48172",
+        "hx_48171",
+        "hx_48170",
+        "hx_48450"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48450",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.1326,
+      "edge_id": "corridor_node_hx_48176__node_hx_48725",
+      "from_node_id": "node_hx_48176",
+      "path_hex_ids": [
+        "hx_48176",
+        "hx_48175",
+        "hx_48174",
+        "hx_48173",
+        "hx_48172",
+        "hx_48171",
+        "hx_48170",
+        "hx_48169",
+        "hx_48168",
+        "hx_48167",
+        "hx_48166",
+        "hx_48165",
+        "hx_48445",
+        "hx_48725"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48725",
+      "travel_cost": 17.992
+    },
+    {
+      "corridor_strength": 0.3213,
+      "edge_id": "corridor_node_hx_48176__node_hx_49581",
+      "from_node_id": "node_hx_48176",
+      "path_hex_ids": [
+        "hx_48176",
+        "hx_48457",
+        "hx_48738",
+        "hx_49019",
+        "hx_49300",
+        "hx_49581"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49581",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.098,
+      "edge_id": "corridor_node_hx_48176__node_hx_51274",
+      "from_node_id": "node_hx_48176",
+      "path_hex_ids": [
+        "hx_51274",
+        "hx_50993",
+        "hx_50712",
+        "hx_50431",
+        "hx_50150",
+        "hx_49869",
+        "hx_49588",
+        "hx_49307",
+        "hx_49026",
+        "hx_48745",
+        "hx_48464",
+        "hx_48183",
+        "hx_48182",
+        "hx_48181",
+        "hx_48180",
+        "hx_48179",
+        "hx_48178",
+        "hx_48177",
+        "hx_48176"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_51274",
+      "travel_cost": 24.912
+    },
+    {
+      "corridor_strength": 0.2692,
+      "edge_id": "corridor_node_hx_48450__node_hx_48725",
+      "from_node_id": "node_hx_48450",
+      "path_hex_ids": [
+        "hx_48450",
+        "hx_48449",
+        "hx_48448",
+        "hx_48447",
+        "hx_48446",
+        "hx_48445",
+        "hx_48725"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_48725",
+      "travel_cost": 8.304
+    },
+    {
+      "corridor_strength": 0.156,
+      "edge_id": "corridor_node_hx_48450__node_hx_49581",
+      "from_node_id": "node_hx_48450",
+      "path_hex_ids": [
+        "hx_49581",
+        "hx_49300",
+        "hx_49019",
+        "hx_48738",
+        "hx_48457",
+        "hx_48456",
+        "hx_48455",
+        "hx_48454",
+        "hx_48453",
+        "hx_48452",
+        "hx_48451",
+        "hx_48450"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49581",
+      "travel_cost": 15.224
+    },
+    {
+      "corridor_strength": 0.4381,
+      "edge_id": "corridor_node_hx_49063__node_hx_49066",
+      "from_node_id": "node_hx_49063",
+      "path_hex_ids": [
+        "hx_49063",
+        "hx_49064",
+        "hx_49065",
+        "hx_49066"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_49066",
+      "travel_cost": 4.912
+    },
+    {
+      "corridor_strength": 0.2965,
+      "edge_id": "corridor_node_hx_49063__node_hx_50466",
+      "from_node_id": "node_hx_49063",
+      "path_hex_ids": [
+        "hx_49063",
+        "hx_49343",
+        "hx_49623",
+        "hx_49904",
+        "hx_50185",
+        "hx_50466"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_50466",
+      "travel_cost": 7.68
+    },
+    {
+      "corridor_strength": 0.2476,
+      "edge_id": "corridor_node_hx_49063__node_hx_50742",
+      "from_node_id": "node_hx_49063",
+      "path_hex_ids": [
+        "hx_49063",
+        "hx_49062",
+        "hx_49342",
+        "hx_49622",
+        "hx_49902",
+        "hx_50182",
+        "hx_50462",
+        "hx_50742"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_50742",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.2316,
+      "edge_id": "corridor_node_hx_49066__node_hx_50466",
+      "from_node_id": "node_hx_49066",
+      "path_hex_ids": [
+        "hx_50466",
+        "hx_50185",
+        "hx_49905",
+        "hx_49625",
+        "hx_49345",
+        "hx_49065",
+        "hx_49066"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_50466",
+      "travel_cost": 9.824
+    },
+    {
+      "corridor_strength": 0.1347,
+      "edge_id": "corridor_node_hx_49581__node_hx_51274",
+      "from_node_id": "node_hx_49581",
+      "path_hex_ids": [
+        "hx_49581",
+        "hx_49582",
+        "hx_49583",
+        "hx_49584",
+        "hx_49585",
+        "hx_49586",
+        "hx_49587",
+        "hx_49588",
+        "hx_49869",
+        "hx_50150",
+        "hx_50431",
+        "hx_50712",
+        "hx_50993",
+        "hx_51274"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_51274",
+      "travel_cost": 17.992
+    },
+    {
+      "corridor_strength": 0.2547,
+      "edge_id": "corridor_node_hx_50466__node_hx_50742",
+      "from_node_id": "node_hx_50466",
+      "path_hex_ids": [
+        "hx_50466",
+        "hx_50185",
+        "hx_50184",
+        "hx_50183",
+        "hx_50182",
+        "hx_50462",
+        "hx_50742"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_50742",
+      "travel_cost": 9.064
+    },
+    {
+      "corridor_strength": 0.2069,
+      "edge_id": "corridor_node_hx_50466__node_hx_51585",
+      "from_node_id": "node_hx_50466",
+      "path_hex_ids": [
+        "hx_51585",
+        "hx_51304",
+        "hx_51024",
+        "hx_50744",
+        "hx_50464",
+        "hx_50184",
+        "hx_50185",
+        "hx_50466"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_51585",
+      "travel_cost": 11.208
+    },
+    {
+      "corridor_strength": 0.3333,
+      "edge_id": "corridor_node_hx_50742__node_hx_51580",
+      "from_node_id": "node_hx_50742",
+      "path_hex_ids": [
+        "hx_50742",
+        "hx_50741",
+        "hx_50740",
+        "hx_51020",
+        "hx_51300",
+        "hx_51580"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_51580",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.4396,
+      "edge_id": "corridor_node_hx_50742__node_hx_51585",
+      "from_node_id": "node_hx_50742",
+      "path_hex_ids": [
+        "hx_50742",
+        "hx_51023",
+        "hx_51304",
+        "hx_51585"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_51585",
+      "travel_cost": 4.912
+    },
+    {
+      "corridor_strength": 0.2577,
+      "edge_id": "corridor_node_hx_50742__node_hx_52142",
+      "from_node_id": "node_hx_50742",
+      "path_hex_ids": [
+        "hx_52142",
+        "hx_51861",
+        "hx_51581",
+        "hx_51301",
+        "hx_51021",
+        "hx_50741",
+        "hx_50742"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_52142",
+      "travel_cost": 9.064
+    },
+    {
+      "corridor_strength": 0.1165,
+      "edge_id": "corridor_node_hx_51274__node_hx_52689",
+      "from_node_id": "node_hx_51274",
+      "path_hex_ids": [
+        "hx_51274",
+        "hx_51275",
+        "hx_51276",
+        "hx_51277",
+        "hx_51278",
+        "hx_51279",
+        "hx_51280",
+        "hx_51281",
+        "hx_51282",
+        "hx_51283",
+        "hx_51284",
+        "hx_51565",
+        "hx_51846",
+        "hx_52127",
+        "hx_52408",
+        "hx_52689"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_52689",
+      "travel_cost": 20.76
+    },
+    {
+      "corridor_strength": 0.2586,
+      "edge_id": "corridor_node_hx_51580__node_hx_51585",
+      "from_node_id": "node_hx_51580",
+      "path_hex_ids": [
+        "hx_51580",
+        "hx_51581",
+        "hx_51582",
+        "hx_51302",
+        "hx_51303",
+        "hx_51304",
+        "hx_51585"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_51585",
+      "travel_cost": 9.064
+    },
+    {
+      "corridor_strength": 0.5734,
+      "edge_id": "corridor_node_hx_51580__node_hx_52142",
+      "from_node_id": "node_hx_51580",
+      "path_hex_ids": [
+        "hx_51580",
+        "hx_51861",
+        "hx_52142"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_52142",
+      "travel_cost": 3.528
+    },
+    {
+      "corridor_strength": 0.3352,
+      "edge_id": "corridor_node_hx_51580__node_hx_52418",
+      "from_node_id": "node_hx_51580",
+      "path_hex_ids": [
+        "hx_52418",
+        "hx_52138",
+        "hx_51858",
+        "hx_51578",
+        "hx_51579",
+        "hx_51580"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_52418",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2093,
+      "edge_id": "corridor_node_hx_51585__node_hx_52142",
+      "from_node_id": "node_hx_51585",
+      "path_hex_ids": [
+        "hx_52142",
+        "hx_51861",
+        "hx_51581",
+        "hx_51582",
+        "hx_51302",
+        "hx_51303",
+        "hx_51304",
+        "hx_51585"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_52142",
+      "travel_cost": 11.208
+    },
+    {
+      "corridor_strength": 0.3005,
+      "edge_id": "corridor_node_hx_52142__node_hx_52418",
+      "from_node_id": "node_hx_52142",
+      "path_hex_ids": [
+        "hx_52418",
+        "hx_52138",
+        "hx_52139",
+        "hx_52140",
+        "hx_52141",
+        "hx_52142"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_52418",
+      "travel_cost": 7.68
+    },
+    {
+      "corridor_strength": 0.2357,
+      "edge_id": "corridor_node_hx_52142__node_hx_53261",
+      "from_node_id": "node_hx_52142",
+      "path_hex_ids": [
+        "hx_53261",
+        "hx_52980",
+        "hx_52700",
+        "hx_52420",
+        "hx_52140",
+        "hx_52141",
+        "hx_52142"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_53261",
+      "travel_cost": 9.824
+    },
+    {
+      "corridor_strength": 0.1747,
+      "edge_id": "corridor_node_hx_52418__node_hx_52689",
+      "from_node_id": "node_hx_52418",
+      "path_hex_ids": [
+        "hx_52689",
+        "hx_52409",
+        "hx_52410",
+        "hx_52411",
+        "hx_52412",
+        "hx_52413",
+        "hx_52414",
+        "hx_52415",
+        "hx_52416",
+        "hx_52417",
+        "hx_52418"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_52689",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.4415,
+      "edge_id": "corridor_node_hx_52418__node_hx_53261",
+      "from_node_id": "node_hx_52418",
+      "path_hex_ids": [
+        "hx_52418",
+        "hx_52699",
+        "hx_52980",
+        "hx_53261"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_53261",
+      "travel_cost": 4.912
+    },
+    {
+      "corridor_strength": 0.2456,
+      "edge_id": "corridor_node_hx_52418__node_hx_54379",
+      "from_node_id": "node_hx_52418",
+      "path_hex_ids": [
+        "hx_52418",
+        "hx_52698",
+        "hx_52978",
+        "hx_53258",
+        "hx_53538",
+        "hx_53818",
+        "hx_54098",
+        "hx_54379"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_54379",
+      "travel_cost": 9.688
+    },
+    {
+      "corridor_strength": 0.3203,
+      "edge_id": "corridor_node_hx_52689__node_hx_54094",
+      "from_node_id": "node_hx_52689",
+      "path_hex_ids": [
+        "hx_52689",
+        "hx_52970",
+        "hx_53251",
+        "hx_53532",
+        "hx_53813",
+        "hx_54094"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_54094",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.1718,
+      "edge_id": "corridor_node_hx_52689__node_hx_54379",
+      "from_node_id": "node_hx_52689",
+      "path_hex_ids": [
+        "hx_52689",
+        "hx_52690",
+        "hx_52691",
+        "hx_52692",
+        "hx_52693",
+        "hx_52974",
+        "hx_53255",
+        "hx_53536",
+        "hx_53817",
+        "hx_54098",
+        "hx_54379"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_54379",
+      "travel_cost": 13.84
+    },
+    {
+      "corridor_strength": 0.202,
+      "edge_id": "corridor_node_hx_53261__node_hx_54663",
+      "from_node_id": "node_hx_53261",
+      "path_hex_ids": [
+        "hx_53261",
+        "hx_53260",
+        "hx_53540",
+        "hx_53820",
+        "hx_54101",
+        "hx_54382",
+        "hx_54663"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_54663",
+      "travel_cost": 11.344
+    },
+    {
+      "corridor_strength": 0.3244,
+      "edge_id": "corridor_node_hx_54094__node_hx_54379",
+      "from_node_id": "node_hx_54094",
+      "path_hex_ids": [
+        "hx_54094",
+        "hx_54095",
+        "hx_54096",
+        "hx_54097",
+        "hx_54098",
+        "hx_54379"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_54379",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.3259,
+      "edge_id": "corridor_node_hx_54094__node_hx_55495",
+      "from_node_id": "node_hx_54094",
+      "path_hex_ids": [
+        "hx_54094",
+        "hx_54374",
+        "hx_54654",
+        "hx_54934",
+        "hx_55214",
+        "hx_55495"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_55495",
+      "travel_cost": 6.92
+    },
+    {
+      "corridor_strength": 0.2845,
+      "edge_id": "corridor_node_hx_54379__node_hx_54663",
+      "from_node_id": "node_hx_54379",
+      "path_hex_ids": [
+        "hx_54379",
+        "hx_54380",
+        "hx_54381",
+        "hx_54382",
+        "hx_54663"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_54663",
+      "travel_cost": 7.816
+    },
+    {
+      "corridor_strength": 0.2149,
+      "edge_id": "corridor_node_hx_54379__node_hx_55495",
+      "from_node_id": "node_hx_54379",
+      "path_hex_ids": [
+        "hx_54379",
+        "hx_54378",
+        "hx_54377",
+        "hx_54376",
+        "hx_54375",
+        "hx_54655",
+        "hx_54935",
+        "hx_55215",
+        "hx_55495"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_55495",
+      "travel_cost": 11.072
+    },
+    {
+      "corridor_strength": 0.2069,
+      "edge_id": "corridor_node_hx_54379__node_hx_55782",
+      "from_node_id": "node_hx_54379",
+      "path_hex_ids": [
+        "hx_54379",
+        "hx_54659",
+        "hx_54940",
+        "hx_55221",
+        "hx_55501",
+        "hx_55782"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_55782",
+      "travel_cost": 10.136
+    },
+    {
+      "corridor_strength": 0.1278,
+      "edge_id": "corridor_node_hx_54379__node_hx_56332",
+      "from_node_id": "node_hx_54379",
+      "path_hex_ids": [
+        "hx_56332",
+        "hx_56052",
+        "hx_55772",
+        "hx_55492",
+        "hx_55212",
+        "hx_54932",
+        "hx_54652",
+        "hx_54372",
+        "hx_54373",
+        "hx_54374",
+        "hx_54375",
+        "hx_54376",
+        "hx_54377",
+        "hx_54378",
+        "hx_54379"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_56332",
+      "travel_cost": 19.376
+    },
+    {
+      "corridor_strength": 0.1609,
+      "edge_id": "corridor_node_hx_54663__node_hx_55782",
+      "from_node_id": "node_hx_54663",
+      "path_hex_ids": [
+        "hx_54663",
+        "hx_54662",
+        "hx_54942",
+        "hx_55222",
+        "hx_55502",
+        "hx_55782"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_55782",
+      "travel_cost": 12.856
+    },
+    {
+      "corridor_strength": 0.2812,
+      "edge_id": "corridor_node_hx_55495__node_hx_56332",
+      "from_node_id": "node_hx_55495",
+      "path_hex_ids": [
+        "hx_55495",
+        "hx_55494",
+        "hx_55493",
+        "hx_55492",
+        "hx_55772",
+        "hx_56052",
+        "hx_56332"
+      ],
+      "route_tier": "trunk",
+      "to_node_id": "node_hx_56332",
+      "travel_cost": 8.304
+    },
+    {
+      "corridor_strength": 0.2392,
+      "edge_id": "corridor_node_hx_55495__node_hx_56619",
+      "from_node_id": "node_hx_55495",
+      "path_hex_ids": [
+        "hx_55495",
+        "hx_55776",
+        "hx_56057",
+        "hx_56338",
+        "hx_56619"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_56619",
+      "travel_cost": 9.192
+    },
+    {
+      "corridor_strength": 0.2236,
+      "edge_id": "corridor_node_hx_55495__node_hx_57175",
+      "from_node_id": "node_hx_55495",
+      "path_hex_ids": [
+        "hx_57175",
+        "hx_56894",
+        "hx_56614",
+        "hx_56334",
+        "hx_56054",
+        "hx_55774",
+        "hx_55494",
+        "hx_55495"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_57175",
+      "travel_cost": 10.448
+    },
+    {
+      "corridor_strength": 0.1073,
+      "edge_id": "corridor_node_hx_55782__node_hx_56619",
+      "from_node_id": "node_hx_55782",
+      "path_hex_ids": [
+        "hx_55782",
+        "hx_55781",
+        "hx_55500",
+        "hx_55499",
+        "hx_55779",
+        "hx_55778",
+        "hx_56058",
+        "hx_56338",
+        "hx_56619"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_56619",
+      "travel_cost": 19.024
+    },
+    {
+      "corridor_strength": 0.1707,
+      "edge_id": "corridor_node_hx_56332__node_hx_56619",
+      "from_node_id": "node_hx_56332",
+      "path_hex_ids": [
+        "hx_56332",
+        "hx_56333",
+        "hx_56334",
+        "hx_56335",
+        "hx_56336",
+        "hx_56337",
+        "hx_56338",
+        "hx_56619"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_56619",
+      "travel_cost": 13.344
+    },
+    {
+      "corridor_strength": 0.4347,
+      "edge_id": "corridor_node_hx_56332__node_hx_57175",
+      "from_node_id": "node_hx_56332",
+      "path_hex_ids": [
+        "hx_56332",
+        "hx_56613",
+        "hx_56894",
+        "hx_57175"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_57175",
+      "travel_cost": 4.912
+    },
+    {
+      "corridor_strength": 0.0689,
+      "edge_id": "corridor_node_hx_56332__node_hx_58286",
+      "from_node_id": "node_hx_56332",
+      "path_hex_ids": [
+        "hx_58286",
+        "hx_58006",
+        "hx_58007",
+        "hx_58008",
+        "hx_58009",
+        "hx_58010",
+        "hx_58011",
+        "hx_57731",
+        "hx_57451",
+        "hx_57171",
+        "hx_56891",
+        "hx_56611",
+        "hx_56331",
+        "hx_56332"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_58286",
+      "travel_cost": 29.848
+    },
+    {
+      "corridor_strength": 0.1392,
+      "edge_id": "corridor_node_hx_56332__node_hx_58576",
+      "from_node_id": "node_hx_56332",
+      "path_hex_ids": [
+        "hx_58576",
+        "hx_58295",
+        "hx_58014",
+        "hx_57734",
+        "hx_57453",
+        "hx_57172",
+        "hx_56892",
+        "hx_56612",
+        "hx_56332"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_58576",
+      "travel_cost": 15.808
+    },
+    {
+      "corridor_strength": 0.1059,
+      "edge_id": "corridor_node_hx_56332__node_hx_58851",
+      "from_node_id": "node_hx_56332",
+      "path_hex_ids": [
+        "hx_58851",
+        "hx_58571",
+        "hx_58291",
+        "hx_58011",
+        "hx_57731",
+        "hx_57451",
+        "hx_57171",
+        "hx_56891",
+        "hx_56611",
+        "hx_56331",
+        "hx_56332"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_58851",
+      "travel_cost": 21.08
+    },
+    {
+      "corridor_strength": 0.1451,
+      "edge_id": "corridor_node_hx_56619__node_hx_57175",
+      "from_node_id": "node_hx_56619",
+      "path_hex_ids": [
+        "hx_56619",
+        "hx_56618",
+        "hx_56337",
+        "hx_56336",
+        "hx_56335",
+        "hx_56615",
+        "hx_56614",
+        "hx_56894",
+        "hx_57175"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_57175",
+      "travel_cost": 15.488
+    },
+    {
+      "corridor_strength": 0.1351,
+      "edge_id": "corridor_node_hx_57175__node_hx_58576",
+      "from_node_id": "node_hx_57175",
+      "path_hex_ids": [
+        "hx_57175",
+        "hx_57455",
+        "hx_57735",
+        "hx_58015",
+        "hx_58295",
+        "hx_58576"
+      ],
+      "route_tier": "regional",
+      "to_node_id": "node_hx_58576",
+      "travel_cost": 15.896
+    },
+    {
+      "corridor_strength": 0.058,
+      "edge_id": "corridor_node_hx_58286__node_hx_58576",
+      "from_node_id": "node_hx_58286",
+      "path_hex_ids": [
+        "hx_58286",
+        "hx_58006",
+        "hx_58007",
+        "hx_58008",
+        "hx_58009",
+        "hx_58010",
+        "hx_58011",
+        "hx_58012",
+        "hx_58013",
+        "hx_58014",
+        "hx_58295",
+        "hx_58576"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_58576",
+      "travel_cost": 30.736
+    },
+    {
+      "corridor_strength": 0.1019,
+      "edge_id": "corridor_node_hx_58286__node_hx_58851",
+      "from_node_id": "node_hx_58286",
+      "path_hex_ids": [
+        "hx_58286",
+        "hx_58006",
+        "hx_58007",
+        "hx_58008",
+        "hx_58289",
+        "hx_58570",
+        "hx_58851"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_58851",
+      "travel_cost": 17.04
+    },
+    {
+      "corridor_strength": 0.1001,
+      "edge_id": "corridor_node_hx_58576__node_hx_58851",
+      "from_node_id": "node_hx_58576",
+      "path_hex_ids": [
+        "hx_58576",
+        "hx_58575",
+        "hx_58294",
+        "hx_58293",
+        "hx_58292",
+        "hx_58291",
+        "hx_58571",
+        "hx_58851"
+      ],
+      "route_tier": "local",
+      "to_node_id": "node_hx_58851",
+      "travel_cost": 19.504
+    }
+  ],
+  "corridor_nodes": [
+    {
+      "crossing_score": 0.4778,
+      "hex_id": "hx_22358",
+      "local_food_support": 0.228,
+      "node_id": "node_hx_22358",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.063,
+      "settlement_suitability": 0.2269
+    },
+    {
+      "crossing_score": 0.4051,
+      "hex_id": "hx_23203",
+      "local_food_support": 0.2309,
+      "node_id": "node_hx_23203",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1303,
+      "settlement_suitability": 0.2297
+    },
+    {
+      "crossing_score": 0.4624,
+      "hex_id": "hx_25194",
+      "local_food_support": 0.1564,
+      "node_id": "node_hx_25194",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1758,
+      "settlement_suitability": 0.1569
+    },
+    {
+      "crossing_score": 0.4879,
+      "hex_id": "hx_26317",
+      "local_food_support": 0.2753,
+      "node_id": "node_hx_26317",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2151,
+      "settlement_suitability": 0.2731
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_27972",
+      "local_food_support": 0.6056,
+      "node_id": "node_hx_27972",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3631,
+      "settlement_suitability": 0.5442
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_28247",
+      "local_food_support": 0.6079,
+      "node_id": "node_hx_28247",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3455,
+      "settlement_suitability": 0.4839
+    },
+    {
+      "crossing_score": 0.6561,
+      "hex_id": "hx_28569",
+      "local_food_support": 0.3939,
+      "node_id": "node_hx_28569",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2847,
+      "settlement_suitability": 0.3951
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_28841",
+      "local_food_support": 0.454,
+      "node_id": "node_hx_28841",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4745,
+      "settlement_suitability": 0.509
+    },
+    {
+      "crossing_score": 0.6568,
+      "hex_id": "hx_29119",
+      "local_food_support": 0.3971,
+      "node_id": "node_hx_29119",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3671,
+      "settlement_suitability": 0.3982
+    },
+    {
+      "crossing_score": 0.6768,
+      "hex_id": "hx_29126",
+      "local_food_support": 0.4904,
+      "node_id": "node_hx_29126",
+      "node_kind": "mixed",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3247,
+      "settlement_suitability": 0.5364
+    },
+    {
+      "crossing_score": 0.5544,
+      "hex_id": "hx_29133",
+      "local_food_support": 0.4362,
+      "node_id": "node_hx_29133",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4526,
+      "settlement_suitability": 0.4272
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_29372",
+      "local_food_support": 1,
+      "node_id": "node_hx_29372",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.4106,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0.5515,
+      "hex_id": "hx_29403",
+      "local_food_support": 0.4229,
+      "node_id": "node_hx_29403",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2914,
+      "settlement_suitability": 0.4142
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_29691",
+      "local_food_support": 0.6927,
+      "node_id": "node_hx_29691",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5399,
+      "settlement_suitability": 0.6241
+    },
+    {
+      "crossing_score": 0.663,
+      "hex_id": "hx_29698",
+      "local_food_support": 0.4259,
+      "node_id": "node_hx_29698",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2641,
+      "settlement_suitability": 0.4263
+    },
+    {
+      "crossing_score": 0.6476,
+      "hex_id": "hx_30238",
+      "local_food_support": 0.3541,
+      "node_id": "node_hx_30238",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1266,
+      "settlement_suitability": 0.3562
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_30260",
+      "local_food_support": 0.4854,
+      "node_id": "node_hx_30260",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.4075,
+      "settlement_suitability": 0.5613
+    },
+    {
+      "crossing_score": 0.8045,
+      "hex_id": "hx_30262",
+      "local_food_support": 0.3469,
+      "node_id": "node_hx_30262",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.231,
+      "settlement_suitability": 0.3588
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_31094",
+      "local_food_support": 0.987,
+      "node_id": "node_hx_31094",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5745,
+      "settlement_suitability": 0.7701
+    },
+    {
+      "crossing_score": 0.5446,
+      "hex_id": "hx_31636",
+      "local_food_support": 0.3907,
+      "node_id": "node_hx_31636",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2128,
+      "settlement_suitability": 0.3828
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_31648",
+      "local_food_support": 0.707,
+      "node_id": "node_hx_31648",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3629,
+      "settlement_suitability": 0.54
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_32219",
+      "local_food_support": 1,
+      "node_id": "node_hx_32219",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4438,
+      "settlement_suitability": 0.7784
+    },
+    {
+      "crossing_score": 0.6679,
+      "hex_id": "hx_32475",
+      "local_food_support": 0.4486,
+      "node_id": "node_hx_32475",
+      "node_kind": "mixed",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3563,
+      "settlement_suitability": 0.5081
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_32485",
+      "local_food_support": 0.8157,
+      "node_id": "node_hx_32485",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6588,
+      "settlement_suitability": 0.6654
+    },
+    {
+      "crossing_score": 0.5445,
+      "hex_id": "hx_32747",
+      "local_food_support": 0.3904,
+      "node_id": "node_hx_32747",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1694,
+      "settlement_suitability": 0.3824
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_32760",
+      "local_food_support": 0.611,
+      "node_id": "node_hx_32760",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5955,
+      "settlement_suitability": 0.5024
+    },
+    {
+      "crossing_score": 0.5251,
+      "hex_id": "hx_32800",
+      "local_food_support": 0.3965,
+      "node_id": "node_hx_32800",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2757,
+      "settlement_suitability": 0.387
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_33002",
+      "local_food_support": 0.6465,
+      "node_id": "node_hx_33002",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3015,
+      "settlement_suitability": 0.475
+    },
+    {
+      "crossing_score": 0.5493,
+      "hex_id": "hx_33033",
+      "local_food_support": 0.4127,
+      "node_id": "node_hx_33033",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2448,
+      "settlement_suitability": 0.4042
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_33050",
+      "local_food_support": 0.9957,
+      "node_id": "node_hx_33050",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6106,
+      "settlement_suitability": 0.7677
+    },
+    {
+      "crossing_score": 0.6402,
+      "hex_id": "hx_33077",
+      "local_food_support": 0.3199,
+      "node_id": "node_hx_33077",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2341,
+      "settlement_suitability": 0.3228
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_33083",
+      "local_food_support": 0.6375,
+      "node_id": "node_hx_33083",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.405,
+      "settlement_suitability": 0.6046
+    },
+    {
+      "crossing_score": 0.3689,
+      "hex_id": "hx_33088",
+      "local_food_support": 0.2555,
+      "node_id": "node_hx_33088",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2652,
+      "settlement_suitability": 0.2507
+    },
+    {
+      "crossing_score": 0.5402,
+      "hex_id": "hx_33867",
+      "local_food_support": 0.3701,
+      "node_id": "node_hx_33867",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2552,
+      "settlement_suitability": 0.3626
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_33886",
+      "local_food_support": 1,
+      "node_id": "node_hx_33886",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6098,
+      "settlement_suitability": 0.7664
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_33900",
+      "local_food_support": 1,
+      "node_id": "node_hx_33900",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4485,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0.5375,
+      "hex_id": "hx_34144",
+      "local_food_support": 0.3575,
+      "node_id": "node_hx_34144",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1288,
+      "settlement_suitability": 0.3503
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_34157",
+      "local_food_support": 0.721,
+      "node_id": "node_hx_34157",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3605,
+      "settlement_suitability": 0.6347
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_34196",
+      "local_food_support": 0.7299,
+      "node_id": "node_hx_34196",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4667,
+      "settlement_suitability": 0.6096
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_34201",
+      "local_food_support": 0.8278,
+      "node_id": "node_hx_34201",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5175,
+      "settlement_suitability": 0.709
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_34404",
+      "local_food_support": 0.9652,
+      "node_id": "node_hx_34404",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4227,
+      "settlement_suitability": 0.7483
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_34487",
+      "local_food_support": 0.9615,
+      "node_id": "node_hx_34487",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6419,
+      "settlement_suitability": 0.7945
+    },
+    {
+      "crossing_score": 0.6748,
+      "hex_id": "hx_34491",
+      "local_food_support": 0.4809,
+      "node_id": "node_hx_34491",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2861,
+      "settlement_suitability": 0.4801
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_35003",
+      "local_food_support": 1,
+      "node_id": "node_hx_35003",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5834,
+      "settlement_suitability": 0.7704
+    },
+    {
+      "crossing_score": 0.536,
+      "hex_id": "hx_35544",
+      "local_food_support": 0.3507,
+      "node_id": "node_hx_35544",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1147,
+      "settlement_suitability": 0.3437
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_35602",
+      "local_food_support": 1,
+      "node_id": "node_hx_35602",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6776,
+      "settlement_suitability": 0.8
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_35807",
+      "local_food_support": 0.9826,
+      "node_id": "node_hx_35807",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3529,
+      "settlement_suitability": 0.7674
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_35821",
+      "local_food_support": 0.3679,
+      "node_id": "node_hx_35821",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4447,
+      "settlement_suitability": 0.4727
+    },
+    {
+      "crossing_score": 0.5063,
+      "hex_id": "hx_35901",
+      "local_food_support": 0.188,
+      "node_id": "node_hx_35901",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2386,
+      "settlement_suitability": 0.1952
+    },
+    {
+      "crossing_score": 0.5383,
+      "hex_id": "hx_36098",
+      "local_food_support": 0.3613,
+      "node_id": "node_hx_36098",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2074,
+      "settlement_suitability": 0.354
+    },
+    {
+      "crossing_score": 0.5428,
+      "hex_id": "hx_36102",
+      "local_food_support": 0.3821,
+      "node_id": "node_hx_36102",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4457,
+      "settlement_suitability": 0.3744
+    },
+    {
+      "crossing_score": 0.4432,
+      "hex_id": "hx_36178",
+      "local_food_support": 0.4102,
+      "node_id": "node_hx_36178",
+      "node_kind": "crossing",
+      "proto_type_hint": "river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.325,
+      "settlement_suitability": 0.4031
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_36396",
+      "local_food_support": 0.6087,
+      "node_id": "node_hx_36396",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4368,
+      "settlement_suitability": 0.4776
+    },
+    {
+      "crossing_score": 0.5908,
+      "hex_id": "hx_36745",
+      "local_food_support": 0.2401,
+      "node_id": "node_hx_36745",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3518,
+      "settlement_suitability": 0.246
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_36989",
+      "local_food_support": 1,
+      "node_id": "node_hx_36989",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3184,
+      "settlement_suitability": 0.7865
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_36998",
+      "local_food_support": 1,
+      "node_id": "node_hx_36998",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2807,
+      "settlement_suitability": 0.7906
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_37233",
+      "local_food_support": 0.7296,
+      "node_id": "node_hx_37233",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4827,
+      "settlement_suitability": 0.6107
+    },
+    {
+      "crossing_score": 0.5934,
+      "hex_id": "hx_37305",
+      "local_food_support": 0.3014,
+      "node_id": "node_hx_37305",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.303,
+      "settlement_suitability": 0.2907
+    },
+    {
+      "crossing_score": 0.5709,
+      "hex_id": "hx_37497",
+      "local_food_support": 0.5133,
+      "node_id": "node_hx_37497",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4558,
+      "settlement_suitability": 0.5025
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_37798",
+      "local_food_support": 0.9617,
+      "node_id": "node_hx_37798",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6832,
+      "settlement_suitability": 0.7501
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_37816",
+      "local_food_support": 1,
+      "node_id": "node_hx_37816",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.4086,
+      "settlement_suitability": 0.7626
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_37858",
+      "local_food_support": 0.9957,
+      "node_id": "node_hx_37858",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3774,
+      "settlement_suitability": 0.7797
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_38085",
+      "local_food_support": 0.9835,
+      "node_id": "node_hx_38085",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4767,
+      "settlement_suitability": 0.756
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_38340",
+      "local_food_support": 0.6094,
+      "node_id": "node_hx_38340",
+      "node_kind": "site",
+      "proto_type_hint": "crossing",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4562,
+      "settlement_suitability": 0.5937
+    },
+    {
+      "crossing_score": 0.5406,
+      "hex_id": "hx_38606",
+      "local_food_support": 0.3722,
+      "node_id": "node_hx_38606",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1323,
+      "settlement_suitability": 0.3647
+    },
+    {
+      "crossing_score": 0.6943,
+      "hex_id": "hx_38616",
+      "local_food_support": 0.5716,
+      "node_id": "node_hx_38616",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3289,
+      "settlement_suitability": 0.5686
+    },
+    {
+      "crossing_score": 0.7135,
+      "hex_id": "hx_38620",
+      "local_food_support": 0.6608,
+      "node_id": "node_hx_38620",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5125,
+      "settlement_suitability": 0.6558
+    },
+    {
+      "crossing_score": 0.439,
+      "hex_id": "hx_38705",
+      "local_food_support": 0.2847,
+      "node_id": "node_hx_38705",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3549,
+      "settlement_suitability": 0.2781
+    },
+    {
+      "crossing_score": 0.5299,
+      "hex_id": "hx_38893",
+      "local_food_support": 0.4186,
+      "node_id": "node_hx_38893",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2565,
+      "settlement_suitability": 0.4086
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_38910",
+      "local_food_support": 0.7774,
+      "node_id": "node_hx_38910",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4826,
+      "settlement_suitability": 0.6533
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_38917",
+      "local_food_support": 1,
+      "node_id": "node_hx_38917",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6875,
+      "settlement_suitability": 0.7784
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_39221",
+      "local_food_support": 1,
+      "node_id": "node_hx_39221",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3645,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_39260",
+      "local_food_support": 0.9802,
+      "node_id": "node_hx_39260",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.8199,
+      "settlement_suitability": 0.8089
+    },
+    {
+      "crossing_score": 0.6699,
+      "hex_id": "hx_39442",
+      "local_food_support": 0.35,
+      "node_id": "node_hx_39442",
+      "node_kind": "mixed",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0,
+      "settlement_suitability": 0.4683
+    },
+    {
+      "crossing_score": 0.543,
+      "hex_id": "hx_39450",
+      "local_food_support": 0.3833,
+      "node_id": "node_hx_39450",
+      "node_kind": "crossing",
+      "proto_type_hint": "major_river_ford",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2155,
+      "settlement_suitability": 0.3756
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_39744",
+      "local_food_support": 0.9522,
+      "node_id": "node_hx_39744",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5457,
+      "settlement_suitability": 0.7907
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_39755",
+      "local_food_support": 0.9957,
+      "node_id": "node_hx_39755",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.622,
+      "settlement_suitability": 0.7919
+    },
+    {
+      "crossing_score": 0.6608,
+      "hex_id": "hx_40014",
+      "local_food_support": 0.4156,
+      "node_id": "node_hx_40014",
+      "node_kind": "mixed",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1814,
+      "settlement_suitability": 0.4858
+    },
+    {
+      "crossing_score": 0.6244,
+      "hex_id": "hx_40104",
+      "local_food_support": 0.5492,
+      "node_id": "node_hx_40104",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5,
+      "settlement_suitability": 0.546
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_40312",
+      "local_food_support": 1,
+      "node_id": "node_hx_40312",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4267,
+      "settlement_suitability": 0.8
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_40658",
+      "local_food_support": 1,
+      "node_id": "node_hx_40658",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4926,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0.6503,
+      "hex_id": "hx_41504",
+      "local_food_support": 0.4434,
+      "node_id": "node_hx_41504",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.2853,
+      "settlement_suitability": 0.4295
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_42899",
+      "local_food_support": 0.9865,
+      "node_id": "node_hx_42899",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.7763,
+      "settlement_suitability": 0.8091
+    },
+    {
+      "crossing_score": 0.4592,
+      "hex_id": "hx_42904",
+      "local_food_support": 0.3437,
+      "node_id": "node_hx_42904",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3,
+      "settlement_suitability": 0.3358
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_43168",
+      "local_food_support": 1,
+      "node_id": "node_hx_43168",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3632,
+      "settlement_suitability": 0.7664
+    },
+    {
+      "crossing_score": 0.6291,
+      "hex_id": "hx_44023",
+      "local_food_support": 0.5666,
+      "node_id": "node_hx_44023",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.4149,
+      "settlement_suitability": 0.5592
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_44263",
+      "local_food_support": 1,
+      "node_id": "node_hx_44263",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.025,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_44573",
+      "local_food_support": 1,
+      "node_id": "node_hx_44573",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4468,
+      "settlement_suitability": 0.7865
+    },
+    {
+      "crossing_score": 0.6688,
+      "hex_id": "hx_45424",
+      "local_food_support": 0.4993,
+      "node_id": "node_hx_45424",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3427,
+      "settlement_suitability": 0.4822
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_45974",
+      "local_food_support": 1,
+      "node_id": "node_hx_45974",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.537,
+      "settlement_suitability": 0.7906
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_47652",
+      "local_food_support": 1,
+      "node_id": "node_hx_47652",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3016,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_47662",
+      "local_food_support": 0.9837,
+      "node_id": "node_hx_47662",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.9675,
+      "settlement_suitability": 0.8102
+    },
+    {
+      "crossing_score": 0.6804,
+      "hex_id": "hx_47666",
+      "local_food_support": 0.5461,
+      "node_id": "node_hx_47666",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.419,
+      "settlement_suitability": 0.5392
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_47880",
+      "local_food_support": 0.8861,
+      "node_id": "node_hx_47880",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3415,
+      "settlement_suitability": 0.6981
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_48176",
+      "local_food_support": 1,
+      "node_id": "node_hx_48176",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.529,
+      "settlement_suitability": 0.7626
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_48450",
+      "local_food_support": 0.987,
+      "node_id": "node_hx_48450",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4903,
+      "settlement_suitability": 0.7483
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_48725",
+      "local_food_support": 1,
+      "node_id": "node_hx_48725",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4206,
+      "settlement_suitability": 0.7566
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_49063",
+      "local_food_support": 0.9615,
+      "node_id": "node_hx_49063",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.8667,
+      "settlement_suitability": 0.8281
+    },
+    {
+      "crossing_score": 0.7618,
+      "hex_id": "hx_49066",
+      "local_food_support": 0.6683,
+      "node_id": "node_hx_49066",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.7123,
+      "settlement_suitability": 0.6529
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_49581",
+      "local_food_support": 1,
+      "node_id": "node_hx_49581",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3474,
+      "settlement_suitability": 0.7824
+    },
+    {
+      "crossing_score": 0.7452,
+      "hex_id": "hx_50466",
+      "local_food_support": 0.5953,
+      "node_id": "node_hx_50466",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5842,
+      "settlement_suitability": 0.5816
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_50742",
+      "local_food_support": 0.9436,
+      "node_id": "node_hx_50742",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 1,
+      "settlement_suitability": 0.8185
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_51274",
+      "local_food_support": 0.9957,
+      "node_id": "node_hx_51274",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1824,
+      "settlement_suitability": 0.7756
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_51580",
+      "local_food_support": 0.8927,
+      "node_id": "node_hx_51580",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.8777,
+      "settlement_suitability": 0.8216
+    },
+    {
+      "crossing_score": 0.7806,
+      "hex_id": "hx_51585",
+      "local_food_support": 0.5523,
+      "node_id": "node_hx_51585",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.6536,
+      "settlement_suitability": 0.5397
+    },
+    {
+      "crossing_score": 0.7746,
+      "hex_id": "hx_52142",
+      "local_food_support": 0.6996,
+      "node_id": "node_hx_52142",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.9368,
+      "settlement_suitability": 0.6892
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_52418",
+      "local_food_support": 0.974,
+      "node_id": "node_hx_52418",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.8758,
+      "settlement_suitability": 0.8334
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_52689",
+      "local_food_support": 1,
+      "node_id": "node_hx_52689",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.4535,
+      "settlement_suitability": 0.7586
+    },
+    {
+      "crossing_score": 0.7766,
+      "hex_id": "hx_53261",
+      "local_food_support": 0.7134,
+      "node_id": "node_hx_53261",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5102,
+      "settlement_suitability": 0.6951
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_54094",
+      "local_food_support": 1,
+      "node_id": "node_hx_54094",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5681,
+      "settlement_suitability": 0.7784
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_54379",
+      "local_food_support": 0.9504,
+      "node_id": "node_hx_54379",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.9569,
+      "settlement_suitability": 0.7911
+    },
+    {
+      "crossing_score": 0.7167,
+      "hex_id": "hx_54663",
+      "local_food_support": 0.4855,
+      "node_id": "node_hx_54663",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.389,
+      "settlement_suitability": 0.4763
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_55495",
+      "local_food_support": 0.9701,
+      "node_id": "node_hx_55495",
+      "node_kind": "site",
+      "proto_type_hint": "rural",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.7649,
+      "settlement_suitability": 0.8031
+    },
+    {
+      "crossing_score": 0.5124,
+      "hex_id": "hx_55782",
+      "local_food_support": 0.3792,
+      "node_id": "node_hx_55782",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.3017,
+      "settlement_suitability": 0.3687
+    },
+    {
+      "crossing_score": 0,
+      "hex_id": "hx_56332",
+      "local_food_support": 0.9578,
+      "node_id": "node_hx_56332",
+      "node_kind": "site",
+      "proto_type_hint": "mixed",
+      "route_anchor_tier": "regional_anchor",
+      "route_centrality_score": 0.8137,
+      "settlement_suitability": 0.8132
+    },
+    {
+      "crossing_score": 0.6353,
+      "hex_id": "hx_56619",
+      "local_food_support": 0.3975,
+      "node_id": "node_hx_56619",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.4079,
+      "settlement_suitability": 0.3865
+    },
+    {
+      "crossing_score": 0.7565,
+      "hex_id": "hx_57175",
+      "local_food_support": 0.6244,
+      "node_id": "node_hx_57175",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "strong_local",
+      "route_centrality_score": 0.5642,
+      "settlement_suitability": 0.6138
+    },
+    {
+      "crossing_score": 0.3132,
+      "hex_id": "hx_58286",
+      "local_food_support": 0.0873,
+      "node_id": "node_hx_58286",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.1539,
+      "settlement_suitability": 0.0853
+    },
+    {
+      "crossing_score": 0.5265,
+      "hex_id": "hx_58576",
+      "local_food_support": 0.2255,
+      "node_id": "node_hx_58576",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.281,
+      "settlement_suitability": 0.2185
+    },
+    {
+      "crossing_score": 0.5257,
+      "hex_id": "hx_58851",
+      "local_food_support": 0.2343,
+      "node_id": "node_hx_58851",
+      "node_kind": "crossing",
+      "proto_type_hint": "ridge_pass",
+      "route_anchor_tier": "local",
+      "route_centrality_score": 0.202,
+      "settlement_suitability": 0.2402
+    }
+  ],
+  "crossing_nodes": [
+    {
+      "crossing_id": "cross_hx_22358",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.4778,
+      "hex_id": "hx_22358",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_23203",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.4051,
+      "hex_id": "hx_23203",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_25194",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.4624,
+      "hex_id": "hx_25194",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_26317",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.4879,
+      "hex_id": "hx_26317",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_28569",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6561,
+      "hex_id": "hx_28569",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_29119",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6568,
+      "hex_id": "hx_29119",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_29126",
+      "crossing_kind": "mixed",
+      "crossing_score": 0.6768,
+      "hex_id": "hx_29126",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_29133",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5544,
+      "hex_id": "hx_29133",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_29403",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5515,
+      "hex_id": "hx_29403",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_29698",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.663,
+      "hex_id": "hx_29698",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_30238",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6476,
+      "hex_id": "hx_30238",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_30262",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.8045,
+      "hex_id": "hx_30262",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_31636",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5446,
+      "hex_id": "hx_31636",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_32475",
+      "crossing_kind": "mixed",
+      "crossing_score": 0.6679,
+      "hex_id": "hx_32475",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_32747",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5445,
+      "hex_id": "hx_32747",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_32800",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5251,
+      "hex_id": "hx_32800",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_33033",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5493,
+      "hex_id": "hx_33033",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_33077",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6402,
+      "hex_id": "hx_33077",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_33088",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.3689,
+      "hex_id": "hx_33088",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_33867",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5402,
+      "hex_id": "hx_33867",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_34144",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5375,
+      "hex_id": "hx_34144",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_34491",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6748,
+      "hex_id": "hx_34491",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_35544",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.536,
+      "hex_id": "hx_35544",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_35901",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.5063,
+      "hex_id": "hx_35901",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_36098",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5383,
+      "hex_id": "hx_36098",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_36102",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5428,
+      "hex_id": "hx_36102",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_36178",
+      "crossing_kind": "river_ford",
+      "crossing_score": 0.4432,
+      "hex_id": "hx_36178",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_36745",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5908,
+      "hex_id": "hx_36745",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_37305",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.5934,
+      "hex_id": "hx_37305",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_37497",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5709,
+      "hex_id": "hx_37497",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_38606",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5406,
+      "hex_id": "hx_38606",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_38616",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.6943,
+      "hex_id": "hx_38616",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_38620",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.7135,
+      "hex_id": "hx_38620",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_38705",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.439,
+      "hex_id": "hx_38705",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_38893",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.5299,
+      "hex_id": "hx_38893",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_39442",
+      "crossing_kind": "mixed",
+      "crossing_score": 0.6699,
+      "hex_id": "hx_39442",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_39450",
+      "crossing_kind": "major_river_ford",
+      "crossing_score": 0.543,
+      "hex_id": "hx_39450",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_40014",
+      "crossing_kind": "mixed",
+      "crossing_score": 0.6608,
+      "hex_id": "hx_40014",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_40104",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6244,
+      "hex_id": "hx_40104",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_41504",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6503,
+      "hex_id": "hx_41504",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_42904",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.4592,
+      "hex_id": "hx_42904",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_44023",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6291,
+      "hex_id": "hx_44023",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_45424",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6688,
+      "hex_id": "hx_45424",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_47666",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6804,
+      "hex_id": "hx_47666",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_49066",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7618,
+      "hex_id": "hx_49066",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_50466",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7452,
+      "hex_id": "hx_50466",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_51585",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7806,
+      "hex_id": "hx_51585",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_52142",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7746,
+      "hex_id": "hx_52142",
+      "route_anchor_tier": "regional_anchor"
+    },
+    {
+      "crossing_id": "cross_hx_53261",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7766,
+      "hex_id": "hx_53261",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_54663",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7167,
+      "hex_id": "hx_54663",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_55782",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.5124,
+      "hex_id": "hx_55782",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_56619",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.6353,
+      "hex_id": "hx_56619",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_57175",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.7565,
+      "hex_id": "hx_57175",
+      "route_anchor_tier": "strong_local"
+    },
+    {
+      "crossing_id": "cross_hx_58286",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.3132,
+      "hex_id": "hx_58286",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_58576",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.5265,
+      "hex_id": "hx_58576",
+      "route_anchor_tier": "local"
+    },
+    {
+      "crossing_id": "cross_hx_58851",
+      "crossing_kind": "ridge_pass",
+      "crossing_score": 0.5257,
+      "hex_id": "hx_58851",
+      "route_anchor_tier": "local"
+    }
+  ],
+  "kingdom_scope": "k_core",
+  "map_schema_version": "map_schema_v1",
+  "mapgen_seed": "PLAY_A_001",
+  "schema_version": "corridor_graph_v1"
+}

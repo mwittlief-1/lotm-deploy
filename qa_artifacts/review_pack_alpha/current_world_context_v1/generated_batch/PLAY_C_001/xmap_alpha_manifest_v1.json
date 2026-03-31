@@ -1,0 +1,77 @@
+{
+  "config_sha256": "328996c6ed32de6fa9ee396be6f7a66aca9d382490b52851c319d73fb7a00484",
+  "distance_metrics": {
+    "canonical_numeric_distance": "travel_cost_distance",
+    "companion_metric": "route_hop_distance",
+    "export_mode": "preview_rows_plus_route_graph",
+    "far_threshold_default": null,
+    "preview_row_count": 16
+  },
+  "kingdom_scope": "k_core",
+  "map_schema_version": "map_schema_v1",
+  "mapgen_seed": "PLAY_C_001",
+  "public_artifacts": {
+    "primary": {
+      "manifest": {
+        "filename": "xmap_alpha_manifest_v1.json"
+      },
+      "manor_units": {
+        "filename": "manor_units_v1.json",
+        "sha256": "1384486945a4445716f5ef29fb15bdf8c4aefcb163481ecf00287e86b5329909"
+      },
+      "world_topology": {
+        "filename": "world_topology_v1.json",
+        "sha256": "6444c4bdf2669e24a3cb8813bb76992d2096c4b56bfa237eae11cb515ba291af"
+      }
+    }
+  },
+  "schema_version": "xmap_alpha_manifest_v1",
+  "source_artifacts": {
+    "debug": {
+      "corridor_graph": {
+        "filename": "corridor_graph_v1.json",
+        "sha256": "a020da3419fcce37e54b291291f8ef0ac1e33daf360c547f8e6a35f516f3c4f4"
+      },
+      "hex_profile": {
+        "filename": "hex_economic_profile_v1.json",
+        "sha256": "d2ba342ce30430dad705d76a7f501d67f533951d03f14c3443c9bac5a3c6bc2b"
+      },
+      "manor_report": {
+        "filename": "manor_generation_report.json",
+        "sha256": "6bbf8e28b9f6b35ac58d2f160b14188165e882d34d51fe1f0efcec230e309460"
+      },
+      "settlement_scaffold": {
+        "filename": "settlement_scaffold_v1.json",
+        "sha256": "fc9aa3858ec3b384f1e5dbde794eedb368a2f9d9fa7afcf7bd35b8da547e259d"
+      }
+    },
+    "primary": {
+      "manifest": {
+        "filename": "xmap_alpha_manifest_v1.json"
+      },
+      "manor_units": {
+        "filename": "manor_units_v1.json",
+        "sha256": "1384486945a4445716f5ef29fb15bdf8c4aefcb163481ecf00287e86b5329909"
+      },
+      "world_topology": {
+        "filename": "world_topology_v1.json",
+        "sha256": "6444c4bdf2669e24a3cb8813bb76992d2096c4b56bfa237eae11cb515ba291af"
+      }
+    }
+  },
+  "summary": {
+    "assignable_residual_component_count": 11,
+    "assignable_residual_hex_count": 450,
+    "elite_seat_complex_count": 121,
+    "manor_count": 407,
+    "oversize_split_count": 3,
+    "pre_reserved_component_count": 17,
+    "pre_reserved_hex_count": 432,
+    "proto_settlement_count": 64,
+    "residual_component_count": 21,
+    "residual_hex_count": 882,
+    "route_edge_count": 1066,
+    "royal_forest_component_count": 0,
+    "royal_forest_hex_count": 0
+  }
+}

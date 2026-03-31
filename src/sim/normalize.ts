@@ -1,10 +1,13 @@
 import { setAvailableEnergy, setEnergyMax } from "./domains/court/energy";
 import { normalizeConstructionState } from "./domains/economy/construction";
 import { setArrearsBushels, setArrearsCoin, setBushelBalance, setCoinBalance, setTaxDueCoin, setTitheDueBushels } from "./domains/economy/ledger";
+import { ensureStateSchemaScaffold } from "./stateSchema";
 import type { RunState } from "./types";
 import { asNonNegInt, clampInt } from "./util";
 
 export function normalizeState(state: RunState): void {
+  ensureStateSchemaScaffold(state);
+
   const m = state.manor;
 
   m.population = asNonNegInt(m.population);

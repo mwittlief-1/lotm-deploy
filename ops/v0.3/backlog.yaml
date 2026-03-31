@@ -24,6 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
+  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
@@ -409,7 +410,7 @@ epics:
 - id: V03-R0-003
   title: Court pacing scaffold v0 with decision budget
   release: v0.3.0
-  status: ready
+  status: done
   priority: 56
   tranche: 1
   change_type: behavior_change
@@ -573,7 +574,7 @@ epics:
 - id: V03-R1-002
   title: Versioned state schema and migration scaffold
   release: v0.3.1
-  status: todo
+  status: done
   priority: 52
   tranche: 2
   change_type: refactor
@@ -2249,7 +2250,7 @@ tasks:
   title: Close epic and refresh court pacing docs
   release: v0.3.0
   parent_epic: V03-R0-003
-  status: ready
+  status: done
   priority: 88
   tranche: 1
   change_type: refactor
@@ -2273,11 +2274,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_engine_t07_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - epic report is written
   - court pacing docs reflect the decision-budget contract
@@ -2577,7 +2578,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Define deterministic non-uniform relationship seed schema
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2609,11 +2610,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_social_t02_dispatch
 - id: V03-R0-005-T03
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -3423,7 +3424,7 @@ tasks:
   title: Add state schema version metadata and registry manifest
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 82
   tranche: 2
   change_type: refactor
@@ -3447,11 +3448,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Snapshots and replay artifacts may gain state version metadata and bounded registry manifest fields.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_tooling_t02_reclaim_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - state schema version is stored explicitly
   - registry manifest exists for bounded registries
@@ -3468,7 +3469,7 @@ tasks:
   title: Add migration runner and no-op step contract
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 80
   tranche: 2
   change_type: refactor
@@ -3513,7 +3514,7 @@ tasks:
   title: Add economy and portfolio placeholder migrations through the scaffold
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 78
   tranche: 2
   change_type: refactor
@@ -3558,7 +3559,7 @@ tasks:
   title: Add bounded snapshot and migration failure coverage
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3605,7 +3606,7 @@ tasks:
   title: Close epic and refresh state-architecture docs
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3693,7 +3694,7 @@ tasks:
   title: Add arrears registry and per-counterparty settlement scaffold
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 82
   tranche: 2
   change_type: behavior_change
@@ -3739,7 +3740,7 @@ tasks:
   title: Implement bounded penalty stage and arrears-carry receipts
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
@@ -3784,7 +3785,7 @@ tasks:
   title: Implement seizure and forced-payment tangible-bite caps
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 78
   tranche: 2
   change_type: behavior_change
@@ -3830,7 +3831,7 @@ tasks:
   title: Integrate obligation settlement and enforcement phase hooks
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: behavior_change
@@ -3876,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: ready
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3902,11 +3903,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_ui_t06_dispatch
   done_conditions:
   - settlement and enforcement outputs are available as canonical snapshot/view-model fields
   - counterparty summaries are deterministic and replay-stable
@@ -6905,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6938,11 +6939,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_economy_pricing_t01_dispatch
 - id: V03-R3-004-T02
   parent_epic: V03-R3-004
   release: v0.3.3

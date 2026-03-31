@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-003-T06
+  last_completed_task_id: V03-R1-003-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 5f2bbf051f6b87fb00b3227e9be4dde3965c2982
+  git_commit: be43f7f61b28e4ce0e7ba60a721573182d5f668d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,28 +18,34 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
-    run2: e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511
+    run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+    run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted UI/Experience V03-R0-003-T06 on kickoff, reclaimed the expired
-  Tooling/QA claim for V03-R1-002-T02 under run log
-  2026-03-27_ui_acceptance_tooling_reclaim_and_engine_t07_dispatch, and
-  opened Engine Core V03-R0-003-T07 plus a fresh Tooling/QA dispatch window.
-  UI is now idle, Economy/Fiscal remains blocked behind V03-R1-002-T06, and
-  world/topology automation remains blocked behind V03-XMAP-001. Integrator
-  validation, scheduler dry-run, rebase dry-run, focused UI coverage, qa,
-  preflight, replay twice, and duplicate audit all passed on kickoff with
-  matching replay hash e68a2e361fa0c0a63755e1f24f3e4ac122ec83411d708c1d7e0cebe7d0601511.
+  Accepted integrator-owned V03-R1-003-T05 on kickoff from commit
+  be43f7f61b28e4ce0e7ba60a721573182d5f668d, which moved obligation settlement
+  and close-turn enforcement into the canonical phase/domain seam and added
+  direct phase integration coverage. Opened UI V03-R1-003-T06, Social
+  V03-R0-005-T02, and Economy V03-R3-004-T01 with fresh claim windows for
+  maximum safe parallelism. Kickoff verification passed for validate, scheduler
+  dry-run, rebase dry-run, focused obligation phase coverage, qa, preflight,
+  replay batch twice, and repo duplicate audit with stable replay hash
+  b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f.
 active_claims:
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R0-003-T07
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R3-004-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_engine_t07_dispatch
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T02
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_economy_pricing_t01_dispatch
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R0-005-T02
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-27T20:43:55-0400'
-    claim_expires_at: '2026-03-28T00:43:55-0400'
-    run_id: 2026-03-27_tooling_t02_reclaim_dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_social_t02_dispatch
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R1-003-T06
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_ui_t06_dispatch
