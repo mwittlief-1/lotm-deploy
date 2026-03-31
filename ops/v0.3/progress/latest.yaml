@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-003-T03
+  last_completed_task_id: V03-R1-003-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cdd10a14170ea33c231723d3e9c5180a89771baf
+  git_commit: 2f4a4c356cfe406a1ba93521b6ddff0d2def1468
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,18 +21,19 @@ last_run:
     run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
     run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
 notes: >-
-  Accepted Economy/Fiscal V03-R1-003-T03 on kickoff and opened
-  Economy/Fiscal V03-R1-003-T04 under run log
-  2026-03-30_economy_t03_acceptance_and_t04_dispatch. Tooling, UI, Engine,
-  and Social are idle, and world/topology automation remains blocked behind
-  V03-XMAP-001. Integrator verification passed for validate, scheduler
-  dry-run, rebase dry-run, the focused obligation enforcement spec, qa,
+  Accepted Economy/Fiscal V03-R1-003-T04 on kickoff from the completed lane
+  handoff V03-R1-003-T04-20260330T182410-0400, cleared the stale expired claim,
+  and opened integrator-owned V03-R1-003-T05 under run id
+  2026-03-31_economy_t05_dispatch. Kickoff verification passed for validate,
+  scheduler dry-run, rebase dry-run, focused obligation suite coverage, qa,
   preflight, replay batch twice, and repo duplicate audit with stable replay
   hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
+  Tooling, UI, Engine, and Social remain idle, and world/topology automation
+  remains blocked behind V03-XMAP-001.
 active_claims:
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R1-003-T04
+  codex/v0.3-refactor-kickoff:
+    task_id: V03-R1-003-T05
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T18:15:15-0400'
-    claim_expires_at: '2026-03-30T22:15:15-0400'
-    run_id: 2026-03-30_economy_t04_dispatch
+    claimed_at: '2026-03-31T07:53:18-0400'
+    claim_expires_at: '2026-03-31T11:53:30-0400'
+    run_id: 2026-03-31_economy_t05_dispatch
