@@ -3033,7 +3033,7 @@ tasks:
   lane_branch: codex/v0.3-lane-world-topology
   deps: []
   requires_integrator: true
-  blocked_reason: Waiting for the external mapgen alpha checklist and approved integration checkpoint.
+  blocked_reason: Waiting for the external mapgen alpha checklist and approved integration checkpoint; lotm-deploy already carries the frozen xmap_alpha_v1 import surface and should not run another import pass before the checkpoint clears.
   allowed_paths:
   - ops/v0.3/**
   forbidden_paths:
@@ -3065,11 +3065,11 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: After merge checkpoint, lock the merged world-domain contract surface, imported fixture shape, and deterministic ownership boundaries for topology data.
+  goal: After the merge checkpoint clears, rebase the merged world-domain contract and fixture import plan against the already-imported xmap_alpha_v1 surface instead of performing a fresh import pass.
   deps:
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-XMAP-001; the frozen xmap_alpha_v1 contract/docs/import surface already exists in lotm-deploy and should be treated as repo truth when this task is rebased.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3112,12 +3112,12 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Expose deterministic adjacency between manors as a stable registry with ordering and lookup guarantees.
+  goal: Rebase deterministic manor adjacency work against the imported territorial and route adjacency surface already present in src/sim/domains/world/**, preserving stable ordering and lookup guarantees.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-XMAP-001; adjacency/topology registries are largely already present in the frozen import surface and should be rebased against repo truth after unlock.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3157,12 +3157,12 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Add numeric manor distance with a tunable far-threshold surface that can be reused by relevance and scope logic.
+  goal: "Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline."
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-XMAP-001; numeric distance is already imported, so the remaining work here starts with the tunable far-threshold layer after unlock.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3202,13 +3202,13 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-refactor-kickoff
-  goal: Wire merged adjacency and distance selectors into bounded world snapshot fields without reopening world-generation design decisions.
+  goal: After T03, integrator wires the rebased adjacency/distance selectors into bounded world snapshot fields without reopening the frozen xmap_alpha_v1 import contract or world-generation design decisions.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   - V03-R1-001-T03
   requires_integrator: true
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-XMAP-001 plus rebased T02/T03 completion; the import surface is already frozen and this task should wire selectors rather than re-import world data.
   allowed_paths:
   - src/sim/phases/**
   - src/sim/domains/world/**
