@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-004-T02
+  last_completed_task_id: V03-R3-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6d2f259e2ef1b332964bcb76bb4191b82a5b97ce
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: c751865285f0959386851105748884d821d1d8d8
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,23 +15,19 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
     run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted UI V03-R1-005-T01 and Economy V03-R3-004-T02 onto kickoff;
-  reopened UI V03-R1-005-T02 as ready; dispatched UI V03-R1-001-T05 and
-  Economy V03-R3-004-T03; and left Social V03-R0-005-T03 plus World
-  V03-R1-001-T06 as the continuing active lane claims.
+  Economy/Fiscal completed V03-R3-004-T03 under dispatch run id
+  2026-03-31_economy_t03_dispatch. Fixed pricing helpers now expose bounded
+  food-store sell-cap and sell-quote behavior plus typed subject-based price
+  lookup over the economy-owned fixed-ratio table, while replay remains stable
+  at hash b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f.
+  V03-R3-004-T04 remains todo pending scheduler promotion.
 active_claims:
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:42:26-0400'
-    claim_expires_at: '2026-03-31T13:42:26-0400'
-    run_id: 2026-03-31_economy_t03_dispatch
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T03
     claimed_by: integrator.dispatch
