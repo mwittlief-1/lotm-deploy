@@ -1,0 +1,13 @@
+sweep,variant,seed,generation_ok,validation_ok,failure_stage,target_hexes_per_manor,total_manor_count,rural_manor_count,median_hexes_per_manor,weak_manor_repairs,border_hex_transfers,residual_share,elite_direct_domain_share
+A,density_h8,PLAY_A_001,true,true,,8,528,407,8.5,1667,1139,0.196398,0.067166
+A,density_h8,PLAY_B_001,true,false,validate,8,429,308,8,873,345,0.398526,0.0625
+A,density_h8,PLAY_C_001,true,false,validate,8,545,424,9,1714,1200,0.200525,0.067754
+A,density_h12,PLAY_A_001,true,true,,12,622,501,9,1396,1373,0.108073,0.067166
+A,density_h12,PLAY_B_001,true,true,,12,647,526,10,1366,1269,0.06876,0.0625
+A,density_h12,PLAY_C_001,true,true,,12,640,519,10,1573,1534,0.063595,0.067754
+A,density_h16,PLAY_A_001,true,true,,16,473,352,9,1062,1051,0.122287,0.067166
+A,density_h16,PLAY_B_001,true,true,,16,512,391,10,2327,2280,0.219608,0.0625
+A,density_h16,PLAY_C_001,true,true,,16,506,385,11,1228,1224,0.120841,0.067754
+A,density_h20,PLAY_A_001,true,true,,20,387,266,11,428,423,0.123589,0.067166
+A,density_h20,PLAY_B_001,true,true,,20,438,317,11,2098,2088,0.26565,0.0625
+A,density_h20,PLAY_C_001,true,true,,20,407,286,12,177,174,0.096541,0.067754

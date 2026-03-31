@@ -1,0 +1,13 @@
+{
+  "border_hex_transfers": 423,
+  "weak_manor_repairs": 428,
+  "merges": 3,
+  "dissolves": 2,
+  "oversized_splits_attempted": 15,
+  "oversized_splits_kept": 5,
+  "tiny_components_absorbed": 8,
+  "productive_components_absorbed": 8,
+  "residual_components_carved": 15,
+  "total_residual_hexes": 1139,
+  "total_royal_forest_hexes": 57
+}

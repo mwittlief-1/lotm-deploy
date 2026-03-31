@@ -345,7 +345,7 @@ epics:
 - id: V03-R0-001
   title: Determinism and receipts v1 hardening
   release: v0.3.0
-  status: in_progress
+  status: ready
   priority: 60
   tranche: 1
   change_type: behavior_change
@@ -2578,7 +2578,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Define deterministic non-uniform relationship seed schema
-  status: todo
+  status: ready
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2610,11 +2610,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_social_t02_dispatch
 - id: V03-R0-005-T03
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -3831,7 +3831,7 @@ tasks:
   title: Integrate obligation settlement and enforcement phase hooks
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: behavior_change
@@ -3877,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: ready
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3903,11 +3903,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_ui_t06_dispatch
   done_conditions:
   - settlement and enforcement outputs are available as canonical snapshot/view-model fields
   - counterparty summaries are deterministic and replay-stable
@@ -6906,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6939,11 +6939,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_economy_pricing_t01_dispatch
 - id: V03-R3-004-T02
   parent_epic: V03-R3-004
   release: v0.3.3

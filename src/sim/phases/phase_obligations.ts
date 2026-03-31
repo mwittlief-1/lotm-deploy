@@ -3,16 +3,14 @@ import {
   clearWarLevyDue,
   setTitheDueBushels,
   setTaxDueCoin,
-  spendArrearsBushels,
-  spendArrearsCoin,
   spendBushels,
   spendCoin,
-  spendTitheDueBushels,
-  spendTaxDueCoin
 } from "../domains/economy/ledger";
+import { applyEconomyObligationCloseTurnStage } from "../domains/economy/obligationEnforcement";
+import { settleEconomyObligationCounterparty } from "../domains/economy/obligationRegistry";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
 import type { RunState, TurnDecisions } from "../types";
-import { asNonNegInt, clampInt } from "../util";
+import { clampInt } from "../util";
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -43,22 +41,30 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
 export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
   const ob = state.manor.obligations;
 
-  let coinPay = spendCoin(state, decisions.obligations.pay_coin);
-  let bushelPay = spendBushels(state, decisions.obligations.pay_bushels);
-
   const arrearsCoinBefore = ob.arrears.coin;
   const arrearsBushelsBefore = ob.arrears.bushels;
-  const toArrearsCoin = spendArrearsCoin(state, coinPay);
-  coinPay = asNonNegInt(coinPay - toArrearsCoin);
-
-  const toArrearsBushels = spendArrearsBushels(state, bushelPay);
-  bushelPay = asNonNegInt(bushelPay - toArrearsBushels);
-
-  const toTax = spendTaxDueCoin(state, coinPay);
-  coinPay = asNonNegInt(coinPay - toTax);
-
-  const toTithe = spendTitheDueBushels(state, bushelPay);
-  bushelPay = asNonNegInt(bushelPay - toTithe);
+  const liegeSettlement = settleEconomyObligationCounterparty(state, {
+    phase: "obligations",
+    phase_sequence: 1,
+    counterparty_kind: "liege",
+    requested_amount: decisions.obligations.pay_coin,
+    payment_mode: "coin",
+    rule_id: "obligations.liege_due_settlement",
+    related_actor_ids: [state.house.head.id, state.locals.liege.id]
+  });
+  const churchSettlement = settleEconomyObligationCounterparty(state, {
+    phase: "obligations",
+    phase_sequence: 2,
+    counterparty_kind: "church",
+    requested_amount: decisions.obligations.pay_bushels,
+    payment_mode: "food_stores",
+    rule_id: "obligations.church_due_settlement",
+    related_actor_ids: [state.house.head.id, state.locals.clergy.id]
+  });
+  const toArrearsCoin = liegeSettlement.paid_to_arrears;
+  const toArrearsBushels = churchSettlement.paid_to_arrears;
+  const toTax = liegeSettlement.paid_to_due;
+  const toTithe = churchSettlement.paid_to_due;
 
   if (arrearsCoinBefore > 0 || arrearsBushelsBefore > 0) {
     reportNotes.push(`Paid arrears: coin -${toArrearsCoin}, bushels -${toArrearsBushels}.`);
@@ -102,4 +108,34 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
       reportNotes.push("War levy ignored; liege displeased.");
     }
   }
+}
+
+function obligationStatusNote(label: string, amount: number, assetLabel: string): string {
+  if (amount <= 0) return `${label} clear`;
+  return `${label} arrears ${amount} ${assetLabel}`;
+}
+
+export function applyCloseTurnObligationsPhase(state: RunState, reportNotes: string[]): void {
+  const result = applyEconomyObligationCloseTurnStage(state, {
+    phase: "succession",
+    phase_sequence: 1,
+    rule_prefix: "obligations.close_turn",
+    related_actor_ids: [state.house.head.id, state.locals.clergy.id, state.locals.liege.id],
+    shortage: Boolean((state.flags as Record<string, unknown>).Shortage)
+  });
+  const churchCarry = result.carry_results_by_counterparty.church.carried_amount;
+  const liegeCarry = result.carry_results_by_counterparty.liege.carried_amount;
+  const churchEntry = result.penalty_stage.entries.find((entry) => entry.counterparty_kind === "church");
+  const liegeEntry = result.penalty_stage.entries.find((entry) => entry.counterparty_kind === "liege");
+  const unrestNote =
+    result.penalty_stage.stable_unrest_delta !== 0
+      ? `unrest eased by ${Math.abs(result.penalty_stage.stable_unrest_delta)}`
+      : result.penalty_stage.shortage_active
+        ? "unrest unchanged (shortage active)"
+        : "unrest unchanged";
+
+  reportNotes.push(`Obligation carry: tax +${liegeCarry} coin to arrears; tithe +${churchCarry} bushels to arrears.`);
+  reportNotes.push(
+    `Obligation enforcement: ${obligationStatusNote("liege", liegeEntry?.arrears_amount ?? 0, "coin")}; ${obligationStatusNote("church", churchEntry?.arrears_amount ?? 0, "bushels")}; ${unrestNote}.`
+  );
 }
