@@ -1,0 +1,40 @@
+version: 1
+run_id: V03-R3-004-T01-20260331T081428-0400
+task_id: V03-R3-004-T01
+status: done
+date: 2026-03-31
+branch: codex/v0.3-lane-economy-fiscal
+commit: d826b7d215cb07d74ce062f21beecbefaa833d8e
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+  run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+artifacts:
+  pricing_audit: docs/releases/v0.3.3_PRICING_SURFACE_AUDIT.md
+findings:
+  - Live `price_per_bushel` and `sell_cap_bushels` generation still lives in `src/sim/phases/phase_consumption.ts`, with deterministic RNG ownership and report wiring but no economy-owned price contract yet.
+  - UI surfaces already treat pricing as read-only report data, while the economy domain owns the asset mutation primitives and fiscal placeholders but not the pricing lookup seam itself.
+  - Current trade tuning is spread across shared constants, improvement modifiers, and generic event multipliers, and canonical `sell.market_grain` receipt naming exists only as fixture/test precedent rather than live sell-flow output.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R3-004-T02
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T01 closed cleanly on the lane branch, but T02 remains todo and has not yet been scheduler-promoted for economy execution.

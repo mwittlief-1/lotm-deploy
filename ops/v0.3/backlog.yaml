@@ -6906,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6939,11 +6939,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_economy_pricing_t01_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T02
   parent_epic: V03-R3-004
   release: v0.3.3
