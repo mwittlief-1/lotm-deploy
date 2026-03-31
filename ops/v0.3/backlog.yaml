@@ -2578,7 +2578,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Define deterministic non-uniform relationship seed schema
-  status: ready
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2610,16 +2610,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T02.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_social_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-005-T03
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Implement seeded relationship edges for player, liege, church, and local houses
-  status: todo
+  status: ready
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2651,11 +2651,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_social_t03_dispatch
 - id: V03-R0-005-T04
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -3150,7 +3150,7 @@ tasks:
   title: Implement numeric distance baseline and tunable far threshold
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: ready
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
@@ -3175,11 +3175,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: World debug and replay artifacts may gain numeric distance outputs and threshold metadata after merge.
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:30:20-0400'
-    claim_expires_at: '2026-03-31T12:30:20-0400'
-    run_id: 2026-03-31_world_t03_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - numeric manor distance is available through stable world selectors
   - far-threshold constant is configurable and test-covered
@@ -3195,7 +3195,7 @@ tasks:
   title: Expose topology selectors and bounded world snapshot fields
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: ready
   priority: 78
   tranche: 2
   change_type: behavior_change
@@ -3208,7 +3208,7 @@ tasks:
   - V03-R1-001-T02
   - V03-R1-001-T03
   requires_integrator: true
-  blocked_reason: Waiting for V03-R1-001-T03 completion on codex/v0.3-lane-world-topology.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/phases/**
   - src/sim/domains/world/**
@@ -3301,7 +3301,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-R1-001-T03 and V03-R1-001-T04 completion.
+  blocked_reason: Waiting for V03-R1-001-T04 completion on codex/v0.3-refactor-kickoff.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3877,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3903,11 +3903,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_ui_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - settlement and enforcement outputs are available as canonical snapshot/view-model fields
   - counterparty summaries are deterministic and replay-stable
@@ -4208,7 +4208,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Audit obligations, arrears, and counterparty surfaces on gameplay screens
-  status: todo
+  status: ready
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4242,11 +4242,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_ui_r1_005_t01_dispatch
 - id: V03-R1-005-T02
   parent_epic: V03-R1-005
   release: v0.3.1
@@ -6906,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6939,16 +6939,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_economy_pricing_t01_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T02
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Define minimal price table and typed price reference contract
-  status: todo
+  status: ready
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6979,11 +6979,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_economy_t02_dispatch
 - id: V03-R3-004-T03
   parent_epic: V03-R3-004
   release: v0.3.3

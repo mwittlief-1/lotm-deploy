@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R1-001-T02
+  current_task_id: V03-R1-001-T04
+  last_completed_task_id: V03-R1-001-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 07409bc331844b4d56b43248ddd1b9ca8cc74478
+  git_commit: cf5dd49fb5aae292525aba3e12186e318f435eb7
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,35 +21,27 @@ last_run:
     run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
     run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Flipped external checkpoint V03-XMAP-001 to done using the approved
-  integration checkpoint record in lotm-mapgen, status-rebased
-  V03-R1-001-T01 and V03-R1-001-T02 to done against the already-landed frozen
-  xmap_alpha_v1 world surface, and opened V03-R1-001-T03 on the
-  world-topology lane. Kickoff verification passed for validate, scheduler
-  dry-run, rebase dry-run, and focused world-domain contract coverage. Existing
-  UI, Social, and Economy lane claims remain active.
+  Accepted Social V03-R0-005-T02, UI V03-R1-003-T06, Economy
+  V03-R3-004-T01, and World V03-R1-001-T03 onto kickoff; reopened
+  Social V03-R0-005-T03, UI V03-R1-005-T01, and Economy V03-R3-004-T02 for
+  continued lane execution; and unblocked integrator-owned V03-R1-001-T04
+  after the world far-threshold work landed cleanly on kickoff.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T01
+    task_id: V03-R3-004-T02
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_economy_pricing_t01_dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_economy_t02_dispatch
   codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-005-T02
+    task_id: V03-R0-005-T03
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_social_t02_dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_social_t03_dispatch
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-003-T06
+    task_id: V03-R1-005-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_ui_t06_dispatch
-  codex/v0.3-lane-world-topology:
-    task_id: V03-R1-001-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:30:20-0400'
-    claim_expires_at: '2026-03-31T12:30:20-0400'
-    run_id: 2026-03-31_world_t03_dispatch
+    claimed_at: '2026-03-31T08:56:51-0400'
+    claim_expires_at: '2026-03-31T12:56:51-0400'
+    run_id: 2026-03-31_ui_r1_005_t01_dispatch
