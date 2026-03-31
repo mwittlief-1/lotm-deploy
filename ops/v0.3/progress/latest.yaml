@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-003-T04
+  last_completed_task_id: V03-R1-003-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 2f4a4c356cfe406a1ba93521b6ddff0d2def1468
+  git_commit: be43f7f61b28e4ce0e7ba60a721573182d5f668d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,22 +18,34 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
-    run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
+    run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
+    run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted Economy/Fiscal V03-R1-003-T04 on kickoff from the completed lane
-  handoff V03-R1-003-T04-20260330T182410-0400, cleared the stale expired claim,
-  and opened integrator-owned V03-R1-003-T05 under run id
-  2026-03-31_economy_t05_dispatch. Kickoff verification passed for validate,
-  scheduler dry-run, rebase dry-run, focused obligation suite coverage, qa,
-  preflight, replay batch twice, and repo duplicate audit with stable replay
-  hash 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba.
-  Tooling, UI, Engine, and Social remain idle, and world/topology automation
-  remains blocked behind V03-XMAP-001.
+  Accepted integrator-owned V03-R1-003-T05 on kickoff from commit
+  be43f7f61b28e4ce0e7ba60a721573182d5f668d, which moved obligation settlement
+  and close-turn enforcement into the canonical phase/domain seam and added
+  direct phase integration coverage. Opened UI V03-R1-003-T06, Social
+  V03-R0-005-T02, and Economy V03-R3-004-T01 with fresh claim windows for
+  maximum safe parallelism. Kickoff verification passed for validate, scheduler
+  dry-run, rebase dry-run, focused obligation phase coverage, qa, preflight,
+  replay batch twice, and repo duplicate audit with stable replay hash
+  b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f.
 active_claims:
-  codex/v0.3-refactor-kickoff:
-    task_id: V03-R1-003-T05
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R3-004-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T07:53:18-0400'
-    claim_expires_at: '2026-03-31T11:53:30-0400'
-    run_id: 2026-03-31_economy_t05_dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_economy_pricing_t01_dispatch
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R0-005-T02
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_social_t02_dispatch
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R1-003-T06
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:07:41-0400'
+    claim_expires_at: '2026-03-31T12:07:41-0400'
+    run_id: 2026-03-31_ui_t06_dispatch
