@@ -1,0 +1,37 @@
+version: 1
+run_id: 2026-03-31_social_t04_dispatch
+task_id: V03-R0-005-T04
+status: done
+date: 2026-03-31
+branch: codex/v0.3-lane-social-mechanics
+commit: e88e31d2ccfe6e7c28023ad33efcbefcd9cadaeb
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  relevance_module: src/sim/domains/people/knownHouseRelevance.ts
+  marriage_module: src/sim/domains/people/marriage.ts
+  relevance_test: tests/sim/known_house_relevance.test.ts
+findings:
+  - Added a canonical known-house relevance snapshot that promotes tier1 house visibility from direct blood and marriage ties to the player household while keeping the output deterministic, deduplicated, and capped.
+  - Promotion priority now favors houses with live marriage ties ahead of blood-only ties, which gives the bounded tier1 list a stable and explainable ordering when the cap is hit.
+  - Marriage-window scope now honors promoted relevant houses even when the incoming tier set omitted them, so kinship and marriage ties can elevate a house into offer consideration without changing integrator-owned tiering code.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-005-T05
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 is closed on the lane branch; the next social task remains unready until kickoff promotes it.

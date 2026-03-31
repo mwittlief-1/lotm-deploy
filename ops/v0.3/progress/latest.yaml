@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-001-T06
+  last_completed_task_id: V03-R0-005-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 40ea247a8c6c0d484947bab34a7e4326ac1927b5
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: e88e31d2ccfe6e7c28023ad33efcbefcd9cadaeb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,13 +18,13 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
-    run2: b94a175112e69286b4573afda16f01071d93d31653d4a72e75531025c21e36bf
+    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted Social V03-R0-005-T03 and World V03-R1-001-T06 onto kickoff;
-  dispatched Social V03-R0-005-T04 as the next same-lane continuation;
-  kept UI V03-R1-001-T05 and Economy V03-R3-004-T03 active; and parked
-  the world lane until UI completes V03-R1-001-T05.
+  Completed Social V03-R0-005-T04 on the lane branch with deterministic
+  known-house relevance promotion from blood and marriage ties; UI
+  V03-R1-001-T05 and Economy V03-R3-004-T03 remain actively claimed while
+  the next social task waits on kickoff promotion.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T03
@@ -32,12 +32,6 @@ active_claims:
     claimed_at: '2026-03-31T09:42:26-0400'
     claim_expires_at: '2026-03-31T13:42:26-0400'
     run_id: 2026-03-31_economy_t03_dispatch
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-005-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:54:41-0400'
-    claim_expires_at: '2026-03-31T13:54:41-0400'
-    run_id: 2026-03-31_social_t04_dispatch
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-001-T05
     claimed_by: integrator.dispatch
