@@ -24,6 +24,11 @@ describe("play screen chrome", () => {
         id: "relationship_drawer",
         title: "Relationship drawer",
         description: "House and person relationship edges stay available here for replay audits and balancing checks."
+      },
+      {
+        id: "topology_distances",
+        title: "Topology distances",
+        description: "Bounded world snapshot fields stay visible here so raw distance values and the current far threshold can be audited in the UI."
       }
     ]);
     expect(PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY).toBe(

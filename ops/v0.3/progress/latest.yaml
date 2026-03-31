@@ -6,35 +6,43 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: e88e31d2ccfe6e7c28023ad33efcbefcd9cadaeb
+  git_commit: 7f9a4e43e611fca73e153c0dcf7f4696292f7e0c
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: pass
-    preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    qa: not_run
+    preflight: not_run
+    repo_duplicates: not_run
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-notes: >-
-  Completed Social V03-R0-005-T04 on the lane branch with deterministic
-  known-house relevance promotion from blood and marriage ties; UI
-  V03-R1-001-T05 and Economy V03-R3-004-T03 remain actively claimed while
-  the next social task waits on kickoff promotion.
+    run1: not_run
+    run2: not_run
+notes: Reconciled the active lane claims without accepting new handoffs. `ops:v0.3:validate`, `ops:v0.3:scheduler-dry-run`, and `ops:v0.3:rebase-dry-run` passed on the integrator worktree, but all four ready claimed tasks (`V03-R0-005-T05`, `V03-R1-005-T02`, `V03-R3-004-T04`, `V03-R1-001-T07`) still lacked handoff artifact evidence, so this pass refreshed their claim TTLs only. The Social lane was then synced to kickoff truth with autostash so local QA artifacts could be restored afterward. Tooling and Engine remain without claimable work this pass.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T03
+    task_id: V03-R3-004-T04
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:42:26-0400'
-    claim_expires_at: '2026-03-31T13:42:26-0400'
-    run_id: 2026-03-31_economy_t03_dispatch
+    claimed_at: '2026-03-31T10:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
+    run_id: 2026-03-31_economy_t04_dispatch
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R0-005-T05
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T10:28:50-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
+    run_id: 2026-03-31_social_t05_dispatch
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-001-T05
+    task_id: V03-R1-005-T02
     claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:42:26-0400'
-    claim_expires_at: '2026-03-31T13:42:26-0400'
-    run_id: 2026-03-31_ui_t05_dispatch
+    claimed_at: '2026-03-31T10:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
+    run_id: 2026-03-31_ui_t02_dispatch
+  codex/v0.3-lane-world-topology:
+    task_id: V03-R1-001-T07
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T10:06:01-0400'
+    claim_expires_at: '2026-03-31T15:01:12-0400'
+    run_id: 2026-03-31_world_t07_dispatch
