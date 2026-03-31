@@ -150,8 +150,12 @@ export function applyEconomyObligationStageOnePenalties(
   input: EconomyObligationPenaltyStageInputV1 = {}
 ): EconomyObligationPenaltyStageResultV1 {
   const result = buildEconomyObligationPenaltyStageFromState(state, input);
+  const entryByKind = Object.fromEntries(
+    result.entries.map((entry) => [entry.counterparty_kind, entry])
+  ) as Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1>;
 
-  for (const entry of result.entries) {
+  for (const counterpartyKind of ["liege", "church"] as const) {
+    const entry = entryByKind[counterpartyKind];
     applyRelationshipDelta(
       state,
       entry.counterparty_id,
