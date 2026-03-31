@@ -3877,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3903,11 +3903,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_ui_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - settlement and enforcement outputs are available as canonical snapshot/view-model fields
   - counterparty summaries are deterministic and replay-stable

@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-003-T05
+  last_completed_task_id: V03-R1-003-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: be43f7f61b28e4ce0e7ba60a721573182d5f668d
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: 580bfd53abf825c566cfb0301068cb087330d2d2
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,21 +15,20 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
     run2: b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f
 notes: >-
-  Accepted integrator-owned V03-R1-003-T05 on kickoff from commit
-  be43f7f61b28e4ce0e7ba60a721573182d5f668d, which moved obligation settlement
-  and close-turn enforcement into the canonical phase/domain seam and added
-  direct phase integration coverage. Opened UI V03-R1-003-T06, Social
-  V03-R0-005-T02, and Economy V03-R3-004-T01 with fresh claim windows for
-  maximum safe parallelism. Kickoff verification passed for validate, scheduler
-  dry-run, rebase dry-run, focused obligation phase coverage, qa, preflight,
-  replay batch twice, and repo duplicate audit with stable replay hash
-  b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f.
+  Completed UI lane task V03-R1-003-T06 by projecting a canonical
+  `economy_obligations_view` into bounded snapshots and exporting a stable
+  obligations view-model from the experience domain. This keeps the task inside
+  the allowed sim-domain seams while making dues, arrears, settlement state,
+  and stage-one enforcement summaries available to later UI surfaces. Social
+  V03-R0-005-T02 and Economy V03-R3-004-T01 remain dispatch-claimed through
+  2026-03-31T12:07:41-0400. qa, preflight, and replay batch twice all passed
+  with stable hash b09d55c24b36212f79c7dcd032bbf04f512e9af796f9cf87c46322f2f38a4f2f.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T01
@@ -43,9 +42,3 @@ active_claims:
     claimed_at: '2026-03-31T08:07:41-0400'
     claim_expires_at: '2026-03-31T12:07:41-0400'
     run_id: 2026-03-31_social_t02_dispatch
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-003-T06
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T08:07:41-0400'
-    claim_expires_at: '2026-03-31T12:07:41-0400'
-    run_id: 2026-03-31_ui_t06_dispatch
