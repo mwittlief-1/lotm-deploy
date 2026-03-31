@@ -12,6 +12,8 @@ import {
   WORLD_DOMAIN_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SCHEMA_VERSION,
   XMAP_ALPHA_MANIFEST_SCHEMA_VERSION,
+  type WorldDistanceBandOptionsV1,
+  type WorldDistanceBandV1,
   type WorldDomainV1,
   type WorldNumericDistanceV1,
   type XMapAlphaManifestV1,
@@ -92,7 +94,24 @@ function fromDistanceMilli(value: number): number {
   return value / DISTANCE_SCALE;
 }
 
+function normalizeFarThreshold(value: number | null | undefined, label: string): number | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  assertWorld(Number.isFinite(value) && value >= 0, `${label} must be a non-negative finite number`);
+  return value;
+}
+
 function validateSchemas(surface: XMapImportSurfaceV1): void {
+  const manifestFarThreshold = normalizeFarThreshold(
+    surface.manifest.distance_metrics.far_threshold_default,
+    "manifest far_threshold_default"
+  );
+  const topologyFarThreshold = normalizeFarThreshold(
+    surface.world_topology.distance_metrics.far_threshold_default,
+    "world_topology far_threshold_default"
+  );
+
   assertWorld(surface.manifest.schema_version === XMAP_ALPHA_MANIFEST_SCHEMA_VERSION, "unexpected manifest schema_version");
   assertWorld(surface.manor_units.schema_version === MANOR_UNITS_SCHEMA_VERSION, "unexpected manor_units schema_version");
   assertWorld(surface.holding_fabric.schema_version === HOLDING_FABRIC_SCHEMA_VERSION, "unexpected holding_fabric schema_version");
@@ -117,6 +136,7 @@ function validateSchemas(surface: XMapImportSurfaceV1): void {
     surface.world_topology.distance_metrics.companion_metric === ROUTE_HOP_DISTANCE_METRIC,
     "topology companion distance metric drifted"
   );
+  assertWorld(manifestFarThreshold === topologyFarThreshold, "far_threshold_default drifted between manifest and topology");
   assertWorld(
     surface.manor_units.config_sha256 === surface.manifest.config_sha256 &&
       surface.holding_fabric.config_sha256 === surface.manifest.config_sha256 &&
@@ -513,6 +533,36 @@ export function getTravelCostDistance(domain: WorldDomainV1, fromManorId: string
 
 export function getRouteHopDistance(domain: WorldDomainV1, fromManorId: string, toManorId: string): number | null {
   return getNumericDistanceMetrics(domain, fromManorId, toManorId)?.route_hop_distance ?? null;
+}
+
+export function getFarThresholdDefault(domain: WorldDomainV1): number | null {
+  return normalizeFarThreshold(domain.world_topology.distance_metrics.far_threshold_default, "world far_threshold_default");
+}
+
+export function getFarThreshold(domain: WorldDomainV1, options?: WorldDistanceBandOptionsV1): number | null {
+  if (options?.far_threshold !== undefined) {
+    return normalizeFarThreshold(options.far_threshold, "world far_threshold override");
+  }
+  return getFarThresholdDefault(domain);
+}
+
+export function classifyTravelDistance(
+  domain: WorldDomainV1,
+  fromManorId: string,
+  toManorId: string,
+  options?: WorldDistanceBandOptionsV1
+): WorldDistanceBandV1 | null {
+  const travelCostDistance = getTravelCostDistance(domain, fromManorId, toManorId);
+  if (travelCostDistance === null) {
+    return null;
+  }
+
+  const farThreshold = getFarThreshold(domain, options);
+  if (farThreshold === null) {
+    return null;
+  }
+
+  return travelCostDistance >= farThreshold ? "far" : "near";
 }
 
 export function getRouteEdgeById(domain: WorldDomainV1, edgeId: string): XMapWeightedRouteEdgeV1 | null {

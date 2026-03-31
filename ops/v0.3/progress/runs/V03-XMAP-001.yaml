@@ -1,0 +1,39 @@
+version: 1
+run_id: V03-XMAP-001-20260331T083020-0400
+task_id: V03-XMAP-001
+status: done
+date: 2026-03-31
+branch: codex/v0.3-refactor-kickoff
+commit: 07409bc331844b4d56b43248ddd1b9ca8cc74478
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: not_run
+  preflight: not_run
+  seed_replay_batch_twice: not_run
+replay_hashes:
+  run1: not_run
+  run2: not_run
+artifacts:
+  approved_checkpoint_doc: /Users/matt_wittlief_home/lotm-mapgen/docs/map/V03_XMAP_001_APPROVED_INTEGRATION_CHECKPOINT_2026_03_31.md
+  approved_checkpoint_json: /Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/V03_XMAP_001_approved_integration_checkpoint_2026_03_31.json
+  rc_checklist: /Users/matt_wittlief_home/lotm-mapgen/docs/map/XMAP_ALPHA_RC_CHECKLIST_2026_03_31.md
+  checkpoint_index: /Users/matt_wittlief_home/lotm-mapgen/docs/map/XMAP_ALPHA_CHECKPOINT.md
+findings:
+  - lotm-mapgen now carries the approved integration checkpoint record required by the external checkpoint task.
+  - the downstream frozen import surface in lotm-deploy remains the repo-truth XMAP contract at kickoff commit eaa9da5.
+  - no new import pass is required or permitted before topology follow-on work.
+stop_reason: checkpoint_flipped_done
+next_task_cursor: V03-R1-001-T03
+next_task_ready: true
+control_plane_notes:
+  reason: External checkpoint flipped to done after verifying the approved lotm-mapgen checkpoint record, machine-readable companion, and completed RC checklist.
+
