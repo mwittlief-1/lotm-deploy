@@ -10,6 +10,7 @@ import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, Turn
 import { clampInt } from "../../util";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
+import { listRelevantTier1HouseIds } from "./knownHouseRelevance";
 import { applyRelationshipDelta } from "./relationshipEngine";
 
 const MARRIAGE_INBOUND_DECISION_COST = 1;
@@ -88,7 +89,10 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
   const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
 
   const tier1HouseIds = tierSets
-    ? [...tierSets.tier1.houses].filter((houseId) => houseId !== playerHouseId).sort((a, b) => a.localeCompare(b))
+    ? listRelevantTier1HouseIds(
+        state,
+        [...tierSets.tier1.houses].filter((houseId) => houseId !== playerHouseId)
+      )
     : Object.keys(houses).filter((houseId) => houseId !== playerHouseId).sort((a, b) => a.localeCompare(b));
 
   const rejectCooldowns = buildMarriageRejectCooldownsFromState(state);
