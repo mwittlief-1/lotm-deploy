@@ -3024,7 +3024,7 @@ tasks:
   title: Declare map alpha complete and merged into lotm_deploy
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 999
   tranche: 2
   change_type: external_checkpoint
@@ -3033,7 +3033,7 @@ tasks:
   lane_branch: codex/v0.3-lane-world-topology
   deps: []
   requires_integrator: true
-  blocked_reason: Waiting for the external mapgen alpha checklist and approved integration checkpoint; lotm-deploy already carries the frozen xmap_alpha_v1 import surface and should not run another import pass before the checkpoint clears.
+  blocked_reason: ''
   allowed_paths:
   - ops/v0.3/**
   forbidden_paths:
@@ -3058,7 +3058,7 @@ tasks:
   title: Define merged topology contract surface and fixture import plan
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
@@ -3069,7 +3069,7 @@ tasks:
   deps:
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001; the frozen xmap_alpha_v1 contract/docs/import surface already exists in lotm-deploy and should be treated as repo truth when this task is rebased.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3105,7 +3105,7 @@ tasks:
   title: Implement deterministic manor adjacency registry
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 82
   tranche: 2
   change_type: behavior_change
@@ -3117,7 +3117,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001; adjacency/topology registries are largely already present in the frozen import surface and should be rebased against repo truth after unlock.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3150,7 +3150,7 @@ tasks:
   title: Implement numeric distance baseline and tunable far threshold
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: ready
   priority: 80
   tranche: 2
   change_type: behavior_change
@@ -3162,7 +3162,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001; numeric distance is already imported, so the remaining work here starts with the tunable far-threshold layer after unlock.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3175,11 +3175,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: World debug and replay artifacts may gain numeric distance outputs and threshold metadata after merge.
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T08:30:20-0400'
+    claim_expires_at: '2026-03-31T12:30:20-0400'
+    run_id: 2026-03-31_world_t03_dispatch
   done_conditions:
   - numeric manor distance is available through stable world selectors
   - far-threshold constant is configurable and test-covered
@@ -3208,7 +3208,7 @@ tasks:
   - V03-R1-001-T02
   - V03-R1-001-T03
   requires_integrator: true
-  blocked_reason: Waiting for V03-XMAP-001 plus rebased T02/T03 completion; the import surface is already frozen and this task should wire selectors rather than re-import world data.
+  blocked_reason: Waiting for V03-R1-001-T03 completion on codex/v0.3-lane-world-topology.
   allowed_paths:
   - src/sim/phases/**
   - src/sim/domains/world/**
@@ -3254,7 +3254,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for integrator-owned V03-R1-001-T04 snapshot wiring.
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -3301,7 +3301,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-R1-001-T03 and V03-R1-001-T04 completion.
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3348,7 +3348,7 @@ tasks:
   - V03-R1-001-T05
   - V03-R1-001-T06
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: Waiting for V03-R1-001-T05 and V03-R1-001-T06 completion.
   allowed_paths:
   - docs/qa/**
   - docs/arch/**
