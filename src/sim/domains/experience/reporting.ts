@@ -1,6 +1,7 @@
 import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../stateSchema";
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
+import { buildEconomyObligationsView } from "./obligationsView";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const snapshot = deepCopy({
@@ -15,6 +16,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     player_house_id: (state as any).player_house_id,
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
     economy: (state as any).economy,
+    economy_obligations_view: buildEconomyObligationsView(state),
     portfolio: (state as any).portfolio,
     flags: state.flags,
     game_over: state.game_over ?? null

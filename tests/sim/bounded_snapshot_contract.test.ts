@@ -17,6 +17,10 @@ describe("bounded snapshot contract", () => {
     expect(serialized.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
     expect(serialized.bounded_registry_manifest).toEqual(buildBoundedRegistryManifest());
     expect(serialized.economy).toEqual(state.economy);
+    expect(serialized.economy_obligations_view).toMatchObject({
+      schema_version: "economy_obligations_view_v1",
+      counterparty_order: ["liege", "church"]
+    });
     expect(serialized.portfolio).toEqual(state.portfolio);
     expect(serialized.log).toBeUndefined();
     expect(serialized.institutions).toBeUndefined();

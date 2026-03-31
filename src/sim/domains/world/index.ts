@@ -1,5 +1,6 @@
 export * from "./types";
 export {
+  classifyTravelDistance,
   createWorldDomain,
   getArchbishopricById,
   getArchbishopricForManor,
@@ -8,6 +9,8 @@ export {
   getBundledWorldImportSurface,
   getCountyById,
   getCountyForManor,
+  getFarThreshold,
+  getFarThresholdDefault,
   getHoldingById,
   getHoldingFabricFile,
   getHoldingImmediateLordActorId,
