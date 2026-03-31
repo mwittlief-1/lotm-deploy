@@ -3242,7 +3242,7 @@ tasks:
   title: Render topology distance and threshold debug surfaces
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: ready
+  status: done
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3267,11 +3267,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T09:42:26-0400'
-    claim_expires_at: '2026-03-31T13:42:26-0400'
-    run_id: 2026-03-31_ui_t05_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - ui shows raw numeric distance where world debug surfaces are enabled
   - ui shows the current far-threshold value
