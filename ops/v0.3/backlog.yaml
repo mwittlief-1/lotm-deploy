@@ -2732,11 +2732,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T05.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T20:18:56-0400'
+    claim_expires_at: '2026-04-01T00:18:56-0400'
+    run_id: 2026-03-31_frontier_redispatch_social_economy
 - id: V03-R0-005-T06
   parent_epic: V03-R0-005
   release: v0.3.0
@@ -7060,11 +7060,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T04.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-03-31T20:18:56-0400'
+    claim_expires_at: '2026-04-01T00:18:56-0400'
+    run_id: 2026-03-31_frontier_redispatch_social_economy
 - id: V03-R3-004-T05
   parent_epic: V03-R3-004
   release: v0.3.3
