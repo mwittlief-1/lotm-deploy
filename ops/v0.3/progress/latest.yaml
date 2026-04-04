@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-004-T05
+  last_completed_task_id: V03-R1-005-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: d85efc91e8e1242977065eeb88ca99232bdd8e2e
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,16 +15,17 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted UI V03-R1-005-T03 and Economy V03-R3-004-T05 on kickoff,
-  closed the V03-R3-004 pricing epic, and reopened the next safe manual
-  work as active claims for Social V03-R0-005-T06 and UI V03-R1-005-T04.
-  Social's lane-local backlog/progress edits were not accepted as task work.
+  Completed UI V03-R1-005-T04 by surfacing arrears stage and enforcement
+  state directly on the gameplay cards and obligations detail sheet,
+  while keeping the this-turn versus next-turn response copy explicit.
+  The UI active claim is cleared; Social V03-R0-005-T06 remains the only
+  active manual lane claim in this branch state.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
@@ -32,9 +33,3 @@ active_claims:
     claimed_at: '2026-04-04T17:04:23-0400'
     claim_expires_at: '2026-04-04T21:04:23-0400'
     run_id: manual-social-v03-r0-005-t06-20260404T170423-0400
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-005-T04
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-04T17:04:23-0400'
-    claim_expires_at: '2026-04-04T21:04:23-0400'
-    run_id: manual-ui-v03-r1-005-t04-20260404T170423-0400
