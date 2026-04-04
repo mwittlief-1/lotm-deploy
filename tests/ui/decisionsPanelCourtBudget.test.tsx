@@ -72,8 +72,12 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
         amountLabel: "4 coin",
         summary: "House Liege: 4 coin in arrears, 3 coin due.",
         receiptCategories: ["coin", "unrest"],
+        enforcementStage: 1,
         enforcementState: "arrears",
         enforcementSummary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+        resolvedSummary: "This turn: arrears carried, so stage 1 active now applies.",
+        responseSummary: "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+        stageLabel: "Stage 1 active",
         carriedThisTurn: true,
         settledThisTurn: false
       },
@@ -82,6 +86,7 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
         availableInBudget: true,
         cost: 1,
         detail: "Court favor spent on noble gifts.",
+        leverSummary: "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.",
         receiptCategories: ["coin"],
         spent: 0,
         title: "Gift to liege"
@@ -108,8 +113,12 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
         amountLabel: "0 bushels",
         summary: "Parish Church: no carried arrears.",
         receiptCategories: ["food", "unrest"],
+        enforcementStage: 1,
         enforcementState: "clear",
         enforcementSummary: "Parish Church: clear.",
+        resolvedSummary: "This turn: no arrears carried, so pressure stayed clear.",
+        responseSummary: "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.",
+        stageLabel: "Pressure clear",
         carriedThisTurn: false,
         settledThisTurn: true
       },
@@ -118,6 +127,7 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
         availableInBudget: true,
         cost: 1,
         detail: "Court effort spent on religious offerings.",
+        leverSummary: "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.",
         receiptCategories: ["food"],
         spent: 0,
         title: "Offering to church"

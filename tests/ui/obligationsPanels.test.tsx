@@ -94,6 +94,8 @@ describe("obligations panels", () => {
     expect(html).toContain("Due now:");
     expect(html).toContain("Overdue:");
     expect(html).toContain("Carried arrears:");
+    expect(html).toContain("Relationship lever");
+    expect(html).toContain("Gift to liege");
     expect(html).toContain("Stage 1 active");
     expect(html).toContain("This turn");
   });
@@ -114,6 +116,7 @@ describe("obligations panels", () => {
     expect(html).toContain("Jump to Decisions");
     expect(html).toContain("Gift to liege");
     expect(html).toContain("Offering to church");
+    expect(html).toContain("Relationship lever");
     expect(html).toContain("coin receipts");
     expect(html).toContain("food receipts");
     expect(html).toContain("Arrears stage");
