@@ -1,0 +1,33 @@
+version: 1
+run_id: manual-social-v03-r0-005-t06-20260404T170423-0400
+task_id: V03-R0-005-T06
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-social-mechanics
+commit: e184028f0ff53d1a79372acdf48630c4eaf0cf46
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+artifacts:
+  closeout_doc: docs/releases/v0.3.0_relationship_seeding_closeout.md
+  historical_audit: docs/releases/v0.3.0_world_init_relationship_seed_audit.md
+  epic_report: ops/v0.3/progress/runs/V03-R0-005.md
+findings:
+  - Relationship seeding is now documented as a closed `v0.3.0` baseline: liege, clergy, and local-house player-head edges start from deterministic non-uniform seed profiles at world init, while later edge creation remains on the flat fallback unless future scope changes it.
+  - Known-world assumptions are now explicit for downstream work: external houses keep seeded household depth, local noble shells remain intentionally shallow, and preview plus bounded snapshots expose coarse `known_houses` and `house_dossiers` read surfaces without leaking hidden state.
+  - Grants, claims, clergy, and office follow-on work can treat seeded profiles and known-house summaries as locked inputs, but they still need separate scope for institution-holder linkage, deeper local dynasties, and runtime mechanics that consume seeded relationship strength directly.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: V03-R0-005 is closed on the lane branch and no next social task is ready in the current control-plane snapshot.

@@ -476,7 +476,7 @@ epics:
 - id: V03-R0-005
   title: Relationship seeding and known-world baseline
   release: v0.3.0
-  status: ready
+  status: done
   priority: 57
   tranche: 1
   change_type: behavior_change
@@ -2741,7 +2741,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Close epic and refresh relationship seeding docs
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor
@@ -2772,11 +2772,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T06.yaml
   claim:
-    status: claimed
-    claimed_by: manual-social-lane
-    claimed_at: '2026-04-04T17:04:23-0400'
-    claim_expires_at: '2026-04-04T21:04:23-0400'
-    run_id: manual-social-v03-r0-005-t06-20260404T170423-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-006-T01
   parent_epic: V03-R0-006
   release: v0.3.0
