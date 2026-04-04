@@ -19,6 +19,7 @@ const PREVIEW_STATE = {
         counterparty_label: "House Liege",
         due_amount: 3,
         arrears_amount: 4,
+        enforcement_stage: 1,
         settlement_status: "due_and_arrears",
         settlement_summary: "House Liege: 4 coin in arrears, 3 coin due.",
         enforcement_state: "arrears",
@@ -31,6 +32,7 @@ const PREVIEW_STATE = {
         counterparty_label: "Parish Church",
         due_amount: 5,
         arrears_amount: 0,
+        enforcement_stage: 1,
         settlement_status: "due_only",
         settlement_summary: "Parish Church: 5 bushels due.",
         enforcement_state: "clear",
@@ -106,8 +108,12 @@ describe("playScreenObligations", () => {
           amountLabel: "4 coin",
           summary: "House Liege: 4 coin in arrears, 3 coin due.",
           receiptCategories: ["coin", "unrest"],
+          enforcementStage: 1,
           enforcementState: "arrears",
           enforcementSummary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+          responseSummary: "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+          resolvedSummary: "This turn: arrears carried, so stage 1 active now applies.",
+          stageLabel: "Stage 1 active",
           carriedThisTurn: true,
           settledThisTurn: false
         },
@@ -142,8 +148,13 @@ describe("playScreenObligations", () => {
           amountLabel: "0 bushels",
           summary: "Parish Church: no carried arrears.",
           receiptCategories: ["food", "unrest"],
+          enforcementStage: 1,
           enforcementState: "clear",
           enforcementSummary: "Parish Church: clear.",
+          responseSummary:
+            "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.",
+          resolvedSummary: "This turn: no arrears carried, so pressure stayed clear.",
+          stageLabel: "Pressure clear",
           carriedThisTurn: false,
           settledThisTurn: true
         },
@@ -201,13 +212,13 @@ describe("playScreenObligations", () => {
     expect(obligationsModalTitle("church")).toBe("Church obligations");
 
     expect(obligationsModalSubtitle("turn_report", "overview")).toBe(
-      "Compare liege and church pressure side by side before you set the next turn's response. Jump to Decisions below when you are ready to respond with coin, bushels, or court attention."
+      "Compare liege and church pressure side by side, including any carried arrears stage, before you set the next turn's response. Jump to Decisions below when you are ready to respond with coin, bushels, or court attention."
     );
     expect(obligationsModalSubtitle("decisions", "liege")).toBe(
-      "Track tax due, coin arrears, and gifts to the liege in one place. Use the payment controls just below to respond after you review the resolved dues."
+      "Track tax due, coin arrears, and the current liege pressure stage in one place. Use the payment controls just below to respond after you review the already-resolved stage state."
     );
     expect(obligationsModalSubtitle("decisions", "church")).toBe(
-      "Track tithe due, bushel arrears, and church offerings in one place. Use the payment controls just below to respond after you review the resolved dues."
+      "Track tithe due, bushel arrears, and the current church pressure stage in one place. Use the payment controls just below to respond after you review the already-resolved stage state."
     );
   });
 });
