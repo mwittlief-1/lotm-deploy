@@ -1,5 +1,8 @@
 # XMAP Alpha Handoff
 
+Last updated: 2026-04-04
+Task: `V03-R1-001-T07`
+
 This repo's Current World Context v1 alpha handoff bundle for `lotm-deploy` is:
 
 - `manor_units_v1.json`
@@ -23,6 +26,8 @@ Supporting debug sidecars:
   - route adjacency query
   - numeric distance query
   - configurable `far` helper in downstream repo
+  - bounded world-topology snapshot reporting
+  - topology debug display surfaces backed by bounded snapshot data
 
 ## Explicit Non-Goals At Merge
 
@@ -30,6 +35,17 @@ Supporting debug sidecars:
 - no people-domain rewrite at merge time
 - no tier-cap or inheritance consumer logic required yet
 - no UI redesign required for merge readiness
+
+## Merged Topology Contract
+
+The accepted `V03-R1-001` world/topology epic now closes with these repo-truth surfaces:
+
+- frozen import inputs remain `data/map/xmap_alpha_v1/manor_units_v1.json`, `data/map/xmap_alpha_v1/holding_fabric_v1.json`, `data/map/xmap_alpha_v1/world_topology_v1.json`, and `data/map/xmap_alpha_v1/xmap_alpha_manifest_v1.json`
+- `src/sim/domains/world/**` remains the canonical domain seam for stable manor IDs, higher-order holding IDs, overlay lookups, territorial adjacency, route adjacency, weighted route-edge semantics, and numeric distance selectors
+- `travel_cost_distance` remains the canonical numeric baseline and `route_hop_distance` remains the companion QA/debug metric
+- configurable far-threshold behavior is layered on top of the numeric baseline rather than reopened in the import/schema surface
+- bounded reporting now exposes `world_topology_snapshot_v1` for deterministic downstream consumers without dumping the full topology graph into snapshots
+- accepted UI consumers remain display-only and read the bounded topology snapshot rather than mutating world state directly
 
 ## Artifact Semantics
 
@@ -63,3 +79,28 @@ The current alpha now targets a bounded `300–500` manor world with `15` counti
 - stable numeric distance meaning
 
 But the underlying export strategy may still become lighter than the current preview-row representation once later institutions and fiscal consumers are aggregated over this manor/holding layer.
+
+## Accepted Evidence
+
+- Canonical world import/domain seam: `src/sim/domains/world/xmap.ts`
+- Canonical world-domain coverage: `tests/sim/world_xmap_domain.test.ts`
+- Accepted bounded snapshot evidence: `ops/v0.3/progress/runs/V03-R1-001-T04.md`
+- Accepted UI debug evidence: `ops/v0.3/progress/runs/V03-R1-001-T05.md`
+- Deterministic topology fixture note: `docs/qa/world_topology_fixtures_v0.3.1.md`
+- Deterministic topology fixture coverage: `tests/sim/world_topology_fixtures.test.ts`
+
+## Accepted Diff Notes
+
+- `V03-R1-001-T01` and `V03-R1-001-T02` were resolved as repo-truth rebase tasks after `V03-XMAP-001`; no new XMAP import pass was reopened.
+- `V03-R1-001-T03` added configurable far-threshold selectors on top of the existing numeric distance seam without mutating the frozen import bundle.
+- `V03-R1-001-T04` added bounded snapshot fields for downstream reporting while preserving the stricter integrator boundary around orchestration and turn wiring.
+- `V03-R1-001-T05` consumed the bounded snapshot in debug UI surfaces only; it did not widen the underlying world contract.
+- `V03-R1-001-T06` locked deterministic topology fixtures and QA guidance without reopening import or schema design.
+
+## Epic Outcome
+
+`V03-R1-001` is ready to remain `done` in backlog state after merge because:
+
+- the frozen XMAP alpha bundle is now anchored by one canonical world-domain seam in repo truth
+- adjacency, numeric distance, far-threshold classification, bounded snapshot reporting, and deterministic topology fixtures all have accepted evidence
+- the remaining world/topology boundary is now about later consumer scope, not about re-litigating the frozen import contract

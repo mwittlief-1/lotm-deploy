@@ -1,5 +1,6 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import type { EconomyPricingSurface } from "../playViewModel";
 import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
 import { PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
@@ -29,6 +30,7 @@ type TurnReportPanelProps = {
   idle: number;
   manor: any;
   peasantConsumptionBushels: number | null;
+  pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   report: any;
   showHouseholdDetails: boolean;
@@ -60,6 +62,7 @@ export function TurnReportPanel({
   idle,
   manor,
   peasantConsumptionBushels,
+  pricingSurface,
   previewState,
   report,
   showHouseholdDetails,
@@ -168,7 +171,28 @@ export function TurnReportPanel({
           Sell cap: {report.market.sell_cap_bushels} bushels
           <Tip text="Selling consumes 1 energy. Amount is trimmed to the market cap." />
         </li>
+        {pricingSurface ? (
+          <li>
+            Reference: {pricingSurface.referenceLabel} ({pricingSurface.referenceId}) at {pricingSurface.ratioLabel}
+          </li>
+        ) : null}
+        {pricingSurface ? (
+          <li>
+            Fixed reference cap: {pricingSurface.fixedSellCapUnits} bushels; current stores allow up to {pricingSurface.maxSellableUnits} for{" "}
+            {pricingSurface.maxQuotedCoin} coin
+          </li>
+        ) : null}
       </ul>
+      {pricingSurface && pricingSurface.catalogLines.length > 0 ? (
+        <details style={{ marginTop: 6 }}>
+          <summary>Pricing reference catalog</summary>
+          <ul style={{ marginTop: 6 }}>
+            {pricingSurface.catalogLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
       <h4 style={{ marginTop: 12 }}>Obligations</h4>
       <ul>

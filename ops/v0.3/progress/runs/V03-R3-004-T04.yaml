@@ -1,0 +1,45 @@
+version: 1
+run_id: 2026-03-31_economy_t04_dispatch
+task_id: V03-R3-004-T04
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-economy-fiscal
+commit: 3987e8c9490f7975d146a6c73cd28d35a6a868de
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  pricing_view_module: src/sim/domains/experience/pricingView.ts
+  pricing_surface_module: src/ui/playViewModel.ts
+  pricing_report_panel: src/ui/panels/TurnReportPanel.tsx
+  pricing_decisions_panel: src/ui/panels/DecisionsPanel.tsx
+  pricing_view_tests: tests/sim/pricing_view.test.ts
+  pricing_surface_tests: tests/ui/pricingSurface.test.ts
+findings:
+  - Bounded snapshots now embed a stable economy_pricing_view that carries the ordered fixed price references plus a read-only food-store sell action surface.
+  - The play UI now consumes a single pricing surface derived from the experience view, so report and decision panels can present pricing references without ad hoc quote or sell-cap math.
+  - Placeholder meat and labor price references now appear in the read-only catalog with stable ordering, preserving room for later pricing surfaces without inventing new identifiers.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R3-004-T05
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 closed cleanly on the lane branch, but T05 remains todo and has not yet been scheduler-promoted for economy execution.

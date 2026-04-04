@@ -15,13 +15,16 @@ const ALLOWED_KEYS = new Set([
   "game_over",
   "economy",
   "economy_obligations_view",
+  "economy_pricing_view",
   "portfolio",
   "people",
   "houses",
   "player_house_id",
   "world_topology_view",
   "kinship",
-  "kinship_edges"
+  "kinship_edges",
+  "known_houses",
+  "house_dossiers"
 ]);
 
 describe("TurnLogEntry snapshots", () => {

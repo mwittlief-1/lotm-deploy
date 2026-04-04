@@ -1,5 +1,6 @@
 import React from "react";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
+import type { EconomyPricingSurface } from "../playViewModel";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_PANEL_ACCENT_STYLE,
@@ -43,6 +44,7 @@ type DecisionsPanelProps = {
   pfParentsByChild: Map<string, string[]>;
   pfPeopleRec: Record<string, any>;
   pfPersonHouseById: Map<string, string>;
+  pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   prospectsTotalCount: number;
   sellCapBushels: number;
@@ -214,6 +216,7 @@ export function DecisionsPanel({
   pfParentsByChild,
   pfPeopleRec,
   pfPersonHouseById,
+  pricingSurface,
   previewState,
   prospectsTotalCount,
   sellCapBushels,
@@ -356,6 +359,17 @@ export function DecisionsPanel({
             style={{ width: 100 }}
           />
           <span style={{ opacity: 0.8 }}> (cap {sellCapBushels})</span>
+          {pricingSurface ? (
+            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82, lineHeight: 1.4 }}>
+              <div>
+                Reference price: <b>{pricingSurface.ratioLabel}</b>.
+              </div>
+              <div>
+                Fixed reference cap: {pricingSurface.fixedSellCapUnits} bushels; max sellable now {pricingSurface.maxSellableUnits} for{" "}
+                {pricingSurface.maxQuotedCoin} coin.
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 

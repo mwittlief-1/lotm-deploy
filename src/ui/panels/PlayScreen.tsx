@@ -14,6 +14,7 @@ import {
   fmtSigned
 } from "../viewHelpers";
 import {
+  buildEconomyPricingSurface,
   buildObligationTiming,
   costsForProspect as getProspectCosts,
   effectsSummary as summarizeProspectEffects,
@@ -193,6 +194,7 @@ export function PlayScreen({
   const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
+  const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -638,6 +640,7 @@ export function PlayScreen({
         idle={idle}
         manor={m}
         peasantConsumptionBushels={peasantConsumptionBushels}
+        pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         report={ctx.report}
         showHouseholdDetails={showHouseholdDetails}
@@ -721,6 +724,7 @@ export function PlayScreen({
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}
         pfPersonHouseById={pfHouseIx.personHouseById}
+        pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         prospectsTotalCount={prospectsTotalCount}
         sellCapBushels={ctx.report.market.sell_cap_bushels}
