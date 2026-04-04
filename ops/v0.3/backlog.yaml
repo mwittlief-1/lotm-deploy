@@ -2700,7 +2700,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Expose known-house and dossier summary snapshot fields
-  status: ready
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2732,11 +2732,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:27:38-0400'
-    claim_expires_at: '2026-03-31T14:27:38-0400'
-    run_id: 2026-03-31_social_t04_acceptance_and_t05_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-005-T06
   parent_epic: V03-R0-005
   release: v0.3.0

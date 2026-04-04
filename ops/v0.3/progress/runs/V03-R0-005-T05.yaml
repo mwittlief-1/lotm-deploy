@@ -1,0 +1,38 @@
+version: 1
+run_id: 2026-03-31_social_t04_acceptance_and_t05_dispatch
+task_id: V03-R0-005-T05
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-social-mechanics
+commit: ef746e5339fc72aca7d3befee0152917b442c51a
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  summary_module: src/sim/domains/people/knownHouseSummaries.ts
+  preview_hook: src/sim/domains/people/playerHousehold.ts
+  snapshot_module: src/sim/domains/experience/reporting.ts
+  snapshot_test: tests/sim/known_house_snapshot_fields.test.ts
+findings:
+  - Added canonical known-house summary and house-dossier snapshot builders that derive bounded, deterministic surfaces directly from house registries plus the T04 relevance snapshot.
+  - Preview state now carries top-level and house-scoped `known_houses` and `house_dossiers`, so existing view-model consumers can read summary objects without inferring hidden relationship or heir state in the UI.
+  - Dossier summaries stay coarse by exposing tie class, relationship band, and household depth counts rather than raw hidden state, while bounded snapshots now preserve the same summary surfaces in turn history.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R0-005-T06
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 is closed on the lane branch; the next social task remains unready until kickoff promotes it.

@@ -21,6 +21,27 @@ describe("bounded snapshot contract", () => {
       schema_version: "economy_obligations_view_v1",
       counterparty_order: ["liege", "church"]
     });
+    expect(Array.isArray(serialized.known_houses)).toBe(true);
+    expect(serialized.known_houses.length).toBeGreaterThan(0);
+    expect(serialized.known_houses[0]).toMatchObject({
+      house_id: expect.any(String),
+      house_name: expect.any(String),
+      relationship: {
+        allegiance: expect.any(Number),
+        respect: expect.any(Number),
+        threat: expect.any(Number)
+      }
+    });
+    expect(serialized.house_dossiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          schema_version: "house_dossier_summary_v1",
+          house_id: expect.any(String),
+          relationship_band: expect.any(String),
+          kinship_summary: expect.any(String)
+        })
+      ])
+    );
     expect(serialized.world_topology_view).toMatchObject({
       schema_version: "world_topology_snapshot_v1",
       anchor_manor_id: "manor_hx_26597",

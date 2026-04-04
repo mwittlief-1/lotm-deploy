@@ -2,9 +2,11 @@ import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../st
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 import { buildEconomyObligationsView } from "./obligationsView";
+import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
+  const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
@@ -20,6 +22,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     economy_obligations_view: buildEconomyObligationsView(state),
     portfolio: (state as any).portfolio,
     world_topology_view: buildBoundedWorldTopologyView(),
+    known_houses: experienceSurfaces.known_houses,
+    house_dossiers: experienceSurfaces.house_dossiers,
     flags: state.flags,
     game_over: state.game_over ?? null
   });

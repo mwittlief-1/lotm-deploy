@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-005-T04
+  last_completed_task_id: V03-R0-005-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6f628059157228a2922c15b6766a3c6f55df5a7b
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: ef746e5339fc72aca7d3befee0152917b442c51a
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,11 +21,10 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  No new finished lane-owned handoffs were present beyond the already
-  accepted Social V03-R0-005-T04 intake. Economy V03-R3-004-T04, Social
-  V03-R0-005-T05, UI V03-R1-005-T02, and World V03-R1-001-T07 remain the
-  active claims. Economy, Social, and World lane branches were synced
-  back to kickoff truth, and UI was already aligned.
+  Completed Social V03-R0-005-T05 on the lane branch with bounded
+  known-house and dossier summary snapshot fields; Economy V03-R3-004-T04,
+  UI V03-R1-005-T02, and World V03-R1-001-T07 remain actively claimed while
+  the next social task waits on kickoff promotion.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
     task_id: V03-R3-004-T04
@@ -33,12 +32,6 @@ active_claims:
     claimed_at: '2026-03-31T10:06:01-0400'
     claim_expires_at: '2026-03-31T14:06:01-0400'
     run_id: 2026-03-31_economy_t04_dispatch
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-005-T05
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:27:38-0400'
-    claim_expires_at: '2026-03-31T14:27:38-0400'
-    run_id: 2026-03-31_social_t04_acceptance_and_t05_dispatch
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T02
     claimed_by: integrator.dispatch
