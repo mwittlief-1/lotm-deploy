@@ -4294,7 +4294,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render obligations modal and counterparty summaries on gameplay surfaces
-  status: ready
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change

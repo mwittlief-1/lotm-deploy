@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-005-T06
-  last_completed_task_id: V03-R1-001-T07
+  last_completed_task_id: V03-R1-005-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: 0a22ec6c351d889ac9a86ea45ac4aa04402a587b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,15 +15,14 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted completed manual handoffs for Social V03-R0-005-T05, World
-  V03-R1-001-T07, UI V03-R1-005-T02, and Economy V03-R3-004-T04 after
-  reconciling shared snapshot and UI surfaces on kickoff. V03-R1-001 now
-  remains done, and the next manual queue is Social V03-R0-005-T06, UI
-  V03-R1-005-T03, and Economy V03-R3-004-T05 with no active claims.
+  Completed UI V03-R1-005-T03 by wiring obligations counterparty summary
+  cards and a dedicated detail sheet into the gameplay shell; removed the
+  UI active claim after the lane handoff landed cleanly; and left
+  V03-R1-005-T04 unready because it still remains in todo state.
 active_claims: {}
