@@ -7028,7 +7028,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Expose read-only price references in snapshots and UI surfaces
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7060,11 +7060,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T04.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_economy_t04_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T05
   parent_epic: V03-R3-004
   release: v0.3.3

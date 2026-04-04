@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R0-005-T04
+  last_completed_task_id: V03-R3-004-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6f628059157228a2922c15b6766a3c6f55df5a7b
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: 3987e8c9490f7975d146a6c73cd28d35a6a868de
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,24 +15,19 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  No new finished lane-owned handoffs were present beyond the already
-  accepted Social V03-R0-005-T04 intake. Economy V03-R3-004-T04, Social
-  V03-R0-005-T05, UI V03-R1-005-T02, and World V03-R1-001-T07 remain the
-  active claims. Economy, Social, and World lane branches were synced
-  back to kickoff truth, and UI was already aligned.
+  Economy/Fiscal completed V03-R3-004-T04 under dispatch run id
+  2026-03-31_economy_t04_dispatch. The experience layer now projects a
+  read-only economy_pricing_view into bounded snapshots, and the play UI
+  reads a stable pricing surface from that view for market reference
+  presentation without inline pricing math. V03-R3-004-T05 remains todo
+  pending scheduler promotion.
 active_claims:
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_economy_t04_dispatch
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T05
     claimed_by: integrator.dispatch
