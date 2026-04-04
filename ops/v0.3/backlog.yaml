@@ -24,6 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
+  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
@@ -475,7 +476,7 @@ epics:
 - id: V03-R0-005
   title: Relationship seeding and known-world baseline
   release: v0.3.0
-  status: ready
+  status: done
   priority: 57
   tranche: 1
   change_type: behavior_change
@@ -540,7 +541,7 @@ epics:
 - id: V03-R1-001
   title: Map topology contract and numeric distance baseline
   release: v0.3.1
-  status: blocked
+  status: done
   priority: 54
   tranche: 2
   change_type: behavior_change
@@ -551,7 +552,7 @@ epics:
   - V03-R0-003
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - src/ui/**
@@ -573,7 +574,7 @@ epics:
 - id: V03-R1-002
   title: Versioned state schema and migration scaffold
   release: v0.3.1
-  status: todo
+  status: done
   priority: 52
   tranche: 2
   change_type: refactor
@@ -1043,7 +1044,7 @@ epics:
 - id: V03-R3-004
   title: Pricing and markets minimal
   release: v0.3.3
-  status: todo
+  status: done
   priority: 37
   tranche: 4
   change_type: behavior_change
@@ -2577,7 +2578,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Define deterministic non-uniform relationship seed schema
-  status: todo
+  status: done
   priority: 98
   tranche: 1
   change_type: refactor
@@ -2618,7 +2619,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Implement seeded relationship edges for player, liege, church, and local houses
-  status: todo
+  status: done
   priority: 97
   tranche: 1
   change_type: behavior_change
@@ -2659,7 +2660,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Implement T0/T1 relevance and kinship promotion baseline
-  status: todo
+  status: done
   priority: 96
   tranche: 1
   change_type: behavior_change
@@ -2699,7 +2700,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Expose known-house and dossier summary snapshot fields
-  status: todo
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2740,7 +2741,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Close epic and refresh relationship seeding docs
-  status: todo
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor
@@ -3023,7 +3024,7 @@ tasks:
   title: Declare map alpha complete and merged into lotm_deploy
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 999
   tranche: 2
   change_type: external_checkpoint
@@ -3032,7 +3033,7 @@ tasks:
   lane_branch: codex/v0.3-lane-world-topology
   deps: []
   requires_integrator: true
-  blocked_reason: Waiting for the external mapgen alpha checklist and approved integration checkpoint.
+  blocked_reason: ''
   allowed_paths:
   - ops/v0.3/**
   forbidden_paths:
@@ -3057,18 +3058,18 @@ tasks:
   title: Define merged topology contract surface and fixture import plan
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 84
   tranche: 2
   change_type: refactor
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: After merge checkpoint, lock the merged world-domain contract surface, imported fixture shape, and deterministic ownership boundaries for topology data.
+  goal: After the merge checkpoint clears, rebase the merged world-domain contract and fixture import plan against the already-imported xmap_alpha_v1 surface instead of performing a fresh import pass.
   deps:
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3104,19 +3105,19 @@ tasks:
   title: Implement deterministic manor adjacency registry
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 82
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Expose deterministic adjacency between manors as a stable registry with ordering and lookup guarantees.
+  goal: Rebase deterministic manor adjacency work against the imported territorial and route adjacency surface already present in src/sim/domains/world/**, preserving stable ordering and lookup guarantees.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3149,19 +3150,19 @@ tasks:
   title: Implement numeric distance baseline and tunable far threshold
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: Add numeric manor distance with a tunable far-threshold surface that can be reused by relevance and scope logic.
+  goal: "Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline."
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3194,20 +3195,20 @@ tasks:
   title: Expose topology selectors and bounded world snapshot fields
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 78
   tranche: 2
   change_type: behavior_change
   category: World
   phase: topology
   lane_branch: codex/v0.3-refactor-kickoff
-  goal: Wire merged adjacency and distance selectors into bounded world snapshot fields without reopening world-generation design decisions.
+  goal: After T03, integrator wires the rebased adjacency/distance selectors into bounded world snapshot fields without reopening the frozen xmap_alpha_v1 import contract or world-generation design decisions.
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
   - V03-R1-001-T03
   requires_integrator: true
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/phases/**
   - src/sim/domains/world/**
@@ -3241,7 +3242,7 @@ tasks:
   title: Render topology distance and threshold debug surfaces
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3253,7 +3254,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -3286,7 +3287,7 @@ tasks:
   title: Add topology determinism fixtures and contract coverage
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3300,7 +3301,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -3334,7 +3335,7 @@ tasks:
   title: Close epic and refresh world-domain docs
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: blocked
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -3347,7 +3348,7 @@ tasks:
   - V03-R1-001-T05
   - V03-R1-001-T06
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - docs/qa/**
   - docs/arch/**
@@ -3468,7 +3469,7 @@ tasks:
   title: Add migration runner and no-op step contract
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: ready
+  status: done
   priority: 80
   tranche: 2
   change_type: refactor
@@ -3492,11 +3493,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T08:58:43-0400'
-    claim_expires_at: '2026-03-30T12:58:43-0400'
-    run_id: 2026-03-30_tooling_t03_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - migration runner can execute ordered migration steps
   - no-op migration path is test-covered and deterministic
@@ -3513,7 +3514,7 @@ tasks:
   title: Add economy and portfolio placeholder migrations through the scaffold
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 78
   tranche: 2
   change_type: refactor
@@ -3558,7 +3559,7 @@ tasks:
   title: Add bounded snapshot and migration failure coverage
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: refactor
@@ -3605,7 +3606,7 @@ tasks:
   title: Close epic and refresh state-architecture docs
   release: v0.3.1
   parent_epic: V03-R1-002
-  status: todo
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -3693,7 +3694,7 @@ tasks:
   title: Add arrears registry and per-counterparty settlement scaffold
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 82
   tranche: 2
   change_type: behavior_change
@@ -3739,7 +3740,7 @@ tasks:
   title: Implement bounded penalty stage and arrears-carry receipts
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 80
   tranche: 2
   change_type: behavior_change
@@ -3784,7 +3785,7 @@ tasks:
   title: Implement seizure and forced-payment tangible-bite caps
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 78
   tranche: 2
   change_type: behavior_change
@@ -3830,7 +3831,7 @@ tasks:
   title: Integrate obligation settlement and enforcement phase hooks
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 76
   tranche: 2
   change_type: behavior_change
@@ -3876,7 +3877,7 @@ tasks:
   title: Expose enforcement state and counterparty summaries through snapshot outputs
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 74
   tranche: 2
   change_type: refactor
@@ -4207,7 +4208,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Audit obligations, arrears, and counterparty surfaces on gameplay screens
-  status: todo
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4250,7 +4251,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4293,7 +4294,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render obligations modal and counterparty summaries on gameplay surfaces
-  status: todo
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4334,7 +4335,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render arrears stage and enforcement state legibility flows
-  status: todo
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4376,7 +4377,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render gifts and offerings as explicit relationship levers in receipts and summaries
-  status: todo
+  status: ready
   priority: 95
   tranche: 2
   change_type: behavior_change
@@ -4408,11 +4409,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T05.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-04T17:28:51-0400'
+    claim_expires_at: '2026-04-04T21:28:51-0400'
+    run_id: manual-ui-v03-r1-005-t05-20260404T172851-0400
 - id: V03-R1-005-T06
   parent_epic: V03-R1-005
   release: v0.3.1
@@ -6905,7 +6906,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Audit current price, sell-cap, and trade-constant surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6947,7 +6948,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Define minimal price table and typed price reference contract
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6987,7 +6988,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Implement fixed pricing constants for key goods and labor placeholders
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7027,7 +7028,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Expose read-only price references in snapshots and UI surfaces
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7068,7 +7069,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Add pricing regression coverage and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7108,7 +7109,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Audit existing liege, church, and realm pressure surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7141,11 +7142,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-engine-lane
+    claimed_at: '2026-04-04T17:28:51-0400'
+    claim_expires_at: '2026-04-04T21:28:51-0400'
+    run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400
 - id: V03-R3-005-T02
   parent_epic: V03-R3-005
   release: v0.3.3

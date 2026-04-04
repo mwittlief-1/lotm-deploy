@@ -1,0 +1,18 @@
+{
+  "role_counts": {
+    "market_town": 15,
+    "county_seat": 15,
+    "royal_seat": 1,
+    "royal_castle": 2,
+    "bishop_seat": 8,
+    "abbey_site": 45,
+    "baronial_seat": 60
+  },
+  "overlap_counts": {
+    "bishop_seat+county_castle+county_seat+market_town": 3,
+    "bishop_seat+county_seat+market_town": 5,
+    "county_castle+county_seat+market_town": 3,
+    "county_seat+market_town": 3,
+    "county_seat+market_town+royal_castle+royal_seat": 1
+  }
+}

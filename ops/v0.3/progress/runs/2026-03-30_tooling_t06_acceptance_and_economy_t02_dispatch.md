@@ -1,0 +1,30 @@
+# Integrator Acceptance And Dispatch
+
+**Date:** 2026-03-30
+**Branch:** codex/v0.3-refactor-kickoff
+
+## Accepted lane work
+- Tooling/QA: accepted `V03-R1-002-T06`, including the refreshed migration runner contract in `docs/arch/state_migration_runner_v0.3.1.md`, the placeholder registry closeout note in `docs/arch/state_placeholder_registries_v0.3.1.md`, the task run log at `ops/v0.3/progress/runs/V03-R1-002-T06.md`, and the epic closeout report at `ops/v0.3/progress/runs/V03-R1-002.md`.
+
+## New dispatch
+- Economy/Fiscal: opened `V03-R1-003-T02`
+- `claimed_at`: `2026-03-30T14:38:38-0400`
+- `claim_expires_at`: `2026-03-30T18:38:38-0400`
+- `run_id`: `2026-03-30_economy_t02_dispatch`
+
+## Verification
+- `npm run ops:v0.3:validate -- --json`
+- `ruby scripts/opsV03SchedulerDryRun.rb --json`
+- `ruby scripts/opsV03RebaseDryRun.rb --json`
+- `npm run qa`
+- `npm run preflight`
+- `npm run seed:replay:batch` twice
+- `npm run repo:duplicates -- --json`
+- Replay hash matched twice: `7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba`
+
+## Still idle or blocked
+- Tooling/QA has no ready follow-on task after closing `V03-R1-002`.
+- Engine Core is idle.
+- UI/Experience is idle with no ready follow-on task.
+- Social/Mechanics remains idle with no ready follow-on task.
+- World/topology remains blocked behind `V03-XMAP-001`.

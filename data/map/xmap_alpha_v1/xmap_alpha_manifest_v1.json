@@ -1,0 +1,91 @@
+{
+  "config_sha256": "46ce9171b1cf3b4ee5de1bef3fa635e8c8c155b718e98067755b436df55c28ce",
+  "distance_metrics": {
+    "canonical_numeric_distance": "travel_cost_distance",
+    "companion_metric": "route_hop_distance",
+    "export_mode": "preview_rows_plus_route_graph",
+    "far_threshold_default": null,
+    "preview_row_count": 16
+  },
+  "kingdom_scope": "k_core",
+  "map_schema_version": "map_schema_v1",
+  "mapgen_seed": "PLAY_A_001",
+  "public_artifacts": {
+    "primary": {
+      "holding_fabric": {
+        "filename": "holding_fabric_v1.json",
+        "sha256": "597cdbee2c9820ec7143c7abe51fd27b1e13320daa7bfb1c9b098fec2fc3aabc"
+      },
+      "manifest": {
+        "filename": "xmap_alpha_manifest_v1.json"
+      },
+      "manor_units": {
+        "filename": "manor_units_v1.json",
+        "sha256": "f34f61655a3a76d7837bc61fc4c1667a3697c2b7512e317f3a8cd07f419448f5"
+      },
+      "world_topology": {
+        "filename": "world_topology_v1.json",
+        "sha256": "6ba7e2f006aa314272dd6c6803969f7c1d14158ab5a5e5ef568a8cf1487e33ba"
+      }
+    }
+  },
+  "schema_version": "xmap_alpha_manifest_v1",
+  "source_artifacts": {
+    "debug": {
+      "corridor_graph": {
+        "filename": "corridor_graph_v1.json",
+        "sha256": "459581ed9e30041835cf0526694ccdc92f9ab45d1753d6e9ef8092065b08a98c"
+      },
+      "hex_profile": {
+        "filename": "hex_economic_profile_v1.json",
+        "sha256": "7f9460b86abbec26a1e6b1a665b5350a5aab5649cb7126f0bd07ec834088ae4c"
+      },
+      "manor_report": {
+        "filename": "manor_generation_report.json",
+        "sha256": "d180a62d340c3909271a432e1eed58b252b5717c2d153f8f241d33762c8664cb"
+      },
+      "settlement_scaffold": {
+        "filename": "settlement_scaffold_v1.json",
+        "sha256": "fbdeca035ed5fbd1d768e797e72e9697a35b12836cc5ba170a00c92c5dc2c3ef"
+      }
+    },
+    "primary": {
+      "holding_fabric": {
+        "filename": "holding_fabric_v1.json",
+        "sha256": "597cdbee2c9820ec7143c7abe51fd27b1e13320daa7bfb1c9b098fec2fc3aabc"
+      },
+      "manifest": {
+        "filename": "xmap_alpha_manifest_v1.json"
+      },
+      "manor_units": {
+        "filename": "manor_units_v1.json",
+        "sha256": "f34f61655a3a76d7837bc61fc4c1667a3697c2b7512e317f3a8cd07f419448f5"
+      },
+      "world_topology": {
+        "filename": "world_topology_v1.json",
+        "sha256": "6ba7e2f006aa314272dd6c6803969f7c1d14158ab5a5e5ef568a8cf1487e33ba"
+      }
+    }
+  },
+  "summary": {
+    "archbishopric_count": 2,
+    "assignable_residual_component_count": 12,
+    "assignable_residual_hex_count": 228,
+    "barony_count": 60,
+    "bishopric_count": 8,
+    "county_count": 15,
+    "crown_demesne_hex_share": 0.0463,
+    "direct_church_fief_hex_share": 0.1567,
+    "elite_seat_complex_count": 121,
+    "manor_count": 387,
+    "oversize_split_count": 5,
+    "pre_reserved_component_count": 20,
+    "pre_reserved_hex_count": 911,
+    "proto_settlement_count": 68,
+    "residual_component_count": 21,
+    "residual_hex_count": 1139,
+    "route_edge_count": 996,
+    "royal_forest_component_count": 1,
+    "royal_forest_hex_count": 57
+  }
+}

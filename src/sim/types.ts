@@ -1,4 +1,5 @@
 import { SIM_VERSION } from "./version";
+import type { WorldTopologySnapshotV1 } from "./domains/world/types";
 
 export type SimVersion = typeof SIM_VERSION;
 
@@ -134,6 +135,7 @@ export interface ManorState {
   farmers: number;
   builders: number;
   bushels_stored: number;
+  meat_stores?: number;
   coin: number;
   unrest: number; // 0..100
   improvements: string[];
@@ -165,6 +167,9 @@ export interface GameOverState {
 export type RunStateSchemaVersion = "run_state_schema_v0.3.1";
 export type BoundedRegistryManifestSchemaVersion = "bounded_registry_manifest_v1";
 export type BoundedRegistryManifestEntryKind = "edge_list" | "pointer" | "record";
+export type EconomyRegistryPlaceholderSchemaVersion = "economy_registry_placeholder_v1";
+export type ManorEconomySurfaceSchemaVersion = "manor_economy_surface_v1";
+export type PortfolioRegistryPlaceholderSchemaVersion = "portfolio_registry_placeholder_v1";
 
 export interface BoundedRegistryManifestEntry {
   registry_id: string;
@@ -178,6 +183,58 @@ export interface BoundedRegistryManifestEntry {
 export interface BoundedRegistryManifest {
   schema_version: BoundedRegistryManifestSchemaVersion;
   entries: BoundedRegistryManifestEntry[];
+}
+
+export interface EconomyRegistryPlaceholderV1 {
+  schema_version: EconomyRegistryPlaceholderSchemaVersion;
+  surface_id: "manor_economy_surface";
+  surface_schema_version: ManorEconomySurfaceSchemaVersion;
+  tracked_state_paths: string[];
+}
+
+export interface PortfolioRegistryPlaceholderV1 {
+  schema_version: PortfolioRegistryPlaceholderSchemaVersion;
+  positions: string[];
+}
+
+export type KnownHouseRelevanceReason = "player_house" | "blood_tie" | "marriage_tie";
+export type KnownHouseRelevanceTier = "tier0" | "tier1";
+export type HouseDossierKinshipSummary = "none" | "blood_tie" | "marriage_tie" | "blood_and_marriage_tie";
+export type HouseDossierRelationshipBand = "unknown" | "favorable" | "steady" | "wary" | "hostile";
+export type HouseDossierHouseholdScope = "head_only" | "household_seeded";
+
+export interface KnownHouseSummary {
+  house_id: string;
+  house_name: string;
+  tier: string;
+  relevance_tier: KnownHouseRelevanceTier;
+  relevance_reasons: KnownHouseRelevanceReason[];
+  head_id: string | null;
+  head_name: string;
+  head_age: number | null;
+  head_status: "Alive" | "Deceased" | "Unknown";
+  head_short_id: string | null;
+  heir_indicator: "has_male_heir" | "no_male_heir" | "heiress_possible";
+  has_male_heir: boolean;
+  heiress_possible: boolean;
+  relationship: { allegiance: number; respect: number; threat: number } | null;
+}
+
+export interface HouseDossierSummary {
+  schema_version: "house_dossier_summary_v1";
+  house_id: string;
+  house_name: string;
+  tier: string;
+  relevance_tier: KnownHouseRelevanceTier;
+  relevance_reasons: KnownHouseRelevanceReason[];
+  kinship_summary: HouseDossierKinshipSummary;
+  relationship_band: HouseDossierRelationshipBand;
+  household_scope: HouseDossierHouseholdScope;
+  household_member_count: number;
+  living_member_count: number;
+  child_count: number;
+  has_male_heir: boolean;
+  heiress_possible: boolean;
 }
 
 export interface RunState {
@@ -201,6 +258,10 @@ export interface RunState {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  portfolio?: PortfolioRegistryPlaceholderV1;
+  known_houses?: KnownHouseSummary[];
+  house_dossiers?: HouseDossierSummary[];
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
@@ -231,6 +292,12 @@ export interface RunSnapshot {
   institutions?: Record<string, Institution>;
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
+  economy?: EconomyRegistryPlaceholderV1;
+  economy_obligations_view?: { schema_version: string; [key: string]: unknown };
+  portfolio?: PortfolioRegistryPlaceholderV1;
+  world_topology_view?: WorldTopologySnapshotV1;
+  known_houses?: KnownHouseSummary[];
+  house_dossiers?: HouseDossierSummary[];
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }

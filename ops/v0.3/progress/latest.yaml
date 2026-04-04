@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-002-T02
+  last_completed_task_id: V03-R1-005-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: bb7bdd8532093fbf315e0522bb69cf4f0d377156
+  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,22 +18,23 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0
-    run2: 2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0
+    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted Engine Core V03-R0-003-T07 and Tooling/QA V03-R1-002-T02 on
-  kickoff, closed epic V03-R0-003, and opened Tooling/QA V03-R1-002-T03 under
-  run log 2026-03-30_engine_t07_and_tooling_t02_acceptance. UI and Social are
-  idle, Economy/Fiscal remains blocked behind V03-R1-002-T06, and
-  world/topology automation remains blocked behind V03-XMAP-001. Integrator
-  validation, scheduler dry-run, rebase dry-run, focused schema coverage, qa,
-  preflight, replay twice, and duplicate audit all passed on kickoff. The new
-  accepted replay hash is
-  2407c097b96753f5edc3023eb632c9b4b57ead3a5514234c6ad25bcc2e3e57b0.
+  Accepted Social V03-R0-005-T06 and UI V03-R1-005-T04 on kickoff,
+  marked V03-R0-005 done, and reopened the next safe manual work as
+  active claims for UI V03-R1-005-T05 and Engine V03-R3-005-T01.
+  Economy and World have no current ready follow-on tasks.
 active_claims:
-  codex/v0.3-lane-tooling-qa:
-    task_id: V03-R1-002-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-30T08:58:43-0400'
-    claim_expires_at: '2026-03-30T12:58:43-0400'
-    run_id: 2026-03-30_tooling_t03_dispatch
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R1-005-T05
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-04T17:28:51-0400'
+    claim_expires_at: '2026-04-04T21:28:51-0400'
+    run_id: manual-ui-v03-r1-005-t05-20260404T172851-0400
+  codex/v0.3-lane-engine-core:
+    task_id: V03-R3-005-T01
+    claimed_by: manual-engine-lane
+    claimed_at: '2026-04-04T17:28:51-0400'
+    claim_expires_at: '2026-04-04T21:28:51-0400'
+    run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400

@@ -1,0 +1,37 @@
+version: 1
+run_id: V03-R1-005-T02-20260404T161334-0400
+task_id: V03-R1-005-T02
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-ui-experience
+commit: 3cfae8481e6687974863cf5b21371a6d07069b37
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  obligations_contract: src/ui/playScreenObligations.ts
+  receipts_model: src/ui/playScreenReceipts.ts
+  play_screen_wiring: src/ui/panels/PlayScreen.tsx
+  obligations_test: tests/ui/playScreenObligations.test.ts
+  receipts_test: tests/ui/playScreenReceipts.test.ts
+findings:
+  - Added a deterministic liege/church counterparty contract built from the bounded `economy_obligations_view` plus the existing court budget surface, keeping obligations, arrears pressure, gifts, and offerings in one presentation-only seam.
+  - Threaded that contract into the receipts view-model so raw receipt lines now carry explicit counterparty tags and produce liege/church receipt sections without changing the visible gameplay UI yet.
+  - Kept the contract aligned to the existing receipt categories by making liege surfaces coin-first plus unrest, and church surfaces food-first plus unrest, which sets up V03-R1-005-T03 without reopening sim orchestration.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R1-005-T03
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: Backlog task state, claim mirror, and progress cursor validate cleanly after closing V03-R1-005-T02, and the next UI obligations task is not ready yet.

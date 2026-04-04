@@ -1,11 +1,21 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import type {
+  ObligationsCounterpartyContractSection,
+  ObligationsModalFocus
+} from "../playScreenObligations";
+import type { EconomyPricingSurface } from "../playViewModel";
 import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
-import { PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_PANEL_STYLE,
+  PLAY_SCREEN_SECTION_SIGILS
+} from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
 import { HouseholdDetailsPanel } from "./HouseholdDetailsPanel";
 import { HouseholdPanel } from "./HouseholdPanel";
 import { ModalSheet } from "./ModalSheet";
+import { ObligationsSummaryCards } from "./ObligationsSummaryCards";
 import { SectionHeading } from "./SectionHeading";
 
 type TurnReportPanelProps = {
@@ -28,7 +38,10 @@ type TurnReportPanelProps = {
   hasConsumptionSplit: boolean;
   idle: number;
   manor: any;
+  obligationsSections: ObligationsCounterpartyContractSection[];
+  onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
   peasantConsumptionBushels: number | null;
+  pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   report: any;
   showHouseholdDetails: boolean;
@@ -59,7 +72,10 @@ export function TurnReportPanel({
   hasConsumptionSplit,
   idle,
   manor,
+  obligationsSections,
+  onOpenObligationsDetails,
   peasantConsumptionBushels,
+  pricingSurface,
   previewState,
   report,
   showHouseholdDetails,
@@ -168,9 +184,37 @@ export function TurnReportPanel({
           Sell cap: {report.market.sell_cap_bushels} bushels
           <Tip text="Selling consumes 1 energy. Amount is trimmed to the market cap." />
         </li>
+        {pricingSurface ? (
+          <li>
+            Reference: {pricingSurface.referenceLabel} ({pricingSurface.referenceId}) at {pricingSurface.ratioLabel}
+          </li>
+        ) : null}
+        {pricingSurface ? (
+          <li>
+            Fixed reference cap: {pricingSurface.fixedSellCapUnits} bushels; current stores allow up to {pricingSurface.maxSellableUnits} for{" "}
+            {pricingSurface.maxQuotedCoin} coin
+          </li>
+        ) : null}
       </ul>
+      {pricingSurface && pricingSurface.catalogLines.length > 0 ? (
+        <details style={{ marginTop: 6 }}>
+          <summary>Pricing reference catalog</summary>
+          <ul style={{ marginTop: 6 }}>
+            {pricingSurface.catalogLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
 
-      <h4 style={{ marginTop: 12 }}>Obligations</h4>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
+        <h4 style={{ margin: 0 }}>Obligations</h4>
+        {obligationsSections.length > 0 ? (
+          <button onClick={() => onOpenObligationsDetails("overview")} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+            Open detail sheet
+          </button>
+        ) : null}
+      </div>
       <ul>
         <li>
           <b>{copy.obligationsTotal}</b>: {fmtObAmount(totalObligations)}
@@ -188,6 +232,12 @@ export function TurnReportPanel({
         </li>
       </ul>
       <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.obligationsHelper}</div>
+      <ObligationsSummaryCards
+        helperText="Resolved this turn: each card shows whether arrears carried and whether any enforcement pressure stage is already active."
+        onOpenDetails={onOpenObligationsDetails}
+        sections={obligationsSections}
+        surface="turn_report"
+      />
 
       <ModalSheet
         onClose={toggleHouseholdDetails}

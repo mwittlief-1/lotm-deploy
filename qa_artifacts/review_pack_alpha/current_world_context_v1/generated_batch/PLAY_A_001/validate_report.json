@@ -1,0 +1,149 @@
+{
+  "started_at": "2026-03-30T17:20:50.512Z",
+  "map_path": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/map_v1.json",
+  "config_path": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/chosen_config_current_world_context_v1.json",
+  "metrics_out": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/validate_metrics.json",
+  "xmap_paths": {
+    "primary": {
+      "manor_units": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/manor_units_v1.json",
+      "world_topology": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/world_topology_v1.json",
+      "manifest": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/xmap_alpha_manifest_v1.json"
+    },
+    "debug": {
+      "hex_profile": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/hex_economic_profile_v1.json",
+      "corridor_graph": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/corridor_graph_v1.json",
+      "settlement_scaffold": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/settlement_scaffold_v1.json",
+      "manor_report": "/Users/matt_wittlief_home/lotm-mapgen/qa_artifacts/review_pack_alpha/current_world_context_v1/generated_batch/PLAY_A_001/manor_generation_report.json"
+    }
+  },
+  "ok": true,
+  "errors": [],
+  "warnings": [
+    {
+      "message": "estuary_length out of band",
+      "ctx": {
+        "estuary_length": 3,
+        "band": [
+          6,
+          12
+        ]
+      }
+    },
+    {
+      "message": "estuary_mouth_width out of band",
+      "ctx": {
+        "estuary_mouth_width": 11,
+        "band": [
+          3,
+          7
+        ]
+      }
+    },
+    {
+      "message": "market_towns_total out of band",
+      "ctx": {
+        "count": 41,
+        "band": [
+          22,
+          35
+        ]
+      }
+    },
+    {
+      "message": "coastline_share_out_of_band",
+      "ctx": {
+        "code": "coastline_share_out_of_band",
+        "coastline_share": 0.511875,
+        "target": [
+          0.25,
+          0.4
+        ]
+      }
+    }
+  ],
+  "xmap_alpha": {
+    "ok": true,
+    "summary": {
+      "manor_count": 387,
+      "route_edge_count": 996,
+      "territorial_edge_count": 1057
+    },
+    "manifest": {
+      "config_sha256": "328996c6ed32de6fa9ee396be6f7a66aca9d382490b52851c319d73fb7a00484",
+      "distance_metrics": {
+        "canonical_numeric_distance": "travel_cost_distance",
+        "companion_metric": "route_hop_distance",
+        "export_mode": "preview_rows_plus_route_graph",
+        "far_threshold_default": null,
+        "preview_row_count": 16
+      },
+      "kingdom_scope": "k_core",
+      "map_schema_version": "map_schema_v1",
+      "mapgen_seed": "PLAY_A_001",
+      "public_artifacts": {
+        "primary": {
+          "manifest": {
+            "filename": "xmap_alpha_manifest_v1.json"
+          },
+          "manor_units": {
+            "filename": "manor_units_v1.json",
+            "sha256": "41b3f789d353ff7dc210bc53c16aaa90c5cefc1f8f07141e85b2147560ced88b"
+          },
+          "world_topology": {
+            "filename": "world_topology_v1.json",
+            "sha256": "5efc8fc566e142a9efddf1efdb505919c6dab13de83d33f9486237613edbcce8"
+          }
+        }
+      },
+      "schema_version": "xmap_alpha_manifest_v1",
+      "source_artifacts": {
+        "debug": {
+          "corridor_graph": {
+            "filename": "corridor_graph_v1.json",
+            "sha256": "807f6bfc551c47bbd53b0f81d20e3276ce5fb9491c00e89761bbaa2bb45f47a1"
+          },
+          "hex_profile": {
+            "filename": "hex_economic_profile_v1.json",
+            "sha256": "ff0be32e3a59d823fee7817a5cab02c34f0a74b7578a19546338e4e645f93e0f"
+          },
+          "manor_report": {
+            "filename": "manor_generation_report.json",
+            "sha256": "20e04723144c919b37ff50fd61cc65ac6c0a50dd00f18c62f6be7c0a1eb18452"
+          },
+          "settlement_scaffold": {
+            "filename": "settlement_scaffold_v1.json",
+            "sha256": "9560f358529316f4bf329c4384ea8211c6a79e7027104ab146ea1bcc9e0fa115"
+          }
+        },
+        "primary": {
+          "manifest": {
+            "filename": "xmap_alpha_manifest_v1.json"
+          },
+          "manor_units": {
+            "filename": "manor_units_v1.json",
+            "sha256": "41b3f789d353ff7dc210bc53c16aaa90c5cefc1f8f07141e85b2147560ced88b"
+          },
+          "world_topology": {
+            "filename": "world_topology_v1.json",
+            "sha256": "5efc8fc566e142a9efddf1efdb505919c6dab13de83d33f9486237613edbcce8"
+          }
+        }
+      },
+      "summary": {
+        "assignable_residual_component_count": 12,
+        "assignable_residual_hex_count": 228,
+        "elite_seat_complex_count": 121,
+        "manor_count": 387,
+        "oversize_split_count": 5,
+        "pre_reserved_component_count": 20,
+        "pre_reserved_hex_count": 911,
+        "proto_settlement_count": 68,
+        "residual_component_count": 21,
+        "residual_hex_count": 1139,
+        "route_edge_count": 996,
+        "royal_forest_component_count": 1,
+        "royal_forest_hex_count": 57
+      }
+    }
+  }
+}
