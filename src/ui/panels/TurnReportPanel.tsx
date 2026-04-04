@@ -233,9 +233,10 @@ export function TurnReportPanel({
       </ul>
       <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.obligationsHelper}</div>
       <ObligationsSummaryCards
-        helperText="Liege and church pressure stay separated here so the detail sheet and the payment controls use the same language."
+        helperText="Resolved this turn: each card shows whether arrears carried and whether any enforcement pressure stage is already active."
         onOpenDetails={onOpenObligationsDetails}
         sections={obligationsSections}
+        surface="turn_report"
       />
 
       <ModalSheet

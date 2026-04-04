@@ -25,8 +25,12 @@ export type ObligationsContractGroup = {
 
 export type ObligationsContractPenaltyGroup = ObligationsContractGroup & {
   carriedThisTurn: boolean;
+  enforcementStage: number | null;
   enforcementState: "clear" | "arrears";
   enforcementSummary: string;
+  responseSummary: string;
+  resolvedSummary: string;
+  stageLabel: string;
   settledThisTurn: boolean;
 };
 
@@ -66,6 +70,7 @@ type ParsedObligationsViewSummary = {
   counterpartyKind: ObligationsCounterpartyId;
   counterpartyLabel: string;
   dueAmount: number;
+  enforcementStage: number | null;
   enforcementState: "clear" | "arrears";
   enforcementSummary: string;
   settlementStatus: string;
@@ -124,6 +129,11 @@ function readBoolean(value: unknown): boolean {
   return value === true;
 }
 
+function readStage(value: unknown): number | null {
+  const parsed = readNumber(value);
+  return parsed !== null && parsed > 0 ? parsed : null;
+}
+
 function formatAmount(amount: number, counterpartyId: ObligationsCounterpartyId): string {
   if (counterpartyId === "liege") return `${amount} coin`;
   return `${amount} ${amount === 1 ? "bushel" : "bushels"}`;
@@ -135,6 +145,47 @@ function gestureActionId(counterpartyId: ObligationsCounterpartyId): "gift_liege
 
 function gestureReceiptCategory(counterpartyId: ObligationsCounterpartyId): ObligationReceiptCategory[] {
   return counterpartyId === "liege" ? ["coin"] : ["food"];
+}
+
+function enforcementStageLabel(summary: ParsedObligationsViewSummary): string {
+  if (summary.enforcementState === "clear") return "Pressure clear";
+  if (summary.enforcementStage !== null) return `Stage ${summary.enforcementStage} active`;
+  return "Pressure active";
+}
+
+function resolvedPressureSummary(summary: ParsedObligationsViewSummary): string {
+  if (summary.enforcementState === "arrears") {
+    if (summary.carriedThisTurn) {
+      return `This turn: arrears carried, so ${enforcementStageLabel(summary).toLowerCase()} now applies.`;
+    }
+    return `This turn: arrears remained open, so ${enforcementStageLabel(summary).toLowerCase()} stayed in place.`;
+  }
+
+  if (summary.settledThisTurn) {
+    return "This turn: no arrears carried, so pressure stayed clear.";
+  }
+
+  return "This turn: pressure ended clear with no carried arrears.";
+}
+
+function responsePressureSummary(summary: ParsedObligationsViewSummary): string {
+  if (summary.counterpartyKind === "liege") {
+    if (summary.arrearsAmount > 0) {
+      return "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.";
+    }
+    if (summary.dueAmount > 0) {
+      return "Next turn: line up coin for the current tax due before it carries, then add a gift if support still looks thin.";
+    }
+    return "Next turn: no liege arrears are carried right now, but coin payments and gifts remain your levers if pressure returns.";
+  }
+
+  if (summary.arrearsAmount > 0) {
+    return "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.";
+  }
+  if (summary.dueAmount > 0) {
+    return "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.";
+  }
+  return "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.";
 }
 
 function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCounterpartyId, ParsedObligationsViewSummary> | null {
@@ -160,6 +211,7 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
       counterpartyKind,
       counterpartyLabel,
       dueAmount: readNumber(summary.due_amount) ?? 0,
+      enforcementStage: readStage(summary.enforcement_stage),
       enforcementState: summary.enforcement_state === "arrears" ? "arrears" : "clear",
       enforcementSummary: readString(summary.enforcement_summary) ?? `${counterpartyLabel}: clear.`,
       settlementStatus: readString(summary.settlement_status) ?? "clear",
@@ -216,8 +268,12 @@ export function buildObligationsCounterpartyContract(args: {
         amountLabel: formatAmount(summary.arrearsAmount, counterpartyId),
         summary: summary.arrearsAmount > 0 ? summary.settlementSummary : `${summary.counterpartyLabel}: no carried arrears.`,
         receiptCategories: [...meta.receiptCategoryOrder],
+        enforcementStage: summary.enforcementStage,
         enforcementState: summary.enforcementState,
         enforcementSummary: summary.enforcementSummary,
+        responseSummary: responsePressureSummary(summary),
+        resolvedSummary: resolvedPressureSummary(summary),
+        stageLabel: enforcementStageLabel(summary),
         carriedThisTurn: summary.carriedThisTurn,
         settledThisTurn: summary.settledThisTurn
       },
@@ -289,14 +345,14 @@ export function obligationsModalTitle(focus: ObligationsModalFocus): string {
 export function obligationsModalSubtitle(origin: ObligationsModalOrigin, focus: ObligationsModalFocus): string {
   const routeHint =
     origin === "decisions"
-      ? "Use the payment controls just below to respond after you review the resolved dues."
+      ? "Use the payment controls just below to respond after you review the already-resolved stage state."
       : "Jump to Decisions below when you are ready to respond with coin, bushels, or court attention.";
 
   if (focus === "liege") {
-    return `Track tax due, coin arrears, and gifts to the liege in one place. ${routeHint}`;
+    return `Track tax due, coin arrears, and the current liege pressure stage in one place. ${routeHint}`;
   }
   if (focus === "church") {
-    return `Track tithe due, bushel arrears, and church offerings in one place. ${routeHint}`;
+    return `Track tithe due, bushel arrears, and the current church pressure stage in one place. ${routeHint}`;
   }
-  return `Compare liege and church pressure side by side before you set the next turn's response. ${routeHint}`;
+  return `Compare liege and church pressure side by side, including any carried arrears stage, before you set the next turn's response. ${routeHint}`;
 }

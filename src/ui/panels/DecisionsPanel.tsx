@@ -398,9 +398,10 @@ export function DecisionsPanel({
           </div>
         ) : null}
         <ObligationsSummaryCards
-          helperText="The detail sheet mirrors the same liege and church groupings before you commit payments or court attention."
+          helperText="Next turn response: these cards keep the active stage visible while showing what coin, bushels, and court attention can still change."
           onOpenDetails={onOpenObligationsDetails}
           sections={obligationsSections}
+          surface="decisions"
         />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10, fontSize: 12 }}>
