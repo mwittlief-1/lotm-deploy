@@ -4377,7 +4377,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render gifts and offerings as explicit relationship levers in receipts and summaries
-  status: ready
+  status: done
   priority: 95
   tranche: 2
   change_type: behavior_change
@@ -4409,11 +4409,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-04T17:28:51-0400'
-    claim_expires_at: '2026-04-04T21:28:51-0400'
-    run_id: manual-ui-v03-r1-005-t05-20260404T172851-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-005-T06
   parent_epic: V03-R1-005
   release: v0.3.1
