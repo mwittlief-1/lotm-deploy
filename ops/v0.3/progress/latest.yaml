@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R0-005-T06
-  last_completed_task_id: V03-R1-001-T07
+  last_completed_task_id: V03-R3-004-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: 4b0b39647f3fd82174ea39f49db4f260bebcf4ec
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,15 +15,15 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    repo_duplicates: not_run
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: not_run
+    run2: not_run
 notes: >-
-  Accepted completed manual handoffs for Social V03-R0-005-T05, World
-  V03-R1-001-T07, UI V03-R1-005-T02, and Economy V03-R3-004-T04 after
-  reconciling shared snapshot and UI surfaces on kickoff. V03-R1-001 now
-  remains done, and the next manual queue is Social V03-R0-005-T06, UI
-  V03-R1-005-T03, and Economy V03-R3-004-T05 with no active claims.
+  Economy/Fiscal completed V03-R3-004-T05 and closed the pricing epic
+  with release documentation plus cross-surface regression coverage for
+  the contract, bounded snapshot, and UI pricing references. Social
+  V03-R0-005-T06 remains the current kickoff cursor, and there is no
+  active economy claim after this closeout.
 active_claims: {}

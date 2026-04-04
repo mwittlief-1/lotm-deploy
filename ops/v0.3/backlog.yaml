@@ -7069,7 +7069,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Add pricing regression coverage and docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
