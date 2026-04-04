@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { buildObligationsCounterpartyContract, classifyReceiptCounterpartyTags } from "../../src/ui/playScreenObligations";
+import {
+  buildObligationsCounterpartyContract,
+  classifyReceiptCounterpartyTags,
+  createObligationsModalRoute,
+  obligationsModalSubtitle,
+  obligationsModalTitle,
+  selectObligationsCounterpartySections
+} from "../../src/ui/playScreenObligations";
 
 const PREVIEW_STATE = {
   economy_obligations_view: {
@@ -168,5 +175,39 @@ describe("playScreenObligations", () => {
     ).toEqual(["liege"]);
     expect(classifyReceiptCounterpartyTags("Offering to church used 1 court budget.", contract)).toEqual(["church"]);
     expect(classifyReceiptCounterpartyTags("2 events applied.", contract)).toEqual([]);
+  });
+
+  it("keeps modal routing, focus selection, and helper copy deterministic", () => {
+    const contract = buildObligationsCounterpartyContract({
+      courtDecisionBudget: COURT_BUDGET,
+      previewState: PREVIEW_STATE
+    });
+
+    expect(createObligationsModalRoute("turn_report")).toEqual({
+      origin: "turn_report",
+      focus: "overview"
+    });
+    expect(createObligationsModalRoute("decisions", "church")).toEqual({
+      origin: "decisions",
+      focus: "church"
+    });
+
+    expect(selectObligationsCounterpartySections(contract, "overview").map((section) => section.id)).toEqual(["liege", "church"]);
+    expect(selectObligationsCounterpartySections(contract, "liege").map((section) => section.id)).toEqual(["liege"]);
+    expect(selectObligationsCounterpartySections(contract, "church").map((section) => section.id)).toEqual(["church"]);
+
+    expect(obligationsModalTitle("overview")).toBe("Obligations & counterparties");
+    expect(obligationsModalTitle("liege")).toBe("Liege obligations");
+    expect(obligationsModalTitle("church")).toBe("Church obligations");
+
+    expect(obligationsModalSubtitle("turn_report", "overview")).toBe(
+      "Compare liege and church pressure side by side before you set the next turn's response. Jump to Decisions below when you are ready to respond with coin, bushels, or court attention."
+    );
+    expect(obligationsModalSubtitle("decisions", "liege")).toBe(
+      "Track tax due, coin arrears, and gifts to the liege in one place. Use the payment controls just below to respond after you review the resolved dues."
+    );
+    expect(obligationsModalSubtitle("decisions", "church")).toBe(
+      "Track tithe due, bushel arrears, and church offerings in one place. Use the payment controls just below to respond after you review the resolved dues."
+    );
   });
 });

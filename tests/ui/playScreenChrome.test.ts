@@ -9,7 +9,8 @@ import {
 describe("play screen chrome", () => {
   it("keeps the first detail modal title stable for gameplay shells", () => {
     expect(PLAY_SCREEN_MODAL_TITLES).toEqual({
-      household: "Household details"
+      household: "Household details",
+      obligations: "Obligations & counterparties"
     });
   });
 

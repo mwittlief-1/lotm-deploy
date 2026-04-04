@@ -49,6 +49,8 @@ describe("pricing panels", () => {
         hasConsumptionSplit={false}
         idle={1}
         manor={state.manor}
+        obligationsSections={[]}
+        onOpenObligationsDetails={() => undefined}
         peasantConsumptionBushels={0}
         pricingSurface={pricingSurface}
         previewState={state}

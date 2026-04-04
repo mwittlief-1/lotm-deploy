@@ -1044,7 +1044,7 @@ epics:
 - id: V03-R3-004
   title: Pricing and markets minimal
   release: v0.3.3
-  status: todo
+  status: done
   priority: 37
   tranche: 4
   change_type: behavior_change
@@ -2772,11 +2772,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T06.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-social-lane
+    claimed_at: '2026-04-04T17:04:23-0400'
+    claim_expires_at: '2026-04-04T21:04:23-0400'
+    run_id: manual-social-v03-r0-005-t06-20260404T170423-0400
 - id: V03-R0-006-T01
   parent_epic: V03-R0-006
   release: v0.3.0
@@ -4294,7 +4294,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render obligations modal and counterparty summaries on gameplay surfaces
-  status: ready
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4335,7 +4335,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render arrears stage and enforcement state legibility flows
-  status: todo
+  status: ready
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4368,11 +4368,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T04.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-04T17:04:23-0400'
+    claim_expires_at: '2026-04-04T21:04:23-0400'
+    run_id: manual-ui-v03-r1-005-t04-20260404T170423-0400
 - id: V03-R1-005-T05
   parent_epic: V03-R1-005
   release: v0.3.1
