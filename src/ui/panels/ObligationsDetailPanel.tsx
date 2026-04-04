@@ -126,7 +126,9 @@ export function ObligationsDetailPanel({
             </div>
 
             <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10, background: "#fdfbf7" }}>
-              <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>{section.gestureGroup.title}</div>
+              <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>Relationship lever</div>
+              <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{section.gestureGroup.title}</div>
+              <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{section.gestureGroup.leverSummary}</div>
               <div style={{ marginTop: 4, fontSize: 16, fontWeight: 700 }}>
                 {section.gestureGroup.cost === null ? "Not budgeted" : `Cost ${section.gestureGroup.cost}`}
               </div>

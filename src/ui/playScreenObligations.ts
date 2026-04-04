@@ -39,6 +39,7 @@ export type ObligationsContractGestureGroup = {
   availableInBudget: boolean;
   cost: number | null;
   detail: string;
+  leverSummary: string;
   receiptCategories: ObligationReceiptCategory[];
   spent: number | null;
   title: string;
@@ -145,6 +146,20 @@ function gestureActionId(counterpartyId: ObligationsCounterpartyId): "gift_liege
 
 function gestureReceiptCategory(counterpartyId: ObligationsCounterpartyId): ObligationReceiptCategory[] {
   return counterpartyId === "liege" ? ["coin"] : ["food"];
+}
+
+function gestureRelationshipSummary(counterpartyId: ObligationsCounterpartyId, summary: ParsedObligationsViewSummary): string {
+  if (counterpartyId === "liege") {
+    if (summary.enforcementState === "arrears") {
+      return "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.";
+    }
+    return "Gift to liege is the relationship lever for steadying noble support when dues alone are not the whole problem.";
+  }
+
+  if (summary.enforcementState === "arrears") {
+    return "Offering to church is the relationship lever for easing church pressure when bushel arrears are already visible.";
+  }
+  return "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.";
 }
 
 function enforcementStageLabel(summary: ParsedObligationsViewSummary): string {
@@ -281,6 +296,7 @@ export function buildObligationsCounterpartyContract(args: {
         actionId: gestureActionId(counterpartyId),
         title: gestureEntry?.label ?? (counterpartyId === "liege" ? "Gift to liege" : "Offering to church"),
         detail: gestureEntry?.detail ?? meta.defaultGestureDetail,
+        leverSummary: gestureRelationshipSummary(counterpartyId, summary),
         cost: gestureEntry?.cost ?? null,
         spent: gestureEntry?.spent ?? null,
         availableInBudget: gestureEntry !== null,
