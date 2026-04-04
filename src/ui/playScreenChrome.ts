@@ -1,5 +1,6 @@
 export const PLAY_SCREEN_MODAL_TITLES = {
-  household: "Household details"
+  household: "Household details",
+  obligations: "Obligations & counterparties"
 } as const;
 
 export const PLAY_SCREEN_DEBUG_SURFACES = [

@@ -1,12 +1,21 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import type {
+  ObligationsCounterpartyContractSection,
+  ObligationsModalFocus
+} from "../playScreenObligations";
 import type { EconomyPricingSurface } from "../playViewModel";
 import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
-import { PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
+import {
+  PLAY_SCREEN_ACTION_BUTTON_STYLE,
+  PLAY_SCREEN_PANEL_STYLE,
+  PLAY_SCREEN_SECTION_SIGILS
+} from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
 import { HouseholdDetailsPanel } from "./HouseholdDetailsPanel";
 import { HouseholdPanel } from "./HouseholdPanel";
 import { ModalSheet } from "./ModalSheet";
+import { ObligationsSummaryCards } from "./ObligationsSummaryCards";
 import { SectionHeading } from "./SectionHeading";
 
 type TurnReportPanelProps = {
@@ -29,6 +38,8 @@ type TurnReportPanelProps = {
   hasConsumptionSplit: boolean;
   idle: number;
   manor: any;
+  obligationsSections: ObligationsCounterpartyContractSection[];
+  onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
   peasantConsumptionBushels: number | null;
   pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
@@ -61,6 +72,8 @@ export function TurnReportPanel({
   hasConsumptionSplit,
   idle,
   manor,
+  obligationsSections,
+  onOpenObligationsDetails,
   peasantConsumptionBushels,
   pricingSurface,
   previewState,
@@ -194,7 +207,14 @@ export function TurnReportPanel({
         </details>
       ) : null}
 
-      <h4 style={{ marginTop: 12 }}>Obligations</h4>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 12 }}>
+        <h4 style={{ margin: 0 }}>Obligations</h4>
+        {obligationsSections.length > 0 ? (
+          <button onClick={() => onOpenObligationsDetails("overview")} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+            Open detail sheet
+          </button>
+        ) : null}
+      </div>
       <ul>
         <li>
           <b>{copy.obligationsTotal}</b>: {fmtObAmount(totalObligations)}
@@ -212,6 +232,11 @@ export function TurnReportPanel({
         </li>
       </ul>
       <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.obligationsHelper}</div>
+      <ObligationsSummaryCards
+        helperText="Liege and church pressure stay separated here so the detail sheet and the payment controls use the same language."
+        onOpenDetails={onOpenObligationsDetails}
+        sections={obligationsSections}
+      />
 
       <ModalSheet
         onClose={toggleHouseholdDetails}

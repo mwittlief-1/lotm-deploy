@@ -7,6 +7,13 @@ export const PLAY_SCREEN_OBLIGATION_RECEIPT_CATEGORY_ORDER = ["coin", "food", "u
 
 export type ObligationsCounterpartyId = (typeof PLAY_SCREEN_OBLIGATION_COUNTERPARTY_ORDER)[number];
 export type ObligationReceiptCategory = (typeof PLAY_SCREEN_OBLIGATION_RECEIPT_CATEGORY_ORDER)[number];
+export type ObligationsModalFocus = "overview" | ObligationsCounterpartyId;
+export type ObligationsModalOrigin = "turn_report" | "decisions";
+
+export type ObligationsModalRoute = {
+  focus: ObligationsModalFocus;
+  origin: ObligationsModalOrigin;
+};
 
 export type ObligationsContractGroup = {
   amount: number;
@@ -255,4 +262,41 @@ export function classifyReceiptCounterpartyTags(
   if (normalizedLine.includes("arrears bushels")) matched.add("church");
 
   return contract.counterpartyOrder.filter((counterpartyId) => matched.has(counterpartyId));
+}
+
+export function createObligationsModalRoute(
+  origin: ObligationsModalOrigin,
+  focus: ObligationsModalFocus = "overview"
+): ObligationsModalRoute {
+  return { origin, focus };
+}
+
+export function selectObligationsCounterpartySections(
+  contract: ObligationsCounterpartyContract | null,
+  focus: ObligationsModalFocus
+): ObligationsCounterpartyContractSection[] {
+  if (!contract) return [];
+  if (focus === "overview") return contract.counterpartySections;
+  return contract.counterpartySections.filter((section) => section.id === focus);
+}
+
+export function obligationsModalTitle(focus: ObligationsModalFocus): string {
+  if (focus === "liege") return "Liege obligations";
+  if (focus === "church") return "Church obligations";
+  return "Obligations & counterparties";
+}
+
+export function obligationsModalSubtitle(origin: ObligationsModalOrigin, focus: ObligationsModalFocus): string {
+  const routeHint =
+    origin === "decisions"
+      ? "Use the payment controls just below to respond after you review the resolved dues."
+      : "Jump to Decisions below when you are ready to respond with coin, bushels, or court attention.";
+
+  if (focus === "liege") {
+    return `Track tax due, coin arrears, and gifts to the liege in one place. ${routeHint}`;
+  }
+  if (focus === "church") {
+    return `Track tithe due, bushel arrears, and church offerings in one place. ${routeHint}`;
+  }
+  return `Compare liege and church pressure side by side before you set the next turn's response. ${routeHint}`;
 }
