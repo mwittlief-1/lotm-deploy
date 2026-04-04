@@ -541,7 +541,7 @@ epics:
 - id: V03-R1-001
   title: Map topology contract and numeric distance baseline
   release: v0.3.1
-  status: blocked
+  status: done
   priority: 54
   tranche: 2
   change_type: behavior_change
@@ -552,7 +552,7 @@ epics:
   - V03-R0-003
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - src/ui/**
@@ -2700,7 +2700,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Expose known-house and dossier summary snapshot fields
-  status: ready
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2741,7 +2741,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Close epic and refresh relationship seeding docs
-  status: todo
+  status: ready
   priority: 94
   tranche: 1
   change_type: refactor
@@ -3335,7 +3335,7 @@ tasks:
   title: Close epic and refresh world-domain docs
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: ready
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -4251,7 +4251,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: ready
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4294,7 +4294,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render obligations modal and counterparty summaries on gameplay surfaces
-  status: todo
+  status: ready
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -7028,7 +7028,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Expose read-only price references in snapshots and UI surfaces
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7069,7 +7069,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Add pricing regression coverage and docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 4
   change_type: refactor

@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R0-005-T05
-  last_completed_task_id: V03-R0-005-T04
+  current_task_id: V03-R0-005-T06
+  last_completed_task_id: V03-R1-001-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,11 +21,9 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Manual reset after pausing automation loops. Reclaimed stale Social
-  V03-R0-005-T05 and Economy V03-R3-004-T04 claims after confirming their
-  prior claim windows had expired without acceptance-ready handoffs,
-  cleared lingering active-claim drift from progress state, and restored the
-  ready queue to a fully manual baseline. Social V03-R0-005-T05, World
-  V03-R1-001-T07, UI V03-R1-005-T02, and Economy V03-R3-004-T04 are now
-  ready and unclaimed for manual lane pickup.
+  Accepted completed manual handoffs for Social V03-R0-005-T05, World
+  V03-R1-001-T07, UI V03-R1-005-T02, and Economy V03-R3-004-T04 after
+  reconciling shared snapshot and UI surfaces on kickoff. V03-R1-001 now
+  remains done, and the next manual queue is Social V03-R0-005-T06, UI
+  V03-R1-005-T03, and Economy V03-R3-004-T05 with no active claims.
 active_claims: {}

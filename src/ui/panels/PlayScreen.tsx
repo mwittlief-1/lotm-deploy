@@ -14,6 +14,7 @@ import {
   fmtSigned
 } from "../viewHelpers";
 import {
+  buildEconomyPricingSurface,
   buildObligationTiming,
   costsForProspect as getProspectCosts,
   effectsSummary as summarizeProspectEffects,
@@ -51,6 +52,7 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import { buildObligationsCounterpartyContract } from "../playScreenObligations";
 import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
@@ -192,6 +194,7 @@ export function PlayScreen({
   const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
+  const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -458,6 +461,14 @@ export function PlayScreen({
 
   const { dueEntering, accruedThisTurn, arrearsCarried, totalObligations } = buildObligationTiming(ctx.report, ob);
   const courtDecisionBudget = buildCourtDecisionBudgetSurface(ctx.report, mw);
+  const obligationsContract = useMemo(
+    () =>
+      buildObligationsCounterpartyContract({
+        courtDecisionBudget,
+        previewState: ctx.preview_state
+      }),
+    [courtDecisionBudget, ctx.preview_state]
+  );
   const topologyDebugSurface = buildTopologyDebugSurface(ctx.preview_state);
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -550,9 +561,10 @@ export function PlayScreen({
     () =>
       buildReceiptViewerData({
         diffLedgerItems,
+        obligationsContract,
         phaseResults: ctx.phase_results_v0
       }),
-    [ctx.phase_results_v0, diffLedgerItems]
+    [ctx.phase_results_v0, diffLedgerItems, obligationsContract]
   );
   const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
@@ -628,6 +640,7 @@ export function PlayScreen({
         idle={idle}
         manor={m}
         peasantConsumptionBushels={peasantConsumptionBushels}
+        pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         report={ctx.report}
         showHouseholdDetails={showHouseholdDetails}
@@ -711,6 +724,7 @@ export function PlayScreen({
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}
         pfPersonHouseById={pfHouseIx.personHouseById}
+        pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         prospectsTotalCount={prospectsTotalCount}
         sellCapBushels={ctx.report.market.sell_cap_bushels}

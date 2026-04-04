@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { PhaseResultV0 } from "../../src/sim/types";
 import type { LedgerItem } from "../../src/ui/playScreenModel";
+import { buildObligationsCounterpartyContract } from "../../src/ui/playScreenObligations";
 import {
   buildReceiptViewerData,
   createExplainChangesRoute,
@@ -36,6 +37,65 @@ const DIFF_LEDGER_ITEMS: LedgerItem[] = [
     source: "event"
   }
 ];
+
+const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
+  courtDecisionBudget: {
+    limit: 6,
+    spent: 1,
+    remaining: 5,
+    exhausted: false,
+    entries: [
+      {
+        action: "gift_liege",
+        cost: 1,
+        spent: 0,
+        label: "Gift to liege",
+        detail: "Court favor spent on noble gifts.",
+        isHighestCost: false
+      },
+      {
+        action: "offering_church",
+        cost: 1,
+        spent: 1,
+        label: "Offering to church",
+        detail: "Court effort spent on religious offerings.",
+        isHighestCost: false
+      }
+    ]
+  } as any,
+  previewState: {
+    economy_obligations_view: {
+      schema_version: "economy_obligations_view_v1",
+      counterparty_order: ["liege", "church"],
+      counterparty_summaries: [
+        {
+          counterparty_kind: "liege",
+          counterparty_label: "House Liege",
+          due_amount: 2,
+          arrears_amount: 1,
+          settlement_status: "due_and_arrears",
+          settlement_summary: "House Liege: 1 coin in arrears, 2 coin due.",
+          enforcement_state: "arrears",
+          enforcement_summary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+          settled_this_turn: false,
+          carried_this_turn: true
+        },
+        {
+          counterparty_kind: "church",
+          counterparty_label: "Parish Church",
+          due_amount: 60,
+          arrears_amount: 12,
+          settlement_status: "due_and_arrears",
+          settlement_summary: "Parish Church: 12 bushels in arrears, 60 bushels due.",
+          enforcement_state: "arrears",
+          enforcement_summary: "Stage-one enforcement pressure rose for Parish Church because arrears remain open after carry.",
+          settled_this_turn: false,
+          carried_this_turn: true
+        }
+      ]
+    }
+  } as any
+});
 
 const PHASE_RESULTS: PhaseResultV0[] = [
   {
@@ -85,15 +145,19 @@ describe("playScreenReceipts", () => {
   it("builds grouped and raw receipt data from phase receipts", () => {
     const data = buildReceiptViewerData({
       diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
       phaseResults: PHASE_RESULTS
     });
 
     expect(data.groupedSections.map((section) => section.id)).toEqual(["overview", "food", "coin", "unrest"]);
     expect(data.groupedSections[0].highlights.map((highlight) => highlight.id)).toEqual(["food", "coin", "unrest"]);
+    expect(data.counterpartySections.map((section) => section.id)).toEqual(["liege", "church"]);
 
     const foodSection = data.groupedSections.find((section) => section.id === "food");
     const coinSection = data.groupedSections.find((section) => section.id === "coin");
     const unrestSection = data.groupedSections.find((section) => section.id === "unrest");
+    const liegeSection = data.counterpartySections.find((section) => section.id === "liege");
+    const churchSection = data.counterpartySections.find((section) => section.id === "church");
 
     expect(foodSection?.receipts.map((receipt) => receipt.line)).toEqual([
       "Tax due 2 coin; tithe due 60 bushels.",
@@ -110,6 +174,31 @@ describe("playScreenReceipts", () => {
       "Arrears coin 1; arrears bushels 12.",
       "2 events applied."
     ]);
+    expect(liegeSection).toMatchObject({
+      title: "House Liege",
+      dueSummary: "House Liege: 1 coin in arrears, 2 coin due.",
+      penaltySummary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+      gestureLabel: "Gift to liege",
+      receiptCategoryOrder: ["coin", "unrest"]
+    });
+    expect(liegeSection?.receipts.map((receipt) => receipt.line)).toEqual([
+      "Tax due 2 coin; tithe due 60 bushels.",
+      "Arrears coin 1; arrears bushels 12."
+    ]);
+    expect(churchSection).toMatchObject({
+      title: "Parish Church",
+      dueSummary: "Parish Church: 12 bushels in arrears, 60 bushels due.",
+      penaltySummary: "Stage-one enforcement pressure rose for Parish Church because arrears remain open after carry.",
+      gestureLabel: "Offering to church",
+      receiptCategoryOrder: ["food", "unrest"]
+    });
+    expect(churchSection?.receipts.map((receipt) => receipt.line)).toEqual([
+      "Tax due 2 coin; tithe due 60 bushels.",
+      "Arrears coin 1; arrears bushels 12."
+    ]);
+    expect(data.rawPhases[0]?.receipts[0]?.counterpartyTags).toEqual(["liege", "church"]);
+    expect(data.rawPhases[0]?.receipts[1]?.counterpartyTags).toEqual(["liege", "church"]);
+    expect(data.rawPhases[1]?.receipts[0]?.counterpartyTags).toEqual([]);
 
     expect(data.rawPhases.map((phase) => phase.phase)).toEqual(["obligations", "consumption", "events"]);
   });
@@ -117,6 +206,7 @@ describe("playScreenReceipts", () => {
   it("filters grouped sections and raw phases for focused chip routes", () => {
     const data = buildReceiptViewerData({
       diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
       phaseResults: PHASE_RESULTS
     });
 
@@ -127,6 +217,7 @@ describe("playScreenReceipts", () => {
         label: "Obligations",
         receipts: [
           {
+            counterpartyTags: ["liege", "church"],
             id: "obligations_00",
             kind: "summary",
             line: "Tax due 2 coin; tithe due 60 bushels.",
@@ -135,6 +226,7 @@ describe("playScreenReceipts", () => {
             tags: ["coin", "food"]
           },
           {
+            counterpartyTags: ["liege", "church"],
             id: "obligations_01",
             kind: "summary",
             line: "Arrears coin 1; arrears bushels 12.",
@@ -149,6 +241,7 @@ describe("playScreenReceipts", () => {
         label: "Consumption",
         receipts: [
           {
+            counterpartyTags: [],
             id: "consumption_00",
             kind: "summary",
             line: "Weather 0.70; market 0.08 coin/bushel; sell cap 460.",
