@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-005-T05
+  last_completed_task_id: V03-R3-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 1c60c737af146f6bd09e55d94d79c09987a7bcce
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,20 +15,26 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Completed UI V03-R1-005-T05 by making gifts and offerings explicit
-  relationship levers on the obligations summaries and in the receipts
-  explainer. The UI active claim is cleared, while Engine V03-R3-005-T01
-  remains the only active mirrored lane claim in this branch state.
+  Accepted UI V03-R1-005-T05 and Engine V03-R3-005-T01 on kickoff,
+  reopened the next safe manual work as active claims for UI
+  V03-R1-005-T06 and Engine V03-R3-005-T02, and left Social,
+  Economy, and World without current ready follow-on tasks.
 active_claims:
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R1-005-T06
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-04T18:09:43-0400'
+    claim_expires_at: '2026-04-04T22:09:43-0400'
+    run_id: manual-ui-v03-r1-005-t06-20260404T180943-0400
   codex/v0.3-lane-engine-core:
-    task_id: V03-R3-005-T01
+    task_id: V03-R3-005-T02
     claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T17:28:51-0400'
-    claim_expires_at: '2026-04-04T21:28:51-0400'
-    run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400
+    claimed_at: '2026-04-04T18:09:43-0400'
+    claim_expires_at: '2026-04-04T22:09:43-0400'
+    run_id: manual-engine-v03-r3-005-t02-20260404T180943-0400
