@@ -46,6 +46,7 @@ import {
   createResourceChipRoute,
   receiptViewerSubtitle,
   receiptViewerTitle,
+  selectCounterpartyReceiptSections,
   selectGroupedReceiptSections,
   selectRawReceiptPhases,
   type ReceiptViewerMode,
@@ -580,6 +581,7 @@ export function PlayScreen({
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
   const receiptsViewerTitleText = receiptViewerTitle(activeReceiptViewerFocus);
   const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
+  const visibleCounterpartyReceiptSections = selectCounterpartyReceiptSections(receiptsViewerData.counterpartySections, activeReceiptViewerFocus);
   const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
   const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
   const activeObligationsModalFocus: ObligationsModalFocus = obligationsModalRoute?.focus ?? "overview";
@@ -882,6 +884,7 @@ export function PlayScreen({
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
         <ReceiptsViewerPanel
+          counterpartySections={visibleCounterpartyReceiptSections}
           groupedSections={visibleGroupedReceiptSections}
           mode={receiptsViewerMode}
           onModeChange={handleReceiptViewerModeChange}

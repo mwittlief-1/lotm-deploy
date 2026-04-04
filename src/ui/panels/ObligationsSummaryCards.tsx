@@ -89,6 +89,21 @@ export function ObligationsSummaryCards({
                 lineHeight: 1.45
               }}
             >
+              <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>Relationship lever</div>
+              <div style={{ marginTop: 4, fontWeight: 700 }}>{section.gestureGroup.title}</div>
+              <div style={{ marginTop: 4 }}>{section.gestureGroup.leverSummary}</div>
+            </div>
+
+            <div
+              style={{
+                padding: "8px 10px",
+                borderRadius: 12,
+                background: "#fdf8ef",
+                border: "1px solid rgba(172, 143, 100, 0.22)",
+                fontSize: 12,
+                lineHeight: 1.45
+              }}
+            >
               <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>
                 {surface === "turn_report" ? "This turn" : "Next turn"}
               </div>

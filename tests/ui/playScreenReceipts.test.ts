@@ -7,6 +7,7 @@ import {
   buildReceiptViewerData,
   createExplainChangesRoute,
   createResourceChipRoute,
+  selectCounterpartyReceiptSections,
   selectGroupedReceiptSections,
   selectRawReceiptPhases
 } from "../../src/ui/playScreenReceipts";
@@ -73,6 +74,7 @@ const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
           counterparty_label: "House Liege",
           due_amount: 2,
           arrears_amount: 1,
+          enforcement_stage: 1,
           settlement_status: "due_and_arrears",
           settlement_summary: "House Liege: 1 coin in arrears, 2 coin due.",
           enforcement_state: "arrears",
@@ -85,6 +87,7 @@ const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
           counterparty_label: "Parish Church",
           due_amount: 60,
           arrears_amount: 12,
+          enforcement_stage: 1,
           settlement_status: "due_and_arrears",
           settlement_summary: "Parish Church: 12 bushels in arrears, 60 bushels due.",
           enforcement_state: "arrears",
@@ -179,6 +182,7 @@ describe("playScreenReceipts", () => {
       dueSummary: "House Liege: 1 coin in arrears, 2 coin due.",
       penaltySummary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
       gestureLabel: "Gift to liege",
+      gestureSummary: "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.",
       receiptCategoryOrder: ["coin", "unrest"]
     });
     expect(liegeSection?.receipts.map((receipt) => receipt.line)).toEqual([
@@ -190,6 +194,7 @@ describe("playScreenReceipts", () => {
       dueSummary: "Parish Church: 12 bushels in arrears, 60 bushels due.",
       penaltySummary: "Stage-one enforcement pressure rose for Parish Church because arrears remain open after carry.",
       gestureLabel: "Offering to church",
+      gestureSummary: "Offering to church is the relationship lever for easing church pressure when bushel arrears are already visible.",
       receiptCategoryOrder: ["food", "unrest"]
     });
     expect(churchSection?.receipts.map((receipt) => receipt.line)).toEqual([
@@ -211,6 +216,9 @@ describe("playScreenReceipts", () => {
     });
 
     expect(selectGroupedReceiptSections(data.groupedSections, "coin").map((section) => section.id)).toEqual(["coin"]);
+    expect(selectCounterpartyReceiptSections(data.counterpartySections, "coin").map((section) => section.id)).toEqual(["liege"]);
+    expect(selectCounterpartyReceiptSections(data.counterpartySections, "food").map((section) => section.id)).toEqual(["church"]);
+    expect(selectCounterpartyReceiptSections(data.counterpartySections, "unrest").map((section) => section.id)).toEqual(["liege", "church"]);
     expect(selectRawReceiptPhases(data.rawPhases, "coin")).toEqual([
       {
         phase: "obligations",

@@ -1,0 +1,36 @@
+version: 1
+run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400
+task_id: V03-R3-005-T01
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-engine-core
+commit: 7d9c452ced37296922ca3e81c593d907ae008710
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  audit_doc: docs/releases/v0.3.3_REALM_PRESSURE_SURFACE_AUDIT.md
+findings:
+  - Live liege and church pressure already exists, but it is distributed across the economy obligation registry, obligation enforcement, and the read-only `economy_obligations_view` rather than a realm-domain seam.
+  - Magnate pressure is not a live runtime system yet; the current precursors are seeded `local_house` relationships plus the bounded `known_houses` and `house_dossiers` read surfaces.
+  - No `src/sim/domains/realm/**` implementation or `political_weather` snapshot/export field exists yet, so `T02` through `T04` still need to formalize the read-only contract and exposure path.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R3-005-T02
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: T01 closed cleanly on the lane branch after a descriptive audit only. T02 remains todo, so engine cannot continue until the scheduler promotes the next task.
