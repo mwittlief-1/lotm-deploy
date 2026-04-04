@@ -1,30 +1,32 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-005-T04
+  last_completed_task_id: V03-R3-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_branch: codex/v0.3-lane-engine-core
+  git_commit: 7d9c452ced37296922ca3e81c593d907ae008710
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
+    ops_v03_validate: pass
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted Social V03-R0-005-T06 and UI V03-R1-005-T04 on kickoff,
-  marked V03-R0-005 done, and reopened the next safe manual work as
-  active claims for UI V03-R1-005-T05 and Engine V03-R3-005-T01.
-  Economy and World have no current ready follow-on tasks.
+  Closed Engine V03-R3-005-T01 on codex/v0.3-lane-engine-core after
+  auditing live liege, church, and magnate-adjacent pressure precursors
+  for v0.3.3 political-weather scaffolding. UI V03-R1-005-T05 remains
+  the only active manual claim, and Engine V03-R3-005-T02 is still todo,
+  so no next engine task is ready yet.
 active_claims:
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T05
@@ -32,9 +34,3 @@ active_claims:
     claimed_at: '2026-04-04T17:28:51-0400'
     claim_expires_at: '2026-04-04T21:28:51-0400'
     run_id: manual-ui-v03-r1-005-t05-20260404T172851-0400
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R3-005-T01
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T17:28:51-0400'
-    claim_expires_at: '2026-04-04T21:28:51-0400'
-    run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400
