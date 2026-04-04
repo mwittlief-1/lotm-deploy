@@ -22,7 +22,9 @@ const ALLOWED_KEYS = new Set([
   "player_house_id",
   "world_topology_view",
   "kinship",
-  "kinship_edges"
+  "kinship_edges",
+  "known_houses",
+  "house_dossiers"
 ]);
 
 describe("TurnLogEntry snapshots", () => {

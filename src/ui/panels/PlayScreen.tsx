@@ -52,6 +52,7 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import { buildObligationsCounterpartyContract } from "../playScreenObligations";
 import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
@@ -460,6 +461,14 @@ export function PlayScreen({
 
   const { dueEntering, accruedThisTurn, arrearsCarried, totalObligations } = buildObligationTiming(ctx.report, ob);
   const courtDecisionBudget = buildCourtDecisionBudgetSurface(ctx.report, mw);
+  const obligationsContract = useMemo(
+    () =>
+      buildObligationsCounterpartyContract({
+        courtDecisionBudget,
+        previewState: ctx.preview_state
+      }),
+    [courtDecisionBudget, ctx.preview_state]
+  );
   const topologyDebugSurface = buildTopologyDebugSurface(ctx.preview_state);
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -552,9 +561,10 @@ export function PlayScreen({
     () =>
       buildReceiptViewerData({
         diffLedgerItems,
+        obligationsContract,
         phaseResults: ctx.phase_results_v0
       }),
-    [ctx.phase_results_v0, diffLedgerItems]
+    [ctx.phase_results_v0, diffLedgerItems, obligationsContract]
   );
   const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";

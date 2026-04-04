@@ -1,7 +1,7 @@
 # World Topology Fixtures v0.3.1
 
-Last updated: 2026-03-31
-Task: `V03-R1-001-T06`
+Last updated: 2026-04-04
+Task: `V03-R1-001-T06` (refreshed by `V03-R1-001-T07`)
 
 ## Scope
 
@@ -41,3 +41,4 @@ This task adds a bounded, deterministic topology fixture for the world lane with
 
 - The fixture uses the frozen bundled world surface plus a local `far_threshold_default = 50` override so near/far coverage stays deterministic without mutating the vendored import files.
 - Refresh the fixture only when bounded topology fields, selector ordering, or distance-band semantics change intentionally.
+- The broader topology-contract closeout now lives in `docs/arch/XMAP_ALPHA_HANDOFF.md` and `ops/v0.3/progress/runs/V03-R1-001.md`.
