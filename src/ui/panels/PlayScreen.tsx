@@ -52,7 +52,15 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
-import { buildObligationsCounterpartyContract } from "../playScreenObligations";
+import {
+  buildObligationsCounterpartyContract,
+  createObligationsModalRoute,
+  obligationsModalSubtitle,
+  obligationsModalTitle,
+  selectObligationsCounterpartySections,
+  type ObligationsModalFocus,
+  type ObligationsModalRoute
+} from "../playScreenObligations";
 import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
@@ -79,6 +87,7 @@ import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
+import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
@@ -139,6 +148,7 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
+  const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
@@ -572,6 +582,11 @@ export function PlayScreen({
   const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
   const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
   const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
+  const activeObligationsModalFocus: ObligationsModalFocus = obligationsModalRoute?.focus ?? "overview";
+  const allObligationsSections = obligationsContract?.counterpartySections ?? [];
+  const visibleObligationsSections = selectObligationsCounterpartySections(obligationsContract, activeObligationsModalFocus);
+  const obligationsModalTitleText = obligationsModalTitle(activeObligationsModalFocus);
+  const obligationsModalSubtitleText = obligationsModalSubtitle(obligationsModalRoute?.origin ?? "turn_report", activeObligationsModalFocus);
   const [runLogDebugSurface, relationshipDebugSurface, topologyDebugSurfaceMeta] = PLAY_SCREEN_DEBUG_SURFACES;
 
   function openExplainChanges() {
@@ -584,6 +599,23 @@ export function PlayScreen({
 
   function closeReceiptViewer() {
     setReceiptViewerRoute(null);
+  }
+
+  function openObligationsDetails(origin: "turn_report" | "decisions", focus: ObligationsModalFocus = "overview") {
+    setObligationsModalRoute(createObligationsModalRoute(origin, focus));
+  }
+
+  function closeObligationsDetails() {
+    setObligationsModalRoute(null);
+  }
+
+  function focusObligationsCounterparty(focus: ObligationsModalFocus) {
+    setObligationsModalRoute((current) => createObligationsModalRoute(current?.origin ?? "turn_report", focus));
+  }
+
+  function jumpToObligationsDecisions() {
+    setObligationsModalRoute(null);
+    scrollToAnchor(PLAY_ANCHORS.obligations);
   }
 
   function handleReceiptViewerModeChange(mode: ReceiptViewerMode) {
@@ -639,6 +671,8 @@ export function PlayScreen({
         hasConsumptionSplit={hasConsumptionSplit}
         idle={idle}
         manor={m}
+        obligationsSections={allObligationsSections}
+        onOpenObligationsDetails={(focus) => openObligationsDetails("turn_report", focus)}
         peasantConsumptionBushels={peasantConsumptionBushels}
         pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
@@ -718,8 +752,10 @@ export function PlayScreen({
         marriageWindow={mw}
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
+        obligationsSections={allObligationsSections}
         onExportFullRunJson={onExportFullRunJson}
         onExportRunSummary={onExportRunSummary}
+        onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
         pfHouseLabelById={pfHouseIx.houseLabelById}
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}
@@ -828,6 +864,21 @@ export function PlayScreen({
           ) : null
         )}
       </div>
+
+      <ModalSheet
+        onClose={closeObligationsDetails}
+        open={obligationsModalRoute !== null}
+        subtitle={obligationsModalSubtitleText}
+        title={obligationsModalTitleText}
+      >
+        <ObligationsDetailPanel
+          allSections={allObligationsSections}
+          focus={activeObligationsModalFocus}
+          onFocusChange={focusObligationsCounterparty}
+          onJumpToDecisions={jumpToObligationsDecisions}
+          sections={visibleObligationsSections}
+        />
+      </ModalSheet>
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
         <ReceiptsViewerPanel

@@ -1,0 +1,42 @@
+version: 1
+run_id: V03-R3-004-T05-20260404T164712-0400
+task_id: V03-R3-004-T05
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-economy-fiscal
+commit: 4b0b39647f3fd82174ea39f49db4f260bebcf4ec
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: not_run
+  repo_duplicates: not_run
+replay_hashes:
+  run1: not_run
+  run2: not_run
+artifacts:
+  pricing_rules_packet: docs/releases/v0.3.3_PRICING_RULES_PACKET.md
+  pricing_regression_tests: tests/sim/pricing_regression.test.ts
+  pricing_panel_tests: tests/ui/pricingPanels.test.tsx
+findings:
+  - Added a release-facing pricing rules packet that locks the active food-store ratio, placeholder catalog entries, sell-cap semantics, and the read-only transport boundary for the extracted pricing surfaces.
+  - Added cross-surface regression coverage so contract ordering, bounded snapshot pricing views, and UI pricing presentation now fail together if the fixed pricing baseline drifts.
+  - Closed the `V03-R3-004` pricing tranche with a balance-hook handoff that keeps future tuning anchored to the economy-owned pricing contract instead of new UI or phase-local math.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 closed cleanly on the lane branch, and no further economy task is scheduler-claimable in the current control-plane state.
