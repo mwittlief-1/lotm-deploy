@@ -4418,7 +4418,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Close epic and refresh obligations legibility docs
-  status: ready
+  status: done
   priority: 94
   tranche: 2
   change_type: refactor
@@ -4450,11 +4450,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T06.yaml
   claim:
-    status: claimed
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-04T18:09:43-0400'
-    claim_expires_at: '2026-04-04T22:09:43-0400'
-    run_id: manual-ui-v03-r1-005-t06-20260404T180943-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-006-T01
   parent_epic: V03-R1-006
   release: v0.3.1
