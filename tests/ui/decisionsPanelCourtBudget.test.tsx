@@ -105,6 +105,18 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
     pfParentsByChild: new Map(),
     pfPeopleRec: {},
     pfPersonHouseById: new Map(),
+    pricingSurface: {
+      schemaVersion: "economy_pricing_view_v1",
+      referenceId: "price_ref:food_stores_market_sell",
+      referenceLabel: "Food stores market sell",
+      ratioLabel: "1 coin / 10 bushels",
+      fixedSellCapUnits: 240,
+      maxSellableUnits: 120,
+      maxQuotedCoin: 12,
+      catalogLines: [
+        "Food stores market sell: 1 coin / 10 bushels (active)"
+      ]
+    },
     previewState: {
       house: {
         energy: {
@@ -137,5 +149,8 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Cost 2");
     expect(html).toContain("Used 2");
     expect(html).toContain("Highest cost");
+    expect(html).toContain("Reference price:");
+    expect(html).toContain("1 coin / 10 bushels");
+    expect(html).toContain("Fixed reference cap: 240 bushels");
   });
 });

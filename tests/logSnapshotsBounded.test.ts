@@ -15,6 +15,7 @@ const ALLOWED_KEYS = new Set([
   "game_over",
   "economy",
   "economy_obligations_view",
+  "economy_pricing_view",
   "portfolio",
   "people",
   "houses",

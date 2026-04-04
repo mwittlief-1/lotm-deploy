@@ -2,6 +2,7 @@ import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../st
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 import { buildEconomyObligationsView } from "./obligationsView";
+import { buildEconomyPricingView } from "./pricingView";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { buildBoundedWorldTopologyView } from "../world";
 
@@ -20,13 +21,14 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
     economy: (state as any).economy,
     economy_obligations_view: buildEconomyObligationsView(state),
+    economy_pricing_view: buildEconomyPricingView(state),
     portfolio: (state as any).portfolio,
     world_topology_view: buildBoundedWorldTopologyView(),
     known_houses: experienceSurfaces.known_houses,
     house_dossiers: experienceSurfaces.house_dossiers,
     flags: state.flags,
     game_over: state.game_over ?? null
-  });
+  }) as RunSnapshot;
   if ((state as any).beliefs) {
     Object.defineProperty(snapshot, "beliefs", {
       value: deepCopy((state as any).beliefs),

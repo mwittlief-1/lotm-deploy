@@ -21,6 +21,15 @@ describe("bounded snapshot contract", () => {
       schema_version: "economy_obligations_view_v1",
       counterparty_order: ["liege", "church"]
     });
+    expect(serialized.economy_pricing_view).toMatchObject({
+      schema_version: "economy_pricing_view_v1",
+      reference_order: [
+        "food_stores_market_sell",
+        "meat_stores_market_sell_placeholder",
+        "farm_labor_turn_placeholder",
+        "builder_labor_turn_placeholder"
+      ]
+    });
     expect(Array.isArray(serialized.known_houses)).toBe(true);
     expect(serialized.known_houses.length).toBeGreaterThan(0);
     expect(serialized.known_houses[0]).toMatchObject({

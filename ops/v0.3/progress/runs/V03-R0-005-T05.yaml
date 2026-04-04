@@ -4,7 +4,7 @@ task_id: V03-R0-005-T05
 status: done
 date: 2026-04-04
 branch: codex/v0.3-lane-social-mechanics
-commit: ef746e5339fc72aca7d3befee0152917b442c51a
+commit: caeb7de5ade840cfc95b72507ba22f747a566a14
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
