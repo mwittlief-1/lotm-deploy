@@ -1,5 +1,9 @@
 import React from "react";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
+import type {
+  ObligationsCounterpartyContractSection,
+  ObligationsModalFocus
+} from "../playScreenObligations";
 import type { EconomyPricingSurface } from "../playViewModel";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
@@ -10,6 +14,7 @@ import {
 } from "../playScreenTheme";
 import type { CourtDecisionBudgetSurface } from "../playScreenCourtBudget";
 import { Tip, formatParentsLine, formatPersonWithAgeAndHouse } from "../viewHelpers";
+import { ObligationsSummaryCards } from "./ObligationsSummaryCards";
 import { SectionHeading } from "./SectionHeading";
 
 type OblAmount = { coin: number; bushels: number };
@@ -38,8 +43,10 @@ type DecisionsPanelProps = {
   marriageWindow: MarriageWindow | null;
   maxLaborShift: number;
   obligations: any;
+  obligationsSections: ObligationsCounterpartyContractSection[];
   onExportFullRunJson: () => void;
   onExportRunSummary: () => void;
+  onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
   pfHouseLabelById: Map<string, string>;
   pfParentsByChild: Map<string, string[]>;
   pfPeopleRec: Record<string, any>;
@@ -210,8 +217,10 @@ export function DecisionsPanel({
   marriageWindow,
   maxLaborShift,
   obligations,
+  obligationsSections,
   onExportFullRunJson,
   onExportRunSummary,
+  onOpenObligationsDetails,
   pfHouseLabelById,
   pfParentsByChild,
   pfPeopleRec,
@@ -374,13 +383,25 @@ export function DecisionsPanel({
       </div>
 
       <div id={anchorObligations} style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #eee" }}>
-        <h4 style={{ margin: 0 }}>Obligations</h4>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <h4 style={{ margin: 0 }}>Obligations</h4>
+          {obligationsSections.length > 0 ? (
+            <button onClick={() => onOpenObligationsDetails("overview")} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+              Open detail sheet
+            </button>
+          ) : null}
+        </div>
         <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{copy.obligationsHelper}</div>
         {coinShortfall > 0 || bushelsShortfall > 0 ? (
           <div style={{ fontSize: 12, marginTop: 6 }}>
             Shortfall → arrears: {fmtObAmount({ coin: coinShortfall, bushels: bushelsShortfall })}
           </div>
         ) : null}
+        <ObligationsSummaryCards
+          helperText="The detail sheet mirrors the same liege and church groupings before you commit payments or court attention."
+          onOpenDetails={onOpenObligationsDetails}
+          sections={obligationsSections}
+        />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10, fontSize: 12 }}>
           <div>
