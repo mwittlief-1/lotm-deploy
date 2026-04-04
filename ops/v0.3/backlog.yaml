@@ -4251,7 +4251,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: ready
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4285,11 +4285,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T02.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T10:06:01-0400'
-    claim_expires_at: '2026-03-31T14:06:01-0400'
-    run_id: 2026-03-31_ui_t02_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-005-T03
   parent_epic: V03-R1-005
   release: v0.3.1
