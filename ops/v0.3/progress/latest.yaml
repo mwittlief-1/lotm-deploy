@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: V03-R1-001-T07
+  current_task_id: V03-R0-005-T05
   last_completed_task_id: V03-R0-005-T04
 runtime:
   node_version: v24.13.1
@@ -21,22 +21,11 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  No new lane handoff was accepted. Social V03-R0-005-T05 and Economy
-  V03-R3-004-T04 were re-dispatched because both lane worktrees are
-  clean, their deps remain satisfied, and no integrator boundary blocks
-  them. UI V03-R1-005-T02 and World V03-R1-001-T07 were left unclaimed
-  because their lane worktrees carry local integrator-only ops metadata
-  edits and still lack the contract handoff reports.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R0-005-T05
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T20:18:56-0400'
-    claim_expires_at: '2026-04-01T00:18:56-0400'
-    run_id: 2026-03-31_frontier_redispatch_social_economy
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R3-004-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T20:18:56-0400'
-    claim_expires_at: '2026-04-01T00:18:56-0400'
-    run_id: 2026-03-31_frontier_redispatch_social_economy
+  Manual reset after pausing automation loops. Reclaimed stale Social
+  V03-R0-005-T05 and Economy V03-R3-004-T04 claims after confirming their
+  prior claim windows had expired without acceptance-ready handoffs,
+  cleared lingering active-claim drift from progress state, and restored the
+  ready queue to a fully manual baseline. Social V03-R0-005-T05, World
+  V03-R1-001-T07, UI V03-R1-005-T02, and Economy V03-R3-004-T04 are now
+  ready and unclaimed for manual lane pickup.
+active_claims: {}
