@@ -21,6 +21,7 @@ describe("playScreenTheme", () => {
       ledger: "LD",
       state: "ST",
       report: "RP",
+      portfolio: "PF",
       decisions: "DO",
       receipts: "EX"
     });

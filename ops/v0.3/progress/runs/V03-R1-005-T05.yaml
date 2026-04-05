@@ -1,0 +1,40 @@
+version: 1
+run_id: V03-R1-005-T05-20260404T174937-0400
+task_id: V03-R1-005-T05
+status: done
+date: 2026-04-04
+branch: codex/v0.3-lane-ui-experience
+commit: 1c60c737af146f6bd09e55d94d79c09987a7bcce
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  obligations_contract: src/ui/playScreenObligations.ts
+  receipts_contract: src/ui/playScreenReceipts.ts
+  obligations_summary_cards: src/ui/panels/ObligationsSummaryCards.tsx
+  obligations_detail_panel: src/ui/panels/ObligationsDetailPanel.tsx
+  receipts_viewer_panel: src/ui/panels/ReceiptsViewerPanel.tsx
+  play_screen_wiring: src/ui/panels/PlayScreen.tsx
+  receipts_data_test: tests/ui/playScreenReceipts.test.ts
+  receipts_panel_test: tests/ui/receiptsViewerPanel.test.tsx
+findings:
+  - Added explicit relationship-lever copy to the liege gift and church offering surfaces so those actions now read as named counterparty tools instead of generic court-budget entries.
+  - Promoted the receipts modal into a counterparty-first explainer by rendering liege and church paths above the resource-grouped sections, keeping due state, pressure, and lever copy together.
+  - Kept chip-focus routing coherent by filtering the counterparty cards to the active resource lens instead of showing unrelated counterparties on focused receipt routes.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R1-005-T06
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: Backlog claim state, progress cursor, and run log validate cleanly after closing V03-R1-005-T05, and the remaining UI closeout task stays todo rather than ready.

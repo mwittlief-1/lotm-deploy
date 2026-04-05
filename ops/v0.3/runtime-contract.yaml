@@ -13,7 +13,25 @@ control_plane_rules:
   default_claim_ttl_hours: 4
   scheduler_mode: "lane_parallel"
   progress_active_claims_field: "active_claims"
-  same_lane_continuation: "integrator_chains_safe_same_lane_follow_ons_in_same_reconciliation_pass"
+  same_lane_continuation: "lane_may_self_chain_safe_same_lane_follow_ons_until_cross_lane_or_integrator_boundary"
+  lane_local_self_advance:
+    allowed: true
+    kickoff_remains_authoritative_for_cross_lane_coordination: true
+    conditions:
+      - "next task is in the same lane"
+      - "next task requires_integrator is false"
+      - "all cross-lane deps are already done in kickoff truth"
+      - "only same-lane deps may be satisfied by lane-local completed tasks not yet integrated"
+      - "no checkpoint, escalation, or integrator-only boundary applies"
+      - "lane keeps at most one active task at a time"
+    required_records:
+      - "close current task in the lane-local run log"
+      - "record the local claim transition for the next task in the lane-local run log"
+      - "update lane-local backlog/progress state so integrator can reconcile the chain later"
+    prohibited:
+      - "skip over decomposed tasks"
+      - "advance across requires_integrator true tasks"
+      - "use lane-local provisional claims as cross-lane scheduling authority"
   non_checkpoint_tasks_require_parent_epic: true
   external_checkpoint_parent_epic_optional: true
   current_task_must_reference_task_id: true
@@ -22,6 +40,33 @@ control_plane_rules:
     - "src/sim/relationshipEngine.ts -> src/sim/domains/people/relationshipEngine.ts"
     - "src/components/** -> src/App.tsx + src/ui/**"
     - "docs/ui/** -> docs/ux/**"
+  world_topology_import_surface:
+    status: "frozen_until_checkpoint_changes"
+    repo_truth_commit: "eaa9da5"
+    data_paths:
+      - "data/map/xmap_alpha_v1/manor_units_v1.json"
+      - "data/map/xmap_alpha_v1/holding_fabric_v1.json"
+      - "data/map/xmap_alpha_v1/world_topology_v1.json"
+      - "data/map/xmap_alpha_v1/xmap_alpha_manifest_v1.json"
+    docs_paths:
+      - "docs/schemas/xmap_alpha_v1.md"
+      - "docs/arch/XMAP_ALPHA_HANDOFF.md"
+      - "docs/HOLDING_FABRIC_LEGAL_RULES_v0_1.md"
+    no_new_import_before_checkpoint: true
+    rebase_after_checkpoint:
+      - "V03-R1-001-T01"
+      - "V03-R1-001-T02"
+    first_remaining_map_coded_task_after_checkpoint: "V03-R1-001-T03"
+    integrator_follow_on_after_rebase: "V03-R1-001-T04"
+    preserved_semantics:
+      - "stable manor_id"
+      - "stable higher-order holding ids"
+      - "territorial adjacency semantics"
+      - "route adjacency semantics"
+      - "weighted route graph semantics"
+      - "travel_cost_distance meaning"
+      - "route_hop_distance meaning"
+      - "holding_fabric_legal_rules_v0_1 field family"
   reclaim_note_required: true
   reclaim_note_fields:
     - prior_claimed_by

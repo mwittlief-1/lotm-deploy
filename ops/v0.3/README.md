@@ -1,6 +1,6 @@
 # ops/v0.3 — Automation Execution Contract (Canonical)
 
-**Last Updated:** 2026-03-30
+**Last Updated:** 2026-03-31
 **Scope:** v0.3 unattended execution and backlog rebaseline.
 **Source of Truth:** This folder is canonical for automation state and rules.
 
@@ -13,14 +13,19 @@
 6. Schedule lane-parallel: at most one active claimed task per lane, with `cursor.current_task_id` tracking the first globally claimable ready task and `active_claims` tracking live lane work.
 7. A task is claimable only when `status: ready`, deps are done, `claim.status: unclaimed`, the lane has no active claim, and the task is not blocked by topology policy.
 8. Skip any task in `codex/v0.3-lane-world-topology` until `V03-XMAP-001` is `done`.
-9. Claim the task before editing, set `claim_expires_at` to 4 hours ahead by default, and refresh the claim while the run remains active.
-10. Reclaim only expired claims, and record the reclaim event in the run log.
-11. Run `npm run ops:v0.3:validate`, `npm run ops:v0.3:scheduler-dry-run`, and `npm run ops:v0.3:rebase-dry-run` before accepting control-plane edits.
-12. Run the task's `required_gates` from `gates.yaml`.
-13. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
-14. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
-15. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
-16. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+9. Treat the imported `xmap_alpha_v1` bundle already landed in `lotm-deploy` as the frozen world import surface while `V03-XMAP-001` remains blocked; do not run another import pass on kickoff.
+10. After `V03-XMAP-001` clears, rebase `V03-R1-001-T01` and `V03-R1-001-T02` against the frozen import surface and start fresh topology coding at `V03-R1-001-T03`.
+11. Claim the task before editing, set `claim_expires_at` to 4 hours ahead by default, and refresh the claim while the run remains active.
+12. Reclaim only expired claims, and record the reclaim event in the run log.
+13. Run `npm run ops:v0.3:validate`, `npm run ops:v0.3:scheduler-dry-run`, and `npm run ops:v0.3:rebase-dry-run` before accepting control-plane edits.
+14. Run the task's `required_gates` from `gates.yaml`.
+15. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
+16. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
+17. Lane-owned same-lane chains may self-advance on the lane branch without waiting for integrator acceptance when the next task is in the same lane, `requires_integrator: false`, the only newly satisfied deps are tasks already completed in that lane branch, all cross-lane deps are already `done` in kickoff truth, and no checkpoint, escalation, or integrator-only boundary applies.
+18. A lane self-advance still keeps at most one active task in that lane at a time: close the current task locally, claim the next local same-lane frontier, and continue.
+19. Record each lane-local self-dispatch in the lane task run log and lane-local `ops/v0.3` state so integrator can reconcile the chain later without ambiguity.
+20. When integrator accepts a lane-owned task and the next decomposed task in that same lane is already eligible, integrator may still promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
+21. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
 
 ## Backlog model
 - `releases[]` define the roadmap containers.
@@ -28,6 +33,8 @@
 - `tasks[]` define the executable queue for unattended work.
 - Oversized epic-like work must be decomposed into `tasks[]` before unattended execution may select it.
 - `V03-XMAP-001` is the external checkpoint that unlocks `codex/v0.3-lane-world-topology`.
+- The frozen XMAP repo-truth surface in this repo is `data/map/xmap_alpha_v1/*` plus `src/sim/domains/world/**`, landed at kickoff commit `eaa9da5`.
+- Until `V03-XMAP-001` is flipped to `done`, world/topology planning assumes `V03-R1-001-T01` and `V03-R1-001-T02` will be rebased against that frozen surface rather than rebuilt from a new import.
 
 ## Canonical precedence
 - `ops/v0.3/*` is the machine-operated control plane.
@@ -53,13 +60,18 @@
 - Canonical lanes are `codex/v0.3-refactor-kickoff`, `codex/v0.3-lane-tooling-qa`, `codex/v0.3-lane-social-mechanics`, `codex/v0.3-lane-engine-core`, `codex/v0.3-lane-ui-experience`, `codex/v0.3-lane-economy-fiscal`, and `codex/v0.3-lane-world-topology`.
 - Bootstrap local lane branches from `codex/v0.3-refactor-kickoff` before dispatch.
 - `progress/latest.yaml.active_claims` is the source of truth for in-flight lane work.
-- Same-lane task chains should continue without an extra operator pause once the integrator accepts the prior task and no explicit checkpoint rule applies.
+- Same-lane task chains may continue on the lane branch without an extra operator pause when the next task is same-lane, non-integrator, and free of cross-lane blockers.
+- Lane-local self-advance is provisional until the integrator reconciles it back into kickoff; kickoff remains the durable source of truth for cross-lane scheduling.
+- Cross-lane deps must already be `done` in kickoff truth before a lane may self-advance past them.
+- Lane-local self-advance must never edit another lane's surfaces or integrator-only files.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
 
 ## Claim Policy
 - Default claim TTL is 4 hours unless a task-specific exception is documented in the control plane.
 - Intake review may normalize missing claim blocks to the canonical unclaimed shape, but it does not create new active claims.
 - Reclaim only expired claims. Record `prior_claimed_by`, `prior_claim_expires_at`, and `reclaiming_run_id` in the run log notes.
+- A lane may close one claimed task and immediately claim the next same-lane eligible task locally without an integrator pass if all self-advance conditions are satisfied.
+- Lane-local self-advance may not skip over a task, create multiple active claims in one lane, or advance across a task with `requires_integrator: true`.
 
 ## Determinism summary
 - No unplanned golden drift.

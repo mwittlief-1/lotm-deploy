@@ -1,0 +1,752 @@
+import type { HouseDossierSummary, Institution, KnownHouseSummary, RunState } from "../../types";
+import {
+  buildEconomyObligationPenaltyStageFromState,
+  type EconomyObligationPenaltyStageEntryV1
+} from "../economy/obligationEnforcement";
+import {
+  buildEconomyObligationRegistryFromState,
+  type EconomyObligationCounterpartyKindV1,
+  type EconomyObligationRegistryV1
+} from "../economy/obligationRegistry";
+
+export const REALM_PRESSURE_REGISTRY_SCHEMA_VERSION = "realm_pressure_registry_v1" as const;
+export const POLITICAL_WEATHER_SCHEMA_VERSION = "political_weather_v1" as const;
+export const POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION = "political_weather_content_hooks_v1" as const;
+export const REALM_PRESSURE_ACTOR_KEYS = ["crown", "magnates", "church"] as const;
+export const REALM_PRESSURE_READ_MODE = "read_only" as const;
+export const REALM_PRESSURE_ACTIVATION_STATUS = "inactive" as const;
+export const REALM_PRESSURE_BASELINE_STATUSES = ["placeholder_zero", "seeded"] as const;
+export const REALM_MAGNATE_RELATIONSHIP_BANDS = ["unknown", "favorable", "steady", "wary", "hostile"] as const;
+export const REALM_MAGNATE_KINSHIP_SUMMARIES = ["none", "blood_tie", "marriage_tie", "blood_and_marriage_tie"] as const;
+export const POLITICAL_WEATHER_PRESSURE_BANDS = ["quiet", "watchful", "elevated", "critical"] as const;
+
+export type RealmPressureActorKeyV1 = typeof REALM_PRESSURE_ACTOR_KEYS[number];
+export type RealmPressureReadModeV1 = typeof REALM_PRESSURE_READ_MODE;
+export type RealmPressureActivationStatusV1 = typeof REALM_PRESSURE_ACTIVATION_STATUS;
+export type RealmPressureBaselineStatusV1 = typeof REALM_PRESSURE_BASELINE_STATUSES[number];
+export type RealmMagnateRelationshipBandV1 = typeof REALM_MAGNATE_RELATIONSHIP_BANDS[number];
+export type RealmMagnateKinshipSummaryV1 = typeof REALM_MAGNATE_KINSHIP_SUMMARIES[number];
+export type PoliticalWeatherPressureBandV1 = typeof POLITICAL_WEATHER_PRESSURE_BANDS[number];
+export type RealmPressureEnforcementStateV1 = "clear" | "arrears";
+export type RealmPressureChurchTargetModeV1 =
+  | "split_surface"
+  | "clergy_person_only"
+  | "parish_institution_only"
+  | "missing";
+export type RealmPressureSourceSurfaceStatusV1 = "available" | "missing";
+
+export interface RealmMagnateRelationshipBandCountsV1 {
+  unknown: number;
+  favorable: number;
+  steady: number;
+  wary: number;
+  hostile: number;
+}
+
+export interface RealmMagnateKinshipCountsV1 {
+  none: number;
+  blood_tie: number;
+  marriage_tie: number;
+  blood_and_marriage_tie: number;
+}
+
+export interface RealmPressureEntryBaseV1 {
+  schema_version: typeof REALM_PRESSURE_REGISTRY_SCHEMA_VERSION;
+  actor_key: RealmPressureActorKeyV1;
+  actor_label: string;
+  read_mode: RealmPressureReadModeV1;
+  activation_status: RealmPressureActivationStatusV1;
+  baseline_status: RealmPressureBaselineStatusV1;
+  latent_pressure: number;
+  source_surface_ids: string[];
+  source_summary: string;
+}
+
+export interface RealmCrownPressureInputsV1 {
+  counterparty_id: string;
+  counterparty_label: string;
+  due_asset: "tax_due_coin";
+  due_amount: number;
+  arrears_asset: "arrears_coin";
+  arrears_amount: number;
+  total_outstanding: number;
+  settlement_cadence_turns: 1;
+  enforcement_state: RealmPressureEnforcementStateV1;
+  enforcement_rule_id: string;
+  relationship_delta: {
+    respect: number;
+    threat: number;
+  };
+  grant_pressure_estimate: number;
+  war_levy_active: boolean;
+  war_levy_kind: string | null;
+}
+
+export interface RealmCrownPressureEntryV1 extends RealmPressureEntryBaseV1 {
+  actor_key: "crown";
+  inputs: RealmCrownPressureInputsV1;
+}
+
+export interface RealmMagnatesPressureInputsV1 {
+  source_surface_status: RealmPressureSourceSurfaceStatusV1;
+  local_noble_ids: string[];
+  known_house_count: number;
+  dossier_count: number;
+  relevant_house_ids: string[];
+  high_pressure_house_ids: string[];
+  relationship_band_counts: RealmMagnateRelationshipBandCountsV1;
+  kinship_counts: RealmMagnateKinshipCountsV1;
+}
+
+export interface RealmMagnatesPressureEntryV1 extends RealmPressureEntryBaseV1 {
+  actor_key: "magnates";
+  inputs: RealmMagnatesPressureInputsV1;
+}
+
+export interface RealmChurchPressureInputsV1 {
+  counterparty_id: string;
+  counterparty_label: string;
+  due_asset: "tithe_due_bushels";
+  due_amount: number;
+  arrears_asset: "arrears_bushels";
+  arrears_amount: number;
+  total_outstanding: number;
+  settlement_cadence_turns: 1;
+  enforcement_state: RealmPressureEnforcementStateV1;
+  enforcement_rule_id: string;
+  relationship_delta: {
+    respect: number;
+    threat: number;
+  };
+  parish_institution_id: string | null;
+  parish_institution_name: string | null;
+  parish_priest_person_id: string | null;
+  church_target_mode: RealmPressureChurchTargetModeV1;
+}
+
+export interface RealmChurchPressureEntryV1 extends RealmPressureEntryBaseV1 {
+  actor_key: "church";
+  inputs: RealmChurchPressureInputsV1;
+}
+
+export type RealmPressureEntryV1 =
+  | RealmCrownPressureEntryV1
+  | RealmMagnatesPressureEntryV1
+  | RealmChurchPressureEntryV1;
+
+export interface RealmPressureRegistryEntriesByKeyV1 {
+  crown: RealmCrownPressureEntryV1;
+  magnates: RealmMagnatesPressureEntryV1;
+  church: RealmChurchPressureEntryV1;
+}
+
+export interface RealmPressureRegistryV1 {
+  schema_version: typeof REALM_PRESSURE_REGISTRY_SCHEMA_VERSION;
+  turn: number;
+  actor_order: RealmPressureActorKeyV1[];
+  entries_by_key: RealmPressureRegistryEntriesByKeyV1;
+}
+
+export interface PoliticalWeatherSharedContextV1 {
+  unrest: number;
+  shortage_active: boolean;
+  war_levy_active: boolean;
+}
+
+export interface PoliticalWeatherV1 {
+  schema_version: typeof POLITICAL_WEATHER_SCHEMA_VERSION;
+  registry_schema_version: typeof REALM_PRESSURE_REGISTRY_SCHEMA_VERSION;
+  turn: number;
+  read_mode: RealmPressureReadModeV1;
+  activation_status: RealmPressureActivationStatusV1;
+  actor_order: RealmPressureActorKeyV1[];
+  shared_context: PoliticalWeatherSharedContextV1;
+  summary_lines: string[];
+  registry: RealmPressureRegistryV1;
+}
+
+export interface PoliticalWeatherBuildInputV1 {
+  known_houses?: KnownHouseSummary[];
+  house_dossiers?: HouseDossierSummary[];
+}
+
+interface PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: RealmPressureActorKeyV1;
+  actor_label: string;
+  latent_pressure: number;
+  pressure_band: PoliticalWeatherPressureBandV1;
+  summary_line: string;
+}
+
+export interface PoliticalWeatherContentHookCrownEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "crown";
+  total_outstanding: number;
+  grant_pressure_estimate: number;
+  war_levy_active: boolean;
+  enforcement_state: RealmPressureEnforcementStateV1;
+}
+
+export interface PoliticalWeatherContentHookMagnatesEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "magnates";
+  observed_house_count: number;
+  high_pressure_house_count: number;
+  hostile_house_count: number;
+  wary_house_count: number;
+  source_surface_status: RealmPressureSourceSurfaceStatusV1;
+}
+
+export interface PoliticalWeatherContentHookChurchEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "church";
+  total_outstanding: number;
+  church_target_mode: RealmPressureChurchTargetModeV1;
+  enforcement_state: RealmPressureEnforcementStateV1;
+}
+
+export interface PoliticalWeatherContentHooksV1 {
+  schema_version: typeof POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION;
+  turn: number;
+  read_mode: RealmPressureReadModeV1;
+  activation_status: RealmPressureActivationStatusV1;
+  actor_order: RealmPressureActorKeyV1[];
+  shared_context: PoliticalWeatherSharedContextV1;
+  highest_pressure_actor_key: RealmPressureActorKeyV1 | null;
+  highest_pressure_value: number;
+  any_elevated_pressure: boolean;
+  actors_by_key: {
+    crown: PoliticalWeatherContentHookCrownEntryV1;
+    magnates: PoliticalWeatherContentHookMagnatesEntryV1;
+    church: PoliticalWeatherContentHookChurchEntryV1;
+  };
+}
+
+interface RelationshipVectorLike {
+  allegiance: number;
+  respect: number;
+  threat: number;
+}
+
+function compareText(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+function normalizeInteger(value: number): number {
+  return Math.trunc(value);
+}
+
+function normalizeNonNegativeInteger(value: number): number {
+  return Math.max(0, normalizeInteger(value));
+}
+
+function clampLatentPressure(value: number): number {
+  return Math.max(0, Math.min(100, normalizeInteger(value)));
+}
+
+function canonicalStringList(values: readonly string[]): string[] {
+  return [...new Set(values.map((value) => String(value)).filter((value) => value.length > 0))].sort(compareText);
+}
+
+function averageRounded(values: readonly number[]): number {
+  if (values.length === 0) return 0;
+  return normalizeInteger(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
+function relationshipBandCounts(): RealmMagnateRelationshipBandCountsV1 {
+  return {
+    unknown: 0,
+    favorable: 0,
+    steady: 0,
+    wary: 0,
+    hostile: 0
+  };
+}
+
+function kinshipCounts(): RealmMagnateKinshipCountsV1 {
+  return {
+    none: 0,
+    blood_tie: 0,
+    marriage_tie: 0,
+    blood_and_marriage_tie: 0
+  };
+}
+
+function readKnownHouses(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): KnownHouseSummary[] {
+  const rows = Array.isArray(input.known_houses) ? input.known_houses : Array.isArray(state.known_houses) ? state.known_houses : [];
+  const byHouseId = new Map<string, KnownHouseSummary>();
+
+  for (const row of rows) {
+    if (!row || typeof row.house_id !== "string" || row.house_id.length === 0) continue;
+    if (!byHouseId.has(row.house_id)) {
+      byHouseId.set(row.house_id, row);
+    }
+  }
+
+  return [...byHouseId.values()].sort((a, b) => compareText(a.house_id, b.house_id));
+}
+
+function readHouseDossiers(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): HouseDossierSummary[] {
+  const rows =
+    Array.isArray(input.house_dossiers) ? input.house_dossiers : Array.isArray(state.house_dossiers) ? state.house_dossiers : [];
+  const byHouseId = new Map<string, HouseDossierSummary>();
+
+  for (const row of rows) {
+    if (!row || typeof row.house_id !== "string" || row.house_id.length === 0) continue;
+    if (!byHouseId.has(row.house_id)) {
+      byHouseId.set(row.house_id, row);
+    }
+  }
+
+  return [...byHouseId.values()].sort((a, b) => compareText(a.house_id, b.house_id));
+}
+
+function parishInstitutionFromState(state: RunState): Institution | null {
+  const anyState = state as any;
+  const institutions =
+    anyState?.institutions && typeof anyState.institutions === "object" && !Array.isArray(anyState.institutions)
+      ? (anyState.institutions as Record<string, Institution>)
+      : {};
+
+  const candidateIds = canonicalStringList([
+    typeof anyState?.locals?.parish_institution_id === "string" ? anyState.locals.parish_institution_id : "",
+    typeof anyState?.manor?.parish_institution_id === "string" ? anyState.manor.parish_institution_id : ""
+  ]);
+
+  for (const candidateId of candidateIds) {
+    const institution = institutions[candidateId];
+    if (institution && institution.type === "parish") return institution;
+  }
+
+  const firstParish = Object.values(institutions)
+    .filter((institution): institution is Institution => Boolean(institution && institution.type === "parish"))
+    .sort((a, b) => compareText(a.id, b.id))[0];
+
+  return firstParish ?? null;
+}
+
+function grantPressureEstimate(state: RunState): number {
+  const arrears = state.manor?.obligations?.arrears;
+  const arrearsCoin = normalizeNonNegativeInteger(arrears?.coin ?? 0);
+  const arrearsBushels = normalizeNonNegativeInteger(arrears?.bushels ?? 0);
+  return normalizeNonNegativeInteger(arrearsCoin + Math.floor(arrearsBushels / 100));
+}
+
+function relationshipVectorFromState(state: RunState, actorId: string | null | undefined): RelationshipVectorLike | null {
+  const normalizedActorId = typeof actorId === "string" && actorId.length > 0 ? actorId : null;
+  const headId = typeof state.house?.head?.id === "string" && state.house.head.id.length > 0 ? state.house.head.id : null;
+  if (!normalizedActorId || !headId) return null;
+
+  const direct = (state.relationships ?? []).find((edge) => edge.from_id === normalizedActorId && edge.to_id === headId);
+  const reverse = (state.relationships ?? []).find((edge) => edge.from_id === headId && edge.to_id === normalizedActorId);
+  const edge = direct ?? reverse;
+  if (!edge) return null;
+
+  return {
+    allegiance: normalizeNonNegativeInteger(edge.allegiance),
+    respect: normalizeNonNegativeInteger(edge.respect),
+    threat: normalizeNonNegativeInteger(edge.threat)
+  };
+}
+
+function relationshipPressureFromVector(vector: RelationshipVectorLike | null | undefined): number {
+  if (!vector) return 0;
+
+  const allegiancePressure = Math.max(0, 55 - normalizeNonNegativeInteger(vector.allegiance));
+  const respectPressure = Math.max(0, 55 - normalizeNonNegativeInteger(vector.respect));
+  const threatPressure = Math.max(0, normalizeNonNegativeInteger(vector.threat) - 15);
+
+  return clampLatentPressure(Math.floor((allegiancePressure + respectPressure + threatPressure) / 3));
+}
+
+function knownHouseRelationshipPressure(knownHouses: readonly KnownHouseSummary[]): number {
+  return averageRounded(
+    knownHouses
+      .map((row) => relationshipPressureFromVector(row.relationship ?? null))
+      .filter((value) => value > 0)
+  );
+}
+
+function localNobleRelationshipPressure(state: RunState, nobleIds: readonly string[]): number {
+  return averageRounded(
+    nobleIds
+      .map((nobleId) => relationshipPressureFromVector(relationshipVectorFromState(state, nobleId)))
+      .filter((value) => value > 0)
+  );
+}
+
+function warLevyKind(state: RunState): string | null {
+  const levy = state.manor?.obligations?.war_levy_due;
+  return levy && typeof levy.kind === "string" && levy.kind.length > 0 ? levy.kind : null;
+}
+
+function enforcementState(entry: EconomyObligationPenaltyStageEntryV1): RealmPressureEnforcementStateV1 {
+  return entry.arrears_amount > 0 ? "arrears" : "clear";
+}
+
+function churchTargetMode(state: RunState, parish: Institution | null): RealmPressureChurchTargetModeV1 {
+  const hasClergy = Boolean(state.locals?.clergy?.id);
+  const hasParish = Boolean(parish);
+
+  if (hasClergy && hasParish) return "split_surface";
+  if (hasClergy) return "clergy_person_only";
+  if (hasParish) return "parish_institution_only";
+  return "missing";
+}
+
+function pressureBand(latentPressure: number): PoliticalWeatherPressureBandV1 {
+  const normalized = clampLatentPressure(latentPressure);
+  if (normalized >= 60) return "critical";
+  if (normalized >= 40) return "elevated";
+  if (normalized >= 20) return "watchful";
+  return "quiet";
+}
+
+function baseEntry(
+  actorKey: RealmPressureActorKeyV1,
+  actorLabel: string,
+  sourceSurfaceIds: readonly string[],
+  sourceSummary: string,
+  latentPressure: number,
+  baselineStatus: RealmPressureBaselineStatusV1
+): RealmPressureEntryBaseV1 {
+  return {
+    schema_version: REALM_PRESSURE_REGISTRY_SCHEMA_VERSION,
+    actor_key: actorKey,
+    actor_label: actorLabel,
+    read_mode: REALM_PRESSURE_READ_MODE,
+    activation_status: REALM_PRESSURE_ACTIVATION_STATUS,
+    baseline_status: baselineStatus,
+    latent_pressure: clampLatentPressure(latentPressure),
+    source_surface_ids: canonicalStringList(sourceSurfaceIds),
+    source_summary: sourceSummary
+  };
+}
+
+function buildPenaltyByKind(
+  state: RunState
+): Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1> {
+  const penaltyStage = buildEconomyObligationPenaltyStageFromState(state);
+  return Object.fromEntries(penaltyStage.entries.map((entry) => [entry.counterparty_kind, entry])) as Record<
+    EconomyObligationCounterpartyKindV1,
+    EconomyObligationPenaltyStageEntryV1
+  >;
+}
+
+function buildCrownPressureEntry(
+  state: RunState,
+  registry: EconomyObligationRegistryV1,
+  penaltyByKind: Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1>
+): RealmCrownPressureEntryV1 {
+  const liege = registry.counterparties_by_key.liege;
+  const penalty = penaltyByKind.liege;
+  const relationshipPressure = relationshipPressureFromVector(relationshipVectorFromState(state, liege.counterparty_id));
+  const liabilityPressure = Math.min(
+    35,
+    normalizeNonNegativeInteger(liege.due_amount) + normalizeNonNegativeInteger(liege.arrears_amount) * 2
+  );
+  const grantPressure = Math.min(18, grantPressureEstimate(state) * 2);
+  const levyPressure = Boolean(state.manor?.obligations?.war_levy_due) ? 12 : 0;
+  const unrestPressure = Math.min(8, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 12));
+  const latentPressure = liabilityPressure + grantPressure + levyPressure + relationshipPressure + unrestPressure;
+
+  return {
+    ...baseEntry(
+      "crown",
+      "Crown",
+      [
+        "economy_obligation_registry.liege",
+        "economy_obligation_penalty_stage.liege",
+        "manor.obligations.war_levy_due",
+        "phase_prospects.grant_pressure_proxy"
+      ],
+      "Read-only crown precursor surface combines liege obligations, stage-one enforcement, the current arrears-based grant proxy, war-levy visibility, and liege relationship strain.",
+      latentPressure,
+      "seeded"
+    ),
+    actor_key: "crown",
+    inputs: {
+      counterparty_id: liege.counterparty_id,
+      counterparty_label: liege.counterparty_label,
+      due_asset: "tax_due_coin",
+      due_amount: normalizeNonNegativeInteger(liege.due_amount),
+      arrears_asset: "arrears_coin",
+      arrears_amount: normalizeNonNegativeInteger(liege.arrears_amount),
+      total_outstanding: normalizeNonNegativeInteger(liege.due_amount + liege.arrears_amount),
+      settlement_cadence_turns: 1,
+      enforcement_state: enforcementState(penalty),
+      enforcement_rule_id: penalty.rule_id,
+      relationship_delta: {
+        respect: normalizeInteger(penalty.relationship_delta.respect),
+        threat: normalizeInteger(penalty.relationship_delta.threat)
+      },
+      grant_pressure_estimate: grantPressureEstimate(state),
+      war_levy_active: Boolean(state.manor?.obligations?.war_levy_due),
+      war_levy_kind: warLevyKind(state)
+    }
+  };
+}
+
+function buildMagnatesPressureEntry(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): RealmMagnatesPressureEntryV1 {
+  const anyState = state as any;
+  const knownHouses = readKnownHouses(state, input);
+  const dossiers = readHouseDossiers(state, input);
+  const localNobleIds = canonicalStringList((state.locals?.nobles ?? []).map((person) => person.id));
+  const relevantHouseIds = canonicalStringList([
+    ...knownHouses.map((row) => row.house_id),
+    ...dossiers.map((row) => row.house_id)
+  ]);
+  const highPressureHouseIds = canonicalStringList(
+    dossiers
+      .filter((row) => row.relationship_band === "hostile" || row.relationship_band === "wary")
+      .map((row) => row.house_id)
+  );
+  const bands = relationshipBandCounts();
+  const kinships = kinshipCounts();
+
+  for (const row of dossiers) {
+    bands[row.relationship_band] += 1;
+    kinships[row.kinship_summary] += 1;
+  }
+
+  const sourceSurfaceStatus: RealmPressureSourceSurfaceStatusV1 =
+    Array.isArray(input.known_houses) ||
+    Array.isArray(input.house_dossiers) ||
+    Array.isArray(anyState?.known_houses) ||
+    Array.isArray(anyState?.house_dossiers)
+      ? "available"
+      : "missing";
+  const dossierPressure = Math.min(50, bands.hostile * 14 + bands.wary * 8 + bands.steady * 3 + bands.unknown * 2);
+  const knownHousePressure = knownHouseRelationshipPressure(knownHouses);
+  const noblePressure = localNobleRelationshipPressure(state, localNobleIds) + Math.min(10, localNobleIds.length * 2);
+  const kinshipRelief =
+    kinships.blood_and_marriage_tie * 4 + kinships.blood_tie * 2 + kinships.marriage_tie;
+  const unrestPressure = Math.min(5, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 20));
+  const latentPressure = dossierPressure + knownHousePressure + noblePressure + unrestPressure - kinshipRelief;
+  const hasSeedContext = localNobleIds.length > 0 || knownHouses.length > 0 || dossiers.length > 0;
+
+  return {
+    ...baseEntry(
+      "magnates",
+      "Magnates",
+      ["house_dossiers", "known_houses", "locals.nobles"],
+      "Read-only magnate precursor surface combines observed local nobles with known-house summaries, dossier bands, and current magnate relationship strain when available.",
+      latentPressure,
+      hasSeedContext ? "seeded" : "placeholder_zero"
+    ),
+    actor_key: "magnates",
+    inputs: {
+      source_surface_status: sourceSurfaceStatus,
+      local_noble_ids: localNobleIds,
+      known_house_count: knownHouses.length,
+      dossier_count: dossiers.length,
+      relevant_house_ids: relevantHouseIds,
+      high_pressure_house_ids: highPressureHouseIds,
+      relationship_band_counts: bands,
+      kinship_counts: kinships
+    }
+  };
+}
+
+function buildChurchPressureEntry(
+  state: RunState,
+  registry: EconomyObligationRegistryV1,
+  penaltyByKind: Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1>
+): RealmChurchPressureEntryV1 {
+  const church = registry.counterparties_by_key.church;
+  const penalty = penaltyByKind.church;
+  const parish = parishInstitutionFromState(state);
+  const targetMode = churchTargetMode(state, parish);
+  const relationshipPressure = relationshipPressureFromVector(relationshipVectorFromState(state, church.counterparty_id));
+  const liabilityPressure = Math.min(
+    35,
+    Math.floor(normalizeNonNegativeInteger(church.due_amount) / 4) +
+      Math.floor(normalizeNonNegativeInteger(church.arrears_amount) / 12)
+  );
+  const shortagePressure = Boolean((state.flags as Record<string, unknown>).Shortage) ? 8 : 0;
+  const targetModePressure =
+    targetMode === "split_surface" ? 6 : targetMode === "clergy_person_only" || targetMode === "parish_institution_only" ? 2 : 0;
+  const unrestPressure = Math.min(6, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 15));
+  const latentPressure = liabilityPressure + relationshipPressure + shortagePressure + targetModePressure + unrestPressure;
+
+  return {
+    ...baseEntry(
+      "church",
+      "Church",
+      [
+        "economy_obligation_registry.church",
+        "economy_obligation_penalty_stage.church",
+        "world.parish_institution_visibility"
+      ],
+      "Read-only church precursor surface combines church obligations, stage-one enforcement, parish visibility, and current clergy relationship strain.",
+      latentPressure,
+      "seeded"
+    ),
+    actor_key: "church",
+    inputs: {
+      counterparty_id: church.counterparty_id,
+      counterparty_label: church.counterparty_label,
+      due_asset: "tithe_due_bushels",
+      due_amount: normalizeNonNegativeInteger(church.due_amount),
+      arrears_asset: "arrears_bushels",
+      arrears_amount: normalizeNonNegativeInteger(church.arrears_amount),
+      total_outstanding: normalizeNonNegativeInteger(church.due_amount + church.arrears_amount),
+      settlement_cadence_turns: 1,
+      enforcement_state: enforcementState(penalty),
+      enforcement_rule_id: penalty.rule_id,
+      relationship_delta: {
+        respect: normalizeInteger(penalty.relationship_delta.respect),
+        threat: normalizeInteger(penalty.relationship_delta.threat)
+      },
+      parish_institution_id: parish?.id ?? null,
+      parish_institution_name:
+        parish && typeof parish.name === "string" && parish.name.length > 0 ? parish.name : parish?.id ?? null,
+      parish_priest_person_id:
+        parish && "priest_person_id" in parish && typeof parish.priest_person_id === "string"
+          ? parish.priest_person_id
+          : null,
+      church_target_mode: targetMode
+    }
+  };
+}
+
+function summaryLineForEntry(entry: RealmPressureEntryV1): string {
+  switch (entry.actor_key) {
+    case "crown":
+      return `Crown: ${entry.inputs.total_outstanding} outstanding, grant proxy ${entry.inputs.grant_pressure_estimate}, levy ${entry.inputs.war_levy_active ? "active" : "clear"}.`;
+    case "magnates":
+      return `Magnates: ${entry.inputs.relevant_house_ids.length} observed houses, ${entry.inputs.high_pressure_house_ids.length} high-pressure houses, ${entry.inputs.local_noble_ids.length} local nobles.`;
+    case "church":
+      return `Church: ${entry.inputs.total_outstanding} outstanding, target ${entry.inputs.church_target_mode}.`;
+  }
+}
+
+export function buildRealmPressureRegistryFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): RealmPressureRegistryV1 {
+  const registry = buildEconomyObligationRegistryFromState(state);
+  const penaltyByKind = buildPenaltyByKind(state);
+  const actorOrder = [...REALM_PRESSURE_ACTOR_KEYS];
+
+  return {
+    schema_version: REALM_PRESSURE_REGISTRY_SCHEMA_VERSION,
+    turn: normalizeNonNegativeInteger(state.turn_index),
+    actor_order: actorOrder,
+    entries_by_key: {
+      crown: buildCrownPressureEntry(state, registry, penaltyByKind),
+      magnates: buildMagnatesPressureEntry(state, input),
+      church: buildChurchPressureEntry(state, registry, penaltyByKind)
+    }
+  };
+}
+
+export function buildPoliticalWeatherFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): PoliticalWeatherV1 {
+  const registry = buildRealmPressureRegistryFromState(state, input);
+  const actorOrder = [...registry.actor_order];
+  const shortageActive = Boolean((state.flags as Record<string, unknown>).Shortage);
+  const warLevyActive = Boolean(state.manor?.obligations?.war_levy_due);
+
+  return {
+    schema_version: POLITICAL_WEATHER_SCHEMA_VERSION,
+    registry_schema_version: REALM_PRESSURE_REGISTRY_SCHEMA_VERSION,
+    turn: registry.turn,
+    read_mode: REALM_PRESSURE_READ_MODE,
+    activation_status: REALM_PRESSURE_ACTIVATION_STATUS,
+    actor_order: actorOrder,
+    shared_context: {
+      unrest: normalizeNonNegativeInteger(state.manor?.unrest ?? 0),
+      shortage_active: shortageActive,
+      war_levy_active: warLevyActive
+    },
+    summary_lines: actorOrder.map((actorKey) => summaryLineForEntry(registry.entries_by_key[actorKey])),
+    registry
+  };
+}
+
+export function buildPoliticalWeatherContentHooksFromWeather(weather: PoliticalWeatherV1): PoliticalWeatherContentHooksV1 {
+  const actorOrder = [...weather.actor_order];
+  let highestPressureActorKey: RealmPressureActorKeyV1 | null = null;
+  let highestPressureValue = -1;
+
+  for (const actorKey of actorOrder) {
+    const latentPressure = weather.registry.entries_by_key[actorKey].latent_pressure;
+    if (latentPressure > highestPressureValue) {
+      highestPressureValue = latentPressure;
+      highestPressureActorKey = actorKey;
+    }
+  }
+
+  const actorsByKey = {
+    crown: {
+      actor_key: "crown",
+      actor_label: weather.registry.entries_by_key.crown.actor_label,
+      latent_pressure: weather.registry.entries_by_key.crown.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.crown.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("crown")] ?? "",
+      total_outstanding: weather.registry.entries_by_key.crown.inputs.total_outstanding,
+      grant_pressure_estimate: weather.registry.entries_by_key.crown.inputs.grant_pressure_estimate,
+      war_levy_active: weather.registry.entries_by_key.crown.inputs.war_levy_active,
+      enforcement_state: weather.registry.entries_by_key.crown.inputs.enforcement_state
+    },
+    magnates: {
+      actor_key: "magnates",
+      actor_label: weather.registry.entries_by_key.magnates.actor_label,
+      latent_pressure: weather.registry.entries_by_key.magnates.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.magnates.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("magnates")] ?? "",
+      observed_house_count: weather.registry.entries_by_key.magnates.inputs.relevant_house_ids.length,
+      high_pressure_house_count: weather.registry.entries_by_key.magnates.inputs.high_pressure_house_ids.length,
+      hostile_house_count: weather.registry.entries_by_key.magnates.inputs.relationship_band_counts.hostile,
+      wary_house_count: weather.registry.entries_by_key.magnates.inputs.relationship_band_counts.wary,
+      source_surface_status: weather.registry.entries_by_key.magnates.inputs.source_surface_status
+    },
+    church: {
+      actor_key: "church",
+      actor_label: weather.registry.entries_by_key.church.actor_label,
+      latent_pressure: weather.registry.entries_by_key.church.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.church.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("church")] ?? "",
+      total_outstanding: weather.registry.entries_by_key.church.inputs.total_outstanding,
+      church_target_mode: weather.registry.entries_by_key.church.inputs.church_target_mode,
+      enforcement_state: weather.registry.entries_by_key.church.inputs.enforcement_state
+    }
+  } satisfies PoliticalWeatherContentHooksV1["actors_by_key"];
+
+  return {
+    schema_version: POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION,
+    turn: weather.turn,
+    read_mode: weather.read_mode,
+    activation_status: weather.activation_status,
+    actor_order: actorOrder,
+    shared_context: { ...weather.shared_context },
+    highest_pressure_actor_key: highestPressureActorKey,
+    highest_pressure_value: highestPressureValue >= 0 ? highestPressureValue : 0,
+    any_elevated_pressure: actorOrder.some((actorKey) => weather.registry.entries_by_key[actorKey].latent_pressure >= 40),
+    actors_by_key: actorsByKey
+  };
+}
+
+export function buildPoliticalWeatherContentHooksFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): PoliticalWeatherContentHooksV1 {
+  return buildPoliticalWeatherContentHooksFromWeather(buildPoliticalWeatherFromState(state, input));
+}
+
+export function serializeRealmPressureRegistrySnapshot(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): string {
+  return JSON.stringify(buildRealmPressureRegistryFromState(state, input));
+}
+
+export function serializePoliticalWeatherSnapshot(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): string {
+  return JSON.stringify(buildPoliticalWeatherFromState(state, input));
+}
+
+export function serializePoliticalWeatherContentHooksSnapshot(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): string {
+  return JSON.stringify(buildPoliticalWeatherContentHooksFromState(state, input));
+}

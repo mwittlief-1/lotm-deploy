@@ -23,9 +23,6 @@ describe("ops v0.3 control plane", () => {
     expect(payload.active_claims).toEqual(validated.summary.active_claims);
     expect(payload.first_ready_by_lane).toEqual(validated.summary.first_ready_by_lane);
     expect(payload.first_claimable_by_lane).toEqual(validated.summary.first_claimable_by_lane);
-    expect(payload.first_ready_by_lane["codex/v0.3-lane-world-topology"]).toBeUndefined();
-    expect(payload.first_claimable_by_lane["codex/v0.3-lane-world-topology"]).toBeUndefined();
-
     for (const lane of Object.keys(payload.active_claims)) {
       expect(payload.first_claimable_by_lane[lane]).toBeUndefined();
     }

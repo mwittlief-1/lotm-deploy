@@ -1,11 +1,10 @@
 import { playerHouseIdOf, registryPersonFor } from "../actors";
-import { TURN_YEARS, UNREST_BASELINE_DECAY_WHEN_STABLE } from "../constants";
+import { TURN_YEARS } from "../constants";
 import { addCourtExtraId, removeCourtExcludeId } from "../court";
-import { rollTaxDueCoinIntoArrears, rollTitheDueBushelsIntoArrears } from "../domains/economy/ledger";
-import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
 import { getChildren as kinChildren, getParents as kinParents, isAlive as kinIsAlive } from "../kinship";
+import { applyCloseTurnObligationsPhase } from "./phase_obligations";
 import type { HouseLogEvent, Person, RunState } from "../types";
-import { asNonNegInt, clampInt } from "../util";
+import { asNonNegInt } from "../util";
 
 const SUCCESSION_MIN_AGE = 15;
 
@@ -288,26 +287,7 @@ export function closeTurnPhase(
   houseLog: HouseLogEvent[],
   deps: SuccessionDeps
 ): void {
-  const ob = state.manor.obligations;
-
-  rollTaxDueCoinIntoArrears(state);
-  rollTitheDueBushelsIntoArrears(state);
-
-  if (ob.arrears.coin === 0) {
-    applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: +1, threat: -1 }, "close_turn_tax_clear");
-  } else {
-    applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -1, threat: +1 }, "close_turn_tax_arrears");
-  }
-  if (ob.arrears.bushels === 0) {
-    applyRelationshipDelta(state, state.locals.clergy.id, state.house.head.id, { respect: +1 }, "close_turn_tithe_clear");
-  } else {
-    applyRelationshipDelta(state, state.locals.clergy.id, state.house.head.id, { respect: -1, threat: +1 }, "close_turn_tithe_arrears");
-  }
-
-  const shortage = Boolean((state.flags as any).Shortage);
-  if (!shortage && ob.arrears.coin === 0 && ob.arrears.bushels === 0) {
-    state.manor.unrest = clampInt(state.manor.unrest - UNREST_BASELINE_DECAY_WHEN_STABLE, 0, 100);
-  }
+  applyCloseTurnObligationsPhase(state, reportNotes);
 
   delete (state.flags as any).Shortage;
   delete (state.flags as any).MarriageOffer;

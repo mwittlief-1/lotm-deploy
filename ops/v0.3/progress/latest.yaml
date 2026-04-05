@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R1-002-T06
+  current_task_id: V03-R2-001-T06
+  last_completed_task_id: V03-R2-001-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: fcdd6bb431014a7e8dcef8d7e64e8c46cde6ce80
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 90bb905be75ea5d275bb0146d64071d519cba8c4
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,7 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
-    run2: 7c3add4efbb31817f77ee31e535dae2dc8b74197e84c5e945f37f3ac3676e7ba
-notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to (none). No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
+    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+notes: >-
+  Accepted UI V03-R2-001-T07 on kickoff. Tooling
+  V03-R2-001-T06 remains the only open frontier before
+  Economy can close the portfolio-accounting epic with
+  V03-R2-001-T08.
 active_claims: {}

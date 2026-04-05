@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { DecisionsPanel } from "../../src/ui/panels/DecisionsPanel";
 import type { CourtDecisionBudgetSurface } from "../../src/ui/playScreenCourtBudget";
+import type { ObligationsCounterpartyContractSection } from "../../src/ui/playScreenObligations";
 
 function createCourtDecisionBudget(): CourtDecisionBudgetSurface {
   return {
@@ -46,6 +47,93 @@ function createCourtDecisionBudget(): CourtDecisionBudgetSurface {
       }
     ]
   };
+}
+
+function createObligationsSections(): ObligationsCounterpartyContractSection[] {
+  return [
+    {
+      id: "liege",
+      title: "House Liege",
+      shortTitle: "Liege",
+      helper: "Keeps liege dues, arrears pressure, and gift language aligned with coin-first receipts.",
+      settlementStatus: "due_and_arrears",
+      receiptCategoryOrder: ["coin", "unrest"],
+      receiptKeywords: ["liege"],
+      dueGroup: {
+        title: "Tax due",
+        amount: 3,
+        amountLabel: "3 coin",
+        summary: "House Liege: 4 coin in arrears, 3 coin due.",
+        receiptCategories: ["coin"]
+      },
+      penaltyGroup: {
+        title: "Arrears & liege pressure",
+        amount: 4,
+        amountLabel: "4 coin",
+        summary: "House Liege: 4 coin in arrears, 3 coin due.",
+        receiptCategories: ["coin", "unrest"],
+        enforcementStage: 1,
+        enforcementState: "arrears",
+        enforcementSummary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+        resolvedSummary: "This turn: arrears carried, so stage 1 active now applies.",
+        responseSummary: "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+        stageLabel: "Stage 1 active",
+        carriedThisTurn: true,
+        settledThisTurn: false
+      },
+      gestureGroup: {
+        actionId: "gift_liege",
+        availableInBudget: true,
+        cost: 1,
+        detail: "Court favor spent on noble gifts.",
+        leverSummary: "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.",
+        receiptCategories: ["coin"],
+        spent: 0,
+        title: "Gift to liege"
+      }
+    },
+    {
+      id: "church",
+      title: "Parish Church",
+      shortTitle: "Church",
+      helper: "Keeps church dues, arrears pressure, and offering language aligned with food-first receipts.",
+      settlementStatus: "due_only",
+      receiptCategoryOrder: ["food", "unrest"],
+      receiptKeywords: ["church"],
+      dueGroup: {
+        title: "Tithe due",
+        amount: 5,
+        amountLabel: "5 bushels",
+        summary: "Parish Church: 5 bushels due.",
+        receiptCategories: ["food"]
+      },
+      penaltyGroup: {
+        title: "Arrears & church pressure",
+        amount: 0,
+        amountLabel: "0 bushels",
+        summary: "Parish Church: no carried arrears.",
+        receiptCategories: ["food", "unrest"],
+        enforcementStage: 1,
+        enforcementState: "clear",
+        enforcementSummary: "Parish Church: clear.",
+        resolvedSummary: "This turn: no arrears carried, so pressure stayed clear.",
+        responseSummary: "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.",
+        stageLabel: "Pressure clear",
+        carriedThisTurn: false,
+        settledThisTurn: true
+      },
+      gestureGroup: {
+        actionId: "offering_church",
+        availableInBudget: true,
+        cost: 1,
+        detail: "Court effort spent on religious offerings.",
+        leverSummary: "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.",
+        receiptCategories: ["food"],
+        spent: 0,
+        title: "Offering to church"
+      }
+    }
+  ];
 }
 
 function createProps(): React.ComponentProps<typeof DecisionsPanel> {
@@ -99,12 +187,26 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
     marriageWindow: null,
     maxLaborShift: 2,
     obligations: { war_levy_due: null },
+    obligationsSections: createObligationsSections(),
     onExportFullRunJson: () => undefined,
     onExportRunSummary: () => undefined,
+    onOpenObligationsDetails: () => undefined,
     pfHouseLabelById: new Map(),
     pfParentsByChild: new Map(),
     pfPeopleRec: {},
     pfPersonHouseById: new Map(),
+    pricingSurface: {
+      schemaVersion: "economy_pricing_view_v1",
+      referenceId: "price_ref:food_stores_market_sell",
+      referenceLabel: "Food stores market sell",
+      ratioLabel: "1 coin / 10 bushels",
+      fixedSellCapUnits: 240,
+      maxSellableUnits: 120,
+      maxQuotedCoin: 12,
+      catalogLines: [
+        "Food stores market sell: 1 coin / 10 bushels (active)"
+      ]
+    },
     previewState: {
       house: {
         energy: {
@@ -137,5 +239,11 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Cost 2");
     expect(html).toContain("Used 2");
     expect(html).toContain("Highest cost");
+    expect(html).toContain("Reference price:");
+    expect(html).toContain("1 coin / 10 bushels");
+    expect(html).toContain("Fixed reference cap: 240 bushels");
+    expect(html).toContain("Open detail sheet");
+    expect(html).toContain("House Liege");
+    expect(html).toContain("Parish Church");
   });
 });
