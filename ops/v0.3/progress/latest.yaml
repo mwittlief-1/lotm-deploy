@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-001-T08
+  last_completed_task_id: V03-R4-002-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: e05ffb3244e984de7847de43ab9d086b46364c84
+  git_commit: 24557fc5125e421910b5f8ea45e582aece599656
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,18 +21,17 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Refreshed the economy lane from kickoff truth, closed the
-  V03-R2-001 portfolio-accounting epic, and promoted Economy
-  V03-R4-002-T01 as the next same-lane dependency-clean task
-  while keeping the local validator's empty current_task_id
-  mirror.
+  Closed Economy V03-R4-002-T01 after auditing the fiscal knob
+  surfaces, then promoted and claimed V03-R4-002-T02 as the next
+  same-lane dependency-clean task while keeping the local
+  validator's empty current_task_id mirror.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R4-002-T01
+    task_id: V03-R4-002-T02
     claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T14:35:43-04:00'
-    claim_expires_at: '2026-04-05T18:35:43-04:00'
-    run_id: manual-economy-v03-r4-002-t01-20260405T143543-0400
+    claimed_at: '2026-04-05T14:44:51-04:00'
+    claim_expires_at: '2026-04-05T18:44:51-04:00'
+    run_id: manual-economy-v03-r4-002-t02-20260405T144451-0400
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
     claimed_by: manual-social-lane
