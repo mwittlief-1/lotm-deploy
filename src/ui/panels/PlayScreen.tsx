@@ -53,7 +53,7 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
-import { buildPortfolioScopeContract } from "../playScreenPortfolio";
+import { buildPortfolioScopeContract, type PortfolioScopeMode } from "../playScreenPortfolio";
 import {
   buildObligationsCounterpartyContract,
   createObligationsModalRoute,
@@ -152,6 +152,7 @@ export function PlayScreen({
   toast
 }: PlayScreenProps) {
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
+  const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
@@ -209,7 +210,6 @@ export function PlayScreen({
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
-  const portfolioSurface = portfolioContract?.portfolioSummary ?? null;
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -691,7 +691,13 @@ export function PlayScreen({
         turnYears={TURN_YEARS}
       />
     ),
-    portfolio_overview: portfolioSurface ? <PortfolioOverviewPanel surface={portfolioSurface} /> : null,
+    portfolio_overview: portfolioContract ? (
+      <PortfolioOverviewPanel
+        contract={portfolioContract}
+        onScopeModeChange={setPortfolioScopeMode}
+        scopeMode={portfolioScopeMode}
+      />
+    ) : null,
     prospects: (
       <ProspectsPanel
         anchorId={PLAY_ANCHORS.prospects}
