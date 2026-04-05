@@ -3157,7 +3157,7 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: "Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline."
+  goal: 'Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline.'
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
@@ -4896,7 +4896,7 @@ tasks:
   title: Add multi-manor regression suite and invariants
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: ready
+  status: done
   priority: 74
   tranche: 3
   change_type: refactor
@@ -4937,6 +4937,9 @@ tasks:
   - non_perturbation_failure
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-001-T06.md
+  outputs:
+  - tests/sim/portfolio_invariant_regression.test.ts
+  - docs/qa/portfolio_invariant_regression_v0.3.2.md
 - id: V03-R2-001-T07
   title: Render portfolio totals and outliers UI stub
   release: v0.3.2
