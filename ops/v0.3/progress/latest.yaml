@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-001-T08
-  last_completed_task_id: V03-R2-001-T06
+  current_task_id: V03-R2-005-T01
+  last_completed_task_id: V03-R2-001-T08
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,7 +21,8 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted Tooling V03-R2-001-T06 on kickoff and
-  promoted Economy V03-R2-001-T08 as the final
-  portfolio-accounting epic closeout task.
+  Accepted Economy V03-R2-001-T08 and marked
+  V03-R2-001 done. Promoted UI V03-R2-005-T01,
+  Tooling V03-R3-001-T01, and Economy V03-R4-002-T01
+  as the next clean frontiers.
 active_claims: {}

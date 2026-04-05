@@ -237,3 +237,27 @@ The safe baseline is:
 - outliers rank explicit deterministic metrics only
 
 If `T02` through `T04` follow that contract, portfolio rollups can land without changing current manor semantics or forcing early price valuation into the economy domain.
+
+## Epic closeout baseline after T05-T07
+
+The shipped `v0.3.2` portfolio baseline now extends beyond the original lane-local audit.
+
+Accepted follow-on work landed:
+
+- `V03-R2-001-T05` integrated the portfolio analysis surface into accepted phase and bounded snapshot refresh paths on kickoff.
+- `V03-R2-001-T06` added the regression suite and QA guidance that proves portfolio totals continue to equal summed manor rows.
+- `V03-R2-001-T07` added the read-only gameplay stub that exposes portfolio totals and bounded outlier lists without adding post-`v0.3` controls.
+
+### Locked shipped boundary
+
+The accepted `v0.3.2` contract is now:
+
+- `state.portfolio` is no longer only a placeholder at the shipped snapshot boundary; accepted phase wiring can refresh a bounded `economy_portfolio_analysis_v1` surface.
+- portfolio totals remain deterministic sums of manor asset totals and manor category totals
+- manor nets remain asset-local and price-free
+- outlier lists remain bounded, explicitly keyed, and tie-break on deterministic manor key ordering
+- UI exposure remains read-only and presentation-only
+
+### Accepted diff note
+
+`T05` intentionally changed bounded snapshot and replay artifacts so portfolio totals and outlier rows can appear in the shipped analysis surface. `T06` and `T07` then held replay on the same stable hash `7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a`.
