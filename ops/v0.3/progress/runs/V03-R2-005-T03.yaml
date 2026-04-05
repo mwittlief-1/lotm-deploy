@@ -1,0 +1,37 @@
+version: 1
+run_id: manual-ui-v03-r2-005-t03-20260405T180752-0400
+task_id: V03-R2-005-T03
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-ui-experience
+commit: d5d10e91751791e99d9d21ef145e7a096aeb8ed8
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  portfolio_panel: src/ui/panels/PortfolioOverviewPanel.tsx
+  play_screen_wiring: src/ui/panels/PlayScreen.tsx
+  panel_tests: tests/ui/portfolioOverviewPanel.test.tsx
+findings:
+  - Added a single holdings-surface scope toggle that makes portfolio summary versus current-manor detail explicit without creating a second portfolio card elsewhere in the shell.
+  - Kept portfolio totals at the top of the panel while moving manor-specific follow-up into a compact selected-manor detail block, so the new focus state stays readable instead of turning into a miniature ledger table.
+  - Reframed the outlier list as exception rows, including a selected-detail marker when the focused manor is already one of the strongest portfolio extremes.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-005-T04
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  dispatch_reason: Same-lane self-advance policy promoted and claimed T04 after T03 closed on the lane branch.

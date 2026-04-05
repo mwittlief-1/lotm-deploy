@@ -5838,7 +5838,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render portfolio summary, outliers list, and manor-scope toggle
-  status: ready
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5870,16 +5870,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-005-T03.yaml
   claim:
-    status: claimed
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-05T18:07:52-0400'
-    claim_expires_at: '2026-04-05T22:07:55-0400'
-    run_id: manual-ui-v03-r2-005-t03-20260405T180752-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R2-005-T04
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render manor selector and receipts scope filter
-  status: todo
+  status: ready
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5911,11 +5911,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-005-T04.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-05T18:20:48-0400'
+    claim_expires_at: '2026-04-05T22:20:48-0400'
+    run_id: manual-ui-v03-r2-005-t04-20260405T182048-0400
 - id: V03-R2-005-T05
   parent_epic: V03-R2-005
   release: v0.3.2
