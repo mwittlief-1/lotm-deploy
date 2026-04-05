@@ -24,7 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
-  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
+  same_lane_continuation_rule: a lane may locally close one same-lane task and claim the next same-lane task without waiting for integrator acceptance when requires_integrator is false, cross-lane deps are already done in kickoff truth, newly satisfied deps come only from that lane's completed chain, and no checkpoint, escalation, or integrator boundary applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
