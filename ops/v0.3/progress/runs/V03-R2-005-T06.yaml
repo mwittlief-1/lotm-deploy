@@ -1,0 +1,32 @@
+version: 1
+run_id: manual-ui-v03-r2-005-t06-20260405T190755-0400
+task_id: V03-R2-005-T06
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-ui-experience
+commit: d4eb616cb8cd67f589bac75b0bf19f2949617a14
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: not_run
+artifacts:
+  audit_doc: docs/ux/v0.3.2_portfolio_scope_audit.md
+  implementation_notes: docs/ux/v0.3.2_portfolio_implementation_notes.md
+findings:
+  - The portfolio scope epic now has a closeout doc that records the shipped selector, evidence-scope, and deferred map-checkpoint rules in one stable reference for content and playtest work.
+  - The original portfolio scope audit now carries an implementation-status appendix so the inventory and the shipped T02-T04 outcome remain linked without duplicating the whole audit.
+  - The closeout explicitly records that T05 remains blocked behind V03-XMAP-001 and merged map surfaces, so the lane stops cleanly after T06 with no active UI claim.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  reason: Backlog task state, progress cursor, and the mirrored active-claim set validate cleanly after closing V03-R2-005-T06, and no next ready UI lane task is available while T05 remains blocked on V03-XMAP-001.

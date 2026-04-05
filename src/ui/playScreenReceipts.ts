@@ -1,10 +1,16 @@
 import type { StickyResourceChip } from "./playScreenLayout";
 import type { LedgerItem, SourceTag } from "./playScreenModel";
 import type { PhaseNameV0, PhaseReceiptKindV0, PhaseResultV0 } from "../sim/types";
+import {
+  classifyReceiptCounterpartyTags,
+  type ObligationsCounterpartyContract,
+  type ObligationsCounterpartyId
+} from "./playScreenObligations";
 
 export type ReceiptViewerMode = "grouped" | "raw";
 export type ReceiptViewerFocus = "overview" | StickyResourceChip["id"];
 type ReceiptFocusTag = Exclude<ReceiptViewerFocus, "overview">;
+export type ReceiptCounterpartyTag = ObligationsCounterpartyId;
 
 export type ReceiptViewerRoute = {
   focus: ReceiptViewerFocus;
@@ -28,12 +34,31 @@ export type GroupedReceiptSection = {
 };
 
 export type ReceiptLine = {
+  counterpartyTags: ReceiptCounterpartyTag[];
   id: string;
   kind: PhaseReceiptKindV0;
   line: string;
   phase: PhaseNameV0;
   phaseLabel: string;
   tags: ReceiptFocusTag[];
+};
+
+export type CounterpartyReceiptSection = {
+  dueSummary: string;
+  gestureCost: number | null;
+  gestureDetail: string;
+  gestureLabel: string;
+  gestureSummary: string;
+  gestureSpent: number | null;
+  helper: string;
+  id: ReceiptCounterpartyTag;
+  penaltySummary: string;
+  receiptCategoryOrder: ReceiptFocusTag[];
+  resolvedSummary: string;
+  responseSummary: string;
+  receipts: ReceiptLine[];
+  stageLabel: string;
+  title: string;
 };
 
 export type RawReceiptPhase = {
@@ -43,6 +68,7 @@ export type RawReceiptPhase = {
 };
 
 export type ReceiptViewerData = {
+  counterpartySections: CounterpartyReceiptSection[];
   groupedSections: GroupedReceiptSection[];
   rawPhases: RawReceiptPhase[];
 };
@@ -80,7 +106,7 @@ const GROUPED_SECTION_META: Record<ReceiptViewerFocus, { title: string; helper: 
 };
 
 const FOCUS_SUBTITLES: Record<ReceiptViewerFocus, string> = {
-  overview: "Grouped mode keeps the headline story first. Raw mode preserves the exact phase receipt trail underneath it.",
+  overview: "Grouped mode keeps counterparties and relationship levers first, then the resource story beneath them. Raw mode preserves the exact phase receipt trail underneath it.",
   food: "Food details keep the resource chip aligned with the receipt trail behind harvest, stores, and dues.",
   coin: "Coin details keep the resource chip aligned with the receipt trail behind market context and obligations.",
   unrest: "Unrest details keep stability pressure and its supporting receipt trail in one focused surface."
@@ -106,11 +132,17 @@ function classifyReceiptTags(phase: PhaseNameV0, line: string): ReceiptFocusTag[
   return Array.from(tags).sort((a, b) => a.localeCompare(b));
 }
 
-function normalizeReceiptLine(phase: PhaseNameV0, receipt: { kind: PhaseReceiptKindV0; line: string }, index: number): ReceiptLine | null {
+function normalizeReceiptLine(
+  phase: PhaseNameV0,
+  receipt: { kind: PhaseReceiptKindV0; line: string },
+  index: number,
+  obligationsContract: ObligationsCounterpartyContract | null
+): ReceiptLine | null {
   const line = typeof receipt.line === "string" ? receipt.line.trim() : "";
   if (!line) return null;
 
   return {
+    counterpartyTags: classifyReceiptCounterpartyTags(line, obligationsContract),
     id: `${phase}_${String(index).padStart(2, "0")}`,
     kind: receipt.kind,
     line,
@@ -128,15 +160,16 @@ function highlightForMetric(diffLedgerItems: LedgerItem[], metric: ReceiptFocusT
 
 export function buildReceiptViewerData(args: {
   diffLedgerItems: LedgerItem[];
+  obligationsContract?: ObligationsCounterpartyContract | null;
   phaseResults: PhaseResultV0[] | null | undefined;
 }): ReceiptViewerData {
-  const { diffLedgerItems, phaseResults } = args;
+  const { diffLedgerItems, obligationsContract = null, phaseResults } = args;
   const rawPhases: RawReceiptPhase[] = [];
 
   for (const phaseResult of Array.isArray(phaseResults) ? phaseResults : []) {
     const receipts = Array.isArray(phaseResult?.receipts)
       ? phaseResult.receipts
-          .map((receipt, index) => normalizeReceiptLine(phaseResult.phase, receipt, index))
+          .map((receipt, index) => normalizeReceiptLine(phaseResult.phase, receipt, index, obligationsContract))
           .filter((receipt): receipt is ReceiptLine => receipt !== null)
       : [];
     if (receipts.length === 0) continue;
@@ -179,7 +212,27 @@ export function buildReceiptViewerData(args: {
     }
   ];
 
-  return { groupedSections, rawPhases };
+  const counterpartySections: CounterpartyReceiptSection[] = obligationsContract
+    ? obligationsContract.counterpartySections.map((section) => ({
+        id: section.id,
+        title: section.title,
+        helper: section.helper,
+        dueSummary: section.dueGroup.summary,
+        penaltySummary: section.penaltyGroup.enforcementSummary,
+        gestureLabel: section.gestureGroup.title,
+        gestureDetail: section.gestureGroup.detail,
+        gestureSummary: section.gestureGroup.leverSummary,
+        gestureCost: section.gestureGroup.cost,
+        gestureSpent: section.gestureGroup.spent,
+        receiptCategoryOrder: [...section.receiptCategoryOrder],
+        resolvedSummary: section.penaltyGroup.resolvedSummary,
+        responseSummary: section.penaltyGroup.responseSummary,
+        receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.counterpartyTags.includes(section.id))),
+        stageLabel: section.penaltyGroup.stageLabel
+      }))
+    : [];
+
+  return { counterpartySections, groupedSections, rawPhases };
 }
 
 export function createExplainChangesRoute(): ReceiptViewerRoute {
@@ -204,6 +257,14 @@ export function selectGroupedReceiptSections(
 ): GroupedReceiptSection[] {
   if (focus === "overview") return groupedSections;
   return groupedSections.filter((section) => section.id === focus);
+}
+
+export function selectCounterpartyReceiptSections(
+  counterpartySections: CounterpartyReceiptSection[],
+  focus: ReceiptViewerFocus
+): CounterpartyReceiptSection[] {
+  if (focus === "overview") return counterpartySections;
+  return counterpartySections.filter((section) => section.receiptCategoryOrder.includes(focus));
 }
 
 export function selectRawReceiptPhases(rawPhases: RawReceiptPhase[], focus: ReceiptViewerFocus): RawReceiptPhase[] {

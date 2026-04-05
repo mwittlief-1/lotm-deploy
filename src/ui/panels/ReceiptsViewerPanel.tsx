@@ -1,6 +1,7 @@
 import React from "react";
 
 import type {
+  CounterpartyReceiptSection,
   GroupedReceiptSection,
   RawReceiptPhase,
   ReceiptViewerMode
@@ -13,6 +14,7 @@ import {
 } from "../playScreenTheme";
 
 type ReceiptsViewerPanelProps = {
+  counterpartySections: CounterpartyReceiptSection[];
   groupedSections: GroupedReceiptSection[];
   mode: ReceiptViewerMode;
   onModeChange: (mode: ReceiptViewerMode) => void;
@@ -47,7 +49,23 @@ function modeButtonStyle(active: boolean): React.CSSProperties {
   };
 }
 
+function stagePillStyle(label: string): React.CSSProperties {
+  const active = label.toLowerCase().includes("stage");
+  return {
+    padding: "4px 10px",
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    border: active ? "1px solid rgba(133, 67, 48, 0.28)" : "1px solid rgba(91, 112, 68, 0.24)",
+    background: active ? "rgba(159, 92, 65, 0.12)" : "rgba(141, 168, 118, 0.14)",
+    color: active ? "#854330" : "#4f633b"
+  };
+}
+
 export function ReceiptsViewerPanel({
+  counterpartySections,
   groupedSections,
   mode,
   onModeChange,
@@ -84,6 +102,102 @@ export function ReceiptsViewerPanel({
 
       {mode === "grouped" ? (
         <div style={{ display: "grid", gap: 12 }}>
+          {counterpartySections.length ? (
+            <section
+              data-receipts-counterparties="true"
+              style={{
+                padding: 14,
+                borderRadius: 14,
+                color: PLAY_SCREEN_THEME.ink,
+                ...PLAY_SCREEN_SUBCARD_STYLE
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>Counterparty paths</div>
+              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>
+                Gifts and offerings stay attached to liege and church identity here, so each obligation fact and relationship action keeps one stable home.
+              </div>
+
+              <div style={{ display: "grid", gap: 12, marginTop: 12 }}>
+                {counterpartySections.map((section) => (
+                  <div
+                    data-receipts-counterparty={section.id}
+                    key={section.id}
+                    style={{
+                      padding: 12,
+                      borderRadius: 12,
+                      border: "1px solid rgba(172, 143, 100, 0.24)",
+                      background: "#fdfbf7",
+                      display: "grid",
+                      gap: 10
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start", flexWrap: "wrap" }}>
+                      <div>
+                        <div style={{ fontWeight: 700 }}>{section.title}</div>
+                        <div style={{ fontSize: 12, opacity: 0.78, marginTop: 4 }}>{section.helper}</div>
+                      </div>
+                      <span style={stagePillStyle(section.stageLabel)}>{section.stageLabel}</span>
+                    </div>
+
+                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+                      <div style={{ padding: 10, borderRadius: 12, background: "#fcfaf5", border: "1px solid rgba(172, 143, 100, 0.18)" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Due & pressure</div>
+                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45 }}>{section.dueSummary}</div>
+                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45 }}>{section.penaltySummary}</div>
+                      </div>
+
+                      <div style={{ padding: 10, borderRadius: 12, background: "#fcfaf5", border: "1px solid rgba(172, 143, 100, 0.18)" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Relationship lever</div>
+                        <div style={{ marginTop: 6, fontWeight: 700 }}>{section.gestureLabel}</div>
+                        <div style={{ marginTop: 4, fontSize: 12, lineHeight: 1.45 }}>{section.gestureSummary}</div>
+                        <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>{section.gestureDetail}</div>
+                        <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+                          {section.gestureCost === null ? "No court budget cost recorded." : `Cost ${section.gestureCost}.`}
+                          {section.gestureSpent !== null ? ` Used this turn ${section.gestureSpent}.` : ""}
+                        </div>
+                      </div>
+
+                      <div style={{ padding: 10, borderRadius: 12, background: "#fcfaf5", border: "1px solid rgba(172, 143, 100, 0.18)" }}>
+                        <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Timing</div>
+                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45 }}>{section.resolvedSummary}</div>
+                        <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45 }}>{section.responseSummary}</div>
+                      </div>
+                    </div>
+
+                    {section.receipts.length ? (
+                      <div style={{ display: "grid", gap: 8 }}>
+                        <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Matched receipts</div>
+                        {section.receipts.map((receipt) => (
+                          <div
+                            data-counterparty-receipt-line={receipt.id}
+                            key={receipt.id}
+                            style={{
+                              padding: "10px 12px",
+                              borderRadius: 12,
+                              border: "1px solid rgba(172, 143, 100, 0.24)",
+                              background: "#fff"
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+                              <div style={{ fontWeight: 600 }}>{receipt.line}</div>
+                              <div style={{ fontSize: 11, opacity: 0.7 }}>
+                                {receipt.phaseLabel} · {receipt.kind}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, opacity: 0.72 }}>
+                        No receipt lines matched this counterparty yet. The summaries above remain the primary explanation home.
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           {groupedSections.map((section) => (
             <section
               data-receipts-section={section.id}

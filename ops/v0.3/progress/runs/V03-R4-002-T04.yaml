@@ -1,0 +1,46 @@
+version: 1
+run_id: manual-economy-v03-r4-002-t04-20260405T150701-0400
+task_id: V03-R4-002-T04
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-economy-fiscal
+commit: d948b79ef6082b25045fef1e7438d526a88061cf
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  regression_seed_script: scripts/fiscalRegressionSeeds.ts
+  regression_seed_test: tests/sim/fiscal_regression_seed_pack.test.ts
+  regression_seed_pack: qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json
+  regression_turns_15_runs: qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json
+  regression_turns_30_builder_runs: qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/runs.json
+findings:
+  - Added a deterministic regression seed pack with canonical stable, arrears-pressure, dispossession, and manor-count-baseline scenarios sourced from the DOE harness artifacts.
+  - The canonical 15-turn slice still never dispossesses and keeps manor-count distribution fixed at `1`, so the dispossession comparison point is intentionally sourced from a builder-forward 30-turn slice.
+  - The QA flow is recorded inside the seed-pack artifact itself so later balance work can regenerate the same comparison surfaces without reopening docs during this task's restricted path scope.
+stop_reason: continued_same_lane
+next_task_cursor: V03-R4-002-T05
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  qa_fallback: single-worker_vitest_plus_uat_gate
+  regression_seed_pack_hash: fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7
+  turns_30_builder_summary_hash: 2c5b5878bb7caee5f698723fafd78d15a760a69e98b46c0fcbd7f8792984a27f
+  reason: T04 closed cleanly and T05 was immediately promoted and claimed under same-lane continuation.

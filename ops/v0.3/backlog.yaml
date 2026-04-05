@@ -476,7 +476,7 @@ epics:
 - id: V03-R0-005
   title: Relationship seeding and known-world baseline
   release: v0.3.0
-  status: ready
+  status: done
   priority: 57
   tranche: 1
   change_type: behavior_change
@@ -541,7 +541,7 @@ epics:
 - id: V03-R1-001
   title: Map topology contract and numeric distance baseline
   release: v0.3.1
-  status: blocked
+  status: done
   priority: 54
   tranche: 2
   change_type: behavior_change
@@ -670,7 +670,7 @@ epics:
 - id: V03-R1-005
   title: Obligations and counterparty legibility UX
   release: v0.3.1
-  status: todo
+  status: done
   priority: 49
   tranche: 2
   change_type: behavior_change
@@ -1044,7 +1044,7 @@ epics:
 - id: V03-R3-004
   title: Pricing and markets minimal
   release: v0.3.3
-  status: todo
+  status: done
   priority: 37
   tranche: 4
   change_type: behavior_change
@@ -1216,7 +1216,7 @@ epics:
 - id: V03-R4-002
   title: Economy knobs and balance hooks
   release: v0.3.4
-  status: todo
+  status: done
   priority: 30
   tranche: 5
   change_type: behavior_change
@@ -2700,7 +2700,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Expose known-house and dossier summary snapshot fields
-  status: ready
+  status: done
   priority: 95
   tranche: 1
   change_type: behavior_change
@@ -2732,16 +2732,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T20:18:56-0400'
-    claim_expires_at: '2026-04-01T00:18:56-0400'
-    run_id: 2026-03-31_frontier_redispatch_social_economy
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-005-T06
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Close epic and refresh relationship seeding docs
-  status: todo
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor
@@ -3335,7 +3335,7 @@ tasks:
   title: Close epic and refresh world-domain docs
   release: v0.3.1
   parent_epic: V03-R1-001
-  status: ready
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -4251,7 +4251,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Define obligations receipt-grouping and counterparty view-model contract
-  status: ready
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4294,7 +4294,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render obligations modal and counterparty summaries on gameplay surfaces
-  status: todo
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4335,7 +4335,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render arrears stage and enforcement state legibility flows
-  status: todo
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4377,7 +4377,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render gifts and offerings as explicit relationship levers in receipts and summaries
-  status: todo
+  status: done
   priority: 95
   tranche: 2
   change_type: behavior_change
@@ -4418,7 +4418,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Close epic and refresh obligations legibility docs
-  status: todo
+  status: done
   priority: 94
   tranche: 2
   change_type: refactor
@@ -5027,7 +5027,7 @@ tasks:
   title: Audit current relevance and tier-scope rules against topology selectors
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: ready
   priority: 68
   tranche: 3
   change_type: refactor
@@ -5039,7 +5039,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T07
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5076,7 +5076,7 @@ tasks:
   title: Implement deterministic tier-scope cap table
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: todo
   priority: 66
   tranche: 3
   change_type: behavior_change
@@ -5088,7 +5088,7 @@ tasks:
   - V03-XMAP-001
   - V03-R2-002-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5121,7 +5121,7 @@ tasks:
   title: Apply numeric distance and far-threshold selectors to scope capping
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: todo
   priority: 64
   tranche: 3
   change_type: behavior_change
@@ -5134,7 +5134,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R2-002-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5167,7 +5167,7 @@ tasks:
   title: Expose deterministic distance and scope debug outputs
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: todo
   priority: 62
   tranche: 3
   change_type: refactor
@@ -5179,7 +5179,7 @@ tasks:
   - V03-XMAP-001
   - V03-R2-002-T03
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -5212,7 +5212,7 @@ tasks:
   title: Add tier-scope regression fixtures and close epic
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: todo
   priority: 60
   tranche: 3
   change_type: refactor
@@ -5225,7 +5225,7 @@ tasks:
   - V03-R2-002-T03
   - V03-R2-002-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5260,7 +5260,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Audit budget-consuming actions and candidate delegation surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5753,7 +5753,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Audit holdings and ledger surfaces for manor-versus-portfolio scope
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5796,7 +5796,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Define portfolio view-model, manor selector, and outlier summary contract
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -5838,7 +5838,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render portfolio summary, outliers list, and manor-scope toggle
-  status: todo
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5879,7 +5879,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render manor selector and receipts scope filter
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5920,7 +5920,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Wire center-on-selected-holding affordance behind the map checkpoint
-  status: blocked
+  status: ready
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5932,7 +5932,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/App.tsx
   - src/ui/**
@@ -5963,7 +5963,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Close epic and refresh portfolio UX docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -6253,7 +6253,7 @@ tasks:
   title: Audit replay coverage against v0.3 registries and quotas
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 58
   tranche: 4
   change_type: refactor
@@ -6300,7 +6300,7 @@ tasks:
   title: Add at least two new invariants tests for fiscal and portfolio surfaces
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: ready
   priority: 56
   tranche: 4
   change_type: refactor
@@ -6345,7 +6345,7 @@ tasks:
   title: Add replay-hash, snapshot-cap, and turn-budget guards
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: ready
   priority: 54
   tranche: 4
   change_type: refactor
@@ -7028,7 +7028,7 @@ tasks:
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Expose read-only price references in snapshots and UI surfaces
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7060,16 +7060,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-004-T04.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-03-31T20:18:56-0400'
-    claim_expires_at: '2026-04-01T00:18:56-0400'
-    run_id: 2026-03-31_frontier_redispatch_social_economy
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-004-T05
   parent_epic: V03-R3-004
   release: v0.3.3
   title: Add pricing regression coverage and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -8004,7 +8004,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Audit fiscal constants and identify tunable knob surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 5
   change_type: refactor
@@ -8048,7 +8048,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Define central tuning table for obligations, maintenance, prices, and consumption
-  status: todo
+  status: done
   priority: 98
   tranche: 5
   change_type: refactor
@@ -8089,7 +8089,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Add fiscal DOE harness and KPI summary artifacts
-  status: todo
+  status: done
   priority: 97
   tranche: 5
   change_type: behavior_change
@@ -8131,7 +8131,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Add balance regression seeds for arrears, dispossession, and manor-count distribution
-  status: todo
+  status: done
   priority: 96
   tranche: 5
   change_type: behavior_change
@@ -8172,7 +8172,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Close epic and refresh balance-hook docs
-  status: todo
+  status: done
   priority: 95
   tranche: 5
   change_type: refactor
