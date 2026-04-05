@@ -1,4 +1,3 @@
-import { UNREST_BASELINE_DECAY_WHEN_STABLE } from "../../constants";
 import type { PhaseNameV0, RunState } from "../../types";
 import { clampInt } from "../../util";
 import { applyRelationshipDelta } from "../people/relationshipEngine";
@@ -10,6 +9,10 @@ import {
   type EconomyObligationCounterpartyKindV1,
   type EconomyObligationRegistryV1
 } from "./obligationRegistry";
+import {
+  economyObligationStageOneRelationshipDelta,
+  economyStableUnrestReliefWhenClear
+} from "./tuningTable";
 
 export const ECONOMY_OBLIGATION_PENALTY_STAGE_SCHEMA_VERSION = "economy_obligation_penalty_stage_v1" as const;
 export const ECONOMY_OBLIGATION_PENALTY_STAGE_CATEGORY = "enforcement.penalty" as const;
@@ -73,15 +76,7 @@ function penaltyRelationshipDelta(
   counterpartyKind: EconomyObligationCounterpartyKindV1,
   arrearsAmount: number
 ): { respect: number; threat: number } {
-  if (arrearsAmount > 0) {
-    return { respect: -1, threat: +1 };
-  }
-
-  if (counterpartyKind === "liege") {
-    return { respect: +1, threat: -1 };
-  }
-
-  return { respect: +1, threat: 0 };
+  return economyObligationStageOneRelationshipDelta(counterpartyKind, arrearsAmount > 0 ? "arrears" : "clear");
 }
 
 function penaltyRuleId(
@@ -128,7 +123,7 @@ export function buildEconomyObligationPenaltyStageFromState(
 
   const shortage = shortageActive(state, input);
   const allClear = entries.every((entry) => entry.arrears_amount === 0);
-  const stableUnrestDelta = !shortage && allClear ? -UNREST_BASELINE_DECAY_WHEN_STABLE : 0;
+  const stableUnrestDelta = !shortage && allClear ? -economyStableUnrestReliefWhenClear() : 0;
 
   return {
     schema_version: ECONOMY_OBLIGATION_PENALTY_STAGE_SCHEMA_VERSION,

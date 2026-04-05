@@ -1,19 +1,16 @@
-import { BUSHELS_PER_PERSON_PER_YEAR, BUILDER_EXTRA_BUSHELS_PER_YEAR, TURN_YEARS } from "../../constants";
 import { courtConsumptionBushels_v0_2_4 } from "../../court";
 import type { PhaseNameV0, RunState } from "../../types";
 import { foodStoreBalance, meatStoreBalance } from "./ledger";
 import { buildEconomyProductionOutputsFromState } from "./productionRegistry";
 import { spendTrackedStoreWithReceiptWriter } from "./storeReceiptWriters";
+import { ECONOMY_FISCAL_TUNING_TABLE } from "./tuningTable";
 
 export const ECONOMY_CONSUMPTION_SCHEMA_VERSION = "economy_consumption_v1" as const;
 export const ECONOMY_EQUILIBRIUM_FIXTURE_SCHEMA_VERSION = "economy_equilibrium_fixture_v1" as const;
 
 // Meat is a bounded supplement rather than a staple. Court intake gets a richer target,
 // but any leftover store can still backfill food shortfalls before a shortage is declared.
-export const ECONOMY_MEAT_TARGET_BPS = {
-  peasant: 100,
-  court: 500
-} as const;
+export const ECONOMY_MEAT_TARGET_BPS = ECONOMY_FISCAL_TUNING_TABLE.consumption.meat_target_bps;
 
 export interface EconomyConsumptionInputV1 {
   turn: number;
@@ -118,16 +115,22 @@ export function peasantConsumptionBushelsForState(state: RunState): number {
   const idle = Math.max(0, population - farmers - builders);
 
   return normalizedNonNegative(
-    (farmers * BUSHELS_PER_PERSON_PER_YEAR +
-      builders * (BUSHELS_PER_PERSON_PER_YEAR + BUILDER_EXTRA_BUSHELS_PER_YEAR) +
-      idle * BUSHELS_PER_PERSON_PER_YEAR) *
-      TURN_YEARS
+    (farmers * ECONOMY_FISCAL_TUNING_TABLE.consumption.bushels_per_person_per_year +
+      builders *
+        (ECONOMY_FISCAL_TUNING_TABLE.consumption.bushels_per_person_per_year +
+          ECONOMY_FISCAL_TUNING_TABLE.consumption.builder_extra_bushels_per_year) +
+      idle * ECONOMY_FISCAL_TUNING_TABLE.consumption.bushels_per_person_per_year) *
+      ECONOMY_FISCAL_TUNING_TABLE.consumption.turn_years
   );
 }
 
 export function courtConsumptionBushelsForState(state: RunState): number {
   return normalizedNonNegative(
-    courtConsumptionBushels_v0_2_4(state, BUSHELS_PER_PERSON_PER_YEAR, TURN_YEARS).court_consumption_bushels
+    courtConsumptionBushels_v0_2_4(
+      state,
+      ECONOMY_FISCAL_TUNING_TABLE.consumption.bushels_per_person_per_year,
+      ECONOMY_FISCAL_TUNING_TABLE.consumption.turn_years
+    ).court_consumption_bushels
   );
 }
 

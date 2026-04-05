@@ -1,6 +1,6 @@
-import { TURN_YEARS } from "../../constants";
 import type { RunState } from "../../types";
 import { meatStoreBalance, trackedStoreBalance } from "./ledger";
+import { ECONOMY_FISCAL_TUNING_TABLE } from "./tuningTable";
 
 export const ECONOMY_PRODUCTION_REGISTRY_SCHEMA_VERSION = "economy_production_registry_v1" as const;
 export const ECONOMY_PRODUCTION_SUMMARY_SCHEMA_VERSION = "economy_production_summary_v1" as const;
@@ -80,8 +80,15 @@ export function makeEconomyProductionSourceKey(
 export function deterministicHuntingYieldForState(state: RunState): number {
   const idleWorkers = Math.max(0, normalizeInteger(state.manor.population) - normalizeInteger(state.manor.farmers) - normalizeInteger(state.manor.builders));
   const headMartial = Math.max(0, normalizeInteger(state.house.head?.traits?.martial ?? 0));
-  const baseYield = Math.floor((idleWorkers * TURN_YEARS) / 2);
-  const martialBonus = Math.floor((idleWorkers * Math.max(0, headMartial - 2)) / 3);
+  const baseYield = Math.floor(
+    (idleWorkers * ECONOMY_FISCAL_TUNING_TABLE.production.turn_years) /
+      ECONOMY_FISCAL_TUNING_TABLE.production.hunting.idle_worker_turn_years_divisor
+  );
+  const martialBonus = Math.floor(
+    (idleWorkers *
+      Math.max(0, headMartial - ECONOMY_FISCAL_TUNING_TABLE.production.hunting.martial_bonus_threshold)) /
+      ECONOMY_FISCAL_TUNING_TABLE.production.hunting.martial_bonus_divisor
+  );
   return normalizedNonNegative(baseYield + martialBonus);
 }
 
