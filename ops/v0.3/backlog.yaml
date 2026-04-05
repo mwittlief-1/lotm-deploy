@@ -4941,7 +4941,7 @@ tasks:
   title: Render portfolio totals and outliers UI stub
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: ready
+  status: done
   priority: 72
   tranche: 3
   change_type: refactor
