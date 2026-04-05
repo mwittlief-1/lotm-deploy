@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-001-T06
-  last_completed_task_id: V03-R2-001-T07
+  current_task_id: V03-R2-001-T08
+  last_completed_task_id: V03-R2-001-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 90bb905be75ea5d275bb0146d64071d519cba8c4
+  git_commit: 54f4984ba53bf9ed7c17781be7de8f0dcc6fc28d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,8 +21,7 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted UI V03-R2-001-T07 on kickoff. Tooling
-  V03-R2-001-T06 remains the only open frontier before
-  Economy can close the portfolio-accounting epic with
-  V03-R2-001-T08.
+  Accepted Tooling V03-R2-001-T06 on kickoff and
+  promoted Economy V03-R2-001-T08 as the final
+  portfolio-accounting epic closeout task.
 active_claims: {}
