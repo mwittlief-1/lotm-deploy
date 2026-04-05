@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-001-T04
+  last_completed_task_id: V03-R2-001-T08
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: d3123b97d7436db68d8a773032d5410250b23b50
+  git_commit: e05ffb3244e984de7847de43ab9d086b46364c84
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,12 +21,18 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Closed Economy V03-R2-001-T04 after landing deterministic
-  per-manor net and outlier analysis. No same-lane follow-on is
-  claimable here because V03-R2-001-T05 is integrator-owned on
-  codex/v0.3-refactor-kickoff, so the economy lane stops cleanly
-  while keeping the local validator's empty current_task_id mirror.
+  Refreshed the economy lane from kickoff truth, closed the
+  V03-R2-001 portfolio-accounting epic, and promoted Economy
+  V03-R4-002-T01 as the next same-lane dependency-clean task
+  while keeping the local validator's empty current_task_id
+  mirror.
 active_claims:
+  codex/v0.3-lane-economy-fiscal:
+    task_id: V03-R4-002-T01
+    claimed_by: manual-economy-lane
+    claimed_at: '2026-04-05T14:35:43-04:00'
+    claim_expires_at: '2026-04-05T18:35:43-04:00'
+    run_id: manual-economy-v03-r4-002-t01-20260405T143543-0400
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
     claimed_by: manual-social-lane
