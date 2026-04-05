@@ -108,9 +108,13 @@ describe("ReceiptsViewerPanel", () => {
         mode="grouped"
         onModeChange={() => undefined}
         rawPhases={data.rawPhases}
+        scopeLabel="Current manor chronicle"
+        scopeSummary="Explain Changes is still showing the current manor receipt trail."
       />
     );
 
+    expect(markup).toContain("Current manor chronicle");
+    expect(markup).toContain("Explain Changes is still showing the current manor receipt trail.");
     expect(markup).toContain("Counterparty paths");
     expect(markup).toContain("Relationship lever");
     expect(markup).toContain("Gift to liege");

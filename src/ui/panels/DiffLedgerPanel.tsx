@@ -13,9 +13,11 @@ type DiffLedgerPanelProps = {
   copy: any;
   items: DiffLedgerItem[];
   onOpenExplainChanges?: () => void;
+  scopeHelperText?: string;
+  scopeLabel?: string;
 };
 
-export function DiffLedgerPanel({ copy, items, onOpenExplainChanges }: DiffLedgerPanelProps) {
+export function DiffLedgerPanel({ copy, items, onOpenExplainChanges, scopeHelperText, scopeLabel }: DiffLedgerPanelProps) {
   return (
     <div style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginBottom: 12 }}>
       <SectionHeading
@@ -26,11 +28,28 @@ export function DiffLedgerPanel({ copy, items, onOpenExplainChanges }: DiffLedge
             </button>
           ) : null
         }
-        helper={copy.diffLedgerHelper}
+        helper={scopeHelperText ?? copy.diffLedgerHelper}
         sigil={PLAY_SCREEN_SECTION_SIGILS.ledger}
         timingLabel={copy.turnSummary_last3Years}
         title={copy.diffLedgerTitle}
       />
+
+      {scopeLabel ? (
+        <div style={{ marginTop: 10 }}>
+          <span
+            style={{
+              fontSize: 11,
+              padding: "2px 8px",
+              border: "1px solid rgba(172, 143, 100, 0.32)",
+              borderRadius: 999,
+              background: "#f8f0df",
+              color: "#74542f"
+            }}
+          >
+            {scopeLabel}
+          </span>
+        </div>
+      ) : null}
 
       <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
         {items.map((it) => (
