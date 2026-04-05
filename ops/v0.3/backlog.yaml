@@ -1077,7 +1077,7 @@ epics:
 - id: V03-R3-005
   title: Realm political weather scaffolding
   release: v0.3.3
-  status: todo
+  status: done
   priority: 36
   tranche: 4
   change_type: behavior_change
@@ -7272,7 +7272,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7304,11 +7304,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-05T00:49:44-0400'
-    claim_expires_at: '2026-04-05T04:49:44-0400'
-    run_id: manual-engine-v03-r3-005-t05-20260405T004944-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-006-T01
   parent_epic: V03-R3-006
   release: v0.3.3
