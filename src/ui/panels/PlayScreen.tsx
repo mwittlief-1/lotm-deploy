@@ -53,6 +53,7 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import { buildPortfolioOverviewSurface } from "../playScreenPortfolio";
 import {
   buildObligationsCounterpartyContract,
   createObligationsModalRoute,
@@ -89,6 +90,7 @@ import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
 import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
+import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
@@ -206,6 +208,7 @@ export function PlayScreen({
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
+  const portfolioSurface = useMemo(() => buildPortfolioOverviewSurface(ctx.preview_state), [ctx.preview_state]);
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -687,6 +690,7 @@ export function PlayScreen({
         turnYears={TURN_YEARS}
       />
     ),
+    portfolio_overview: portfolioSurface ? <PortfolioOverviewPanel surface={portfolioSurface} /> : null,
     prospects: (
       <ProspectsPanel
         anchorId={PLAY_ANCHORS.prospects}
