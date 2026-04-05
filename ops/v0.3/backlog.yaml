@@ -7231,7 +7231,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Expose political weather outputs to snapshots and content hooks
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7263,16 +7263,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T04.yaml
   claim:
-    status: claimed
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-05T00:09:49-0400'
-    claim_expires_at: '2026-04-05T04:09:49-0400'
-    run_id: manual-engine-v03-r3-005-t04-20260405T000949-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-005-T05
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7304,11 +7304,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T05.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-engine-lane
+    claimed_at: '2026-04-05T00:49:44-0400'
+    claim_expires_at: '2026-04-05T04:49:44-0400'
+    run_id: manual-engine-v03-r3-005-t05-20260405T004944-0400
 - id: V03-R3-006-T01
   parent_epic: V03-R3-006
   release: v0.3.3

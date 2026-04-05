@@ -11,12 +11,14 @@ import {
 
 export const REALM_PRESSURE_REGISTRY_SCHEMA_VERSION = "realm_pressure_registry_v1" as const;
 export const POLITICAL_WEATHER_SCHEMA_VERSION = "political_weather_v1" as const;
+export const POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION = "political_weather_content_hooks_v1" as const;
 export const REALM_PRESSURE_ACTOR_KEYS = ["crown", "magnates", "church"] as const;
 export const REALM_PRESSURE_READ_MODE = "read_only" as const;
 export const REALM_PRESSURE_ACTIVATION_STATUS = "inactive" as const;
 export const REALM_PRESSURE_BASELINE_STATUSES = ["placeholder_zero", "seeded"] as const;
 export const REALM_MAGNATE_RELATIONSHIP_BANDS = ["unknown", "favorable", "steady", "wary", "hostile"] as const;
 export const REALM_MAGNATE_KINSHIP_SUMMARIES = ["none", "blood_tie", "marriage_tie", "blood_and_marriage_tie"] as const;
+export const POLITICAL_WEATHER_PRESSURE_BANDS = ["quiet", "watchful", "elevated", "critical"] as const;
 
 export type RealmPressureActorKeyV1 = typeof REALM_PRESSURE_ACTOR_KEYS[number];
 export type RealmPressureReadModeV1 = typeof REALM_PRESSURE_READ_MODE;
@@ -24,6 +26,7 @@ export type RealmPressureActivationStatusV1 = typeof REALM_PRESSURE_ACTIVATION_S
 export type RealmPressureBaselineStatusV1 = typeof REALM_PRESSURE_BASELINE_STATUSES[number];
 export type RealmMagnateRelationshipBandV1 = typeof REALM_MAGNATE_RELATIONSHIP_BANDS[number];
 export type RealmMagnateKinshipSummaryV1 = typeof REALM_MAGNATE_KINSHIP_SUMMARIES[number];
+export type PoliticalWeatherPressureBandV1 = typeof POLITICAL_WEATHER_PRESSURE_BANDS[number];
 export type RealmPressureEnforcementStateV1 = "clear" | "arrears";
 export type RealmPressureChurchTargetModeV1 =
   | "split_surface"
@@ -162,6 +165,60 @@ export interface PoliticalWeatherV1 {
   registry: RealmPressureRegistryV1;
 }
 
+export interface PoliticalWeatherBuildInputV1 {
+  known_houses?: KnownHouseSummary[];
+  house_dossiers?: HouseDossierSummary[];
+}
+
+interface PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: RealmPressureActorKeyV1;
+  actor_label: string;
+  latent_pressure: number;
+  pressure_band: PoliticalWeatherPressureBandV1;
+  summary_line: string;
+}
+
+export interface PoliticalWeatherContentHookCrownEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "crown";
+  total_outstanding: number;
+  grant_pressure_estimate: number;
+  war_levy_active: boolean;
+  enforcement_state: RealmPressureEnforcementStateV1;
+}
+
+export interface PoliticalWeatherContentHookMagnatesEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "magnates";
+  observed_house_count: number;
+  high_pressure_house_count: number;
+  hostile_house_count: number;
+  wary_house_count: number;
+  source_surface_status: RealmPressureSourceSurfaceStatusV1;
+}
+
+export interface PoliticalWeatherContentHookChurchEntryV1 extends PoliticalWeatherContentHookEntryBaseV1 {
+  actor_key: "church";
+  total_outstanding: number;
+  church_target_mode: RealmPressureChurchTargetModeV1;
+  enforcement_state: RealmPressureEnforcementStateV1;
+}
+
+export interface PoliticalWeatherContentHooksV1 {
+  schema_version: typeof POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION;
+  turn: number;
+  read_mode: RealmPressureReadModeV1;
+  activation_status: RealmPressureActivationStatusV1;
+  actor_order: RealmPressureActorKeyV1[];
+  shared_context: PoliticalWeatherSharedContextV1;
+  highest_pressure_actor_key: RealmPressureActorKeyV1 | null;
+  highest_pressure_value: number;
+  any_elevated_pressure: boolean;
+  actors_by_key: {
+    crown: PoliticalWeatherContentHookCrownEntryV1;
+    magnates: PoliticalWeatherContentHookMagnatesEntryV1;
+    church: PoliticalWeatherContentHookChurchEntryV1;
+  };
+}
+
 interface RelationshipVectorLike {
   allegiance: number;
   respect: number;
@@ -214,8 +271,8 @@ function kinshipCounts(): RealmMagnateKinshipCountsV1 {
   };
 }
 
-function readKnownHouses(state: RunState): KnownHouseSummary[] {
-  const rows = Array.isArray(state.known_houses) ? state.known_houses : [];
+function readKnownHouses(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): KnownHouseSummary[] {
+  const rows = Array.isArray(input.known_houses) ? input.known_houses : Array.isArray(state.known_houses) ? state.known_houses : [];
   const byHouseId = new Map<string, KnownHouseSummary>();
 
   for (const row of rows) {
@@ -228,8 +285,9 @@ function readKnownHouses(state: RunState): KnownHouseSummary[] {
   return [...byHouseId.values()].sort((a, b) => compareText(a.house_id, b.house_id));
 }
 
-function readHouseDossiers(state: RunState): HouseDossierSummary[] {
-  const rows = Array.isArray(state.house_dossiers) ? state.house_dossiers : [];
+function readHouseDossiers(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): HouseDossierSummary[] {
+  const rows =
+    Array.isArray(input.house_dossiers) ? input.house_dossiers : Array.isArray(state.house_dossiers) ? state.house_dossiers : [];
   const byHouseId = new Map<string, HouseDossierSummary>();
 
   for (const row of rows) {
@@ -335,6 +393,14 @@ function churchTargetMode(state: RunState, parish: Institution | null): RealmPre
   return "missing";
 }
 
+function pressureBand(latentPressure: number): PoliticalWeatherPressureBandV1 {
+  const normalized = clampLatentPressure(latentPressure);
+  if (normalized >= 60) return "critical";
+  if (normalized >= 40) return "elevated";
+  if (normalized >= 20) return "watchful";
+  return "quiet";
+}
+
 function baseEntry(
   actorKey: RealmPressureActorKeyV1,
   actorLabel: string,
@@ -420,10 +486,10 @@ function buildCrownPressureEntry(
   };
 }
 
-function buildMagnatesPressureEntry(state: RunState): RealmMagnatesPressureEntryV1 {
+function buildMagnatesPressureEntry(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): RealmMagnatesPressureEntryV1 {
   const anyState = state as any;
-  const knownHouses = readKnownHouses(state);
-  const dossiers = readHouseDossiers(state);
+  const knownHouses = readKnownHouses(state, input);
+  const dossiers = readHouseDossiers(state, input);
   const localNobleIds = canonicalStringList((state.locals?.nobles ?? []).map((person) => person.id));
   const relevantHouseIds = canonicalStringList([
     ...knownHouses.map((row) => row.house_id),
@@ -443,7 +509,12 @@ function buildMagnatesPressureEntry(state: RunState): RealmMagnatesPressureEntry
   }
 
   const sourceSurfaceStatus: RealmPressureSourceSurfaceStatusV1 =
-    Array.isArray(anyState?.known_houses) || Array.isArray(anyState?.house_dossiers) ? "available" : "missing";
+    Array.isArray(input.known_houses) ||
+    Array.isArray(input.house_dossiers) ||
+    Array.isArray(anyState?.known_houses) ||
+    Array.isArray(anyState?.house_dossiers)
+      ? "available"
+      : "missing";
   const dossierPressure = Math.min(50, bands.hostile * 14 + bands.wary * 8 + bands.steady * 3 + bands.unknown * 2);
   const knownHousePressure = knownHouseRelationshipPressure(knownHouses);
   const noblePressure = localNobleRelationshipPressure(state, localNobleIds) + Math.min(10, localNobleIds.length * 2);
@@ -549,7 +620,10 @@ function summaryLineForEntry(entry: RealmPressureEntryV1): string {
   }
 }
 
-export function buildRealmPressureRegistryFromState(state: RunState): RealmPressureRegistryV1 {
+export function buildRealmPressureRegistryFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): RealmPressureRegistryV1 {
   const registry = buildEconomyObligationRegistryFromState(state);
   const penaltyByKind = buildPenaltyByKind(state);
   const actorOrder = [...REALM_PRESSURE_ACTOR_KEYS];
@@ -560,14 +634,17 @@ export function buildRealmPressureRegistryFromState(state: RunState): RealmPress
     actor_order: actorOrder,
     entries_by_key: {
       crown: buildCrownPressureEntry(state, registry, penaltyByKind),
-      magnates: buildMagnatesPressureEntry(state),
+      magnates: buildMagnatesPressureEntry(state, input),
       church: buildChurchPressureEntry(state, registry, penaltyByKind)
     }
   };
 }
 
-export function buildPoliticalWeatherFromState(state: RunState): PoliticalWeatherV1 {
-  const registry = buildRealmPressureRegistryFromState(state);
+export function buildPoliticalWeatherFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): PoliticalWeatherV1 {
+  const registry = buildRealmPressureRegistryFromState(state, input);
   const actorOrder = [...registry.actor_order];
   const shortageActive = Boolean((state.flags as Record<string, unknown>).Shortage);
   const warLevyActive = Boolean(state.manor?.obligations?.war_levy_due);
@@ -589,10 +666,87 @@ export function buildPoliticalWeatherFromState(state: RunState): PoliticalWeathe
   };
 }
 
-export function serializeRealmPressureRegistrySnapshot(state: RunState): string {
-  return JSON.stringify(buildRealmPressureRegistryFromState(state));
+export function buildPoliticalWeatherContentHooksFromWeather(weather: PoliticalWeatherV1): PoliticalWeatherContentHooksV1 {
+  const actorOrder = [...weather.actor_order];
+  let highestPressureActorKey: RealmPressureActorKeyV1 | null = null;
+  let highestPressureValue = -1;
+
+  for (const actorKey of actorOrder) {
+    const latentPressure = weather.registry.entries_by_key[actorKey].latent_pressure;
+    if (latentPressure > highestPressureValue) {
+      highestPressureValue = latentPressure;
+      highestPressureActorKey = actorKey;
+    }
+  }
+
+  const actorsByKey = {
+    crown: {
+      actor_key: "crown",
+      actor_label: weather.registry.entries_by_key.crown.actor_label,
+      latent_pressure: weather.registry.entries_by_key.crown.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.crown.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("crown")] ?? "",
+      total_outstanding: weather.registry.entries_by_key.crown.inputs.total_outstanding,
+      grant_pressure_estimate: weather.registry.entries_by_key.crown.inputs.grant_pressure_estimate,
+      war_levy_active: weather.registry.entries_by_key.crown.inputs.war_levy_active,
+      enforcement_state: weather.registry.entries_by_key.crown.inputs.enforcement_state
+    },
+    magnates: {
+      actor_key: "magnates",
+      actor_label: weather.registry.entries_by_key.magnates.actor_label,
+      latent_pressure: weather.registry.entries_by_key.magnates.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.magnates.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("magnates")] ?? "",
+      observed_house_count: weather.registry.entries_by_key.magnates.inputs.relevant_house_ids.length,
+      high_pressure_house_count: weather.registry.entries_by_key.magnates.inputs.high_pressure_house_ids.length,
+      hostile_house_count: weather.registry.entries_by_key.magnates.inputs.relationship_band_counts.hostile,
+      wary_house_count: weather.registry.entries_by_key.magnates.inputs.relationship_band_counts.wary,
+      source_surface_status: weather.registry.entries_by_key.magnates.inputs.source_surface_status
+    },
+    church: {
+      actor_key: "church",
+      actor_label: weather.registry.entries_by_key.church.actor_label,
+      latent_pressure: weather.registry.entries_by_key.church.latent_pressure,
+      pressure_band: pressureBand(weather.registry.entries_by_key.church.latent_pressure),
+      summary_line: weather.summary_lines[actorOrder.indexOf("church")] ?? "",
+      total_outstanding: weather.registry.entries_by_key.church.inputs.total_outstanding,
+      church_target_mode: weather.registry.entries_by_key.church.inputs.church_target_mode,
+      enforcement_state: weather.registry.entries_by_key.church.inputs.enforcement_state
+    }
+  } satisfies PoliticalWeatherContentHooksV1["actors_by_key"];
+
+  return {
+    schema_version: POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION,
+    turn: weather.turn,
+    read_mode: weather.read_mode,
+    activation_status: weather.activation_status,
+    actor_order: actorOrder,
+    shared_context: { ...weather.shared_context },
+    highest_pressure_actor_key: highestPressureActorKey,
+    highest_pressure_value: highestPressureValue >= 0 ? highestPressureValue : 0,
+    any_elevated_pressure: actorOrder.some((actorKey) => weather.registry.entries_by_key[actorKey].latent_pressure >= 40),
+    actors_by_key: actorsByKey
+  };
 }
 
-export function serializePoliticalWeatherSnapshot(state: RunState): string {
-  return JSON.stringify(buildPoliticalWeatherFromState(state));
+export function buildPoliticalWeatherContentHooksFromState(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): PoliticalWeatherContentHooksV1 {
+  return buildPoliticalWeatherContentHooksFromWeather(buildPoliticalWeatherFromState(state, input));
+}
+
+export function serializeRealmPressureRegistrySnapshot(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): string {
+  return JSON.stringify(buildRealmPressureRegistryFromState(state, input));
+}
+
+export function serializePoliticalWeatherSnapshot(state: RunState, input: PoliticalWeatherBuildInputV1 = {}): string {
+  return JSON.stringify(buildPoliticalWeatherFromState(state, input));
+}
+
+export function serializePoliticalWeatherContentHooksSnapshot(
+  state: RunState,
+  input: PoliticalWeatherBuildInputV1 = {}
+): string {
+  return JSON.stringify(buildPoliticalWeatherContentHooksFromState(state, input));
 }
