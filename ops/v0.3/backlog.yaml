@@ -4806,7 +4806,7 @@ tasks:
   title: Implement per-manor net and outliers computation
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: ready
+  status: done
   priority: 78
   tranche: 3
   change_type: behavior_change
@@ -4830,11 +4830,11 @@ tasks:
   requires_golden_change: true
   expected_diff_note: Portfolio outputs may gain per-manor net values and outlier lists.
   claim:
-    status: claimed
-    claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T07:16:36-04:00'
-    claim_expires_at: '2026-04-05T11:16:36-04:00'
-    run_id: manual-economy-v03-r2-001-t04-20260405T071636-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - per-manor net values are computed deterministically
   - outlier identification is deterministic and bounded
