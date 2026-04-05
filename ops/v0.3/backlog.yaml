@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4005,7 +4005,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Define next-in-line map and claimant registry schema
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
