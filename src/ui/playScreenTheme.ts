@@ -125,6 +125,7 @@ export const PLAY_SCREEN_SECTION_SIGILS = {
   ledger: "LD",
   state: "ST",
   report: "RP",
+  portfolio: "PF",
   decisions: "DO",
   receipts: "EX"
 } as const;
