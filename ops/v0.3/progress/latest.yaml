@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-001-T06
+  last_completed_task_id: V03-R3-001-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: dd34972e2ff94ecaf4c5dc0c991a997e670b49bc
+  git_commit: 5f5a6e2c12f5bae9737f0b775711be1994b0cfe7
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,8 +20,5 @@ last_run:
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-notes: >-
-  Closed Tooling V03-R2-001-T06 after adding the multi-manor
-  portfolio invariant regression suite and QA guidance. No
-  tooling lane claims remain active after the handoff.
+notes: Imported canonical backlog has been normalized to repo-truth paths and canonical claims. Lane-parallel scheduling is active with current_task_id set to (none). No active lane claims are currently recorded. World/topology automation remains blocked behind V03-XMAP-001.
 active_claims: {}
