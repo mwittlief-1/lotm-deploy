@@ -162,6 +162,12 @@ export interface PoliticalWeatherV1 {
   registry: RealmPressureRegistryV1;
 }
 
+interface RelationshipVectorLike {
+  allegiance: number;
+  respect: number;
+  threat: number;
+}
+
 function compareText(a: string, b: string): number {
   if (a < b) return -1;
   if (a > b) return 1;
@@ -176,8 +182,17 @@ function normalizeNonNegativeInteger(value: number): number {
   return Math.max(0, normalizeInteger(value));
 }
 
+function clampLatentPressure(value: number): number {
+  return Math.max(0, Math.min(100, normalizeInteger(value)));
+}
+
 function canonicalStringList(values: readonly string[]): string[] {
   return [...new Set(values.map((value) => String(value)).filter((value) => value.length > 0))].sort(compareText);
+}
+
+function averageRounded(values: readonly number[]): number {
+  if (values.length === 0) return 0;
+  return normalizeInteger(values.reduce((sum, value) => sum + value, 0) / values.length);
 }
 
 function relationshipBandCounts(): RealmMagnateRelationshipBandCountsV1 {
@@ -258,6 +273,49 @@ function grantPressureEstimate(state: RunState): number {
   return normalizeNonNegativeInteger(arrearsCoin + Math.floor(arrearsBushels / 100));
 }
 
+function relationshipVectorFromState(state: RunState, actorId: string | null | undefined): RelationshipVectorLike | null {
+  const normalizedActorId = typeof actorId === "string" && actorId.length > 0 ? actorId : null;
+  const headId = typeof state.house?.head?.id === "string" && state.house.head.id.length > 0 ? state.house.head.id : null;
+  if (!normalizedActorId || !headId) return null;
+
+  const direct = (state.relationships ?? []).find((edge) => edge.from_id === normalizedActorId && edge.to_id === headId);
+  const reverse = (state.relationships ?? []).find((edge) => edge.from_id === headId && edge.to_id === normalizedActorId);
+  const edge = direct ?? reverse;
+  if (!edge) return null;
+
+  return {
+    allegiance: normalizeNonNegativeInteger(edge.allegiance),
+    respect: normalizeNonNegativeInteger(edge.respect),
+    threat: normalizeNonNegativeInteger(edge.threat)
+  };
+}
+
+function relationshipPressureFromVector(vector: RelationshipVectorLike | null | undefined): number {
+  if (!vector) return 0;
+
+  const allegiancePressure = Math.max(0, 55 - normalizeNonNegativeInteger(vector.allegiance));
+  const respectPressure = Math.max(0, 55 - normalizeNonNegativeInteger(vector.respect));
+  const threatPressure = Math.max(0, normalizeNonNegativeInteger(vector.threat) - 15);
+
+  return clampLatentPressure(Math.floor((allegiancePressure + respectPressure + threatPressure) / 3));
+}
+
+function knownHouseRelationshipPressure(knownHouses: readonly KnownHouseSummary[]): number {
+  return averageRounded(
+    knownHouses
+      .map((row) => relationshipPressureFromVector(row.relationship ?? null))
+      .filter((value) => value > 0)
+  );
+}
+
+function localNobleRelationshipPressure(state: RunState, nobleIds: readonly string[]): number {
+  return averageRounded(
+    nobleIds
+      .map((nobleId) => relationshipPressureFromVector(relationshipVectorFromState(state, nobleId)))
+      .filter((value) => value > 0)
+  );
+}
+
 function warLevyKind(state: RunState): string | null {
   const levy = state.manor?.obligations?.war_levy_due;
   return levy && typeof levy.kind === "string" && levy.kind.length > 0 ? levy.kind : null;
@@ -281,7 +339,9 @@ function baseEntry(
   actorKey: RealmPressureActorKeyV1,
   actorLabel: string,
   sourceSurfaceIds: readonly string[],
-  sourceSummary: string
+  sourceSummary: string,
+  latentPressure: number,
+  baselineStatus: RealmPressureBaselineStatusV1
 ): RealmPressureEntryBaseV1 {
   return {
     schema_version: REALM_PRESSURE_REGISTRY_SCHEMA_VERSION,
@@ -289,8 +349,8 @@ function baseEntry(
     actor_label: actorLabel,
     read_mode: REALM_PRESSURE_READ_MODE,
     activation_status: REALM_PRESSURE_ACTIVATION_STATUS,
-    baseline_status: "placeholder_zero",
-    latent_pressure: 0,
+    baseline_status: baselineStatus,
+    latent_pressure: clampLatentPressure(latentPressure),
     source_surface_ids: canonicalStringList(sourceSurfaceIds),
     source_summary: sourceSummary
   };
@@ -313,6 +373,15 @@ function buildCrownPressureEntry(
 ): RealmCrownPressureEntryV1 {
   const liege = registry.counterparties_by_key.liege;
   const penalty = penaltyByKind.liege;
+  const relationshipPressure = relationshipPressureFromVector(relationshipVectorFromState(state, liege.counterparty_id));
+  const liabilityPressure = Math.min(
+    35,
+    normalizeNonNegativeInteger(liege.due_amount) + normalizeNonNegativeInteger(liege.arrears_amount) * 2
+  );
+  const grantPressure = Math.min(18, grantPressureEstimate(state) * 2);
+  const levyPressure = Boolean(state.manor?.obligations?.war_levy_due) ? 12 : 0;
+  const unrestPressure = Math.min(8, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 12));
+  const latentPressure = liabilityPressure + grantPressure + levyPressure + relationshipPressure + unrestPressure;
 
   return {
     ...baseEntry(
@@ -324,7 +393,9 @@ function buildCrownPressureEntry(
         "manor.obligations.war_levy_due",
         "phase_prospects.grant_pressure_proxy"
       ],
-      "Read-only crown precursor surface combines liege obligations, stage-one enforcement, the current arrears-based grant proxy, and war-levy visibility."
+      "Read-only crown precursor surface combines liege obligations, stage-one enforcement, the current arrears-based grant proxy, war-levy visibility, and liege relationship strain.",
+      latentPressure,
+      "seeded"
     ),
     actor_key: "crown",
     inputs: {
@@ -373,13 +444,23 @@ function buildMagnatesPressureEntry(state: RunState): RealmMagnatesPressureEntry
 
   const sourceSurfaceStatus: RealmPressureSourceSurfaceStatusV1 =
     Array.isArray(anyState?.known_houses) || Array.isArray(anyState?.house_dossiers) ? "available" : "missing";
+  const dossierPressure = Math.min(50, bands.hostile * 14 + bands.wary * 8 + bands.steady * 3 + bands.unknown * 2);
+  const knownHousePressure = knownHouseRelationshipPressure(knownHouses);
+  const noblePressure = localNobleRelationshipPressure(state, localNobleIds) + Math.min(10, localNobleIds.length * 2);
+  const kinshipRelief =
+    kinships.blood_and_marriage_tie * 4 + kinships.blood_tie * 2 + kinships.marriage_tie;
+  const unrestPressure = Math.min(5, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 20));
+  const latentPressure = dossierPressure + knownHousePressure + noblePressure + unrestPressure - kinshipRelief;
+  const hasSeedContext = localNobleIds.length > 0 || knownHouses.length > 0 || dossiers.length > 0;
 
   return {
     ...baseEntry(
       "magnates",
       "Magnates",
       ["house_dossiers", "known_houses", "locals.nobles"],
-      "Read-only magnate precursor surface combines observed local nobles with known-house and dossier summaries when available."
+      "Read-only magnate precursor surface combines observed local nobles with known-house summaries, dossier bands, and current magnate relationship strain when available.",
+      latentPressure,
+      hasSeedContext ? "seeded" : "placeholder_zero"
     ),
     actor_key: "magnates",
     inputs: {
@@ -403,6 +484,18 @@ function buildChurchPressureEntry(
   const church = registry.counterparties_by_key.church;
   const penalty = penaltyByKind.church;
   const parish = parishInstitutionFromState(state);
+  const targetMode = churchTargetMode(state, parish);
+  const relationshipPressure = relationshipPressureFromVector(relationshipVectorFromState(state, church.counterparty_id));
+  const liabilityPressure = Math.min(
+    35,
+    Math.floor(normalizeNonNegativeInteger(church.due_amount) / 4) +
+      Math.floor(normalizeNonNegativeInteger(church.arrears_amount) / 12)
+  );
+  const shortagePressure = Boolean((state.flags as Record<string, unknown>).Shortage) ? 8 : 0;
+  const targetModePressure =
+    targetMode === "split_surface" ? 6 : targetMode === "clergy_person_only" || targetMode === "parish_institution_only" ? 2 : 0;
+  const unrestPressure = Math.min(6, Math.floor(normalizeNonNegativeInteger(state.manor?.unrest ?? 0) / 15));
+  const latentPressure = liabilityPressure + relationshipPressure + shortagePressure + targetModePressure + unrestPressure;
 
   return {
     ...baseEntry(
@@ -413,7 +506,9 @@ function buildChurchPressureEntry(
         "economy_obligation_penalty_stage.church",
         "world.parish_institution_visibility"
       ],
-      "Read-only church precursor surface combines church obligations, stage-one enforcement, and the current clergy-versus-parish visibility seam."
+      "Read-only church precursor surface combines church obligations, stage-one enforcement, parish visibility, and current clergy relationship strain.",
+      latentPressure,
+      "seeded"
     ),
     actor_key: "church",
     inputs: {
@@ -438,7 +533,7 @@ function buildChurchPressureEntry(
         parish && "priest_person_id" in parish && typeof parish.priest_person_id === "string"
           ? parish.priest_person_id
           : null,
-      church_target_mode: churchTargetMode(state, parish)
+      church_target_mode: targetMode
     }
   };
 }
