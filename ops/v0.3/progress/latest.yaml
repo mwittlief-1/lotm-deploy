@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-001-T06
-  last_completed_task_id: V03-R2-001-T07
+  current_task_id: V03-R2-005-T01
+  last_completed_task_id: V03-R2-001-T08
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-ui-experience
-  git_commit: b7eedfbea179c3a5921cf76c0a4b56632f2cba92
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 54f4984ba53bf9ed7c17781be7de8f0dcc6fc28d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,14 +15,14 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Refreshed the UI lane from kickoff truth, closed UI
-  V03-R2-001-T07 on the accepted portfolio-analysis seam, and left
-  Tooling V03-R2-001-T06 as the active cross-lane next task. No next
-  same-lane UI task is ready after this handoff.
+  Accepted Economy V03-R2-001-T08 and marked
+  V03-R2-001 done. Promoted UI V03-R2-005-T01,
+  Tooling V03-R3-001-T01, and Economy V03-R4-002-T01
+  as the next clean frontiers.
 active_claims: {}

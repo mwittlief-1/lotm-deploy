@@ -739,7 +739,7 @@ epics:
 - id: V03-R2-001
   title: Multi-manor portfolio accounting baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 48
   tranche: 3
   change_type: behavior_change
@@ -4896,7 +4896,7 @@ tasks:
   title: Add multi-manor regression suite and invariants
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: ready
+  status: done
   priority: 74
   tranche: 3
   change_type: refactor
@@ -4985,7 +4985,7 @@ tasks:
   title: Close epic and refresh portfolio docs
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 70
   tranche: 3
   change_type: refactor
@@ -5753,7 +5753,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Audit holdings and ledger surfaces for manor-versus-portfolio scope
-  status: todo
+  status: ready
   priority: 99
   tranche: 3
   change_type: refactor
@@ -6253,7 +6253,7 @@ tasks:
   title: Audit replay coverage against v0.3 registries and quotas
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: ready
   priority: 58
   tranche: 4
   change_type: refactor
@@ -8004,7 +8004,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Audit fiscal constants and identify tunable knob surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 5
   change_type: refactor
