@@ -53,7 +53,7 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
-import { buildPortfolioOverviewSurface } from "../playScreenPortfolio";
+import { buildPortfolioScopeContract } from "../playScreenPortfolio";
 import {
   buildObligationsCounterpartyContract,
   createObligationsModalRoute,
@@ -208,7 +208,8 @@ export function PlayScreen({
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
-  const portfolioSurface = useMemo(() => buildPortfolioOverviewSurface(ctx.preview_state), [ctx.preview_state]);
+  const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
+  const portfolioSurface = portfolioContract?.portfolioSummary ?? null;
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
