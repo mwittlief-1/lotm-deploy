@@ -6256,7 +6256,7 @@ tasks:
   title: Audit replay coverage against v0.3 registries and quotas
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 58
   tranche: 4
   change_type: refactor
