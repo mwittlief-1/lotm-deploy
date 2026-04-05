@@ -605,7 +605,7 @@ epics:
 - id: V03-R1-003
   title: Obligations enforcement and arrears ladder
   release: v0.3.1
-  status: todo
+  status: done
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -3923,7 +3923,7 @@ tasks:
   title: Close epic and refresh fiscal DOE notes
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor

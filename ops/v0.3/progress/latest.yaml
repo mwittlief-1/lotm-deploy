@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-004-T05
+  last_completed_task_id: V03-R1-003-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: ca271b9e19a10c6e05d3437c1cfd39e6edd9da7e
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,16 +15,16 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
-    seed_replay_batch_twice: pass
+    repo_duplicates: not_run
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: not_run
+    run2: not_run
 notes: >-
-  Accepted UI V03-R1-005-T03 and Economy V03-R3-004-T05 on kickoff,
-  closed the V03-R3-004 pricing epic, and reopened the next safe manual
-  work as active claims for Social V03-R0-005-T06 and UI V03-R1-005-T04.
-  Social's lane-local backlog/progress edits were not accepted as task work.
+  Economy/Fiscal completed V03-R1-003-T07, refreshed the fiscal DOE and
+  arrears/enforcement ladder docs, and closed epic V03-R1-003 as done.
+  This lane branch keeps the local validator's empty current_task_id
+  mirror, and there is no next same-lane economy task currently ready.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
