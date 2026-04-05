@@ -24,6 +24,7 @@ import {
   makeFiscalSettlementScaffold,
   type FiscalSettlementScaffoldV1
 } from "./storeReceiptWriters";
+import { economyObligationSettlementCadenceTurns } from "./tuningTable";
 
 export const ECONOMY_OBLIGATION_REGISTRY_SCHEMA_VERSION = "economy_obligation_registry_v1" as const;
 export const ECONOMY_OBLIGATION_COUNTERPARTY_KINDS = ["church", "liege"] as const;
@@ -349,7 +350,7 @@ function buildCounterpartyEntry(
     accepted_payment_modes: acceptedPaymentModesFor(spec.contract_id),
     supported_payment_modes: [...spec.supported_payment_modes],
     preferred_payment_mode: contractSnapshot.preferred_payment_mode,
-    settlement_cadence_turns: 1,
+    settlement_cadence_turns: economyObligationSettlementCadenceTurns(),
     last_settled_turn_index: meta.last_settled_turn_index,
     last_carried_turn_index: meta.last_carried_turn_index
   };
