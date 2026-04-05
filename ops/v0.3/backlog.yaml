@@ -8048,7 +8048,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Define central tuning table for obligations, maintenance, prices, and consumption
-  status: ready
+  status: done
   priority: 98
   tranche: 5
   change_type: refactor
@@ -8080,16 +8080,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-002-T02.yaml
   claim:
-    status: claimed
-    claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T14:44:51-04:00'
-    claim_expires_at: '2026-04-05T18:44:51-04:00'
-    run_id: manual-economy-v03-r4-002-t02-20260405T144451-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R4-002-T03
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Add fiscal DOE harness and KPI summary artifacts
-  status: todo
+  status: ready
   priority: 97
   tranche: 5
   change_type: behavior_change
@@ -8122,11 +8122,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-002-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-economy-lane
+    claimed_at: '2026-04-05T14:57:57-04:00'
+    claim_expires_at: '2026-04-05T18:57:57-04:00'
+    run_id: manual-economy-v03-r4-002-t03-20260405T145757-0400
 - id: V03-R4-002-T04
   parent_epic: V03-R4-002
   release: v0.3.4
