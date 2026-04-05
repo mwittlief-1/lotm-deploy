@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R3-005-T02
+  current_task_id: V03-R2-001-T06
+  last_completed_task_id: V03-R2-001-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
+  git_commit: dba03f8d74351e3624511a3a1ee3f7cb8b8c61cd
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,14 +21,8 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted UI V03-R1-005-T06 and Engine V03-R3-005-T02 on kickoff,
-  marked V03-R1-005 done, reopened Engine V03-R3-005-T03 as the next
-  safe same-lane claim, and left Social, Economy, World, and UI
-  without current ready follow-on tasks.
-active_claims:
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R3-005-T03
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T23:46:59-0400'
-    claim_expires_at: '2026-04-05T03:46:59-0400'
-    run_id: manual-engine-v03-r3-005-t03-20260404T234659-0400
+  Accepted Economy V03-R2-001-T01/T02/T03/T04 from the lane,
+  completed integrator-owned V03-R2-001-T05 on kickoff, and
+  promoted Tooling V03-R2-001-T06 plus UI V03-R2-001-T07 as
+  the next clean portfolio-accounting frontiers.
+active_claims: {}

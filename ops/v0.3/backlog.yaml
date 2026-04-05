@@ -24,7 +24,7 @@ scheduler_semantics:
   execution_scope: scheduler selects from tasks only; epics are planning containers and are not directly executable
   blocked_lane_rule: any task in lane_branch codex/v0.3-lane-world-topology is ineligible until V03-XMAP-001 is done
   dependency_rule: world/topology tasks must explicitly depend on V03-XMAP-001
-  same_lane_continuation_rule: after integrator acceptance, immediately promote and dispatch the next decomposed task in the same lane when its newly satisfied deps were completed in that lane and no cross-lane checkpoint, integrator boundary, or escalation applies
+  same_lane_continuation_rule: a lane may locally close one same-lane task and claim the next same-lane task without waiting for integrator acceptance when requires_integrator is false, cross-lane deps are already done in kickoff truth, newly satisfied deps come only from that lane's completed chain, and no checkpoint, escalation, or integrator boundary applies
   claim_expiry_rule: a claim is stale once claim_expires_at is in the past
   claim_reclaim_rule: stale claims may be reset to unclaimed by the integrator chat or by a scheduler starting a new run after recording the reclaim event in the run log
   claim_refresh_rule: the claiming chat may extend claim_expires_at while it is actively working
@@ -605,7 +605,7 @@ epics:
 - id: V03-R1-003
   title: Obligations enforcement and arrears ladder
   release: v0.3.1
-  status: todo
+  status: done
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -637,7 +637,7 @@ epics:
 - id: V03-R1-004
   title: Claims and succession baseline
   release: v0.3.1
-  status: todo
+  status: blocked
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -647,7 +647,7 @@ epics:
   deps:
   - V03-R0-002
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Current inheritance-claim prospect generation still lives in src/sim/phases/phase_prospects.ts outside the lane write surface.
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/relationshipEngine.ts
@@ -1077,7 +1077,7 @@ epics:
 - id: V03-R3-005
   title: Realm political weather scaffolding
   release: v0.3.3
-  status: todo
+  status: done
   priority: 36
   tranche: 4
   change_type: behavior_change
@@ -3923,7 +3923,7 @@ tasks:
   title: Close epic and refresh fiscal DOE notes
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4005,7 +4005,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Define next-in-line map and claimant registry schema
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4045,7 +4045,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Implement inheritance_claim prospect type and bounded generation rules
-  status: todo
+  status: blocked
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4055,7 +4055,7 @@ tasks:
   deps:
   - V03-R1-004-T02
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Current inheritance-claim prospect generation still lives in src/sim/phases/phase_prospects.ts outside the lane write surface.
   allowed_paths:
   - src/sim/domains/people/**
   - tests/**
@@ -4666,7 +4666,7 @@ tasks:
   title: Audit manor-level assets and define portfolio invariant contract
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 84
   tranche: 3
   change_type: refactor
@@ -4714,7 +4714,7 @@ tasks:
   title: Add portfolio registry schema and manor rollup keys
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 82
   tranche: 3
   change_type: refactor
@@ -4760,7 +4760,7 @@ tasks:
   title: Implement portfolio total aggregation from manor registries
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 80
   tranche: 3
   change_type: behavior_change
@@ -4806,7 +4806,7 @@ tasks:
   title: Implement per-manor net and outliers computation
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 78
   tranche: 3
   change_type: behavior_change
@@ -4850,7 +4850,7 @@ tasks:
   title: Integrate portfolio registry into phase and snapshot outputs
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 76
   tranche: 3
   change_type: behavior_change
@@ -4896,7 +4896,7 @@ tasks:
   title: Add multi-manor regression suite and invariants
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: ready
   priority: 74
   tranche: 3
   change_type: refactor
@@ -4941,7 +4941,7 @@ tasks:
   title: Render portfolio totals and outliers UI stub
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: ready
   priority: 72
   tranche: 3
   change_type: refactor
@@ -7191,7 +7191,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Seed crown-magnate-church latent pressure baselines deterministically
-  status: ready
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7222,16 +7222,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T03.yaml
   claim:
-    status: claimed
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T23:46:59-0400'
-    claim_expires_at: '2026-04-05T03:46:59-0400'
-    run_id: manual-engine-v03-r3-005-t03-20260404T234659-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-005-T04
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Expose political weather outputs to snapshots and content hooks
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7272,7 +7272,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor

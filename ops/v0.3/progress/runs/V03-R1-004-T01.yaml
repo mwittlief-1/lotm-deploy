@@ -1,0 +1,35 @@
+version: 1
+run_id: V03-R1-004-T01-20260405T010950-0400
+task_id: V03-R1-004-T01
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: e6ced880b86cd77ed4b36f07f3d1f2e20a1e6553
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  audit_doc: docs/releases/v0.3.1_claims_and_succession_surface_audit.md
+findings:
+  - The repo already has a deterministic player-house heir resolver and succession transition, but the canonical data surface is still only `house.heir_id` plus succession log events rather than a reusable ordered line.
+  - The current `inheritance_claim` path is only a thin prospect hook triggered when no heir exists; it carries no claimant registry, branch metadata, or bounded explanation of why a claim exists.
+  - Marriage-to-succession interaction currently comes through preserved kinship and spouse edges, lineage retention after daughters marry out, and spouse resolution during succession, not through explicit claimant scoring or line ordering.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-004-T02
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  dispatch_reason: user override promoted T01 from todo to ready; same-lane policy promoted and claimed T02 after T01 closed.

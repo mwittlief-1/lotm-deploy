@@ -8,6 +8,7 @@ import {
 } from "../domains/economy/ledger";
 import { applyEconomyObligationCloseTurnStage } from "../domains/economy/obligationEnforcement";
 import { settleEconomyObligationCounterparty } from "../domains/economy/obligationRegistry";
+import { recordEconomyPortfolioPhaseHints, refreshEconomyPortfolioState } from "../domains/economy/portfolioAnalysis";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
 import type { RunState, TurnDecisions } from "../types";
 import { clampInt } from "../util";
@@ -36,6 +37,11 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
     state.manor.unrest = clampInt(state.manor.unrest + UNREST_ARREARS_PENALTY, 0, 100);
     applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -1, threat: +1 }, "obligations_current_due_pressure");
   }
+
+  recordEconomyPortfolioPhaseHints(state, {
+    production_food_delta: productionBushels
+  });
+  refreshEconomyPortfolioState(state);
 }
 
 export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
@@ -108,6 +114,8 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
       reportNotes.push("War levy ignored; liege displeased.");
     }
   }
+
+  refreshEconomyPortfolioState(state);
 }
 
 function obligationStatusNote(label: string, amount: number, assetLabel: string): string {
@@ -138,4 +146,9 @@ export function applyCloseTurnObligationsPhase(state: RunState, reportNotes: str
   reportNotes.push(
     `Obligation enforcement: ${obligationStatusNote("liege", liegeEntry?.arrears_amount ?? 0, "coin")}; ${obligationStatusNote("church", churchEntry?.arrears_amount ?? 0, "bushels")}; ${unrestNote}.`
   );
+
+  recordEconomyPortfolioPhaseHints(state, {
+    consumption_shortage_bushels: Boolean((state.flags as Record<string, unknown>).Shortage) ? 1 : 0
+  });
+  refreshEconomyPortfolioState(state);
 }
