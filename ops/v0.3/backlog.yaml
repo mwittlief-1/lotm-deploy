@@ -670,7 +670,7 @@ epics:
 - id: V03-R1-005
   title: Obligations and counterparty legibility UX
   release: v0.3.1
-  status: todo
+  status: done
   priority: 49
   tranche: 2
   change_type: behavior_change
@@ -7151,7 +7151,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Define realm pressure registry and read-only political weather schema
-  status: ready
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7182,16 +7182,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T02.yaml
   claim:
-    status: claimed
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T18:09:43-0400'
-    claim_expires_at: '2026-04-04T22:09:43-0400'
-    run_id: manual-engine-v03-r3-005-t02-20260404T180943-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-005-T03
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Seed crown-magnate-church latent pressure baselines deterministically
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7222,11 +7222,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-engine-lane
+    claimed_at: '2026-04-04T23:46:59-0400'
+    claim_expires_at: '2026-04-05T03:46:59-0400'
+    run_id: manual-engine-v03-r3-005-t03-20260404T234659-0400
 - id: V03-R3-005-T04
   parent_epic: V03-R3-005
   release: v0.3.3
