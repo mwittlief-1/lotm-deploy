@@ -4,6 +4,7 @@ import { deepCopy } from "../../util";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { buildPoliticalWeatherFromState } from "../realm";
 import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
@@ -22,6 +23,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     economy: (state as any).economy,
     economy_obligations_view: buildEconomyObligationsView(state),
     economy_pricing_view: buildEconomyPricingView(state),
+    political_weather: buildPoliticalWeatherFromState(state, experienceSurfaces),
     portfolio: (state as any).portfolio,
     world_topology_view: buildBoundedWorldTopologyView(),
     known_houses: experienceSurfaces.known_houses,

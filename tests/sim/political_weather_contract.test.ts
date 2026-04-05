@@ -3,11 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { HouseDossierSummary, KnownHouseSummary, Person, RunState } from "../../src/sim/types";
 import { SIM_VERSION } from "../../src/sim/version";
 import {
+  POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION,
   POLITICAL_WEATHER_SCHEMA_VERSION,
   REALM_PRESSURE_ACTOR_KEYS,
   REALM_PRESSURE_REGISTRY_SCHEMA_VERSION,
+  buildPoliticalWeatherContentHooksFromState,
   buildPoliticalWeatherFromState,
   buildRealmPressureRegistryFromState,
+  serializePoliticalWeatherContentHooksSnapshot,
   serializePoliticalWeatherSnapshot,
   serializeRealmPressureRegistrySnapshot
 } from "../../src/sim/domains/realm";
@@ -310,6 +313,62 @@ describe("political weather contract", () => {
 
     expect(serializeRealmPressureRegistrySnapshot(stateA)).toBe(serializeRealmPressureRegistrySnapshot(stateB));
     expect(serializePoliticalWeatherSnapshot(stateA)).toBe(serializePoliticalWeatherSnapshot(stateB));
+    expect(serializePoliticalWeatherContentHooksSnapshot(stateA)).toBe(serializePoliticalWeatherContentHooksSnapshot(stateB));
+  });
+
+  it("builds stable content-hook summaries so content can read weather fields without inferring realm math", () => {
+    const state = mkState();
+
+    expect(buildPoliticalWeatherContentHooksFromState(state)).toEqual({
+      schema_version: POLITICAL_WEATHER_CONTENT_HOOKS_SCHEMA_VERSION,
+      turn: 3,
+      read_mode: "read_only",
+      activation_status: "inactive",
+      actor_order: ["crown", "magnates", "church"],
+      shared_context: {
+        unrest: 17,
+        shortage_active: true,
+        war_levy_active: true
+      },
+      highest_pressure_actor_key: "crown",
+      highest_pressure_value: 58,
+      any_elevated_pressure: true,
+      actors_by_key: {
+        crown: {
+          actor_key: "crown",
+          actor_label: "Crown",
+          latent_pressure: 58,
+          pressure_band: "elevated",
+          summary_line: "Crown: 10 outstanding, grant proxy 7, levy active.",
+          total_outstanding: 10,
+          grant_pressure_estimate: 7,
+          war_levy_active: true,
+          enforcement_state: "arrears"
+        },
+        magnates: {
+          actor_key: "magnates",
+          actor_label: "Magnates",
+          latent_pressure: 39,
+          pressure_band: "watchful",
+          summary_line: "Magnates: 2 observed houses, 2 high-pressure houses, 2 local nobles.",
+          observed_house_count: 2,
+          high_pressure_house_count: 2,
+          hostile_house_count: 1,
+          wary_house_count: 1,
+          source_surface_status: "available"
+        },
+        church: {
+          actor_key: "church",
+          actor_label: "Church",
+          latent_pressure: 38,
+          pressure_band: "watchful",
+          summary_line: "Church: 131 outstanding, target split_surface.",
+          total_outstanding: 131,
+          church_target_mode: "split_surface",
+          enforcement_state: "arrears"
+        }
+      }
+    });
   });
 
   it("raises latent pressure when relationship and realm context worsens while keeping values bounded", () => {
