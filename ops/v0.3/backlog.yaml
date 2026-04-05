@@ -8131,7 +8131,7 @@ tasks:
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Add balance regression seeds for arrears, dispossession, and manor-count distribution
-  status: ready
+  status: done
   priority: 96
   tranche: 5
   change_type: behavior_change
@@ -8163,16 +8163,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-002-T04.yaml
   claim:
-    status: claimed
-    claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T15:07:01-04:00'
-    claim_expires_at: '2026-04-05T19:07:01-04:00'
-    run_id: manual-economy-v03-r4-002-t04-20260405T150701-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R4-002-T05
   parent_epic: V03-R4-002
   release: v0.3.4
   title: Close epic and refresh balance-hook docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 5
   change_type: refactor
@@ -8203,11 +8203,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-002-T05.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-economy-lane
+    claimed_at: '2026-04-05T17:48:41-04:00'
+    claim_expires_at: '2026-04-05T21:48:41-04:00'
+    run_id: manual-economy-v03-r4-002-t05-20260405T174841-0400
 - id: V03-R4-003-T01
   parent_epic: V03-R4-003
   release: v0.3.4
