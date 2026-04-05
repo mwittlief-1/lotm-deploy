@@ -5879,7 +5879,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render manor selector and receipts scope filter
-  status: ready
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5911,11 +5911,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-005-T04.yaml
   claim:
-    status: claimed
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-05T18:20:48-0400'
-    claim_expires_at: '2026-04-05T22:20:48-0400'
-    run_id: manual-ui-v03-r2-005-t04-20260405T182048-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R2-005-T05
   parent_epic: V03-R2-005
   release: v0.3.2
@@ -5963,7 +5963,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Close epic and refresh portfolio UX docs
-  status: todo
+  status: ready
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5994,11 +5994,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-005-T06.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: manual-ui-lane
+    claimed_at: '2026-04-05T19:07:55-0400'
+    claim_expires_at: '2026-04-05T23:07:55-0400'
+    run_id: manual-ui-v03-r2-005-t06-20260405T190755-0400
 - id: V03-R2-006-T01
   parent_epic: V03-R2-006
   release: v0.3.2
