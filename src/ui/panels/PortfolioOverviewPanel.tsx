@@ -3,6 +3,7 @@ import React from "react";
 import type {
   PortfolioScopeContract,
   PortfolioScopeMode,
+  PortfolioSelectedManorSurface,
   PortfolioSummaryCard
 } from "../playScreenPortfolio";
 import {
@@ -17,6 +18,9 @@ import { SectionHeading } from "./SectionHeading";
 type PortfolioOverviewPanelProps = {
   contract: PortfolioScopeContract;
   onScopeModeChange: (mode: PortfolioScopeMode) => void;
+  onSelectManor: (manorId: string) => void;
+  selectedManor: PortfolioSelectedManorSurface;
+  selectedManorId: string;
   scopeMode: PortfolioScopeMode;
 };
 
@@ -79,11 +83,13 @@ function renderSummaryCards(cards: PortfolioSummaryCard[], valueFontSize: number
 export function PortfolioOverviewPanel({
   contract,
   onScopeModeChange,
+  onSelectManor,
+  selectedManor,
+  selectedManorId,
   scopeMode
 }: PortfolioOverviewPanelProps) {
   const surface = contract.portfolioSummary;
   const activeScope = contract.scopeOptions.find((option) => option.id === scopeMode) ?? contract.scopeOptions[0];
-  const selectedManor = contract.selectedManor;
   const assetCards = selectedManor.summaryCards.slice(0, 3);
   const pressureCards = selectedManor.summaryCards.slice(3);
 
@@ -153,6 +159,38 @@ export function PortfolioOverviewPanel({
 
           {scopeMode === "selected_manor" ? (
             <>
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>
+                  {contract.selectorLabel}
+                </div>
+                <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
+                  Selector order stays deterministic and never mutates sim state. This only changes which manor the holdings shell is
+                  following.
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                  {contract.selectorOptions.map((option) => (
+                    <button
+                      data-portfolio-selector={option.manorId}
+                      key={option.id}
+                      onClick={() => onSelectManor(option.manorId)}
+                      style={{
+                        ...scopeToggleStyles(option.manorId === selectedManorId),
+                        display: "grid",
+                        gap: 2,
+                        textAlign: "left",
+                        minWidth: 160
+                      }}
+                      type="button"
+                    >
+                      <span>{option.title}</span>
+                      <span style={{ fontSize: 11, lineHeight: 1.35, opacity: option.manorId === selectedManorId ? 0.92 : 0.76 }}>
+                        {option.summary}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div style={{ marginTop: 10 }}>
                 <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>
                   Selected manor

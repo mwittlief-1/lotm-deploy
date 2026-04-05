@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildPortfolioEvidenceScope,
   buildPortfolioOverviewSurface,
-  buildPortfolioScopeContract
+  buildPortfolioScopeContract,
+  selectPortfolioManor
 } from "../../src/ui/playScreenPortfolio";
 
 const PREVIEW_STATE = {
@@ -222,6 +224,7 @@ describe("playScreenPortfolio", () => {
 
     expect(contractA?.selectedManor).toEqual({
       helper: "Current manor detail stays ready for manor-scoped ledger and receipt follow-up.",
+      isAnchorManor: true,
       manorId: "manor_hx_26597",
       manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
       modeLabel: "Current manor detail",
@@ -298,6 +301,57 @@ describe("playScreenPortfolio", () => {
         }
       ],
       title: "Current manor"
+    });
+  });
+
+  it("resolves selected manor detail and evidence scope from the shared contract", () => {
+    const contract = buildPortfolioScopeContract(PREVIEW_STATE);
+
+    if (!contract) {
+      throw new Error("Expected a portfolio scope contract.");
+    }
+
+    expect(selectPortfolioManor(contract, "manor_hx_30001")).toMatchObject({
+      isAnchorManor: false,
+      manorId: "manor_hx_30001",
+      title: "Hx 30001",
+      summary: "Hx 30001 is currently flagged by 3 tracked extremes."
+    });
+
+    expect(
+      buildPortfolioEvidenceScope({
+        contract,
+        scopeMode: "portfolio",
+        selectedManorId: null
+      })
+    ).toEqual({
+      chipHelperText:
+        "Portfolio summary is active above, but headline chips still open the current manor chronicle so the resolved ledger stays grounded in one bounded holding.",
+      diffLedgerHelper:
+        "Portfolio summary is active above. This resolved ledger still follows the current manor chronicle until you switch into selected-manor detail.",
+      diffLedgerScopeLabel: "Current manor chronicle",
+      receiptScopeLabel: "Current manor chronicle",
+      receiptScopeSummary:
+        "Explain Changes is still showing the current manor receipt trail. Portfolio totals remain summary context only.",
+      state: "current_manor"
+    });
+
+    expect(
+      buildPortfolioEvidenceScope({
+        contract,
+        scopeMode: "selected_manor",
+        selectedManorId: "manor_hx_30001"
+      })
+    ).toEqual({
+      chipHelperText:
+        "Hx 30001 detail is selected above, but the headline chips still track the current manor chronicle because only that holding exposes resolved receipts in this snapshot.",
+      diffLedgerHelper:
+        "Hx 30001 detail is selected above, but this resolved ledger remains pinned to the current manor chronicle because non-anchor holdings do not expose a separate ledger trail yet.",
+      diffLedgerScopeLabel: "Current manor chronicle · Hx 30001 selected",
+      receiptScopeLabel: "Hx 30001 selected",
+      receiptScopeSummary:
+        "Hx 30001 detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.",
+      state: "selected_manor_holdings_only"
     });
   });
 

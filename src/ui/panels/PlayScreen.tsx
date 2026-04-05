@@ -53,7 +53,12 @@ import {
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
-import { buildPortfolioScopeContract, type PortfolioScopeMode } from "../playScreenPortfolio";
+import {
+  buildPortfolioEvidenceScope,
+  buildPortfolioScopeContract,
+  selectPortfolioManor,
+  type PortfolioScopeMode
+} from "../playScreenPortfolio";
 import {
   buildObligationsCounterpartyContract,
   createObligationsModalRoute,
@@ -153,6 +158,7 @@ export function PlayScreen({
 }: PlayScreenProps) {
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
+  const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
@@ -210,6 +216,12 @@ export function PlayScreen({
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
+  const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
+  const portfolioEvidenceScope = buildPortfolioEvidenceScope({
+    contract: portfolioContract,
+    scopeMode: portfolioScopeMode,
+    selectedManorId: selectedPortfolioManorId
+  });
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -603,6 +615,15 @@ export function PlayScreen({
     setReceiptViewerRoute(createResourceChipRoute(chipId));
   }
 
+  function handlePortfolioScopeModeChange(mode: PortfolioScopeMode) {
+    setPortfolioScopeMode(mode);
+  }
+
+  function handlePortfolioManorSelect(manorId: string) {
+    setPortfolioScopeMode("selected_manor");
+    setSelectedPortfolioManorId(manorId);
+  }
+
   function closeReceiptViewer() {
     setReceiptViewerRoute(null);
   }
@@ -630,7 +651,15 @@ export function PlayScreen({
 
   const playSections: Record<PlayScreenCardId, React.ReactNode> = {
     council_agenda: <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />,
-    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} onOpenExplainChanges={openExplainChanges} />,
+    diff_ledger: (
+      <DiffLedgerPanel
+        copy={copy}
+        items={diffLedgerItems}
+        onOpenExplainChanges={openExplainChanges}
+        scopeHelperText={portfolioEvidenceScope.diffLedgerHelper}
+        scopeLabel={portfolioEvidenceScope.diffLedgerScopeLabel}
+      />
+    ),
     manor_state: (
       <ManorStatePanel
         anchorUnrest={PLAY_ANCHORS.unrest}
@@ -694,7 +723,10 @@ export function PlayScreen({
     portfolio_overview: portfolioContract ? (
       <PortfolioOverviewPanel
         contract={portfolioContract}
-        onScopeModeChange={setPortfolioScopeMode}
+        onScopeModeChange={handlePortfolioScopeModeChange}
+        onSelectManor={handlePortfolioManorSelect}
+        selectedManor={activePortfolioManor ?? portfolioContract.selectedManor}
+        selectedManorId={activePortfolioManor?.manorId ?? portfolioContract.selectedManorId}
         scopeMode={portfolioScopeMode}
       />
     ) : null,
@@ -863,7 +895,7 @@ export function PlayScreen({
 
       <StickyResourceChips
         chips={resourceChips}
-        helperText={copy.resourceChipHelper ?? "Open a chip to follow the deeper ledger without leaving the gameplay shell."}
+        helperText={portfolioEvidenceScope.chipHelperText}
         onOpenChipDetails={openChipDetails}
         timingLabel={copy.turnSummary_last3Years}
       />
@@ -900,6 +932,8 @@ export function PlayScreen({
           mode={receiptsViewerMode}
           onModeChange={handleReceiptViewerModeChange}
           rawPhases={visibleRawReceiptPhases}
+          scopeLabel={portfolioEvidenceScope.receiptScopeLabel}
+          scopeSummary={portfolioEvidenceScope.receiptScopeSummary}
         />
       </ModalSheet>
     </div>

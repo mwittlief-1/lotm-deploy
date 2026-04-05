@@ -64,6 +64,7 @@ export type PortfolioSelectorOption = {
 
 export type PortfolioSelectedManorSurface = {
   helper: string;
+  isAnchorManor: boolean;
   manorId: string;
   manorKey: string;
   modeLabel: string;
@@ -80,10 +81,22 @@ export type PortfolioSurfaceScopeRule = {
   mode: PortfolioScopeMode;
 };
 
+export type PortfolioEvidenceScopeState = "current_manor" | "selected_manor_live" | "selected_manor_holdings_only";
+
+export type PortfolioEvidenceScope = {
+  chipHelperText: string;
+  diffLedgerHelper: string;
+  diffLedgerScopeLabel: string;
+  receiptScopeLabel: string;
+  receiptScopeSummary: string;
+  state: PortfolioEvidenceScopeState;
+};
+
 export type PortfolioScopeContract = {
   anchorManorId: string | null;
   defaultMode: PortfolioScopeMode;
   manorCount: number;
+  manorDetailsById: Record<string, PortfolioSelectedManorSurface>;
   portfolioSummary: PortfolioOverviewSurface;
   schemaVersion: typeof PLAY_SCREEN_PORTFOLIO_CONTRACT_SCHEMA_VERSION;
   scopeOptions: PortfolioScopeOption[];
@@ -580,6 +593,25 @@ function buildSurfaceScopeRules(selectedRow: ParsedPortfolioRow): PortfolioSurfa
   return PLAY_SCREEN_PORTFOLIO_SURFACE_ORDER.map((surfaceId) => byId[surfaceId]);
 }
 
+function buildSelectedManorSurface(
+  row: ParsedPortfolioRow,
+  outlierFlags: PortfolioOutlierFlag[]
+): PortfolioSelectedManorSurface {
+  return {
+    helper: row.isAnchorManor
+      ? "Current manor detail stays ready for manor-scoped ledger and receipt follow-up."
+      : `${row.manorLabel} is the deterministic manor detail selection exposed by this contract.`,
+    isAnchorManor: row.isAnchorManor,
+    manorId: row.manorId,
+    manorKey: row.manorKey,
+    modeLabel: selectedManorModeLabel(row),
+    outlierFlags,
+    summary: buildSelectedManorSummary(row, outlierFlags.length),
+    summaryCards: buildSelectedManorCards(row.row),
+    title: row.manorLabel
+  };
+}
+
 export function buildPortfolioScopeContract(previewState: unknown): PortfolioScopeContract | null {
   const context = readPortfolioContext(previewState);
   if (!context) return null;
@@ -591,10 +623,13 @@ export function buildPortfolioScopeContract(previewState: unknown): PortfolioSco
   const rows = readPortfolioRowsInOrder(portfolio, manorKeys, anchorManorId);
   if (rows.length === 0) return null;
 
+  const manorDetailsById = Object.fromEntries(
+    rows.map((row) => {
+      const outlierFlags = (outlierGroupsByManorId.get(row.manorId)?.flags ?? []).map(({ priority: _priority, ...flag }) => flag);
+      return [row.manorId, buildSelectedManorSurface(row, outlierFlags)];
+    })
+  ) as Record<string, PortfolioSelectedManorSurface>;
   const selectedRow = rows.find((row) => row.isAnchorManor) ?? rows[0];
-  const selectedOutlierFlags = (outlierGroupsByManorId.get(selectedRow.manorId)?.flags ?? []).map(
-    ({ priority: _priority, ...flag }) => flag
-  );
   const scopeOptions: PortfolioScopeOption[] = [
     {
       id: "portfolio",
@@ -614,20 +649,13 @@ export function buildPortfolioScopeContract(previewState: unknown): PortfolioSco
     anchorManorId,
     defaultMode: "portfolio",
     manorCount,
+    manorDetailsById,
     portfolioSummary,
     schemaVersion: PLAY_SCREEN_PORTFOLIO_CONTRACT_SCHEMA_VERSION,
     scopeOptions,
     selectedManor: {
-      helper: selectedRow.isAnchorManor
-        ? "Current manor detail stays ready for manor-scoped ledger and receipt follow-up."
-        : `${selectedRow.manorLabel} is the deterministic manor detail selection exposed by this contract.`,
-      manorId: selectedRow.manorId,
-      manorKey: selectedRow.manorKey,
-      modeLabel: scopeOptions[1].label,
-      outlierFlags: selectedOutlierFlags,
-      summary: buildSelectedManorSummary(selectedRow, selectedOutlierFlags.length),
-      summaryCards: buildSelectedManorCards(selectedRow.row),
-      title: selectedRow.manorLabel
+      ...manorDetailsById[selectedRow.manorId],
+      modeLabel: scopeOptions[1].label
     },
     selectedManorId: selectedRow.manorId,
     selectorHelper:
@@ -658,4 +686,58 @@ export function buildPortfolioOverviewSurface(previewState: unknown): PortfolioO
   const context = readPortfolioContext(previewState);
   if (!context) return null;
   return buildPortfolioOverviewSurfaceFromContext(context);
+}
+
+export function selectPortfolioManor(
+  contract: PortfolioScopeContract,
+  manorId: string | null | undefined
+): PortfolioSelectedManorSurface {
+  if (manorId && contract.manorDetailsById[manorId]) return contract.manorDetailsById[manorId];
+  return contract.selectedManor;
+}
+
+export function buildPortfolioEvidenceScope(args: {
+  contract: PortfolioScopeContract | null;
+  scopeMode: PortfolioScopeMode;
+  selectedManorId: string | null | undefined;
+}): PortfolioEvidenceScope {
+  const { contract, scopeMode, selectedManorId } = args;
+
+  if (!contract || scopeMode === "portfolio") {
+    return {
+      chipHelperText:
+        "Portfolio summary is active above, but headline chips still open the current manor chronicle so the resolved ledger stays grounded in one bounded holding.",
+      diffLedgerHelper:
+        "Portfolio summary is active above. This resolved ledger still follows the current manor chronicle until you switch into selected-manor detail.",
+      diffLedgerScopeLabel: "Current manor chronicle",
+      receiptScopeLabel: "Current manor chronicle",
+      receiptScopeSummary:
+        "Explain Changes is still showing the current manor receipt trail. Portfolio totals remain summary context only.",
+      state: "current_manor"
+    };
+  }
+
+  const selectedManor = selectPortfolioManor(contract, selectedManorId);
+  if (selectedManor.isAnchorManor) {
+    return {
+      chipHelperText:
+        "Selected manor detail is active and it currently matches the current manor, so chips, ledger, and receipts all stay live on the same resolved holding.",
+      diffLedgerHelper:
+        "Selected manor detail is active and it currently matches the current manor, so this resolved ledger is the live follow-up for the same holding.",
+      diffLedgerScopeLabel: `${selectedManor.title} detail`,
+      receiptScopeLabel: `${selectedManor.title} detail`,
+      receiptScopeSummary:
+        "Explain Changes is following the same selected manor detail that is active in Holdings because the selected manor still matches the current chronicle.",
+      state: "selected_manor_live"
+    };
+  }
+
+  return {
+    chipHelperText: `${selectedManor.title} detail is selected above, but the headline chips still track the current manor chronicle because only that holding exposes resolved receipts in this snapshot.`,
+    diffLedgerHelper: `${selectedManor.title} detail is selected above, but this resolved ledger remains pinned to the current manor chronicle because non-anchor holdings do not expose a separate ledger trail yet.`,
+    diffLedgerScopeLabel: `Current manor chronicle · ${selectedManor.title} selected`,
+    receiptScopeLabel: `${selectedManor.title} selected`,
+    receiptScopeSummary: `${selectedManor.title} detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.`,
+    state: "selected_manor_holdings_only"
+  };
 }

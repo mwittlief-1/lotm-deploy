@@ -17,6 +17,8 @@ type ReceiptsViewerPanelProps = {
   mode: ReceiptViewerMode;
   onModeChange: (mode: ReceiptViewerMode) => void;
   rawPhases: RawReceiptPhase[];
+  scopeLabel?: string;
+  scopeSummary?: string;
 };
 
 const SOURCE_TONE_STYLE: Record<string, React.CSSProperties> = {
@@ -49,10 +51,28 @@ export function ReceiptsViewerPanel({
   groupedSections,
   mode,
   onModeChange,
-  rawPhases
+  rawPhases,
+  scopeLabel,
+  scopeSummary
 }: ReceiptsViewerPanelProps) {
   return (
     <div style={{ display: "grid", gap: 14 }}>
+      {scopeLabel || scopeSummary ? (
+        <div
+          data-receipts-scope="true"
+          style={{
+            padding: 12,
+            borderRadius: 12,
+            border: "1px solid rgba(172, 143, 100, 0.24)",
+            background: "#fcfaf5",
+            color: PLAY_SCREEN_THEME.ink
+          }}
+        >
+          {scopeLabel ? <div style={{ fontWeight: 700 }}>{scopeLabel}</div> : null}
+          {scopeSummary ? <div style={{ fontSize: 12, lineHeight: 1.45, opacity: 0.82, marginTop: scopeLabel ? 4 : 0 }}>{scopeSummary}</div> : null}
+        </div>
+      ) : null}
+
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button aria-pressed={mode === "grouped"} onClick={() => onModeChange("grouped")} style={modeButtonStyle(mode === "grouped")} type="button">
           Grouped

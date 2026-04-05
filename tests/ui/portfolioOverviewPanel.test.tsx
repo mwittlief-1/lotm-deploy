@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { PortfolioOverviewPanel } from "../../src/ui/panels/PortfolioOverviewPanel";
-import { buildPortfolioScopeContract } from "../../src/ui/playScreenPortfolio";
+import { buildPortfolioScopeContract, selectPortfolioManor } from "../../src/ui/playScreenPortfolio";
 
 const PREVIEW_STATE = {
   world_topology_view: {
@@ -114,7 +114,14 @@ describe("PortfolioOverviewPanel", () => {
     }
 
     const html = renderToStaticMarkup(
-      <PortfolioOverviewPanel contract={contract} onScopeModeChange={() => undefined} scopeMode="portfolio" />
+      <PortfolioOverviewPanel
+        contract={contract}
+        onScopeModeChange={() => undefined}
+        onSelectManor={() => undefined}
+        selectedManor={contract.selectedManor}
+        selectedManorId={contract.selectedManorId}
+        scopeMode="portfolio"
+      />
     );
 
     expect(html).toContain("Portfolio Totals &amp; Outliers");
@@ -135,14 +142,23 @@ describe("PortfolioOverviewPanel", () => {
     }
 
     const html = renderToStaticMarkup(
-      <PortfolioOverviewPanel contract={contract} onScopeModeChange={() => undefined} scopeMode="selected_manor" />
+      <PortfolioOverviewPanel
+        contract={contract}
+        onScopeModeChange={() => undefined}
+        onSelectManor={() => undefined}
+        selectedManor={selectPortfolioManor(contract, "manor_hx_30001")}
+        selectedManorId="manor_hx_30001"
+        scopeMode="selected_manor"
+      />
     );
 
     expect(html).toContain("Selected manor active");
-    expect(html).toContain("Selected manor");
+    expect(html).toContain("Tracked manor detail");
+    expect(html).toContain("Hx 30001");
+    expect(html).toContain("3 outlier flags");
     expect(html).toContain("Coin on hand");
     expect(html).toContain("Open dues &amp; arrears");
-    expect(html).toContain("Current manor is currently flagged by 3 tracked extremes.");
+    expect(html).toContain("Hx 30001 is currently flagged by 3 tracked extremes.");
     expect(html).toContain("Selected detail");
   });
 });
