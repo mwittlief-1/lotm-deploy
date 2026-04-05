@@ -1,0 +1,44 @@
+version: 1
+run_id: manual-economy-v03-r4-002-t03-20260405T145757-0400
+task_id: V03-R4-002-T03
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-economy-fiscal
+commit: d511484427cdfaf748133f34daa9bfc9b425212b
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  fiscal_doe_script: scripts/fiscalDoe.ts
+  fiscal_doe_domain: src/sim/domains/economy/fiscalDoe.ts
+  fiscal_doe_runs: qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json
+  fiscal_doe_summary: qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json
+findings:
+  - Added a repeatable fiscal DOE harness that runs the canonical seed and policy slice, records per-run arrears, stores, dispossession, and manor-count metrics, and emits stable hashed artifacts.
+  - The current canonical slice shows no dispossession and a manor-count distribution fixed at `1`, which is consistent with the still-placeholder runtime portfolio integration and provides a deterministic baseline for later comparison.
+  - Meat stores stay at `0` across the current canonical slice, so T04 should use the new harness outputs to choose representative fiscal regression seeds rather than assume the default pack already exercises every balance hook.
+stop_reason: continued_same_lane
+next_task_cursor: V03-R4-002-T04
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  qa_fallback: single-worker_vitest_plus_uat_gate
+  fiscal_doe_summary_hash: 580114e27c935040b8533cebc03bde8e1a0466102d900d6c77fc5fdcfe7cf8a2
+  reason: T03 closed cleanly and T04 was immediately promoted and claimed under same-lane continuation.

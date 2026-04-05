@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R4-002-T02
+  last_completed_task_id: V03-R4-002-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: c861682d074f82c0bdb1a4e52ad38b74274965ee
+  git_commit: d511484427cdfaf748133f34daa9bfc9b425212b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,17 +21,18 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Closed Economy V03-R4-002-T02 after centralizing the lane-owned
-  fiscal tuning table, then promoted and claimed V03-R4-002-T03
-  as the next same-lane dependency-clean task while keeping the
-  local validator's empty current_task_id mirror.
+  Closed Economy V03-R4-002-T03 after landing the fiscal DOE
+  harness and KPI artifacts, then promoted and claimed
+  V03-R4-002-T04 as the next same-lane dependency-clean task
+  while keeping the local validator's empty current_task_id
+  mirror.
 active_claims:
   codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R4-002-T03
+    task_id: V03-R4-002-T04
     claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T14:57:57-04:00'
-    claim_expires_at: '2026-04-05T18:57:57-04:00'
-    run_id: manual-economy-v03-r4-002-t03-20260405T145757-0400
+    claimed_at: '2026-04-05T15:07:01-04:00'
+    claim_expires_at: '2026-04-05T19:07:01-04:00'
+    run_id: manual-economy-v03-r4-002-t04-20260405T150701-0400
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
     claimed_by: manual-social-lane
