@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R4-002-T04
+  last_completed_task_id: V03-R4-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-economy-fiscal
-  git_commit: d948b79ef6082b25045fef1e7438d526a88061cf
+  git_commit: 34b7d8f44f9c232ce786956df90ca3dd3f12e3d9
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -16,24 +16,17 @@ last_run:
     qa: pass
     preflight: pass
     repo_duplicates: not_run
-    seed_replay_batch_twice: pass
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: not_run
+    run2: not_run
 notes: >-
-  Closed Economy V03-R4-002-T04 after landing deterministic
-  regression seeds for stable, arrears, dispossession, and
-  manor-count comparison points, then promoted and claimed
-  V03-R4-002-T05 as the next same-lane dependency-clean task
-  while keeping the local validator's empty current_task_id
-  mirror.
+  Closed Economy V03-R4-002-T05 after publishing the
+  v0.3.4 balance-hook packet, refreshing the fiscal knob audit,
+  and writing the epic handoff report. No same-lane economy
+  follow-on is scheduler-claimable in the current control-plane
+  state, so the lane stops cleanly here.
 active_claims:
-  codex/v0.3-lane-economy-fiscal:
-    task_id: V03-R4-002-T05
-    claimed_by: manual-economy-lane
-    claimed_at: '2026-04-05T17:48:41-04:00'
-    claim_expires_at: '2026-04-05T21:48:41-04:00'
-    run_id: manual-economy-v03-r4-002-t05-20260405T174841-0400
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R0-005-T06
     claimed_by: manual-social-lane
