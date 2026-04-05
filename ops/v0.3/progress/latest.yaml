@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R1-003-T07
   last_completed_task_id: V03-R3-005-T04
 runtime:
   node_version: v24.13.1
@@ -23,8 +23,9 @@ last_run:
 notes: >-
   Accepted Engine V03-R3-005-T04 on kickoff and reopened
   Engine V03-R3-005-T05 as the next safe same-lane claim.
-  Social, Economy, World, and UI remain without current ready
-  follow-on tasks.
+  Promoted Economy V03-R1-003-T07 and Social V03-R1-004-T01
+  to ready so those lanes can resume alongside Engine under the
+  lane-local self-advance policy.
 active_claims:
   codex/v0.3-lane-engine-core:
     task_id: V03-R3-005-T05

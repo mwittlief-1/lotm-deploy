@@ -3923,7 +3923,7 @@ tasks:
   title: Close epic and refresh fiscal DOE notes
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: ready
   priority: 72
   tranche: 2
   change_type: refactor
@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 2
   change_type: refactor
