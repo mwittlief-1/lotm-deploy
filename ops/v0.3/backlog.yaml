@@ -605,7 +605,7 @@ epics:
 - id: V03-R1-003
   title: Obligations enforcement and arrears ladder
   release: v0.3.1
-  status: todo
+  status: done
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -637,7 +637,7 @@ epics:
 - id: V03-R1-004
   title: Claims and succession baseline
   release: v0.3.1
-  status: todo
+  status: blocked
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -647,7 +647,7 @@ epics:
   deps:
   - V03-R0-002
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Current inheritance-claim prospect generation still lives in src/sim/phases/phase_prospects.ts outside the lane write surface.
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/relationshipEngine.ts
@@ -1077,7 +1077,7 @@ epics:
 - id: V03-R3-005
   title: Realm political weather scaffolding
   release: v0.3.3
-  status: todo
+  status: done
   priority: 36
   tranche: 4
   change_type: behavior_change
@@ -3923,7 +3923,7 @@ tasks:
   title: Close epic and refresh fiscal DOE notes
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: ready
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4005,7 +4005,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Define next-in-line map and claimant registry schema
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4045,7 +4045,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Implement inheritance_claim prospect type and bounded generation rules
-  status: todo
+  status: blocked
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4055,7 +4055,7 @@ tasks:
   deps:
   - V03-R1-004-T02
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Current inheritance-claim prospect generation still lives in src/sim/phases/phase_prospects.ts outside the lane write surface.
   allowed_paths:
   - src/sim/domains/people/**
   - tests/**
@@ -4666,7 +4666,7 @@ tasks:
   title: Audit manor-level assets and define portfolio invariant contract
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: ready
   priority: 84
   tranche: 3
   change_type: refactor
@@ -7272,7 +7272,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7304,11 +7304,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-005-T05.yaml
   claim:
-    status: claimed
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-05T00:49:44-0400'
-    claim_expires_at: '2026-04-05T04:49:44-0400'
-    run_id: manual-engine-v03-r3-005-t05-20260405T004944-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-006-T01
   parent_epic: V03-R3-006
   release: v0.3.3

@@ -1,7 +1,7 @@
 # Obligations Audit v0.3.1
 
-Last updated: 2026-03-26
-Task: `V03-R1-003-T01`
+Last updated: 2026-04-05
+Task: `V03-R1-003-T01` through `V03-R1-003-T07`
 
 ## Scope
 
@@ -186,3 +186,52 @@ The current repo is in a useful intermediate state for `v0.3.1` obligations work
 - the asset, receipt, and payment-mode contracts already exist in the economy domain
 - the live runtime still settles church and liege obligations through older aggregate tax/tithe slots
 - the next task should convert those aggregate slots into a per-counterparty registry and wire the existing scaffold/receipt helpers into the live phase callers, rather than inventing a parallel obligations contract
+
+## Epic closeout baseline after T02-T06
+
+The follow-on tasks landed the planned obligations ladder and then surfaced it through bounded views:
+
+| Surface | Landed baseline | Stable handoff boundary |
+| --- | --- | --- |
+| Counterparty registry | `V03-R1-003-T02` added a deterministic per-counterparty registry for liege and church dues, arrears, cadence, and settlement scaffolds. | Aggregate `tax_due_coin` / `tithe_due_bushels` remain compatibility-facing runtime slots, but registry ordering and counterparty identifiers are now canonical. |
+| Stage-one enforcement | `V03-R1-003-T03` made arrears carry explicit and attached bounded pressure through `enforcement.penalty` receipts, relationship deltas, and unrest nudges. | Stage-one remains the first response to open arrears and should stay bounded rather than becoming a new dispossession path. |
+| Tangible-bite caps | `V03-R1-003-T04` added capped enterprise seizure and forced store payment under `enforcement.seizure` and `enforcement.forced_payment_stores`. | Tangible bite remains deterministic and capped per turn; it does not imply store-to-coin valuation or unbounded confiscation. |
+| Phase integration | `V03-R1-003-T05` moved settlement, arrears carry, and enforcement execution into the phase wrappers without reopening `src/sim/turn.ts`. | Phase ordering stays integrator-owned, but the semantic write rules now live in the economy helpers accepted by kickoff. |
+| Snapshot/read-model legibility | `V03-R1-003-T06` added `economy_obligations_view_v1` so snapshots expose liege-first counterparty summaries, totals, carry state, and enforcement state deterministically. | UI and later reporting work should consume the bounded obligations view rather than rebuild counterparty math from raw manor fields. |
+
+## Locked arrears and enforcement ladder
+
+The shipped `v0.3.1` ladder is now:
+
+1. Assess dues once per turn for church and liege.
+2. Settle per counterparty through the economy-owned scaffold and accepted payment modes.
+3. Carry any remaining due into explicit arrears with canonical carry receipts.
+4. Apply bounded stage-one pressure through relationship and unrest effects.
+5. Apply capped stage-two tangible bite through seizure or forced store payment when arrears remain.
+
+Current intentionally deferred boundaries:
+
+- institution-aware church targeting still stays on the existing clergy-facing target
+- extraordinary levy / `service_placeholder` remains a schema hook rather than an active runtime ladder branch
+- the `v0.3.1` ladder stops short of stage-three dispossession automation
+
+## DOE handoff
+
+`docs/qa/fiscal_doe_notes_v0.3.1.md` is now the refreshed DOE scaffold for this epic. It is the working note for:
+
+- arrears incidence and stage mix
+- liege versus church carry pressure
+- seizure and forced-payment frequency
+- shortage coupling against church food-store enforcement
+
+## Closeout conclusion
+
+`V03-R1-003` is no longer an intermediate obligations audit only. The epic now has:
+
+- canonical per-counterparty registry semantics
+- explicit arrears carry and enforcement receipt taxonomy
+- bounded stage-one and stage-two ladder behavior
+- accepted phase integration
+- bounded snapshot/view-model outputs for downstream UI work
+
+That is enough to mark the epic `done` in backlog state and to hand later balance work a stable obligations baseline rather than a partially-audited seam.

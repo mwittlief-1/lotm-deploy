@@ -1,0 +1,126 @@
+{
+  "schema_version": "realm_pressure_registry_v1",
+  "turn": 3,
+  "actor_order": [
+    "crown",
+    "magnates",
+    "church"
+  ],
+  "entries_by_key": {
+    "crown": {
+      "schema_version": "realm_pressure_registry_v1",
+      "actor_key": "crown",
+      "actor_label": "Crown",
+      "read_mode": "read_only",
+      "activation_status": "inactive",
+      "baseline_status": "seeded",
+      "latent_pressure": 58,
+      "source_surface_ids": [
+        "economy_obligation_penalty_stage.liege",
+        "economy_obligation_registry.liege",
+        "manor.obligations.war_levy_due",
+        "phase_prospects.grant_pressure_proxy"
+      ],
+      "source_summary": "Read-only crown precursor surface combines liege obligations, stage-one enforcement, the current arrears-based grant proxy, war-levy visibility, and liege relationship strain.",
+      "inputs": {
+        "counterparty_id": "p_liege",
+        "counterparty_label": "p_liege",
+        "due_asset": "tax_due_coin",
+        "due_amount": 4,
+        "arrears_asset": "arrears_coin",
+        "arrears_amount": 6,
+        "total_outstanding": 10,
+        "settlement_cadence_turns": 1,
+        "enforcement_state": "arrears",
+        "enforcement_rule_id": "enforcement.penalty.stage_one.liege_arrears",
+        "relationship_delta": {
+          "respect": -1,
+          "threat": 1
+        },
+        "grant_pressure_estimate": 7,
+        "war_levy_active": true,
+        "war_levy_kind": "men_or_coin"
+      }
+    },
+    "magnates": {
+      "schema_version": "realm_pressure_registry_v1",
+      "actor_key": "magnates",
+      "actor_label": "Magnates",
+      "read_mode": "read_only",
+      "activation_status": "inactive",
+      "baseline_status": "seeded",
+      "latent_pressure": 39,
+      "source_surface_ids": [
+        "house_dossiers",
+        "known_houses",
+        "locals.nobles"
+      ],
+      "source_summary": "Read-only magnate precursor surface combines observed local nobles with known-house summaries, dossier bands, and current magnate relationship strain when available.",
+      "inputs": {
+        "source_surface_status": "available",
+        "local_noble_ids": [
+          "p_noble1",
+          "p_noble2"
+        ],
+        "known_house_count": 2,
+        "dossier_count": 2,
+        "relevant_house_ids": [
+          "h_alpha",
+          "h_beta"
+        ],
+        "high_pressure_house_ids": [
+          "h_alpha",
+          "h_beta"
+        ],
+        "relationship_band_counts": {
+          "unknown": 0,
+          "favorable": 0,
+          "steady": 0,
+          "wary": 1,
+          "hostile": 1
+        },
+        "kinship_counts": {
+          "none": 0,
+          "blood_tie": 1,
+          "marriage_tie": 1,
+          "blood_and_marriage_tie": 0
+        }
+      }
+    },
+    "church": {
+      "schema_version": "realm_pressure_registry_v1",
+      "actor_key": "church",
+      "actor_label": "Church",
+      "read_mode": "read_only",
+      "activation_status": "inactive",
+      "baseline_status": "seeded",
+      "latent_pressure": 38,
+      "source_surface_ids": [
+        "economy_obligation_penalty_stage.church",
+        "economy_obligation_registry.church",
+        "world.parish_institution_visibility"
+      ],
+      "source_summary": "Read-only church precursor surface combines church obligations, stage-one enforcement, parish visibility, and current clergy relationship strain.",
+      "inputs": {
+        "counterparty_id": "p_clergy",
+        "counterparty_label": "p_clergy",
+        "due_asset": "tithe_due_bushels",
+        "due_amount": 21,
+        "arrears_asset": "arrears_bushels",
+        "arrears_amount": 110,
+        "total_outstanding": 131,
+        "settlement_cadence_turns": 1,
+        "enforcement_state": "arrears",
+        "enforcement_rule_id": "enforcement.penalty.stage_one.church_arrears",
+        "relationship_delta": {
+          "respect": -1,
+          "threat": 1
+        },
+        "parish_institution_id": "i_parish_player_local",
+        "parish_institution_name": "St. Brigid",
+        "parish_priest_person_id": null,
+        "church_target_mode": "split_surface"
+      }
+    }
+  }
+}
