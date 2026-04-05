@@ -4666,7 +4666,7 @@ tasks:
   title: Audit manor-level assets and define portfolio invariant contract
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: ready
+  status: done
   priority: 84
   tranche: 3
   change_type: refactor
@@ -4714,7 +4714,7 @@ tasks:
   title: Add portfolio registry schema and manor rollup keys
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 82
   tranche: 3
   change_type: refactor
@@ -4760,7 +4760,7 @@ tasks:
   title: Implement portfolio total aggregation from manor registries
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 80
   tranche: 3
   change_type: behavior_change
@@ -4806,7 +4806,7 @@ tasks:
   title: Implement per-manor net and outliers computation
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 78
   tranche: 3
   change_type: behavior_change
@@ -4850,7 +4850,7 @@ tasks:
   title: Integrate portfolio registry into phase and snapshot outputs
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 76
   tranche: 3
   change_type: behavior_change
@@ -4896,7 +4896,7 @@ tasks:
   title: Add multi-manor regression suite and invariants
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: ready
   priority: 74
   tranche: 3
   change_type: refactor
@@ -4941,7 +4941,7 @@ tasks:
   title: Render portfolio totals and outliers UI stub
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: ready
   priority: 72
   tranche: 3
   change_type: refactor
