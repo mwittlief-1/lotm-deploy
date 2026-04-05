@@ -5,26 +5,30 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-engine-core
-  git_commit: 8f01e876ee81c6e1619ce04c16f9061baffaf223
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 872a51e308c3cca829f2cb2c36c355dd331d8751
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    ops_v03_validate: pass
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Closed Engine V03-R3-005-T03 on codex/v0.3-lane-engine-core after
-  seeding bounded latent pressure baselines for crown, magnates, and
-  church from live obligation, relationship, and known-house context.
-  No engine follow-on task is ready yet because V03-R3-005-T04 remains
-  todo.
-active_claims: {}
+  Accepted Engine V03-R3-005-T03 on kickoff and reopened
+  Engine V03-R3-005-T04 as the next safe same-lane claim.
+  Social, Economy, World, and UI remain without current ready
+  follow-on tasks.
+active_claims:
+  codex/v0.3-lane-engine-core:
+    task_id: V03-R3-005-T04
+    claimed_by: manual-engine-lane
+    claimed_at: '2026-04-05T00:09:49-0400'
+    claim_expires_at: '2026-04-05T04:09:49-0400'
+    run_id: manual-engine-v03-r3-005-t04-20260405T000949-0400
