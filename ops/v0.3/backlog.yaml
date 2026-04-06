@@ -944,7 +944,7 @@ epics:
 - id: V03-R3-001
   title: Replay hardening and reliability quota
   release: v0.3.3
-  status: todo
+  status: done
   priority: 44
   tranche: 4
   change_type: refactor
@@ -6445,7 +6445,7 @@ tasks:
   title: Close epic and record reliability quota completion
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 50
   tranche: 4
   change_type: refactor
@@ -6481,6 +6481,8 @@ tasks:
   escalation_triggers: []
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-001-T05.md
+  outputs:
+  - ops/v0.3/progress/runs/V03-R3-001.md
 - id: V03-R3-002-T01
   title: Audit person-placement surfaces for clergy and institution holders
   release: v0.3.3
