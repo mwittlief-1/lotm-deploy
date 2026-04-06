@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R2-004-T04
+  current_task_id: V03-R2-004-T03
+  last_completed_task_id: V03-R2-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: 0907a23a2beede8e4f6c22f9f54264da40a66598
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 25f6b3b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,24 +18,12 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Social V03-R2-004-T04 is closed on the lane branch with structure-first
-  realm-office holder registries and deterministic tenure-transition
-  helpers. The social lane stops here because V03-R2-004-T05 is still
-  blocked behind T03 in this branch snapshot. UI V03-R1-005-T05 and Engine
-  V03-R3-005-T01 remain the other recorded lane claims.
-active_claims:
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R1-005-T05
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-04T17:28:51-0400'
-    claim_expires_at: '2026-04-04T21:28:51-0400'
-    run_id: manual-ui-v03-r1-005-t05-20260404T172851-0400
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R3-005-T01
-    claimed_by: manual-engine-lane
-    claimed_at: '2026-04-04T17:28:51-0400'
-    claim_expires_at: '2026-04-04T21:28:51-0400'
-    run_id: manual-engine-v03-r3-005-t01-20260404T172851-0400
+  Accepted World V03-R2-002-T05 and closed epic V03-R2-002 with the bounded
+  tier-scope regression fixture, fixture-backed topology debug test, and QA
+  closeout note. Integrator carved a behavior-preserving court seam so Social
+  V03-R2-004-T03 is ready again. Social T05 and T06 return to normal todo
+  state behind T03. No active claims are open.
+active_claims: {}

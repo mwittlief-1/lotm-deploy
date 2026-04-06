@@ -1,0 +1,40 @@
+version: 1
+run_id: manual-economy-v03-r4-002-t01-20260405T143543-0400
+task_id: V03-R4-002-T01
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-economy-fiscal
+commit: 24557fc5125e421910b5f8ea45e582aece599656
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  fiscal_knob_surface_audit: docs/releases/v0.3.4_FISCAL_KNOB_SURFACE_AUDIT.md
+findings:
+  - Obligations, pricing, consumption, and hunting now have explicit economy-owned seams, but several numeric inputs still live as embedded literals or mirrored imports rather than a shared tuning table.
+  - Maintenance is still a documented balance family plus scattered receipt taxonomy and event-local coin drains, not an economy-owned runtime tuning seam.
+  - V03-R4-002-T02 should centralize the live numeric surfaces first and represent maintenance hooks as explicit placeholders instead of prose-only notes.
+stop_reason: continued_same_lane
+next_task_cursor: V03-R4-002-T02
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  qa_fallback: single-worker_vitest_plus_uat_gate
+  reason: T01 closed cleanly and T02 was immediately promoted and claimed under same-lane continuation.

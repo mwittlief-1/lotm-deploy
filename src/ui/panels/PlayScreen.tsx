@@ -46,12 +46,21 @@ import {
   createResourceChipRoute,
   receiptViewerSubtitle,
   receiptViewerTitle,
+  selectCounterpartyReceiptSections,
   selectGroupedReceiptSections,
   selectRawReceiptPhases,
   type ReceiptViewerMode,
   type ReceiptViewerRoute
 } from "../playScreenReceipts";
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import {
+  buildPortfolioEvidenceScope,
+  buildPortfolioMapCheckpoint,
+  buildPortfolioScopeContract,
+  selectPortfolioManor,
+  type PortfolioMapTarget,
+  type PortfolioScopeMode
+} from "../playScreenPortfolio";
 import {
   buildObligationsCounterpartyContract,
   createObligationsModalRoute,
@@ -88,6 +97,7 @@ import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
 import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
+import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
@@ -107,6 +117,7 @@ type PlayScreenProps = {
   decisions: PlayDecisions;
   gameOverReasonCopy: Record<string, string>;
   onAdvanceTurn: () => void;
+  onCenterSelectedHolding?: (target: PortfolioMapTarget) => void;
   onExportFullRunJson: () => void;
   onExportRunSummary: () => void;
   onOpenLog: () => void;
@@ -131,6 +142,7 @@ export function PlayScreen({
   decisions,
   gameOverReasonCopy,
   onAdvanceTurn,
+  onCenterSelectedHolding,
   onExportFullRunJson,
   onExportRunSummary,
   onOpenLog,
@@ -149,6 +161,8 @@ export function PlayScreen({
   toast
 }: PlayScreenProps) {
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
+  const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
+  const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
@@ -205,6 +219,13 @@ export function PlayScreen({
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
+  const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
+  const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
+  const portfolioEvidenceScope = buildPortfolioEvidenceScope({
+    contract: portfolioContract,
+    scopeMode: portfolioScopeMode,
+    selectedManorId: selectedPortfolioManorId
+  });
 
   const prospectsWindowRaw: any =
     (ctx as any).prospects_window ??
@@ -479,7 +500,18 @@ export function PlayScreen({
       }),
     [courtDecisionBudget, ctx.preview_state]
   );
-  const topologyDebugSurface = buildTopologyDebugSurface(ctx.preview_state);
+  const topologyDebugSurface = useMemo(() => buildTopologyDebugSurface(ctx.preview_state), [ctx.preview_state]);
+  const portfolioMapCheckpoint = useMemo(
+    () =>
+      buildPortfolioMapCheckpoint({
+        contract: portfolioContract,
+        mapCheckpointAvailable: typeof onCenterSelectedHolding === "function",
+        scopeMode: portfolioScopeMode,
+        selectedManorId: selectedPortfolioManorId,
+        topologySurface: topologyDebugSurface
+      }),
+    [onCenterSelectedHolding, portfolioContract, portfolioScopeMode, selectedPortfolioManorId, topologyDebugSurface]
+  );
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
   const constructionRatePlannedNextTurn = decisions.labor.desired_builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -580,6 +612,7 @@ export function PlayScreen({
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
   const receiptsViewerTitleText = receiptViewerTitle(activeReceiptViewerFocus);
   const receiptsViewerSubtitleText = receiptViewerSubtitle(activeReceiptViewerFocus);
+  const visibleCounterpartyReceiptSections = selectCounterpartyReceiptSections(receiptsViewerData.counterpartySections, activeReceiptViewerFocus);
   const visibleGroupedReceiptSections = selectGroupedReceiptSections(receiptsViewerData.groupedSections, activeReceiptViewerFocus);
   const visibleRawReceiptPhases = selectRawReceiptPhases(receiptsViewerData.rawPhases, activeReceiptViewerFocus);
   const activeObligationsModalFocus: ObligationsModalFocus = obligationsModalRoute?.focus ?? "overview";
@@ -595,6 +628,15 @@ export function PlayScreen({
 
   function openChipDetails(chipId: StickyResourceChip["id"]) {
     setReceiptViewerRoute(createResourceChipRoute(chipId));
+  }
+
+  function handlePortfolioScopeModeChange(mode: PortfolioScopeMode) {
+    setPortfolioScopeMode(mode);
+  }
+
+  function handlePortfolioManorSelect(manorId: string) {
+    setPortfolioScopeMode("selected_manor");
+    setSelectedPortfolioManorId(manorId);
   }
 
   function closeReceiptViewer() {
@@ -624,7 +666,15 @@ export function PlayScreen({
 
   const playSections: Record<PlayScreenCardId, React.ReactNode> = {
     council_agenda: <CouncilAgendaPanel copy={copy} items={councilAgendaItems} onScrollToAnchor={scrollToAnchor} />,
-    diff_ledger: <DiffLedgerPanel copy={copy} items={diffLedgerItems} onOpenExplainChanges={openExplainChanges} />,
+    diff_ledger: (
+      <DiffLedgerPanel
+        copy={copy}
+        items={diffLedgerItems}
+        onOpenExplainChanges={openExplainChanges}
+        scopeHelperText={portfolioEvidenceScope.diffLedgerHelper}
+        scopeLabel={portfolioEvidenceScope.diffLedgerScopeLabel}
+      />
+    ),
     manor_state: (
       <ManorStatePanel
         anchorUnrest={PLAY_ANCHORS.unrest}
@@ -685,6 +735,22 @@ export function PlayScreen({
         turnYears={TURN_YEARS}
       />
     ),
+    portfolio_overview: portfolioContract ? (
+      <PortfolioOverviewPanel
+        contract={portfolioContract}
+        mapCheckpoint={portfolioMapCheckpoint}
+        onCenterSelectedHolding={
+          portfolioMapCheckpoint?.state === "ready" && onCenterSelectedHolding
+            ? () => onCenterSelectedHolding(portfolioMapCheckpoint.target)
+            : undefined
+        }
+        onScopeModeChange={handlePortfolioScopeModeChange}
+        onSelectManor={handlePortfolioManorSelect}
+        selectedManor={activePortfolioManor ?? portfolioContract.selectedManor}
+        selectedManorId={activePortfolioManor?.manorId ?? portfolioContract.selectedManorId}
+        scopeMode={portfolioScopeMode}
+      />
+    ) : null,
     prospects: (
       <ProspectsPanel
         anchorId={PLAY_ANCHORS.prospects}
@@ -850,7 +916,7 @@ export function PlayScreen({
 
       <StickyResourceChips
         chips={resourceChips}
-        helperText={copy.resourceChipHelper ?? "Open a chip to follow the deeper ledger without leaving the gameplay shell."}
+        helperText={portfolioEvidenceScope.chipHelperText}
         onOpenChipDetails={openChipDetails}
         timingLabel={copy.turnSummary_last3Years}
       />
@@ -882,10 +948,13 @@ export function PlayScreen({
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
         <ReceiptsViewerPanel
+          counterpartySections={visibleCounterpartyReceiptSections}
           groupedSections={visibleGroupedReceiptSections}
           mode={receiptsViewerMode}
           onModeChange={handleReceiptViewerModeChange}
           rawPhases={visibleRawReceiptPhases}
+          scopeLabel={portfolioEvidenceScope.receiptScopeLabel}
+          scopeSummary={portfolioEvidenceScope.receiptScopeSummary}
         />
       </ModalSheet>
     </div>

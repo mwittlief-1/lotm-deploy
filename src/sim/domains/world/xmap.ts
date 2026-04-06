@@ -10,11 +10,23 @@ import {
   MANOR_UNITS_SCHEMA_VERSION,
   ROUTE_HOP_DISTANCE_METRIC,
   WORLD_DOMAIN_SCHEMA_VERSION,
+  WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SCHEMA_VERSION,
   XMAP_ALPHA_MANIFEST_SCHEMA_VERSION,
   type WorldDistanceBandOptionsV1,
   type WorldDistanceBandV1,
+  type WorldScopeCapBucketV1,
+  type WorldScopeCapCandidateV1,
+  type WorldScopeCapDecisionV1,
+  type WorldScopeCapEvaluationV1,
+  type WorldScopeCandidateOptionsV1,
+  type WorldScopeCapRowV1,
+  type WorldScopeCapRuleV1,
+  type WorldScopedManorCandidateV1,
+  type WorldScopedManorEvaluationV1,
+  type WorldScopeCapTableV1,
+  type WorldScopeCapTierKeyV1,
   type WorldDomainV1,
   type WorldNumericDistanceV1,
   type WorldTopologySnapshotDistanceSampleV1,
@@ -48,8 +60,96 @@ const EMPTY_TERRITORIAL_NEIGHBORS: readonly XMapTerritorialNeighborV1[] = [];
 const EMPTY_ROUTE_NEIGHBORS: readonly XMapRouteNeighborV1[] = [];
 const DISTANCE_SCALE = 1000;
 const WORLD_TOPOLOGY_DISTANCE_SAMPLE_LIMIT = 8;
+const WORLD_SCOPE_CAP_BUCKET_ORDER = [
+  "kinship",
+  "territorial_adjacent",
+  "route_adjacent",
+  "near",
+  "far"
+] as const satisfies readonly WorldScopeCapBucketV1[];
+
+const WORLD_SCOPE_CAP_ROWS: readonly WorldScopeCapRowV1[] = [
+  {
+    tier_key: "king",
+    tier_labels: ["King"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 48 },
+      { bucket: "territorial_adjacent", max_total_houses: 96 },
+      { bucket: "route_adjacent", max_total_houses: 144 },
+      { bucket: "near", max_total_houses: 216 },
+      { bucket: "far", max_total_houses: 320 }
+    ]
+  },
+  {
+    tier_key: "count",
+    tier_labels: ["Count", "Earl"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 40 },
+      { bucket: "territorial_adjacent", max_total_houses: 80 },
+      { bucket: "route_adjacent", max_total_houses: 120 },
+      { bucket: "near", max_total_houses: 184 },
+      { bucket: "far", max_total_houses: 256 }
+    ]
+  },
+  {
+    tier_key: "baron",
+    tier_labels: ["Baron"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 32 },
+      { bucket: "territorial_adjacent", max_total_houses: 64 },
+      { bucket: "route_adjacent", max_total_houses: 96 },
+      { bucket: "near", max_total_houses: 144 },
+      { bucket: "far", max_total_houses: 208 }
+    ]
+  },
+  {
+    tier_key: "knight",
+    tier_labels: ["Knight"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 24 },
+      { bucket: "territorial_adjacent", max_total_houses: 48 },
+      { bucket: "route_adjacent", max_total_houses: 72 },
+      { bucket: "near", max_total_houses: 112 },
+      { bucket: "far", max_total_houses: 160 }
+    ]
+  },
+  {
+    tier_key: "bishop",
+    tier_labels: ["Bishop"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 32 },
+      { bucket: "territorial_adjacent", max_total_houses: 64 },
+      { bucket: "route_adjacent", max_total_houses: 96 },
+      { bucket: "near", max_total_houses: 144 },
+      { bucket: "far", max_total_houses: 208 }
+    ]
+  },
+  {
+    tier_key: "abbot",
+    tier_labels: ["Abbot"],
+    rules: [
+      { bucket: "kinship", max_total_houses: 28 },
+      { bucket: "territorial_adjacent", max_total_houses: 56 },
+      { bucket: "route_adjacent", max_total_houses: 84 },
+      { bucket: "near", max_total_houses: 128 },
+      { bucket: "far", max_total_houses: 192 }
+    ]
+  },
+  {
+    tier_key: "unknown",
+    tier_labels: [],
+    rules: [
+      { bucket: "kinship", max_total_houses: 24 },
+      { bucket: "territorial_adjacent", max_total_houses: 48 },
+      { bucket: "route_adjacent", max_total_houses: 72 },
+      { bucket: "near", max_total_houses: 112 },
+      { bucket: "far", max_total_houses: 160 }
+    ]
+  }
+] as const;
 
 let bundledWorldDomain: WorldDomainV1 | undefined;
+let worldScopeCapTable: WorldScopeCapTableV1 | undefined;
 
 const travelDistanceCacheByDomain = new WeakMap<WorldDomainV1, Map<string, Map<string, number>>>();
 const routeHopCacheByDomain = new WeakMap<WorldDomainV1, Map<string, Map<string, number>>>();
@@ -117,6 +217,98 @@ function normalizeFarThreshold(value: number | null | undefined, label: string):
   }
   assertWorld(Number.isFinite(value) && value >= 0, `${label} must be a non-negative finite number`);
   return value;
+}
+
+function normalizeScopeCapCount(value: number, label: string): number {
+  assertWorld(Number.isInteger(value) && value >= 0, `${label} must be a non-negative integer`);
+  return value;
+}
+
+function normalizeScopeCapBucket(bucket: string): WorldScopeCapBucketV1 {
+  assertWorld(
+    WORLD_SCOPE_CAP_BUCKET_ORDER.includes(bucket as WorldScopeCapBucketV1),
+    `unknown scope cap bucket ${bucket}`
+  );
+  return bucket as WorldScopeCapBucketV1;
+}
+
+function compareScopeBucket(left: WorldScopeCapBucketV1, right: WorldScopeCapBucketV1): number {
+  return WORLD_SCOPE_CAP_BUCKET_ORDER.indexOf(left) - WORLD_SCOPE_CAP_BUCKET_ORDER.indexOf(right);
+}
+
+function cloneScopeCapRules(rules: readonly WorldScopeCapRuleV1[]): WorldScopeCapRuleV1[] {
+  return rules.map((rule) => ({
+    bucket: rule.bucket,
+    max_total_houses: rule.max_total_houses
+  }));
+}
+
+function validateScopeCapRows(rows: readonly WorldScopeCapRowV1[]): void {
+  for (const row of rows) {
+    assertWorld(row.rules.length === WORLD_SCOPE_CAP_BUCKET_ORDER.length, `scope cap row ${row.tier_key} must define every bucket`);
+    let previous = -1;
+
+    for (let index = 0; index < row.rules.length; index += 1) {
+      const rule = row.rules[index];
+      assertWorld(rule !== undefined, `scope cap row ${row.tier_key} has a missing rule`);
+      const expectedBucket = WORLD_SCOPE_CAP_BUCKET_ORDER[index];
+      assertWorld(
+        rule.bucket === expectedBucket,
+        `scope cap row ${row.tier_key} must follow canonical bucket order; expected ${expectedBucket}`
+      );
+      const maxTotal = normalizeScopeCapCount(rule.max_total_houses, `scope cap row ${row.tier_key} bucket ${rule.bucket}`);
+      assertWorld(
+        maxTotal >= previous,
+        `scope cap row ${row.tier_key} bucket ${rule.bucket} must not reduce the cumulative cap`
+      );
+      previous = maxTotal;
+    }
+  }
+}
+
+function normalizedScopeTierLabel(label: string | null | undefined): string {
+  return String(label ?? "")
+    .trim()
+    .toLowerCase();
+}
+
+function bucketLimitFromRules(rules: readonly WorldScopeCapRuleV1[], bucket: WorldScopeCapBucketV1): number {
+  const rule = rules.find((entry) => entry.bucket === bucket);
+  assertWorld(rule, `scope cap bucket ${bucket} is missing from the cap table`);
+  return normalizeScopeCapCount(rule.max_total_houses, `scope cap bucket ${bucket}`);
+}
+
+function normalizeManorIdList(manorIds: readonly string[] | null | undefined): string[] {
+  const deduped = new Set<string>();
+  for (const manorId of manorIds ?? []) {
+    if (typeof manorId !== "string") continue;
+    const trimmed = manorId.trim();
+    if (!trimmed) continue;
+    deduped.add(trimmed);
+  }
+  return [...deduped].sort(compareStrings);
+}
+
+function hasNeighborManorId<T extends XMapTerritorialNeighborV1 | XMapRouteNeighborV1>(
+  rows: readonly T[] | null,
+  manorId: string
+): boolean {
+  return (rows ?? []).some((neighbor) => neighbor.manor_id === manorId);
+}
+
+function resolveScopeCandidateManorIds(
+  domain: WorldDomainV1,
+  anchorManorId: string,
+  options?: WorldScopeCandidateOptionsV1
+): string[] {
+  if (!domain.manors_by_id.has(anchorManorId)) return [];
+
+  const configured = normalizeManorIdList(options?.candidate_manor_ids);
+  if (configured.length > 0) {
+    return configured.filter((manorId) => manorId !== anchorManorId && domain.manors_by_id.has(manorId));
+  }
+
+  return [...domain.world_topology.manor_ids].filter((manorId) => manorId !== anchorManorId);
 }
 
 function validateSchemas(surface: XMapImportSurfaceV1): void {
@@ -552,6 +744,123 @@ export function getRouteHopDistance(domain: WorldDomainV1, fromManorId: string, 
   return getNumericDistanceMetrics(domain, fromManorId, toManorId)?.route_hop_distance ?? null;
 }
 
+export function normalizeWorldScopeCapTierKey(tierLabel: string | null | undefined): WorldScopeCapTierKeyV1 {
+  const normalized = normalizedScopeTierLabel(tierLabel);
+
+  if (normalized === "king") return "king";
+  if (normalized === "count" || normalized === "earl") return "count";
+  if (normalized === "baron") return "baron";
+  if (normalized === "knight") return "knight";
+  if (normalized === "bishop") return "bishop";
+  if (normalized === "abbot") return "abbot";
+  return "unknown";
+}
+
+export function getWorldScopeCapBucketOrder(): readonly WorldScopeCapBucketV1[] {
+  return [...WORLD_SCOPE_CAP_BUCKET_ORDER];
+}
+
+export function getWorldScopeCapTable(): WorldScopeCapTableV1 {
+  validateScopeCapRows(WORLD_SCOPE_CAP_ROWS);
+
+  worldScopeCapTable ??= {
+    schema_version: WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION,
+    canonical_numeric_distance: CANONICAL_NUMERIC_DISTANCE_METRIC,
+    bucket_order: [...WORLD_SCOPE_CAP_BUCKET_ORDER],
+    rows: WORLD_SCOPE_CAP_ROWS.map((row) => ({
+      tier_key: row.tier_key,
+      tier_labels: [...row.tier_labels],
+      rules: cloneScopeCapRules(row.rules)
+    }))
+  };
+
+  return {
+    schema_version: worldScopeCapTable.schema_version,
+    canonical_numeric_distance: worldScopeCapTable.canonical_numeric_distance,
+    bucket_order: [...worldScopeCapTable.bucket_order],
+    rows: worldScopeCapTable.rows.map((row) => ({
+      tier_key: row.tier_key,
+      tier_labels: [...row.tier_labels],
+      rules: cloneScopeCapRules(row.rules)
+    }))
+  };
+}
+
+export function getWorldScopeCapRowForTier(tierLabel: string | null | undefined): WorldScopeCapRowV1 {
+  const tierKey = normalizeWorldScopeCapTierKey(tierLabel);
+  const table = getWorldScopeCapTable();
+  const row = table.rows.find((entry) => entry.tier_key === tierKey);
+  assertWorld(row, `scope cap row missing for tier ${tierKey}`);
+  return {
+    tier_key: row.tier_key,
+    tier_labels: [...row.tier_labels],
+    rules: cloneScopeCapRules(row.rules)
+  };
+}
+
+export function getWorldScopeCapLimit(
+  tierLabel: string | null | undefined,
+  bucket: WorldScopeCapBucketV1
+): number {
+  return bucketLimitFromRules(getWorldScopeCapRowForTier(tierLabel).rules, normalizeScopeCapBucket(bucket));
+}
+
+export function evaluateWorldScopeCaps(
+  tierLabel: string | null | undefined,
+  candidates: Iterable<WorldScopeCapCandidateV1>
+): WorldScopeCapEvaluationV1 {
+  const row = getWorldScopeCapRowForTier(tierLabel);
+  const deduped = new Map<string, WorldScopeCapCandidateV1>();
+
+  for (const candidate of candidates) {
+    const stableId = typeof candidate?.stable_id === "string" ? candidate.stable_id.trim() : "";
+    if (!stableId) continue;
+    const bucket = normalizeScopeCapBucket(candidate.bucket);
+    const existing = deduped.get(stableId);
+    if (!existing || compareScopeBucket(bucket, existing.bucket) < 0) {
+      deduped.set(stableId, { stable_id: stableId, bucket });
+    }
+  }
+
+  const normalizedCandidates = [...deduped.values()].sort((left, right) => {
+    const bucketDelta = compareScopeBucket(left.bucket, right.bucket);
+    if (bucketDelta !== 0) return bucketDelta;
+    return compareStrings(left.stable_id, right.stable_id);
+  });
+
+  const admittedIds: string[] = [];
+  const rejectedIds: string[] = [];
+  const decisions: WorldScopeCapDecisionV1[] = [];
+
+  for (const candidate of normalizedCandidates) {
+    const bucketRank = WORLD_SCOPE_CAP_BUCKET_ORDER.indexOf(candidate.bucket);
+    const bucketLimit = bucketLimitFromRules(row.rules, candidate.bucket);
+    const admitted = admittedIds.length < bucketLimit;
+
+    if (admitted) admittedIds.push(candidate.stable_id);
+    else rejectedIds.push(candidate.stable_id);
+
+    decisions.push({
+      stable_id: candidate.stable_id,
+      bucket: candidate.bucket,
+      bucket_rank: bucketRank,
+      bucket_limit: bucketLimit,
+      admitted,
+      admitted_total: admittedIds.length
+    });
+  }
+
+  return {
+    schema_version: WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION,
+    source_tier: row.tier_key,
+    bucket_order: [...WORLD_SCOPE_CAP_BUCKET_ORDER],
+    rules: cloneScopeCapRules(row.rules),
+    admitted_ids: admittedIds,
+    rejected_ids: rejectedIds,
+    decisions
+  };
+}
+
 export function getFarThresholdDefault(domain: WorldDomainV1): number | null {
   return normalizeFarThreshold(domain.world_topology.distance_metrics.far_threshold_default, "world far_threshold_default");
 }
@@ -580,6 +889,90 @@ export function classifyTravelDistance(
   }
 
   return travelCostDistance >= farThreshold ? "far" : "near";
+}
+
+export function classifyWorldScopeBucket(
+  domain: WorldDomainV1,
+  anchorManorId: string,
+  candidateManorId: string,
+  options?: WorldScopeCandidateOptionsV1
+): WorldScopeCapBucketV1 | null {
+  if (!domain.manors_by_id.has(anchorManorId) || !domain.manors_by_id.has(candidateManorId) || anchorManorId === candidateManorId) {
+    return null;
+  }
+
+  const kinshipManorIds = new Set(normalizeManorIdList(options?.kinship_manor_ids));
+  if (kinshipManorIds.has(candidateManorId)) {
+    return "kinship";
+  }
+
+  if (hasNeighborManorId(getTerritorialAdjacency(domain, anchorManorId), candidateManorId)) {
+    return "territorial_adjacent";
+  }
+
+  if (hasNeighborManorId(getRouteAdjacency(domain, anchorManorId), candidateManorId)) {
+    return "route_adjacent";
+  }
+
+  return classifyTravelDistance(domain, anchorManorId, candidateManorId, options);
+}
+
+export function listWorldScopeCandidatesForAnchor(
+  domain: WorldDomainV1,
+  anchorManorId: string,
+  options?: WorldScopeCandidateOptionsV1
+): WorldScopedManorCandidateV1[] {
+  if (!domain.manors_by_id.has(anchorManorId)) {
+    return [];
+  }
+
+  const candidates: WorldScopedManorCandidateV1[] = [];
+  const candidateManorIds = resolveScopeCandidateManorIds(domain, anchorManorId, options);
+
+  for (const manorId of candidateManorIds) {
+    const metrics = getNumericDistanceMetrics(domain, anchorManorId, manorId);
+    if (!metrics) continue;
+
+    const territorialAdjacent = hasNeighborManorId(getTerritorialAdjacency(domain, anchorManorId), manorId);
+    const routeAdjacent = hasNeighborManorId(getRouteAdjacency(domain, anchorManorId), manorId);
+    const distanceBand = classifyTravelDistance(domain, anchorManorId, manorId, options);
+    const bucket = classifyWorldScopeBucket(domain, anchorManorId, manorId, options);
+    if (!bucket) continue;
+
+    candidates.push({
+      manor_id: manorId,
+      stable_id: manorId,
+      bucket,
+      travel_cost_distance: metrics.travel_cost_distance,
+      route_hop_distance: metrics.route_hop_distance,
+      distance_band: distanceBand,
+      territorial_adjacent: territorialAdjacent,
+      route_adjacent: routeAdjacent
+    });
+  }
+
+  candidates.sort((left, right) => {
+    const bucketDelta = compareScopeBucket(left.bucket, right.bucket);
+    if (bucketDelta !== 0) return bucketDelta;
+    return compareStrings(left.manor_id, right.manor_id);
+  });
+
+  return candidates;
+}
+
+export function evaluateWorldScopeCapsForAnchor(
+  domain: WorldDomainV1,
+  anchorManorId: string,
+  tierLabel: string | null | undefined,
+  options?: WorldScopeCandidateOptionsV1
+): WorldScopedManorEvaluationV1 {
+  const candidates = listWorldScopeCandidatesForAnchor(domain, anchorManorId, options);
+  return {
+    anchor_manor_id: anchorManorId,
+    far_threshold: getFarThreshold(domain, options),
+    candidates,
+    cap_evaluation: evaluateWorldScopeCaps(tierLabel, candidates)
+  };
 }
 
 export function buildBoundedWorldTopologyView(domain: WorldDomainV1 = loadBundledWorldDomain()): WorldTopologySnapshotV1 {

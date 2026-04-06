@@ -1,0 +1,206 @@
+{
+  "hash": "fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7",
+  "kind": "economy_fiscal_regression_seed_pack_v1",
+  "qa_flow": {
+    "commands": [
+      "node node_modules/tsx/dist/cli.mjs scripts/fiscalDoe.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/fiscalDoe.ts --policies=builder-forward --turns=30 --outdir=qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward",
+      "node node_modules/tsx/dist/cli.mjs scripts/fiscalRegressionSeeds.ts"
+    ],
+    "note": "These scenarios are the canonical fiscal regression comparison points for v0.3.4 balance work."
+  },
+  "scenarios": [
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 19,
+        "food_stores": 903,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "focus": [
+        "stores",
+        "manor_count_distribution"
+      ],
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 342,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "scenario_id": "stable_clear_prudent_turns_15",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json",
+      "source_hash": "5ee59f0ebafdca32661f28942665c4822da7ee5bc28f5fc0aaa6dc6b46dae5e9",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 444,
+        "arrears_coin": 6,
+        "coin": 0,
+        "food_stores": 402,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 52
+      },
+      "focus": [
+        "arrears",
+        "stores"
+      ],
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 444,
+        "arrears_coin": 6,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "scenario_id": "arrears_pressure_builder_turns_15",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json",
+      "source_hash": "5ee59f0ebafdca32661f28942665c4822da7ee5bc28f5fc0aaa6dc6b46dae5e9",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 424,
+        "arrears_coin": 6,
+        "coin": 119,
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 100
+      },
+      "focus": [
+        "dispossession",
+        "arrears",
+        "stores"
+      ],
+      "game_over_reason": "Dispossessed",
+      "game_over_turn": 26,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": true,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": true,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 424,
+        "arrears_coin": 6,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "scenario_id": "dispossession_builder_turns_30",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/runs.json",
+      "source_hash": "d27ff20e27e15a514ff0433e5e72e718f4d08ad5d67cd9beeb794276dddf32fc",
+      "turns_played": 26,
+      "turns_requested": 30
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 118,
+        "food_stores": 1192,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 3
+      },
+      "focus": [
+        "manor_count_distribution"
+      ],
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 91,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "scenario_id": "single_manor_distribution_baseline",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json",
+      "source_hash": "5ee59f0ebafdca32661f28942665c4822da7ee5bc28f5fc0aaa6dc6b46dae5e9",
+      "turns_played": 15,
+      "turns_requested": 15
+    }
+  ],
+  "source_runs": [
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/runs.json",
+      "hash": "5ee59f0ebafdca32661f28942665c4822da7ee5bc28f5fc0aaa6dc6b46dae5e9",
+      "policies": [
+        "builder-forward",
+        "prudent-builder"
+      ],
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/runs.json",
+      "hash": "d27ff20e27e15a514ff0433e5e72e718f4d08ad5d67cd9beeb794276dddf32fc",
+      "policies": [
+        "builder-forward"
+      ],
+      "turns": 30
+    }
+  ],
+  "tuning_table_hash": "2aec5cdc86272758701412b8dd9ba35b405f0e1143ce78d8fc6ed01120a1664f"
+}
