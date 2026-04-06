@@ -1,6 +1,7 @@
 import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../stateSchema";
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
+import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
@@ -9,6 +10,7 @@ import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const delegationView = buildCourtDelegationView(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
@@ -24,6 +26,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     economy_obligations_view: buildEconomyObligationsView(state),
     economy_pricing_view: buildEconomyPricingView(state),
     political_weather: buildPoliticalWeatherFromState(state, experienceSurfaces),
+    court_delegation_view: delegationView,
     portfolio: (state as any).portfolio,
     world_topology_view: buildBoundedWorldTopologyView(),
     known_houses: experienceSurfaces.known_houses,
@@ -39,6 +42,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
       configurable: true
     });
   }
+  (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
   return snapshot;
 }
 

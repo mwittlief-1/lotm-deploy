@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-002-T01
-  last_completed_task_id: V03-R2-005-T05
+  current_task_id: V03-R2-002-T04
+  last_completed_task_id: V03-R3-001-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-ui-experience
-  git_commit: d31484c3ba93044f82951c45d92f9c480f4a9302
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: c90735d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,8 +21,9 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Closed UI V03-R2-005-T05 after adding a dormant selected-holding
-  map checkpoint seam behind the portfolio selector and topology
-  surface. The UI claim is cleared and no next ready UI lane task is
-  available in the current backlog state.
+  Accepted World V03-R2-002-T02 and T03, accepted Social V03-R2-003-T03
+  through T06 and closed the delegation epic, and accepted Tooling
+  V03-R3-001-T02 through T05 and closed the replay reliability epic.
+  Reopened UI V03-R2-002-T04 from the world-topology chain and promoted
+  Social V03-R2-004-T01 as the next clean parallel frontier.
 active_claims: {}

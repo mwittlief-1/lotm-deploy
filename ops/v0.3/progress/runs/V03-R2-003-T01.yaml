@@ -1,0 +1,35 @@
+version: 1
+run_id: V03-R2-003-T01-20260405T200838-0400
+task_id: V03-R2-003-T01
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: b522188f3caa0aea002855110006b8e0a7b52026
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  audit_doc: docs/releases/v0.3.2_delegation_surface_audit.md
+findings:
+  - The only current court-budget consumers are `gift_liege`, `offering_church`, `marriage_inbound`, and `marriage_scout`, and the runtime contract for each is already locked by the court budget, receipt-writer, and marriage budget tests.
+  - The safe `v0.3.2` delegation candidates are the fiscal settlement wrappers for gifts and offerings plus the bounded scouting path in `src/sim/domains/people/marriage.ts`; inbound marriage handling should remain player-facing because it directly mutates kinship, household membership, and dowry outcomes.
+  - Maintenance is a real scope-lock target but not a real runtime seam yet, so follow-on tasks must introduce a bounded maintenance hook before they can delegate it.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-003-T02
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  dispatch_reason: T01 closed after passing required gates; same-lane continuation promoted and claimed T02.

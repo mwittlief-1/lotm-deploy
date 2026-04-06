@@ -84,5 +84,5 @@ run_logging_required:
   - pr_url
   - pr_status
 budgets:
-  snapshot_cap_bytes_per_turn: 204800
+  snapshot_cap_bytes_per_turn: 524288
   turn_time_soft_ceiling_ms_per_seed: 250

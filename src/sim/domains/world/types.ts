@@ -7,6 +7,7 @@ export const WORLD_DOMAIN_SCHEMA_VERSION = "xmap_world_domain_v1" as const;
 export const CANONICAL_NUMERIC_DISTANCE_METRIC = "travel_cost_distance" as const;
 export const ROUTE_HOP_DISTANCE_METRIC = "route_hop_distance" as const;
 export const WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION = "world_topology_snapshot_v1" as const;
+export const WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION = "world_scope_cap_table_v1" as const;
 
 export type XMapFranchiseBundleV1 = {
   market_right: string;
@@ -300,6 +301,71 @@ export type WorldDistanceBandV1 = "near" | "far";
 
 export interface WorldDistanceBandOptionsV1 {
   far_threshold?: number | null;
+}
+
+export type WorldScopeCapTierKeyV1 = "king" | "count" | "baron" | "knight" | "bishop" | "abbot" | "unknown";
+
+export type WorldScopeCapBucketV1 = "kinship" | "territorial_adjacent" | "route_adjacent" | "near" | "far";
+
+export interface WorldScopeCapRuleV1 {
+  bucket: WorldScopeCapBucketV1;
+  max_total_houses: number;
+}
+
+export interface WorldScopeCapRowV1 {
+  tier_key: WorldScopeCapTierKeyV1;
+  tier_labels: string[];
+  rules: WorldScopeCapRuleV1[];
+}
+
+export interface WorldScopeCapTableV1 {
+  schema_version: typeof WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION;
+  canonical_numeric_distance: typeof CANONICAL_NUMERIC_DISTANCE_METRIC;
+  bucket_order: WorldScopeCapBucketV1[];
+  rows: WorldScopeCapRowV1[];
+}
+
+export interface WorldScopeCapCandidateV1 {
+  stable_id: string;
+  bucket: WorldScopeCapBucketV1;
+}
+
+export interface WorldScopeCapDecisionV1 {
+  stable_id: string;
+  bucket: WorldScopeCapBucketV1;
+  bucket_rank: number;
+  bucket_limit: number;
+  admitted: boolean;
+  admitted_total: number;
+}
+
+export interface WorldScopeCapEvaluationV1 {
+  schema_version: typeof WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION;
+  source_tier: WorldScopeCapTierKeyV1;
+  bucket_order: WorldScopeCapBucketV1[];
+  rules: WorldScopeCapRuleV1[];
+  admitted_ids: string[];
+  rejected_ids: string[];
+  decisions: WorldScopeCapDecisionV1[];
+}
+
+export interface WorldScopeCandidateOptionsV1 extends WorldDistanceBandOptionsV1 {
+  candidate_manor_ids?: string[] | null;
+  kinship_manor_ids?: string[] | null;
+}
+
+export interface WorldScopedManorCandidateV1 extends WorldNumericDistanceV1, WorldScopeCapCandidateV1 {
+  manor_id: string;
+  distance_band: WorldDistanceBandV1 | null;
+  territorial_adjacent: boolean;
+  route_adjacent: boolean;
+}
+
+export interface WorldScopedManorEvaluationV1 {
+  anchor_manor_id: string;
+  far_threshold: number | null;
+  candidates: WorldScopedManorCandidateV1[];
+  cap_evaluation: WorldScopeCapEvaluationV1;
 }
 
 export interface WorldTopologySnapshotDistanceSampleV1 extends WorldNumericDistanceV1 {
