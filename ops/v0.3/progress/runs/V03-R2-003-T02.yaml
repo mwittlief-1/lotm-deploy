@@ -1,0 +1,36 @@
+version: 1
+run_id: V03-R2-003-T02-20260405T202855-0400
+task_id: V03-R2-003-T02
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: b522188f3caa0aea002855110006b8e0a7b52026
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  schema_module: src/sim/domains/court/delegationRegistry.ts
+  schema_test: tests/sim/delegation_registry.test.ts
+findings:
+  - Added a court-owned delegation registry seam with fixed action ordering for `gift_liege`, `offering_church`, `marriage_scout`, and `maintenance`, so later tasks can layer behavior without changing integrator or ledger boundaries.
+  - Locked an efficiency-only effect contract that resolves deterministic budget-cost, amount, and future energy-cost transforms with explicit floors rather than hidden variance or ad hoc overrides.
+  - Kept the live branch behavior-preserving by default: the new registry normalizes to manual entries until later tasks wire delegated execution into settlement, maintenance, or scouting paths.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T02 closed after passing gates; T03 remains todo and has not been promoted in this branch snapshot.

@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-004-T02
+  last_completed_task_id: V03-R2-003-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: e6ced880b86cd77ed4b36f07f3d1f2e20a1e6553
+  git_commit: b522188f3caa0aea002855110006b8e0a7b52026
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,13 +21,11 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Social V03-R1-004-T01 and V03-R1-004-T02 are closed on the lane branch,
-  adding the succession surface audit and a behavior-preserving succession
-  registry seam. Same-lane auto-claim stops here because T03's live
-  prospect generation still depends on src/sim/phases/phase_prospects.ts,
-  outside the current lane write boundary. UI V03-R1-005-T05 and Engine
-  V03-R3-005-T01 remain the other active lane claims in this branch
-  snapshot.
+  Social V03-R2-003-T01 and V03-R2-003-T02 are closed on the lane branch.
+  The delegation audit and court registry seam both passed required gates,
+  and no further social delegation task has been promoted in this branch
+  snapshot. UI V03-R1-005-T05 and Engine V03-R3-005-T01 remain the other
+  active lane claims.
 active_claims:
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T05

@@ -5260,7 +5260,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Audit budget-consuming actions and candidate delegation surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5303,7 +5303,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Define delegation registry and efficiency-only effect contract
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
