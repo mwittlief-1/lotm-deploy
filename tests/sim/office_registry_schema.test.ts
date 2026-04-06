@@ -549,6 +549,85 @@ describe("office registry schema", () => {
     ]);
   });
 
+  it("keeps service placement tenure stable until the holder actually changes", () => {
+    const state = mkState();
+    (state as any).people.p_steward = mkPerson("p_steward", "M", 37);
+    (state as any).people.p_new_steward = mkPerson("p_new_steward", "M", 34);
+
+    const initialTransition = appointCourtOfficeHolder(
+      ensureCourtOfficeRegistry(state),
+      ensureCourtServiceRecordRegistry(state),
+      {
+        seat_id: "house:house:h_player:steward",
+        holder_person_id: "p_steward",
+        holder_kind: "non_family_retainer",
+        payment_basis: "retainer_upkeep",
+        transition_turn_index: 4,
+      }
+    );
+
+    (state.house as any).court_office_registry = initialTransition.registry;
+    (state.house as any).court_service_record_registry = initialTransition.service_record_registry;
+
+    const persisted = appointCourtOfficeHolder(
+      initialTransition.registry,
+      initialTransition.service_record_registry,
+      {
+        seat_id: "house:house:h_player:steward",
+        holder_person_id: "p_steward",
+        holder_kind: "non_family_retainer",
+        payment_basis: "retainer_upkeep",
+        transition_turn_index: 5,
+      }
+    );
+
+    expect(persisted.ended_record_id).toBeNull();
+    expect(persisted.started_record_id).toBeNull();
+    expect(persisted.service_record_registry.record_ids).toEqual([
+      "house:house:h_player:steward:p_steward:4",
+    ]);
+    expect(persisted.service_record_registry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      serve_at_actor_id: "house:h_player",
+      institution_assignment_id: null,
+      predecessor_record_id: null,
+      successor_record_id: null,
+      start_turn_index: 4,
+      end_turn_index: null,
+    });
+
+    const transitioned = appointCourtOfficeHolder(
+      persisted.registry,
+      persisted.service_record_registry,
+      {
+        seat_id: "house:house:h_player:steward",
+        holder_person_id: "p_new_steward",
+        holder_kind: "non_family_retainer",
+        payment_basis: "retainer_upkeep",
+        transition_turn_index: 5,
+      }
+    );
+
+    expect(transitioned.service_record_registry.record_ids).toEqual([
+      "house:house:h_player:steward:p_new_steward:5",
+      "house:house:h_player:steward:p_steward:4",
+    ]);
+    expect(transitioned.service_record_registry.active_record_ids).toEqual([
+      "house:house:h_player:steward:p_new_steward:5",
+    ]);
+    expect(transitioned.service_record_registry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      end_turn_index: 5,
+      successor_record_id: "house:house:h_player:steward:p_new_steward:5",
+    });
+    expect(transitioned.service_record_registry.records_by_id["house:house:h_player:steward:p_new_steward:5"]).toMatchObject({
+      serve_at_actor_id: "house:h_player",
+      institution_assignment_id: null,
+      predecessor_record_id: "house:house:h_player:steward:p_steward:4",
+      successor_record_id: null,
+      start_turn_index: 5,
+      end_turn_index: null,
+    });
+  });
+
   it("classifies household members separately from non-family retainers for seat filling", () => {
     const state = mkState();
     const houseSon = mkPerson("p_house_son", "M", 16);

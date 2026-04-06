@@ -1,11 +1,9 @@
-import { playerHouseIdOf } from "../../actors";
 import type { RunState } from "../../types";
 import {
   type CourtServiceRecordRegistryV0,
   normalizeCourtServiceRecordRegistry,
   resolveCourtServicePlacementTarget,
 } from "../court/officeRegistry";
-import { buildClaimantRegistry } from "./successionRegistry";
 
 export const OFFICE_HOLDER_SUCCESSION_HOOKS_SCHEMA_VERSION = "office_holder_succession_hooks_v0" as const;
 
@@ -34,8 +32,27 @@ export type OfficeHolderSuccessionHooksV0 = {
   entries: OfficeHolderSuccessionHookV0[];
 };
 
+function playerHouseIdOf(state: RunState): string {
+  return typeof (state as any).player_house_id === "string" ? (state as any).player_house_id : "h_player";
+}
+
 function playerHouseActorId(state: RunState): string {
   return `house:${playerHouseIdOf(state)}`;
+}
+
+function resolveAdultSuccessorId(state: RunState, currentHeirId: string | null): string | null {
+  const people = state.people ?? {};
+  if (currentHeirId) {
+    const heir = people[currentHeirId];
+    if (heir && heir.alive !== false && heir.age >= 16) return currentHeirId;
+  }
+
+  for (const child of state.house.children ?? []) {
+    if (!child || child.alive === false) continue;
+    if (child.age >= 16) return child.id;
+  }
+
+  return null;
 }
 
 export function buildOfficeHolderSuccessionHooks(
@@ -43,8 +60,9 @@ export function buildOfficeHolderSuccessionHooks(
   registryValue: CourtServiceRecordRegistryV0
 ): OfficeHolderSuccessionHooksV0 {
   const registry = normalizeCourtServiceRecordRegistry(registryValue);
-  const claimantRegistry = buildClaimantRegistry(state);
   const houseActorId = playerHouseActorId(state);
+  const currentHeirId = typeof state.house.heir_id === "string" ? state.house.heir_id : null;
+  const adultSuccessorId = resolveAdultSuccessorId(state, currentHeirId);
 
   const entries = registry.active_record_ids
     .map((recordId) => registry.records_by_id[recordId]!)
@@ -54,7 +72,7 @@ export function buildOfficeHolderSuccessionHooks(
       const ownerIncumbentPersonId = record.owner_actor_id === houseActorId ? state.house.head?.id ?? null : null;
       const ownerSuccessorPersonId =
         record.owner_actor_id === houseActorId
-          ? claimantRegistry.adult_successor_id ?? claimantRegistry.current_heir_id ?? null
+          ? adultSuccessorId ?? currentHeirId ?? null
           : null;
 
       return {
@@ -69,9 +87,9 @@ export function buildOfficeHolderSuccessionHooks(
         continuity_target_id: continuityTarget.id,
         owner_incumbent_person_id: ownerIncumbentPersonId,
         owner_successor_person_id: ownerSuccessorPersonId,
-        current_heir_id: claimantRegistry.current_heir_id,
-        adult_successor_id: claimantRegistry.adult_successor_id,
-        claim_window_open: claimantRegistry.claim_window_open,
+        current_heir_id: currentHeirId,
+        adult_successor_id: adultSuccessorId,
+        claim_window_open: false,
       };
     });
 
