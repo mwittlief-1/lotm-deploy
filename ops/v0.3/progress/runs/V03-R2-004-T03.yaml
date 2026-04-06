@@ -1,0 +1,39 @@
+version: 1
+run_id: V03-R2-004-T03-20260406T154549-0400
+task_id: V03-R2-004-T03
+status: done
+date: 2026-04-06
+branch: codex/v0.3-lane-social-mechanics
+commit: d7b7692a9c683d030617d584a5c9761866a0d60e
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 3e603711e9c4efe243bbb5f1008fcd64ca49409701d1d10b8b468f2c8b44b004
+  run2: 3e603711e9c4efe243bbb5f1008fcd64ca49409701d1d10b8b468f2c8b44b004
+artifacts:
+  office_registry_module: src/sim/domains/court/officeRegistry.ts
+  retainer_upkeep_module: src/sim/domains/economy/retainerUpkeep.ts
+  office_registry_test: tests/sim/office_registry_schema.test.ts
+  retainer_upkeep_test: tests/sim/retainer_upkeep.test.ts
+  ui_contract_test: tests/ui/playScreenObligations.test.ts
+findings:
+  - Deterministic house-court seat-fill decisions now classify officers as either household members or non-family retainers, and the legacy mirror path persists the result into canonical office and service registries.
+  - Added a dedicated retainer-upkeep scaffold seam in the economy domain so non-family court officers carry explicit one-coin upkeep costs through canonical ledger receipts.
+  - Closed a pre-existing QA drift by updating the obligations UI contract test to include the already-live `gestureGroup.leverSummary` field, which restored the required suite without changing runtime behavior.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T03 closed after required gates passed; the current backlog snapshot has no ready tasks in any lane, and T05 remains todo on the social chain.
