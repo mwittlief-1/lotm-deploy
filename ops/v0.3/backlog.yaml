@@ -6401,7 +6401,7 @@ tasks:
   title: Refresh mandatory replay command and reliability docs
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 52
   tranche: 4
   change_type: refactor
@@ -6439,6 +6439,8 @@ tasks:
   escalation_triggers: []
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-001-T04.md
+  outputs:
+  - docs/qa/replay_reliability_runbook_v0.3.3.md
 - id: V03-R3-001-T05
   title: Close epic and record reliability quota completion
   release: v0.3.3
