@@ -80,6 +80,71 @@ export function TopologyDebugPanel({ description, surface, title }: TopologyDebu
             </tbody>
           </table>
         </div>
+
+        {surface.scopeCaps ? (
+          <div
+            style={{
+              display: "grid",
+              gap: 10,
+              padding: 12,
+              border: "1px solid #ece5d6",
+              background: "#faf7f0"
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 700 }}>Scope cap row</div>
+              <div style={{ fontSize: 12, opacity: 0.82, marginTop: 4 }}>
+                {surface.scopeCaps.tierLabel} normalizes to <code>{surface.scopeCaps.sourceTier}</code>. Using{" "}
+                <code>{surface.scopeCaps.metricLabel}</code> with far threshold <code>{surface.scopeCaps.farThreshold}</code>, the
+                world bundle admits {surface.scopeCaps.admittedCount} of {surface.scopeCaps.candidateCount} topology candidates and
+                leaves {surface.scopeCaps.rejectedCount} outside the cumulative cap.
+              </div>
+            </div>
+
+            <div style={{ fontSize: 12, opacity: 0.78 }}>{surface.scopeCaps.kinshipJoinSummary}</div>
+
+            <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
+              {surface.scopeCaps.bucketSummaries.map((bucket) => (
+                <div key={bucket.bucketId} style={{ border: "1px solid #ece5d6", background: "#fff", padding: 10 }}>
+                  <div style={META_LABEL_STYLE}>{bucket.label}</div>
+                  <div style={META_VALUE_STYLE}>Cap {bucket.cumulativeLimit}</div>
+                  <div style={{ fontSize: 12, marginTop: 6 }}>
+                    Admitted {bucket.admittedCount} · Outside cap {bucket.rejectedCount}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Manor</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Bucket</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>{surface.rawMetric}</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Route hops</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Band</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Status</th>
+                    <th align="left" style={{ borderBottom: "1px solid #ddd7cb", padding: "0 0 6px" }}>Rationale</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.scopeCaps.sampleRows.map((sample) => (
+                    <tr key={`${sample.statusLabel}:${sample.manorId}`}>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0" }}>{sample.manorId}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0" }}>{sample.bucketLabel}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0" }}>{sample.rawDistance}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0" }}>{sample.routeHops}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0", textTransform: "capitalize" }}>{sample.distanceBand}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0" }}>{sample.statusLabel}</td>
+                      <td style={{ borderBottom: "1px solid #f0e7d7", padding: "8px 0", lineHeight: 1.45 }}>{sample.rationale}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
