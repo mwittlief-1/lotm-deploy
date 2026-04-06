@@ -873,7 +873,7 @@ epics:
 - id: V03-R2-005
   title: Portfolio UX stub and manor selector baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 43
   tranche: 3
   change_type: behavior_change
@@ -5027,7 +5027,7 @@ tasks:
   title: Audit current relevance and tier-scope rules against topology selectors
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: ready
+  status: done
   priority: 68
   tranche: 3
   change_type: refactor
@@ -5076,7 +5076,7 @@ tasks:
   title: Implement deterministic tier-scope cap table
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: todo
+  status: ready
   priority: 66
   tranche: 3
   change_type: behavior_change
@@ -5260,7 +5260,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Audit budget-consuming actions and candidate delegation surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5303,7 +5303,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Define delegation registry and efficiency-only effect contract
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -5343,7 +5343,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Implement delegated settlement, maintenance, and gift execution hooks
-  status: todo
+  status: ready
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5920,7 +5920,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Wire center-on-selected-holding affordance behind the map checkpoint
-  status: ready
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
