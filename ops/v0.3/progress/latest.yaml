@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-004-T05
-  last_completed_task_id: V03-R2-004-T03
+  current_task_id: ''
+  last_completed_task_id: V03-R2-004-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: bb98549
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: cde5bfb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,11 +18,12 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+    run2: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
 notes: >-
-  Accepted a replay-safe Social V03-R2-004-T03 salvage on kickoff by keeping
-  pure house-court seat-fill classification and retainer-upkeep scaffolding
-  while leaving the live registry mirror unchanged. Social V03-R2-004-T05 is
-  now ready as the next lane frontier. No active claims are open.
+  Social closed V03-R2-004-T05 with durable office service placement records,
+  no-op tenure persistence for unchanged holders, and succession hook
+  scaffolding for future office and clergy placement work. QA, preflight, and
+  replay batch gates passed with matching hashes. T06 remains todo in this
+  branch snapshot, so there is no next social claim yet.
 active_claims: {}
