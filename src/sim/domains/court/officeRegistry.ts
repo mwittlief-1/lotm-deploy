@@ -1,4 +1,4 @@
-import type { RunState } from "../../types";
+import type { RunState, ServiceRecord } from "../../types";
 import { asNonNegInt } from "../../util";
 
 export const COURT_OFFICE_REGISTRY_SCHEMA_VERSION = "court_office_registry_v0" as const;
@@ -32,6 +32,9 @@ export type CourtServicePaymentBasis = (typeof COURT_SERVICE_PAYMENT_BASES)[numb
 
 export const HOUSE_COURT_OFFICE_KEYS = ["steward", "clerk", "marshal"] as const;
 export type HouseCourtOfficeKey = (typeof HOUSE_COURT_OFFICE_KEYS)[number];
+export const HOUSE_COURT_VARIANTS = ["A", "B", "C"] as const;
+export type HouseCourtVariant = (typeof HOUSE_COURT_VARIANTS)[number];
+export type LegacyHouseCourtAssignments = Partial<Record<HouseCourtOfficeKey, string>>;
 
 export const HOUSE_COURT_REQUIRED_OFFICE_KEYS = ["steward"] as const;
 
@@ -148,6 +151,23 @@ const REALM_COURT_OFFICE_TITLES: Record<RealmCourtOfficeKey, string> = {
   constable: "Constable",
 };
 
+function defaultLegacyCourtOfficerId(role: HouseCourtOfficeKey): string {
+  return `p_court_${role}`;
+}
+
+function defaultPlayerHouseId(state: RunState): string {
+  return typeof (state as any).player_house_id === "string" ? (state as any).player_house_id : "h_player";
+}
+
+function getPlayerHouseRegistry(state: RunState): any {
+  const anyState: any = state as any;
+  const houses = anyState.houses;
+  if (!houses || typeof houses !== "object") return null;
+  const playerHouseId = defaultPlayerHouseId(state);
+  const house = houses[playerHouseId];
+  return house && typeof house === "object" ? house : null;
+}
+
 function normalizeOptionalId(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
 }
@@ -255,6 +275,58 @@ function registryFrom(value: CourtOfficeRegistryV0 | RunState): CourtOfficeRegis
     existing.schema_version === COURT_OFFICE_REGISTRY_SCHEMA_VERSION
     ? normalizeCourtOfficeRegistry(existing)
     : createHouseCourtOfficeRegistry(defaultHouseOwnerActorId(value));
+}
+
+function normalizeLegacyHouseCourtAssignments(
+  currentAssignments: Record<string, unknown> | null | undefined,
+  people: Record<string, { alive?: boolean }> | null | undefined
+): LegacyHouseCourtAssignments {
+  const nextAssignments: LegacyHouseCourtAssignments = {};
+
+  for (const role of HOUSE_COURT_OFFICE_KEYS) {
+    const personId = normalizeOptionalId(currentAssignments?.[role]);
+    if (!personId) continue;
+    if (people?.[personId]?.alive === false) continue;
+    nextAssignments[role] = personId;
+  }
+
+  return nextAssignments;
+}
+
+export function planLegacyHouseCourtAssignments(
+  currentAssignments: Record<string, unknown> | null | undefined,
+  people: Record<string, { alive?: boolean }> | null | undefined,
+  variant: HouseCourtVariant | null
+): LegacyHouseCourtAssignments {
+  const nextAssignments = normalizeLegacyHouseCourtAssignments(currentAssignments, people);
+
+  if (variant === "A") return {};
+  if (variant === "B") {
+    return {
+      steward: nextAssignments.steward ?? defaultLegacyCourtOfficerId("steward"),
+    };
+  }
+  if (variant === "C") {
+    return {
+      steward: nextAssignments.steward ?? defaultLegacyCourtOfficerId("steward"),
+      clerk: nextAssignments.clerk ?? defaultLegacyCourtOfficerId("clerk"),
+    };
+  }
+
+  return {
+    ...(nextAssignments.clerk ? { clerk: nextAssignments.clerk } : {}),
+    ...(nextAssignments.marshal ? { marshal: nextAssignments.marshal } : {}),
+    steward: nextAssignments.steward ?? defaultLegacyCourtOfficerId("steward"),
+  };
+}
+
+export function listLegacyFilledHouseCourtOffices(state: RunState): Array<{ role: HouseCourtOfficeKey; person_id: string }> {
+  const houseRegistry = getPlayerHouseRegistry(state);
+  const assignments = normalizeLegacyHouseCourtAssignments(houseRegistry?.court_officers, (state as any).people as any);
+
+  return HOUSE_COURT_OFFICE_KEYS.flatMap((role) =>
+    assignments[role] ? [{ role, person_id: assignments[role]! }] : []
+  );
 }
 
 export function createCourtOfficeSeat(draft: CourtOfficeSeatDraft): CourtOfficeSeatV0 {
@@ -657,4 +729,64 @@ export function ensureCourtServiceRecordRegistry(state: RunState): CourtServiceR
 
   houseAny.court_service_record_registry = normalized;
   return normalized;
+}
+
+export function syncLegacyHouseCourtServiceRecords(
+  state: RunState,
+  roles: LegacyHouseCourtAssignments
+): void {
+  const anyState: any = state as any;
+  const prior: ServiceRecord[] = Array.isArray(anyState.service_records) ? (anyState.service_records as ServiceRecord[]) : [];
+  const people: Record<string, { alive?: boolean }> =
+    anyState.people && typeof anyState.people === "object" ? (anyState.people as Record<string, { alive?: boolean }>) : {};
+  const byId = new Map<string, ServiceRecord>();
+
+  for (const record of prior) {
+    if (!record || typeof record !== "object") continue;
+    const id = (record as any).id;
+    if (typeof id !== "string" || !id) continue;
+    byId.set(id, record);
+  }
+
+  const playerHouseId = defaultPlayerHouseId(state);
+  const actor = { kind: "house", id: playerHouseId } as const;
+  const nowTurn = typeof anyState.turn_index === "number" ? anyState.turn_index : 0;
+  const roleKeys = HOUSE_COURT_OFFICE_KEYS.filter((role) => Boolean(roles[role]));
+  const activeRoleIds = new Set(roleKeys.map((role) => `sr_${playerHouseId}_${role}`));
+
+  for (const role of roleKeys) {
+    const personId = roles[role];
+    if (typeof personId !== "string" || !personId) continue;
+    if (people[personId]?.alive === false) continue;
+
+    const id = `sr_${playerHouseId}_${role}`;
+    const existing = byId.get(id);
+    if (existing) {
+      if (existing.person_id !== personId) {
+        existing.person_id = personId;
+        existing.start_turn_index = nowTurn;
+      }
+      existing.serving_actor_id = actor as any;
+      existing.role = role;
+      existing.end_turn_index = null;
+    } else {
+      byId.set(id, {
+        id,
+        person_id: personId,
+        serving_actor_id: actor as any,
+        role,
+        start_turn_index: nowTurn,
+        end_turn_index: null,
+      });
+    }
+  }
+
+  for (const [id, record] of byId.entries()) {
+    if (!activeRoleIds.has(id)) continue;
+    const personId = record.person_id;
+    const person = typeof personId === "string" ? people[personId] : null;
+    if (!person || person.alive === false) record.end_turn_index = nowTurn;
+  }
+
+  anyState.service_records = Array.from(byId.values()).sort((left, right) => String(left.id).localeCompare(String(right.id)));
 }

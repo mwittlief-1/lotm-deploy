@@ -15,7 +15,10 @@ import {
   buildCourtOfficeRegistry,
   buildCourtServiceRecordRegistry,
   isVacancyCapExceeded,
+  listLegacyFilledHouseCourtOffices,
+  planLegacyHouseCourtAssignments,
   resolveVacancyTurnsOpen,
+  syncLegacyHouseCourtServiceRecords,
   vacateCourtOfficeHolder,
 } from "../../src/sim/domains/court/officeRegistry";
 
@@ -375,5 +378,71 @@ describe("office registry schema", () => {
     expect((state.house as any).court_service_record_registry.schema_version).toBe(
       COURT_SERVICE_RECORD_REGISTRY_SCHEMA_VERSION
     );
+  });
+
+  it("plans legacy house court assignments without changing the old variant rules", () => {
+    const people = {
+      p_steward: { alive: true },
+      p_clerk: { alive: true },
+      p_dead: { alive: false },
+    };
+
+    expect(planLegacyHouseCourtAssignments({ steward: "p_steward", clerk: "p_clerk" }, people, null)).toEqual({
+      clerk: "p_clerk",
+      steward: "p_steward",
+    });
+    expect(planLegacyHouseCourtAssignments({ steward: "p_dead", marshal: "p_dead" }, people, null)).toEqual({
+      steward: "p_court_steward",
+    });
+    expect(planLegacyHouseCourtAssignments({ steward: "p_steward", clerk: "p_clerk" }, people, "A")).toEqual({});
+    expect(planLegacyHouseCourtAssignments({ steward: "p_steward", marshal: "p_dead" }, people, "B")).toEqual({
+      steward: "p_steward",
+    });
+    expect(planLegacyHouseCourtAssignments({}, people, "C")).toEqual({
+      steward: "p_court_steward",
+      clerk: "p_court_clerk",
+    });
+  });
+
+  it("lists and mirrors legacy house court officers in stable role order", () => {
+    const state = mkState();
+    (state as any).houses.h_player.court_officers = {
+      marshal: "p_marshal",
+      steward: "p_steward",
+      clerk: "p_clerk",
+    };
+    (state as any).people.p_steward = mkPerson("p_steward", "M", 37);
+    (state as any).people.p_clerk = mkPerson("p_clerk", "M", 33);
+    (state as any).people.p_marshal = mkPerson("p_marshal", "M", 35);
+
+    expect(listLegacyFilledHouseCourtOffices(state)).toEqual([
+      { role: "steward", person_id: "p_steward" },
+      { role: "clerk", person_id: "p_clerk" },
+      { role: "marshal", person_id: "p_marshal" },
+    ]);
+
+    syncLegacyHouseCourtServiceRecords(state, {
+      steward: "p_steward",
+      clerk: "p_clerk",
+    });
+
+    expect((state as any).service_records).toEqual([
+      {
+        id: "sr_h_player_clerk",
+        person_id: "p_clerk",
+        serving_actor_id: { kind: "house", id: "h_player" },
+        role: "clerk",
+        start_turn_index: 4,
+        end_turn_index: null,
+      },
+      {
+        id: "sr_h_player_steward",
+        person_id: "p_steward",
+        serving_actor_id: { kind: "house", id: "h_player" },
+        role: "steward",
+        start_turn_index: 4,
+        end_turn_index: null,
+      },
+    ]);
   });
 });
