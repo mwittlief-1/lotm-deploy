@@ -5920,7 +5920,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Wire center-on-selected-holding affordance behind the map checkpoint
-  status: ready
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change

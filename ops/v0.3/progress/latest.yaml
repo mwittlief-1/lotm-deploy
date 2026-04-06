@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R2-002-T01
-  last_completed_task_id: V03-R4-002-T05
+  last_completed_task_id: V03-R2-005-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: e6d4f0b6f94d4ced3df0be0d5f1f4c66d576d2de
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: d31484c3ba93044f82951c45d92f9c480f4a9302
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,8 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted the UI portfolio scope chain V03-R2-005-T01 through T04 plus T06,
-  accepted Tooling V03-R3-001-T01, and accepted Economy V03-R4-002-T01 through
-  T05. Reopened UI V03-R2-005-T05, unlocked World V03-R2-002-T01 by clearing
-  stale XMAP blocker state, promoted Tooling V03-R3-001-T02 and T03, and
-  opened Social V03-R2-003-T01 for parallel work.
+  Closed UI V03-R2-005-T05 after adding a dormant selected-holding
+  map checkpoint seam behind the portfolio selector and topology
+  surface. The UI claim is cleared and no next ready UI lane task is
+  available in the current backlog state.
 active_claims: {}

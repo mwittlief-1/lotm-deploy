@@ -1,0 +1,37 @@
+version: 1
+run_id: manual-ui-v03-r2-005-t05-20260405T200908-0400
+task_id: V03-R2-005-T05
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-ui-experience
+commit: d31484c3ba93044f82951c45d92f9c480f4a9302
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  scope_contract: src/ui/playScreenPortfolio.ts
+  play_screen_wiring: src/ui/panels/PlayScreen.tsx
+  holdings_panel: src/ui/panels/PortfolioOverviewPanel.tsx
+findings:
+  - Added a UI-owned map checkpoint contract that derives the selected manor target from the existing portfolio selector and only exposes a concrete holding target when the bounded topology surface provides one.
+  - Routed the holdings panel through that checkpoint contract so selected-manor detail now shows a stable center-on-selected-holding control without mutating sim state or widening the portfolio IA.
+  - Kept the control dormant when the gameplay shell has no live map callback or when the selected manor is not the anchor holding, so future world-map integration can attach cleanly without rewriting the selector flow.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 closed cleanly on the UI lane, the mirrored claim is cleared, and no next ready UI lane task is exposed after the portfolio map-checkpoint handoff.
