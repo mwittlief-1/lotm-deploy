@@ -5631,7 +5631,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement realm-office holder registry and tenure transitions
-  status: ready
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5671,7 +5671,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement service placement persistence and holder succession hooks
-  status: todo
+  status: blocked
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5682,7 +5682,7 @@ tasks:
   - V03-R2-004-T03
   - V03-R2-004-T04
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Depends on V03-R2-004-T03, which remains blocked at the legacy src/sim/court.ts seat-filling path.
   allowed_paths:
   - src/sim/domains/court/**
   - src/sim/domains/people/**
@@ -5713,7 +5713,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Add office and seat-filling invariants and docs
-  status: todo
+  status: blocked
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5723,7 +5723,7 @@ tasks:
   deps:
   - V03-R2-004-T05
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Depends on V03-R2-004-T05, which is blocked behind the unresolved V03-R2-004-T03 branch.
   allowed_paths:
   - tests/**
   - docs/releases/**

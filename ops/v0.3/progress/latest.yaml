@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: V03-R2-002-T05
-  last_completed_task_id: V03-R2-004-T02
+  last_completed_task_id: V03-R2-004-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,8 +21,9 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted UI V03-R2-002-T04 and Social V03-R2-004-T01 plus T02.
-  Reopened World V03-R2-002-T05 from the topology chain, marked Social
-  V03-R2-004-T03 blocked at the legacy src/sim/court.ts boundary, and
-  promoted Social V03-R2-004-T04 as the next clean same-lane frontier.
+  Accepted Social V03-R2-004-T04 after landing deterministic realm-office
+  transition helpers in the office registry seam. World V03-R2-002-T05
+  remains the only open frontier. Social V03-R2-004-T05 and T06 stay blocked
+  because T03 is still unresolved at the legacy src/sim/court.ts seat-filling
+  boundary.
 active_claims: {}
