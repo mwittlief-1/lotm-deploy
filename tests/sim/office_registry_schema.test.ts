@@ -8,14 +8,15 @@ import {
   COURT_SERVICE_RECORD_REGISTRY_SCHEMA_VERSION,
   COURT_SERVICE_RECORD_SCHEMA_VERSION,
   appointCourtOfficeHolder,
+  buildCourtOfficeRegistry,
+  buildCourtServiceRecordRegistry,
   createHouseCourtOfficeRegistry,
   createRealmCourtOfficeRegistry,
   ensureCourtOfficeRegistry,
   ensureCourtServiceRecordRegistry,
-  buildCourtOfficeRegistry,
-  buildCourtServiceRecordRegistry,
   isVacancyCapExceeded,
   listLegacyFilledHouseCourtOffices,
+  planHouseCourtSeatFillDecisions,
   planLegacyHouseCourtAssignments,
   resolveVacancyTurnsOpen,
   syncLegacyHouseCourtServiceRecords,
@@ -442,6 +443,47 @@ describe("office registry schema", () => {
         role: "steward",
         start_turn_index: 4,
         end_turn_index: null,
+      },
+    ]);
+    expect((state.house as any).court_office_registry.seats_by_id["house:house:h_player:steward"]).toMatchObject({
+      holder_person_id: "p_steward",
+      holder_kind: "non_family_retainer",
+      active_service_record_id: "house:house:h_player:steward:p_steward:4",
+    });
+    expect((state.house as any).court_service_record_registry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      payment_basis: "retainer_upkeep",
+      holder_kind: "non_family_retainer",
+      start_turn_index: 4,
+      end_turn_index: null,
+    });
+  });
+
+  it("classifies household members separately from non-family retainers for seat filling", () => {
+    const state = mkState();
+    const houseSon = mkPerson("p_house_son", "M", 16);
+    const outsiderClerk = mkPerson("p_outsider_clerk", "F", 29);
+
+    (state as any).people.p_house_son = houseSon;
+    (state as any).people.p_outsider_clerk = outsiderClerk;
+    (state as any).houses.h_player.member_person_ids = ["p_head", "p_house_son"];
+
+    expect(planHouseCourtSeatFillDecisions(state, {
+      steward: "p_house_son",
+      clerk: "p_outsider_clerk",
+    })).toEqual([
+      {
+        seat_id: "house:house:h_player:steward",
+        seat_key: "steward",
+        person_id: "p_house_son",
+        holder_kind: "household_member",
+        payment_basis: "family_service",
+      },
+      {
+        seat_id: "house:house:h_player:clerk",
+        seat_key: "clerk",
+        person_id: "p_outsider_clerk",
+        holder_kind: "non_family_retainer",
+        payment_basis: "retainer_upkeep",
       },
     ]);
   });
