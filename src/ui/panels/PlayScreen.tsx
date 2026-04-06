@@ -55,8 +55,10 @@ import {
 import { buildCourtDecisionBudgetSurface } from "../playScreenCourtBudget";
 import {
   buildPortfolioEvidenceScope,
+  buildPortfolioMapCheckpoint,
   buildPortfolioScopeContract,
   selectPortfolioManor,
+  type PortfolioMapTarget,
   type PortfolioScopeMode
 } from "../playScreenPortfolio";
 import {
@@ -115,6 +117,7 @@ type PlayScreenProps = {
   decisions: PlayDecisions;
   gameOverReasonCopy: Record<string, string>;
   onAdvanceTurn: () => void;
+  onCenterSelectedHolding?: (target: PortfolioMapTarget) => void;
   onExportFullRunJson: () => void;
   onExportRunSummary: () => void;
   onOpenLog: () => void;
@@ -139,6 +142,7 @@ export function PlayScreen({
   decisions,
   gameOverReasonCopy,
   onAdvanceTurn,
+  onCenterSelectedHolding,
   onExportFullRunJson,
   onExportRunSummary,
   onOpenLog,
@@ -496,7 +500,18 @@ export function PlayScreen({
       }),
     [courtDecisionBudget, ctx.preview_state]
   );
-  const topologyDebugSurface = buildTopologyDebugSurface(ctx.preview_state);
+  const topologyDebugSurface = useMemo(() => buildTopologyDebugSurface(ctx.preview_state), [ctx.preview_state]);
+  const portfolioMapCheckpoint = useMemo(
+    () =>
+      buildPortfolioMapCheckpoint({
+        contract: portfolioContract,
+        mapCheckpointAvailable: typeof onCenterSelectedHolding === "function",
+        scopeMode: portfolioScopeMode,
+        selectedManorId: selectedPortfolioManorId,
+        topologySurface: topologyDebugSurface
+      }),
+    [onCenterSelectedHolding, portfolioContract, portfolioScopeMode, selectedPortfolioManorId, topologyDebugSurface]
+  );
 
   const constructionRateThisTurn = m.builders * BUILD_RATE_PER_BUILDER_PER_TURN;
   const constructionRatePlannedNextTurn = decisions.labor.desired_builders * BUILD_RATE_PER_BUILDER_PER_TURN;
@@ -723,6 +738,12 @@ export function PlayScreen({
     portfolio_overview: portfolioContract ? (
       <PortfolioOverviewPanel
         contract={portfolioContract}
+        mapCheckpoint={portfolioMapCheckpoint}
+        onCenterSelectedHolding={
+          portfolioMapCheckpoint?.state === "ready" && onCenterSelectedHolding
+            ? () => onCenterSelectedHolding(portfolioMapCheckpoint.target)
+            : undefined
+        }
         onScopeModeChange={handlePortfolioScopeModeChange}
         onSelectManor={handlePortfolioManorSelect}
         selectedManor={activePortfolioManor ?? portfolioContract.selectedManor}

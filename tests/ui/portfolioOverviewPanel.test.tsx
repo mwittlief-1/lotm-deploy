@@ -3,11 +3,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { PortfolioOverviewPanel } from "../../src/ui/panels/PortfolioOverviewPanel";
-import { buildPortfolioScopeContract, selectPortfolioManor } from "../../src/ui/playScreenPortfolio";
+import { buildPortfolioMapCheckpoint, buildPortfolioScopeContract, selectPortfolioManor } from "../../src/ui/playScreenPortfolio";
 
 const PREVIEW_STATE = {
   world_topology_view: {
-    anchor_manor_id: "manor_hx_26597"
+    anchor_manor_id: "manor_hx_26597",
+    anchor_holding_id: "holding_hx_26597",
+    anchor_county_id: "county_hx_2"
   },
   portfolio: {
     schema_version: "economy_portfolio_analysis_v1",
@@ -144,6 +146,22 @@ describe("PortfolioOverviewPanel", () => {
     const html = renderToStaticMarkup(
       <PortfolioOverviewPanel
         contract={contract}
+        mapCheckpoint={buildPortfolioMapCheckpoint({
+          contract,
+          mapCheckpointAvailable: false,
+          scopeMode: "selected_manor",
+          selectedManorId: "manor_hx_30001",
+          topologySurface: {
+            anchorCountyId: "county_hx_2",
+            anchorHoldingId: "holding_hx_26597",
+            anchorManorId: "manor_hx_26597",
+            companionMetric: "route_hop_distance",
+            farThreshold: "50",
+            rawMetric: "travel_cost_distance",
+            sampleSummary: "Showing 0 sampled distances.",
+            samples: []
+          }
+        })}
         onScopeModeChange={() => undefined}
         onSelectManor={() => undefined}
         selectedManor={selectPortfolioManor(contract, "manor_hx_30001")}
@@ -160,5 +178,8 @@ describe("PortfolioOverviewPanel", () => {
     expect(html).toContain("Open dues &amp; arrears");
     expect(html).toContain("Hx 30001 is currently flagged by 3 tracked extremes.");
     expect(html).toContain("Selected detail");
+    expect(html).toContain("Map checkpoint");
+    expect(html).toContain("Center on selected holding");
+    expect(html).toContain("Dormant");
   });
 });
