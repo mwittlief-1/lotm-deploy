@@ -35,6 +35,9 @@ export type HouseCourtOfficeKey = (typeof HOUSE_COURT_OFFICE_KEYS)[number];
 
 export const HOUSE_COURT_REQUIRED_OFFICE_KEYS = ["steward"] as const;
 
+export const REALM_COURT_OFFICE_KEYS = ["chancellor", "chamberlain", "constable"] as const;
+export type RealmCourtOfficeKey = (typeof REALM_COURT_OFFICE_KEYS)[number];
+
 export type CourtOfficeSeatV0 = {
   schema_version: typeof COURT_OFFICE_SEAT_SCHEMA_VERSION;
   seat_id: string;
@@ -84,6 +87,24 @@ export type CourtServiceRecordRegistryV0 = {
   records_by_id: Record<string, CourtServiceRecordV0>;
 };
 
+export type CourtOfficeTransitionDraft = {
+  seat_id: string;
+  holder_person_id?: string | null;
+  holder_house_id?: string | null;
+  holder_kind?: CourtOfficeHolderKind;
+  payment_basis?: CourtServicePaymentBasis;
+  transition_turn_index?: number | null;
+  record_id?: string;
+};
+
+export type CourtOfficeTransitionResult = {
+  registry: CourtOfficeRegistryV0;
+  service_record_registry: CourtServiceRecordRegistryV0;
+  seat: CourtOfficeSeatV0;
+  ended_record_id: string | null;
+  started_record_id: string | null;
+};
+
 export type CourtOfficeSeatDraft = {
   seat_id?: string;
   scope?: CourtOfficeScope;
@@ -119,6 +140,12 @@ const HOUSE_COURT_OFFICE_TITLES: Record<HouseCourtOfficeKey, string> = {
   steward: "Steward",
   clerk: "Clerk",
   marshal: "Marshal",
+};
+
+const REALM_COURT_OFFICE_TITLES: Record<RealmCourtOfficeKey, string> = {
+  chancellor: "Chancellor",
+  chamberlain: "Chamberlain",
+  constable: "Constable",
 };
 
 function normalizeOptionalId(value: unknown): string | null {
@@ -167,6 +194,9 @@ function isHouseCourtOfficeKey(value: string): value is HouseCourtOfficeKey {
 
 function titleForSeatKey(seatKey: string): string {
   if (isHouseCourtOfficeKey(seatKey)) return HOUSE_COURT_OFFICE_TITLES[seatKey];
+  if ((REALM_COURT_OFFICE_KEYS as readonly string[]).includes(seatKey)) {
+    return REALM_COURT_OFFICE_TITLES[seatKey as RealmCourtOfficeKey];
+  }
   return seatKey
     .split("_")
     .filter((part) => part.length > 0)
@@ -183,6 +213,11 @@ function houseSeatOrderIndex(seatKey: string): number {
   return index === -1 ? HOUSE_COURT_OFFICE_KEYS.length : index;
 }
 
+function realmSeatOrderIndex(seatKey: string): number {
+  const index = REALM_COURT_OFFICE_KEYS.indexOf(seatKey as RealmCourtOfficeKey);
+  return index === -1 ? REALM_COURT_OFFICE_KEYS.length : index;
+}
+
 function compareSeats(left: CourtOfficeSeatV0, right: CourtOfficeSeatV0): number {
   if (left.scope !== right.scope) return left.scope === "house" ? -1 : 1;
   if (left.owner_actor_id !== right.owner_actor_id) {
@@ -190,6 +225,10 @@ function compareSeats(left: CourtOfficeSeatV0, right: CourtOfficeSeatV0): number
   }
   if (left.scope === "house" && right.scope === "house") {
     const rankDiff = houseSeatOrderIndex(left.seat_key) - houseSeatOrderIndex(right.seat_key);
+    if (rankDiff !== 0) return rankDiff;
+  }
+  if (left.scope === "realm" && right.scope === "realm") {
+    const rankDiff = realmSeatOrderIndex(left.seat_key) - realmSeatOrderIndex(right.seat_key);
     if (rankDiff !== 0) return rankDiff;
   }
   if (left.seat_key !== right.seat_key) return left.seat_key.localeCompare(right.seat_key);
@@ -345,6 +384,42 @@ export function createHouseCourtOfficeRegistry(
   return buildCourtOfficeRegistry([...baselineBySeatId.values(), ...extraDrafts]);
 }
 
+export function createRealmCourtOfficeRegistry(
+  ownerActorId = "actor:realm",
+  drafts: readonly CourtOfficeSeatDraft[] = []
+): CourtOfficeRegistryV0 {
+  const baselineBySeatId = new Map<string, CourtOfficeSeatDraft>();
+
+  for (const seatKey of REALM_COURT_OFFICE_KEYS) {
+    const seatId = defaultSeatId("realm", ownerActorId, seatKey);
+    baselineBySeatId.set(seatId, {
+      seat_id: seatId,
+      scope: "realm",
+      owner_actor_id: ownerActorId,
+      seat_key: seatKey,
+      title: REALM_COURT_OFFICE_TITLES[seatKey],
+      requirement: "optional",
+      vacancy_cap_turns: 0,
+    });
+  }
+
+  const extraDrafts: CourtOfficeSeatDraft[] = [];
+  for (const draft of drafts) {
+    if (!draft || typeof draft !== "object") continue;
+    const scope = normalizeScope(draft.scope ?? "realm");
+    const draftOwnerActorId = normalizeRequiredId(draft.owner_actor_id, ownerActorId);
+    const seatId = normalizeRequiredId(draft.seat_id, defaultSeatId(scope, draftOwnerActorId, draft.seat_key));
+
+    if (scope === "realm" && draftOwnerActorId === ownerActorId && baselineBySeatId.has(seatId)) {
+      baselineBySeatId.set(seatId, { ...baselineBySeatId.get(seatId), ...draft, seat_id: seatId, scope: "realm" });
+    } else {
+      extraDrafts.push({ ...draft, scope });
+    }
+  }
+
+  return buildCourtOfficeRegistry([...baselineBySeatId.values(), ...extraDrafts]);
+}
+
 export function ensureCourtOfficeRegistry(state: RunState): CourtOfficeRegistryV0 {
   const houseAny: any = state.house as any;
   const existing = houseAny?.court_office_registry;
@@ -377,6 +452,115 @@ export function isVacancyCapExceeded(seat: CourtOfficeSeatV0, currentTurnIndex: 
   if (seat.holder_person_id) return false;
   if (seat.vacancy_started_turn_index === null) return false;
   return resolveVacancyTurnsOpen(seat, currentTurnIndex) > seat.vacancy_cap_turns;
+}
+
+function closeActiveServiceRecord(
+  registry: CourtServiceRecordRegistryV0,
+  recordId: string | null,
+  transitionTurnIndex: number | null
+): CourtServiceRecordRegistryV0 {
+  if (!recordId) return registry;
+  const record = registry.records_by_id[recordId];
+  if (!record) return registry;
+
+  return buildCourtServiceRecordRegistry(
+    registry.record_ids.map((id) => {
+      const current = registry.records_by_id[id]!;
+      return id === recordId
+        ? {
+            ...current,
+            end_turn_index: transitionTurnIndex,
+          }
+        : current;
+    })
+  );
+}
+
+export function transitionCourtOfficeHolder(
+  registryValue: CourtOfficeRegistryV0 | RunState,
+  serviceRegistryValue: CourtServiceRecordRegistryV0,
+  draft: CourtOfficeTransitionDraft
+): CourtOfficeTransitionResult {
+  const registry = registryFrom(registryValue);
+  const currentSeat = registry.seats_by_id[draft.seat_id];
+  if (!currentSeat) {
+    throw new Error(`Unknown court office seat: ${draft.seat_id}`);
+  }
+
+  const transitionTurnIndex = normalizeTurnIndex(draft.transition_turn_index);
+  const holderPersonId = normalizeOptionalId(draft.holder_person_id);
+  const endedRecordId = currentSeat.active_service_record_id ?? null;
+
+  const closedServiceRegistry = closeActiveServiceRecord(serviceRegistryValue, endedRecordId, transitionTurnIndex);
+
+  let nextServiceRegistry = closedServiceRegistry;
+  let startedRecordId: string | null = null;
+
+  if (holderPersonId) {
+    const nextRecord = createCourtServiceRecord({
+      record_id: draft.record_id,
+      seat_id: currentSeat.seat_id,
+      scope: currentSeat.scope,
+      owner_actor_id: currentSeat.owner_actor_id,
+      seat_key: currentSeat.seat_key,
+      holder_person_id: holderPersonId,
+      holder_house_id: draft.holder_house_id,
+      holder_kind: draft.holder_kind ?? "realm_holder",
+      payment_basis: draft.payment_basis ?? "realm_stipend",
+      start_turn_index: transitionTurnIndex,
+    });
+    if (!nextRecord) {
+      throw new Error(`Unable to create court service record for seat: ${currentSeat.seat_id}`);
+    }
+    startedRecordId = nextRecord.record_id;
+    nextServiceRegistry = buildCourtServiceRecordRegistry([
+      ...closedServiceRegistry.record_ids.map((recordId) => closedServiceRegistry.records_by_id[recordId]!),
+      nextRecord,
+    ]);
+  }
+
+  const nextSeat = createCourtOfficeSeat({
+    ...currentSeat,
+    holder_person_id: holderPersonId,
+    holder_house_id: holderPersonId ? draft.holder_house_id : null,
+    holder_kind: holderPersonId ? draft.holder_kind ?? "realm_holder" : null,
+    filled_turn_index: holderPersonId ? transitionTurnIndex : null,
+    vacancy_started_turn_index: holderPersonId ? null : transitionTurnIndex,
+    last_transition_turn_index: transitionTurnIndex,
+    active_service_record_id: startedRecordId,
+  });
+
+  const nextRegistry = buildCourtOfficeRegistry(
+    registry.seat_ids.map((seatId) => (seatId === nextSeat.seat_id ? nextSeat : registry.seats_by_id[seatId]!))
+  );
+
+  return {
+    registry: nextRegistry,
+    service_record_registry: nextServiceRegistry,
+    seat: nextSeat,
+    ended_record_id: endedRecordId,
+    started_record_id: startedRecordId,
+  };
+}
+
+export function appointCourtOfficeHolder(
+  registryValue: CourtOfficeRegistryV0 | RunState,
+  serviceRegistryValue: CourtServiceRecordRegistryV0,
+  draft: CourtOfficeTransitionDraft
+): CourtOfficeTransitionResult {
+  return transitionCourtOfficeHolder(registryValue, serviceRegistryValue, draft);
+}
+
+export function vacateCourtOfficeHolder(
+  registryValue: CourtOfficeRegistryV0 | RunState,
+  serviceRegistryValue: CourtServiceRecordRegistryV0,
+  draft: Omit<CourtOfficeTransitionDraft, "holder_person_id" | "holder_house_id" | "holder_kind" | "payment_basis">
+): CourtOfficeTransitionResult {
+  return transitionCourtOfficeHolder(registryValue, serviceRegistryValue, {
+    ...draft,
+    holder_person_id: null,
+    holder_house_id: null,
+  });
 }
 
 export function createCourtServiceRecord(draft: CourtServiceRecordDraft): CourtServiceRecordV0 | null {

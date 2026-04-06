@@ -5631,7 +5631,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement realm-office holder registry and tenure transitions
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change

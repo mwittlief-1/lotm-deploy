@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-004-T02
+  last_completed_task_id: V03-R2-004-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,14 +21,11 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Social V03-R2-004-T01 and V03-R2-004-T02 are closed on the lane branch.
-  The offices audit now documents the live legacy seat and service surfaces,
-  and the new court office registry/service record schemas are in place with
-  a deterministic one-turn vacancy cap. Social did not self-advance into
-  T03 because live seat filling and service mirroring still execute through
-  the legacy court layer outside the current task's allowed write surface.
-  UI V03-R1-005-T05 and Engine V03-R3-005-T01 remain the other recorded
-  lane claims.
+  Social V03-R2-004-T04 is closed on the lane branch with structure-first
+  realm-office holder registries and deterministic tenure-transition
+  helpers. The social lane stops here because V03-R2-004-T05 is still
+  blocked behind T03 in this branch snapshot. UI V03-R1-005-T05 and Engine
+  V03-R3-005-T01 remain the other recorded lane claims.
 active_claims:
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T05

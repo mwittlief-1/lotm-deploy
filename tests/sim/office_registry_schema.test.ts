@@ -7,13 +7,16 @@ import {
   COURT_OFFICE_SEAT_SCHEMA_VERSION,
   COURT_SERVICE_RECORD_REGISTRY_SCHEMA_VERSION,
   COURT_SERVICE_RECORD_SCHEMA_VERSION,
+  appointCourtOfficeHolder,
   createHouseCourtOfficeRegistry,
+  createRealmCourtOfficeRegistry,
   ensureCourtOfficeRegistry,
   ensureCourtServiceRecordRegistry,
   buildCourtOfficeRegistry,
   buildCourtServiceRecordRegistry,
   isVacancyCapExceeded,
   resolveVacancyTurnsOpen,
+  vacateCourtOfficeHolder,
 } from "../../src/sim/domains/court/officeRegistry";
 
 function mkPerson(id: string, sex: "M" | "F", age: number): Person {
@@ -119,6 +122,20 @@ describe("office registry schema", () => {
       last_transition_turn_index: null,
       active_service_record_id: null,
     });
+  });
+
+  it("builds a stable realm baseline with deterministic seat order", () => {
+    const registry = createRealmCourtOfficeRegistry("actor:earl");
+
+    expect(registry.schema_version).toBe(COURT_OFFICE_REGISTRY_SCHEMA_VERSION);
+    expect(registry.seat_ids).toEqual([
+      "realm:actor:earl:chancellor",
+      "realm:actor:earl:chamberlain",
+      "realm:actor:earl:constable",
+    ]);
+    expect(registry.required_seat_ids).toEqual([]);
+    expect(registry.filled_seat_ids).toEqual([]);
+    expect(registry.vacant_required_seat_ids).toEqual([]);
   });
 
   it("normalizes mixed house and realm seats into a deterministic order", () => {
@@ -229,6 +246,115 @@ describe("office registry schema", () => {
       start_turn_index: 1,
       end_turn_index: null,
     });
+  });
+
+  it("replaces a realm office holder with deterministic tenure transitions", () => {
+    const registry = createRealmCourtOfficeRegistry("actor:earl", [
+      {
+        seat_key: "chancellor",
+        holder_person_id: "p_old_chancellor",
+        holder_kind: "realm_holder",
+        filled_turn_index: 2,
+        active_service_record_id: "realm:actor:earl:chancellor:p_old_chancellor:2",
+      },
+    ]);
+    const services = buildCourtServiceRecordRegistry([
+      {
+        seat_id: "realm:actor:earl:chancellor",
+        scope: "realm",
+        owner_actor_id: "actor:earl",
+        seat_key: "chancellor",
+        holder_person_id: "p_old_chancellor",
+        holder_kind: "realm_holder",
+        payment_basis: "realm_stipend",
+        start_turn_index: 2,
+      },
+    ]);
+
+    const result = appointCourtOfficeHolder(registry, services, {
+      seat_id: "realm:actor:earl:chancellor",
+      holder_person_id: "p_new_chancellor",
+      holder_kind: "realm_holder",
+      payment_basis: "realm_stipend",
+      transition_turn_index: 5,
+    });
+
+    expect(result.ended_record_id).toBe("realm:actor:earl:chancellor:p_old_chancellor:2");
+    expect(result.started_record_id).toBe("realm:actor:earl:chancellor:p_new_chancellor:5");
+    expect(result.seat).toMatchObject({
+      seat_id: "realm:actor:earl:chancellor",
+      holder_person_id: "p_new_chancellor",
+      holder_kind: "realm_holder",
+      filled_turn_index: 5,
+      vacancy_started_turn_index: null,
+      last_transition_turn_index: 5,
+      active_service_record_id: "realm:actor:earl:chancellor:p_new_chancellor:5",
+    });
+    expect(result.service_record_registry.records_by_id["realm:actor:earl:chancellor:p_old_chancellor:2"]).toMatchObject({
+      end_turn_index: 5,
+    });
+    expect(result.service_record_registry.records_by_id["realm:actor:earl:chancellor:p_new_chancellor:5"]).toEqual({
+      schema_version: COURT_SERVICE_RECORD_SCHEMA_VERSION,
+      record_id: "realm:actor:earl:chancellor:p_new_chancellor:5",
+      seat_id: "realm:actor:earl:chancellor",
+      scope: "realm",
+      owner_actor_id: "actor:earl",
+      seat_key: "chancellor",
+      holder_person_id: "p_new_chancellor",
+      holder_house_id: null,
+      holder_kind: "realm_holder",
+      payment_basis: "realm_stipend",
+      start_turn_index: 5,
+      end_turn_index: null,
+    });
+  });
+
+  it("vacates a realm office holder and starts a deterministic vacancy window", () => {
+    const registry = createRealmCourtOfficeRegistry("actor:earl", [
+      {
+        seat_key: "constable",
+        requirement: "required",
+        vacancy_cap_turns: 1,
+        holder_person_id: "p_constable",
+        holder_kind: "realm_holder",
+        filled_turn_index: 3,
+        active_service_record_id: "realm:actor:earl:constable:p_constable:3",
+      },
+    ]);
+    const services = buildCourtServiceRecordRegistry([
+      {
+        seat_id: "realm:actor:earl:constable",
+        scope: "realm",
+        owner_actor_id: "actor:earl",
+        seat_key: "constable",
+        holder_person_id: "p_constable",
+        holder_kind: "realm_holder",
+        payment_basis: "realm_stipend",
+        start_turn_index: 3,
+      },
+    ]);
+
+    const result = vacateCourtOfficeHolder(registry, services, {
+      seat_id: "realm:actor:earl:constable",
+      transition_turn_index: 6,
+    });
+
+    expect(result.ended_record_id).toBe("realm:actor:earl:constable:p_constable:3");
+    expect(result.started_record_id).toBeNull();
+    expect(result.seat).toMatchObject({
+      seat_id: "realm:actor:earl:constable",
+      holder_person_id: null,
+      filled_turn_index: null,
+      vacancy_started_turn_index: 6,
+      last_transition_turn_index: 6,
+      active_service_record_id: null,
+    });
+    expect(result.service_record_registry.records_by_id["realm:actor:earl:constable:p_constable:3"]).toMatchObject({
+      end_turn_index: 6,
+    });
+    expect(resolveVacancyTurnsOpen(result.seat, 7)).toBe(1);
+    expect(isVacancyCapExceeded(result.seat, 7)).toBe(false);
+    expect(isVacancyCapExceeded(result.seat, 8)).toBe(true);
   });
 
   it("attaches baseline office and service registries onto state", () => {
