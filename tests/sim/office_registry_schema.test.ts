@@ -243,10 +243,14 @@ describe("office registry schema", () => {
       scope: "realm",
       owner_actor_id: "actor:earl",
       seat_key: "chancellor",
+      serve_at_actor_id: "actor:earl",
+      institution_assignment_id: null,
       holder_person_id: "p_chancellor",
       holder_house_id: null,
       holder_kind: "realm_holder",
       payment_basis: "realm_stipend",
+      predecessor_record_id: null,
+      successor_record_id: null,
       start_turn_index: 1,
       end_turn_index: null,
     });
@@ -296,6 +300,7 @@ describe("office registry schema", () => {
     });
     expect(result.service_record_registry.records_by_id["realm:actor:earl:chancellor:p_old_chancellor:2"]).toMatchObject({
       end_turn_index: 5,
+      successor_record_id: "realm:actor:earl:chancellor:p_new_chancellor:5",
     });
     expect(result.service_record_registry.records_by_id["realm:actor:earl:chancellor:p_new_chancellor:5"]).toEqual({
       schema_version: COURT_SERVICE_RECORD_SCHEMA_VERSION,
@@ -304,10 +309,14 @@ describe("office registry schema", () => {
       scope: "realm",
       owner_actor_id: "actor:earl",
       seat_key: "chancellor",
+      serve_at_actor_id: "actor:earl",
+      institution_assignment_id: null,
       holder_person_id: "p_new_chancellor",
       holder_house_id: null,
       holder_kind: "realm_holder",
       payment_basis: "realm_stipend",
+      predecessor_record_id: "realm:actor:earl:chancellor:p_old_chancellor:2",
+      successor_record_id: null,
       start_turn_index: 5,
       end_turn_index: null,
     });
@@ -453,7 +462,59 @@ describe("office registry schema", () => {
     expect((state.house as any).court_service_record_registry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
       payment_basis: "retainer_upkeep",
       holder_kind: "non_family_retainer",
+      serve_at_actor_id: "house:h_player",
+      institution_assignment_id: null,
       start_turn_index: 4,
+      end_turn_index: null,
+    });
+  });
+
+  it("keeps service placement tenure stable until the holder actually changes", () => {
+    const state = mkState();
+    (state as any).people.p_steward = mkPerson("p_steward", "M", 37);
+    (state as any).people.p_new_steward = mkPerson("p_new_steward", "M", 34);
+
+    syncLegacyHouseCourtServiceRecords(state, {
+      steward: "p_steward",
+    });
+
+    state.turn_index = 5;
+    syncLegacyHouseCourtServiceRecords(state, {
+      steward: "p_steward",
+    });
+
+    const persistedRegistry = (state.house as any).court_service_record_registry;
+    expect(persistedRegistry.record_ids).toEqual(["house:house:h_player:steward:p_steward:4"]);
+    expect(persistedRegistry.active_record_ids).toEqual(["house:house:h_player:steward:p_steward:4"]);
+    expect(persistedRegistry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      serve_at_actor_id: "house:h_player",
+      institution_assignment_id: null,
+      predecessor_record_id: null,
+      successor_record_id: null,
+      start_turn_index: 4,
+      end_turn_index: null,
+    });
+
+    syncLegacyHouseCourtServiceRecords(state, {
+      steward: "p_new_steward",
+    });
+
+    const transitionedRegistry = (state.house as any).court_service_record_registry;
+    expect(transitionedRegistry.record_ids).toEqual([
+      "house:house:h_player:steward:p_new_steward:5",
+      "house:house:h_player:steward:p_steward:4",
+    ]);
+    expect(transitionedRegistry.active_record_ids).toEqual(["house:house:h_player:steward:p_new_steward:5"]);
+    expect(transitionedRegistry.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      end_turn_index: 5,
+      successor_record_id: "house:house:h_player:steward:p_new_steward:5",
+    });
+    expect(transitionedRegistry.records_by_id["house:house:h_player:steward:p_new_steward:5"]).toMatchObject({
+      serve_at_actor_id: "house:h_player",
+      institution_assignment_id: null,
+      predecessor_record_id: "house:house:h_player:steward:p_steward:4",
+      successor_record_id: null,
+      start_turn_index: 5,
       end_turn_index: null,
     });
   });

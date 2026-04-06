@@ -75,10 +75,14 @@ export type CourtServiceRecordV0 = {
   scope: CourtOfficeScope;
   owner_actor_id: string;
   seat_key: string;
+  serve_at_actor_id: string;
+  institution_assignment_id: string | null;
   holder_person_id: string;
   holder_house_id: string | null;
   holder_kind: CourtOfficeHolderKind;
   payment_basis: CourtServicePaymentBasis;
+  predecessor_record_id: string | null;
+  successor_record_id: string | null;
   start_turn_index: number | null;
   end_turn_index: number | null;
 };
@@ -96,6 +100,8 @@ export type CourtOfficeTransitionDraft = {
   holder_house_id?: string | null;
   holder_kind?: CourtOfficeHolderKind;
   payment_basis?: CourtServicePaymentBasis;
+  serve_at_actor_id?: string;
+  institution_assignment_id?: string | null;
   transition_turn_index?: number | null;
   record_id?: string;
 };
@@ -139,10 +145,14 @@ export type CourtServiceRecordDraft = {
   scope?: CourtOfficeScope;
   owner_actor_id?: string;
   seat_key?: string;
+  serve_at_actor_id?: string;
+  institution_assignment_id?: string | null;
   holder_person_id?: string | null;
   holder_house_id?: string | null;
   holder_kind?: CourtOfficeHolderKind;
   payment_basis?: CourtServicePaymentBasis;
+  predecessor_record_id?: string | null;
+  successor_record_id?: string | null;
   start_turn_index?: number | null;
   end_turn_index?: number | null;
 };
@@ -214,6 +224,10 @@ function normalizePaymentBasis(value: unknown): CourtServicePaymentBasis {
     value === "benefice"
     ? value
     : "unknown";
+}
+
+function sameOptionalId(left: unknown, right: unknown): boolean {
+  return normalizeOptionalId(left) === normalizeOptionalId(right);
 }
 
 function isHouseCourtOfficeKey(value: string): value is HouseCourtOfficeKey {
@@ -601,6 +615,28 @@ function closeActiveServiceRecord(
   );
 }
 
+export type CourtServicePlacementTargetKind = "serving_actor" | "institution_assignment";
+
+export type CourtServicePlacementTarget = {
+  kind: CourtServicePlacementTargetKind;
+  id: string;
+};
+
+export function resolveCourtServicePlacementTarget(record: CourtServiceRecordV0): CourtServicePlacementTarget {
+  const institutionAssignmentId = normalizeOptionalId(record.institution_assignment_id);
+  if (institutionAssignmentId) {
+    return {
+      kind: "institution_assignment",
+      id: institutionAssignmentId,
+    };
+  }
+
+  return {
+    kind: "serving_actor",
+    id: record.serve_at_actor_id,
+  };
+}
+
 export function transitionCourtOfficeHolder(
   registryValue: CourtOfficeRegistryV0 | RunState,
   serviceRegistryValue: CourtServiceRecordRegistryV0,
@@ -615,6 +651,38 @@ export function transitionCourtOfficeHolder(
   const transitionTurnIndex = normalizeTurnIndex(draft.transition_turn_index);
   const holderPersonId = normalizeOptionalId(draft.holder_person_id);
   const endedRecordId = currentSeat.active_service_record_id ?? null;
+  const activeRecord = endedRecordId ? serviceRegistryValue.records_by_id[endedRecordId] ?? null : null;
+  const nextServeAtActorId = normalizeRequiredId(draft.serve_at_actor_id, currentSeat.owner_actor_id);
+  const nextInstitutionAssignmentId = normalizeOptionalId(draft.institution_assignment_id);
+
+  if (!holderPersonId) {
+    if (!currentSeat.holder_person_id && !endedRecordId) {
+      return {
+        registry,
+        service_record_registry: serviceRegistryValue,
+        seat: currentSeat,
+        ended_record_id: null,
+        started_record_id: null,
+      };
+    }
+  } else if (
+    activeRecord &&
+    currentSeat.holder_person_id === holderPersonId &&
+    sameOptionalId(currentSeat.holder_house_id, draft.holder_house_id) &&
+    normalizeHolderKind(currentSeat.holder_kind ?? activeRecord.holder_kind) ===
+      normalizeHolderKind(draft.holder_kind ?? currentSeat.holder_kind ?? activeRecord.holder_kind) &&
+    normalizePaymentBasis(activeRecord.payment_basis) === normalizePaymentBasis(draft.payment_basis ?? activeRecord.payment_basis) &&
+    activeRecord.serve_at_actor_id === nextServeAtActorId &&
+    sameOptionalId(activeRecord.institution_assignment_id, nextInstitutionAssignmentId)
+  ) {
+    return {
+      registry,
+      service_record_registry: serviceRegistryValue,
+      seat: currentSeat,
+      ended_record_id: null,
+      started_record_id: null,
+    };
+  }
 
   const closedServiceRegistry = closeActiveServiceRecord(serviceRegistryValue, endedRecordId, transitionTurnIndex);
 
@@ -628,10 +696,13 @@ export function transitionCourtOfficeHolder(
       scope: currentSeat.scope,
       owner_actor_id: currentSeat.owner_actor_id,
       seat_key: currentSeat.seat_key,
+      serve_at_actor_id: nextServeAtActorId,
+      institution_assignment_id: nextInstitutionAssignmentId,
       holder_person_id: holderPersonId,
       holder_house_id: draft.holder_house_id,
       holder_kind: draft.holder_kind ?? "realm_holder",
       payment_basis: draft.payment_basis ?? "realm_stipend",
+      predecessor_record_id: endedRecordId,
       start_turn_index: transitionTurnIndex,
     });
     if (!nextRecord) {
@@ -639,7 +710,15 @@ export function transitionCourtOfficeHolder(
     }
     startedRecordId = nextRecord.record_id;
     nextServiceRegistry = buildCourtServiceRecordRegistry([
-      ...closedServiceRegistry.record_ids.map((recordId) => closedServiceRegistry.records_by_id[recordId]!),
+      ...closedServiceRegistry.record_ids.map((recordId) => {
+        const record = closedServiceRegistry.records_by_id[recordId]!;
+        return recordId === endedRecordId
+          ? {
+              ...record,
+              successor_record_id: startedRecordId,
+            }
+          : record;
+      }),
       nextRecord,
     ]);
   }
@@ -696,6 +775,7 @@ export function createCourtServiceRecord(draft: CourtServiceRecordDraft): CourtS
   const ownerActorId = normalizeRequiredId(draft.owner_actor_id, scope === "house" ? "house:h_player" : "actor:realm");
   const seatKey = normalizeRequiredId(draft.seat_key, draft.seat_id.split(":").slice(-1)[0] ?? "seat");
   const startTurnIndex = normalizeTurnIndex(draft.start_turn_index);
+  const serveAtActorId = normalizeRequiredId(draft.serve_at_actor_id, ownerActorId);
 
   return {
     schema_version: COURT_SERVICE_RECORD_SCHEMA_VERSION,
@@ -704,10 +784,14 @@ export function createCourtServiceRecord(draft: CourtServiceRecordDraft): CourtS
     scope,
     owner_actor_id: ownerActorId,
     seat_key: seatKey,
+    serve_at_actor_id: serveAtActorId,
+    institution_assignment_id: normalizeOptionalId(draft.institution_assignment_id),
     holder_person_id: holderPersonId,
     holder_house_id: normalizeOptionalId(draft.holder_house_id),
     holder_kind: normalizeHolderKind(draft.holder_kind),
     payment_basis: normalizePaymentBasis(draft.payment_basis),
+    predecessor_record_id: normalizeOptionalId(draft.predecessor_record_id),
+    successor_record_id: normalizeOptionalId(draft.successor_record_id),
     start_turn_index: startTurnIndex,
     end_turn_index: normalizeTurnIndex(draft.end_turn_index),
   };
@@ -755,10 +839,14 @@ export function normalizeCourtServiceRecordRegistry(value: any): CourtServiceRec
       scope: rawRecord.scope,
       owner_actor_id: rawRecord.owner_actor_id,
       seat_key: rawRecord.seat_key,
+      serve_at_actor_id: rawRecord.serve_at_actor_id,
+      institution_assignment_id: rawRecord.institution_assignment_id,
       holder_person_id: rawRecord.holder_person_id,
       holder_house_id: rawRecord.holder_house_id,
       holder_kind: rawRecord.holder_kind,
       payment_basis: rawRecord.payment_basis,
+      predecessor_record_id: rawRecord.predecessor_record_id,
+      successor_record_id: rawRecord.successor_record_id,
       start_turn_index: rawRecord.start_turn_index,
       end_turn_index: rawRecord.end_turn_index,
     }));
