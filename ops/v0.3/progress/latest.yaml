@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-001-T04
+  last_completed_task_id: V03-R3-001-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,8 +21,8 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Completed Tooling V03-R3-001-T04 by publishing the
-  replay reliability runbook and mandatory command
-  guidance. No tooling lane claims remain active
-  after the handoff.
+  Completed Tooling V03-R3-001-T05 by closing the
+  replay-hardening epic and recording reliability
+  quota completion. No tooling lane claims remain
+  active after the handoff.
 active_claims: {}
