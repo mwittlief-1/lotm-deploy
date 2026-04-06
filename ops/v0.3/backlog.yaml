@@ -774,7 +774,7 @@ epics:
 - id: V03-R2-002
   title: Tier scope caps and deterministic debug outputs
   release: v0.3.2
-  status: in_progress
+  status: done
   priority: 46
   tranche: 3
   change_type: behavior_change
@@ -5212,7 +5212,7 @@ tasks:
   title: Add tier-scope regression fixtures and close epic
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: ready
+  status: done
   priority: 60
   tranche: 3
   change_type: refactor

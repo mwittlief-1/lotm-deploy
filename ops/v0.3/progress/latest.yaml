@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-002-T05
-  last_completed_task_id: V03-R2-004-T04
+  current_task_id: ''
+  last_completed_task_id: V03-R2-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,9 +21,9 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted Social V03-R2-004-T04 after landing deterministic realm-office
-  transition helpers in the office registry seam. World V03-R2-002-T05
-  remains the only open frontier. Social V03-R2-004-T05 and T06 stay blocked
-  because T03 is still unresolved at the legacy src/sim/court.ts seat-filling
-  boundary.
+  Accepted World V03-R2-002-T05 and closed epic V03-R2-002 with the bounded
+  tier-scope regression fixture, fixture-backed topology debug test, and QA
+  closeout note. No lane tasks are currently ready. Social V03-R2-004-T03
+  remains blocked at the legacy src/sim/court.ts seat-filling boundary, and
+  T05/T06 stay blocked behind that branch.
 active_claims: {}
