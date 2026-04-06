@@ -1,0 +1,620 @@
+{
+  "app_version": "v0.2.9",
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "hash": "5ee59f0ebafdca32661f28942665c4822da7ee5bc28f5fc0aaa6dc6b46dae5e9",
+  "kind": "economy_fiscal_doe_runs_v1",
+  "policies": [
+    "builder-forward",
+    "prudent-builder"
+  ],
+  "policy_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "run_count": 16,
+  "runs": [
+    {
+      "ending": {
+        "arrears_bushels": 444,
+        "arrears_coin": 6,
+        "coin": 0,
+        "food_stores": 402,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 52
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 444,
+        "arrears_coin": 6,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 225,
+        "arrears_coin": 4,
+        "coin": 0,
+        "food_stores": 477,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 45
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 225,
+        "arrears_coin": 4,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 185,
+        "arrears_coin": 6,
+        "coin": 140,
+        "food_stores": 1218,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 56
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 185,
+        "arrears_coin": 6,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 5,
+        "coin": 2,
+        "food_stores": 588,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 13
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 5,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 144,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_004_widow_line",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 163,
+        "arrears_coin": 5,
+        "coin": 1,
+        "food_stores": 566,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 36
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 163,
+        "arrears_coin": 5,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_005_unrest_pressure",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 9,
+        "coin": 0,
+        "food_stores": 176,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 17
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 9,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 176,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_006_construction_path",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 334,
+        "arrears_coin": 8,
+        "coin": 0,
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 65
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 334,
+        "arrears_coin": 8,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 14,
+        "coin": 0,
+        "food_stores": 368,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 17
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 14,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 368,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "builder-forward",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_008_long_tail_check",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 118,
+        "food_stores": 1192,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 3
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 91,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 19,
+        "food_stores": 903,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 342,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 64,
+        "food_stores": 819,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 34
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": true,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": true,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 196,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 0,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 132,
+        "food_stores": 1158,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 679,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_004_widow_line",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 207,
+        "food_stores": 1174,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 273,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_005_unrest_pressure",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 173,
+        "food_stores": 1111,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 671,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_006_construction_path",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 102,
+        "food_stores": 327,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": true,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": true,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 3,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 34,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "turns_played": 15,
+      "turns_requested": 15
+    },
+    {
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "coin": 199,
+        "food_stores": 820,
+        "manor_count": 1,
+        "meat_stores": 0,
+        "unrest": 0
+      },
+      "game_over_reason": null,
+      "game_over_turn": null,
+      "indicators": {
+        "any_arrears_seen": false,
+        "any_game_over": false,
+        "bushels_arrears_seen": false,
+        "coin_arrears_seen": false,
+        "dispossessed": false,
+        "food_stockout_seen": false,
+        "meat_stockout_seen": true
+      },
+      "maxima": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "manor_count": 1
+      },
+      "minima": {
+        "food_stores": 489,
+        "manor_count": 1,
+        "meat_stores": 0
+      },
+      "policy": "prudent-builder",
+      "schema_version": "economy_fiscal_doe_run_metric_v1",
+      "seed": "lotm_v022_seed_008_long_tail_check",
+      "turns_played": 15,
+      "turns_requested": 15
+    }
+  ],
+  "seed_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "seeds": [
+    "lotm_v022_seed_001_baseline_extworld",
+    "lotm_v022_seed_002_relationship_edges",
+    "lotm_v022_seed_003_succession_pressure",
+    "lotm_v022_seed_004_widow_line",
+    "lotm_v022_seed_005_unrest_pressure",
+    "lotm_v022_seed_006_construction_path",
+    "lotm_v022_seed_007_weather_volatility",
+    "lotm_v022_seed_008_long_tail_check"
+  ],
+  "sim_version": "v0.2.7.2",
+  "tuning_table_hash": "2aec5cdc86272758701412b8dd9ba35b405f0e1143ce78d8fc6ed01120a1664f",
+  "turns": 15
+}

@@ -1,19 +1,15 @@
-import { BUSHELS_PER_PERSON_PER_YEAR } from "../../constants";
 import type { RunState } from "../../types";
 import { foodStoreBalance } from "./ledger";
-import { FISCAL_LEDGER_RUNTIME_ASSET_PATHS } from "./schema";
+import {
+  ECONOMY_FISCAL_TUNING_TABLE,
+  ECONOMY_TUNING_PRICE_KEYS
+} from "./tuningTable";
 
 export const ECONOMY_PRICE_TABLE_SCHEMA_VERSION = "economy_price_table_v1" as const;
 export const ECONOMY_PRICE_REFERENCE_SCHEMA_VERSION = "economy_price_reference_v1" as const;
 export const ECONOMY_FIXED_SELL_ACTION_SCHEMA_VERSION = "economy_fixed_sell_action_v1" as const;
-export const ECONOMY_FIXED_SELL_CAP_BPS = 10000 as const;
-
-export const ECONOMY_PRICE_KEYS = [
-  "food_stores_market_sell",
-  "meat_stores_market_sell_placeholder",
-  "farm_labor_turn_placeholder",
-  "builder_labor_turn_placeholder"
-] as const;
+export const ECONOMY_FIXED_SELL_CAP_BPS = ECONOMY_FISCAL_TUNING_TABLE.pricing.fixed_sell_cap_bps;
+export const ECONOMY_PRICE_KEYS = ECONOMY_TUNING_PRICE_KEYS;
 
 export const ECONOMY_PRICE_CATEGORIES = [
   "good",
@@ -103,60 +99,7 @@ export interface EconomyFixedSellActionV1 {
 }
 
 // Keep prices as integer ratios so later wiring can stay deterministic without float drift.
-export const ECONOMY_FIXED_PRICE_TABLE: EconomyPriceTableContractV1 = {
-  food_stores_market_sell: {
-    category: "good",
-    lifecycle: "active",
-    subject: "food_stores",
-    label: "Food stores market sell",
-    pricing_model: "fixed_ratio",
-    quote_asset: "coin",
-    quote_amount: 1,
-    base_amount: 10,
-    unit: "store_unit",
-    runtime_asset_path: FISCAL_LEDGER_RUNTIME_ASSET_PATHS.food_stores,
-    notes: "Anchors the future fixed bushel sale constant near the legacy 0.10 coin-per-bushel midpoint."
-  },
-  meat_stores_market_sell_placeholder: {
-    category: "good",
-    lifecycle: "placeholder",
-    subject: "meat_stores",
-    label: "Meat stores market sell placeholder",
-    pricing_model: "fixed_ratio",
-    quote_asset: "coin",
-    quote_amount: 1,
-    base_amount: 5,
-    unit: "store_unit",
-    runtime_asset_path: FISCAL_LEDGER_RUNTIME_ASSET_PATHS.meat_stores,
-    notes: "Reserved for future meat-sale exposure without implying an active live market action in v0.3."
-  },
-  farm_labor_turn_placeholder: {
-    category: "labor",
-    lifecycle: "placeholder",
-    subject: "farm_labor_turn",
-    label: "Farm labor turn placeholder",
-    pricing_model: "fixed_ratio",
-    quote_asset: "coin",
-    quote_amount: 1,
-    base_amount: 1,
-    unit: "labor_turn",
-    runtime_asset_path: null,
-    notes: "Reserved for future fixed labor pricing hooks; not wired into runtime actions in v0.3."
-  },
-  builder_labor_turn_placeholder: {
-    category: "labor",
-    lifecycle: "placeholder",
-    subject: "builder_labor_turn",
-    label: "Builder labor turn placeholder",
-    pricing_model: "fixed_ratio",
-    quote_asset: "coin",
-    quote_amount: 2,
-    base_amount: 1,
-    unit: "labor_turn",
-    runtime_asset_path: null,
-    notes: "Reserved for future construction labor pricing hooks; not wired into runtime actions in v0.3."
-  }
-} as const;
+export const ECONOMY_FIXED_PRICE_TABLE = ECONOMY_FISCAL_TUNING_TABLE.pricing.price_table as EconomyPriceTableContractV1;
 
 function normalizePositiveInteger(value: number): number {
   return Math.max(1, Math.trunc(value));
@@ -249,7 +192,12 @@ export function quoteCoinForEconomyPriceReference(reference: EconomyPriceReferen
 
 export function fixedSellCapUnitsForPopulation(population: number): number {
   const normalizedPopulation = normalizeNonNegativeInteger(population);
-  return Math.floor((normalizedPopulation * BUSHELS_PER_PERSON_PER_YEAR * ECONOMY_FIXED_SELL_CAP_BPS) / 10000);
+  return Math.floor(
+    (normalizedPopulation *
+      normalizePositiveInteger(ECONOMY_FISCAL_TUNING_TABLE.consumption.bushels_per_person_per_year) *
+      normalizePositiveInteger(ECONOMY_FIXED_SELL_CAP_BPS)) /
+      10000
+  );
 }
 
 export function buildFoodStoreFixedSellAction(
