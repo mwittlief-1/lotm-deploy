@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-002-T04
-  last_completed_task_id: V03-R3-001-T05
+  current_task_id: V03-R2-002-T05
+  last_completed_task_id: V03-R2-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -18,12 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted World V03-R2-002-T02 and T03, accepted Social V03-R2-003-T03
-  through T06 and closed the delegation epic, and accepted Tooling
-  V03-R3-001-T02 through T05 and closed the replay reliability epic.
-  Reopened UI V03-R2-002-T04 from the world-topology chain and promoted
-  Social V03-R2-004-T01 as the next clean parallel frontier.
+  Accepted UI V03-R2-002-T04 and Social V03-R2-004-T01 plus T02.
+  Reopened World V03-R2-002-T05 from the topology chain, marked Social
+  V03-R2-004-T03 blocked at the legacy src/sim/court.ts boundary, and
+  promoted Social V03-R2-004-T04 as the next clean same-lane frontier.
 active_claims: {}

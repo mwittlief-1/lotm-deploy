@@ -1,0 +1,36 @@
+version: 1
+run_id: V03-R2-004-T02-20260405T224002-0400
+task_id: V03-R2-004-T02
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: 0907a23a2beede8e4f6c22f9f54264da40a66598
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  office_registry_module: src/sim/domains/court/officeRegistry.ts
+  office_registry_test: tests/sim/office_registry_schema.test.ts
+findings:
+  - Added `court_office_registry_v0` and `court_service_record_registry_v0` as deterministic court-domain seams with explicit seat ordering, holder fields, and typed service-payment metadata.
+  - Locked the current house baseline as `steward` required with a one-turn vacancy cap while keeping `clerk` and `marshal` optional and leaving scope and owner fields generic enough for later realm office holders.
+  - Stopped before T03 because live officer generation, roster reporting, and service mirroring still run through the legacy `src/sim/court.ts` layer outside the current task chain's allowed write surface.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T02 closed after passing required gates; the next behavior task was not promoted because live seat filling still depends on the legacy court implementation outside this task family.
