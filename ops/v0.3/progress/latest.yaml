@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-002-T02
-  last_completed_task_id: V03-R2-005-T05
+  current_task_id: V03-R2-002-T04
+  last_completed_task_id: V03-R3-001-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: b40f30c9297f
+  git_commit: c90735d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,9 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Accepted Social V03-R2-003-T01 and T02, accepted World V03-R2-002-T01,
-  accepted UI V03-R2-005-T05, and left Tooling V03-R3-001-T02/T03 open because
-  no T02 handoff exists yet. Reopened World V03-R2-002-T02 and Social
-  V03-R2-003-T03 for same-lane continuation; Tooling V03-R3-001-T02 and T03
-  remain the active ready frontiers.
+  Accepted World V03-R2-002-T02 and T03, accepted Social V03-R2-003-T03
+  through T06 and closed the delegation epic, and accepted Tooling
+  V03-R3-001-T02 through T05 and closed the replay reliability epic.
+  Reopened UI V03-R2-002-T04 from the world-topology chain and promoted
+  Social V03-R2-004-T01 as the next clean parallel frontier.
 active_claims: {}

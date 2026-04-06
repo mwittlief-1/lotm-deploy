@@ -13,6 +13,11 @@ import { resolveSeedReplayPlan } from "./seed_replay/seedPlan";
 
 type Mode = "single" | "batch";
 
+type ReplayBudgets = {
+  snapshotCapBytesPerTurn: number;
+  turnTimeSoftCeilingMsPerSeed: number;
+};
+
 type Args = {
   mode: Mode;
   seed?: string;
@@ -54,6 +59,21 @@ function loadBuildInfo(): BuildInfo | null {
   const buildInfoPath = path.resolve("docs", "BUILD_INFO.json");
   if (!fs.existsSync(buildInfoPath)) return null;
   return JSON.parse(fs.readFileSync(buildInfoPath, "utf8")) as BuildInfo;
+}
+
+function readReplayBudgets(): ReplayBudgets {
+  const runtimeContract = fs.readFileSync(path.resolve("ops", "v0.3", "runtime-contract.yaml"), "utf8");
+  const snapshotCapMatch = runtimeContract.match(/snapshot_cap_bytes_per_turn:\s*(\d+)/);
+  const turnTimeMatch = runtimeContract.match(/turn_time_soft_ceiling_ms_per_seed:\s*(\d+)/);
+
+  if (!snapshotCapMatch || !turnTimeMatch) {
+    throw new Error("Unable to read replay budgets from ops/v0.3/runtime-contract.yaml");
+  }
+
+  return {
+    snapshotCapBytesPerTurn: Number(snapshotCapMatch[1]),
+    turnTimeSoftCeilingMsPerSeed: Number(turnTimeMatch[1])
+  };
 }
 
 function coreEconomySig(state: RunState) {
@@ -107,16 +127,46 @@ function buildTurnTrace(entry: TurnLogEntry) {
   };
 }
 
-function replayRun(seed: string, policy: PolicyId, turns: number): { finalState: RunState; trace: ReturnType<typeof buildTurnTrace>[] } {
+function replayRun(
+  seed: string,
+  policy: PolicyId,
+  turns: number,
+  budgets: ReplayBudgets
+): { finalState: RunState; trace: ReturnType<typeof buildTurnTrace>[]; snapshotMaxBytes: number } {
   let state = createNewRun(seed);
   const canonicalPolicy = canonicalizePolicyId(policy);
+  let snapshotMaxBytes = 0;
+  let turnTimeOverages = 0;
   for (let i = 0; i < turns; i++) {
     if (state.game_over) break;
+    const startedAt = process.hrtime.bigint();
     const ctx = proposeTurn(state);
     const decisions = decide(canonicalPolicy, state, ctx);
     state = applyDecisions(state, decisions);
+    const elapsedMs = Number(process.hrtime.bigint() - startedAt) / 1e6;
+    if (elapsedMs > budgets.turnTimeSoftCeilingMsPerSeed) {
+      turnTimeOverages += 1;
+    }
+
+    const latest = state.log.at(-1);
+    const snapshotAfter = latest?.snapshot_after;
+    if (snapshotAfter) {
+      const bytes = Buffer.byteLength(stableStringify(snapshotAfter), "utf8");
+      snapshotMaxBytes = Math.max(snapshotMaxBytes, bytes);
+      if (bytes > budgets.snapshotCapBytesPerTurn) {
+        throw new Error(
+          `Seed replay snapshot cap exceeded (seed=${seed}, policy=${canonicalPolicy}, turn=${i + 1}, bytes=${bytes}, cap=${budgets.snapshotCapBytesPerTurn})`
+        );
+      }
+    }
   }
-  return { finalState: state, trace: state.log.map(buildTurnTrace) };
+  if (turnTimeOverages > 0) {
+    console.warn(
+      `seed replay warning: ${turnTimeOverages} turn(s) exceeded the soft time ceiling (${budgets.turnTimeSoftCeilingMsPerSeed}ms) for seed=${seed}, policy=${canonicalPolicy}`
+    );
+  }
+  const trace = state.log.map(buildTurnTrace);
+  return { finalState: state, trace, snapshotMaxBytes };
 }
 
 async function main() {
@@ -136,6 +186,7 @@ async function main() {
   const policies = mode === "single" ? [canonicalizePolicyId(args.policy ?? plan.policies[0] ?? "prudent-builder")] : plan.policies;
   const outdir = args.outdir ? path.resolve(args.outdir) : defaultReplayOutdir(plan.appVersion, mode, plan.turns);
 
+  const budgets = readReplayBudgets();
   const runs: Array<{
     policy: PolicyId;
     seed: string;
@@ -145,11 +196,12 @@ async function main() {
     final_signature: ReturnType<typeof coreEconomySig>;
     final_summary: ReturnType<typeof buildRunSummary>;
     baseline_match: boolean | null;
+    snapshot_max_bytes: number;
   }> = [];
 
   for (const policy of policies.slice().sort((a, b) => a.localeCompare(b))) {
     for (const seed of seeds.slice().sort((a, b) => a.localeCompare(b))) {
-      const { finalState, trace } = await replayRun(seed, policy, plan.turns);
+      const { finalState, trace, snapshotMaxBytes } = await replayRun(seed, policy, plan.turns, budgets);
       const finalSignature = coreEconomySig(finalState);
       const baselineExpected =
         plan.baseline && Number(plan.baseline.payload.turns ?? 15) === plan.turns
@@ -180,7 +232,8 @@ async function main() {
         hash: written.hash,
         final_signature: finalSignature,
         final_summary: payload.final_summary,
-        baseline_match: payload.baseline_match
+        baseline_match: payload.baseline_match,
+        snapshot_max_bytes: snapshotMaxBytes
       });
     }
   }
@@ -201,6 +254,8 @@ async function main() {
     run_count: runs.length,
     baseline_match_count: runs.filter((run) => run.baseline_match === true).length,
     baseline_mismatch_count: runs.filter((run) => run.baseline_match === false).length,
+    snapshot_budget_bytes_per_turn: budgets.snapshotCapBytesPerTurn,
+    turn_time_soft_ceiling_ms_per_seed: budgets.turnTimeSoftCeilingMsPerSeed,
     runs
   };
   const summary = writeStableArtifact(summaryArtifactPath(outdir), summaryPayload);

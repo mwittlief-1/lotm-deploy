@@ -7,6 +7,7 @@ import {
   startConstructionProject
 } from "../domains/economy/construction";
 import { applyBushelDelta, applyCoinDelta, canAffordCoin, setBushelBalance, spendBushels, spendCoin } from "../domains/economy/ledger";
+import { recordEconomyPortfolioPhaseHints, refreshEconomyPortfolioState } from "../domains/economy/portfolioAnalysis";
 import { Rng } from "../rng";
 import type { RunState, TurnContext, TurnDecisions } from "../types";
 import { asNonNegInt, clampInt } from "../util";
@@ -162,6 +163,12 @@ export function applyConsumptionAndShortagePhase(state: RunState, court_consumpt
   const before = state.manor.bushels_stored;
   if (before >= consumption) {
     spendBushels(state, consumption);
+    recordEconomyPortfolioPhaseHints(state, {
+      consumption_food_stores: consumption,
+      consumption_meat_stores: 0,
+      consumption_shortage_bushels: 0
+    });
+    refreshEconomyPortfolioState(state);
     return {
       consumption_bushels: consumption,
       peasant_consumption_bushels: peasantConsumption,
@@ -242,6 +249,12 @@ export function applyConsumptionAndShortagePhase(state: RunState, court_consumpt
     res.labor_before = labor_before;
     res.labor_after = labor_after;
   }
+  recordEconomyPortfolioPhaseHints(state, {
+    consumption_food_stores: consumption,
+    consumption_meat_stores: 0,
+    consumption_shortage_bushels: shortage
+  });
+  refreshEconomyPortfolioState(state);
   return res;
 }
 

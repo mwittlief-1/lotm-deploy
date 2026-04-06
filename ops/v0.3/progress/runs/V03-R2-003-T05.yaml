@@ -1,0 +1,38 @@
+version: 1
+run_id: V03-R2-003-T05-20260405T212500-0400
+task_id: V03-R2-003-T05
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: e1ce0189a2b30dc509cf11379948d8c665246455
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  delegation_registry_module: src/sim/domains/court/delegationRegistry.ts
+  reporting_module: src/sim/domains/experience/reporting.ts
+  snapshot_test: tests/sim/court_delegation_snapshot.test.ts
+  bounded_contract_test: tests/sim/bounded_snapshot_contract.test.ts
+findings:
+  - Added an ordered `court_delegation_view_v0` projection in the court domain so bounded consumers can read active delegation families and flattened effect metadata without parsing the raw registry.
+  - Wired delegation summaries into bounded experience snapshots and house-level snapshot copies, keeping the log snapshot contract bounded and ordered.
+  - Locked the snapshot shape and allowed-key contract with focused tests so future court or portfolio readers can consume delegation state without recomputing it from court-domain internals.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-003-T06
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  dispatch_reason: T05 closed after passing required gates; same-lane continuation promoted and claimed T06.

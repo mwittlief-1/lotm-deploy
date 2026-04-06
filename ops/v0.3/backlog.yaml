@@ -806,7 +806,7 @@ epics:
 - id: V03-R2-003
   title: Delegation mechanics v0
   release: v0.3.2
-  status: todo
+  status: done
   priority: 45
   tranche: 3
   change_type: behavior_change
@@ -944,7 +944,7 @@ epics:
 - id: V03-R3-001
   title: Replay hardening and reliability quota
   release: v0.3.3
-  status: todo
+  status: done
   priority: 44
   tranche: 4
   change_type: refactor
@@ -5076,7 +5076,7 @@ tasks:
   title: Implement deterministic tier-scope cap table
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: ready
+  status: done
   priority: 66
   tranche: 3
   change_type: behavior_change
@@ -5121,7 +5121,7 @@ tasks:
   title: Apply numeric distance and far-threshold selectors to scope capping
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: todo
+  status: done
   priority: 64
   tranche: 3
   change_type: behavior_change
@@ -5167,7 +5167,7 @@ tasks:
   title: Expose deterministic distance and scope debug outputs
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: todo
+  status: ready
   priority: 62
   tranche: 3
   change_type: refactor
@@ -5343,7 +5343,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Implement delegated settlement, maintenance, and gift execution hooks
-  status: ready
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5384,7 +5384,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Implement delegated scouting and budget-cost reduction rules
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5425,7 +5425,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Expose delegation outputs to court and portfolio snapshots
-  status: todo
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5467,7 +5467,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Close epic and refresh delegation docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5507,7 +5507,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Audit role surfaces, seat requirements, and current holder transitions
-  status: todo
+  status: ready
   priority: 99
   tranche: 3
   change_type: refactor
@@ -6300,7 +6300,7 @@ tasks:
   title: Add at least two new invariants tests for fiscal and portfolio surfaces
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: ready
+  status: done
   priority: 56
   tranche: 4
   change_type: refactor
@@ -6345,7 +6345,7 @@ tasks:
   title: Add replay-hash, snapshot-cap, and turn-budget guards
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: ready
+  status: done
   priority: 54
   tranche: 4
   change_type: refactor
@@ -6391,7 +6391,7 @@ tasks:
   title: Refresh mandatory replay command and reliability docs
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 52
   tranche: 4
   change_type: refactor
@@ -6433,7 +6433,7 @@ tasks:
   title: Close epic and record reliability quota completion
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 50
   tranche: 4
   change_type: refactor
