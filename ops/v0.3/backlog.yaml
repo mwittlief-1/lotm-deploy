@@ -5590,7 +5590,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement house-court seat filling and non-family retainer cost hooks
-  status: blocked
+  status: ready
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5600,7 +5600,7 @@ tasks:
   deps:
   - V03-R2-004-T02
   requires_integrator: false
-  blocked_reason: Live seat filling, roster reporting, and service mirroring still route through src/sim/court.ts outside the current lane write surface.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/court/**
   - src/sim/domains/economy/**
@@ -5671,7 +5671,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement service placement persistence and holder succession hooks
-  status: blocked
+  status: todo
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5682,7 +5682,7 @@ tasks:
   - V03-R2-004-T03
   - V03-R2-004-T04
   requires_integrator: false
-  blocked_reason: Depends on V03-R2-004-T03, which remains blocked at the legacy src/sim/court.ts seat-filling path.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/court/**
   - src/sim/domains/people/**
@@ -5713,7 +5713,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Add office and seat-filling invariants and docs
-  status: blocked
+  status: todo
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5723,7 +5723,7 @@ tasks:
   deps:
   - V03-R2-004-T05
   requires_integrator: false
-  blocked_reason: Depends on V03-R2-004-T05, which is blocked behind the unresolved V03-R2-004-T03 branch.
+  blocked_reason: ''
   allowed_paths:
   - tests/**
   - docs/releases/**

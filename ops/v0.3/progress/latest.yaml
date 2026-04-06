@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R2-004-T03
   last_completed_task_id: V03-R2-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: c90735d
+  git_commit: 25f6b3b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -23,7 +23,7 @@ last_run:
 notes: >-
   Accepted World V03-R2-002-T05 and closed epic V03-R2-002 with the bounded
   tier-scope regression fixture, fixture-backed topology debug test, and QA
-  closeout note. No lane tasks are currently ready. Social V03-R2-004-T03
-  remains blocked at the legacy src/sim/court.ts seat-filling boundary, and
-  T05/T06 stay blocked behind that branch.
+  closeout note. Integrator carved a behavior-preserving court seam so Social
+  V03-R2-004-T03 is ready again. Social T05 and T06 return to normal todo
+  state behind T03. No active claims are open.
 active_claims: {}
