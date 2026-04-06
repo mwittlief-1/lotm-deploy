@@ -3,6 +3,7 @@ import { asNonNegInt } from "../../util";
 
 export const COURT_DELEGATION_REGISTRY_SCHEMA_VERSION = "court_delegation_registry_v0" as const;
 export const COURT_DELEGATION_EFFECT_CONTRACT_SCHEMA_VERSION = "court_delegation_effect_contract_v0" as const;
+export const COURT_DELEGATION_VIEW_SCHEMA_VERSION = "court_delegation_view_v0" as const;
 
 export const COURT_DELEGATION_ACTIONS = [
   "gift_liege",
@@ -39,6 +40,25 @@ export type CourtDelegationRegistryV0 = {
   entries_by_action: Record<CourtDelegationAction, CourtDelegationRegistryEntryV0>;
 };
 
+export type CourtDelegationActionViewV0 = {
+  action: CourtDelegationAction;
+  mode: CourtDelegationMode;
+  delegated: boolean;
+  summary_label: string;
+  budget_cost_delta: number;
+  budget_cost_floor: number;
+  amount_multiplier_pct: number;
+  energy_cost_delta: number;
+  energy_cost_floor: number;
+};
+
+export type CourtDelegationViewV0 = {
+  schema_version: typeof COURT_DELEGATION_VIEW_SCHEMA_VERSION;
+  action_keys: CourtDelegationAction[];
+  active_action_keys: CourtDelegationAction[];
+  actions: CourtDelegationActionViewV0[];
+};
+
 export type CourtDelegationEffectContractDraft = Partial<
   Omit<CourtDelegationEffectContractV0, "schema_version">
 >;
@@ -57,6 +77,17 @@ const ACTION_SUMMARY_LABELS: Record<CourtDelegationAction, string> = {
   marriage_scout: "Marriage scouting",
   maintenance: "Maintenance",
 };
+
+function registryFrom(value: CourtDelegationRegistryV0 | RunState): CourtDelegationRegistryV0 {
+  if (!("run_seed" in value)) return normalizeCourtDelegationRegistry(value);
+
+  const existing = (value.house as any)?.court_delegation_registry;
+  return existing &&
+    typeof existing === "object" &&
+    existing.schema_version === COURT_DELEGATION_REGISTRY_SCHEMA_VERSION
+    ? normalizeCourtDelegationRegistry(existing)
+    : createCourtDelegationRegistry();
+}
 
 function normalizeInteger(value: number | null | undefined): number {
   return Math.trunc(Number.isFinite(value) ? Number(value) : 0);
@@ -171,7 +202,32 @@ export function ensureCourtDelegationRegistry(state: RunState): CourtDelegationR
       : createCourtDelegationRegistry();
 
   houseAny.court_delegation_registry = normalized;
+  houseAny.court_delegation_view = buildCourtDelegationView(normalized);
   return normalized;
+}
+
+export function buildCourtDelegationView(value: CourtDelegationRegistryV0 | RunState): CourtDelegationViewV0 {
+  const registry = registryFrom(value);
+
+  return {
+    schema_version: COURT_DELEGATION_VIEW_SCHEMA_VERSION,
+    action_keys: [...registry.action_keys],
+    active_action_keys: [...registry.active_action_keys],
+    actions: registry.action_keys.map((action) => {
+      const entry = registry.entries_by_action[action];
+      return {
+        action,
+        mode: entry.mode,
+        delegated: entry.delegated,
+        summary_label: entry.summary_label,
+        budget_cost_delta: entry.effect.budget_cost_delta,
+        budget_cost_floor: entry.effect.budget_cost_floor,
+        amount_multiplier_pct: entry.effect.amount_multiplier_pct,
+        energy_cost_delta: entry.effect.energy_cost_delta,
+        energy_cost_floor: entry.effect.energy_cost_floor,
+      };
+    }),
+  };
 }
 
 export function resolveCourtDelegationEntry(

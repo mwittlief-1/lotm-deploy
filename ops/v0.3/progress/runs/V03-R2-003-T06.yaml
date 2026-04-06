@@ -1,0 +1,35 @@
+version: 1
+run_id: V03-R2-003-T06-20260405T213114-0400
+task_id: V03-R2-003-T06
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: e1ce0189a2b30dc509cf11379948d8c665246455
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+replay_hashes:
+  run1: ''
+  run2: ''
+artifacts:
+  closeout_doc: docs/releases/v0.3.2_delegation_v0_closeout.md
+  epic_report: ops/v0.3/progress/runs/V03-R2-003.md
+findings:
+  - Consolidated the accepted delegation audit, registry seam, execution hooks, and snapshot outputs into a release-facing closeout doc for the v0.3.2 delegation baseline.
+  - Recorded the epic handoff in `V03-R2-003.md`, including the locked deterministic rules, explicit non-goals, and the stable downstream inputs later office and agenda work may assume.
+  - Closed the epic and task state cleanly after the required documentation and ops gates passed, leaving no active social claim and no further promoted same-lane task in this branch snapshot.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T06 closed after passing documentation and control-plane gates; no further social task is promoted in this branch snapshot.

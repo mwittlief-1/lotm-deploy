@@ -1,7 +1,7 @@
 version: 1
 run_id: V03-R2-003-T04-20260405T211805-0400
 task_id: V03-R2-003-T04
-status: claimed
+status: done
 date: 2026-04-05
 branch: codex/v0.3-lane-social-mechanics
 commit: a7f47b864423cf21260db0ab6439030c23fb4e87
@@ -13,20 +13,24 @@ runtime:
   pr_url: ''
   pr_status: ''
 gates:
-  qa: pending
-  preflight: pending
-  seed_replay_batch_twice: pending
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
 replay_hashes:
-  run1: ''
-  run2: ''
-artifacts: {}
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  marriage_module: src/sim/domains/people/marriage.ts
+  marriage_test: tests/sim/marriage_decision_budget.test.ts
 findings:
-  - T04 starts from the accepted delegation registry seam and T03 settlement hooks; the remaining work is to wire delegated scouting into the people-domain marriage path with explicit deterministic budget effects.
-stop_reason: in_progress
-next_task_cursor: ''
-next_task_ready: false
+  - Wired marriage scouting through the delegation registry so delegated scout entries can reshape court-budget cost without touching candidate ordering, RNG usage, or inbound marriage handling.
+  - Locked an explicit strategic floor of one court decision for external scouting, so delegation can reduce scouting cost but cannot erase the external action tradeoff.
+  - Kept default behavior stable because manual scout entries still consume the baseline two-decision cost and emit the same notes as before.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-003-T05
+next_task_ready: true
 control_plane_notes:
-  ops_v0_3_validate: pending
-  ops_v0_3_scheduler_dry_run: pending
-  ops_v0_3_rebase_dry_run: pending
-  reason: same-lane continuation claim opened for delegated scouting work.
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  dispatch_reason: T04 closed after passing required gates; same-lane continuation promoted and claimed T05.

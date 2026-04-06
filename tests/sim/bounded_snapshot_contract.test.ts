@@ -30,6 +30,11 @@ describe("bounded snapshot contract", () => {
         "builder_labor_turn_placeholder"
       ]
     });
+    expect(serialized.court_delegation_view).toMatchObject({
+      schema_version: "court_delegation_view_v0",
+      action_keys: ["gift_liege", "offering_church", "marriage_scout", "maintenance"],
+      active_action_keys: []
+    });
     expect(Array.isArray(serialized.known_houses)).toBe(true);
     expect(serialized.known_houses.length).toBeGreaterThan(0);
     expect(serialized.known_houses[0]).toMatchObject({
