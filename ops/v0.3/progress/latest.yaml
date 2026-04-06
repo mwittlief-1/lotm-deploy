@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-004-T03
-  last_completed_task_id: V03-R2-002-T05
+  current_task_id: V03-R2-004-T05
+  last_completed_task_id: V03-R2-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 25f6b3b
+  git_commit: bb98549
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,8 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted World V03-R2-002-T05 and closed epic V03-R2-002 with the bounded
-  tier-scope regression fixture, fixture-backed topology debug test, and QA
-  closeout note. Integrator carved a behavior-preserving court seam so Social
-  V03-R2-004-T03 is ready again. Social T05 and T06 return to normal todo
-  state behind T03. No active claims are open.
+  Accepted a replay-safe Social V03-R2-004-T03 salvage on kickoff by keeping
+  pure house-court seat-fill classification and retainer-upkeep scaffolding
+  while leaving the live registry mirror unchanged. Social V03-R2-004-T05 is
+  now ready as the next lane frontier. No active claims are open.
 active_claims: {}

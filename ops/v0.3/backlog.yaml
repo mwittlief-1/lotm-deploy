@@ -5590,7 +5590,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement house-court seat filling and non-family retainer cost hooks
-  status: ready
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5671,7 +5671,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement service placement persistence and holder succession hooks
-  status: todo
+  status: ready
   priority: 95
   tranche: 3
   change_type: behavior_change
