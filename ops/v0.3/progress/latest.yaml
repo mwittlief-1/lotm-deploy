@@ -6,7 +6,7 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: cd0719dc0a48b7a2bc41a1bffcb0d4d2e8f36d4d
+  git_commit: e397a1795a5281aaa1af89da9415e1e5f0d19137
   ci_env: ''
   vercel_env: ''
   pr_url: ''
