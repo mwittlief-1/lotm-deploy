@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-004-T05
-  last_completed_task_id: V03-R2-004-T03
+  current_task_id: V03-R2-004-T06
+  last_completed_task_id: V03-R2-004-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: bb98549
+  git_commit: 694dfcf
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,8 +21,9 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted a replay-safe Social V03-R2-004-T03 salvage on kickoff by keeping
-  pure house-court seat-fill classification and retainer-upkeep scaffolding
-  while leaving the live registry mirror unchanged. Social V03-R2-004-T05 is
-  now ready as the next lane frontier. No active claims are open.
+  Accepted Social V03-R2-004-T05 on kickoff by adapting the stale lane patch
+  onto current repo truth: service placement persistence is now stable across
+  unchanged holders, placement targets are explicit, and office-holder
+  succession hooks are available without changing replay. Social V03-R2-004-T06
+  is now the next ready lane frontier. No active claims are open.
 active_claims: {}
