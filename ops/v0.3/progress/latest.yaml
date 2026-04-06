@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-002-T04
-  last_completed_task_id: V03-R3-001-T05
+  current_task_id: V03-R2-004-T01
+  last_completed_task_id: V03-R2-002-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: c90735d
+  git_branch: codex/v0.3-lane-ui-experience
+  git_commit: 4271ea96a3781de037a1229ed63213ac6fc1ab59
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,12 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Accepted World V03-R2-002-T02 and T03, accepted Social V03-R2-003-T03
-  through T06 and closed the delegation epic, and accepted Tooling
-  V03-R3-001-T02 through T05 and closed the replay reliability epic.
-  Reopened UI V03-R2-002-T04 from the world-topology chain and promoted
-  Social V03-R2-004-T01 as the next clean parallel frontier.
+  Closed UI V03-R2-002-T04 after extending the topology debug
+  surface with deterministic scope-cap inputs, bucket summaries, and
+  admitted or rejected manor rationale. No next ready UI lane task is
+  currently available on this branch state.
 active_claims: {}
