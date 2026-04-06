@@ -1,0 +1,32 @@
+version: 1
+run_id: V03-R2-003-T04-20260405T211805-0400
+task_id: V03-R2-003-T04
+status: claimed
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: a7f47b864423cf21260db0ab6439030c23fb4e87
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pending
+  preflight: pending
+  seed_replay_batch_twice: pending
+replay_hashes:
+  run1: ''
+  run2: ''
+artifacts: {}
+findings:
+  - T04 starts from the accepted delegation registry seam and T03 settlement hooks; the remaining work is to wire delegated scouting into the people-domain marriage path with explicit deterministic budget effects.
+stop_reason: in_progress
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pending
+  ops_v0_3_scheduler_dry_run: pending
+  ops_v0_3_rebase_dry_run: pending
+  reason: same-lane continuation claim opened for delegated scouting work.

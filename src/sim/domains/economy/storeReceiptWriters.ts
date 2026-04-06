@@ -1,5 +1,10 @@
 import type { PhaseNameV0, RunState } from "../../types";
 import { chargeCourtDecisionBudget, type CourtDecisionBudgetAction } from "../court/decisionBudget";
+import {
+  resolveCourtDelegationEntry,
+  resolveDelegatedAmount,
+  resolveDelegatedBudgetCost,
+} from "../court/delegationRegistry";
 import type { EconomyProductionRegistryEntryV1 } from "./productionRegistry";
 import {
   applyTrackedStoreDelta,
@@ -179,6 +184,11 @@ function decisionBudgetActionForContract(contractId: FiscalPaymentContractIdV1):
   }
 }
 
+function delegationActionForSettlementContract(contractId: FiscalPaymentContractIdV1): "gift_liege" | "offering_church" | null {
+  const action = decisionBudgetActionForContract(contractId);
+  return action === "gift_liege" || action === "offering_church" ? action : null;
+}
+
 function canApplyPositiveSettlementAmount(state: RunState, scaffold: FiscalSettlementScaffoldV1): boolean {
   if (scaffold.amount <= 0) return false;
   if (scaffold.selected_payment_mode === "coin") return coinBalance(state) > 0;
@@ -188,11 +198,34 @@ function canApplyPositiveSettlementAmount(state: RunState, scaffold: FiscalSettl
   return false;
 }
 
+export function resolveDelegatedFiscalSettlementScaffold(
+  state: RunState,
+  scaffold: FiscalSettlementScaffoldV1
+): FiscalSettlementScaffoldV1 {
+  const snapshot = toFiscalSettlementScaffoldSnapshot(scaffold);
+  const delegationAction = delegationActionForSettlementContract(snapshot.contract_id);
+  if (!delegationAction) return snapshot;
+
+  const entry = resolveCourtDelegationEntry(state, delegationAction);
+  if (!entry.delegated) return snapshot;
+
+  return {
+    ...snapshot,
+    amount: resolveDelegatedAmount(snapshot.amount, entry),
+  };
+}
+
 function reserveCourtDecisionBudgetForSettlement(state: RunState, scaffold: FiscalSettlementScaffoldV1): boolean {
   const action = decisionBudgetActionForContract(scaffold.contract_id);
   if (!action) return true;
   if (!canApplyPositiveSettlementAmount(state, scaffold)) return false;
-  return chargeCourtDecisionBudget(state, action, 1).applied;
+
+  const delegationAction = delegationActionForSettlementContract(scaffold.contract_id);
+  const entry = delegationAction ? resolveCourtDelegationEntry(state, delegationAction) : null;
+  const budgetCost = entry && entry.delegated ? resolveDelegatedBudgetCost(1, entry) : 1;
+
+  if (budgetCost <= 0) return true;
+  return chargeCourtDecisionBudget(state, action, budgetCost).applied;
 }
 
 function productionSourceLabel(entry: EconomyProductionRegistryEntryV1): string {
@@ -345,7 +378,7 @@ export function applyFiscalSettlementScaffold(
   state: RunState,
   scaffold: FiscalSettlementScaffoldV1
 ): number {
-  const snapshot = toFiscalSettlementScaffoldSnapshot(scaffold);
+  const snapshot = resolveDelegatedFiscalSettlementScaffold(state, scaffold);
   if (snapshot.amount <= 0) return 0;
   if (!reserveCourtDecisionBudgetForSettlement(state, snapshot)) return 0;
 

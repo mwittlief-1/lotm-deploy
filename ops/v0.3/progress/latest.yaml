@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-003-T02
+  last_completed_task_id: V03-R2-003-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: b522188f3caa0aea002855110006b8e0a7b52026
+  git_commit: a7f47b864423cf21260db0ab6439030c23fb4e87
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,12 +21,18 @@ last_run:
     run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
     run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
 notes: >-
-  Social V03-R2-003-T01 and V03-R2-003-T02 are closed on the lane branch.
-  The delegation audit and court registry seam both passed required gates,
-  and no further social delegation task has been promoted in this branch
-  snapshot. UI V03-R1-005-T05 and Engine V03-R3-005-T01 remain the other
-  active lane claims.
+  Social V03-R2-003-T03 is closed on the lane branch with delegated
+  settlement and maintenance hooks plus passing gates. Same-lane
+  continuation promoted and claimed Social V03-R2-003-T04 for delegated
+  scouting and budget-cost rules. UI V03-R1-005-T05 and Engine
+  V03-R3-005-T01 remain the other active lane claims.
 active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R2-003-T04
+    claimed_by: codex
+    claimed_at: '2026-04-05T21:18:05-0400'
+    claim_expires_at: '2026-04-06T01:18:05-0400'
+    run_id: V03-R2-003-T04-20260405T211805-0400
   codex/v0.3-lane-ui-experience:
     task_id: V03-R1-005-T05
     claimed_by: manual-ui-lane
