@@ -1,6 +1,7 @@
 import React from "react";
 
 import type {
+  PortfolioMapCheckpoint,
   PortfolioScopeContract,
   PortfolioScopeMode,
   PortfolioSelectedManorSurface,
@@ -9,6 +10,7 @@ import type {
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_PANEL_ACCENT_STYLE,
+  PLAY_SCREEN_SECONDARY_BUTTON_STYLE,
   PLAY_SCREEN_SECTION_SIGILS,
   PLAY_SCREEN_SUBCARD_STYLE,
   PLAY_SCREEN_THEME
@@ -17,6 +19,8 @@ import { SectionHeading } from "./SectionHeading";
 
 type PortfolioOverviewPanelProps = {
   contract: PortfolioScopeContract;
+  mapCheckpoint?: PortfolioMapCheckpoint | null;
+  onCenterSelectedHolding?: () => void;
   onScopeModeChange: (mode: PortfolioScopeMode) => void;
   onSelectManor: (manorId: string) => void;
   selectedManor: PortfolioSelectedManorSurface;
@@ -82,6 +86,8 @@ function renderSummaryCards(cards: PortfolioSummaryCard[], valueFontSize: number
 
 export function PortfolioOverviewPanel({
   contract,
+  mapCheckpoint = null,
+  onCenterSelectedHolding,
   onScopeModeChange,
   onSelectManor,
   selectedManor,
@@ -200,6 +206,58 @@ export function PortfolioOverviewPanel({
                   {selectedManor.summary}
                 </div>
               </div>
+
+              {mapCheckpoint ? (
+                <div
+                  data-portfolio-map-checkpoint={mapCheckpoint.state}
+                  style={{
+                    ...PLAY_SCREEN_SUBCARD_STYLE,
+                    padding: 10,
+                    marginTop: 10,
+                    background: "#fcfaf5"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+                    <div>
+                      <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>
+                        Map checkpoint
+                      </div>
+                      <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
+                        {mapCheckpoint.helper}
+                      </div>
+                    </div>
+                    <span
+                      style={{
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        border: "1px solid rgba(172, 143, 100, 0.32)",
+                        background: mapCheckpoint.state === "ready" ? "#f8f0df" : PLAY_SCREEN_THEME.surfaceRaised,
+                        color: mapCheckpoint.state === "ready" ? PLAY_SCREEN_THEME.accent : PLAY_SCREEN_THEME.inkMuted,
+                        fontSize: 11,
+                        letterSpacing: 0.4,
+                        textTransform: "uppercase"
+                      }}
+                    >
+                      {mapCheckpoint.statusLabel}
+                    </span>
+                  </div>
+
+                  <button
+                    data-center-selected-holding="true"
+                    disabled={mapCheckpoint.state !== "ready"}
+                    onClick={mapCheckpoint.state === "ready" ? onCenterSelectedHolding : undefined}
+                    style={{
+                      ...(mapCheckpoint.state === "ready" ? PLAY_SCREEN_ACTION_BUTTON_STYLE : PLAY_SCREEN_SECONDARY_BUTTON_STYLE),
+                      marginTop: 10,
+                      opacity: mapCheckpoint.state === "ready" ? 1 : 0.72,
+                      cursor: mapCheckpoint.state === "ready" ? "pointer" : "not-allowed"
+                    }}
+                    type="button"
+                  >
+                    {mapCheckpoint.buttonLabel}
+                  </button>
+                </div>
+              ) : null}
 
               <div
                 style={{

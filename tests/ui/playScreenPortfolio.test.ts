@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPortfolioEvidenceScope,
+  buildPortfolioMapCheckpoint,
   buildPortfolioOverviewSurface,
   buildPortfolioScopeContract,
   selectPortfolioManor
@@ -9,7 +10,9 @@ import {
 
 const PREVIEW_STATE = {
   world_topology_view: {
-    anchor_manor_id: "manor_hx_26597"
+    anchor_manor_id: "manor_hx_26597",
+    anchor_holding_id: "holding_hx_26597",
+    anchor_county_id: "county_hx_2"
   },
   portfolio: {
     schema_version: "economy_portfolio_analysis_v1",
@@ -352,6 +355,116 @@ describe("playScreenPortfolio", () => {
       receiptScopeSummary:
         "Hx 30001 detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.",
       state: "selected_manor_holdings_only"
+    });
+  });
+
+  it("builds a stable map checkpoint affordance without assuming a live map host", () => {
+    const contract = buildPortfolioScopeContract(PREVIEW_STATE);
+
+    if (!contract) {
+      throw new Error("Expected a portfolio scope contract.");
+    }
+
+    expect(
+      buildPortfolioMapCheckpoint({
+        contract,
+        mapCheckpointAvailable: false,
+        scopeMode: "portfolio",
+        selectedManorId: contract.selectedManorId,
+        topologySurface: null
+      })
+    ).toBeNull();
+
+    expect(
+      buildPortfolioMapCheckpoint({
+        contract,
+        mapCheckpointAvailable: false,
+        scopeMode: "selected_manor",
+        selectedManorId: contract.selectedManorId,
+        topologySurface: {
+          anchorCountyId: "county_hx_2",
+          anchorHoldingId: "holding_hx_26597",
+          anchorManorId: "manor_hx_26597",
+          companionMetric: "route_hop_distance",
+          farThreshold: "50",
+          rawMetric: "travel_cost_distance",
+          sampleSummary: "Showing 0 sampled distances.",
+          samples: []
+        }
+      })
+    ).toEqual({
+      buttonLabel: "Center on selected holding",
+      helper:
+        "Holdings already owns the target selection, but this gameplay shell does not yet expose a live map checkpoint. The control stays dormant until a world map surface is attached.",
+      state: "dormant",
+      statusLabel: "Dormant",
+      target: {
+        countyId: "county_hx_2",
+        holdingId: "holding_hx_26597",
+        manorId: "manor_hx_26597",
+        manorLabel: "Current manor"
+      }
+    });
+
+    expect(
+      buildPortfolioMapCheckpoint({
+        contract,
+        mapCheckpointAvailable: true,
+        scopeMode: "selected_manor",
+        selectedManorId: "manor_hx_30001",
+        topologySurface: {
+          anchorCountyId: "county_hx_2",
+          anchorHoldingId: "holding_hx_26597",
+          anchorManorId: "manor_hx_26597",
+          companionMetric: "route_hop_distance",
+          farThreshold: "50",
+          rawMetric: "travel_cost_distance",
+          sampleSummary: "Showing 0 sampled distances.",
+          samples: []
+        }
+      })
+    ).toEqual({
+      buttonLabel: "Center on selected holding",
+      helper:
+        "Hx 30001 is selected in Holdings, but this bounded snapshot still only exposes a concrete holding target for the current manor. The control stays dormant until selected-holding targets widen beyond the anchor manor.",
+      state: "dormant",
+      statusLabel: "Dormant",
+      target: {
+        countyId: null,
+        holdingId: null,
+        manorId: "manor_hx_30001",
+        manorLabel: "Hx 30001"
+      }
+    });
+
+    expect(
+      buildPortfolioMapCheckpoint({
+        contract,
+        mapCheckpointAvailable: true,
+        scopeMode: "selected_manor",
+        selectedManorId: contract.selectedManorId,
+        topologySurface: {
+          anchorCountyId: "county_hx_2",
+          anchorHoldingId: "holding_hx_26597",
+          anchorManorId: "manor_hx_26597",
+          companionMetric: "route_hop_distance",
+          farThreshold: "50",
+          rawMetric: "travel_cost_distance",
+          sampleSummary: "Showing 0 sampled distances.",
+          samples: []
+        }
+      })
+    ).toEqual({
+      buttonLabel: "Center on selected holding",
+      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
+      state: "ready",
+      statusLabel: "Ready",
+      target: {
+        countyId: "county_hx_2",
+        holdingId: "holding_hx_26597",
+        manorId: "manor_hx_26597",
+        manorLabel: "Current manor"
+      }
     });
   });
 

@@ -1,3 +1,5 @@
+import type { TopologyDebugSurface } from "./playScreenTopology";
+
 type PortfolioValueKind = "coin" | "food" | "meat" | "count";
 type PortfolioCardTone = "neutral" | "caution" | "danger";
 
@@ -82,6 +84,7 @@ export type PortfolioSurfaceScopeRule = {
 };
 
 export type PortfolioEvidenceScopeState = "current_manor" | "selected_manor_live" | "selected_manor_holdings_only";
+export type PortfolioMapCheckpointState = "dormant" | "ready";
 
 export type PortfolioEvidenceScope = {
   chipHelperText: string;
@@ -90,6 +93,21 @@ export type PortfolioEvidenceScope = {
   receiptScopeLabel: string;
   receiptScopeSummary: string;
   state: PortfolioEvidenceScopeState;
+};
+
+export type PortfolioMapTarget = {
+  countyId: string | null;
+  holdingId: string | null;
+  manorId: string;
+  manorLabel: string;
+};
+
+export type PortfolioMapCheckpoint = {
+  buttonLabel: string;
+  helper: string;
+  state: PortfolioMapCheckpointState;
+  statusLabel: string;
+  target: PortfolioMapTarget;
 };
 
 export type PortfolioScopeContract = {
@@ -739,5 +757,56 @@ export function buildPortfolioEvidenceScope(args: {
     receiptScopeLabel: `${selectedManor.title} selected`,
     receiptScopeSummary: `${selectedManor.title} detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.`,
     state: "selected_manor_holdings_only"
+  };
+}
+
+export function buildPortfolioMapCheckpoint(args: {
+  contract: PortfolioScopeContract | null;
+  mapCheckpointAvailable: boolean;
+  scopeMode: PortfolioScopeMode;
+  selectedManorId: string | null | undefined;
+  topologySurface: TopologyDebugSurface | null;
+}): PortfolioMapCheckpoint | null {
+  const { contract, mapCheckpointAvailable, scopeMode, selectedManorId, topologySurface } = args;
+
+  if (!contract || scopeMode !== "selected_manor" || !topologySurface) {
+    return null;
+  }
+
+  const selectedManor = selectPortfolioManor(contract, selectedManorId);
+  const target: PortfolioMapTarget = {
+    countyId: selectedManor.isAnchorManor ? topologySurface.anchorCountyId : null,
+    holdingId: selectedManor.isAnchorManor ? topologySurface.anchorHoldingId : null,
+    manorId: selectedManor.manorId,
+    manorLabel: selectedManor.title
+  };
+
+  if (!mapCheckpointAvailable) {
+    return {
+      buttonLabel: "Center on selected holding",
+      helper:
+        "Holdings already owns the target selection, but this gameplay shell does not yet expose a live map checkpoint. The control stays dormant until a world map surface is attached.",
+      state: "dormant",
+      statusLabel: "Dormant",
+      target
+    };
+  }
+
+  if (target.holdingId) {
+    return {
+      buttonLabel: "Center on selected holding",
+      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
+      state: "ready",
+      statusLabel: "Ready",
+      target
+    };
+  }
+
+  return {
+    buttonLabel: "Center on selected holding",
+    helper: `${selectedManor.title} is selected in Holdings, but this bounded snapshot still only exposes a concrete holding target for the current manor. The control stays dormant until selected-holding targets widen beyond the anchor manor.`,
+    state: "dormant",
+    statusLabel: "Dormant",
+    target
   };
 }
