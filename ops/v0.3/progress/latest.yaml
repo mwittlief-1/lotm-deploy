@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R2-004-T05
   last_completed_task_id: V03-R2-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: d7b7692
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: bb98549
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,11 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 3e603711e9c4efe243bbb5f1008fcd64ca49409701d1d10b8b468f2c8b44b004
-    run2: 3e603711e9c4efe243bbb5f1008fcd64ca49409701d1d10b8b468f2c8b44b004
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Social closed V03-R2-004-T03 with deterministic house-court seat filling and
-  non-family retainer upkeep hooks, plus seam-level regression coverage. QA,
-  preflight, and replay batch gates passed with matching hashes. T05 remains
-  todo in this branch snapshot, so there is no next social claim yet.
+  Accepted a replay-safe Social V03-R2-004-T03 salvage on kickoff by keeping
+  pure house-court seat-fill classification and retainer-upkeep scaffolding
+  while leaving the live registry mirror unchanged. Social V03-R2-004-T05 is
+  now ready as the next lane frontier. No active claims are open.
 active_claims: {}
