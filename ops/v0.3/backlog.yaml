@@ -6303,7 +6303,7 @@ tasks:
   title: Add at least two new invariants tests for fiscal and portfolio surfaces
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 56
   tranche: 4
   change_type: refactor
@@ -6344,6 +6344,9 @@ tasks:
   - non_perturbation_failure
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-001-T02.md
+  outputs:
+  - tests/sim/replay_reliability_invariants_v033.test.ts
+  - docs/qa/replay_reliability_invariants_v0.3.3.md
 - id: V03-R3-001-T03
   title: Add replay-hash, snapshot-cap, and turn-budget guards
   release: v0.3.3
