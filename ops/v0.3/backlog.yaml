@@ -6351,7 +6351,7 @@ tasks:
   title: Add replay-hash, snapshot-cap, and turn-budget guards
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 54
   tranche: 4
   change_type: refactor
@@ -6393,6 +6393,10 @@ tasks:
   - non_perturbation_failure
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-001-T03.md
+  outputs:
+  - scripts/seedReplay.ts
+  - docs/qa/replay_reliability_guards_v0.3.3.md
+  - ops/v0.3/runtime-contract.yaml
 - id: V03-R3-001-T04
   title: Refresh mandatory replay command and reliability docs
   release: v0.3.3
