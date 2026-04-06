@@ -108,6 +108,14 @@ export type CourtOfficeTransitionResult = {
   started_record_id: string | null;
 };
 
+export type HouseCourtSeatFillDecision = {
+  seat_id: string;
+  seat_key: HouseCourtOfficeKey;
+  person_id: string;
+  holder_kind: Extract<CourtOfficeHolderKind, "household_member" | "non_family_retainer">;
+  payment_basis: Extract<CourtServicePaymentBasis, "family_service" | "retainer_upkeep">;
+};
+
 export type CourtOfficeSeatDraft = {
   seat_id?: string;
   scope?: CourtOfficeScope;
@@ -293,6 +301,29 @@ function normalizeLegacyHouseCourtAssignments(
   return nextAssignments;
 }
 
+function livingHouseholdMemberIds(state: RunState): Set<string> {
+  const houseRegistry = getPlayerHouseRegistry(state);
+  const people: Record<string, { alive?: boolean }> =
+    (state as any).people && typeof (state as any).people === "object"
+      ? ((state as any).people as Record<string, { alive?: boolean }>)
+      : {};
+  const ids = new Set<string>();
+
+  const push = (value: unknown) => {
+    const id = normalizeOptionalId(value);
+    if (!id) return;
+    if (people[id]?.alive === false) return;
+    ids.add(id);
+  };
+
+  push(state.house.head?.id);
+  push(state.house.spouse?.id);
+  for (const child of state.house.children ?? []) push(child?.id);
+  for (const id of Array.isArray(houseRegistry?.member_person_ids) ? houseRegistry.member_person_ids : []) push(id);
+
+  return ids;
+}
+
 export function planLegacyHouseCourtAssignments(
   currentAssignments: Record<string, unknown> | null | undefined,
   people: Record<string, { alive?: boolean }> | null | undefined,
@@ -327,6 +358,28 @@ export function listLegacyFilledHouseCourtOffices(state: RunState): Array<{ role
   return HOUSE_COURT_OFFICE_KEYS.flatMap((role) =>
     assignments[role] ? [{ role, person_id: assignments[role]! }] : []
   );
+}
+
+export function planHouseCourtSeatFillDecisions(
+  state: RunState,
+  assignments: LegacyHouseCourtAssignments
+): HouseCourtSeatFillDecision[] {
+  const householdIds = livingHouseholdMemberIds(state);
+  const ownerActorId = defaultHouseOwnerActorId(state);
+
+  return HOUSE_COURT_OFFICE_KEYS.flatMap((seatKey) => {
+    const personId = assignments[seatKey];
+    if (!personId) return [];
+
+    const holderKind = householdIds.has(personId) ? "household_member" : "non_family_retainer";
+    return [{
+      seat_id: defaultSeatId("house", ownerActorId, seatKey),
+      seat_key: seatKey,
+      person_id: personId,
+      holder_kind: holderKind,
+      payment_basis: holderKind === "household_member" ? "family_service" : "retainer_upkeep",
+    }];
+  });
 }
 
 export function createCourtOfficeSeat(draft: CourtOfficeSeatDraft): CourtOfficeSeatV0 {
