@@ -5,10 +5,13 @@ import {
   buildClaimantRegistry,
   buildSuccessionLine,
   CLAIMANT_REGISTRY_SCHEMA_VERSION,
+  INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION,
   inheritanceClaimProspectSignature,
   inheritanceClaimProspectSignatureForSubject,
   SUCCESSION_LINE_SCHEMA_VERSION,
 } from "../../src/sim/domains/people/successionRegistry";
+import { buildProspectsWindowPhase } from "../../src/sim/phases/phase_prospects";
+import { computeHeirId } from "../../src/sim/phases/phase_succession";
 import type { Person, RunState } from "../../src/sim/types";
 import { SIM_VERSION } from "../../src/sim/version";
 
@@ -202,6 +205,18 @@ describe("succession registry schema", () => {
   it("builds the current placeholder inheritance claim prospect from the domain seam", () => {
     const state = mkBaseState();
     state.house.heir_id = null;
+    state.house.children = [];
+    state.kinship_edges = [{ kind: "spouse_of", a_id: state.house.head.id, b_id: state.house.spouse!.id }];
+    state.houses!.h_player.child_ids = [];
+    state.houses!.h_player.member_person_ids = [state.house.head.id, state.house.spouse!.id];
+
+    const cousinA = mkPerson("p_cousin_a", "M", 28);
+    const cousinB = mkPerson("p_cousin_b", "F", 25);
+    const cousinC = mkPerson("p_cousin_c", "M", 22);
+    state.people![cousinA.id] = cousinA;
+    state.people![cousinB.id] = cousinB;
+    state.people![cousinC.id] = cousinC;
+    state.houses!.h_player.member_person_ids.push(cousinA.id, cousinB.id, cousinC.id);
 
     const prospect = buildInheritanceClaimProspect(state, {
       prospect_id: "pros_inheritance_claim_test",
@@ -209,6 +224,7 @@ describe("succession registry schema", () => {
       to_house_id: "h_player",
       expires_turn: state.turn_index + 2,
       heir_id: null,
+      preview_limit: 2,
     });
 
     expect(prospect).toMatchObject({
@@ -221,8 +237,70 @@ describe("succession registry schema", () => {
       uncertainty: "possible",
       expires_turn: state.turn_index + 2,
       actions: ["accept", "reject"],
+      claim_metadata_schema_version: INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION,
+      claimant_person_id: "p_spouse",
+      claimant_succession_position: null,
+      claimant_adult_succession_position: null,
+      claimant_basis_kind: "household_member_fallback",
+      claimant_relation_group: "fallback_household",
+      target_house_id: "h_player",
+      target_head_person_id: "p_head",
+      target_current_heir_id: null,
+      target_adult_successor_id: "p_spouse",
+      claim_window_open: true,
+      target_line_overflow_count: 2,
     });
+    expect(prospect?.requirements).toEqual([]);
+    expect((prospect as any)?.target_line_entries).toEqual([
+      {
+        claimant_person_id: "p_spouse",
+        succession_position: null,
+        adult_succession_position: null,
+        basis_kind: "household_member_fallback",
+        relation_group: "fallback_household",
+        blocked_by_current_heir: false,
+        adult_eligible: true,
+      },
+      {
+        claimant_person_id: "p_cousin_a",
+        succession_position: null,
+        adult_succession_position: null,
+        basis_kind: "household_member_fallback",
+        relation_group: "fallback_household",
+        blocked_by_current_heir: false,
+        adult_eligible: true,
+      }
+    ]);
     expect(prospect?.predicted_effects.flags_set).toEqual(["inheritance_claim_active"]);
+  });
+
+  it("routes bounded inheritance claim metadata through the prospects window without adding court-trial mechanics", () => {
+    const state = mkBaseState();
+    state.house.heir_id = null;
+    state.house.children = [];
+    state.kinship_edges = [{ kind: "spouse_of", a_id: state.house.head.id, b_id: state.house.spouse!.id }];
+    state.houses!.h_player.child_ids = [];
+    state.houses!.h_player.member_person_ids = [state.house.head.id, state.house.spouse!.id];
+
+    const prospectLog: any[] = [];
+    const window = buildProspectsWindowPhase(state, null, prospectLog, { computeHeirId });
+    const claim = window.prospects.find((entry) => entry.type === "inheritance_claim") as any;
+
+    expect(claim).toMatchObject({
+      type: "inheritance_claim",
+      subject_person_id: "p_head",
+      claimant_person_id: "p_spouse",
+      claim_window_open: true,
+      target_current_heir_id: null,
+      target_adult_successor_id: "p_spouse",
+      summary: "Inheritance claim",
+      requirements: [],
+      actions: ["accept", "reject"],
+      costs: {},
+      predicted_effects: { flags_set: ["inheritance_claim_active"] }
+    });
+    expect(Array.isArray(claim?.predicted_effects?.relationship_deltas)).toBe(false);
+    expect(window.prospects.filter((entry) => entry.type === "inheritance_claim")).toHaveLength(1);
   });
 
   it("keeps inheritance claim signatures deterministic and head-scoped", () => {

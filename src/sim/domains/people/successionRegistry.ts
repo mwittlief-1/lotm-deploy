@@ -5,9 +5,11 @@ import type { Person, Prospect, RunState } from "../../types";
 const SUCCESSION_MIN_AGE = 15;
 const DEFAULT_SUCCESSION_LINE_LIMIT = 16;
 const DEFAULT_CLAIMANT_REGISTRY_LIMIT = 8;
+const DEFAULT_INHERITANCE_CLAIM_PREVIEW_LIMIT = 3;
 
 export const SUCCESSION_LINE_SCHEMA_VERSION = "succession_line_v0" as const;
 export const CLAIMANT_REGISTRY_SCHEMA_VERSION = "claimant_registry_v0" as const;
+export const INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION = "inheritance_claim_prospect_meta_v0" as const;
 
 export type SuccessionBasisKind =
   | "direct_descendant"
@@ -66,6 +68,32 @@ export type ClaimantRegistry = {
   overflow_count: number;
 };
 
+export type InheritanceClaimProspectPreviewEntry = {
+  claimant_person_id: string;
+  succession_position: number | null;
+  adult_succession_position: number | null;
+  basis_kind: SuccessionBasisKind;
+  relation_group: SuccessionRelationGroup;
+  blocked_by_current_heir: boolean;
+  adult_eligible: boolean;
+};
+
+export type InheritanceClaimProspect = Prospect & {
+  claim_metadata_schema_version: typeof INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION;
+  claimant_person_id: string;
+  claimant_succession_position: number | null;
+  claimant_adult_succession_position: number | null;
+  claimant_basis_kind: SuccessionBasisKind;
+  claimant_relation_group: SuccessionRelationGroup;
+  target_house_id: string;
+  target_head_person_id: string;
+  target_current_heir_id: string | null;
+  target_adult_successor_id: string | null;
+  claim_window_open: boolean;
+  target_line_entries: InheritanceClaimProspectPreviewEntry[];
+  target_line_overflow_count: number;
+};
+
 type SuccessionCandidate = Omit<SuccessionLineEntry, "line_position">;
 
 type BuildSuccessionLineOptions = {
@@ -84,6 +112,8 @@ type BuildInheritanceClaimProspectOptions = {
   expires_turn: number;
   heir_id: string | null;
   subject_person_id?: string | null;
+  preview_limit?: number;
+  claimant_registry_limit?: number;
 };
 
 function byPrimogeniture(a: Person, b: Person): number {
@@ -373,16 +403,66 @@ export function inheritanceClaimProspectSignature(state: RunState): string {
   return inheritanceClaimProspectSignatureForSubject(state.house.head.id);
 }
 
+function toInheritanceClaimPreviewEntry(entry: ClaimantRegistryEntry): InheritanceClaimProspectPreviewEntry {
+  return {
+    claimant_person_id: entry.claimant_person_id,
+    succession_position: entry.succession_position,
+    adult_succession_position: entry.adult_succession_position,
+    basis_kind: entry.basis_kind,
+    relation_group: entry.relation_group,
+    blocked_by_current_heir: entry.blocked_by_current_heir,
+    adult_eligible: entry.adult_eligible,
+  };
+}
+
+function withInheritanceClaimMetadata(
+  prospect: Prospect,
+  metadata: Omit<InheritanceClaimProspect, keyof Prospect>
+): InheritanceClaimProspect {
+  const typedProspect = prospect as InheritanceClaimProspect;
+  for (const [key, value] of Object.entries(metadata)) {
+    Object.defineProperty(typedProspect, key, {
+      value,
+      enumerable: false,
+      writable: true,
+      configurable: true,
+    });
+  }
+  return typedProspect;
+}
+
 export function buildInheritanceClaimProspect(
   state: RunState,
   options: BuildInheritanceClaimProspectOptions
-): Prospect | null {
+): InheritanceClaimProspect | null {
   const subjectPersonId = options.subject_person_id ?? state.house.head?.id ?? null;
   if (options.heir_id !== null || typeof subjectPersonId !== "string" || subjectPersonId.length === 0) {
     return null;
   }
 
-  return {
+  const previewLimit =
+    typeof options.preview_limit === "number"
+      ? Math.max(1, Math.trunc(options.preview_limit))
+      : DEFAULT_INHERITANCE_CLAIM_PREVIEW_LIMIT;
+  const claimantRegistryLimit =
+    typeof options.claimant_registry_limit === "number"
+      ? Math.max(previewLimit, Math.trunc(options.claimant_registry_limit))
+      : DEFAULT_CLAIMANT_REGISTRY_LIMIT;
+  const registry = buildClaimantRegistry(state, { limit: claimantRegistryLimit });
+  const claimant: ClaimantRegistryEntry =
+    registry.entries[0] ?? {
+      claimant_person_id: subjectPersonId,
+      succession_position: null,
+      adult_succession_position: null,
+      basis_kind: "household_member_fallback",
+      relation_group: "fallback_household",
+      blocked_by_current_heir: false,
+      adult_eligible: false,
+    };
+
+  const targetLineEntries = registry.entries.slice(0, previewLimit).map(toInheritanceClaimPreviewEntry);
+  const targetLineOverflowCount = Math.max(0, registry.entries.length - targetLineEntries.length) + registry.overflow_count;
+  const prospect: Prospect = {
     id: options.prospect_id,
     type: "inheritance_claim",
     from_house_id: options.from_house_id,
@@ -396,4 +476,20 @@ export function buildInheritanceClaimProspect(
     expires_turn: options.expires_turn,
     actions: ["accept", "reject"],
   };
+
+  return withInheritanceClaimMetadata(prospect, {
+    claim_metadata_schema_version: INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION,
+    claimant_person_id: claimant.claimant_person_id,
+    claimant_succession_position: claimant.succession_position,
+    claimant_adult_succession_position: claimant.adult_succession_position,
+    claimant_basis_kind: claimant.basis_kind,
+    claimant_relation_group: claimant.relation_group,
+    target_house_id: registry.house_id,
+    target_head_person_id: subjectPersonId,
+    target_current_heir_id: registry.current_heir_id,
+    target_adult_successor_id: registry.adult_successor_id,
+    claim_window_open: registry.claim_window_open,
+    target_line_entries: targetLineEntries,
+    target_line_overflow_count: targetLineOverflowCount,
+  });
 }
