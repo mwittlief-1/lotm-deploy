@@ -1110,7 +1110,7 @@ epics:
 - id: V03-R3-006
   title: AI belief registry and evidence rails
   release: v0.3.3
-  status: todo
+  status: in_progress
   priority: 35
   tranche: 4
   change_type: behavior_change
@@ -1146,7 +1146,7 @@ epics:
 - id: V03-R3-007
   title: Experience content v0 for fiscal, grant, and marriage flows
   release: v0.3.3
-  status: todo
+  status: in_progress
   priority: 34
   tranche: 4
   change_type: behavior_change
@@ -6783,7 +6783,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Populate agenda items from obligations, prospects, offices, and portfolio outliers
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -6794,7 +6794,7 @@ tasks:
   - V03-R3-003-T02
   - V03-R2-006-T06
   requires_integrator: false
-  blocked_reason: awaits V03-R2-006-T06
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/court/**
   - src/sim/domains/economy/**
@@ -6816,16 +6816,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
 - id: V03-R3-003-T04
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Capture what-mattered notes and render court agenda stubs
-  status: todo
+  status: ready
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -6866,7 +6866,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Add agenda determinism coverage and docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7313,7 +7313,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Audit AI rail baseline and identify missing evidence emitters
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7348,16 +7348,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
 - id: V03-R3-006-T02
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Define belief payload for known, likely, and possible states
-  status: todo
+  status: ready
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7397,7 +7397,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Emit evidence events from marriage, obligations, and grant flows
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7439,7 +7439,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Expose belief and evidence debug outputs with neutral policy hook coverage
-  status: todo
+  status: ready
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7480,7 +7480,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Close epic and refresh AI rail docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7520,7 +7520,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Inventory content slots for obligations, offerings, grants, marriage, and dispossession warnings
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7554,16 +7554,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-007-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
 - id: V03-R3-007-T02
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for obligations settlement and gifts or offerings outcomes
-  status: todo
+  status: ready
   priority: 98
   tranche: 4
   change_type: behavior_change
@@ -7604,7 +7604,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for grants received or denied and marriage accept or reject
-  status: todo
+  status: ready
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7645,7 +7645,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for arrears and dispossession ladder warnings
-  status: todo
+  status: ready
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7686,7 +7686,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Wire content references into current UI surfaces and docs
-  status: todo
+  status: ready
   priority: 95
   tranche: 4
   change_type: behavior_change
