@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-006-T03
+  last_completed_task_id: V03-R3-006-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-engine-core
-  git_commit: 8b6d46e
+  git_commit: a22f5ff
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -22,10 +22,10 @@ last_run:
     run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
     run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Closed Engine V03-R3-006-T03 with replay-safe runtime domain evidence
-  emitters across marriage, obligations, and grant preview flows, preserved
-  the existing replay hash, and continued directly into V03-R3-006-T04 under
-  the same accepted dispatch chain.
+  Closed Engine V03-R3-006-T04 with a hidden read-only AI rail debug packet
+  that bundles belief payloads, current runtime evidence, and explicit policy
+  hook metadata, preserved the existing replay hash, and continued directly
+  into V03-R3-006-T05 under the same accepted dispatch chain.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R3-003-T03
@@ -34,7 +34,7 @@ active_claims:
     claim_expires_at: '2026-04-08T17:52:20-0400'
     run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-engine-core:
-    task_id: V03-R3-006-T04
+    task_id: V03-R3-006-T05
     claimed_by: integrator.dispatch
     claimed_at: '2026-04-08T13:52:20-0400'
     claim_expires_at: '2026-04-08T19:57:17-0400'
