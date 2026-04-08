@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-004-T06
+  last_completed_task_id: V03-R2-006-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: cb29420
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: 6dd9bae6ecebed04f035691db3e74e9f341044e8
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,18 +18,13 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
-    run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+    run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+    run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
 notes: >-
-  Accepted Social V03-R1-004-T04 through T06 on kickoff, closed the claims and
-  succession baseline epic, and reopened the grants baseline chain at
-  V03-R2-006-T01. The accepted adaptation keeps succession summaries available
-  on preview-state and bounded snapshot runtime surfaces without changing the
-  serialized deterministic replay line.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R2-006-T01
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T12:54:04-0400'
-    claim_expires_at: '2026-04-08T16:54:04-0400'
-    run_id: 2026-04-08_manual_acceptance_round25
+  Accepted Social V03-R2-006-T01 through T06 on the social lane branch and
+  closed the multi-manor acquisition and grant prospects baseline. The
+  accepted seam now locks explicit grant eligibility, deterministic liege and
+  dispossessed source registries, and a canonical acquisition window on
+  preview-state and bounded snapshot surfaces without changing
+  integrator-owned phase wiring.
+active_claims: {}

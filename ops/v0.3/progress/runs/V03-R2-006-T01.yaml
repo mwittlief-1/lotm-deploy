@@ -1,0 +1,40 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round25
+task_id: V03-R2-006-T01
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: 6dd9bae6ecebed04f035691db3e74e9f341044e8
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+  run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+artifacts:
+  audit_doc: docs/releases/v0.3.2_grant_acquisition_surface_audit.md
+findings:
+  - The audit confirmed that marriage and inheritance already had lane-owned acquisition seams while grants were still phase-owned and arrears-only.
+  - Existing relationship, portfolio, and world inputs were sufficient to define a replay-safe grant seam without crossing into integrator-owned phase wiring.
+  - The accepted lane plan was to lock grant registry, eligibility, source, and acquisition-window semantics in domain surfaces first, then leave live phase adoption for later work.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-006-T02
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T01 completed the acquisition-surface audit and the same-lane grant chain continued directly into the schema seam work.

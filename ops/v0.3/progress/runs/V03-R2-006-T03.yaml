@@ -1,0 +1,42 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round25
+task_id: V03-R2-006-T03
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: 6dd9bae6ecebed04f035691db3e74e9f341044e8
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+  run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+artifacts:
+  eligibility_file: src/sim/domains/people/grantAcquisitionRegistry.ts
+  relationship_reads: src/sim/domains/people/relationshipEngine.ts
+  contract_tests: tests/sim/grant_acquisition_registry.test.ts
+findings:
+  - Grant eligibility now consumes explicit liege favor, dues and arrears tolerance, and manor-capacity headroom rather than repeating ad hoc fiscal pressure checks.
+  - Relationship-engine read helpers were extended so the new grant rules can consume seeded liege favor without direct store access.
+  - The accepted eligibility contract stays deterministic and bounded, which keeps it safe for later preview and snapshot consumers.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-006-T04
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T03 locked the grant eligibility behavior and the same-lane chain continued into source-registry work.

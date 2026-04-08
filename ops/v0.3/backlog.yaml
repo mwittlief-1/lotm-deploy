@@ -908,7 +908,7 @@ epics:
 - id: V03-R2-006
   title: Multi-manor acquisition and grant prospects baseline
   release: v0.3.2
-  status: in_progress
+  status: done
   priority: 42
   tranche: 3
   change_type: behavior_change
@@ -6003,7 +6003,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Audit current prospect surfaces against inheritance, marriage, and grant acquisition sources
-  status: ready
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -6038,16 +6038,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-006-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T12:54:04-0400'
-    claim_expires_at: '2026-04-08T16:54:04-0400'
-    run_id: 2026-04-08_manual_acceptance_round25
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R2-006-T02
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Define grant prospect schema, origin types, and dossier summary fields
-  status: ready
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -6087,7 +6087,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Implement grant eligibility rules from relationship score, fiscal standing, and portfolio capacity
-  status: ready
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -6130,7 +6130,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Implement dispossessed manor pool and liege demesne grant sources
-  status: ready
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -6171,7 +6171,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Integrate acquisition prospect generation and deterministic bounded ranking
-  status: ready
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -6212,7 +6212,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Add acquisition and grant regression fixtures and docs
-  status: ready
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
