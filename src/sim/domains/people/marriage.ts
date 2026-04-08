@@ -9,6 +9,7 @@ import { Rng } from "../../rng";
 import type { TierSets } from "../../tiers";
 import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
 import { clampInt } from "../../util";
+import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
 import { listRelevantTier1HouseIds } from "./knownHouseRelevance";
@@ -38,6 +39,32 @@ function reserveMarriageDecisionBudget(state: RunState, action: "scout" | "inbou
     return chargeCourtDecisionBudget(state, "marriage_scout", resolveMarriageScoutDecisionCost(state)).applied;
   }
   return chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
+}
+
+function marriageWindowSubjectIds(marriageWindow: MarriageWindow | null | undefined): string[] {
+  if (!marriageWindow) return [];
+  return [
+    ...new Set(
+      [...marriageWindow.eligible_child_ids, ...marriageWindow.offers.map((offer) => offer.house_person_id)]
+        .filter((id): id is string => typeof id === "string" && id.length > 0)
+    )
+  ].sort((a, b) => a.localeCompare(b));
+}
+
+function recordMarriageFlowEvidence(
+  state: RunState,
+  kind: string,
+  detail: string,
+  subjectIds: Array<string | null | undefined>
+): void {
+  recordRuntimeDomainEvidence(state, "marriage", [
+    makeEvidenceEvent({
+      kind,
+      detail,
+      category: "marriage",
+      subject_ids: subjectIds
+    })
+  ]);
 }
 
 export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: string): void {
@@ -164,6 +191,10 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   if (!marriageWindow || decision.action === "none") return;
 
   if (!canSpendEnergy(state, 1)) {
+    recordMarriageFlowEvidence(state, "marriage_blocked_energy", "No energy for marriage action.", [
+      state.house.head.id,
+      ...marriageWindowSubjectIds(marriageWindow)
+    ]);
     reportNotes.push("No energy for marriage action.");
     return;
   }
@@ -171,6 +202,9 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   if (decision.action === "scout") {
     const scoutCost = resolveMarriageScoutDecisionCost(state);
     if (!reserveMarriageDecisionBudget(state, "scout")) {
+      recordMarriageFlowEvidence(state, "marriage_scout_blocked_budget", "No court budget for marriage scouting.", [
+        state.house.head.id
+      ]);
       reportNotes.push("No court budget for marriage scouting.");
       return;
     }
@@ -179,19 +213,41 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     const mods = modsObj(state);
     mods["marriage_quality"] = (mods["marriage_quality"] ?? 1) * 1.05;
     if (scoutCost !== MARRIAGE_SCOUT_DECISION_COST) {
+      recordMarriageFlowEvidence(
+        state,
+        "marriage_scout_delegated",
+        `Delegated scouting used ${scoutCost} court decision${scoutCost === 1 ? "" : "s"}.`,
+        [state.house.head.id]
+      );
       reportNotes.push(`Delegated scouting used ${scoutCost} court decision${scoutCost === 1 ? "" : "s"}.`);
     }
+    recordMarriageFlowEvidence(
+      state,
+      "marriage_scouted",
+      "Scouted prospects; next marriage window slightly improved.",
+      [state.house.head.id]
+    );
     reportNotes.push("Scouted prospects; next marriage window slightly improved.");
     return;
   }
 
   if (decision.action === "reject_all") {
     if (!reserveMarriageDecisionBudget(state, "inbound")) {
+      recordMarriageFlowEvidence(state, "marriage_inbound_blocked_budget", "No court budget for inbound marriage handling.", [
+        state.house.head.id,
+        ...marriageWindowSubjectIds(marriageWindow)
+      ]);
       reportNotes.push("No court budget for inbound marriage handling.");
       return;
     }
     spendEnergy(state, 1);
     state.manor.unrest = clampInt(state.manor.unrest + 1, 0, 100);
+    recordMarriageFlowEvidence(
+      state,
+      "marriage_rejected_all",
+      "Rejected all offers; slight social friction (+1 unrest).",
+      [state.house.head.id, ...marriageWindowSubjectIds(marriageWindow)]
+    );
     reportNotes.push("Rejected all offers; slight social friction (+1 unrest).");
     return;
   }
@@ -202,6 +258,7 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   const child = isHeadSubject ? state.house.head : state.house.children.find((person) => person.id === decision.child_id);
   const offer = marriageWindow.offers[decision.offer_index];
   if (!child || !offer) {
+    recordMarriageFlowEvidence(state, "marriage_invalid_selection", "Invalid marriage selection.", [state.house.head.id]);
     reportNotes.push("Invalid marriage selection.");
     return;
   }
@@ -211,6 +268,10 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     const people: Record<string, Person> | undefined = anyState.people as any;
     const spousePerson = people ? people[offer.house_person_id] : null;
     if (spousePerson && spousePerson.sex === child.sex) {
+      recordMarriageFlowEvidence(state, "marriage_accept_blocked", "Cannot accept: same-sex marriage is disallowed.", [
+        child.id,
+        offer.house_person_id
+      ]);
       reportNotes.push("Cannot accept: same-sex marriage is disallowed.");
       return;
     }
@@ -218,11 +279,19 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
 
   const dowry = offer.dowry_coin_net;
   if (dowry < 0 && !canAffordCoin(state, Math.abs(dowry))) {
+    recordMarriageFlowEvidence(state, "marriage_accept_blocked", "Cannot accept: insufficient coin for negative dowry.", [
+      child.id,
+      offer.house_person_id
+    ]);
     reportNotes.push("Cannot accept: insufficient coin for negative dowry.");
     return;
   }
 
   if (!reserveMarriageDecisionBudget(state, "inbound")) {
+    recordMarriageFlowEvidence(state, "marriage_inbound_blocked_budget", "No court budget for inbound marriage handling.", [
+      child.id,
+      offer.house_person_id
+    ]);
     reportNotes.push("No court budget for inbound marriage handling.");
     return;
   }
@@ -302,5 +371,11 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
 
   const mods = modsObj(state);
   mods["birth_bonus"] = (mods["birth_bonus"] ?? 1) * 1.03;
+  recordMarriageFlowEvidence(
+    state,
+    "marriage_accepted",
+    `Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`,
+    [child.id, offer.house_person_id]
+  );
   reportNotes.push(`Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`);
 }
