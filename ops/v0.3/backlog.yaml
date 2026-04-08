@@ -4045,7 +4045,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Implement inheritance_claim prospect type and bounded generation rules
-  status: ready
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4076,11 +4076,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-004-T03.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T10:23:46-0400'
-    claim_expires_at: '2026-04-08T14:23:46-0400'
-    run_id: 2026-04-08_manual_acceptance_round23
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-004-T04
   parent_epic: V03-R1-004
   release: v0.3.1

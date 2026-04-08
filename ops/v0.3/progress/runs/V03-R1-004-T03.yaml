@@ -1,0 +1,41 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round23
+task_id: V03-R1-004-T03
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: c5d88f4a4c9ac3d4602a0082ac0275ed45068521
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
+  run2: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
+artifacts:
+  succession_registry_module: src/sim/domains/people/successionRegistry.ts
+  succession_registry_test: tests/sim/succession_registry.test.ts
+findings:
+  - Inheritance-claim prospect generation now projects a bounded claimant packet from the succession registry, including primary claimant identity, target-line preview entries, overflow count, and head-scoped target metadata.
+  - The existing prospects phase seam did not need new orchestration work: `buildProspectsWindowPhase()` now picks up the richer claim packet through the already accepted people-domain builder.
+  - v0.3 still avoids court-trial mechanics here; claims remain bounded accept/reject prospects with no new ledger cost, relationship delta, or adjudication subsystem.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R1-004-T04
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T03 closed cleanly on the lane branch, but T04 remains todo and has not been promoted in the current branch snapshot.

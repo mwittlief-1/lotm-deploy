@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-004-T02
+  last_completed_task_id: V03-R1-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 24a8492
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: c5d88f4
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,22 +15,15 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
+    run2: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
 notes: >-
-  Accepted the previously missing Social succession baseline on kickoff:
-  V03-R1-004-T01 and T02 are now part of repo truth, and inheritance-claim
-  prospect generation routes through people-domain helpers without changing the
-  accepted replay line. Social V03-R1-004-T03 is actively dispatched, which
-  reopens the succession chain and puts the lane back on a real path toward the
-  later grant and agenda blockers.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R1-004-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T10:23:46-0400'
-    claim_expires_at: '2026-04-08T14:23:46-0400'
-    run_id: 2026-04-08_manual_acceptance_round23
+  Closed Social V03-R1-004-T03 on the lane branch after enriching
+  inheritance-claim prospects with bounded claimant and target-line metadata
+  from the succession registry. Replay stayed deterministic across both runs,
+  but the hash moved because live prospect payloads now carry claimant preview
+  data. T04 remains todo and is not yet promoted in this branch snapshot.
+active_claims: {}
