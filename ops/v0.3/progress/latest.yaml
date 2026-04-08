@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-007-T05
+  last_completed_task_id: V03-R4-003-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 27b90fd
+  git_commit: 4dc502f009c5932901b1509bcc0b84b4f1519248
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,18 +18,16 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Accepted Social V03-R3-003-T03 through T05, Engine V03-R3-006-T01 through
-  T05, and UI V03-R3-007-T01 through T05 on kickoff. Closed the court agenda,
-  AI rails, and experience-content epics, and reopened the UI playtest-ops
-  chain at V03-R4-003-T01. The integrated code kept replay on the existing
-  deterministic baseline.
+  Closed UI V03-R4-003-T01 after inventorying the current export, reporting,
+  and playtest pain surfaces into a typed UI seam and UX audit. Same-lane
+  continuation claimed V03-R4-003-T02 on the refreshed UI branch state.
 active_claims:
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R4-003-T01
+    task_id: V03-R4-003-T02
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T18:51:00-0400'
-    claim_expires_at: '2026-04-08T22:51:00-0400'
-    run_id: 2026-04-08_manual_acceptance_round27
+    claimed_at: '2026-04-08T19:46:52-0400'
+    claim_expires_at: '2026-04-08T23:46:52-0400'
+    run_id: manual-ui-v03-r4-003-t02-20260408T194652-0400

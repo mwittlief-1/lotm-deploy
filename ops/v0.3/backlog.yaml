@@ -8212,7 +8212,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Inventory export, reporting, and playtest pain surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 5
   change_type: refactor
@@ -8246,11 +8246,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T18:51:00-0400'
-    claim_expires_at: '2026-04-08T22:51:00-0400'
-    run_id: 2026-04-08_manual_acceptance_round27
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R4-003-T02
   parent_epic: V03-R4-003
   release: v0.3.4
@@ -8287,11 +8287,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T19:46:52-0400'
+    claim_expires_at: '2026-04-08T23:46:52-0400'
+    run_id: manual-ui-v03-r4-003-t02-20260408T194652-0400
 - id: V03-R4-003-T03
   parent_epic: V03-R4-003
   release: v0.3.4
