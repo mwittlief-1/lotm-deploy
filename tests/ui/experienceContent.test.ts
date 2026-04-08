@@ -6,6 +6,8 @@ import {
   getMarriageProspectTemplate,
   getObligationCounterpartyTemplate,
   listExperienceContentSlots,
+  renderDispossessionEndStateLabel,
+  renderDispossessionThresholdTip,
   renderGrantAcceptConfirmBody,
   renderGrantDecisionToast,
   renderMarriageAcceptConfirmBody,
@@ -27,7 +29,7 @@ describe("experienceContent inventory", () => {
     expect(summary.needsSurfaceCount).toBe(0);
   });
 
-  it("maps current copy sources before the follow-on template tasks rewire them", () => {
+  it("maps the shipped content sources across the locked v0.3.3 surfaces", () => {
     const obligations = listExperienceContentSlots("obligations");
     const grants = listExperienceContentSlots("grants");
     const dispossession = listExperienceContentSlots("dispossession");
@@ -58,6 +60,7 @@ describe("experienceContent inventory", () => {
       expect.objectContaining({
         id: "dispossession.end_state_label",
         currentState: "central_copy",
+        gap: "none",
         plannedTaskId: "V03-R3-007-T05"
       })
     ]);
@@ -211,5 +214,10 @@ describe("experienceContent inventory", () => {
       })
     ).toBe("Marriage arranged. Matilda is now married.\nMatilda leaves your court. Court size decreased.");
     expect(renderMarriageDecisionToast({ action: "reject", standingRisk: true })).toBe("Declined: Marriage. Standing may decrease.");
+  });
+
+  it("renders deterministic dispossession end-state copy for the live gameplay shell", () => {
+    expect(renderDispossessionEndStateLabel()).toBe("Dispossessed (Unrest ≥ 100 at end of turn)");
+    expect(renderDispossessionThresholdTip()).toBe("If Unrest is ≥ 100 at end of a turn, you are Dispossessed (game over).");
   });
 });
