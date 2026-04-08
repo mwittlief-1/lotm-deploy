@@ -10,6 +10,7 @@ import type {
 
 const MAX_OBSERVATIONS_PER_SUBJECT = 12;
 export const BELIEF_PAYLOAD_SCHEMA_VERSION = "belief_payload_v1" as const;
+export const BELIEF_PAYLOAD_REGISTRY_SCHEMA_VERSION = "belief_payload_registry_v1" as const;
 export const BELIEF_PAYLOAD_CONFIDENCE_ORDER = ["known", "likely", "possible"] as const;
 
 export interface BeliefConfidenceStatePayloadV1 {
@@ -31,6 +32,12 @@ export interface BeliefSubjectPayloadV1 {
     likely: BeliefConfidenceStatePayloadV1;
     possible: BeliefConfidenceStatePayloadV1;
   };
+}
+
+export interface BeliefPayloadRegistryV1 {
+  schema_version: typeof BELIEF_PAYLOAD_REGISTRY_SCHEMA_VERSION;
+  subject_ids: string[];
+  by_subject: Record<string, BeliefSubjectPayloadV1>;
 }
 
 function compareText(a: string, b: string): number {
@@ -124,6 +131,22 @@ export function ensureBeliefRegistry(state: RunState): BeliefRegistryV0 {
   return anyState.beliefs as BeliefRegistryV0;
 }
 
+function beliefRegistryView(state: RunState): BeliefRegistryV0 {
+  const anyState: any = state as any;
+  const registry = anyState?.beliefs;
+  if (
+    registry &&
+    typeof registry === "object" &&
+    registry.schema_version === "belief_registry_v0" &&
+    registry.by_subject &&
+    typeof registry.by_subject === "object" &&
+    !Array.isArray(registry.by_subject)
+  ) {
+    return registry as BeliefRegistryV0;
+  }
+  return createBeliefRegistry();
+}
+
 function observationKey(observation: BeliefObservationV0): string {
   return [
     observation.subject_id,
@@ -171,7 +194,7 @@ export function recordBeliefEvidence(
 }
 
 export function getBeliefObservations(state: RunState, subjectId: string): BeliefObservationV0[] {
-  const registry = ensureBeliefRegistry(state);
+  const registry = beliefRegistryView(state);
   return registry.by_subject[subjectId] ?? [];
 }
 
@@ -199,14 +222,25 @@ export function buildBeliefPayloadForSubject(
 }
 
 export function buildBeliefPayloadRegistry(state: RunState): Record<string, BeliefSubjectPayloadV1> {
-  const registry = ensureBeliefRegistry(state);
+  const registry = beliefRegistryView(state);
   const subjectIds = Object.keys(registry.by_subject).sort(compareText);
   return Object.fromEntries(
     subjectIds.map((subjectId) => [subjectId, buildBeliefPayloadForSubject(state, subjectId)])
   );
 }
 
+export function buildBeliefPayloadRegistryView(state: RunState): BeliefPayloadRegistryV1 {
+  const bySubject = buildBeliefPayloadRegistry(state);
+  const subjectIds = Object.keys(bySubject).sort(compareText);
+
+  return {
+    schema_version: BELIEF_PAYLOAD_REGISTRY_SCHEMA_VERSION,
+    subject_ids: subjectIds,
+    by_subject: bySubject
+  };
+}
+
 export function knownBeliefSubjects(state: RunState): string[] {
-  const registry = ensureBeliefRegistry(state);
+  const registry = beliefRegistryView(state);
   return Object.keys(registry.by_subject).sort(compareText);
 }

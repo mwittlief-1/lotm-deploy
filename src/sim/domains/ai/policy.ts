@@ -2,6 +2,9 @@ import type { EvidenceCategoryV0, RunState } from "../../types";
 import { buildBeliefPayloadForSubject } from "./beliefs";
 
 export type PolicyHookV0 = "marriage_offer" | "prospect";
+export const POLICY_HOOK_DEBUG_SCHEMA_VERSION = "policy_hook_debug_v1" as const;
+
+const POLICY_HOOK_ORDER: PolicyHookV0[] = ["marriage_offer", "prospect"];
 
 export interface PolicyIntelSummaryV0 {
   subject_id: string;
@@ -10,6 +13,22 @@ export interface PolicyIntelSummaryV0 {
   possible_count: number;
   latest_turn_index: number | null;
   categories: EvidenceCategoryV0[];
+}
+
+export interface PolicyHookDebugEntryV1 {
+  hook: PolicyHookV0;
+  activation_mode: "belief_backed_bonus_only";
+  neutral_without_intel: true;
+  subject_scope: "explicit_subject_only";
+  current_scale: number;
+  min_bonus: number;
+  max_bonus: number;
+}
+
+export interface PolicyHookDebugV1 {
+  schema_version: typeof POLICY_HOOK_DEBUG_SCHEMA_VERSION;
+  hook_order: PolicyHookV0[];
+  entries_by_hook: Record<PolicyHookV0, PolicyHookDebugEntryV1>;
 }
 
 function sortedUniqueCategories(categories: EvidenceCategoryV0[]): EvidenceCategoryV0[] {
@@ -99,4 +118,31 @@ export function npcPolicyScore(args: {
   }
 
   return args.base_score;
+}
+
+export function buildPolicyHookDebugView(state?: RunState): PolicyHookDebugV1 {
+  return {
+    schema_version: POLICY_HOOK_DEBUG_SCHEMA_VERSION,
+    hook_order: [...POLICY_HOOK_ORDER],
+    entries_by_hook: {
+      marriage_offer: {
+        hook: "marriage_offer",
+        activation_mode: "belief_backed_bonus_only",
+        neutral_without_intel: true,
+        subject_scope: "explicit_subject_only",
+        current_scale: readPolicyTuningScale(state, "ai_marriage_intel_bonus_scale"),
+        min_bonus: -0.25,
+        max_bonus: 0.75
+      },
+      prospect: {
+        hook: "prospect",
+        activation_mode: "belief_backed_bonus_only",
+        neutral_without_intel: true,
+        subject_scope: "explicit_subject_only",
+        current_scale: readPolicyTuningScale(state, "ai_prospect_intel_bonus_scale"),
+        min_bonus: -0.15,
+        max_bonus: 0.4
+      }
+    }
+  };
 }

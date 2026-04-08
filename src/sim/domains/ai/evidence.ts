@@ -109,6 +109,12 @@ function runtimeDomainEvidenceLog(state: RunState): RuntimeDomainEvidenceState {
   return created;
 }
 
+function runtimeDomainEvidenceLogView(state: RunState): RuntimeDomainEvidenceState | null {
+  const existing = runtimeDomainEvidenceLogByState.get(state);
+  if (!existing || existing.turn_index !== state.turn_index) return null;
+  return existing;
+}
+
 export function makeEvidenceEvent(args: {
   kind: string;
   detail: string;
@@ -237,12 +243,12 @@ export function recordRuntimeDomainEvidence(
 }
 
 export function readRuntimeDomainEvidence(state: RunState): DomainEvidenceLogV1 {
-  const runtime = runtimeDomainEvidenceLog(state);
+  const runtime = runtimeDomainEvidenceLogView(state);
   const entries = DOMAIN_EVIDENCE_PHASE_ORDER
-    .filter((phase) => (runtime.by_phase[phase]?.events.length ?? 0) > 0)
+    .filter((phase) => (runtime?.by_phase[phase]?.events.length ?? 0) > 0)
     .map((phase) => ({
       phase,
-      events: (runtime.by_phase[phase]?.events ?? []).map(cloneEvidenceEvent)
+      events: (runtime?.by_phase[phase]?.events ?? []).map(cloneEvidenceEvent)
     }));
 
   return {
