@@ -7397,7 +7397,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Emit evidence events from marriage, obligations, and grant flows
-  status: ready
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7430,11 +7430,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T03.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T19:57:17-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-006-T04
   parent_epic: V03-R3-006
   release: v0.3.3
@@ -7471,11 +7471,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T04.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T19:57:17-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
 - id: V03-R3-006-T05
   parent_epic: V03-R3-006
   release: v0.3.3
