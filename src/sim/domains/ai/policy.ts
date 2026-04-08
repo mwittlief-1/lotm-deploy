@@ -1,5 +1,5 @@
-import type { EvidenceConfidenceV0, EvidenceCategoryV0, RunState } from "../../types";
-import { ensureBeliefRegistry } from "./beliefs";
+import type { EvidenceCategoryV0, RunState } from "../../types";
+import { buildBeliefPayloadForSubject } from "./beliefs";
 
 export type PolicyHookV0 = "marriage_offer" | "prospect";
 
@@ -17,33 +17,19 @@ function sortedUniqueCategories(categories: EvidenceCategoryV0[]): EvidenceCateg
 }
 
 export function summarizeBeliefsForSubject(state: RunState, subjectId: string): PolicyIntelSummaryV0 {
-  const registry = ensureBeliefRegistry(state);
-  const observations = Array.isArray(registry.by_subject[subjectId]) ? registry.by_subject[subjectId] : [];
-
-  let knownCount = 0;
-  let likelyCount = 0;
-  let possibleCount = 0;
-  let latestTurnIndex: number | null = null;
-  const categories: EvidenceCategoryV0[] = [];
-
-  for (const observation of observations) {
-    const confidence: EvidenceConfidenceV0 = observation.confidence;
-    if (confidence === "known") knownCount += 1;
-    else if (confidence === "likely") likelyCount += 1;
-    else possibleCount += 1;
-
-    if (latestTurnIndex === null || observation.turn_index > latestTurnIndex) {
-      latestTurnIndex = observation.turn_index;
-    }
-    categories.push(observation.category);
-  }
+  const payload = buildBeliefPayloadForSubject(state, subjectId);
+  const categories: EvidenceCategoryV0[] = [
+    ...payload.states.known.categories,
+    ...payload.states.likely.categories,
+    ...payload.states.possible.categories
+  ];
 
   return {
     subject_id: subjectId,
-    known_count: knownCount,
-    likely_count: likelyCount,
-    possible_count: possibleCount,
-    latest_turn_index: latestTurnIndex,
+    known_count: payload.states.known.observation_count,
+    likely_count: payload.states.likely.observation_count,
+    possible_count: payload.states.possible.observation_count,
+    latest_turn_index: payload.latest_turn_index,
     categories: sortedUniqueCategories(categories)
   };
 }
