@@ -295,7 +295,7 @@ describe("succession registry schema", () => {
     expect(claim).toMatchObject({
       type: "inheritance_claim",
       subject_person_id: "p_head",
-      summary: "Inheritance claim",
+      summary: expect.stringContaining("advances an inheritance claim."),
       requirements: [],
       actions: ["accept", "reject"],
       costs: {},

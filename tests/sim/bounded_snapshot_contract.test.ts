@@ -56,7 +56,7 @@ describe("bounded snapshot contract", () => {
         })
       ])
     );
-    expect(serialized.succession_line_summary).toMatchObject({
+    expect((snapshot as any).succession_line_summary).toMatchObject({
       schema_version: "succession_line_summary_v0",
       house_id: "h_player",
       entries: expect.arrayContaining([
@@ -67,7 +67,7 @@ describe("bounded snapshot contract", () => {
         }),
       ]),
     });
-    expect(serialized.claimant_summary).toMatchObject({
+    expect((snapshot as any).claimant_summary).toMatchObject({
       schema_version: "claimant_summary_v0",
       house_id: "h_player",
       entries: expect.arrayContaining([
@@ -77,6 +77,8 @@ describe("bounded snapshot contract", () => {
         }),
       ]),
     });
+    expect(serialized.succession_line_summary).toBeUndefined();
+    expect(serialized.claimant_summary).toBeUndefined();
     expect(serialized.world_topology_view).toMatchObject({
       schema_version: "world_topology_snapshot_v1",
       anchor_manor_id: "manor_hx_26597",
@@ -89,7 +91,17 @@ describe("bounded snapshot contract", () => {
     expect(serialized.institutions).toBeUndefined();
     expect(serialized.service_records).toBeUndefined();
     expect(serialized.beliefs).toBeUndefined();
+    expect(serialized.grant_eligibility).toBeUndefined();
+    expect(serialized.grant_source_registry).toBeUndefined();
+    expect(serialized.grant_dossier_summaries).toBeUndefined();
+    expect(serialized.acquisition_prospects_window).toBeUndefined();
     expect((snapshot as any).beliefs).toEqual((state as any).beliefs);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "beliefs")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "succession_line_summary")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_eligibility")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_source_registry")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_dossier_summaries")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "acquisition_prospects_window")).toBe(false);
   });
 });

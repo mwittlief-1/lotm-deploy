@@ -4,6 +4,7 @@ import { deepCopy } from "../../util";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
+import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
 import { buildBoundedWorldTopologyView } from "../world";
@@ -11,6 +12,7 @@ import { buildBoundedWorldTopologyView } from "../world";
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
+  const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   const delegationView = buildCourtDelegationView(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
@@ -65,6 +67,54 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   });
   Object.defineProperty(snapshot.house as object, "claimant_summary", {
     value: deepCopy(successionSurfaces.claimant_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "grant_eligibility", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_eligibility),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "grant_source_registry", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_source_registry),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "grant_dossier_summaries", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_dossier_summaries),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "acquisition_prospects_window", {
+    value: deepCopy(grantAcquisitionSurfaces.acquisition_prospects_window),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "grant_eligibility", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_eligibility),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "grant_source_registry", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_source_registry),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "grant_dossier_summaries", {
+    value: deepCopy(grantAcquisitionSurfaces.grant_dossier_summaries),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "acquisition_prospects_window", {
+    value: deepCopy(grantAcquisitionSurfaces.acquisition_prospects_window),
     enumerable: false,
     writable: true,
     configurable: true
