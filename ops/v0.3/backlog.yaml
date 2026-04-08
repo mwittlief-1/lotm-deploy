@@ -7313,7 +7313,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Audit AI rail baseline and identify missing evidence emitters
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7348,11 +7348,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-006-T02
   parent_epic: V03-R3-006
   release: v0.3.3
@@ -7388,11 +7388,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T19:13:07-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
 - id: V03-R3-006-T03
   parent_epic: V03-R3-006
   release: v0.3.3
