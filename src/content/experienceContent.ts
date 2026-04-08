@@ -40,6 +40,21 @@ export type ExperienceObligationCounterpartyTemplate = {
   shortTitle: string;
 };
 
+export type ExperienceGrantProspectTemplate = {
+  acceptConfirmTitle: string;
+  acceptNoCostBody: string;
+  helperLine: string;
+  rejectRiskNote: string;
+};
+
+export type ExperienceMarriageProspectTemplate = {
+  acceptConfirmTitle: string;
+  acceptNoCostBody: string;
+  outcomeChildLeaves: string;
+  outcomeCourtSizeDecreased: string;
+  outcomeCourtSizeIncreased: string;
+};
+
 const EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES: Record<
   ExperienceObligationCounterpartyId,
   ExperienceObligationCounterpartyTemplate
@@ -64,6 +79,21 @@ const EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES: Record<
     penaltyTitle: "Arrears & church pressure",
     shortTitle: "Church"
   }
+};
+
+const EXPERIENCE_GRANT_PROSPECT_TEMPLATE: ExperienceGrantProspectTemplate = {
+  acceptConfirmTitle: "Accept grant offer?",
+  acceptNoCostBody: "Accept this grant offer?",
+  helperLine: "Support from your liege to ease burdens this turn.",
+  rejectRiskNote: "Declining may reduce your standing."
+};
+
+const EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE: ExperienceMarriageProspectTemplate = {
+  acceptConfirmTitle: "Accept marriage proposal?",
+  acceptNoCostBody: "Accept this marriage proposal?",
+  outcomeChildLeaves: "leaves your court.",
+  outcomeCourtSizeDecreased: "Court size decreased.",
+  outcomeCourtSizeIncreased: "Court size increased."
 };
 
 export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEntry[] = [
@@ -101,27 +131,30 @@ export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEn
     title: "Grant received and denied copy",
     category: "grants",
     currentState: "central_copy",
-    gap: "needs_template",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T03",
     surfaces: ["Prospects panel", "Accept or reject confirm", "Decision toast"],
-    currentRefs: ["src/App.tsx#COPY.prospectGrantHelperLine", "src/App.tsx#COPY.prospectAcceptConfirmTitle_grant", "src/App.tsx#COPY.prospectToastAccepted_grant", "src/App.tsx#COPY.prospectToastRejected_grant"],
-    notes: "Grant copy is centralized in App-level UI copy, but it is still a generic prospect string set rather than a typed v0.3.3 content slot family."
+    currentRefs: [
+      "src/content/experienceContent.ts#EXPERIENCE_GRANT_PROSPECT_TEMPLATE",
+      "src/content/experienceContent.ts#renderGrantAcceptConfirmBody",
+      "src/content/experienceContent.ts#renderGrantDecisionToast"
+    ],
+    notes: "Grant received and denied copy now has a typed template home, so later UI wiring can stop reaching back into generic App-level prospect strings."
   },
   {
     id: "marriage.accept_reject_flow",
     title: "Marriage accept and reject copy",
     category: "marriage",
     currentState: "central_copy",
-    gap: "needs_template",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T03",
     surfaces: ["Prospects panel", "Accept or reject confirm", "Decision toast", "Household details log summaries"],
     currentRefs: [
-      "src/App.tsx#COPY.prospectAcceptConfirmTitle_marriage",
-      "src/App.tsx#COPY.prospectToastAccepted_marriage",
-      "src/App.tsx#COPY.prospectToastRejected_marriage",
-      "src/App.tsx#COPY.marriageToast_line1"
+      "src/content/experienceContent.ts#EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE",
+      "src/content/experienceContent.ts#renderMarriageAcceptConfirmBody",
+      "src/content/experienceContent.ts#renderMarriageDecisionToast"
     ],
-    notes: "Marriage response strings are centralized, but outcome phrasing is split between prospect decisions and household aftermath instead of one content family."
+    notes: "Marriage accept and reject wording now lives in a typed content family that covers both the prospect decision moment and the immediate household outcome language."
   },
   {
     id: "arrears.stage_legibility",
@@ -178,6 +211,14 @@ export function getObligationCounterpartyTemplate(
     ...template,
     keywordHints: [...template.keywordHints]
   };
+}
+
+export function getGrantProspectTemplate(): ExperienceGrantProspectTemplate {
+  return { ...EXPERIENCE_GRANT_PROSPECT_TEMPLATE };
+}
+
+export function getMarriageProspectTemplate(): ExperienceMarriageProspectTemplate {
+  return { ...EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE };
 }
 
 export function renderObligationGestureOutcome(
@@ -245,6 +286,72 @@ export function renderObligationResponseSummary(args: {
     return "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.";
   }
   return "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.";
+}
+
+export function renderGrantAcceptConfirmBody(anyCost: boolean): string {
+  return anyCost ? "This will apply the listed costs. Continue?" : EXPERIENCE_GRANT_PROSPECT_TEMPLATE.acceptNoCostBody;
+}
+
+export function renderGrantDecisionToast(args: {
+  action: "accept" | "reject";
+  shortEffectSummary?: string;
+  standingRisk?: boolean;
+}): string {
+  const { action, shortEffectSummary = "Arrangement recorded.", standingRisk = false } = args;
+  if (action === "accept") {
+    return `Accepted: Grant. ${shortEffectSummary}`;
+  }
+
+  const base = "Declined: Grant.";
+  return standingRisk ? `${base} Standing may decrease.` : base;
+}
+
+export function renderMarriageAcceptConfirmBody(args: {
+  anyCost: boolean;
+  coinDeltaText?: string | null;
+}): string {
+  const { anyCost, coinDeltaText } = args;
+  if (anyCost) {
+    return "This will apply the listed costs. Continue?";
+  }
+  if (coinDeltaText) {
+    return `Dowry: ${coinDeltaText}. Continue?`;
+  }
+  return EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.acceptNoCostBody;
+}
+
+export function renderMarriageDecisionToast(args: {
+  action: "accept" | "reject";
+  childName?: string | null;
+  shortEffectSummary?: string;
+  spouseJoinsCourt?: boolean;
+  spouseName?: string | null;
+  standingRisk?: boolean;
+}): string {
+  const {
+    action,
+    childName,
+    shortEffectSummary = "Arrangement recorded.",
+    spouseJoinsCourt = false,
+    spouseName,
+    standingRisk = false
+  } = args;
+
+  if (action === "reject") {
+    const base = "Declined: Marriage.";
+    return standingRisk ? `${base} Standing may decrease.` : base;
+  }
+
+  if (!childName) {
+    return `Accepted: Marriage. ${shortEffectSummary}`;
+  }
+
+  const line1 = `Marriage arranged. ${childName} is now married.`;
+  if (spouseJoinsCourt && spouseName) {
+    return `${line1}\n${spouseName} joins your court. ${EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.outcomeCourtSizeIncreased}`;
+  }
+
+  return `${line1}\n${childName} ${EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.outcomeChildLeaves} ${EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.outcomeCourtSizeDecreased}`;
 }
 
 export function summarizeExperienceContentInventory(): {

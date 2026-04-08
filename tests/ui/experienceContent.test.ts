@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   EXPERIENCE_CONTENT_CATEGORY_ORDER,
+  getGrantProspectTemplate,
+  getMarriageProspectTemplate,
   getObligationCounterpartyTemplate,
   listExperienceContentSlots,
+  renderGrantAcceptConfirmBody,
+  renderGrantDecisionToast,
+  renderMarriageAcceptConfirmBody,
+  renderMarriageDecisionToast,
   renderObligationGestureOutcome,
   renderObligationResolvedSummary,
   renderObligationResponseSummary,
@@ -37,6 +43,7 @@ describe("experienceContent inventory", () => {
       expect.objectContaining({
         id: "grants.accept_reject_flow",
         currentState: "central_copy",
+        gap: "none",
         plannedTaskId: "V03-R3-007-T03"
       })
     ]);
@@ -53,6 +60,23 @@ describe("experienceContent inventory", () => {
         plannedTaskId: "V03-R3-007-T05"
       })
     ]);
+  });
+
+  it("provides typed grant and marriage template families for the outcome pass", () => {
+    expect(getGrantProspectTemplate()).toEqual({
+      acceptConfirmTitle: "Accept grant offer?",
+      acceptNoCostBody: "Accept this grant offer?",
+      helperLine: "Support from your liege to ease burdens this turn.",
+      rejectRiskNote: "Declining may reduce your standing."
+    });
+
+    expect(getMarriageProspectTemplate()).toEqual({
+      acceptConfirmTitle: "Accept marriage proposal?",
+      acceptNoCostBody: "Accept this marriage proposal?",
+      outcomeChildLeaves: "leaves your court.",
+      outcomeCourtSizeDecreased: "Court size decreased.",
+      outcomeCourtSizeIncreased: "Court size increased."
+    });
   });
 
   it("provides deterministic liege and church settlement templates for the obligations pass", () => {
@@ -132,5 +156,34 @@ describe("experienceContent inventory", () => {
     ).toBe(
       "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support."
     );
+  });
+
+  it("renders deterministic grant and marriage decision copy without touching prospect mechanics", () => {
+    expect(renderGrantAcceptConfirmBody(true)).toBe("This will apply the listed costs. Continue?");
+    expect(renderGrantAcceptConfirmBody(false)).toBe("Accept this grant offer?");
+    expect(renderGrantDecisionToast({ action: "accept", shortEffectSummary: "Coin +4." })).toBe("Accepted: Grant. Coin +4.");
+    expect(renderGrantDecisionToast({ action: "reject", standingRisk: true })).toBe("Declined: Grant. Standing may decrease.");
+
+    expect(renderMarriageAcceptConfirmBody({ anyCost: true, coinDeltaText: "+3 coin" })).toBe(
+      "This will apply the listed costs. Continue?"
+    );
+    expect(renderMarriageAcceptConfirmBody({ anyCost: false, coinDeltaText: "+3 coin" })).toBe("Dowry: +3 coin. Continue?");
+    expect(renderMarriageAcceptConfirmBody({ anyCost: false })).toBe("Accept this marriage proposal?");
+    expect(
+      renderMarriageDecisionToast({
+        action: "accept",
+        childName: "Matilda",
+        spouseJoinsCourt: true,
+        spouseName: "Hugh"
+      })
+    ).toBe("Marriage arranged. Matilda is now married.\nHugh joins your court. Court size increased.");
+    expect(
+      renderMarriageDecisionToast({
+        action: "accept",
+        childName: "Matilda",
+        spouseJoinsCourt: false
+      })
+    ).toBe("Marriage arranged. Matilda is now married.\nMatilda leaves your court. Court size decreased.");
+    expect(renderMarriageDecisionToast({ action: "reject", standingRisk: true })).toBe("Declined: Marriage. Standing may decrease.");
   });
 });
