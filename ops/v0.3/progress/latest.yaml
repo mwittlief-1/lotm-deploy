@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-004-T02
+  last_completed_task_id: V03-R1-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 24a8492
+  git_commit: abf8137
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,16 +21,14 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted the previously missing Social succession baseline on kickoff:
-  V03-R1-004-T01 and T02 are now part of repo truth, and inheritance-claim
-  prospect generation routes through people-domain helpers without changing the
-  accepted replay line. Social V03-R1-004-T03 is actively dispatched, which
-  reopens the succession chain and puts the lane back on a real path toward the
-  later grant and agenda blockers.
+  Accepted Social V03-R1-004-T03 on kickoff using the replay-safe inheritance
+  claim seam. T04 is actively dispatched, and T05/T06 are already promoted so
+  the Social lane can keep moving through the same-lane succession chain
+  without another scheduler stop.
 active_claims:
   codex/v0.3-lane-social-mechanics:
-    task_id: V03-R1-004-T03
+    task_id: V03-R1-004-T04
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T10:23:46-0400'
-    claim_expires_at: '2026-04-08T14:23:46-0400'
-    run_id: 2026-04-08_manual_acceptance_round23
+    claimed_at: '2026-04-08T12:14:01-0400'
+    claim_expires_at: '2026-04-08T16:14:01-0400'
+    run_id: 2026-04-08_manual_acceptance_round24
