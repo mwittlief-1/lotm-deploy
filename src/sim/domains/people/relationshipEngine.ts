@@ -14,6 +14,8 @@ export type RelationshipScoreVector = {
   threat: number;
 };
 
+export type RelationshipStandingBand = "hostile" | "wary" | "steady" | "favorable";
+
 export const RELATIONSHIP_BASELINE = {
   allegiance: 50,
   respect: 50,
@@ -144,6 +146,35 @@ function cloneRelationshipVector(vector: RelationshipScoreVector): RelationshipS
     respect: Math.trunc(vector.respect),
     threat: Math.trunc(vector.threat),
   };
+}
+
+export function readRelationshipVector(
+  state: RunState,
+  fromId: string,
+  toId: string
+): RelationshipScoreVector {
+  const existing = state.relationships.find((edge) => edge.from_id === fromId && edge.to_id === toId);
+  if (existing) {
+    return cloneRelationshipVector(existing);
+  }
+
+  const seededProfile = resolveRelationshipSeedProfileForIds(state, fromId, toId);
+  if (seededProfile) {
+    return cloneRelationshipVector(seededProfile.target);
+  }
+
+  return cloneRelationshipVector(RELATIONSHIP_BASELINE);
+}
+
+export function relationshipFavorScore(vector: RelationshipScoreVector): number {
+  return Math.trunc(vector.allegiance) + Math.trunc(vector.respect) - Math.trunc(vector.threat);
+}
+
+export function classifyRelationshipStanding(vector: RelationshipScoreVector): RelationshipStandingBand {
+  if (vector.threat >= 26 || vector.allegiance <= 42 || vector.respect <= 44) return "hostile";
+  if (vector.allegiance >= 60 && vector.respect >= 56 && vector.threat <= 16) return "favorable";
+  if (vector.allegiance >= 48 && vector.respect >= 48 && vector.threat <= 22) return "steady";
+  return "wary";
 }
 
 export function applyRelationshipDeltaToVector(

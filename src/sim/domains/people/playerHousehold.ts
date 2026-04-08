@@ -1,11 +1,22 @@
 import { registryPersonFor } from "../../actors";
 import type { HouseholdRoster, Person, RunState } from "../../types";
+import { buildGrantAcquisitionExperienceSurfaces } from "./grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "./knownHouseSummaries";
 import { buildSuccessionExperienceSurfaces } from "./successionSummaries";
+
+function attachHiddenSurface(target: object, key: string, value: unknown): void {
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+}
 
 export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
+  const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   (state as any).known_houses = experienceSurfaces.known_houses;
   (state as any).house_dossiers = experienceSurfaces.house_dossiers;
   (state as any).succession_line_summary = successionSurfaces.succession_line_summary;
@@ -14,6 +25,14 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   (state.house as any).house_dossiers = experienceSurfaces.house_dossiers;
   (state.house as any).succession_line_summary = successionSurfaces.succession_line_summary;
   (state.house as any).claimant_summary = successionSurfaces.claimant_summary;
+  attachHiddenSurface(state as object, "grant_eligibility", grantAcquisitionSurfaces.grant_eligibility);
+  attachHiddenSurface(state as object, "grant_source_registry", grantAcquisitionSurfaces.grant_source_registry);
+  attachHiddenSurface(state as object, "grant_dossier_summaries", grantAcquisitionSurfaces.grant_dossier_summaries);
+  attachHiddenSurface(state as object, "acquisition_prospects_window", grantAcquisitionSurfaces.acquisition_prospects_window);
+  attachHiddenSurface(state.house as object, "grant_eligibility", grantAcquisitionSurfaces.grant_eligibility);
+  attachHiddenSurface(state.house as object, "grant_source_registry", grantAcquisitionSurfaces.grant_source_registry);
+  attachHiddenSurface(state.house as object, "grant_dossier_summaries", grantAcquisitionSurfaces.grant_dossier_summaries);
+  attachHiddenSurface(state.house as object, "acquisition_prospects_window", grantAcquisitionSurfaces.acquisition_prospects_window);
 
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;
