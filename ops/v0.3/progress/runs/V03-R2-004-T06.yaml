@@ -1,0 +1,36 @@
+version: 1
+run_id: V03-R2-004-T06-20260408T083429-0400
+task_id: V03-R2-004-T06
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: d25769dc0b50dd691770c7748ddeeed215551a71
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+replay_hashes:
+  run1: ''
+  run2: ''
+artifacts:
+  closeout_doc: docs/releases/v0.3.2_office_service_closeout.md
+  epic_report: ops/v0.3/progress/runs/V03-R2-004.md
+  invariant_tests: tests/sim/office_service_invariants.test.ts
+findings:
+  - Added an explicit invariant test layer that locks canonical seat order, required-seat behavior, placement continuity, and institution-target precedence without changing runtime behavior.
+  - Published the release-facing office/service closeout doc and the parent epic report so later agenda, family, and clergy work has a single accepted contract to target.
+  - Closed the office/service epic cleanly after documentation and required gates passed, leaving agenda follow-on work blocked only on later task promotion rather than missing office baseline evidence.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T06 closed after invariant/docs closeout and required gates; the current backlog snapshot has no ready tasks in any lane, so `V03-R3-003-T01` and `T02` were not legal self-advance targets here.

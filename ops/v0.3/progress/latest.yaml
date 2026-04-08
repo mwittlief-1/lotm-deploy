@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-004-T06
-  last_completed_task_id: V03-R2-004-T05
+  current_task_id: ''
+  last_completed_task_id: V03-R2-004-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 694dfcf
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: d25769d
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,8 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted Social V03-R2-004-T05 on kickoff by adapting the stale lane patch
-  onto current repo truth: service placement persistence is now stable across
-  unchanged holders, placement targets are explicit, and office-holder
-  succession hooks are available without changing replay. Social V03-R2-004-T06
-  is now the next ready lane frontier. No active claims are open.
+  Social closed V03-R2-004-T06 with invariant tests, a release-facing office
+  and service closeout, and the parent epic report. QA and preflight passed on
+  the lane branch. `V03-R3-003-T01` and `T02` remain todo in this branch
+  snapshot, so there is no next legal social claim yet.
 active_claims: {}

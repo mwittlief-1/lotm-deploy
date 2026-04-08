@@ -840,7 +840,7 @@ epics:
 - id: V03-R2-004
   title: Service records, offices, and seat-filling baseline
   release: v0.3.2
-  status: in_progress
+  status: done
   priority: 44
   tranche: 3
   change_type: behavior_change
@@ -5713,7 +5713,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Add office and seat-filling invariants and docs
-  status: ready
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
