@@ -57,9 +57,12 @@ describe("state schema scaffold", () => {
       schema_version: ECONOMY_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
       tracked_state_paths: [...MANOR_ECONOMY_TRACKED_STATE_PATHS]
     });
-    expect(ctxA.preview_state.portfolio).toEqual({
-      schema_version: PORTFOLIO_REGISTRY_PLACEHOLDER_SCHEMA_VERSION,
-      positions: []
+    expect(ctxA.preview_state.portfolio).toMatchObject({
+      schema_version: "economy_portfolio_analysis_v1",
+      scope: {
+        scope_id: "player_portfolio"
+      },
+      manor_keys: [expect.any(String)]
     });
     expect(
       ctxA.preview_state.bounded_registry_manifest?.entries.find((entry) => entry.registry_id === "kinship_edges")?.legacy_paths

@@ -1,0 +1,171 @@
+{
+  "anchorManorId": "manor_hx_26597",
+  "anchorHoldingId": "church_fief_hx_28841",
+  "anchorCountyId": "c_2",
+  "rawMetric": "travel_cost_distance",
+  "companionMetric": "route_hop_distance",
+  "farThreshold": "50",
+  "sampleSummary": "Showing 8 of 387 sampled distances.",
+  "samples": [
+    {
+      "toManorId": "manor_hx_26597",
+      "rawDistance": "0",
+      "routeHops": "0",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_28840",
+      "rawDistance": "17.66",
+      "routeHops": "1",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_28841",
+      "rawDistance": "18.2",
+      "routeHops": "1",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_29126",
+      "rawDistance": "33.73",
+      "routeHops": "1",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_30811",
+      "rawDistance": "46.992",
+      "routeHops": "1",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_31093",
+      "rawDistance": "49.76",
+      "routeHops": "2",
+      "distanceBand": "near"
+    },
+    {
+      "toManorId": "manor_hx_30535",
+      "rawDistance": "50.064",
+      "routeHops": "1",
+      "distanceBand": "far"
+    },
+    {
+      "toManorId": "manor_hx_32209",
+      "rawDistance": "50.596",
+      "routeHops": "1",
+      "distanceBand": "far"
+    }
+  ],
+  "scopeCaps": {
+    "admittedCount": 160,
+    "bucketSummaries": [
+      {
+        "admittedCount": 0,
+        "bucketId": "kinship",
+        "cumulativeLimit": "24",
+        "label": "Kinship",
+        "rejectedCount": 0
+      },
+      {
+        "admittedCount": 6,
+        "bucketId": "territorial_adjacent",
+        "cumulativeLimit": "48",
+        "label": "Territorial Adjacent",
+        "rejectedCount": 0
+      },
+      {
+        "admittedCount": 0,
+        "bucketId": "route_adjacent",
+        "cumulativeLimit": "72",
+        "label": "Route Adjacent",
+        "rejectedCount": 0
+      },
+      {
+        "admittedCount": 1,
+        "bucketId": "near",
+        "cumulativeLimit": "112",
+        "label": "Near",
+        "rejectedCount": 0
+      },
+      {
+        "admittedCount": 153,
+        "bucketId": "far",
+        "cumulativeLimit": "160",
+        "label": "Far",
+        "rejectedCount": 226
+      }
+    ],
+    "candidateCount": 386,
+    "farThreshold": "50",
+    "kinshipJoinSummary": "Kinship remains part of the cap table, but this bounded debug surface cannot join known-house ties onto world manor ids yet, so kinship stays rule-only here.",
+    "metricLabel": "travel_cost_distance",
+    "rejectedCount": 226,
+    "sampleRows": [
+      {
+        "bucketLabel": "Territorial Adjacent",
+        "distanceBand": "near",
+        "manorId": "manor_hx_28840",
+        "rationale": "Territorial adjacency outranks route adjacency and the near/far distance band. Admitted at 1 of the 48 cumulative-house limit.",
+        "rawDistance": "17.66",
+        "routeHops": "1",
+        "statusLabel": "Admitted"
+      },
+      {
+        "bucketLabel": "Territorial Adjacent",
+        "distanceBand": "near",
+        "manorId": "manor_hx_28841",
+        "rationale": "Territorial adjacency outranks route adjacency and the near/far distance band. Admitted at 2 of the 48 cumulative-house limit.",
+        "rawDistance": "18.2",
+        "routeHops": "1",
+        "statusLabel": "Admitted"
+      },
+      {
+        "bucketLabel": "Territorial Adjacent",
+        "distanceBand": "near",
+        "manorId": "manor_hx_29126",
+        "rationale": "Territorial adjacency outranks route adjacency and the near/far distance band. Admitted at 3 of the 48 cumulative-house limit.",
+        "rawDistance": "33.73",
+        "routeHops": "1",
+        "statusLabel": "Admitted"
+      },
+      {
+        "bucketLabel": "Territorial Adjacent",
+        "distanceBand": "far",
+        "manorId": "manor_hx_30535",
+        "rationale": "Territorial adjacency outranks route adjacency and the near/far distance band. Admitted at 4 of the 48 cumulative-house limit.",
+        "rawDistance": "50.064",
+        "routeHops": "1",
+        "statusLabel": "Admitted"
+      },
+      {
+        "bucketLabel": "Far",
+        "distanceBand": "far",
+        "manorId": "manor_hx_39261",
+        "rationale": "At or beyond the travel_cost_distance far threshold (50). Excluded once the Far cap held at 160 total houses.",
+        "rawDistance": "123.112",
+        "routeHops": "12",
+        "statusLabel": "Outside cap"
+      },
+      {
+        "bucketLabel": "Far",
+        "distanceBand": "far",
+        "manorId": "manor_hx_39442",
+        "rationale": "At or beyond the travel_cost_distance far threshold (50). Excluded once the Far cap held at 160 total houses.",
+        "rawDistance": "209.164",
+        "routeHops": "10",
+        "statusLabel": "Outside cap"
+      },
+      {
+        "bucketLabel": "Far",
+        "distanceBand": "far",
+        "manorId": "manor_hx_39462",
+        "rationale": "At or beyond the travel_cost_distance far threshold (50). Excluded once the Far cap held at 160 total houses.",
+        "rawDistance": "128.804",
+        "routeHops": "9",
+        "statusLabel": "Outside cap"
+      }
+    ],
+    "sourceTier": "knight",
+    "tierLabel": "Knight"
+  }
+}

@@ -2,7 +2,10 @@ export * from "./types";
 export {
   buildBoundedWorldTopologyView,
   classifyTravelDistance,
+  classifyWorldScopeBucket,
   createWorldDomain,
+  evaluateWorldScopeCaps,
+  evaluateWorldScopeCapsForAnchor,
   getArchbishopricById,
   getArchbishopricForManor,
   getBishopricById,
@@ -28,6 +31,12 @@ export {
   getRouteHopDistance,
   getTerritorialAdjacency,
   getTravelCostDistance,
+  getWorldScopeCapBucketOrder,
+  getWorldScopeCapLimit,
+  getWorldScopeCapRowForTier,
+  getWorldScopeCapTable,
   getWorldTopologyFile,
-  loadBundledWorldDomain
+  listWorldScopeCandidatesForAnchor,
+  loadBundledWorldDomain,
+  normalizeWorldScopeCapTierKey
 } from "./xmap";

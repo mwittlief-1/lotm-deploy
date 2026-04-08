@@ -1,0 +1,42 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round25
+task_id: V03-R1-004-T06
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: e9afe990106fdc6695d65f61cc7167d044dfddb9
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: pass
+replay_hashes:
+  run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+  run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+artifacts:
+  closeout_doc: docs/releases/v0.3.1_claims_and_succession_closeout.md
+  epic_report: ops/v0.3/progress/runs/V03-R1-004.md
+findings:
+  - The release-facing closeout now records the accepted succession baseline, claimant relevance layer, and explicit v0.3.1 non-goals.
+  - The kickoff copy corrects the snapshot wording to match the replay-safe runtime surface that was actually accepted.
+  - The epic is ready to remain done in backlog state and hand off to grant/acquisition work.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-006-T01
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T06 closes the succession baseline epic and immediately hands the lane into the grants baseline chain.
+

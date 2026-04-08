@@ -1,0 +1,134 @@
+{
+  "app_version": "v0.2.9",
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "hash": "580114e27c935040b8533cebc03bde8e1a0466102d900d6c77fc5fdcfe7cf8a2",
+  "kind": "economy_fiscal_doe_summary_v1",
+  "policies": [
+    "builder-forward",
+    "prudent-builder"
+  ],
+  "policy_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "seed_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "seeds": [
+    "lotm_v022_seed_001_baseline_extworld",
+    "lotm_v022_seed_002_relationship_edges",
+    "lotm_v022_seed_003_succession_pressure",
+    "lotm_v022_seed_004_widow_line",
+    "lotm_v022_seed_005_unrest_pressure",
+    "lotm_v022_seed_006_construction_path",
+    "lotm_v022_seed_007_weather_volatility",
+    "lotm_v022_seed_008_long_tail_check"
+  ],
+  "sim_version": "v0.2.7.2",
+  "summary": {
+    "by_policy": {
+      "builder-forward": {
+        "arrears": {
+          "any_seen_share": 1,
+          "bushels_seen_share": 0.625,
+          "coin_seen_share": 1,
+          "mean_end_bushels": 168.875,
+          "mean_end_coin": 7.125,
+          "mean_max_bushels": 168.875,
+          "mean_max_coin": 7.125
+        },
+        "dispossession": {
+          "any_game_over_count": 0,
+          "dispossessed_count": 0,
+          "dispossession_rate": 0,
+          "median_game_over_turn": null
+        },
+        "manor_count_distribution": [
+          {
+            "manor_count": 1,
+            "run_count": 8,
+            "share": 1
+          }
+        ],
+        "run_count": 8,
+        "stores": {
+          "food_stockout_seen_share": 0.625,
+          "mean_ending_food_stores": 474.375,
+          "mean_ending_meat_stores": 0,
+          "mean_min_food_stores": 86,
+          "mean_min_meat_stores": 0,
+          "meat_stockout_seen_share": 1
+        }
+      },
+      "prudent-builder": {
+        "arrears": {
+          "any_seen_share": 0.375,
+          "bushels_seen_share": 0.25,
+          "coin_seen_share": 0.125,
+          "mean_end_bushels": 0,
+          "mean_end_coin": 0,
+          "mean_max_bushels": 35.875,
+          "mean_max_coin": 0.375
+        },
+        "dispossession": {
+          "any_game_over_count": 0,
+          "dispossessed_count": 0,
+          "dispossession_rate": 0,
+          "median_game_over_turn": null
+        },
+        "manor_count_distribution": [
+          {
+            "manor_count": 1,
+            "run_count": 8,
+            "share": 1
+          }
+        ],
+        "run_count": 8,
+        "stores": {
+          "food_stockout_seen_share": 0.25,
+          "mean_ending_food_stores": 938,
+          "mean_ending_meat_stores": 0,
+          "mean_min_food_stores": 311,
+          "mean_min_meat_stores": 0,
+          "meat_stockout_seen_share": 1
+        }
+      }
+    },
+    "overall": {
+      "arrears": {
+        "any_seen_share": 0.6875,
+        "bushels_seen_share": 0.4375,
+        "coin_seen_share": 0.5625,
+        "mean_end_bushels": 84.4375,
+        "mean_end_coin": 3.5625,
+        "mean_max_bushels": 102.375,
+        "mean_max_coin": 3.75
+      },
+      "dispossession": {
+        "any_game_over_count": 0,
+        "dispossessed_count": 0,
+        "dispossession_rate": 0,
+        "median_game_over_turn": null
+      },
+      "manor_count_distribution": [
+        {
+          "manor_count": 1,
+          "run_count": 16,
+          "share": 1
+        }
+      ],
+      "run_count": 16,
+      "stores": {
+        "food_stockout_seen_share": 0.4375,
+        "mean_ending_food_stores": 706.1875,
+        "mean_ending_meat_stores": 0,
+        "mean_min_food_stores": 198.5,
+        "mean_min_meat_stores": 0,
+        "meat_stockout_seen_share": 1
+      }
+    },
+    "policy_ids": [
+      "builder-forward",
+      "prudent-builder"
+    ],
+    "run_metric_schema_version": "economy_fiscal_doe_run_metric_v1",
+    "schema_version": "economy_fiscal_doe_summary_v1"
+  },
+  "tuning_table_hash": "2aec5cdc86272758701412b8dd9ba35b405f0e1143ce78d8fc6ed01120a1664f",
+  "turns": 15
+}

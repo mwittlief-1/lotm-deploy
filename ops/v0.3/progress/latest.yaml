@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-005-T05
+  last_completed_task_id: V03-R2-006-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-engine-core
-  git_commit: 3963437b61f9740dd8fa6746a3893b4a79295290
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 68fe6a0
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -19,11 +19,30 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: not_run
-    run2: not_run
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Completed Engine V03-R3-005-T05 and closed V03-R3-005 on
-  codex/v0.3-lane-engine-core. The next same-lane task
-  V03-R3-006-T01 is not eligible for self-advance because it
-  remains todo and depends on cross-lane task V03-R2-006-T06.
-active_claims: {}
+  Accepted Social V03-R2-006-T01 through T06 on kickoff, closed the grant
+  acquisition baseline epic, and opened the next real downstream fronts for
+  Social court agenda work, Engine AI rails, and UI content inventory. The
+  accepted integration keeps the grant acquisition surfaces on the existing
+  deterministic replay line.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R3-003-T03
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
+  codex/v0.3-lane-engine-core:
+    task_id: V03-R3-006-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R3-007-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26

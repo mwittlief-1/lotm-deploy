@@ -28,8 +28,9 @@ describe("play screen chrome", () => {
       },
       {
         id: "topology_distances",
-        title: "Topology distances",
-        description: "Bounded world snapshot fields stay visible here so raw distance values and the current far threshold can be audited in the UI."
+        title: "Topology distances & scope caps",
+        description:
+          "Bounded world snapshot fields stay visible here so raw distance values, far-threshold inputs, and scope-cap rationale can be audited in the UI."
       }
     ]);
     expect(PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY).toBe(

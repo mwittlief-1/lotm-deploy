@@ -1,6 +1,7 @@
 import { structuredHouseIdForPerson } from "../../actors";
 import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../../court";
 import { chargeCourtDecisionBudget } from "../court/decisionBudget";
+import { resolveCourtDelegationEntry, resolveDelegatedBudgetCost } from "../court/delegationRegistry";
 import { canSpendEnergy, spendEnergy } from "../court/energy";
 import { applyCoinDelta, canAffordCoin, spendCoin } from "../economy/ledger";
 import { listEligibleCandidates } from "../../marriageMarket";
@@ -15,6 +16,7 @@ import { applyRelationshipDelta } from "./relationshipEngine";
 
 const MARRIAGE_INBOUND_DECISION_COST = 1;
 const MARRIAGE_SCOUT_DECISION_COST = 2;
+const MARRIAGE_SCOUT_MIN_DELEGATED_COST = 1;
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -22,10 +24,20 @@ function modsObj(state: RunState): Record<string, number> {
   return anyFlags._mods as Record<string, number>;
 }
 
+export function resolveMarriageScoutDecisionCost(state: RunState): number {
+  const entry = resolveCourtDelegationEntry(state, "marriage_scout");
+  if (!entry.delegated) return MARRIAGE_SCOUT_DECISION_COST;
+  return Math.max(
+    MARRIAGE_SCOUT_MIN_DELEGATED_COST,
+    resolveDelegatedBudgetCost(MARRIAGE_SCOUT_DECISION_COST, entry)
+  );
+}
+
 function reserveMarriageDecisionBudget(state: RunState, action: "scout" | "inbound"): boolean {
-  return action === "scout"
-    ? chargeCourtDecisionBudget(state, "marriage_scout", MARRIAGE_SCOUT_DECISION_COST).applied
-    : chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
+  if (action === "scout") {
+    return chargeCourtDecisionBudget(state, "marriage_scout", resolveMarriageScoutDecisionCost(state)).applied;
+  }
+  return chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
 }
 
 export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: string): void {
@@ -157,6 +169,7 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   }
 
   if (decision.action === "scout") {
+    const scoutCost = resolveMarriageScoutDecisionCost(state);
     if (!reserveMarriageDecisionBudget(state, "scout")) {
       reportNotes.push("No court budget for marriage scouting.");
       return;
@@ -165,6 +178,9 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     spendCoin(state, 1);
     const mods = modsObj(state);
     mods["marriage_quality"] = (mods["marriage_quality"] ?? 1) * 1.05;
+    if (scoutCost !== MARRIAGE_SCOUT_DECISION_COST) {
+      reportNotes.push(`Delegated scouting used ${scoutCost} court decision${scoutCost === 1 ? "" : "s"}.`);
+    }
     reportNotes.push("Scouted prospects; next marriage window slightly improved.");
     return;
   }
