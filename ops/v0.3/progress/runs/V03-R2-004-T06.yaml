@@ -33,4 +33,4 @@ control_plane_notes:
   ops_v0_3_validate: pass
   ops_v0_3_scheduler_dry_run: pass
   ops_v0_3_rebase_dry_run: pass
-  reason: T06 closed after invariant/docs closeout and required gates; the current backlog snapshot has no ready tasks in any lane, so `V03-R3-003-T01` and `T02` were not legal self-advance targets here.
+  reason: T06 closed after invariant/docs closeout and required gates; the lane-local backlog snapshot had not yet promoted V03-R3-003-T01, so no legal self-advance target was available from that workspace.
