@@ -18,6 +18,7 @@ import {
 import { SectionHeading } from "./SectionHeading";
 
 type PortfolioOverviewPanelProps = {
+  anchorId?: string;
   contract: PortfolioScopeContract;
   mapCheckpoint?: PortfolioMapCheckpoint | null;
   onCenterSelectedHolding?: () => void;
@@ -85,6 +86,7 @@ function renderSummaryCards(cards: PortfolioSummaryCard[], valueFontSize: number
 }
 
 export function PortfolioOverviewPanel({
+  anchorId,
   contract,
   mapCheckpoint = null,
   onCenterSelectedHolding,
@@ -100,7 +102,7 @@ export function PortfolioOverviewPanel({
   const pressureCards = selectedManor.summaryCards.slice(3);
 
   return (
-    <div style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginBottom: 12 }}>
+    <div id={anchorId} style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginBottom: 12 }}>
       <SectionHeading
         action={<span>{surface.manorCountLabel}</span>}
         helper={surface.helper}

@@ -6,7 +6,7 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 7d2d4aad4bfe7d7203a92ef6693a91c13dc7131b
+  git_commit: 27b90fd
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,22 +18,18 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
-    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Closed UI V03-R3-007-T05 after wiring the v0.3.3 experience content
-  registry into the live gameplay shell and UX docs. No next ready UI lane
-  task remained on this branch state.
+  Accepted Social V03-R3-003-T03 through T05, Engine V03-R3-006-T01 through
+  T05, and UI V03-R3-007-T01 through T05 on kickoff. Closed the court agenda,
+  AI rails, and experience-content epics, and reopened the UI playtest-ops
+  chain at V03-R4-003-T01. The integrated code kept replay on the existing
+  deterministic baseline.
 active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R3-003-T03
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R4-003-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R3-006-T01
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    claimed_at: '2026-04-08T18:51:00-0400'
+    claim_expires_at: '2026-04-08T22:51:00-0400'
+    run_id: 2026-04-08_manual_acceptance_round27

@@ -1009,7 +1009,7 @@ epics:
 - id: V03-R3-003
   title: Court pre-agenda scaffolding and agenda items
   release: v0.3.3
-  status: in_progress
+  status: done
   priority: 38
   tranche: 4
   change_type: behavior_change
@@ -1110,7 +1110,7 @@ epics:
 - id: V03-R3-006
   title: AI belief registry and evidence rails
   release: v0.3.3
-  status: in_progress
+  status: done
   priority: 35
   tranche: 4
   change_type: behavior_change
@@ -1146,7 +1146,7 @@ epics:
 - id: V03-R3-007
   title: Experience content v0 for fiscal, grant, and marriage flows
   release: v0.3.3
-  status: in_progress
+  status: done
   priority: 34
   tranche: 4
   change_type: behavior_change
@@ -1252,7 +1252,7 @@ epics:
 - id: V03-R4-003
   title: Experience playtest ops and export conventions
   release: v0.3.4
-  status: todo
+  status: in_progress
   priority: 29
   tranche: 5
   change_type: behavior_change
@@ -6783,7 +6783,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Populate agenda items from obligations, prospects, offices, and portfolio outliers
-  status: ready
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -6816,16 +6816,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T03.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-003-T04
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Capture what-mattered notes and render court agenda stubs
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -6866,7 +6866,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Add agenda determinism coverage and docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7313,7 +7313,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Audit AI rail baseline and identify missing evidence emitters
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7348,16 +7348,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-006-T02
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Define belief payload for known, likely, and possible states
-  status: ready
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7397,7 +7397,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Emit evidence events from marriage, obligations, and grant flows
-  status: ready
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7439,7 +7439,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Expose belief and evidence debug outputs with neutral policy hook coverage
-  status: ready
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7480,7 +7480,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Close epic and refresh AI rail docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -8212,7 +8212,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Inventory export, reporting, and playtest pain surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 5
   change_type: refactor
@@ -8246,16 +8246,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T18:51:00-0400'
+    claim_expires_at: '2026-04-08T22:51:00-0400'
+    run_id: 2026-04-08_manual_acceptance_round27
 - id: V03-R4-003-T02
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Define receipt bundle export conventions and seed-pack instructions
-  status: todo
+  status: ready
   priority: 98
   tranche: 5
   change_type: refactor
@@ -8296,7 +8296,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Add bug-report template and KPI placeholder conventions
-  status: todo
+  status: ready
   priority: 97
   tranche: 5
   change_type: refactor
@@ -8336,7 +8336,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Refresh playtest docs and UI hooks for export access
-  status: todo
+  status: ready
   priority: 96
   tranche: 5
   change_type: behavior_change

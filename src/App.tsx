@@ -281,6 +281,7 @@ const COPY = {
   cta_viewUnrestDetails: "View unrest details",
   cta_viewProspects: "View prospects",
   cta_viewHousehold: "View household",
+  cta_viewPortfolio: "View portfolio",
   cta_viewEvents: "View events",
   cta_openDetails: "Open details",
 
