@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-003-T01
+  last_completed_task_id: V03-R3-003-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 17b2c22
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: 53eea1b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,21 +15,15 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
     seed_replay_batch_twice: pass
+    repo_duplicates: not_run
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+    run2: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
 notes: >-
-  Accepted Social V03-R3-003-T01 on kickoff from the completed lane handoff and
-  dispatched Social V03-R3-003-T02. The same-lane continuation policy now
-  explicitly allows successor pre-promotion when the only unmet dependency is
-  the active predecessor, so long Social chains do not wait on a separate
-  scheduler pass. V03-R3-003-T03 still waits on V03-R2-006-T06.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R3-003-T02
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T09:29:39-0400'
-    claim_expires_at: '2026-04-08T13:29:39-0400'
-    run_id: 2026-04-08_manual_acceptance_round21
+  Closed Social V03-R3-003-T02 on the lane branch after adding the canonical
+  court agenda registry contract, typed source tags, and deterministic source
+  mappings for obligations, prospects, offices, and portfolio outliers. The
+  same-lane continuation policy remains in effect, but Social stops here
+  because V03-R3-003-T03 is still blocked on V03-R2-006-T06.
+active_claims: {}
