@@ -7,6 +7,7 @@ import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
+import { buildPoliticalWeatherFromState } from "../realm";
 import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
@@ -28,6 +29,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     economy: (state as any).economy,
     economy_obligations_view: buildEconomyObligationsView(state),
     economy_pricing_view: buildEconomyPricingView(state),
+    political_weather: buildPoliticalWeatherFromState(state, experienceSurfaces),
     court_delegation_view: delegationView,
     portfolio: (state as any).portfolio,
     world_topology_view: buildBoundedWorldTopologyView(),
