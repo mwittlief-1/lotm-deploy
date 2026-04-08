@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-004-T05
+  last_completed_task_id: V03-R2-004-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 694dfcf
+  git_commit: 0e3dcab
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,16 +21,15 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted Social V03-R2-004-T05 on kickoff by adapting the stale lane patch
-  onto current repo truth: service placement persistence is now stable across
-  unchanged holders, placement targets are explicit, and office-holder
-  succession hooks are available without changing replay. Social V03-R2-004-T06
-  is now actively dispatched. If T06 closes cleanly, Social may self-advance to
-  V03-R3-003-T01 and T02; V03-R3-003-T03 still waits on V03-R2-006-T06.
+  Accepted Social V03-R2-004-T06 on kickoff from the completed lane handoff:
+  invariant coverage and the office/service closeout packet are now part of repo
+  truth, epic V03-R2-004 is closed, and Social V03-R3-003-T01 is actively
+  dispatched. Social may self-advance to V03-R3-003-T02 after T01 closes
+  cleanly; V03-R3-003-T03 still waits on V03-R2-006-T06.
 active_claims:
   codex/v0.3-lane-social-mechanics:
-    task_id: V03-R2-004-T06
+    task_id: V03-R3-003-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-06T17:41:10-0400'
-    claim_expires_at: '2026-04-06T21:41:10-0400'
-    run_id: 2026-04-06_social_t06_dispatch
+    claimed_at: '2026-04-08T08:43:19-0400'
+    claim_expires_at: '2026-04-08T12:43:22-0400'
+    run_id: 2026-04-08_manual_acceptance_round20

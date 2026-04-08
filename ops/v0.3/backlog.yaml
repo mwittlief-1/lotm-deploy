@@ -840,7 +840,7 @@ epics:
 - id: V03-R2-004
   title: Service records, offices, and seat-filling baseline
   release: v0.3.2
-  status: in_progress
+  status: done
   priority: 44
   tranche: 3
   change_type: behavior_change
@@ -5713,7 +5713,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Add office and seat-filling invariants and docs
-  status: ready
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5744,11 +5744,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R2-004-T06.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-06T17:41:10-0400'
-    claim_expires_at: '2026-04-06T21:41:10-0400'
-    run_id: 2026-04-06_social_t06_dispatch
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R2-005-T01
   parent_epic: V03-R2-005
   release: v0.3.2
@@ -6699,7 +6699,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Audit current agenda-worthy events and court-facing summary surfaces
-  status: todo
+  status: ready
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6734,11 +6734,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T01.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T08:43:19-0400'
+    claim_expires_at: '2026-04-08T12:43:22-0400'
+    run_id: 2026-04-08_manual_acceptance_round20
 - id: V03-R3-003-T02
   parent_epic: V03-R3-003
   release: v0.3.3
