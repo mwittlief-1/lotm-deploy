@@ -7520,7 +7520,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Inventory content slots for obligations, offerings, grants, marriage, and dispossession warnings
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7554,11 +7554,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-007-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-007-T02
   parent_epic: V03-R3-007
   release: v0.3.3
@@ -7595,11 +7595,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-007-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T14:55:52-0400'
+    claim_expires_at: '2026-04-08T18:55:52-0400'
+    run_id: manual-ui-v03-r3-007-t02-20260408T145552-0400
 - id: V03-R3-007-T03
   parent_epic: V03-R3-007
   release: v0.3.3
