@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-006-T01
+  last_completed_task_id: V03-R3-006-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-engine-core
-  git_commit: d067e0e
+  git_commit: 9241010
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -22,9 +22,9 @@ last_run:
     run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
     run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Closed Engine V03-R3-006-T01 with a descriptive AI rail baseline audit,
-  confirmed deterministic gates remained green on the engine lane, and
-  continued directly into V03-R3-006-T02 under the same accepted dispatch
+  Closed Engine V03-R3-006-T02 with a deterministic belief-payload seam
+  layered over the existing registry, preserved the replay hash, and
+  continued directly into V03-R3-006-T03 under the same accepted dispatch
   chain.
 active_claims:
   codex/v0.3-lane-social-mechanics:
@@ -34,10 +34,10 @@ active_claims:
     claim_expires_at: '2026-04-08T17:52:20-0400'
     run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-engine-core:
-    task_id: V03-R3-006-T02
+    task_id: V03-R3-006-T03
     claimed_by: integrator.dispatch
     claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T19:13:07-0400'
+    claim_expires_at: '2026-04-08T19:57:17-0400'
     run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-ui-experience:
     task_id: V03-R3-007-T01
