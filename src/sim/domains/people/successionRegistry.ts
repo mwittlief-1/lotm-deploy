@@ -1,6 +1,6 @@
 import { allHouseMemberIds, playerHouseIdOf, registryPersonFor } from "../../actors";
 import { getChildren, getParents } from "../../kinship";
-import type { Person, RunState } from "../../types";
+import type { Person, Prospect, RunState } from "../../types";
 
 const SUCCESSION_MIN_AGE = 15;
 const DEFAULT_SUCCESSION_LINE_LIMIT = 16;
@@ -75,6 +75,15 @@ type BuildSuccessionLineOptions = {
 
 type BuildClaimantRegistryOptions = {
   limit?: number;
+};
+
+type BuildInheritanceClaimProspectOptions = {
+  prospect_id: string;
+  from_house_id: string;
+  to_house_id: string;
+  expires_turn: number;
+  heir_id: string | null;
+  subject_person_id?: string | null;
 };
 
 function byPrimogeniture(a: Person, b: Person): number {
@@ -353,5 +362,38 @@ export function buildClaimantRegistry(
     claim_window_open: currentHeirId === null,
     entries: bounded,
     overflow_count: overflowBase,
+  };
+}
+
+export function inheritanceClaimProspectSignatureForSubject(subjectPersonId: string): string {
+  return `inheritance_claim:${subjectPersonId}`;
+}
+
+export function inheritanceClaimProspectSignature(state: RunState): string {
+  return inheritanceClaimProspectSignatureForSubject(state.house.head.id);
+}
+
+export function buildInheritanceClaimProspect(
+  state: RunState,
+  options: BuildInheritanceClaimProspectOptions
+): Prospect | null {
+  const subjectPersonId = options.subject_person_id ?? state.house.head?.id ?? null;
+  if (options.heir_id !== null || typeof subjectPersonId !== "string" || subjectPersonId.length === 0) {
+    return null;
+  }
+
+  return {
+    id: options.prospect_id,
+    type: "inheritance_claim",
+    from_house_id: options.from_house_id,
+    to_house_id: options.to_house_id,
+    subject_person_id: subjectPersonId,
+    summary: "Inheritance claim",
+    requirements: [],
+    costs: {},
+    predicted_effects: { flags_set: ["inheritance_claim_active"] },
+    uncertainty: "possible",
+    expires_turn: options.expires_turn,
+    actions: ["accept", "reject"],
   };
 }

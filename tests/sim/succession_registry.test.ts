@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildInheritanceClaimProspect,
   buildClaimantRegistry,
   buildSuccessionLine,
   CLAIMANT_REGISTRY_SCHEMA_VERSION,
+  inheritanceClaimProspectSignature,
+  inheritanceClaimProspectSignatureForSubject,
   SUCCESSION_LINE_SCHEMA_VERSION,
 } from "../../src/sim/domains/people/successionRegistry";
 import type { Person, RunState } from "../../src/sim/types";
@@ -194,5 +197,38 @@ describe("succession registry schema", () => {
       basis_kind: "household_member_fallback",
       relation_group: "fallback_household",
     });
+  });
+
+  it("builds the current placeholder inheritance claim prospect from the domain seam", () => {
+    const state = mkBaseState();
+    state.house.heir_id = null;
+
+    const prospect = buildInheritanceClaimProspect(state, {
+      prospect_id: "pros_inheritance_claim_test",
+      from_house_id: "h_sponsor",
+      to_house_id: "h_player",
+      expires_turn: state.turn_index + 2,
+      heir_id: null,
+    });
+
+    expect(prospect).toMatchObject({
+      id: "pros_inheritance_claim_test",
+      type: "inheritance_claim",
+      from_house_id: "h_sponsor",
+      to_house_id: "h_player",
+      subject_person_id: "p_head",
+      summary: "Inheritance claim",
+      uncertainty: "possible",
+      expires_turn: state.turn_index + 2,
+      actions: ["accept", "reject"],
+    });
+    expect(prospect?.predicted_effects.flags_set).toEqual(["inheritance_claim_active"]);
+  });
+
+  it("keeps inheritance claim signatures deterministic and head-scoped", () => {
+    const state = mkBaseState();
+
+    expect(inheritanceClaimProspectSignature(state)).toBe("inheritance_claim:p_head");
+    expect(inheritanceClaimProspectSignatureForSubject("p_other")).toBe("inheritance_claim:p_other");
   });
 });

@@ -6,6 +6,11 @@ import {
   getMarriageOfferRegistryEntryForWindowOffer,
   type MarriageOfferRegistryEntry,
 } from "../domains/people/marriageOfferRegistry";
+import {
+  buildInheritanceClaimProspect,
+  inheritanceClaimProspectSignature,
+  inheritanceClaimProspectSignatureForSubject,
+} from "../domains/people/successionRegistry";
 import { clearReservation, reserveCandidate } from "../marriageMarket";
 import { Rng } from "../rng";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
@@ -90,13 +95,9 @@ function writeResolvedProspectSignatures(state: RunState, map: Record<string, Pr
   anyFlags._prospect_signatures_v1 = out;
 }
 
-function inheritanceClaimSignature(state: RunState): string {
-  return `inheritance_claim:${state.house.head.id}`;
-}
-
 function prospectSignature(prospect: Prospect): string | null {
   if (prospect.type === "inheritance_claim" && prospect.subject_person_id) {
-    return `inheritance_claim:${prospect.subject_person_id}`;
+    return inheritanceClaimProspectSignatureForSubject(prospect.subject_person_id);
   }
   return null;
 }
@@ -423,7 +424,7 @@ export function buildProspectsWindowPhase(
   }
 
   const heir = state.house.heir_id ?? deps.computeHeirId(state);
-  const inheritanceSignature = heir === null ? inheritanceClaimSignature(state) : null;
+  const inheritanceSignature = heir === null ? inheritanceClaimProspectSignature(state) : null;
   if (
     prospects.length < 3 &&
     !activeTypes.has("inheritance_claim") &&
@@ -431,20 +432,15 @@ export function buildProspectsWindowPhase(
     inheritanceSignature &&
     !isProspectSignatureSuppressed(state, inheritanceSignature)
   ) {
-    addProspect({
-      id: makeId("inheritance_claim", state.house.head.id),
-      type: "inheritance_claim",
+    const inheritanceClaimProspect = buildInheritanceClaimProspect(state, {
+      prospect_id: makeId("inheritance_claim", state.house.head.id),
       from_house_id: sponsorHouseId,
       to_house_id: playerHouseId,
-      subject_person_id: state.house.head.id,
-      summary: "Inheritance claim",
-      requirements: [],
-      costs: {},
-      predicted_effects: { flags_set: ["inheritance_claim_active"] },
-      uncertainty: "possible",
       expires_turn: t + 2,
-      actions: ["accept", "reject"]
+      heir_id: heir,
+      subject_person_id: state.house.head.id,
     });
+    if (inheritanceClaimProspect) addProspect(inheritanceClaimProspect);
   }
 
   writeActiveProspects(state, active);
