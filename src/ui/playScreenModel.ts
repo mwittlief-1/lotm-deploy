@@ -1,4 +1,12 @@
-import type { RunState } from "../sim/types";
+import type { ProspectsWindow, RunState } from "../sim/types";
+import {
+  ensureCourtAgendaRegistry,
+  selectCourtAgendaItems,
+  type CourtAgendaItemV0
+} from "../sim/domains/court/agendaRegistry";
+import { buildEconomyPortfolioAnalysisFromState } from "../sim/domains/economy/portfolioAnalysis";
+import { buildEconomyObligationsView } from "../sim/domains/experience/obligationsView";
+import { formatPersonName } from "./viewHelpers";
 
 export const PLAY_ANCHORS = {
   labor: "anchor_labor",
@@ -7,7 +15,8 @@ export const PLAY_ANCHORS = {
   unrest: "anchor_unrest",
   prospects: "anchor_prospects",
   household: "anchor_household",
-  events: "anchor_events"
+  events: "anchor_events",
+  portfolio: "anchor_portfolio"
 } as const;
 
 export type SourceTag = "decision" | "event" | "system_pressure" | "prospect";
@@ -27,6 +36,7 @@ export type AgendaItem = {
   tie_key: string;
   title: string;
   context: string;
+  notes: string[];
   cta_label: string;
   anchor: string;
 };
@@ -379,125 +389,276 @@ export function buildDiffLedgerItems(args: {
   return items;
 }
 
-export function buildCouncilAgendaItems(args: {
+function noteTagValue(item: CourtAgendaItemV0, prefix: string): string | null {
+  for (const tag of item.note_tags) {
+    if (tag.startsWith(prefix)) return tag.slice(prefix.length);
+  }
+  return null;
+}
+
+function humanizeCounterpartyKind(value: string): string {
+  if (value === "liege") return "Liege";
+  if (value === "church") return "Church";
+  return value;
+}
+
+function humanizeProspectType(value: string): string {
+  if (value === "grant") return "Grant";
+  if (value === "marriage") return "Marriage";
+  if (value === "inheritance_claim") return "Inheritance claim";
+  return value;
+}
+
+function humanizePortfolioMetric(metricKey: string): string {
+  switch (metricKey) {
+    case "outlier.highest.arrears_coin":
+      return "coin arrears";
+    case "outlier.highest.arrears_bushels":
+      return "bushel arrears";
+    case "outlier.highest.tax_due_coin":
+      return "coin due";
+    case "outlier.highest.tithe_due_bushels":
+      return "church dues";
+    case "outlier.highest.consumption.shortage_bushels":
+      return "food shortage pressure";
+    case "outlier.lowest.net.coin":
+      return "net coin";
+    case "outlier.lowest.net.food_stores":
+      return "net food stores";
+    case "outlier.lowest.net.meat_stores":
+      return "net meat stores";
+    default:
+      return metricKey;
+  }
+}
+
+function findProspectById(prospectsWindow: ProspectsWindow | null, prospectId: string | null): any | null {
+  if (!prospectsWindow || !prospectId) return null;
+  return (Array.isArray(prospectsWindow.prospects) ? prospectsWindow.prospects : []).find((prospect) => prospect?.id === prospectId) ?? null;
+}
+
+function personNameFromState(state: RunState, personId: string | null): string {
+  if (!personId) return "Unknown person";
+  const person = (state as any)?.people?.[personId] ?? null;
+  return formatPersonName(person ?? { id: personId });
+}
+
+function agendaItemFromRegistry(args: {
   anchors: typeof PLAY_ANCHORS;
-  arrearsCarried: { coin: number; bushels: number };
   copy: any;
-  deltaBushels: number;
-  deltaUnrest: number;
-  dueEntering: { coin: number; bushels: number };
-  laborOversubscribed: boolean;
-  prospectsAll: any[];
-  report: any;
-  shouldSurfaceWeatherOnFood: boolean;
-  weatherHarmedHarvestWhy: string | null;
-}): AgendaItem[] {
-  const {
-    anchors,
-    arrearsCarried,
-    copy,
-    deltaBushels,
-    deltaUnrest,
-    dueEntering,
-    laborOversubscribed,
-    prospectsAll,
-    report,
-    shouldSurfaceWeatherOnFood,
-    weatherHarmedHarvestWhy
-  } = args;
+  item: CourtAgendaItemV0;
+  previewState: RunState;
+  prospectsWindow: ProspectsWindow | null;
+}): AgendaItem {
+  const { anchors, copy, item, previewState, prospectsWindow } = args;
+  const obligationsView = buildEconomyObligationsView(previewState);
+  const officeRegistry = ((previewState.house as any)?.court_office_registry ?? {}) as Record<string, any>;
+  const serviceRegistry = ((previewState.house as any)?.court_service_record_registry ?? {}) as Record<string, any>;
+  const delegationView = ((previewState.house as any)?.court_delegation_view ?? {}) as Record<string, any>;
+  const portfolio = ((previewState as any)?.portfolio ?? buildEconomyPortfolioAnalysisFromState(previewState)) as Record<string, any>;
 
-  const items: AgendaItem[] = [];
-  const nowTurn = report.turn_index;
+  if (item.source_tag === "obligations") {
+    const counterpartyKind = noteTagValue(item, "counterparty:");
+    const summary =
+      obligationsView.counterparty_summaries.find((candidate) => candidate.counterparty_kind === counterpartyKind) ?? null;
 
-  if (laborOversubscribed) {
-    items.push({
-      id: "agenda_labor_oversubscribed",
-      score: 1000,
-      tie_key: "00_labor",
-      title: copy.agenda_labor_title,
-      context: copy.agenda_labor_context,
-      cta_label: copy.cta_reviewLabor,
-      anchor: anchors.labor
-    });
+    if (item.source_key === "obligations.enforcement" && summary) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "Penalty pressure is active",
+        context: summary.enforcement_summary,
+        notes: [summary.settlement_summary],
+        cta_label: copy.cta_reviewObligations,
+        anchor: anchors.obligations
+      };
+    }
+
+    if (item.source_key === "obligations.arrears" && summary) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "Arrears need attention",
+        context: summary.settlement_summary,
+        notes: [summary.enforcement_summary],
+        cta_label: copy.cta_reviewObligations,
+        anchor: anchors.obligations
+      };
+    }
+
+    if (summary) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: copy.agenda_obligations_title,
+        context: summary.settlement_summary,
+        notes: [`${humanizeCounterpartyKind(summary.counterparty_kind)} prefers ${summary.preferred_payment_mode.replaceAll("_", " ")} payments.`],
+        cta_label: copy.cta_reviewObligations,
+        anchor: anchors.obligations
+      };
+    }
   }
 
-  if (report.shortage_bushels > 0 || deltaBushels < 0) {
-    const severity = (report.shortage_bushels ?? 0) + Math.abs(Math.min(0, deltaBushels));
-    items.push({
-      id: "agenda_food_shortage",
-      score: 900 + severity,
-      tie_key: "01_food",
-      title: copy.agenda_food_title,
-      context: shouldSurfaceWeatherOnFood && weatherHarmedHarvestWhy ? weatherHarmedHarvestWhy : copy.agenda_food_context,
-      cta_label: copy.cta_viewFoodDetails,
-      anchor: anchors.food
-    });
-  }
+  if (item.source_tag === "prospects") {
+    const prospect = findProspectById(prospectsWindow, item.subject_ref_id);
+    const expiryLine =
+      prospect && typeof prospect.expires_turn === "number" ? `Expires end of Turn ${Math.trunc(prospect.expires_turn)}.` : null;
 
-  const dueTotal = (dueEntering.coin ?? 0) + (dueEntering.bushels ?? 0);
-  if (dueTotal > 0) {
-    const severity = dueTotal + (arrearsCarried.coin ?? 0) + (arrearsCarried.bushels ?? 0);
-    items.push({
-      id: "agenda_obligations_due",
-      score: 850 + severity,
-      tie_key: "02_obligations",
-      title: copy.agenda_obligations_title,
-      context: copy.agenda_obligations_context,
-      cta_label: copy.cta_reviewObligations,
-      anchor: anchors.obligations
-    });
-  }
-
-  if (deltaUnrest > 0) {
-    items.push({
-      id: "agenda_unrest_rising",
-      score: 800 + deltaUnrest,
-      tie_key: "03_unrest",
-      title: copy.agenda_unrest_title,
-      context: copy.agenda_unrest_context,
-      cta_label: copy.cta_viewUnrestDetails,
-      anchor: anchors.unrest
-    });
-  }
-
-  {
-    const expiring = prospectsAll
-      .filter((prospect) => typeof prospect?.expires_turn === "number" && Number.isFinite(prospect.expires_turn))
-      .map((prospect) => ({ id: typeof prospect?.id === "string" ? prospect.id : "", expires_turn: Math.trunc(prospect.expires_turn as number) }))
-      .filter((prospect) => prospect.id && prospect.expires_turn <= nowTurn + 1)
-      .sort((a, b) => a.expires_turn - b.expires_turn || a.id.localeCompare(b.id));
-
-    const pick = expiring[0];
-    if (pick) {
-      const severity = Math.max(0, (nowTurn + 1) - pick.expires_turn);
-      items.push({
-        id: `agenda_prospect_expiring:${pick.id}`,
-        score: 780 + severity,
-        tie_key: `10_prospect:${pick.id}`,
+    if (item.source_key === "prospects.expiring" && prospect) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
         title: copy.agenda_prospect_title,
-        context: copy.agenda_prospect_context(pick.expires_turn),
+        context: `${humanizeProspectType(prospect.type)}: ${prospect.summary}. ${copy.agenda_prospect_context(prospect.expires_turn)}`,
+        notes: prospect.requirements.slice(0, 1).map((requirement: any) => requirement.text),
         cta_label: copy.cta_viewProspects,
         anchor: anchors.prospects
-      });
+      };
+    }
+
+    if (item.source_key === "prospects.grant" && prospect) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "Grant opportunity is open",
+        context: prospect.summary,
+        notes: expiryLine ? [expiryLine] : [],
+        cta_label: copy.cta_viewProspects,
+        anchor: anchors.prospects
+      };
+    }
+
+    if (item.source_key === "prospects.marriage" && prospect) {
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "Marriage opportunity is open",
+        context: prospect.summary,
+        notes: expiryLine ? [expiryLine] : [],
+        cta_label: copy.cta_viewProspects,
+        anchor: anchors.prospects
+      };
     }
   }
 
-  {
-    const houseLog: any[] = Array.isArray(report?.house_log) ? report.house_log : [];
-    const changed = houseLog.some((entry) => entry?.kind === "heir_selected" || entry?.kind === "succession");
-    if (changed && nowTurn > 0) {
-      items.push({
-        id: "agenda_succession",
-        score: 760,
-        tie_key: "06_heir",
-        title: copy.agenda_succession_title,
-        context: copy.agenda_succession_context,
+  if (item.source_tag === "offices") {
+    if (item.source_key === "offices.required_vacancy") {
+      const seat = officeRegistry.seats_by_id?.[item.subject_ref_id ?? ""];
+      const vacancyTurns =
+        seat && seat.vacancy_started_turn_index !== null
+          ? Math.max(0, Math.trunc(previewState.turn_index) - seat.vacancy_started_turn_index)
+          : 0;
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "A court seat stands vacant",
+        context: `${seat?.title ?? "Required office"} is unfilled.`,
+        notes: [`Vacant for ${vacancyTurns} turn${vacancyTurns === 1 ? "" : "s"}.`],
         cta_label: copy.cta_viewHousehold,
         anchor: anchors.household
-      });
+      };
+    }
+
+    if (item.source_key === "offices.realm_holder_transition") {
+      const seat = officeRegistry.seats_by_id?.[item.subject_ref_id ?? ""];
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "A realm office just changed hands",
+        context: `${seat?.title ?? "Realm office"} last shifted on Turn ${seat?.last_transition_turn_index ?? previewState.turn_index}.`,
+        notes: seat?.holder_person_id ? [`Current holder: ${personNameFromState(previewState, seat.holder_person_id)}.`] : [],
+        cta_label: copy.cta_viewHousehold,
+        anchor: anchors.household
+      };
+    }
+
+    if (item.source_key === "offices.delegated_action") {
+      const action = (Array.isArray(delegationView.actions) ? delegationView.actions : []).find(
+        (entry: any) => entry?.action === item.subject_ref_id
+      );
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "Delegated court work is active",
+        context: `${action?.summary_label ?? "Court action"} remains delegated.`,
+        notes: action ? [`Budget delta ${action.budget_cost_delta}, energy delta ${action.energy_cost_delta}.`] : [],
+        cta_label: copy.cta_viewHousehold,
+        anchor: anchors.household
+      };
+    }
+
+    if (item.source_key === "offices.active_service_record") {
+      const record = serviceRegistry.records_by_id?.[item.subject_ref_id ?? ""];
+      const seat = officeRegistry.seats_by_id?.[record?.seat_id ?? ""];
+      return {
+        id: item.agenda_item_id,
+        score: item.priority,
+        tie_key: item.tie_key,
+        title: "A court placement deserves review",
+        context: `${personNameFromState(previewState, record?.holder_person_id ?? null)} serves as ${seat?.title ?? "office holder"}.`,
+        notes: record ? [`Placement mode: ${String(noteTagValue(item, "placement:") ?? "serving_actor").replaceAll("_", " ")}.`] : [],
+        cta_label: copy.cta_viewHousehold,
+        anchor: anchors.household
+      };
     }
   }
 
-  items.sort((a, b) => b.score - a.score || a.tie_key.localeCompare(b.tie_key));
-  return items.slice(0, Math.min(5, Math.max(3, items.length)));
+  if (item.source_tag === "portfolio_outliers") {
+    const metricKey = noteTagValue(item, "metric:");
+    const entry = metricKey
+      ? ((portfolio.outliers_by_metric?.[metricKey] ?? []) as any[]).find((candidate) => candidate?.manor_id === item.subject_ref_id) ?? null
+      : null;
+    return {
+      id: item.agenda_item_id,
+      score: item.priority,
+      tie_key: item.tie_key,
+      title: "A portfolio outlier needs attention",
+      context: `${humanizePortfolioMetric(metricKey ?? "portfolio.outlier")} is surfacing in the holdings shell.`,
+      notes: entry ? [`Current bounded value: ${entry.value}.`] : [],
+      cta_label: copy.cta_viewPortfolio ?? "View portfolio",
+      anchor: anchors.portfolio
+    };
+  }
+
+  return {
+    id: item.agenda_item_id,
+    score: item.priority,
+    tie_key: item.tie_key,
+    title: "Council agenda item",
+    context: item.summary_key,
+    notes: [],
+    cta_label: copy.cta_openDetails,
+    anchor: anchors.events
+  };
+}
+
+export function buildCouncilAgendaItems(args: {
+  anchors: typeof PLAY_ANCHORS;
+  copy: any;
+  previewState: RunState;
+  report: any;
+}): AgendaItem[] {
+  const { anchors, copy, previewState, report } = args;
+  const prospectsWindow =
+    report?.prospects_window && typeof report.prospects_window === "object" ? (report.prospects_window as ProspectsWindow) : null;
+  const registry = ensureCourtAgendaRegistry(previewState, { prospects_window: prospectsWindow });
+
+  return selectCourtAgendaItems(registry).map((item) =>
+    agendaItemFromRegistry({
+      anchors,
+      copy,
+      item,
+      previewState,
+      prospectsWindow
+    })
+  );
 }

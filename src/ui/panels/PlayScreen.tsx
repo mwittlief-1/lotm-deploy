@@ -580,16 +580,9 @@ export function PlayScreen({
 
   const councilAgendaItems = buildCouncilAgendaItems({
     anchors: PLAY_ANCHORS,
-    arrearsCarried,
     copy,
-    deltaBushels,
-    deltaUnrest,
-    dueEntering,
-    laborOversubscribed,
-    prospectsAll,
+    previewState: ctx.preview_state,
     report: ctx.report,
-    shouldSurfaceWeatherOnFood,
-    weatherHarmedHarvestWhy
   });
 
   const resourceChips = buildStickyResourceChips({
@@ -737,6 +730,7 @@ export function PlayScreen({
     ),
     portfolio_overview: portfolioContract ? (
       <PortfolioOverviewPanel
+        anchorId={PLAY_ANCHORS.portfolio}
         contract={portfolioContract}
         mapCheckpoint={portfolioMapCheckpoint}
         onCenterSelectedHolding={
