@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-006-T06
+  last_completed_task_id: V03-R3-003-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 68fe6a0
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: eaa251e
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,18 +21,12 @@ last_run:
     run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
     run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
 notes: >-
-  Accepted Social V03-R2-006-T01 through T06 on kickoff, closed the grant
-  acquisition baseline epic, and opened the next real downstream fronts for
-  Social court agenda work, Engine AI rails, and UI content inventory. The
-  accepted integration keeps the grant acquisition surfaces on the existing
-  deterministic replay line.
+  Refreshed the social lane from kickoff truth, then accepted Social
+  V03-R3-003-T03 through T05 on the lane branch, closing the court agenda
+  scaffolding epic while preserving the existing Engine and UI dispatch claims.
+  Replay stayed on the accepted deterministic line after the agenda registry,
+  population, and UI stub surfaces were added.
 active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R3-003-T03
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-engine-core:
     task_id: V03-R3-006-T01
     claimed_by: integrator.dispatch
