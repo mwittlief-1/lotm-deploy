@@ -6794,7 +6794,7 @@ tasks:
   - V03-R3-003-T02
   - V03-R2-006-T06
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: awaits V03-R2-006-T06
   allowed_paths:
   - src/sim/domains/court/**
   - src/sim/domains/economy/**
