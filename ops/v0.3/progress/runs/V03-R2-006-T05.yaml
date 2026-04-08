@@ -1,0 +1,43 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round25
+task_id: V03-R2-006-T05
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: 6dd9bae6ecebed04f035691db3e74e9f341044e8
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+  run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+artifacts:
+  registry_file: src/sim/domains/people/grantAcquisitionRegistry.ts
+  preview_surface: src/sim/domains/people/playerHousehold.ts
+  snapshot_surface: src/sim/domains/experience/reporting.ts
+  surface_tests: tests/sim/grant_acquisition_surfaces.test.ts
+findings:
+  - Marriage, grant, and inheritance claim prospects now share one bounded acquisition window with deterministic family ordering and stable tie-breaks.
+  - Preview state and bounded snapshots now expose grant eligibility, source registries, dossier summaries, and the canonical acquisition window as hidden readable surfaces.
+  - The accepted projection seam intentionally leaves phase-level grant accept and reject behavior untouched while giving later consumers a single domain-owned read path.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R2-006-T06
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 completed the acquisition-window surfaces and the same-lane chain continued into fixture and closeout work.
