@@ -5,10 +5,12 @@ import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
 import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const delegationView = buildCourtDelegationView(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
@@ -41,6 +43,30 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     });
   }
   (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
+  Object.defineProperty(snapshot, "succession_line_summary", {
+    value: deepCopy(successionSurfaces.succession_line_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "claimant_summary", {
+    value: deepCopy(successionSurfaces.claimant_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "succession_line_summary", {
+    value: deepCopy(successionSurfaces.succession_line_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "claimant_summary", {
+    value: deepCopy(successionSurfaces.claimant_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
   return snapshot;
 }
 

@@ -1,13 +1,19 @@
 import { registryPersonFor } from "../../actors";
 import type { HouseholdRoster, Person, RunState } from "../../types";
 import { buildKnownHouseExperienceSurfaces } from "./knownHouseSummaries";
+import { buildSuccessionExperienceSurfaces } from "./successionSummaries";
 
 export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   (state as any).known_houses = experienceSurfaces.known_houses;
   (state as any).house_dossiers = experienceSurfaces.house_dossiers;
+  (state as any).succession_line_summary = successionSurfaces.succession_line_summary;
+  (state as any).claimant_summary = successionSurfaces.claimant_summary;
   (state.house as any).known_houses = experienceSurfaces.known_houses;
   (state.house as any).house_dossiers = experienceSurfaces.house_dossiers;
+  (state.house as any).succession_line_summary = successionSurfaces.succession_line_summary;
+  (state.house as any).claimant_summary = successionSurfaces.claimant_summary;
 
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;
