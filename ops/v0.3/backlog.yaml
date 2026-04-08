@@ -1110,7 +1110,7 @@ epics:
 - id: V03-R3-006
   title: AI belief registry and evidence rails
   release: v0.3.3
-  status: in_progress
+  status: done
   priority: 35
   tranche: 4
   change_type: behavior_change
@@ -7480,7 +7480,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Close epic and refresh AI rail docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7511,11 +7511,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-006-T05.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T19:57:17-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-007-T01
   parent_epic: V03-R3-007
   release: v0.3.3

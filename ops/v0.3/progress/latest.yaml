@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-006-T04
+  last_completed_task_id: V03-R3-006-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-engine-core
-  git_commit: a22f5ff
+  git_commit: 5105963
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -17,27 +17,21 @@ last_run:
     qa: pass
     preflight: pass
     repo_duplicates: not_run
-    seed_replay_batch_twice: pass
+    seed_replay_batch_twice: not_run
   replay_hashes:
-    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
-    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run1: not_run
+    run2: not_run
 notes: >-
-  Closed Engine V03-R3-006-T04 with a hidden read-only AI rail debug packet
-  that bundles belief payloads, current runtime evidence, and explicit policy
-  hook metadata, preserved the existing replay hash, and continued directly
-  into V03-R3-006-T05 under the same accepted dispatch chain.
+  Closed Engine V03-R3-006-T05 by locking the v0.3.3 AI rail packet,
+  refreshing the baseline audit with the accepted closeout reference, and
+  finishing the parent epic handoff. No further same-lane engine task is
+  eligible in backlog state, so the lane stops here.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R3-003-T03
     claimed_by: integrator.dispatch
     claimed_at: '2026-04-08T13:52:20-0400'
     claim_expires_at: '2026-04-08T17:52:20-0400'
-    run_id: 2026-04-08_manual_acceptance_round26
-  codex/v0.3-lane-engine-core:
-    task_id: V03-R3-006-T05
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T13:52:20-0400'
-    claim_expires_at: '2026-04-08T19:57:17-0400'
     run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-ui-experience:
     task_id: V03-R3-007-T01
