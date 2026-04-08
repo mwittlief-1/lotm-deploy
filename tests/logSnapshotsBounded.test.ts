@@ -25,7 +25,9 @@ const ALLOWED_KEYS = new Set([
   "kinship",
   "kinship_edges",
   "known_houses",
-  "house_dossiers"
+  "house_dossiers",
+  "succession_line_summary",
+  "claimant_summary"
 ]);
 
 describe("TurnLogEntry snapshots", () => {

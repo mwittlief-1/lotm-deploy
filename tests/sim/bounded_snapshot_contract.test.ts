@@ -56,6 +56,27 @@ describe("bounded snapshot contract", () => {
         })
       ])
     );
+    expect(serialized.succession_line_summary).toMatchObject({
+      schema_version: "succession_line_summary_v0",
+      house_id: "h_player",
+      entries: expect.arrayContaining([
+        expect.objectContaining({
+          person_id: expect.any(String),
+          person_name: expect.any(String),
+          line_position: expect.any(Number),
+        }),
+      ]),
+    });
+    expect(serialized.claimant_summary).toMatchObject({
+      schema_version: "claimant_summary_v0",
+      house_id: "h_player",
+      entries: expect.arrayContaining([
+        expect.objectContaining({
+          claimant_person_id: expect.any(String),
+          claimant_name: expect.any(String),
+        }),
+      ]),
+    });
     expect(serialized.world_topology_view).toMatchObject({
       schema_version: "world_topology_snapshot_v1",
       anchor_manor_id: "manor_hx_26597",

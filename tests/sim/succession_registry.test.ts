@@ -243,6 +243,8 @@ describe("succession registry schema", () => {
       claimant_adult_succession_position: null,
       claimant_basis_kind: "household_member_fallback",
       claimant_relation_group: "fallback_household",
+      claimant_house_id: "h_player",
+      claimant_house_relevance_reasons: [],
       target_house_id: "h_player",
       target_head_person_id: "p_head",
       target_current_heir_id: null,
@@ -260,6 +262,8 @@ describe("succession registry schema", () => {
         relation_group: "fallback_household",
         blocked_by_current_heir: false,
         adult_eligible: true,
+        house_id: "h_player",
+        house_relevance_reasons: [],
       },
       {
         claimant_person_id: "p_cousin_a",
@@ -269,6 +273,8 @@ describe("succession registry schema", () => {
         relation_group: "fallback_household",
         blocked_by_current_heir: false,
         adult_eligible: true,
+        house_id: "h_player",
+        house_relevance_reasons: [],
       }
     ]);
     expect(prospect?.predicted_effects.flags_set).toEqual(["inheritance_claim_active"]);
@@ -293,7 +299,7 @@ describe("succession registry schema", () => {
       claim_window_open: true,
       target_current_heir_id: null,
       target_adult_successor_id: "p_spouse",
-      summary: "Inheritance claim",
+      summary: "p_spouse advances an inheritance claim.",
       requirements: [],
       actions: ["accept", "reject"],
       costs: {},
@@ -301,6 +307,134 @@ describe("succession registry schema", () => {
     });
     expect(Array.isArray(claim?.predicted_effects?.relationship_deltas)).toBe(false);
     expect(window.prospects.filter((entry) => entry.type === "inheritance_claim")).toHaveLength(1);
+  });
+
+  it("feeds cadet and marriage-link relevance into claimant ordering when the canonical line is empty", () => {
+    const state = mkBaseState();
+    state.house.heir_id = null;
+    state.house.children = [];
+    state.kinship_edges = [{ kind: "spouse_of", a_id: state.house.head.id, b_id: state.house.spouse!.id }];
+    state.houses!.h_player.child_ids = [];
+    state.houses!.h_player.member_person_ids = [state.house.head.id, state.house.spouse!.id];
+
+    const father = mkPerson("p_father", "M", 70);
+    const sister = mkPerson("p_sister", "F", 27, { house_id: "h_cadet", residence_house_id: "h_cadet" });
+    const brotherInLaw = mkPerson("p_brother_in_law", "M", 31, { house_id: "h_cadet", residence_house_id: "h_cadet" });
+    const nephew = mkPerson("p_nephew", "M", 18, { house_id: "h_cadet", residence_house_id: "h_cadet" });
+
+    state.people![father.id] = father;
+    state.people![sister.id] = sister;
+    state.people![brotherInLaw.id] = brotherInLaw;
+    state.people![nephew.id] = nephew;
+    state.houses!.h_cadet = {
+      id: "h_cadet",
+      name: "Cadet",
+      tier: "Knight",
+      head_id: brotherInLaw.id,
+      spouse_id: sister.id,
+      child_ids: [nephew.id],
+      member_person_ids: [brotherInLaw.id, sister.id, nephew.id],
+    };
+    state.kinship_edges.push(
+      { kind: "parent_of", parent_id: father.id, child_id: state.house.head.id },
+      { kind: "parent_of", parent_id: father.id, child_id: sister.id },
+      { kind: "spouse_of", a_id: sister.id, b_id: brotherInLaw.id },
+      { kind: "parent_of", parent_id: sister.id, child_id: nephew.id },
+      { kind: "parent_of", parent_id: brotherInLaw.id, child_id: nephew.id },
+    );
+
+    const line = buildSuccessionLine(state, { limit: 6 });
+    const registry = buildClaimantRegistry(state, { limit: 6 });
+    const prospect = buildInheritanceClaimProspect(state, {
+      prospect_id: "pros_inheritance_claim_cadet",
+      from_house_id: "h_sponsor",
+      to_house_id: "h_player",
+      expires_turn: state.turn_index + 2,
+      heir_id: null,
+    });
+
+    expect(line.entries.slice(0, 3).map((entry) => entry.person_id)).toEqual([
+      "p_sister",
+      "p_nephew",
+      "p_brother_in_law",
+    ]);
+    expect(line.entries.slice(0, 3).map((entry) => entry.basis_kind)).toEqual([
+      "cadet_branch_relevance",
+      "cadet_branch_relevance",
+      "marriage_link_relevance",
+    ]);
+    expect(line.entries[0]?.house_relevance_reasons).toEqual(["blood_tie"]);
+    expect(registry.current_heir_id).toBe(null);
+    expect(registry.claim_window_open).toBe(true);
+    expect(registry.entries[0]).toMatchObject({
+      claimant_person_id: "p_sister",
+      basis_kind: "cadet_branch_relevance",
+      house_id: "h_cadet",
+      house_relevance_reasons: ["blood_tie"],
+    });
+    expect(prospect).toMatchObject({
+      claimant_person_id: "p_sister",
+      claimant_basis_kind: "cadet_branch_relevance",
+      claimant_house_id: "h_cadet",
+      claimant_house_relevance_reasons: ["blood_tie"],
+      claim_window_open: true,
+    });
+  });
+
+  it("keeps married-out descendant branches unique when claimant relevance reaches the same external house", () => {
+    const state = mkBaseState();
+    state.house.heir_id = null;
+    state.house.children = [state.house.children[2]!];
+    state.houses!.h_player.child_ids = [state.house.children[0]!.id];
+    state.houses!.h_player.member_person_ids = [state.house.head.id, state.house.spouse!.id, state.house.children[0]!.id];
+    state.people!.p_son_old.alive = false;
+    state.people!.p_son_young.alive = false;
+
+    const daughter = state.house.children[0]!;
+    const groom = mkPerson("p_groom", "M", 20, { house_id: "h_cadet", residence_house_id: "h_cadet" });
+    const grandson = mkPerson("p_grandson_ext", "M", 2, { house_id: "h_cadet", residence_house_id: "h_cadet" });
+    state.people![groom.id] = groom;
+    state.people![grandson.id] = grandson;
+    daughter.house_id = "h_cadet";
+    daughter.residence_house_id = "h_cadet";
+    state.people![daughter.id] = daughter;
+    state.houses!.h_cadet = {
+      id: "h_cadet",
+      name: "Cadet",
+      tier: "Knight",
+      head_id: groom.id,
+      spouse_id: daughter.id,
+      child_ids: [grandson.id],
+      member_person_ids: [groom.id, daughter.id, grandson.id],
+    };
+    state.kinship_edges = state.kinship_edges!.filter((edge: any) => {
+      if (edge.kind !== "parent_of") return true;
+      return edge.child_id === daughter.id;
+    });
+    state.kinship_edges!.push(
+      { kind: "spouse_of", a_id: daughter.id, b_id: groom.id },
+      { kind: "parent_of", parent_id: daughter.id, child_id: grandson.id },
+      { kind: "parent_of", parent_id: groom.id, child_id: grandson.id },
+    );
+
+    const line = buildSuccessionLine(state, { limit: 8 });
+    const daughterEntries = line.entries.filter((entry) => entry.person_id === daughter.id);
+    const grandsonEntries = line.entries.filter((entry) => entry.person_id === grandson.id);
+
+    expect(daughterEntries).toHaveLength(1);
+    expect(grandsonEntries).toHaveLength(1);
+    expect(daughterEntries[0]).toMatchObject({
+      basis_kind: "direct_descendant",
+      relation_group: "daughter_branch",
+      house_id: "h_cadet",
+      house_relevance_reasons: ["blood_tie", "marriage_tie"],
+    });
+    expect(grandsonEntries[0]).toMatchObject({
+      basis_kind: "direct_descendant",
+      relation_group: "daughter_branch",
+      house_id: "h_cadet",
+      house_relevance_reasons: ["blood_tie", "marriage_tie"],
+    });
   });
 
   it("keeps inheritance claim signatures deterministic and head-scoped", () => {

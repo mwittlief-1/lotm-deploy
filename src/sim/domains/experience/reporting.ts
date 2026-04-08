@@ -5,10 +5,12 @@ import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
 import { buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const delegationView = buildCourtDelegationView(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
@@ -29,6 +31,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     world_topology_view: buildBoundedWorldTopologyView(),
     known_houses: experienceSurfaces.known_houses,
     house_dossiers: experienceSurfaces.house_dossiers,
+    succession_line_summary: successionSurfaces.succession_line_summary,
+    claimant_summary: successionSurfaces.claimant_summary,
     flags: state.flags,
     game_over: state.game_over ?? null
   }) as RunSnapshot;
@@ -41,6 +45,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     });
   }
   (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
+  (snapshot.house as any).succession_line_summary = deepCopy(successionSurfaces.succession_line_summary);
+  (snapshot.house as any).claimant_summary = deepCopy(successionSurfaces.claimant_summary);
   return snapshot;
 }
 
