@@ -1,0 +1,41 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round24
+task_id: V03-R1-004-T04
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: e9afe990106fdc6695d65f61cc7167d044dfddb9
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+  run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+artifacts:
+  succession_registry_module: src/sim/domains/people/successionRegistry.ts
+  succession_registry_test: tests/sim/succession_registry.test.ts
+findings:
+  - Repaired the broken inheritance-claim prospect constructor on the lane before layering new claimant-order behavior.
+  - Succession ordering now appends deterministic cadet-branch and marriage-link relevance candidates after the canonical heir line, preserving direct and collateral order while surfacing connected external branches.
+  - Claim generation remains keyed to the canonical heir line, so added relevance does not silently close inheritance-claim windows.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-004-T05
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 closed cleanly and the same-lane chain continued into the summary-surface task.

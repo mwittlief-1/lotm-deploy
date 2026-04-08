@@ -1,0 +1,39 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round24_t06
+task_id: V03-R1-004-T06
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: e9afe990106fdc6695d65f61cc7167d044dfddb9
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+replay_hashes:
+  run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+  run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+artifacts:
+  closeout_doc: docs/releases/v0.3.1_claims_and_succession_closeout.md
+  epic_report: ops/v0.3/progress/runs/V03-R1-004.md
+findings:
+  - The release-facing closeout now records the accepted succession baseline, bounded claimant surface, and explicit `v0.3.1` non-goals for later legal and grant work.
+  - The opening audit remains as the historical baseline, while the closeout doc becomes the canonical release summary for the epic.
+  - The epic is now ready to remain done in backlog state with no active social claim.
+stop_reason: no_eligible_task
+next_task_cursor: ''
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T06 closed the epic and no next same-lane task was dispatched in the current branch snapshot.

@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R1-004-T03
+  last_completed_task_id: V03-R1-004-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: abf8137
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: e9afe99
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,17 +18,12 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
-    run2: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
+    run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+    run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
 notes: >-
-  Accepted Social V03-R1-004-T03 on kickoff using the replay-safe inheritance
-  claim seam. T04 is actively dispatched, and T05/T06 are already promoted so
-  the Social lane can keep moving through the same-lane succession chain
-  without another scheduler stop.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R1-004-T04
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T12:14:01-0400'
-    claim_expires_at: '2026-04-08T16:14:01-0400'
-    run_id: 2026-04-08_manual_acceptance_round24
+  Closed Social V03-R1-004-T04 through T06 on the lane branch. Succession
+  ordering now carries deterministic cadet and marriage-link relevance, and
+  preview/snapshot surfaces now expose bounded succession and claimant
+  summaries directly. Replay moved to the accepted matched hash because the
+  new summary surfaces now serialize into bounded outputs.
+active_claims: {}
