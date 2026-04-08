@@ -1,6 +1,7 @@
 import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "../../stateSchema";
 import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
+import { buildAiRailDebugPacket } from "../ai/debug";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
@@ -44,6 +45,12 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
       configurable: true
     });
   }
+  Object.defineProperty(snapshot, "ai_rail_debug_packet", {
+    value: deepCopy(buildAiRailDebugPacket(state)),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
   (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
   Object.defineProperty(snapshot, "succession_line_summary", {
     value: deepCopy(successionSurfaces.succession_line_summary),
