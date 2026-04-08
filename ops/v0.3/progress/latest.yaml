@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-003-T02
+  last_completed_task_id: V03-R1-004-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: c56702c
+  git_commit: 24a8492
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,10 +21,16 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted Social V03-R3-003-T02 on kickoff from the completed lane handoff:
-  the agenda registry contract seam is now part of repo truth with deterministic
-  typed source mappings for obligations, prospects, offices, and portfolio
-  outliers. Social has no claimable follow-on task yet because V03-R3-003-T03
-  still waits on V03-R2-006-T06; the same-lane pre-promotion policy remains in
-  place for immediate successors when no real dependency blocker exists.
-active_claims: {}
+  Accepted the previously missing Social succession baseline on kickoff:
+  V03-R1-004-T01 and T02 are now part of repo truth, and inheritance-claim
+  prospect generation routes through people-domain helpers without changing the
+  accepted replay line. Social V03-R1-004-T03 is actively dispatched, which
+  reopens the succession chain and puts the lane back on a real path toward the
+  later grant and agenda blockers.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R1-004-T03
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T10:23:46-0400'
+    claim_expires_at: '2026-04-08T14:23:46-0400'
+    run_id: 2026-04-08_manual_acceptance_round23

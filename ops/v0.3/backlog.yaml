@@ -637,7 +637,7 @@ epics:
 - id: V03-R1-004
   title: Claims and succession baseline
   release: v0.3.1
-  status: todo
+  status: in_progress
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4005,7 +4005,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Define next-in-line map and claimant registry schema
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4045,7 +4045,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Implement inheritance_claim prospect type and bounded generation rules
-  status: todo
+  status: ready
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4076,11 +4076,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-004-T03.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T10:23:46-0400'
+    claim_expires_at: '2026-04-08T14:23:46-0400'
+    run_id: 2026-04-08_manual_acceptance_round23
 - id: V03-R1-004-T04
   parent_epic: V03-R1-004
   release: v0.3.1
