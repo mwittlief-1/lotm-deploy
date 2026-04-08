@@ -28,6 +28,7 @@ export const EXPERIENCE_OBLIGATION_COUNTERPARTY_ORDER = ["liege", "church"] as c
 
 export type ExperienceObligationCounterpartyId = (typeof EXPERIENCE_OBLIGATION_COUNTERPARTY_ORDER)[number];
 export type ExperienceObligationEnforcementState = "clear" | "arrears";
+export type ExperienceObligationWarningStage = number | null;
 
 export type ExperienceObligationCounterpartyTemplate = {
   defaultGestureDetail: string;
@@ -160,27 +161,27 @@ export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEn
     id: "arrears.stage_legibility",
     title: "Arrears stage and next-step warnings",
     category: "arrears",
-    currentState: "hard_coded",
-    gap: "needs_template",
+    currentState: "central_copy",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T04",
     surfaces: ["Obligations cards", "Obligations modal", "Receipts counterparty paths"],
     currentRefs: [
-      "src/ui/playScreenObligations.ts#enforcementStageLabel",
-      "src/ui/playScreenObligations.ts#resolvedPressureSummary",
-      "src/ui/playScreenObligations.ts#responsePressureSummary"
+      "src/content/experienceContent.ts#renderObligationStageLabel",
+      "src/content/experienceContent.ts#renderObligationResolvedSummary",
+      "src/content/experienceContent.ts#renderObligationResponseSummary"
     ],
-    notes: "Stage messaging currently supports the v0.3.1 baseline, but it has no shared stage-specific content slots for stage-two tangible bite or stage-three dispossession danger."
+    notes: "The arrears ladder now has a shared stage-aware template path, including stage-two tangible bite and stage-three dispossession danger wording."
   },
   {
     id: "dispossession.pretrigger_warning",
     title: "Dispossession warning before end-state",
     category: "dispossession",
-    currentState: "missing",
-    gap: "needs_surface",
+    currentState: "central_copy",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T04",
-    surfaces: ["No dedicated pre-trigger warning surface yet"],
-    currentRefs: [],
-    notes: "The current shell has a game-over threshold tip and a game-over label, but no dedicated warning string family that escalates before the end-state actually lands."
+    surfaces: ["Obligations cards", "Obligations modal", "Receipts counterparty paths"],
+    currentRefs: ["src/content/experienceContent.ts#renderObligationStageLabel", "src/content/experienceContent.ts#renderObligationResponseSummary"],
+    notes: "Stage-three fiscal pressure now has a dedicated pre-trigger warning template so the player sees dispossession danger before the end-state lands."
   },
   {
     id: "dispossession.end_state_label",
@@ -242,11 +243,14 @@ export function renderObligationResolvedSummary(args: {
   arrearsAmount: number;
   carriedThisTurn: boolean;
   counterpartyId: ExperienceObligationCounterpartyId;
+  enforcementStage: ExperienceObligationWarningStage;
   settledThisTurn: boolean;
-  stageLabel: string;
 }): string {
-  const { arrearsAmount, carriedThisTurn, settledThisTurn, stageLabel } = args;
-  const normalizedStageLabel = stageLabel.trim().toLowerCase();
+  const { arrearsAmount, carriedThisTurn, enforcementStage, settledThisTurn } = args;
+  const normalizedStageLabel = renderObligationStageLabel({
+    enforcementStage,
+    enforcementState: arrearsAmount > 0 ? "arrears" : "clear"
+  }).toLowerCase();
 
   if (arrearsAmount > 0) {
     if (carriedThisTurn) {
@@ -266,11 +270,18 @@ export function renderObligationResponseSummary(args: {
   arrearsAmount: number;
   counterpartyId: ExperienceObligationCounterpartyId;
   dueAmount: number;
+  enforcementStage: ExperienceObligationWarningStage;
 }): string {
-  const { arrearsAmount, counterpartyId, dueAmount } = args;
+  const { arrearsAmount, counterpartyId, dueAmount, enforcementStage } = args;
 
   if (counterpartyId === "liege") {
     if (arrearsAmount > 0) {
+      if (enforcementStage !== null && enforcementStage >= 3) {
+        return "Next turn: dispossession danger is active. Clear liege arrears immediately or you can lose the seat.";
+      }
+      if (enforcementStage !== null && enforcementStage >= 2) {
+        return "Next turn: tangible bite is active. Clear liege arrears before more coin or stores are forced out of the manor.";
+      }
       return "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.";
     }
     if (dueAmount > 0) {
@@ -280,12 +291,31 @@ export function renderObligationResponseSummary(args: {
   }
 
   if (arrearsAmount > 0) {
+    if (enforcementStage !== null && enforcementStage >= 3) {
+      return "Next turn: dispossession danger is active. Clear church arrears immediately or you can lose the seat.";
+    }
+    if (enforcementStage !== null && enforcementStage >= 2) {
+      return "Next turn: tangible bite is active. Clear church arrears before more stores are forced out under church pressure.";
+    }
     return "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.";
   }
   if (dueAmount > 0) {
     return "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.";
   }
   return "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.";
+}
+
+export function renderObligationStageLabel(args: {
+  enforcementStage: ExperienceObligationWarningStage;
+  enforcementState: ExperienceObligationEnforcementState;
+}): string {
+  const { enforcementStage, enforcementState } = args;
+
+  if (enforcementState === "clear") return "Pressure clear";
+  if (enforcementStage === null) return "Pressure active";
+  if (enforcementStage >= 3) return "Stage 3: dispossession danger";
+  if (enforcementStage >= 2) return "Stage 2: tangible bite";
+  return `Stage ${enforcementStage} active`;
 }
 
 export function renderGrantAcceptConfirmBody(anyCost: boolean): string {

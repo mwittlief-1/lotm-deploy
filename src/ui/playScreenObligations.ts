@@ -1,5 +1,12 @@
 import type { RunState } from "../sim/types";
 import type { CourtDecisionBudgetSurface } from "./playScreenCourtBudget";
+import {
+  getObligationCounterpartyTemplate,
+  renderObligationGestureOutcome,
+  renderObligationResolvedSummary,
+  renderObligationResponseSummary,
+  renderObligationStageLabel
+} from "../content/experienceContent";
 
 export const PLAY_SCREEN_OBLIGATIONS_CONTRACT_SCHEMA_VERSION = "play_screen_obligations_contract_v1" as const;
 export const PLAY_SCREEN_OBLIGATION_COUNTERPARTY_ORDER = ["liege", "church"] as const;
@@ -81,36 +88,17 @@ type ParsedObligationsViewSummary = {
 
 const COUNTERPARTY_META: Record<
   ObligationsCounterpartyId,
-  {
-    defaultGestureDetail: string;
-    dueTitle: string;
-    fallbackTitle: string;
-    helper: string;
-    keywordHints: string[];
-    penaltyTitle: string;
+  ReturnType<typeof getObligationCounterpartyTemplate> & {
     receiptCategoryOrder: ObligationReceiptCategory[];
-    shortTitle: string;
   }
 > = {
   liege: {
-    defaultGestureDetail: "Court favor spent on noble gifts.",
-    dueTitle: "Tax due",
-    fallbackTitle: "House Liege",
-    helper: "Keeps liege dues, arrears pressure, and gift language aligned with coin-first receipts.",
-    keywordHints: ["liege", "tax", "gift", "coin arrears", "tax due", "liege tax"],
-    penaltyTitle: "Arrears & liege pressure",
+    ...getObligationCounterpartyTemplate("liege"),
     receiptCategoryOrder: ["coin", "unrest"],
-    shortTitle: "Liege"
   },
   church: {
-    defaultGestureDetail: "Court effort spent on religious offerings.",
-    dueTitle: "Tithe due",
-    fallbackTitle: "Parish Church",
-    helper: "Keeps church dues, arrears pressure, and offering language aligned with food-first receipts.",
-    keywordHints: ["church", "tithe", "offering", "bushels arrears", "tithe due", "church tithe"],
-    penaltyTitle: "Arrears & church pressure",
+    ...getObligationCounterpartyTemplate("church"),
     receiptCategoryOrder: ["food", "unrest"],
-    shortTitle: "Church"
   }
 };
 
@@ -149,58 +137,33 @@ function gestureReceiptCategory(counterpartyId: ObligationsCounterpartyId): Obli
 }
 
 function gestureRelationshipSummary(counterpartyId: ObligationsCounterpartyId, summary: ParsedObligationsViewSummary): string {
-  if (counterpartyId === "liege") {
-    if (summary.enforcementState === "arrears") {
-      return "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.";
-    }
-    return "Gift to liege is the relationship lever for steadying noble support when dues alone are not the whole problem.";
-  }
-
-  if (summary.enforcementState === "arrears") {
-    return "Offering to church is the relationship lever for easing church pressure when bushel arrears are already visible.";
-  }
-  return "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.";
+  return renderObligationGestureOutcome(counterpartyId, summary.enforcementState);
 }
 
 function enforcementStageLabel(summary: ParsedObligationsViewSummary): string {
-  if (summary.enforcementState === "clear") return "Pressure clear";
-  if (summary.enforcementStage !== null) return `Stage ${summary.enforcementStage} active`;
-  return "Pressure active";
+  return renderObligationStageLabel({
+    enforcementStage: summary.enforcementStage,
+    enforcementState: summary.enforcementState
+  });
 }
 
 function resolvedPressureSummary(summary: ParsedObligationsViewSummary): string {
-  if (summary.enforcementState === "arrears") {
-    if (summary.carriedThisTurn) {
-      return `This turn: arrears carried, so ${enforcementStageLabel(summary).toLowerCase()} now applies.`;
-    }
-    return `This turn: arrears remained open, so ${enforcementStageLabel(summary).toLowerCase()} stayed in place.`;
-  }
-
-  if (summary.settledThisTurn) {
-    return "This turn: no arrears carried, so pressure stayed clear.";
-  }
-
-  return "This turn: pressure ended clear with no carried arrears.";
+  return renderObligationResolvedSummary({
+    arrearsAmount: summary.arrearsAmount,
+    carriedThisTurn: summary.carriedThisTurn,
+    counterpartyId: summary.counterpartyKind,
+    enforcementStage: summary.enforcementStage,
+    settledThisTurn: summary.settledThisTurn
+  });
 }
 
 function responsePressureSummary(summary: ParsedObligationsViewSummary): string {
-  if (summary.counterpartyKind === "liege") {
-    if (summary.arrearsAmount > 0) {
-      return "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.";
-    }
-    if (summary.dueAmount > 0) {
-      return "Next turn: line up coin for the current tax due before it carries, then add a gift if support still looks thin.";
-    }
-    return "Next turn: no liege arrears are carried right now, but coin payments and gifts remain your levers if pressure returns.";
-  }
-
-  if (summary.arrearsAmount > 0) {
-    return "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.";
-  }
-  if (summary.dueAmount > 0) {
-    return "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.";
-  }
-  return "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.";
+  return renderObligationResponseSummary({
+    arrearsAmount: summary.arrearsAmount,
+    counterpartyId: summary.counterpartyKind,
+    dueAmount: summary.dueAmount,
+    enforcementStage: summary.enforcementStage
+  });
 }
 
 function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCounterpartyId, ParsedObligationsViewSummary> | null {

@@ -13,6 +13,7 @@ import {
   renderObligationGestureOutcome,
   renderObligationResolvedSummary,
   renderObligationResponseSummary,
+  renderObligationStageLabel,
   summarizeExperienceContentInventory
 } from "../../src/content/experienceContent";
 
@@ -22,8 +23,8 @@ describe("experienceContent inventory", () => {
 
     expect(summary.categories).toEqual([...EXPERIENCE_CONTENT_CATEGORY_ORDER]);
     expect(summary.slotCount).toBe(7);
-    expect(summary.missingCount).toBe(1);
-    expect(summary.needsSurfaceCount).toBe(1);
+    expect(summary.missingCount).toBe(0);
+    expect(summary.needsSurfaceCount).toBe(0);
   });
 
   it("maps current copy sources before the follow-on template tasks rewire them", () => {
@@ -51,8 +52,8 @@ describe("experienceContent inventory", () => {
     expect(dispossession).toEqual([
       expect.objectContaining({
         id: "dispossession.pretrigger_warning",
-        currentState: "missing",
-        gap: "needs_surface"
+        currentState: "central_copy",
+        gap: "none"
       }),
       expect.objectContaining({
         id: "dispossession.end_state_label",
@@ -124,8 +125,8 @@ describe("experienceContent inventory", () => {
         arrearsAmount: 4,
         carriedThisTurn: true,
         counterpartyId: "liege",
+        enforcementStage: 1,
         settledThisTurn: false,
-        stageLabel: "Stage 1 active"
       })
     ).toBe("This turn: arrears carried, so stage 1 active now applies.");
 
@@ -134,8 +135,8 @@ describe("experienceContent inventory", () => {
         arrearsAmount: 0,
         carriedThisTurn: false,
         counterpartyId: "church",
+        enforcementStage: 1,
         settledThisTurn: true,
-        stageLabel: "Pressure clear"
       })
     ).toBe("This turn: no arrears carried, so pressure stayed clear.");
 
@@ -143,7 +144,8 @@ describe("experienceContent inventory", () => {
       renderObligationResponseSummary({
         arrearsAmount: 2,
         counterpartyId: "liege",
-        dueAmount: 3
+        dueAmount: 3,
+        enforcementStage: 1
       })
     ).toBe("Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.");
 
@@ -151,11 +153,35 @@ describe("experienceContent inventory", () => {
       renderObligationResponseSummary({
         arrearsAmount: 0,
         counterpartyId: "church",
-        dueAmount: 5
+        dueAmount: 5,
+        enforcementStage: 1
       })
     ).toBe(
       "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support."
     );
+  });
+
+  it("renders the bounded arrears ladder through stage-two bite and stage-three dispossession danger", () => {
+    expect(renderObligationStageLabel({ enforcementStage: 2, enforcementState: "arrears" })).toBe("Stage 2: tangible bite");
+    expect(renderObligationStageLabel({ enforcementStage: 3, enforcementState: "arrears" })).toBe("Stage 3: dispossession danger");
+
+    expect(
+      renderObligationResponseSummary({
+        arrearsAmount: 4,
+        counterpartyId: "liege",
+        dueAmount: 2,
+        enforcementStage: 2
+      })
+    ).toBe("Next turn: tangible bite is active. Clear liege arrears before more coin or stores are forced out of the manor.");
+
+    expect(
+      renderObligationResponseSummary({
+        arrearsAmount: 12,
+        counterpartyId: "church",
+        dueAmount: 5,
+        enforcementStage: 3
+      })
+    ).toBe("Next turn: dispossession danger is active. Clear church arrears immediately or you can lose the seat.");
   });
 
   it("renders deterministic grant and marriage decision copy without touching prospect mechanics", () => {
