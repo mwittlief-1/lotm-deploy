@@ -6699,7 +6699,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Audit current agenda-worthy events and court-facing summary surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6734,11 +6734,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T08:43:19-0400'
-    claim_expires_at: '2026-04-08T12:43:22-0400'
-    run_id: 2026-04-08_manual_acceptance_round20
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-003-T02
   parent_epic: V03-R3-003
   release: v0.3.3

@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R2-004-T06
+  last_completed_task_id: V03-R3-003-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 0e3dcab
+  git_branch: codex/v0.3-lane-social-mechanics
+  git_commit: 380d53f
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,21 +15,17 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
     seed_replay_batch_twice: pass
+    repo_duplicates: not_run
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+    run2: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
 notes: >-
-  Accepted Social V03-R2-004-T06 on kickoff from the completed lane handoff:
-  invariant coverage and the office/service closeout packet are now part of repo
-  truth, epic V03-R2-004 is closed, and Social V03-R3-003-T01 is actively
-  dispatched. Social may self-advance to V03-R3-003-T02 after T01 closes
-  cleanly; V03-R3-003-T03 still waits on V03-R2-006-T06.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R3-003-T01
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T08:43:19-0400'
-    claim_expires_at: '2026-04-08T12:43:22-0400'
-    run_id: 2026-04-08_manual_acceptance_round20
+  Closed Social V03-R3-003-T01 on the lane branch after the court-agenda
+  surface audit and required gates passed. The audit now inventories the mixed
+  live agenda inputs, maps the existing court-facing summary homes, and records
+  the remaining gap against the locked obligations/prospects/offices/portfolio
+  outliers source list. Social may self-advance to V03-R3-003-T02 only after
+  the scheduler promotes it from todo to ready; V03-R3-003-T03 still waits on
+  V03-R2-006-T06.
+active_claims: {}

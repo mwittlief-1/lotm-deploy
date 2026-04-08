@@ -1,0 +1,40 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round20
+task_id: V03-R3-003-T01
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: 380d53fa87536b48279a71949eb18325de3c99c7
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+  run2: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+artifacts:
+  audit_doc: docs/ux/v0.3.3_court_agenda_surface_audit.md
+findings:
+  - Inventoried the current mixed agenda builder and made the live source set explicit: obligations and expiring prospects already participate, while labor, food, unrest, and succession remain legacy non-epic items.
+  - Mapped the strongest current court-facing explainer homes for each locked agenda family, including obligations cards and receipts, prospects, household roster and succession detail, and portfolio totals plus outlier rows.
+  - Recorded the remaining contract gap for follow-on work: office and portfolio seams are already mechanically real, but neither produces a typed deterministic agenda source yet, and T02 remains blocked on scheduler promotion.
+stop_reason: no_eligible_task
+next_task_cursor: V03-R3-003-T02
+next_task_ready: false
+blocking_dependency: scheduler_promotion_required
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T01 closed cleanly on the lane branch, but T02 remains todo and has not yet been promoted to ready in the current control-plane snapshot.
