@@ -1,0 +1,41 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round21
+task_id: V03-R3-003-T02
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: 53eea1b1326a5281795fcdb467d0c0a9ed827506
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+  run2: 9babf740801f299b4064434a6cbf9dd3590714209d6ff4fbea60596f6fe17de2
+artifacts:
+  agenda_registry_module: src/sim/domains/court/agendaRegistry.ts
+  agenda_registry_test: tests/sim/agenda_registry.test.ts
+findings:
+  - Added `court_agenda_registry_v0`, `court_agenda_item_v0`, and `court_agenda_source_mapping_v0` as a court-domain seam with typed source tags and deterministic normalization helpers.
+  - Locked canonical source mappings for all four agenda families the epic requires: obligations, prospects, offices, and portfolio outliers, with stable source paths and source-mapping keys.
+  - Kept the work structure-first and snapshot-safe: no live agenda behavior changed yet, and the next behavior task remains blocked only on V03-R2-006-T06 rather than missing contract or typing seams.
+stop_reason: blocked_dependency
+next_task_cursor: V03-R3-003-T03
+next_task_ready: false
+blocking_dependency: V03-R2-006-T06
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T02 closed cleanly on the lane branch, but T03 still depends on V03-R2-006-T06 and cannot be started under the current backlog state.
