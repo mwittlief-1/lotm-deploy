@@ -1009,7 +1009,7 @@ epics:
 - id: V03-R3-003
   title: Court pre-agenda scaffolding and agenda items
   release: v0.3.3
-  status: todo
+  status: in_progress
   priority: 38
   tranche: 4
   change_type: behavior_change
@@ -6699,7 +6699,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Audit current agenda-worthy events and court-facing summary surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6734,16 +6734,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T08:43:19-0400'
-    claim_expires_at: '2026-04-08T12:43:22-0400'
-    run_id: 2026-04-08_manual_acceptance_round20
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R3-003-T02
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Define agenda_item schema, typed tags, and source mappings
-  status: todo
+  status: ready
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6774,11 +6774,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-003-T02.yaml
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T09:29:39-0400'
+    claim_expires_at: '2026-04-08T13:29:39-0400'
+    run_id: 2026-04-08_manual_acceptance_round21
 - id: V03-R3-003-T03
   parent_epic: V03-R3-003
   release: v0.3.3

@@ -14,6 +14,17 @@ control_plane_rules:
   scheduler_mode: "lane_parallel"
   progress_active_claims_field: "active_claims"
   same_lane_continuation: "lane_may_self_chain_safe_same_lane_follow_ons_until_cross_lane_or_integrator_boundary"
+  same_lane_prepromotion:
+    allowed: true
+    purpose: "avoid scheduler-promotion stalls on clean same-lane chains"
+    conditions:
+      - "next task is in the same lane"
+      - "next task requires_integrator is false"
+      - "the only unmet deps are the currently active same-lane predecessor tasks"
+      - "no cross-lane blocker, checkpoint, or integrator-only boundary applies"
+    effect:
+      - "integrator may mark the successor task ready before the predecessor is reconciled"
+      - "lane may self-claim the successor after locally closing the predecessor"
   lane_local_self_advance:
     allowed: true
     kickoff_remains_authoritative_for_cross_lane_coordination: true
@@ -22,6 +33,7 @@ control_plane_rules:
       - "next task requires_integrator is false"
       - "all cross-lane deps are already done in kickoff truth"
       - "only same-lane deps may be satisfied by lane-local completed tasks not yet integrated"
+      - "scheduler promotion is not required when same_lane_prepromotion conditions are met"
       - "no checkpoint, escalation, or integrator-only boundary applies"
       - "lane keeps at most one active task at a time"
     required_records:
