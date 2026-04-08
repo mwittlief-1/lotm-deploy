@@ -24,36 +24,77 @@ export type ExperienceContentSlotInventoryEntry = {
   title: string;
 };
 
+export const EXPERIENCE_OBLIGATION_COUNTERPARTY_ORDER = ["liege", "church"] as const;
+
+export type ExperienceObligationCounterpartyId = (typeof EXPERIENCE_OBLIGATION_COUNTERPARTY_ORDER)[number];
+export type ExperienceObligationEnforcementState = "clear" | "arrears";
+
+export type ExperienceObligationCounterpartyTemplate = {
+  defaultGestureDetail: string;
+  dueTitle: string;
+  fallbackTitle: string;
+  gestureTitle: string;
+  helper: string;
+  keywordHints: string[];
+  penaltyTitle: string;
+  shortTitle: string;
+};
+
+const EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES: Record<
+  ExperienceObligationCounterpartyId,
+  ExperienceObligationCounterpartyTemplate
+> = {
+  liege: {
+    defaultGestureDetail: "Court favor spent on noble gifts.",
+    dueTitle: "Tax due",
+    fallbackTitle: "House Liege",
+    gestureTitle: "Gift to liege",
+    helper: "Keeps liege dues, arrears pressure, and gift language aligned with coin-first receipts.",
+    keywordHints: ["liege", "tax", "gift", "coin arrears", "tax due", "liege tax"],
+    penaltyTitle: "Arrears & liege pressure",
+    shortTitle: "Liege"
+  },
+  church: {
+    defaultGestureDetail: "Court effort spent on religious offerings.",
+    dueTitle: "Tithe due",
+    fallbackTitle: "Parish Church",
+    gestureTitle: "Offering to church",
+    helper: "Keeps church dues, arrears pressure, and offering language aligned with food-first receipts.",
+    keywordHints: ["church", "tithe", "offering", "bushels arrears", "tithe due", "church tithe"],
+    penaltyTitle: "Arrears & church pressure",
+    shortTitle: "Church"
+  }
+};
+
 export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEntry[] = [
   {
     id: "obligations.counterparty_cards",
     title: "Obligations settlement and response copy",
     category: "obligations",
-    currentState: "hard_coded",
-    gap: "needs_template",
+    currentState: "central_copy",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T02",
     surfaces: ["Turn report cards", "Decisions helper", "Obligations modal", "Receipts counterparty paths"],
     currentRefs: [
-      "src/ui/playScreenObligations.ts#COUNTERPARTY_META",
-      "src/ui/playScreenObligations.ts#resolvedPressureSummary",
-      "src/ui/playScreenObligations.ts#responsePressureSummary"
+      "src/content/experienceContent.ts#EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES",
+      "src/content/experienceContent.ts#renderObligationResolvedSummary",
+      "src/content/experienceContent.ts#renderObligationResponseSummary"
     ],
-    notes: "Liege and church settlement, timing, and counterparty helper text already exist, but they still live inside the UI contract instead of a shared content module."
+    notes: "Liege and church settlement, timing, and counterparty helper text now live in the shared experience-content registry so current UI surfaces can wire them without duplicating phrases."
   },
   {
     id: "offerings.relationship_levers",
     title: "Gift and offering outcome language",
     category: "offerings",
-    currentState: "hard_coded",
-    gap: "needs_template",
+    currentState: "central_copy",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T02",
     surfaces: ["Court budget", "Obligations cards", "Receipts counterparty paths"],
     currentRefs: [
-      "src/ui/playScreenCourtBudget.ts#COURT_DECISION_BUDGET_ACTION_COPY",
-      "src/ui/playScreenObligations.ts#gestureRelationshipSummary",
-      "src/ui/panels/ReceiptsViewerPanel.tsx"
+      "src/content/experienceContent.ts#EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES",
+      "src/content/experienceContent.ts#renderObligationGestureOutcome"
     ],
-    notes: "Gift to liege and offering to church already have stable labels, but the relationship-outcome phrasing is duplicated across budget and obligations explainers."
+    notes: "Gift to liege and offering to church now have one shared content home for titles, details, and relationship-outcome phrasing."
   },
   {
     id: "grants.accept_reject_flow",
@@ -127,6 +168,83 @@ export function listExperienceContentSlots(category?: ExperienceContentCategory)
     currentRefs: [...entry.currentRefs],
     surfaces: [...entry.surfaces]
   }));
+}
+
+export function getObligationCounterpartyTemplate(
+  counterpartyId: ExperienceObligationCounterpartyId
+): ExperienceObligationCounterpartyTemplate {
+  const template = EXPERIENCE_OBLIGATION_COUNTERPARTY_TEMPLATES[counterpartyId];
+  return {
+    ...template,
+    keywordHints: [...template.keywordHints]
+  };
+}
+
+export function renderObligationGestureOutcome(
+  counterpartyId: ExperienceObligationCounterpartyId,
+  enforcementState: ExperienceObligationEnforcementState
+): string {
+  if (counterpartyId === "liege") {
+    if (enforcementState === "arrears") {
+      return "Gift to liege is the relationship lever for easing noble pressure when coin arrears are already visible.";
+    }
+    return "Gift to liege is the relationship lever for steadying noble support when dues alone are not the whole problem.";
+  }
+
+  if (enforcementState === "arrears") {
+    return "Offering to church is the relationship lever for easing church pressure when bushel arrears are already visible.";
+  }
+  return "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.";
+}
+
+export function renderObligationResolvedSummary(args: {
+  arrearsAmount: number;
+  carriedThisTurn: boolean;
+  counterpartyId: ExperienceObligationCounterpartyId;
+  settledThisTurn: boolean;
+  stageLabel: string;
+}): string {
+  const { arrearsAmount, carriedThisTurn, settledThisTurn, stageLabel } = args;
+  const normalizedStageLabel = stageLabel.trim().toLowerCase();
+
+  if (arrearsAmount > 0) {
+    if (carriedThisTurn) {
+      return `This turn: arrears carried, so ${normalizedStageLabel} now applies.`;
+    }
+    return `This turn: arrears remained open, so ${normalizedStageLabel} stayed in place.`;
+  }
+
+  if (settledThisTurn) {
+    return "This turn: no arrears carried, so pressure stayed clear.";
+  }
+
+  return "This turn: pressure ended clear with no carried arrears.";
+}
+
+export function renderObligationResponseSummary(args: {
+  arrearsAmount: number;
+  counterpartyId: ExperienceObligationCounterpartyId;
+  dueAmount: number;
+}): string {
+  const { arrearsAmount, counterpartyId, dueAmount } = args;
+
+  if (counterpartyId === "liege") {
+    if (arrearsAmount > 0) {
+      return "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.";
+    }
+    if (dueAmount > 0) {
+      return "Next turn: line up coin for the current tax due before it carries, then add a gift if support still looks thin.";
+    }
+    return "Next turn: no liege arrears are carried right now, but coin payments and gifts remain your levers if pressure returns.";
+  }
+
+  if (arrearsAmount > 0) {
+    return "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.";
+  }
+  if (dueAmount > 0) {
+    return "Next turn: line up bushels for the current tithe before it carries, then add an offering if you need extra church support.";
+  }
+  return "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.";
 }
 
 export function summarizeExperienceContentInventory(): {
