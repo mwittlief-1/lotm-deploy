@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-007-T02
+  last_completed_task_id: V03-R3-007-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: d4f2cabd4a5cb0df304226f14aba38c8992f6129
+  git_commit: f20cc9ea83f17471373cffde4481a79c6cfc3afc
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,10 +21,9 @@ last_run:
     run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
     run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Closed UI V03-R3-007-T02 after moving the obligations settlement and
-  gift-or-offering outcome language into the shared experience-content
-  registry. Same-lane continuation claimed V03-R3-007-T03 on the refreshed
-  UI branch state.
+  Closed UI V03-R3-007-T03 after promoting grant and marriage outcome wording
+  into typed content templates. Same-lane continuation claimed V03-R3-007-T04
+  on the refreshed UI branch state.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R3-003-T03
@@ -39,8 +38,8 @@ active_claims:
     claim_expires_at: '2026-04-08T17:52:20-0400'
     run_id: 2026-04-08_manual_acceptance_round26
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R3-007-T03
+    task_id: V03-R3-007-T04
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T15:19:34-0400'
-    claim_expires_at: '2026-04-08T19:19:34-0400'
-    run_id: manual-ui-v03-r3-007-t03-20260408T151934-0400
+    claimed_at: '2026-04-08T16:02:05-0400'
+    claim_expires_at: '2026-04-08T20:02:05-0400'
+    run_id: manual-ui-v03-r3-007-t04-20260408T160205-0400
