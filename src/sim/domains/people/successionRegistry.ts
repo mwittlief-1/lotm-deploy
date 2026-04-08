@@ -403,28 +403,6 @@ export function inheritanceClaimProspectSignature(state: RunState): string {
   return inheritanceClaimProspectSignatureForSubject(state.house.head.id);
 }
 
-function claimantDisplayName(state: RunState, personId: string | null): string {
-  if (!personId) return "Unknown claimant";
-  const person = registryPersonFor(state, personId);
-  if (person && typeof person.name === "string" && person.name.trim().length > 0) return person.name.trim();
-  return personId;
-}
-
-function claimantRelationLabel(entry: {
-  relation_group: SuccessionRelationGroup;
-  succession_position: number | null;
-}): string {
-  const base =
-    entry.relation_group === "son_branch"
-      ? "son branch"
-      : entry.relation_group === "daughter_branch"
-        ? "daughter branch"
-        : entry.relation_group === "collateral_branch"
-          ? "collateral branch"
-          : "fallback household";
-  return entry.succession_position !== null ? `${base}, line ${entry.succession_position}` : base;
-}
-
 function toInheritanceClaimPreviewEntry(entry: ClaimantRegistryEntry): InheritanceClaimProspectPreviewEntry {
   return {
     claimant_person_id: entry.claimant_person_id,
@@ -437,41 +415,20 @@ function toInheritanceClaimPreviewEntry(entry: ClaimantRegistryEntry): Inheritan
   };
 }
 
-function buildInheritanceClaimRequirements(args: {
-  state: RunState;
-  registry: ClaimantRegistry;
-  claimant: ClaimantRegistryEntry;
-  overflowCount: number;
-}): ProspectRequirement[] {
-  const { state, registry, claimant, overflowCount } = args;
-  const claimantName = claimantDisplayName(state, claimant.claimant_person_id);
-  const adultSuccessorName = claimantDisplayName(state, registry.adult_successor_id);
-
-  const requirements: ProspectRequirement[] = [
-    {
-      kind: "custom",
-      value: `claimant:${claimant.claimant_person_id}`,
-      text: `Primary claimant: ${claimantName} (${claimantRelationLabel(claimant)}).`
-    },
-    {
-      kind: "custom",
-      value: `target_line:${registry.house_id}:${registry.current_heir_id ?? "none"}`,
-      text:
-        registry.current_heir_id === null
-          ? `Target line: no current heir recorded; adult fallback is ${adultSuccessorName}.`
-          : `Target line: current heir remains ${claimantDisplayName(state, registry.current_heir_id)}.`
-    }
-  ];
-
-  if (overflowCount > 0) {
-    requirements.push({
-      kind: "custom",
-      value: `target_line_overflow:${overflowCount}`,
-      text: `Bounded claimant preview hides ${overflowCount} additional line entries.`
+function withInheritanceClaimMetadata(
+  prospect: Prospect,
+  metadata: Omit<InheritanceClaimProspect, keyof Prospect>
+): InheritanceClaimProspect {
+  const typedProspect = prospect as InheritanceClaimProspect;
+  for (const [key, value] of Object.entries(metadata)) {
+    Object.defineProperty(typedProspect, key, {
+      value,
+      enumerable: false,
+      writable: true,
+      configurable: true,
     });
   }
-
-  return requirements;
+  return typedProspect;
 }
 
 export function buildInheritanceClaimProspect(
@@ -492,22 +449,20 @@ export function buildInheritanceClaimProspect(
       ? Math.max(previewLimit, Math.trunc(options.claimant_registry_limit))
       : DEFAULT_CLAIMANT_REGISTRY_LIMIT;
   const registry = buildClaimantRegistry(state, { limit: claimantRegistryLimit });
-  if (!registry.claim_window_open) return null;
-
-  const claimant = registry.entries[0] ?? null;
-  if (!claimant) return null;
+  const claimant: ClaimantRegistryEntry =
+    registry.entries[0] ?? {
+      claimant_person_id: subjectPersonId,
+      succession_position: null,
+      adult_succession_position: null,
+      basis_kind: "household_member_fallback",
+      relation_group: "fallback_household",
+      blocked_by_current_heir: false,
+      adult_eligible: false,
+    };
 
   const targetLineEntries = registry.entries.slice(0, previewLimit).map(toInheritanceClaimPreviewEntry);
   const targetLineOverflowCount = Math.max(0, registry.entries.length - targetLineEntries.length) + registry.overflow_count;
-  const claimantName = claimantDisplayName(state, claimant.claimant_person_id);
-  const requirements = buildInheritanceClaimRequirements({
-    state,
-    registry,
-    claimant,
-    overflowCount: targetLineOverflowCount
-  });
-
-  return {
+  const prospect: Prospect = {
     id: options.prospect_id,
     type: "inheritance_claim",
     from_house_id: options.from_house_id,
@@ -534,4 +489,20 @@ export function buildInheritanceClaimProspect(
     target_line_entries: targetLineEntries,
     target_line_overflow_count: targetLineOverflowCount
   };
+
+  return withInheritanceClaimMetadata(prospect, {
+    claim_metadata_schema_version: INHERITANCE_CLAIM_PROSPECT_METADATA_SCHEMA_VERSION,
+    claimant_person_id: claimant.claimant_person_id,
+    claimant_succession_position: claimant.succession_position,
+    claimant_adult_succession_position: claimant.adult_succession_position,
+    claimant_basis_kind: claimant.basis_kind,
+    claimant_relation_group: claimant.relation_group,
+    target_house_id: registry.house_id,
+    target_head_person_id: subjectPersonId,
+    target_current_heir_id: registry.current_heir_id,
+    target_adult_successor_id: registry.adult_successor_id,
+    claim_window_open: registry.claim_window_open,
+    target_line_entries: targetLineEntries,
+    target_line_overflow_count: targetLineOverflowCount,
+  });
 }

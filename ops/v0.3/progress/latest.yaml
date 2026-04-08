@@ -5,8 +5,8 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: c5d88f4
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: abf8137
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,14 @@ last_run:
     run1: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
     run2: 9dbaa46782cfaf9a05b4754a2663707cdf0afffd47c849fd12a3361a51c45d17
 notes: >-
-  Closed Social V03-R1-004-T03 on the lane branch after enriching
-  inheritance-claim prospects with bounded claimant and target-line metadata
-  from the succession registry. Replay stayed deterministic across both runs,
-  but the hash moved because live prospect payloads now carry claimant preview
-  data. T04 remains todo and is not yet promoted in this branch snapshot.
-active_claims: {}
+  Accepted Social V03-R1-004-T03 on kickoff using the replay-safe inheritance
+  claim seam. T04 is actively dispatched, and T05/T06 are already promoted so
+  the Social lane can keep moving through the same-lane succession chain
+  without another scheduler stop.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R1-004-T04
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T12:14:01-0400'
+    claim_expires_at: '2026-04-08T16:14:01-0400'
+    run_id: 2026-04-08_manual_acceptance_round24

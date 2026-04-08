@@ -250,11 +250,7 @@ describe("succession registry schema", () => {
       claim_window_open: true,
       target_line_overflow_count: 2,
     });
-    expect(prospect?.requirements.map((entry) => entry.text)).toEqual([
-      "Primary claimant: p_spouse (fallback household).",
-      "Target line: no current heir recorded; adult fallback is p_spouse.",
-      "Bounded claimant preview hides 2 additional line entries."
-    ]);
+    expect(prospect?.requirements).toEqual([]);
     expect((prospect as any)?.target_line_entries).toEqual([
       {
         claimant_person_id: "p_spouse",
@@ -297,12 +293,13 @@ describe("succession registry schema", () => {
       claim_window_open: true,
       target_current_heir_id: null,
       target_adult_successor_id: "p_spouse",
+      summary: "Inheritance claim",
+      requirements: [],
       actions: ["accept", "reject"],
       costs: {},
       predicted_effects: { flags_set: ["inheritance_claim_active"] }
     });
     expect(Array.isArray(claim?.predicted_effects?.relationship_deltas)).toBe(false);
-    expect(claim?.requirements.every((entry: any) => entry.kind === "custom")).toBe(true);
     expect(window.prospects.filter((entry) => entry.type === "inheritance_claim")).toHaveLength(1);
   });
 
