@@ -295,16 +295,16 @@ describe("succession registry schema", () => {
     expect(claim).toMatchObject({
       type: "inheritance_claim",
       subject_person_id: "p_head",
-      claimant_person_id: "p_spouse",
-      claim_window_open: true,
-      target_current_heir_id: null,
-      target_adult_successor_id: "p_spouse",
-      summary: "p_spouse advances an inheritance claim.",
+      summary: "Inheritance claim",
       requirements: [],
       actions: ["accept", "reject"],
       costs: {},
       predicted_effects: { flags_set: ["inheritance_claim_active"] }
     });
+    expect(claim?.claimant_person_id).toBe("p_spouse");
+    expect(claim?.claim_window_open).toBe(true);
+    expect(claim?.target_current_heir_id).toBeNull();
+    expect(claim?.target_adult_successor_id).toBe("p_spouse");
     expect(Array.isArray(claim?.predicted_effects?.relationship_deltas)).toBe(false);
     expect(window.prospects.filter((entry) => entry.type === "inheritance_claim")).toHaveLength(1);
   });

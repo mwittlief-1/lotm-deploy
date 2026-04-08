@@ -6,7 +6,7 @@ import {
   structuredHouseIdForPerson,
 } from "../../actors";
 import { getChildren, getLivingSpouse, getParents } from "../../kinship";
-import type { Person, Prospect, ProspectRequirement, RunState } from "../../types";
+import type { Person, Prospect, RunState } from "../../types";
 import { buildKnownHouseRelevanceSnapshot } from "./knownHouseRelevance";
 
 const SUCCESSION_MIN_AGE = 15;

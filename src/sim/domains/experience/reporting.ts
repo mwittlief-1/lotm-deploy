@@ -45,8 +45,30 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     });
   }
   (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
-  (snapshot.house as any).succession_line_summary = deepCopy(successionSurfaces.succession_line_summary);
-  (snapshot.house as any).claimant_summary = deepCopy(successionSurfaces.claimant_summary);
+  Object.defineProperty(snapshot, "succession_line_summary", {
+    value: deepCopy(successionSurfaces.succession_line_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot, "claimant_summary", {
+    value: deepCopy(successionSurfaces.claimant_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "succession_line_summary", {
+    value: deepCopy(successionSurfaces.succession_line_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
+  Object.defineProperty(snapshot.house as object, "claimant_summary", {
+    value: deepCopy(successionSurfaces.claimant_summary),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
   return snapshot;
 }
 

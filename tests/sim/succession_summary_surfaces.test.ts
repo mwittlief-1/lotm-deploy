@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createNewRun, proposeTurn } from "../../src/sim";
+import { boundedSnapshot } from "../../src/sim/domains/experience/reporting";
 import {
   CLAIMANT_SUMMARY_SCHEMA_VERSION,
   SUCCESSION_LINE_SUMMARY_SCHEMA_VERSION,
@@ -57,5 +58,24 @@ describe("succession summary surfaces", () => {
       person_name: expect.any(String),
       line_position: expect.any(Number),
     });
+  });
+
+  it("attaches succession summaries to bounded snapshots without changing the serialized snapshot contract", () => {
+    const snapshot: any = boundedSnapshot(createNewRun("succession_summary_snapshot_surface_v031"));
+
+    expect(snapshot.succession_line_summary).toMatchObject({
+      schema_version: SUCCESSION_LINE_SUMMARY_SCHEMA_VERSION,
+      house_id: "h_player",
+      entries: expect.any(Array),
+    });
+    expect(snapshot.claimant_summary).toMatchObject({
+      schema_version: CLAIMANT_SUMMARY_SCHEMA_VERSION,
+      house_id: "h_player",
+      entries: expect.any(Array),
+    });
+    expect(snapshot.house.succession_line_summary).toEqual(snapshot.succession_line_summary);
+    expect(snapshot.house.claimant_summary).toEqual(snapshot.claimant_summary);
+    expect(JSON.parse(JSON.stringify(snapshot)).succession_line_summary).toBeUndefined();
+    expect(JSON.parse(JSON.stringify(snapshot)).claimant_summary).toBeUndefined();
   });
 });

@@ -5,8 +5,8 @@ cursor:
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: e9afe99
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: cb29420
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,15 @@ last_run:
     run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
     run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
 notes: >-
-  Closed Social V03-R1-004-T04 through T06 on the lane branch. Succession
-  ordering now carries deterministic cadet and marriage-link relevance, and
-  preview/snapshot surfaces now expose bounded succession and claimant
-  summaries directly. Replay moved to the accepted matched hash because the
-  new summary surfaces now serialize into bounded outputs.
-active_claims: {}
+  Accepted Social V03-R1-004-T04 through T06 on kickoff, closed the claims and
+  succession baseline epic, and reopened the grants baseline chain at
+  V03-R2-006-T01. The accepted adaptation keeps succession summaries available
+  on preview-state and bounded snapshot runtime surfaces without changing the
+  serialized deterministic replay line.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R2-006-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T12:54:04-0400'
+    claim_expires_at: '2026-04-08T16:54:04-0400'
+    run_id: 2026-04-08_manual_acceptance_round25

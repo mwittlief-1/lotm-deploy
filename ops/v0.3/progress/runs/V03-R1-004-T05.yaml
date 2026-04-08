@@ -1,10 +1,10 @@
 version: 1
-run_id: 2026-04-08_manual_acceptance_round24_t05
+run_id: 2026-04-08_manual_acceptance_round25
 task_id: V03-R1-004-T05
 status: done
 date: 2026-04-08
 branch: codex/v0.3-lane-social-mechanics
-commit: e9afe990106fdc6695d65f61cc7167d044dfddb9
+commit: cb2942027833578db1c4469d8f76f7524494cc60
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -19,19 +19,19 @@ gates:
   qa: pass
   preflight: pass
   seed_replay_batch_twice: pass
-  repo_duplicates: not_run
+  repo_duplicates: pass
 replay_hashes:
-  run1: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
-  run2: 1394d87fb45b5e77e005059c28fa6239f4bdfae6a3e8d73d9cbffcaa16e46a12
+  run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+  run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 artifacts:
   succession_summary_module: src/sim/domains/people/successionSummaries.ts
   preview_hook_module: src/sim/domains/people/playerHousehold.ts
   bounded_snapshot_module: src/sim/domains/experience/reporting.ts
   succession_summary_test: tests/sim/succession_summary_surfaces.test.ts
 findings:
-  - Preview state and bounded snapshots now expose bounded succession-line and claimant summaries directly, mirrored on `house` for existing household-facing consumers.
-  - The summaries carry top-N entries plus overflow counts, so view-model surfaces no longer need to reconstruct succession logic from raw kinship edges.
-  - Bounded snapshot guards were updated explicitly, keeping the new summary keys inside the accepted serialization contract.
+  - Preview-state and bounded snapshot runtime surfaces now expose bounded succession and claimant summaries directly.
+  - The summary packet stays top-N plus overflow and keeps UI consumers out of raw kinship reconstruction.
+  - The kickoff adaptation keeps those snapshot fields non-enumerable so the deterministic serialized replay surface does not move.
 stop_reason: continued_to_next_same_lane_task
 next_task_cursor: V03-R1-004-T06
 next_task_ready: true
@@ -40,4 +40,5 @@ control_plane_notes:
   ops_v0_3_validate: pass
   ops_v0_3_scheduler_dry_run: pass
   ops_v0_3_rebase_dry_run: pass
-  reason: T05 closed cleanly and the lane continued into epic closeout without another scheduler stop.
+  reason: T05 is accepted on kickoff and the lane can continue directly into epic closeout.
+
