@@ -1,4 +1,5 @@
 import React from "react";
+import { renderDispossessionThresholdTip } from "../../content/experienceContent";
 import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
 import { Tip } from "../viewHelpers";
 import { SectionHeading } from "./SectionHeading";
@@ -83,7 +84,7 @@ export function ManorStatePanel({
             Unrest: <b>{manor.unrest}</b>/100 {deltaUnrest !== 0 ? <span style={{ opacity: 0.75 }}>(Δ {fmtSigned(deltaUnrest)})</span> : null}
           </span>
           <progress value={manor.unrest} max={100} style={{ width: 180, height: 14 }} />
-          <Tip text="If Unrest is ≥ 100 at end of a turn, you are Dispossessed (game over)." />
+          <Tip text={renderDispossessionThresholdTip()} />
         </li>
       </ul>
 

@@ -74,6 +74,11 @@ import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
+import {
+  resolveGameOverReasonLabel,
+  resolveProspectAcceptCopy,
+  resolveProspectDecisionToast
+} from "../playScreenExperienceCopy";
 import { PLAY_SCREEN_CARD_ORDER, type PlayScreenCardId, type StickyResourceChip, buildStickyResourceChips } from "../playScreenLayout";
 import { buildTopologyDebugSurface } from "../playScreenTopology";
 import {
@@ -389,23 +394,12 @@ export function PlayScreen({
       const predictedEffects: any = prospect?.predicted_effects;
       const coinDelta = typeof predictedEffects?.coin_delta === "number" && Number.isFinite(predictedEffects.coin_delta) ? Math.trunc(predictedEffects.coin_delta) : null;
 
-      let confirmTitle = copy.prospectAcceptConfirmTitle;
-      let confirmBody = anyCost ? copy.prospectAcceptConfirmBody_withCosts : copy.prospectAcceptConfirmBody_noCosts;
-
-      if (type === "marriage") {
-        confirmTitle = copy.prospectAcceptConfirmTitle_marriage;
-        confirmBody = anyCost
-          ? copy.prospectAcceptConfirmBody_withCosts
-          : coinDelta !== null
-            ? copy.prospectAcceptConfirmBody_marriage_dowry(fmtSigned(coinDelta))
-            : copy.prospectAcceptConfirmBody_marriage_noCosts;
-      } else if (type === "grant") {
-        confirmTitle = copy.prospectAcceptConfirmTitle_grant;
-        confirmBody = anyCost ? copy.prospectAcceptConfirmBody_withCosts : copy.prospectAcceptConfirmBody_grant_noCosts;
-      } else if (type === "inheritance_claim") {
-        confirmTitle = copy.prospectAcceptConfirmTitle_inheritance_claim;
-        confirmBody = copy.prospectAcceptConfirmBody_inheritance_claim;
-      }
+      const { title: confirmTitle, body: confirmBody } = resolveProspectAcceptCopy({
+        anyCost,
+        coinDeltaText: coinDelta !== null ? fmtSigned(coinDelta) : null,
+        fallbackCopy: copy,
+        prospectType: type
+      });
 
       if (!window.confirm(`${confirmTitle}\n\n${confirmBody}`)) return;
 
@@ -418,7 +412,6 @@ export function PlayScreen({
           : type === "inheritance_claim"
             ? copy.prospectToastEffect_claimRecorded
             : copy.prospectToastEffect_arrangementRecorded;
-      const acceptedMsg = copy.prospectToastAccepted(typeToken, shortEffectSummary);
 
       if (type === "marriage") {
         const childId: string | null =
@@ -446,7 +439,6 @@ export function PlayScreen({
           childRec && typeof childRec === "object" && (childRec.sex === "M" || childRec.sex === "F") ? childRec.sex : null;
 
         if (childName) {
-          const line1 = copy.marriageToast_line1(childName);
           const household: any = (ctx.preview_state as any)?.house;
           const heirId: string | null = typeof household?.heir_id === "string" ? household.heir_id : null;
           const kidsArr: any[] = Array.isArray(household?.children) ? household.children : [];
@@ -458,16 +450,31 @@ export function PlayScreen({
 
           setToast({
             kind: "ok",
-            message:
-              spouseJoinsCourt && spouseName
-                ? `${line1}\n${copy.marriageToast_line2_withSpouse(spouseName)}`
-                : `${line1}\n${copy.marriageToast_line2_childLeaves(childName)}`
+            message: resolveProspectDecisionToast({
+              action: "accept",
+              childName,
+              fallbackCopy: copy,
+              prospectType: type,
+              shortEffectSummary,
+              spouseJoinsCourt,
+              spouseName,
+              typeLabel: typeToken
+            })
           });
           return;
         }
       }
 
-      setToast({ kind: "ok", message: acceptedMsg });
+      setToast({
+        kind: "ok",
+        message: resolveProspectDecisionToast({
+          action: "accept",
+          fallbackCopy: copy,
+          prospectType: type,
+          shortEffectSummary,
+          typeLabel: typeToken
+        })
+      });
       return;
     }
 
@@ -475,9 +482,17 @@ export function PlayScreen({
     recordProspectDecision(id, "reject");
 
     const typeToken = prospectTypeLabel(type);
-    const baseMsg = copy.prospectToastDeclined(typeToken);
-    const rejectedMsg = rejectHasStandingRisk(prospect) ? `${baseMsg} ${copy.prospectToastStandingMayDecrease}` : baseMsg;
-    setToast({ kind: "ok", message: rejectedMsg });
+    setToast({
+      kind: "ok",
+      message: resolveProspectDecisionToast({
+        action: "reject",
+        fallbackCopy: copy,
+        prospectType: type,
+        shortEffectSummary: copy.prospectToastEffect_arrangementRecorded,
+        standingRisk: rejectHasStandingRisk(prospect),
+        typeLabel: typeToken
+      })
+    });
   }
 
   const laborRequested =
@@ -896,7 +911,8 @@ export function PlayScreen({
 
       {state.game_over ? (
         <div style={{ padding: 12, border: "1px solid #f55", marginBottom: 12 }}>
-          <b>GAME OVER:</b> {gameOverReasonCopy[state.game_over.reason]} — Turn {state.game_over.turn_index}
+          <b>GAME OVER:</b> {resolveGameOverReasonLabel({ fallbackCopy: gameOverReasonCopy, reason: state.game_over.reason })} — Turn{" "}
+          {state.game_over.turn_index}
         </div>
       ) : null}
 

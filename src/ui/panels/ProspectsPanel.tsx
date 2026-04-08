@@ -1,4 +1,5 @@
 import React from "react";
+import { getGrantProspectTemplate } from "../../content/experienceContent";
 import type { RunState } from "../../sim/types";
 import { Tip, formatParentsLine } from "../viewHelpers";
 
@@ -63,6 +64,7 @@ export function ProspectsPanel({
   uncertaintyLabel
 }: ProspectsPanelProps) {
   const people: any = (previewState as any).people;
+  const grantTemplate = getGrantProspectTemplate();
 
   return (
     <>
@@ -224,11 +226,11 @@ export function ProspectsPanel({
                     {summary ? <div style={{ marginTop: 6 }}>{summary}</div> : null}
 
                     {t === "grant" ? (
-                      <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{copy.prospectGrantHelperLine}</div>
+                      <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{grantTemplate.helperLine}</div>
                     ) : null}
 
                     {t === "grant" && canReject && rejectHasStandingRisk(p) ? (
-                      <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{copy.prospectGrantRejectNote}</div>
+                      <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{grantTemplate.rejectRiskNote}</div>
                     ) : null}
 
                     {reqTexts.length > 0 ? (

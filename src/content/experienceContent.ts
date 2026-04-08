@@ -138,9 +138,11 @@ export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEn
     currentRefs: [
       "src/content/experienceContent.ts#EXPERIENCE_GRANT_PROSPECT_TEMPLATE",
       "src/content/experienceContent.ts#renderGrantAcceptConfirmBody",
-      "src/content/experienceContent.ts#renderGrantDecisionToast"
+      "src/content/experienceContent.ts#renderGrantDecisionToast",
+      "src/ui/panels/ProspectsPanel.tsx",
+      "src/ui/panels/PlayScreen.tsx"
     ],
-    notes: "Grant received and denied copy now has a typed template home, so later UI wiring can stop reaching back into generic App-level prospect strings."
+    notes: "Grant received and denied copy now has a typed template home, and the live prospects surfaces consume that shared grant family directly."
   },
   {
     id: "marriage.accept_reject_flow",
@@ -153,9 +155,10 @@ export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEn
     currentRefs: [
       "src/content/experienceContent.ts#EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE",
       "src/content/experienceContent.ts#renderMarriageAcceptConfirmBody",
-      "src/content/experienceContent.ts#renderMarriageDecisionToast"
+      "src/content/experienceContent.ts#renderMarriageDecisionToast",
+      "src/ui/panels/PlayScreen.tsx"
     ],
-    notes: "Marriage accept and reject wording now lives in a typed content family that covers both the prospect decision moment and the immediate household outcome language."
+    notes: "Marriage accept and reject wording now lives in a typed content family that the live prospects flow uses for both the decision moment and the immediate household outcome language."
   },
   {
     id: "arrears.stage_legibility",
@@ -188,11 +191,16 @@ export const EXPERIENCE_CONTENT_SLOT_INVENTORY: ExperienceContentSlotInventoryEn
     title: "Dispossession end-state label",
     category: "dispossession",
     currentState: "central_copy",
-    gap: "needs_template",
+    gap: "none",
     plannedTaskId: "V03-R3-007-T05",
     surfaces: ["Game-over banner", "Manor-state unrest tip"],
-    currentRefs: ["src/App.tsx#GAME_OVER_REASON_COPY.Dispossessed", "src/ui/panels/ManorStatePanel.tsx"],
-    notes: "The shell already names dispossession after it happens, but the copy still sits apart from the fiscal warning path that leads into it."
+    currentRefs: [
+      "src/content/experienceContent.ts#renderDispossessionEndStateLabel",
+      "src/content/experienceContent.ts#renderDispossessionThresholdTip",
+      "src/ui/panels/PlayScreen.tsx",
+      "src/ui/panels/ManorStatePanel.tsx"
+    ],
+    notes: "The shell now reuses one content family for the dispossession end-state label and the unrest-threshold warning that leads into it."
   }
 ];
 
@@ -382,6 +390,14 @@ export function renderMarriageDecisionToast(args: {
   }
 
   return `${line1}\n${childName} ${EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.outcomeChildLeaves} ${EXPERIENCE_MARRIAGE_PROSPECT_TEMPLATE.outcomeCourtSizeDecreased}`;
+}
+
+export function renderDispossessionEndStateLabel(): string {
+  return "Dispossessed (Unrest ≥ 100 at end of turn)";
+}
+
+export function renderDispossessionThresholdTip(): string {
+  return "If Unrest is ≥ 100 at end of a turn, you are Dispossessed (game over).";
 }
 
 export function summarizeExperienceContentInventory(): {
