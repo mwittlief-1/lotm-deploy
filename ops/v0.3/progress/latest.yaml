@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-007-T04
+  last_completed_task_id: V03-R3-007-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: d990e35f5edcefe44afe7fc1a5633afb319a7098
+  git_commit: 7d2d4aad4bfe7d7203a92ef6693a91c13dc7131b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,9 +21,9 @@ last_run:
     run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
     run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Closed UI V03-R3-007-T04 after promoting stage-aware arrears and
-  dispossession ladder warnings into shared content templates. Same-lane
-  continuation claimed V03-R3-007-T05 on the refreshed UI branch state.
+  Closed UI V03-R3-007-T05 after wiring the v0.3.3 experience content
+  registry into the live gameplay shell and UX docs. No next ready UI lane
+  task remained on this branch state.
 active_claims:
   codex/v0.3-lane-social-mechanics:
     task_id: V03-R3-003-T03
@@ -37,9 +37,3 @@ active_claims:
     claimed_at: '2026-04-08T13:52:20-0400'
     claim_expires_at: '2026-04-08T17:52:20-0400'
     run_id: 2026-04-08_manual_acceptance_round26
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R3-007-T05
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T16:33:03-0400'
-    claim_expires_at: '2026-04-08T20:33:03-0400'
-    run_id: manual-ui-v03-r3-007-t05-20260408T163303-0400

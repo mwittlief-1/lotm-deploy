@@ -7686,7 +7686,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Wire content references into current UI surfaces and docs
-  status: ready
+  status: done
   priority: 95
   tranche: 4
   change_type: behavior_change
@@ -7719,11 +7719,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R3-007-T05.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T16:33:03-0400'
-    claim_expires_at: '2026-04-08T20:33:03-0400'
-    run_id: manual-ui-v03-r3-007-t05-20260408T163303-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R4-001-T01
   title: Audit widowhood, remarriage, heir, and orphan-edge bug backlog
   release: v0.3.4
