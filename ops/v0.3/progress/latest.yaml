@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R2-004-T01
-  last_completed_task_id: V03-R2-002-T04
+  current_task_id: ''
+  last_completed_task_id: V03-R2-006-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 4271ea96a3781de037a1229ed63213ac6fc1ab59
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: 68fe6a0
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,11 +18,30 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
-    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Closed UI V03-R2-002-T04 after extending the topology debug
-  surface with deterministic scope-cap inputs, bucket summaries, and
-  admitted or rejected manor rationale. No next ready UI lane task is
-  currently available on this branch state.
-active_claims: {}
+  Accepted Social V03-R2-006-T01 through T06 on kickoff, closed the grant
+  acquisition baseline epic, and opened the next real downstream fronts for
+  Social court agenda work, Engine AI rails, and UI content inventory. The
+  accepted integration keeps the grant acquisition surfaces on the existing
+  deterministic replay line.
+active_claims:
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R3-003-T03
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
+  codex/v0.3-lane-engine-core:
+    task_id: V03-R3-006-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26
+  codex/v0.3-lane-ui-experience:
+    task_id: V03-R3-007-T01
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T13:52:20-0400'
+    claim_expires_at: '2026-04-08T17:52:20-0400'
+    run_id: 2026-04-08_manual_acceptance_round26

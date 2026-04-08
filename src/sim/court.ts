@@ -1,8 +1,13 @@
-import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState, ServiceRecord } from "./types";
+import type { CourtOfficerRole, CourtRoster, CourtRosterRow, HouseLogEvent, Person, RunState } from "./types";
 import { Rng } from "./rng";
 import { getChildren, getParents, getSiblings } from "./kinship";
 import { allHouseMemberIds, playerHouseIdOf, registryPersonFor } from "./actors";
 import { deriveHouseholdRoster } from "./householdView";
+import {
+  listLegacyFilledHouseCourtOffices,
+  planLegacyHouseCourtAssignments,
+  syncLegacyHouseCourtServiceRecords,
+} from "./domains/court/officeRegistry";
 
 // v0.2.4 Court + Household integration.
 // Tooling/QA note: Court officer generation must be deterministic and stream-isolated.
@@ -106,116 +111,25 @@ export function ensureCourtOfficers(state: RunState): void {
   // - C: steward + clerk
   // Presets only; no RNG. Enforced only when `flags._tuning.court_variant` is set.
   const variant = readCourtVariant(state);
-  const enforceVariant = Boolean(variant);
-  const desired: CourtOfficerRole[] = enforceVariant
-    ? (variant === "A" ? [] : variant === "B" ? ["steward"] : ["steward", "clerk"])
-    : [];
-
-  // v0.2.5 affordability LOCK: court starts small by default.
-  // Back-compat: if a save already has clerk/marshal IDs, preserve them and ensure their Person records exist.
-  const ensureRole = (role: CourtOfficerRole, createIfMissing: boolean) => {
-    const cur = houseRec.court_officers?.[role];
-    if (typeof cur === "string" && cur.length > 0 && people[cur] && people[cur].alive === false) {
-      delete houseRec.court_officers[role];
-    }
-    if (!createIfMissing && !(typeof cur === "string" && cur.length > 0)) return;
-
-    const nextCur = houseRec.court_officers?.[role];
-    const id = typeof nextCur === "string" && nextCur.length > 0 ? nextCur : defaultOfficerId(role);
+  const assignments = planLegacyHouseCourtAssignments(houseRec.court_officers, people, variant);
+  for (const role of ["steward", "clerk", "marshal"] as const) delete houseRec.court_officers[role];
+  for (const [role, id] of Object.entries(assignments) as Array<[CourtOfficerRole, string]>) {
     houseRec.court_officers[role] = id;
     if (!people[id]) {
       const r = base.fork(`role/${role}`);
       people[id] = mkOfficerPerson(r, id, role);
     }
-    // v0.2.5 LOCK: officers must be male (enforce even for legacy saves).
     if (people[id] && people[id].sex !== "M") people[id].sex = "M";
-  };
-
-  if (enforceVariant) {
-    // Remove non-desired roles (mapping only; Person records may remain in registry but will not be counted).
-    const roles: CourtOfficerRole[] = ["steward", "clerk", "marshal"];
-    for (const role of roles) {
-      if (!desired.includes(role)) delete houseRec.court_officers?.[role];
-    }
-    for (const role of desired) ensureRole(role, true);
-  } else {
-    // Default behavior (v0.2.5): steward only.
-    ensureRole("steward", true);
-    // Legacy: only if explicitly present on the house registry.
-    ensureRole("clerk", false);
-    ensureRole("marshal", false);
   }
 
   // v0.2.8.1 HOTFIX: ensure we have minimal ServiceRecords for court officer roles.
   // This is a People-First invariant and unblocks downstream obligations/debug UI.
-  syncCourtOfficerServiceRecords(state, playerHouseId, houseRec.court_officers as Record<CourtOfficerRole, string>);
+  syncLegacyHouseCourtServiceRecords(state, assignments);
 
-}
-
-function syncCourtOfficerServiceRecords(state: RunState, playerHouseId: string, roles: Record<CourtOfficerRole, string>): void {
-  const anyState: any = state as any;
-  const prior: ServiceRecord[] = Array.isArray(anyState.service_records) ? (anyState.service_records as ServiceRecord[]) : [];
-  const people: Record<string, Person> = anyState.people && typeof anyState.people === "object" ? (anyState.people as Record<string, Person>) : {};
-
-  const byId = new Map<string, ServiceRecord>();
-  for (const r of prior) {
-    if (!r || typeof r !== "object") continue;
-    const id = (r as any).id;
-    if (typeof id !== "string" || !id) continue;
-    byId.set(id, r);
-  }
-
-  const actor = { kind: "house", id: playerHouseId } as const;
-  const nowT = typeof (state as any).turn_index === "number" ? (state as any).turn_index : 0;
-
-  const roleKeys = (Object.keys(roles) as CourtOfficerRole[]).sort((a, b) => String(a).localeCompare(String(b)));
-  const activeRoleIds = new Set(roleKeys.map((role) => `sr_${playerHouseId}_${role}`));
-  for (const role of roleKeys) {
-    const personId = roles[role];
-    if (typeof personId !== "string" || !personId) continue;
-    if (people[personId] && people[personId].alive === false) continue;
-
-    const id = `sr_${playerHouseId}_${role}`;
-    const existing = byId.get(id);
-    if (existing) {
-      if (existing.person_id !== personId) {
-        existing.person_id = personId;
-        existing.start_turn_index = nowT;
-      }
-      existing.serving_actor_id = actor as any;
-      existing.role = role;
-      existing.end_turn_index = null;
-    } else {
-      byId.set(id, {
-        id,
-        person_id: personId,
-        serving_actor_id: actor as any,
-        role,
-        start_turn_index: nowT,
-        end_turn_index: null,
-      });
-    }
-  }
-
-  for (const [id, record] of byId.entries()) {
-    if (!activeRoleIds.has(id)) continue;
-    const personId = record.person_id;
-    const person = typeof personId === "string" ? people[personId] : null;
-    if (!person || person.alive === false) record.end_turn_index = nowT;
-  }
-
-  anyState.service_records = [...byId.values()].sort((a, b) => String(a.id).localeCompare(String(b.id)));
 }
 
 export function getCourtOfficerIds(state: RunState): Array<{ role: CourtOfficerRole; person_id: string }> {
-  const h = getHouseRegistry(state);
-  const out: Array<{ role: CourtOfficerRole; person_id: string }> = [];
-  const roles: CourtOfficerRole[] = ["steward", "clerk", "marshal"];
-  for (const role of roles) {
-    const pid = h?.court_officers?.[role];
-    if (typeof pid === "string" && pid.length > 0) out.push({ role, person_id: pid });
-  }
-  return out;
+  return listLegacyFilledHouseCourtOffices(state).map(({ role, person_id }) => ({ role, person_id }));
 }
 
 export function getCourtExtraIds(state: RunState): string[] {

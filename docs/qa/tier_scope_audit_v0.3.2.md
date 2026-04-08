@@ -1,7 +1,7 @@
 # Tier Scope Audit v0.3.2
 
-Last updated: 2026-04-05
-Task: `V03-R2-002-T01`
+Last updated: 2026-04-06
+Task: `V03-R2-002-T01` (fixture closeout in `V03-R2-002-T05`)
 
 ## Scope
 
@@ -12,6 +12,8 @@ This audit covers the world/topology lane scope for `V03-R2-002-T01`:
 - `docs/qa/**`
 
 This task does not change runtime behavior. The lane-owned deliverable is this audit artifact. Current relevance and tier-scope callers outside the world domain were inspected read-only so the audit can map today’s rules onto the merged topology contract.
+
+The accepted deterministic regression fixture that closes this audit now lives in `docs/qa/tier_scope_fixtures_v0.3.2.md`.
 
 Primary surfaces audited:
 
