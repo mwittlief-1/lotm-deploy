@@ -7728,7 +7728,7 @@ tasks:
   title: Audit widowhood, remarriage, heir, and orphan-edge bug backlog
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: ready
+  status: done
   priority: 58
   tranche: 5
   change_type: refactor
@@ -7747,6 +7747,7 @@ tasks:
   - src/sim/domains/people/**
   - src/sim/domains/court/**
   - tests/**
+  - docs/qa/**
   - docs/releases/**
   forbidden_paths:
   - src/sim/turn.ts
@@ -7780,7 +7781,7 @@ tasks:
   title: Fix widowhood and remarriage edge handling
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: ready
   priority: 56
   tranche: 5
   change_type: behavior_change
@@ -7827,7 +7828,7 @@ tasks:
   title: Fix multiple-heir and orphaned-edge graph integrity bugs
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: ready
   priority: 54
   tranche: 5
   change_type: behavior_change
