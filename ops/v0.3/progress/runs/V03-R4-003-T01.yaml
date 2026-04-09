@@ -1,0 +1,34 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round27
+task_id: V03-R4-003-T01
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-ui-experience
+commit: 4dc502f009c5932901b1509bcc0b84b4f1519248
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+  run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+artifacts:
+  audit_doc: docs/ux/v0.3.4_playtest_ops_surface_audit.md
+  inventory_seam: src/ui/playtestOpsInventory.ts
+  inventory_test: tests/ui/playtestOpsInventory.test.ts
+findings:
+  - Inventoried the live export access points across the Decisions footer, debug accordion, and Run Log screen so later tasks can stop treating playtest exports as scattered affordances.
+  - Captured the reporting and evidence surfaces that already explain runs today, including the Turn Report, Diff Ledger, Run Log, and receipts viewer modal.
+  - Documented the current gaps against a future receipt-bundle workflow, especially the lack of bundle naming, seed-pack instructions, and one canonical packet handoff.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R4-003-T02
+next_task_ready: true
+control_plane_notes:
+  reason: T01 closed cleanly after the required gates passed, and same-lane continuation immediately claimed T02.

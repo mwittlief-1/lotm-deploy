@@ -91,12 +91,30 @@ describe("bounded snapshot contract", () => {
     expect(serialized.institutions).toBeUndefined();
     expect(serialized.service_records).toBeUndefined();
     expect(serialized.beliefs).toBeUndefined();
+    expect(serialized.ai_rail_debug_packet).toBeUndefined();
     expect(serialized.grant_eligibility).toBeUndefined();
     expect(serialized.grant_source_registry).toBeUndefined();
     expect(serialized.grant_dossier_summaries).toBeUndefined();
     expect(serialized.acquisition_prospects_window).toBeUndefined();
     expect((snapshot as any).beliefs).toEqual((state as any).beliefs);
+    expect((snapshot as any).ai_rail_debug_packet).toMatchObject({
+      schema_version: "ai_rail_debug_packet_v1",
+      turn_index: state.turn_index,
+      read_mode: "read_only",
+      beliefs: {
+        schema_version: "belief_payload_registry_v1",
+        subject_ids: []
+      },
+      current_evidence: {
+        schema_version: "domain_evidence_log_v1"
+      },
+      policy_hooks: {
+        schema_version: "policy_hook_debug_v1",
+        hook_order: ["marriage_offer", "prospect"]
+      }
+    });
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "beliefs")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "ai_rail_debug_packet")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "succession_line_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_eligibility")).toBe(false);

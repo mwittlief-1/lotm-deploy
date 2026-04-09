@@ -163,7 +163,8 @@ describe("playScreenObligations", () => {
           actionId: "offering_church",
           title: "Offering to church",
           detail: "Court effort spent on religious offerings.",
-          leverSummary: "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.",
+          leverSummary:
+            "Offering to church is the relationship lever for steadying church support when dues alone are not the whole problem.",
           cost: 1,
           spent: 1,
           availableInBudget: true,
@@ -221,6 +222,38 @@ describe("playScreenObligations", () => {
     );
     expect(obligationsModalSubtitle("decisions", "church")).toBe(
       "Track tithe due, bushel arrears, and the current church pressure stage in one place. Use the payment controls just below to respond after you review the already-resolved stage state."
+    );
+  });
+
+  it("surfaces stage-three dispossession danger through the obligations contract", () => {
+    const stageThreeContract = buildObligationsCounterpartyContract({
+      courtDecisionBudget: COURT_BUDGET,
+      previewState: {
+        economy_obligations_view: {
+          schema_version: "economy_obligations_view_v1",
+          counterparty_order: ["liege", "church"],
+          counterparty_summaries: [
+            {
+              counterparty_kind: "liege",
+              counterparty_label: "House Liege",
+              due_amount: 3,
+              arrears_amount: 7,
+              enforcement_stage: 3,
+              settlement_status: "due_and_arrears",
+              settlement_summary: "House Liege: 7 coin in arrears, 3 coin due.",
+              enforcement_state: "arrears",
+              enforcement_summary: "Stage-three enforcement pressure rose for House Liege because arrears remain open after carry.",
+              settled_this_turn: false,
+              carried_this_turn: true
+            }
+          ]
+        }
+      } as any
+    });
+
+    expect(stageThreeContract?.counterpartySections[0]?.penaltyGroup.stageLabel).toBe("Stage 3: dispossession danger");
+    expect(stageThreeContract?.counterpartySections[0]?.penaltyGroup.responseSummary).toBe(
+      "Next turn: dispossession danger is active. Clear liege arrears immediately or you can lose the seat."
     );
   });
 });

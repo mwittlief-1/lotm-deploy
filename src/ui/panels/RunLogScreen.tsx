@@ -1,5 +1,6 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import { buildPlaytestOpsExportCopy } from "../playtestOpsExport";
 import { AllPeopleRegistryPanel } from "./AllPeopleRegistryPanel";
 
 type RunLogScreenProps = {
@@ -19,6 +20,8 @@ export function RunLogScreen({
   onFilterChange,
   state
 }: RunLogScreenProps) {
+  const exportCopy = buildPlaytestOpsExportCopy(state.run_seed);
+
   return (
     <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
       <h2>Run Log</h2>
@@ -31,6 +34,7 @@ export function RunLogScreen({
       <p style={{ opacity: 0.8 }}>
         {state.log.length} turns logged. Game over: {state.game_over ? state.game_over.reason : "no"}.
       </p>
+      <p style={{ opacity: 0.8, marginTop: 8 }}>{exportCopy.runLogHelper}</p>
 
       <pre style={{ background: "#111", color: "#eee", padding: 12, overflow: "auto", maxHeight: 600 }}>
         {JSON.stringify(

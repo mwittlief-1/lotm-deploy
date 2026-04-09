@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import type { Person, RunState } from "../../src/sim/types";
-import { ensureBeliefRegistry, getBeliefObservations, knownBeliefSubjects, recordBeliefEvidence } from "../../src/sim/domains/ai/beliefs";
+import {
+  BELIEF_PAYLOAD_SCHEMA_VERSION,
+  buildBeliefPayloadForSubject,
+  buildBeliefPayloadRegistry,
+  ensureBeliefRegistry,
+  getBeliefObservations,
+  knownBeliefSubjects,
+  recordBeliefEvidence
+} from "../../src/sim/domains/ai/beliefs";
 import { applyDecisions, createDefaultDecisions } from "../../src/sim/turn";
 import { SIM_VERSION } from "../../src/sim/version";
 
@@ -229,6 +237,103 @@ describe("belief registry scaffold", () => {
         confidence: "known"
       }
     ]);
+  });
+
+  it("builds deterministic belief payloads partitioned by known, likely, and possible states", () => {
+    const state = mkState();
+
+    recordBeliefEvidence(state, "prospects", 2, [
+      {
+        kind: "prospect_generated",
+        detail: "Prospect generated: marriage (pr_1).",
+        category: "prospects",
+        confidence: "likely",
+        subject_ids: ["p_child", "p_candidate"]
+      }
+    ]);
+    recordBeliefEvidence(state, "marriage", 3, [
+      {
+        kind: "marriage_offer",
+        detail: "House Vale (p_child)",
+        category: "marriage",
+        confidence: "known",
+        subject_ids: ["p_child"]
+      }
+    ]);
+    recordBeliefEvidence(state, "events", 4, [
+      {
+        kind: "event_applied",
+        detail: "Rumor from the fair.",
+        category: "events",
+        confidence: "possible",
+        subject_ids: ["p_child"]
+      }
+    ]);
+
+    expect(buildBeliefPayloadForSubject(state, "p_child")).toEqual({
+      schema_version: BELIEF_PAYLOAD_SCHEMA_VERSION,
+      subject_id: "p_child",
+      latest_turn_index: 4,
+      dominant_confidence: "known",
+      states: {
+        known: {
+          confidence: "known",
+          observation_count: 1,
+          latest_turn_index: 3,
+          categories: ["marriage"],
+          kinds: ["marriage_offer"],
+          observations: [
+            {
+              subject_id: "p_child",
+              phase: "marriage",
+              turn_index: 3,
+              kind: "marriage_offer",
+              detail: "House Vale (p_child)",
+              category: "marriage",
+              confidence: "known"
+            }
+          ]
+        },
+        likely: {
+          confidence: "likely",
+          observation_count: 1,
+          latest_turn_index: 2,
+          categories: ["prospects"],
+          kinds: ["prospect_generated"],
+          observations: [
+            {
+              subject_id: "p_child",
+              phase: "prospects",
+              turn_index: 2,
+              kind: "prospect_generated",
+              detail: "Prospect generated: marriage (pr_1).",
+              category: "prospects",
+              confidence: "likely"
+            }
+          ]
+        },
+        possible: {
+          confidence: "possible",
+          observation_count: 1,
+          latest_turn_index: 4,
+          categories: ["events"],
+          kinds: ["event_applied"],
+          observations: [
+            {
+              subject_id: "p_child",
+              phase: "events",
+              turn_index: 4,
+              kind: "event_applied",
+              detail: "Rumor from the fair.",
+              category: "events",
+              confidence: "possible"
+            }
+          ]
+        }
+      }
+    });
+
+    expect(Object.keys(buildBeliefPayloadRegistry(state))).toEqual(["p_candidate", "p_child"]);
   });
 
   it("records preview and resolution evidence into beliefs during turn resolution", () => {

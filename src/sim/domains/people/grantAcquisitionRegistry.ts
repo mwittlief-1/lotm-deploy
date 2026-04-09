@@ -11,6 +11,7 @@ import {
   listWorldScopeCandidatesForAnchor,
   loadBundledWorldDomain,
 } from "../world";
+import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { bestMarriageOfferIndexPolicy, buildMarriageWindow } from "./marriage";
 import {
   buildClaimantRegistry,
@@ -815,6 +816,32 @@ export function buildGrantAcquisitionExperienceSurfaces(
 ): GrantAcquisitionExperienceSurfacesV0 {
   const grantEligibility = buildGrantEligibilityAssessment(state);
   const grantSourceRegistry = buildGrantSourceRegistry(state);
+  const acquisitionWindow = buildAcquisitionProspectsWindow(state, {
+    grant_eligibility: grantEligibility,
+    grant_source_registry: grantSourceRegistry,
+  });
+  const grantProspect = acquisitionWindow.prospects.find((prospect) => prospect.type === "grant") ?? null;
+
+  recordRuntimeDomainEvidence(state, "prospects", [
+    makeEvidenceEvent({
+      kind: grantEligibility.eligible ? "grant_eligibility_open" : "grant_eligibility_blocked",
+      detail: grantEligibility.eligible
+        ? "Grant eligibility open for bounded acquisition review."
+        : `Grant eligibility blocked: ${grantEligibility.blockers.join(", ") || "unknown blocker"}.`,
+      category: "prospects",
+      confidence: "known",
+      subject_ids: [state.house.head.id, state.locals.liege.id]
+    }),
+    makeEvidenceEvent({
+      kind: grantProspect ? "grant_prospect_available" : "grant_prospect_unavailable",
+      detail: grantProspect
+        ? `Grant prospect available: ${grantProspect.id}.`
+        : "No bounded grant prospect is currently available.",
+      category: "prospects",
+      confidence: grantProspect ? grantProspect.uncertainty : "known",
+      subject_ids: [state.house.head.id, state.locals.liege.id]
+    })
+  ]);
 
   return {
     grant_eligibility: grantEligibility,
@@ -822,10 +849,7 @@ export function buildGrantAcquisitionExperienceSurfaces(
     grant_dossier_summaries: grantSourceRegistry.source_entry_ids.map(
       (entryId) => grantSourceRegistry.entries_by_id[entryId]!.dossier_summary
     ),
-    acquisition_prospects_window: buildAcquisitionProspectsWindow(state, {
-      grant_eligibility: grantEligibility,
-      grant_source_registry: grantSourceRegistry,
-    }),
+    acquisition_prospects_window: acquisitionWindow,
   };
 }
 
