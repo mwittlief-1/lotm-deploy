@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R4-003-T01
+  last_completed_task_id: V03-R4-003-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 4dc502f009c5932901b1509bcc0b84b4f1519248
+  git_commit: 1809132429280110ccfe37168a8a01d775cfe124
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,13 +21,14 @@ last_run:
     run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
     run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
 notes: >-
-  Closed UI V03-R4-003-T01 after inventorying the current export, reporting,
-  and playtest pain surfaces into a typed UI seam and UX audit. Same-lane
-  continuation claimed V03-R4-003-T02 on the refreshed UI branch state.
+  Closed UI V03-R4-003-T02 after locking the receipt-bundle naming contract,
+  checked-in seed-pack instructions, and manual artifact expectations against
+  the accepted replay batch. Same-lane continuation claimed V03-R4-003-T03 on
+  the refreshed UI branch state.
 active_claims:
   codex/v0.3-lane-ui-experience:
-    task_id: V03-R4-003-T02
+    task_id: V03-R4-003-T03
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T19:46:52-0400'
-    claim_expires_at: '2026-04-08T23:46:52-0400'
-    run_id: manual-ui-v03-r4-003-t02-20260408T194652-0400
+    claimed_at: '2026-04-08T20:05:14-0400'
+    claim_expires_at: '2026-04-09T00:05:14-0400'
+    run_id: manual-ui-v03-r4-003-t03-20260408T200514-0400
