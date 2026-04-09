@@ -3,58 +3,10 @@
   "turn_index": 0,
   "generated_at_turn_index": 0,
   "prospect_ids": [
-    "acq_marriage:p_head:p_ext_48_child1",
     "acq_grant:grant_source:liege_demesne:manor_hx_43741",
     "acq_inheritance_claim:p_head"
   ],
   "prospects": [
-    {
-      "id": "acq_marriage:p_head:p_ext_48_child1",
-      "type": "marriage",
-      "from_house_id": "h_ext_48",
-      "to_house_id": "h_player",
-      "subject_person_id": "p_head",
-      "spouse_person_id": "p_ext_48_child1",
-      "summary": "Marriage proposal",
-      "requirements": [],
-      "costs": {},
-      "predicted_effects": {
-        "coin_delta": -1,
-        "relationship_deltas": [
-          {
-            "scope": "person",
-            "from_id": "p_head",
-            "to_id": "p_ext_48_child1",
-            "allegiance_delta": 1,
-            "respect_delta": 3,
-            "threat_delta": -1
-          },
-          {
-            "scope": "house",
-            "from_id": "h_player",
-            "to_id": "h_ext_48",
-            "allegiance_delta": 6,
-            "respect_delta": 4,
-            "threat_delta": -3
-          },
-          {
-            "scope": "house",
-            "from_id": "h_ext_48",
-            "to_id": "h_player",
-            "allegiance_delta": 6,
-            "respect_delta": 4,
-            "threat_delta": -3
-          }
-        ],
-        "flags_set": []
-      },
-      "uncertainty": "known",
-      "expires_turn": 2,
-      "actions": [
-        "accept",
-        "reject"
-      ]
-    },
     {
       "id": "acq_grant:grant_source:liege_demesne:manor_hx_43741",
       "type": "grant",
@@ -128,7 +80,6 @@
     }
   ],
   "shown_ids": [
-    "acq_marriage:p_head:p_ext_48_child1",
     "acq_grant:grant_source:liege_demesne:manor_hx_43741",
     "acq_inheritance_claim:p_head"
   ],

@@ -140,7 +140,7 @@ describe("grant acquisition registry", () => {
     const two = buildAcquisitionProspectsWindow(same);
 
     expect(one.schema_version).toBe(ACQUISITION_PROSPECTS_WINDOW_SCHEMA_VERSION);
-    expect(one.prospects.map((prospect) => prospect.type)).toEqual(["marriage", "grant", "inheritance_claim"]);
+    expect(one.prospects.map((prospect) => prospect.type)).toEqual(["grant", "inheritance_claim"]);
     expect(one.shown_ids).toEqual(one.prospect_ids);
     expect(one.hidden_ids).toEqual([]);
     expect(serializeAcquisitionProspectsWindow(one)).toBe(serializeAcquisitionProspectsWindow(two));

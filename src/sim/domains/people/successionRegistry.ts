@@ -85,6 +85,13 @@ export type ClaimantRegistry = {
   overflow_count: number;
 };
 
+export type CanonicalSuccessionSelection = {
+  current_heir_id: string | null;
+  adult_successor_id: string | null;
+  current_heir_spouse_id: string | null;
+  adult_successor_spouse_id: string | null;
+};
+
 export type InheritanceClaimProspectPreviewEntry = {
   claimant_person_id: string;
   succession_position: number | null;
@@ -679,18 +686,11 @@ export function buildClaimantRegistry(
   const houseRelevanceByHouseId = buildHouseRelevanceByHouseId(state);
   const fullLine = buildSuccessionLine(state, { min_age: 0, limit: Math.max(limit, DEFAULT_SUCCESSION_LINE_LIMIT) });
   const adultLine = buildSuccessionLine(state, { min_age: SUCCESSION_MIN_AGE, limit: Math.max(limit, DEFAULT_SUCCESSION_LINE_LIMIT) });
-  const canonicalFullLine = uniqueCandidates([
-    ...enumerateDirectDescendantCandidates(state, 0, houseRelevanceByHouseId),
-    ...enumerateCollateralMaleLineCandidates(state, 0, houseRelevanceByHouseId),
-  ]);
-  const canonicalAdultLine = uniqueCandidates([
-    ...enumerateDirectDescendantCandidates(state, SUCCESSION_MIN_AGE, houseRelevanceByHouseId),
-    ...enumerateCollateralMaleLineCandidates(state, SUCCESSION_MIN_AGE, houseRelevanceByHouseId),
-  ]);
-  const fallbackCandidates = enumerateHouseholdFallbackCandidates(state, houseRelevanceByHouseId);
-  const currentHeirId = state.house.heir_id ?? canonicalFullLine[0]?.person_id ?? null;
-  const adultSuccessorId = canonicalAdultLine[0]?.person_id ?? fallbackCandidates[0]?.person_id ?? null;
+  const selection = buildCanonicalSuccessionSelection(state);
+  const currentHeirId = selection.current_heir_id;
+  const adultSuccessorId = selection.adult_successor_id;
   const adultLinePositions = new Map(adultLine.entries.map((entry) => [entry.person_id, entry.line_position]));
+  const fallbackCandidates = enumerateHouseholdFallbackCandidates(state, houseRelevanceByHouseId);
 
   const entries: ClaimantRegistryEntry[] = fullLine.entries.map((entry) => ({
     claimant_person_id: entry.person_id,
@@ -734,6 +734,28 @@ export function buildClaimantRegistry(
     claim_window_open: currentHeirId === null,
     entries: bounded,
     overflow_count: overflowBase,
+  };
+}
+
+export function buildCanonicalSuccessionSelection(state: RunState): CanonicalSuccessionSelection {
+  const houseRelevanceByHouseId = buildHouseRelevanceByHouseId(state);
+  const canonicalFullLine = uniqueCandidates([
+    ...enumerateDirectDescendantCandidates(state, 0, houseRelevanceByHouseId),
+    ...enumerateCollateralMaleLineCandidates(state, 0, houseRelevanceByHouseId),
+  ]);
+  const canonicalAdultLine = uniqueCandidates([
+    ...enumerateDirectDescendantCandidates(state, SUCCESSION_MIN_AGE, houseRelevanceByHouseId),
+    ...enumerateCollateralMaleLineCandidates(state, SUCCESSION_MIN_AGE, houseRelevanceByHouseId),
+  ]);
+  const fallbackCandidates = enumerateHouseholdFallbackCandidates(state, houseRelevanceByHouseId);
+  const currentHeirId = canonicalFullLine[0]?.person_id ?? null;
+  const adultSuccessorId = canonicalAdultLine[0]?.person_id ?? fallbackCandidates[0]?.person_id ?? null;
+
+  return {
+    current_heir_id: currentHeirId,
+    adult_successor_id: adultSuccessorId,
+    current_heir_spouse_id: currentHeirId ? getLivingSpouse(state as any, currentHeirId) : null,
+    adult_successor_spouse_id: adultSuccessorId ? getLivingSpouse(state as any, adultSuccessorId) : null,
   };
 }
 

@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R3-002-T05
-  last_completed_task_id: V03-R3-002-T04
+  current_task_id: V03-R1-006-T01
+  last_completed_task_id: V03-R4-001-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: f718ae4
+  git_commit: f17d1eb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,10 +18,10 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
+    run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted kickoff V03-R3-002-T04, kept replay on the accepted deterministic
-  line, and reopened Social V03-R3-002-T05 as the clergy-placement epic
-  closeout task.
+  Reconciled stale accepted backlog entries back to done state, cleared the
+  stale topology blocker on V03-R1-006, and reopened Social V03-R1-006-T01 as
+  the next honest frontier.
 active_claims: {}

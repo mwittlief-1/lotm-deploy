@@ -6,6 +6,9 @@ This audit covers the current person-placement surfaces for clergy and
 institution holders before the `V03-R3-002` baseline adds a people-domain
 clergy track seam.
 
+This document remains the opening `T01` baseline. The accepted release-facing
+summary now lives in `docs/qa/clergy_placement_closeout_v0.3.3.md`.
+
 ## Current seeded surfaces
 
 - `src/sim/types.ts`
