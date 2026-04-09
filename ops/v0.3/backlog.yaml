@@ -7781,7 +7781,7 @@ tasks:
   title: Fix widowhood and remarriage edge handling
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: ready
+  status: done
   priority: 56
   tranche: 5
   change_type: behavior_change

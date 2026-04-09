@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R4-001-T02
-  last_completed_task_id: V03-R4-001-T01
+  current_task_id: V03-R4-001-T03
+  last_completed_task_id: V03-R4-001-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: f718ae4
+  git_commit: 79c257c
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,10 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
-    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run1: 7c9e41253bc9bfcc3869cfff9a5629c3546ab64156169b87d9a0b01fb15c36b8
+    run2: 7c9e41253bc9bfcc3869cfff9a5629c3546ab64156169b87d9a0b01fb15c36b8
 notes: >-
-  Accepted kickoff V03-R4-001-T01, published the v0.3.4 hardening bug audit,
-  and reopened V03-R4-001-T02 plus V03-R4-001-T03 as the next hardening
-  frontiers.
+  Accepted kickoff V03-R4-001-T02, repaired widowhood and remarriage edge
+  handling, and advanced the queue to V03-R4-001-T03. This round intentionally
+  changed replay and bounded acquisition fixtures to enforce living-spouse
+  gating.
 active_claims: {}
