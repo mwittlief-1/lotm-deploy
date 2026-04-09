@@ -8336,7 +8336,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Refresh playtest docs and UI hooks for export access
-  status: ready
+  status: done
   priority: 96
   tranche: 5
   change_type: behavior_change
@@ -8368,8 +8368,8 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T04.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T20:15:29-0400'
-    claim_expires_at: '2026-04-09T00:15:29-0400'
-    run_id: manual-ui-v03-r4-003-t04-20260408T201529-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
