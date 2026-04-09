@@ -9,6 +9,7 @@ import {
 import { getCourtExcludeIds, getCourtExtraIds, getCourtOfficerIds } from "../court";
 import { processNobleFertility, processNobleMarriages, processNobleMortality } from "../demography";
 import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "../demographyCurves";
+import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
 import { Rng } from "../rng";
 import type { HouseLogEvent, Person, RunState } from "../types";
 import { asNonNegInt, clampInt } from "../util";
@@ -336,6 +337,8 @@ export function applyHouseholdDemographyPhase(
       }
     }
   }
+
+  syncClergyPlacementPersistence(state);
 
   return { births, deaths, population_delta: popDelta };
 }

@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R3-002-T03
+  current_task_id: V03-R3-002-T05
+  last_completed_task_id: V03-R3-002-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-lane-social-mechanics
-  git_commit: fd4b253
+  git_branch: codex/v0.3-refactor-kickoff
+  git_commit: f718ae4
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,16 +15,13 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: not_run
+    repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
-    run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+    run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+    run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Refreshed the social lane from kickoff truth, then completed Social
-  V03-R3-002-T01 through T03 with a clergy placement audit, deterministic
-  clergy-track eligibility and placement seams, and minimal institution-holder
-  persistence. Replay stayed on the accepted clergy baseline hash, and the
-  inherited dispatch claim was cleared after the same-lane continuation
-  finished.
+  Accepted kickoff V03-R3-002-T04, kept replay on the accepted deterministic
+  line, and reopened Social V03-R3-002-T05 as the clergy-placement epic
+  closeout task.
 active_claims: {}
