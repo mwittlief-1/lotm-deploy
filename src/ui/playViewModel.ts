@@ -1,10 +1,21 @@
 import type { RunState } from "../sim/types";
+import { buildEconomyPricingView } from "../sim/domains/experience/pricingView";
 import { buildHouseIndexes, buildParentsIndex, formatParentsLine, formatPersonName } from "./viewHelpers";
 
 export type PopChangeLine = { label: string; amount: number };
 export type UnrestLine = { label: string; amount: number };
 export type UnrestBreakdown = { increased: UnrestLine[]; decreased: UnrestLine[] };
 export type OblAmount = { coin: number; bushels: number };
+export type EconomyPricingSurface = {
+  schemaVersion: string;
+  referenceId: string;
+  referenceLabel: string;
+  ratioLabel: string;
+  fixedSellCapUnits: number;
+  maxSellableUnits: number;
+  maxQuotedCoin: number;
+  catalogLines: string[];
+};
 
 type PersonLike = {
   id: string;
@@ -23,6 +34,53 @@ export type CourtRosterEntry = {
   badges: string[];
   parents_line: string | null;
 };
+
+function pluralize(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural;
+}
+
+function priceUnitLabel(baseAmount: number, unit: string): string {
+  if (unit === "labor_turn") {
+    return `${baseAmount} ${pluralize(baseAmount, "labor turn", "labor turns")}`;
+  }
+  return `${baseAmount} ${pluralize(baseAmount, "bushel", "bushels")}`;
+}
+
+export function buildEconomyPricingSurface(snapshotLike: any): EconomyPricingSurface | null {
+  const view =
+    snapshotLike?.economy_pricing_view && typeof snapshotLike.economy_pricing_view === "object"
+      ? snapshotLike.economy_pricing_view
+      : snapshotLike?.manor && typeof snapshotLike === "object"
+        ? buildEconomyPricingView(snapshotLike as RunState)
+        : null;
+
+  if (!view || typeof view !== "object") return null;
+
+  const foodStoresSellAction = view.food_stores_sell_action;
+  const priceReference = foodStoresSellAction?.price_reference;
+  const references = Array.isArray(view.references) ? view.references : [];
+
+  if (!foodStoresSellAction || !priceReference) return null;
+
+  return {
+    schemaVersion: String(view.schema_version ?? ""),
+    referenceId: String(priceReference.reference_id ?? ""),
+    referenceLabel: String(priceReference.label ?? ""),
+    ratioLabel: `${priceReference.quote_amount} coin / ${priceUnitLabel(priceReference.base_amount, String(priceReference.unit ?? ""))}`,
+    fixedSellCapUnits: Number.isFinite(foodStoresSellAction.sell_cap_units) ? Math.trunc(foodStoresSellAction.sell_cap_units) : 0,
+    maxSellableUnits: Number.isFinite(foodStoresSellAction.sold_units) ? Math.trunc(foodStoresSellAction.sold_units) : 0,
+    maxQuotedCoin: Number.isFinite(foodStoresSellAction.quoted_coin) ? Math.trunc(foodStoresSellAction.quoted_coin) : 0,
+    catalogLines: references.map((reference: any) => {
+      const label = String(reference?.label ?? "");
+      const ratio = `${reference?.quote_amount ?? 0} coin / ${priceUnitLabel(
+        Number.isFinite(reference?.base_amount) ? Math.trunc(reference.base_amount) : 0,
+        String(reference?.unit ?? "")
+      )}`;
+      const lifecycle = reference?.lifecycle === "placeholder" ? "placeholder" : "active";
+      return `${label}: ${ratio} (${lifecycle})`;
+    })
+  };
+}
 
 export function getEligibleMaidensLocalRaw(ctx: any, marriageWindow: any): any {
   return (
