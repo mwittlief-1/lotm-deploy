@@ -345,7 +345,7 @@ epics:
 - id: V03-R0-001
   title: Determinism and receipts v1 hardening
   release: v0.3.0
-  status: ready
+  status: done
   priority: 60
   tranche: 1
   change_type: behavior_change
@@ -442,7 +442,7 @@ epics:
 - id: V03-R0-004
   title: Gameplay screen UX v0 and receipts viewer shell
   release: v0.3.0
-  status: ready
+  status: done
   priority: 58
   tranche: 1
   change_type: behavior_change
@@ -509,7 +509,7 @@ epics:
 - id: V03-R0-006
   title: Multi-asset fiscal baseline for food, meat, hunting, and receipts
   release: v0.3.0
-  status: ready
+  status: done
   priority: 56
   tranche: 1
   change_type: behavior_change
@@ -605,7 +605,7 @@ epics:
 - id: V03-R1-003
   title: Obligations enforcement and arrears ladder
   release: v0.3.1
-  status: todo
+  status: done
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -705,7 +705,7 @@ epics:
 - id: V03-R1-006
   title: World person-to-manor assignment baseline
   release: v0.3.1
-  status: blocked
+  status: ready
   priority: 48
   tranche: 2
   change_type: behavior_change
@@ -716,7 +716,7 @@ epics:
   - V03-XMAP-001
   - V03-R1-001
   requires_integrator: false
-  blocked_reason: Waiting for map topology merge and manor geography contract.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -739,7 +739,7 @@ epics:
 - id: V03-R2-001
   title: Multi-manor portfolio accounting baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 48
   tranche: 3
   change_type: behavior_change
@@ -1077,7 +1077,7 @@ epics:
 - id: V03-R3-005
   title: Realm political weather scaffolding
   release: v0.3.3
-  status: todo
+  status: done
   priority: 36
   tranche: 4
   change_type: behavior_change
@@ -3923,7 +3923,7 @@ tasks:
   title: Close epic and refresh fiscal DOE notes
   release: v0.3.1
   parent_epic: V03-R1-003
-  status: todo
+  status: done
   priority: 72
   tranche: 2
   change_type: refactor
@@ -4459,7 +4459,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Audit people lacking residence_manor_id across relevant roles and surfaces
-  status: blocked
+  status: ready
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4470,7 +4470,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4502,7 +4502,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Define residence_manor_id rules for household, prospects, clergy, and offices
-  status: blocked
+  status: todo
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4512,7 +4512,7 @@ tasks:
   deps:
   - V03-R1-006-T01
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4543,7 +4543,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Implement world-init person-to-manor assignment and transition handlers
-  status: blocked
+  status: todo
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4553,7 +4553,7 @@ tasks:
   deps:
   - V03-R1-006-T02
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4584,7 +4584,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Expose residence selectors and numeric-distance hooks to snapshots
-  status: blocked
+  status: todo
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4594,7 +4594,7 @@ tasks:
   deps:
   - V03-R1-006-T03
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/experience/**
@@ -4626,7 +4626,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Add person-to-manor assignment invariants and docs
-  status: blocked
+  status: todo
   priority: 95
   tranche: 2
   change_type: refactor
@@ -4636,7 +4636,7 @@ tasks:
   deps:
   - V03-R1-006-T04
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - tests/**
   - docs/releases/**
@@ -4666,7 +4666,7 @@ tasks:
   title: Audit manor-level assets and define portfolio invariant contract
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 84
   tranche: 3
   change_type: refactor
@@ -4714,7 +4714,7 @@ tasks:
   title: Add portfolio registry schema and manor rollup keys
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 82
   tranche: 3
   change_type: refactor
@@ -4760,7 +4760,7 @@ tasks:
   title: Implement portfolio total aggregation from manor registries
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 80
   tranche: 3
   change_type: behavior_change
@@ -4806,7 +4806,7 @@ tasks:
   title: Implement per-manor net and outliers computation
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 78
   tranche: 3
   change_type: behavior_change
@@ -4850,7 +4850,7 @@ tasks:
   title: Integrate portfolio registry into phase and snapshot outputs
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 76
   tranche: 3
   change_type: behavior_change
@@ -4896,7 +4896,7 @@ tasks:
   title: Add multi-manor regression suite and invariants
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 74
   tranche: 3
   change_type: refactor
@@ -4941,7 +4941,7 @@ tasks:
   title: Render portfolio totals and outliers UI stub
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 72
   tranche: 3
   change_type: refactor
@@ -4985,7 +4985,7 @@ tasks:
   title: Close epic and refresh portfolio docs
   release: v0.3.2
   parent_epic: V03-R2-001
-  status: todo
+  status: done
   priority: 70
   tranche: 3
   change_type: refactor
@@ -7109,7 +7109,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Audit existing liege, church, and realm pressure surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7151,7 +7151,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Define realm pressure registry and read-only political weather schema
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7191,7 +7191,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Seed crown-magnate-church latent pressure baselines deterministically
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7231,7 +7231,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Expose political weather outputs to snapshots and content hooks
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7272,7 +7272,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor

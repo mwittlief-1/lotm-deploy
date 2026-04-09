@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R1-006-T01
   last_completed_task_id: V03-R4-001-T06
 runtime:
   node_version: v24.13.1
@@ -21,7 +21,7 @@ last_run:
     run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
     run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted kickoff V03-R4-001-T05 and V03-R4-001-T06, closed epic
-  V03-R4-001, and recorded the final hardening playtest guide, release-facing
-  report, and known issues on the accepted replay line.
+  Reconciled stale accepted backlog entries back to done state, cleared the
+  stale topology blocker on V03-R1-006, and reopened Social V03-R1-006-T01 as
+  the next honest frontier.
 active_claims: {}
