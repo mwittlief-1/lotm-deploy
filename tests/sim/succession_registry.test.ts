@@ -11,7 +11,7 @@ import {
   SUCCESSION_LINE_SCHEMA_VERSION,
 } from "../../src/sim/domains/people/successionRegistry";
 import { buildProspectsWindowPhase } from "../../src/sim/phases/phase_prospects";
-import { computeHeirId } from "../../src/sim/phases/phase_succession";
+import { computeAdultSuccessorId, computeHeirId } from "../../src/sim/phases/phase_succession";
 import type { Person, RunState } from "../../src/sim/types";
 import { SIM_VERSION } from "../../src/sim/version";
 
@@ -202,6 +202,7 @@ describe("succession registry schema", () => {
     const registry = buildClaimantRegistry(state);
 
     expect(line.entries).toEqual([]);
+    expect(computeAdultSuccessorId(state)).toBe("p_spouse");
     expect(registry.claim_window_open).toBe(true);
     expect(registry.adult_successor_id).toBe("p_spouse");
     expect(registry.entries[0]).toMatchObject({
