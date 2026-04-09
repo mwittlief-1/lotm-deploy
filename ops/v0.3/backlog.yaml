@@ -6612,7 +6612,7 @@ tasks:
   title: Integrate clergy placement persistence into phase wrappers
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: ready
+  status: done
   priority: 52
   tranche: 4
   change_type: behavior_change
@@ -6659,7 +6659,7 @@ tasks:
   title: Close epic and refresh clergy placement docs
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: ready
   priority: 50
   tranche: 4
   change_type: refactor
