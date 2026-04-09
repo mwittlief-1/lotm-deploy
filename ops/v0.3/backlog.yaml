@@ -6473,7 +6473,7 @@ tasks:
   title: Audit person-placement surfaces for clergy and institution holders
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: ready
+  status: done
   priority: 58
   tranche: 4
   change_type: refactor
@@ -6498,11 +6498,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T20:54:11-0400'
-    claim_expires_at: '2026-04-09T00:54:11-0400'
-    run_id: 2026-04-08_manual_acceptance_round28
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
   done_conditions:
   - current placement surfaces are documented
   - institution-holder minimum needs are identified
@@ -6521,7 +6521,7 @@ tasks:
   title: Add clergy-track schema and eligibility rules
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: ready
+  status: done
   priority: 56
   tranche: 4
   change_type: behavior_change
@@ -6565,7 +6565,7 @@ tasks:
   title: Add minimal institution-holder registry and persistence surfaces
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: ready
+  status: done
   priority: 54
   tranche: 4
   change_type: behavior_change
