@@ -1,6 +1,7 @@
 import { playerHouseIdOf, registryPersonFor } from "../actors";
 import { TURN_YEARS } from "../constants";
 import { addCourtExtraId, removeCourtExcludeId } from "../court";
+import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
 import { getChildren as kinChildren, getParents as kinParents, isAlive as kinIsAlive } from "../kinship";
 import { applyCloseTurnObligationsPhase } from "./phase_obligations";
 import type { HouseLogEvent, Person, RunState } from "../types";
@@ -302,4 +303,5 @@ export function closeTurnPhase(
   }
 
   state.turn_index += 1;
+  syncClergyPlacementPersistence(state);
 }
