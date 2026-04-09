@@ -1180,7 +1180,7 @@ epics:
 - id: V03-R4-001
   title: v0.3.4 hardening and docs refresh
   release: v0.3.4
-  status: todo
+  status: done
   priority: 40
   tranche: 5
   change_type: refactor
@@ -7924,7 +7924,7 @@ tasks:
   title: Refresh v0.3 docs, playtest instructions, and bug report template
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: ready
+  status: done
   priority: 50
   tranche: 5
   change_type: refactor
@@ -7964,7 +7964,7 @@ tasks:
   title: Final release scrub and close v0.3.4 hardening epic
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 48
   tranche: 5
   change_type: refactor
