@@ -3,6 +3,7 @@ import { getLivingSpouse } from "../../kinship";
 import type { HouseholdRoster, Person, RunState } from "../../types";
 import { buildGrantAcquisitionExperienceSurfaces } from "./grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "./knownHouseSummaries";
+import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "./successionSummaries";
 
 function attachHiddenSurface(target: object, key: string, value: unknown): void {
@@ -18,6 +19,7 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
+  ensureResidenceManorBindings(state);
   (state as any).known_houses = experienceSurfaces.known_houses;
   (state as any).house_dossiers = experienceSurfaces.house_dossiers;
   (state as any).succession_line_summary = successionSurfaces.succession_line_summary;

@@ -1,5 +1,6 @@
 import { allHouseMemberIds, playerHouseIdOf, registryPersonFor, structuredHouseIdForPerson } from "../../actors";
 import type { InstitutionType, RunState, Sex } from "../../types";
+import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 
 export const CLERGY_TRACK_REGISTRY_SCHEMA_VERSION = "clergy_track_registry_v0" as const;
 export const CLERGY_TRACK_ENTRY_SCHEMA_VERSION = "clergy_track_entry_v0" as const;
@@ -423,6 +424,7 @@ export function placePersonOnClergyTrack(
   const nextRegistry = buildClergyTrackRegistry(nextEntries);
   (state as any).clergy_track_registry = nextRegistry;
   (state.house as any).clergy_track_registry = nextRegistry;
+  ensureResidenceManorBindings(state);
   return nextRegistry;
 }
 
