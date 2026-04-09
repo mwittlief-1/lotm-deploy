@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R3-002-T05
-  last_completed_task_id: V03-R3-002-T04
+  current_task_id: ''
+  last_completed_task_id: V03-R3-002-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,7 +21,6 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted kickoff V03-R3-002-T04, kept replay on the accepted deterministic
-  line, and reopened Social V03-R3-002-T05 as the clergy-placement epic
-  closeout task.
+  Accepted Social V03-R3-002-T05, closed the clergy-placement epic, and
+  reopened kickoff V03-R4-001-T01 as the next hardening frontier.
 active_claims: {}
