@@ -705,7 +705,7 @@ epics:
 - id: V03-R1-006
   title: World person-to-manor assignment baseline
   release: v0.3.1
-  status: ready
+  status: done
   priority: 48
   tranche: 2
   change_type: behavior_change
@@ -4459,7 +4459,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Audit people lacking residence_manor_id across relevant roles and surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4502,7 +4502,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Define residence_manor_id rules for household, prospects, clergy, and offices
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4543,7 +4543,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Implement world-init person-to-manor assignment and transition handlers
-  status: todo
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4584,7 +4584,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Expose residence selectors and numeric-distance hooks to snapshots
-  status: todo
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4626,7 +4626,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Add person-to-manor assignment invariants and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 2
   change_type: refactor
