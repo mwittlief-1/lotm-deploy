@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R4-003-T04
+  last_completed_task_id: V03-R3-002-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 886f58c
+  git_commit: a1c8f47
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -22,14 +22,7 @@ last_run:
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
   Accepted UI V03-R4-003-T01 through T04 on kickoff and closed the playtest-ops
-  epic. Restored the shared obligations summary card baseline needed by the
-  final UI handoff, kept replay on the accepted deterministic line, and
-  reopened Social at V03-R3-002-T01 with T02 and T03 pre-promoted for
-  same-lane continuation.
-active_claims:
-  codex/v0.3-lane-social-mechanics:
-    task_id: V03-R3-002-T01
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T20:54:11-0400'
-    claim_expires_at: '2026-04-09T00:54:11-0400'
-    run_id: 2026-04-08_manual_acceptance_round28
+  epic. Accepted Social V03-R3-002-T01 through T03 on kickoff, kept replay on
+  the accepted deterministic line, and advanced the clergy baseline to the
+  kickoff-owned phase integration seam at V03-R3-002-T04.
+active_claims: {}
