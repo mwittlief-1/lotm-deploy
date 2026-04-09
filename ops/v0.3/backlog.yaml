@@ -7828,7 +7828,7 @@ tasks:
   title: Fix multiple-heir and orphaned-edge graph integrity bugs
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: ready
+  status: done
   priority: 54
   tranche: 5
   change_type: behavior_change
@@ -7875,7 +7875,7 @@ tasks:
   title: Simplify v0.3 hotspots without intended outcome drift
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: ready
   priority: 52
   tranche: 5
   change_type: refactor

@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R4-001-T03
-  last_completed_task_id: V03-R4-001-T02
+  current_task_id: V03-R4-001-T04
+  last_completed_task_id: V03-R4-001-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 79c257c
+  git_commit: a082a81
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,11 +18,11 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7c9e41253bc9bfcc3869cfff9a5629c3546ab64156169b87d9a0b01fb15c36b8
-    run2: 7c9e41253bc9bfcc3869cfff9a5629c3546ab64156169b87d9a0b01fb15c36b8
+    run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
+    run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted kickoff V03-R4-001-T02, repaired widowhood and remarriage edge
-  handling, and advanced the queue to V03-R4-001-T03. This round intentionally
-  changed replay and bounded acquisition fixtures to enforce living-spouse
-  gating.
+  Accepted kickoff V03-R4-001-T03, repaired canonical heir selection and
+  orphaned spouse-edge handling, and advanced the queue to V03-R4-001-T04.
+  This round intentionally changed replay to reflect corrected succession graph
+  integrity and inheritance-claim suppression.
 active_claims: {}
