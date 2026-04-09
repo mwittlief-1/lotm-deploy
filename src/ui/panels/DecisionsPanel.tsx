@@ -1,5 +1,10 @@
 import React from "react";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
+import type {
+  ObligationsCounterpartyContractSection,
+  ObligationsModalFocus
+} from "../playScreenObligations";
+import type { EconomyPricingSurface } from "../playViewModel";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_PANEL_ACCENT_STYLE,
@@ -8,7 +13,9 @@ import {
   PLAY_SCREEN_SECONDARY_BUTTON_STYLE
 } from "../playScreenTheme";
 import type { CourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import { buildPlaytestOpsExportCopy } from "../playtestOpsExport";
 import { Tip, formatParentsLine, formatPersonWithAgeAndHouse } from "../viewHelpers";
+import { ObligationsSummaryCards } from "./ObligationsSummaryCards";
 import { SectionHeading } from "./SectionHeading";
 
 type OblAmount = { coin: number; bushels: number };
@@ -37,14 +44,19 @@ type DecisionsPanelProps = {
   marriageWindow: MarriageWindow | null;
   maxLaborShift: number;
   obligations: any;
+  obligationsSections: ObligationsCounterpartyContractSection[];
   onExportFullRunJson: () => void;
   onExportRunSummary: () => void;
+  onOpenLog?: () => void;
+  onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
   pfHouseLabelById: Map<string, string>;
   pfParentsByChild: Map<string, string[]>;
   pfPeopleRec: Record<string, any>;
   pfPersonHouseById: Map<string, string>;
+  pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   prospectsTotalCount: number;
+  runSeed: string;
   sellCapBushels: number;
   setDecisions: React.Dispatch<React.SetStateAction<TurnDecisions>>;
   totalObligations: OblAmount;
@@ -208,20 +220,26 @@ export function DecisionsPanel({
   marriageWindow,
   maxLaborShift,
   obligations,
+  obligationsSections,
   onExportFullRunJson,
   onExportRunSummary,
+  onOpenLog,
+  onOpenObligationsDetails,
   pfHouseLabelById,
   pfParentsByChild,
   pfPeopleRec,
   pfPersonHouseById,
+  pricingSurface,
   previewState,
   prospectsTotalCount,
+  runSeed,
   sellCapBushels,
   setDecisions,
   totalObligations,
   turnYears,
   arrearsCarried
 }: DecisionsPanelProps) {
+  const exportCopy = buildPlaytestOpsExportCopy(runSeed);
   const payCoin = Math.max(0, Math.min(Math.max(0, manor.coin), Math.trunc(Number.isFinite(decisions.obligations.pay_coin) ? decisions.obligations.pay_coin : 0)));
   const payBushels = Math.max(
     0,
@@ -356,17 +374,41 @@ export function DecisionsPanel({
             style={{ width: 100 }}
           />
           <span style={{ opacity: 0.8 }}> (cap {sellCapBushels})</span>
+          {pricingSurface ? (
+            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82, lineHeight: 1.4 }}>
+              <div>
+                Reference price: <b>{pricingSurface.ratioLabel}</b>.
+              </div>
+              <div>
+                Fixed reference cap: {pricingSurface.fixedSellCapUnits} bushels; max sellable now {pricingSurface.maxSellableUnits} for{" "}
+                {pricingSurface.maxQuotedCoin} coin.
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
       <div id={anchorObligations} style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid #eee" }}>
-        <h4 style={{ margin: 0 }}>Obligations</h4>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <h4 style={{ margin: 0 }}>Obligations</h4>
+          {obligationsSections.length > 0 ? (
+            <button onClick={() => onOpenObligationsDetails("overview")} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+              Open detail sheet
+            </button>
+          ) : null}
+        </div>
         <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>{copy.obligationsHelper}</div>
         {coinShortfall > 0 || bushelsShortfall > 0 ? (
           <div style={{ fontSize: 12, marginTop: 6 }}>
             Shortfall → arrears: {fmtObAmount({ coin: coinShortfall, bushels: bushelsShortfall })}
           </div>
         ) : null}
+        <ObligationsSummaryCards
+          helperText="Next turn response: these cards keep the active stage visible while showing what coin, bushels, and court attention can still change."
+          onOpenDetails={onOpenObligationsDetails}
+          sections={obligationsSections}
+          surface="decisions"
+        />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10, fontSize: 12 }}>
           <div>
@@ -486,11 +528,13 @@ export function DecisionsPanel({
         />
       ) : null}
 
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button onClick={advanceTurn} disabled={laborLimitExceeded} style={PLAY_SCREEN_ACTION_BUTTON_STYLE}>Advance Turn</button>
+        {onOpenLog ? <button onClick={onOpenLog} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Open Run Log</button> : null}
         <button onClick={onExportRunSummary} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Run Summary</button>
         <button onClick={onExportFullRunJson} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Full Run JSON</button>
       </div>
+      <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>{exportCopy.decisionsHelper}</div>
     </div>
   );
 }

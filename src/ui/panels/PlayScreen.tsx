@@ -74,6 +74,7 @@ import {
   PLAY_SCREEN_DEBUG_ACCORDION_SUMMARY,
   PLAY_SCREEN_DEBUG_SURFACES
 } from "../playScreenChrome";
+import { buildPlaytestOpsExportCopy } from "../playtestOpsExport";
 import {
   resolveGameOverReasonLabel,
   resolveProspectAcceptCopy,
@@ -224,6 +225,7 @@ export function PlayScreen({
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
+  const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
   const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
   const portfolioEvidenceScope = buildPortfolioEvidenceScope({
@@ -830,6 +832,7 @@ export function PlayScreen({
         obligationsSections={allObligationsSections}
         onExportFullRunJson={onExportFullRunJson}
         onExportRunSummary={onExportRunSummary}
+        onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
         pfHouseLabelById={pfHouseIx.houseLabelById}
         pfParentsByChild={pfParentsByChild}
@@ -838,6 +841,7 @@ export function PlayScreen({
         pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         prospectsTotalCount={prospectsTotalCount}
+        runSeed={state.run_seed}
         sellCapBushels={ctx.report.market.sell_cap_bushels}
         setDecisions={setDecisions}
         totalObligations={totalObligations}
@@ -855,6 +859,7 @@ export function PlayScreen({
             <button onClick={onExportRunSummary}>Export Run Summary</button>
             <button onClick={onExportFullRunJson}>Export Full Run JSON</button>
           </div>
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 8 }}>{playtestOpsExportCopy.debugHelper}</div>
         </div>
 
         <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
