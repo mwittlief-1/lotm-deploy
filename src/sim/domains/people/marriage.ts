@@ -15,6 +15,7 @@ import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
 import { listRelevantTier1HouseIds } from "./knownHouseRelevance";
 import { applyRelationshipDelta } from "./relationshipEngine";
+import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 
 const MARRIAGE_INBOUND_DECISION_COST = 1;
 const MARRIAGE_SCOUT_DECISION_COST = 2;
@@ -467,5 +468,6 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     `Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`,
     [child.id, offer.house_person_id]
   );
+  ensureResidenceManorBindings(state);
   reportNotes.push(`Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`);
 }

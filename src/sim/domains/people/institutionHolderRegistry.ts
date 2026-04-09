@@ -8,6 +8,7 @@ import {
   type ClergyTrackKind,
   type ClergyTrackRegistry,
 } from "./clergyTrackRegistry";
+import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 
 export const INSTITUTION_HOLDER_REGISTRY_SCHEMA_VERSION = "institution_holder_registry_v0" as const;
 export const INSTITUTION_HOLDER_ENTRY_SCHEMA_VERSION = "institution_holder_entry_v0" as const;
@@ -285,6 +286,7 @@ export function assignInstitutionHolder(
   }
 
   const institutionHolderRegistry = ensureInstitutionHolderRegistry(state, { clergy_track_registry: clergyTrackRegistry });
+  ensureResidenceManorBindings(state);
   return {
     clergy_track_registry: clergyTrackRegistry,
     institution_holder_registry: institutionHolderRegistry,
