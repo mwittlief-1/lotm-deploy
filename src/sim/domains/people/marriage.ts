@@ -9,6 +9,7 @@ import { Rng } from "../../rng";
 import type { TierSets } from "../../tiers";
 import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
 import { clampInt } from "../../util";
+import { getLivingSpouse } from "../../kinship";
 import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
@@ -18,6 +19,8 @@ import { applyRelationshipDelta } from "./relationshipEngine";
 const MARRIAGE_INBOUND_DECISION_COST = 1;
 const MARRIAGE_SCOUT_DECISION_COST = 2;
 const MARRIAGE_SCOUT_MIN_DELEGATED_COST = 1;
+const SPOUSE_EDGE_A_KEYS = ["a_id", "from_person_id", "from", "a"] as const;
+const SPOUSE_EDGE_B_KEYS = ["b_id", "to_person_id", "to", "b"] as const;
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -80,6 +83,94 @@ export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: str
   if (!exists) edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
 }
 
+function readEdgeIdByKeys(edge: any, keys: readonly string[]): string | null {
+  if (!edge || typeof edge !== "object") return null;
+  for (const key of keys) {
+    const value = edge[key];
+    if (typeof value === "string" && value.length > 0) return value;
+  }
+  return null;
+}
+
+function spouseEdgeEndpoints(edge: any): { a: string | null; b: string | null } {
+  if (!edge || typeof edge !== "object" || edge.kind !== "spouse_of") return { a: null, b: null };
+  return {
+    a: readEdgeIdByKeys(edge, SPOUSE_EDGE_A_KEYS),
+    b: readEdgeIdByKeys(edge, SPOUSE_EDGE_B_KEYS),
+  };
+}
+
+function spouseEdgeIsActive(edge: any): boolean {
+  if (!edge || typeof edge !== "object") return false;
+  if (edge.is_active === false) return false;
+  if (edge.end_turn_index != null) return false;
+  if (edge.ended_turn_index != null) return false;
+  if (edge.end_turn != null) return false;
+  if (edge.ended_turn != null) return false;
+  if (edge.end_year != null) return false;
+  if (edge.ended_year != null) return false;
+  return true;
+}
+
+function hasActiveSpouseEdge(state: RunState, personId: string): boolean {
+  const edges = Array.isArray((state as any).kinship_edges) ? ((state as any).kinship_edges as any[]) : [];
+  for (const edge of edges) {
+    if (!spouseEdgeIsActive(edge)) continue;
+    const { a, b } = spouseEdgeEndpoints(edge);
+    if (a === personId || b === personId) return true;
+  }
+  return false;
+}
+
+function householdWidowMarkerApplies(state: RunState, personId: string): boolean {
+  if (state.house.spouse_status !== "widow") return false;
+  if (personId === state.house.head.id && state.house.head.alive && !getLivingSpouse(state as any, personId)) return true;
+  if (state.house.spouse?.id === personId && state.house.spouse.alive && !getLivingSpouse(state as any, personId)) return true;
+  return false;
+}
+
+function canSeekMarriage(state: RunState, person: Person | undefined | null): boolean {
+  if (!person || !person.alive || person.age < 15) return false;
+  if (getLivingSpouse(state as any, person.id)) return false;
+  if (!person.married) return true;
+  if (householdWidowMarkerApplies(state, person.id)) return true;
+  return hasActiveSpouseEdge(state, person.id);
+}
+
+function syncMarriedFlag(state: RunState, personId: string): void {
+  const nextMarried = Boolean(getLivingSpouse(state as any, personId));
+  const anyState: any = state as any;
+
+  if (anyState.people?.[personId]) anyState.people[personId].married = nextMarried;
+  if (state.house.head.id === personId) state.house.head.married = nextMarried;
+  if (state.house.spouse?.id === personId) state.house.spouse.married = nextMarried;
+
+  const child = state.house.children.find((entry) => entry.id === personId);
+  if (child) child.married = nextMarried;
+}
+
+function retireObsoleteSpouseEdges(state: RunState, personId: string, keepPartnerId: string): string[] {
+  const edges = Array.isArray((state as any).kinship_edges) ? ((state as any).kinship_edges as any[]) : [];
+  const affected = new Set<string>();
+
+  for (const edge of edges) {
+    if (!spouseEdgeIsActive(edge)) continue;
+    const { a, b } = spouseEdgeEndpoints(edge);
+    if (!a || !b) continue;
+
+    let otherId: string | null = null;
+    if (a === personId) otherId = b;
+    else if (b === personId) otherId = a;
+    if (!otherId || otherId === keepPartnerId) continue;
+
+    edge.end_turn_index = state.turn_index;
+    affected.add(personId);
+    affected.add(otherId);
+  }
+
+  return [...affected].sort((left, right) => left.localeCompare(right));
+}
+
 export function bestMarriageOfferIndexPolicy(state: RunState, marriageWindow: MarriageWindow): number | null {
   let bestIdx: number | null = null;
   let bestScore = -Infinity;
@@ -111,12 +202,12 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
 
   const eligibleAll: Person[] = [];
   const pushEligible = (person: Person | undefined | null) => {
-    if (!person || !person.alive || person.married || person.age < 15) return;
+    if (!canSeekMarriage(state, person)) return;
     if (eligibleAll.some((candidate) => candidate.id === person.id)) return;
     eligibleAll.push(person);
   };
 
-  if (!state.house.spouse && state.house.spouse_status !== "widow") pushEligible(state.house.head);
+  pushEligible(state.house.head);
   for (const child of state.house.children) pushEligible(child);
   if (!forced && eligibleAll.length === 0) return null;
   if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
@@ -299,14 +390,13 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   spendEnergy(state, 1);
   applyCoinDelta(state, dowry);
 
-  child.married = true;
-  {
-    const anyState: any = state as any;
-    if (anyState.people && anyState.people[child.id]) anyState.people[child.id].married = true;
-    if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
-  }
-
+  const affectedIds = new Set<string>();
+  for (const personId of retireObsoleteSpouseEdges(state, child.id, offer.house_person_id)) affectedIds.add(personId);
+  for (const personId of retireObsoleteSpouseEdges(state, offer.house_person_id, child.id)) affectedIds.add(personId);
   ensureMarriageKinshipEdge(state, child.id, offer.house_person_id);
+  affectedIds.add(child.id);
+  affectedIds.add(offer.house_person_id);
+  for (const personId of [...affectedIds].sort((left, right) => left.localeCompare(right))) syncMarriedFlag(state, personId);
 
   const spouseJoinsCourt = isHeadSubject ? true : child.sex === "M";
   if (spouseJoinsCourt) {

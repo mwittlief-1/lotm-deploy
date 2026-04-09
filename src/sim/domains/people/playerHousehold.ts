@@ -1,4 +1,5 @@
 import { registryPersonFor } from "../../actors";
+import { getLivingSpouse } from "../../kinship";
 import type { HouseholdRoster, Person, RunState } from "../../types";
 import { buildGrantAcquisitionExperienceSurfaces } from "./grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "./knownHouseSummaries";
@@ -38,7 +39,9 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const spouse = state.house.spouse ?? null;
 
   let widowedPersonId: string | null = null;
-  if (spouse) {
+  if (state.house.spouse_status === "widow" && state.house.head.alive && !getLivingSpouse(state as any, state.house.head.id)) {
+    widowedPersonId = state.house.head.id;
+  } else if (spouse) {
     if (state.house.head.alive && !spouse.alive) widowedPersonId = state.house.head.id;
     else if (!state.house.head.alive && spouse.alive) widowedPersonId = spouse.id;
   }
