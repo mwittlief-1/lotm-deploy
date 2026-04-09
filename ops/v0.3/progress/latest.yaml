@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R3-007-T05
+  last_completed_task_id: V03-R4-003-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 27b90fd
+  git_commit: 886f58c
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,15 +21,15 @@ last_run:
     run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
     run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
 notes: >-
-  Accepted Social V03-R3-003-T03 through T05, Engine V03-R3-006-T01 through
-  T05, and UI V03-R3-007-T01 through T05 on kickoff. Closed the court agenda,
-  AI rails, and experience-content epics, and reopened the UI playtest-ops
-  chain at V03-R4-003-T01. The integrated code kept replay on the existing
-  deterministic baseline.
+  Accepted UI V03-R4-003-T01 through T04 on kickoff and closed the playtest-ops
+  epic. Restored the shared obligations summary card baseline needed by the
+  final UI handoff, kept replay on the accepted deterministic line, and
+  reopened Social at V03-R3-002-T01 with T02 and T03 pre-promoted for
+  same-lane continuation.
 active_claims:
-  codex/v0.3-lane-ui-experience:
-    task_id: V03-R4-003-T01
+  codex/v0.3-lane-social-mechanics:
+    task_id: V03-R3-002-T01
     claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T18:51:00-0400'
-    claim_expires_at: '2026-04-08T22:51:00-0400'
-    run_id: 2026-04-08_manual_acceptance_round27
+    claimed_at: '2026-04-08T20:54:11-0400'
+    claim_expires_at: '2026-04-09T00:54:11-0400'
+    run_id: 2026-04-08_manual_acceptance_round28

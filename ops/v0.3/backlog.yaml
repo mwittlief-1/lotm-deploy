@@ -1252,7 +1252,7 @@ epics:
 - id: V03-R4-003
   title: Experience playtest ops and export conventions
   release: v0.3.4
-  status: in_progress
+  status: done
   priority: 29
   tranche: 5
   change_type: behavior_change
@@ -6473,7 +6473,7 @@ tasks:
   title: Audit person-placement surfaces for clergy and institution holders
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: ready
   priority: 58
   tranche: 4
   change_type: refactor
@@ -6498,11 +6498,11 @@ tasks:
   requires_golden_change: false
   expected_diff_note: ''
   claim:
-    status: unclaimed
-    claimed_by: ''
-    claimed_at: ''
-    claim_expires_at: ''
-    run_id: ''
+    status: claimed
+    claimed_by: integrator.dispatch
+    claimed_at: '2026-04-08T20:54:11-0400'
+    claim_expires_at: '2026-04-09T00:54:11-0400'
+    run_id: 2026-04-08_manual_acceptance_round28
   done_conditions:
   - current placement surfaces are documented
   - institution-holder minimum needs are identified
@@ -6521,7 +6521,7 @@ tasks:
   title: Add clergy-track schema and eligibility rules
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: ready
   priority: 56
   tranche: 4
   change_type: behavior_change
@@ -6565,7 +6565,7 @@ tasks:
   title: Add minimal institution-holder registry and persistence surfaces
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: ready
   priority: 54
   tranche: 4
   change_type: behavior_change
@@ -8212,7 +8212,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Inventory export, reporting, and playtest pain surfaces
-  status: ready
+  status: done
   priority: 99
   tranche: 5
   change_type: refactor
@@ -8246,16 +8246,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T01.yaml
   claim:
-    status: claimed
-    claimed_by: integrator.dispatch
-    claimed_at: '2026-04-08T18:51:00-0400'
-    claim_expires_at: '2026-04-08T22:51:00-0400'
-    run_id: 2026-04-08_manual_acceptance_round27
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R4-003-T02
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Define receipt bundle export conventions and seed-pack instructions
-  status: ready
+  status: done
   priority: 98
   tranche: 5
   change_type: refactor
@@ -8296,7 +8296,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Add bug-report template and KPI placeholder conventions
-  status: ready
+  status: done
   priority: 97
   tranche: 5
   change_type: refactor
@@ -8336,7 +8336,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Refresh playtest docs and UI hooks for export access
-  status: ready
+  status: done
   priority: 96
   tranche: 5
   change_type: behavior_change
