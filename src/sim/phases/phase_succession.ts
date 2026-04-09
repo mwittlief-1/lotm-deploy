@@ -2,7 +2,8 @@ import { playerHouseIdOf, registryPersonFor } from "../actors";
 import { TURN_YEARS } from "../constants";
 import { addCourtExtraId, removeCourtExcludeId } from "../court";
 import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
-import { getChildren as kinChildren, getParents as kinParents, isAlive as kinIsAlive } from "../kinship";
+import { buildCanonicalSuccessionSelection } from "../domains/people/successionRegistry";
+import { getChildren as kinChildren, getLivingSpouse, getParents as kinParents, isAlive as kinIsAlive } from "../kinship";
 import { applyCloseTurnObligationsPhase } from "./phase_obligations";
 import type { HouseLogEvent, Person, RunState } from "../types";
 import { asNonNegInt } from "../util";
@@ -10,18 +11,7 @@ import { asNonNegInt } from "../util";
 const SUCCESSION_MIN_AGE = 15;
 
 export function spouseIdFromKinship(state: RunState, personId: string): string | null {
-  const anyState: any = state as any;
-  const edges = (anyState.kinship_edges ?? []) as any[];
-
-  const matches = new Set<string>();
-  for (const e of edges) {
-    if (!e || e.kind !== "spouse_of") continue;
-    if (e.a_id === personId && typeof e.b_id === "string") matches.add(e.b_id);
-    else if (e.b_id === personId && typeof e.a_id === "string") matches.add(e.a_id);
-  }
-
-  const sorted = [...matches].sort((a, b) => a.localeCompare(b));
-  return sorted[0] ?? null;
+  return getLivingSpouse(state as any, personId);
 }
 
 function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
@@ -177,11 +167,13 @@ function computeHeirIdInternal(state: RunState, minAge: number, persist = true):
 }
 
 export function computeHeirId(state: RunState): string | null {
-  return computeHeirIdInternal(state, 0, true);
+  const heirId = buildCanonicalSuccessionSelection(state).current_heir_id;
+  state.house.heir_id = heirId;
+  return heirId;
 }
 
 export function computeAdultSuccessorId(state: RunState): string | null {
-  return computeHeirIdInternal(state, SUCCESSION_MIN_AGE, false);
+  return buildCanonicalSuccessionSelection(state).adult_successor_id;
 }
 
 type SuccessionDeps = {
