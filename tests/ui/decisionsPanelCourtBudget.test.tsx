@@ -190,6 +190,7 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
     obligationsSections: createObligationsSections(),
     onExportFullRunJson: () => undefined,
     onExportRunSummary: () => undefined,
+    onOpenLog: () => undefined,
     onOpenObligationsDetails: () => undefined,
     pfHouseLabelById: new Map(),
     pfParentsByChild: new Map(),
@@ -216,6 +217,7 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
       }
     } as any,
     prospectsTotalCount: 1,
+    runSeed: "lotm_v022_seed_001_baseline_extworld",
     sellCapBushels: 0,
     setDecisions: () => undefined,
     totalObligations: { coin: 0, bushels: 0 },
@@ -242,6 +244,10 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Reference price:");
     expect(html).toContain("1 coin / 10 bushels");
     expect(html).toContain("Fixed reference cap: 240 bushels");
+    expect(html).toContain("Open Run Log");
+    expect(html).toContain("Playtest packet handoff:");
+    expect(html).toContain("run_summary_lotm_v022_seed_001_baseline_extworld.json");
+    expect(html).toContain("run_export_lotm_v022_seed_001_baseline_extworld.json");
     expect(html).toContain("Open detail sheet");
     expect(html).toContain("House Liege");
     expect(html).toContain("Parish Church");

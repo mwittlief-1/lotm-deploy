@@ -13,6 +13,7 @@ import {
   PLAY_SCREEN_SECONDARY_BUTTON_STYLE
 } from "../playScreenTheme";
 import type { CourtDecisionBudgetSurface } from "../playScreenCourtBudget";
+import { buildPlaytestOpsExportCopy } from "../playtestOpsExport";
 import { Tip, formatParentsLine, formatPersonWithAgeAndHouse } from "../viewHelpers";
 import { ObligationsSummaryCards } from "./ObligationsSummaryCards";
 import { SectionHeading } from "./SectionHeading";
@@ -46,6 +47,7 @@ type DecisionsPanelProps = {
   obligationsSections: ObligationsCounterpartyContractSection[];
   onExportFullRunJson: () => void;
   onExportRunSummary: () => void;
+  onOpenLog?: () => void;
   onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
   pfHouseLabelById: Map<string, string>;
   pfParentsByChild: Map<string, string[]>;
@@ -54,6 +56,7 @@ type DecisionsPanelProps = {
   pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   prospectsTotalCount: number;
+  runSeed: string;
   sellCapBushels: number;
   setDecisions: React.Dispatch<React.SetStateAction<TurnDecisions>>;
   totalObligations: OblAmount;
@@ -220,6 +223,7 @@ export function DecisionsPanel({
   obligationsSections,
   onExportFullRunJson,
   onExportRunSummary,
+  onOpenLog,
   onOpenObligationsDetails,
   pfHouseLabelById,
   pfParentsByChild,
@@ -228,12 +232,14 @@ export function DecisionsPanel({
   pricingSurface,
   previewState,
   prospectsTotalCount,
+  runSeed,
   sellCapBushels,
   setDecisions,
   totalObligations,
   turnYears,
   arrearsCarried
 }: DecisionsPanelProps) {
+  const exportCopy = buildPlaytestOpsExportCopy(runSeed);
   const payCoin = Math.max(0, Math.min(Math.max(0, manor.coin), Math.trunc(Number.isFinite(decisions.obligations.pay_coin) ? decisions.obligations.pay_coin : 0)));
   const payBushels = Math.max(
     0,
@@ -522,11 +528,13 @@ export function DecisionsPanel({
         />
       ) : null}
 
-      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button onClick={advanceTurn} disabled={laborLimitExceeded} style={PLAY_SCREEN_ACTION_BUTTON_STYLE}>Advance Turn</button>
+        {onOpenLog ? <button onClick={onOpenLog} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Open Run Log</button> : null}
         <button onClick={onExportRunSummary} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Run Summary</button>
         <button onClick={onExportFullRunJson} style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}>Export Full Run JSON</button>
       </div>
+      <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>{exportCopy.decisionsHelper}</div>
     </div>
   );
 }
