@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R4-001-T04
-  last_completed_task_id: V03-R4-001-T03
+  current_task_id: V03-R4-001-T05
+  last_completed_task_id: V03-R4-001-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: a082a81
+  git_commit: f17d1eb
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,8 +21,7 @@ last_run:
     run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
     run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted kickoff V03-R4-001-T03, repaired canonical heir selection and
-  orphaned spouse-edge handling, and advanced the queue to V03-R4-001-T04.
-  This round intentionally changed replay to reflect corrected succession graph
-  integrity and inheritance-claim suppression.
+  Accepted kickoff V03-R4-001-T04, removed the duplicate legacy succession
+  fallback path, and advanced the queue to V03-R4-001-T05. Replay remained on
+  the accepted post-T03 line.
 active_claims: {}

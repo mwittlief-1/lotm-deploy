@@ -7875,7 +7875,7 @@ tasks:
   title: Simplify v0.3 hotspots without intended outcome drift
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: ready
+  status: done
   priority: 52
   tranche: 5
   change_type: refactor
@@ -7924,7 +7924,7 @@ tasks:
   title: Refresh v0.3 docs, playtest instructions, and bug report template
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: ready
   priority: 50
   tranche: 5
   change_type: refactor
