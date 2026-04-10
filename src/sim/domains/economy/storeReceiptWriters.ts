@@ -123,6 +123,13 @@ export interface FiscalSettlementScaffoldInputV1 {
   related_actor_ids?: readonly string[];
 }
 
+export interface FiscalSettlementApplyResultV1 {
+  scaffold: FiscalSettlementScaffoldV1;
+  paid_amount: number;
+  applied: boolean;
+  reason: "applied" | "zero_requested_amount" | "budget_exhausted" | "insufficient_payment_asset";
+}
+
 function compareText(a: string, b: string): number {
   if (a < b) return -1;
   if (a > b) return 1;
@@ -378,12 +385,41 @@ export function applyFiscalSettlementScaffold(
   state: RunState,
   scaffold: FiscalSettlementScaffoldV1
 ): number {
+  return applyFiscalSettlementScaffoldWithResult(state, scaffold).paid_amount;
+}
+
+export function applyFiscalSettlementScaffoldWithResult(
+  state: RunState,
+  scaffold: FiscalSettlementScaffoldV1
+): FiscalSettlementApplyResultV1 {
   const snapshot = resolveDelegatedFiscalSettlementScaffold(state, scaffold);
-  if (snapshot.amount <= 0) return 0;
-  if (!reserveCourtDecisionBudgetForSettlement(state, snapshot)) return 0;
+  if (snapshot.amount <= 0) {
+    return {
+      scaffold: snapshot,
+      paid_amount: 0,
+      applied: false,
+      reason: "zero_requested_amount"
+    };
+  }
+  if (!canApplyPositiveSettlementAmount(state, snapshot)) {
+    return {
+      scaffold: snapshot,
+      paid_amount: 0,
+      applied: false,
+      reason: "insufficient_payment_asset"
+    };
+  }
+  if (!reserveCourtDecisionBudgetForSettlement(state, snapshot)) {
+    return {
+      scaffold: snapshot,
+      paid_amount: 0,
+      applied: false,
+      reason: "budget_exhausted"
+    };
+  }
 
   if (snapshot.selected_payment_mode === "coin") {
-    return spendCoin(state, snapshot.amount, {
+    const paidAmount = spendCoin(state, snapshot.amount, {
       phase: snapshot.phase,
       phase_sequence: snapshot.phase_sequence,
       category: snapshot.category,
@@ -394,10 +430,16 @@ export function applyFiscalSettlementScaffold(
       rule_id: snapshot.rule_id,
       related_actor_ids: snapshot.related_actor_ids
     });
+    return {
+      scaffold: snapshot,
+      paid_amount: paidAmount,
+      applied: paidAmount > 0,
+      reason: paidAmount > 0 ? "applied" : "insufficient_payment_asset"
+    };
   }
 
   if (isTrackedStorePaymentMode(snapshot.selected_payment_mode)) {
-    return spendTrackedStoreWithReceiptWriter(state, {
+    const paidAmount = spendTrackedStoreWithReceiptWriter(state, {
       phase: snapshot.phase,
       phase_sequence: snapshot.phase_sequence,
       asset: snapshot.selected_payment_mode,
@@ -411,7 +453,18 @@ export function applyFiscalSettlementScaffold(
       rule_id: snapshot.rule_id,
       related_actor_ids: snapshot.related_actor_ids
     });
+    return {
+      scaffold: snapshot,
+      paid_amount: paidAmount,
+      applied: paidAmount > 0,
+      reason: paidAmount > 0 ? "applied" : "insufficient_payment_asset"
+    };
   }
 
-  return 0;
+  return {
+    scaffold: snapshot,
+    paid_amount: 0,
+    applied: false,
+    reason: "insufficient_payment_asset"
+  };
 }

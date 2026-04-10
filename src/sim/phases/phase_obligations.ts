@@ -1,14 +1,15 @@
 import { UNREST_ARREARS_PENALTY } from "../constants";
+import { clearWarLevyDue, setTitheDueBushels, setTaxDueCoin, spendCoin } from "../domains/economy/ledger";
 import {
-  clearWarLevyDue,
-  setTitheDueBushels,
-  setTaxDueCoin,
-  spendBushels,
-  spendCoin,
-} from "../domains/economy/ledger";
+  resolveEconomyObligationGesture,
+  syncEconomyFiscalReceiptSnapshots,
+  type EconomyObligationGestureActionV1,
+  type EconomyObligationGestureDecisionV1
+} from "../domains/economy/obligationGestures";
 import { applyEconomyObligationCloseTurnStage } from "../domains/economy/obligationEnforcement";
 import { settleEconomyObligationCounterparty } from "../domains/economy/obligationRegistry";
 import { recordEconomyPortfolioPhaseHints, refreshEconomyPortfolioState } from "../domains/economy/portfolioAnalysis";
+import type { FiscalPaymentModeV1 } from "../domains/economy/schema";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
 import type { RunState, TurnDecisions } from "../types";
 import { clampInt } from "../util";
@@ -46,6 +47,7 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
 
 export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
   const ob = state.manor.obligations;
+  const gestureDecisions = resolveObligationGestureDecisions(decisions);
 
   const arrearsCoinBefore = ob.arrears.coin;
   const arrearsBushelsBefore = ob.arrears.bushels;
@@ -77,6 +79,39 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
   }
   if (toTax > 0 || toTithe > 0) {
     reportNotes.push(`Paid current dues: tax -${toTax} coin, tithe -${toTithe} bushels.`);
+  }
+
+  const liegeGesture = resolveEconomyObligationGesture(state, {
+    phase: "obligations",
+    phase_sequence: 3,
+    gesture_action: "gift_liege",
+    decision: gestureDecisions.gift_liege,
+    related_actor_ids: [state.locals.liege.id]
+  });
+  const churchGesture = resolveEconomyObligationGesture(state, {
+    phase: "obligations",
+    phase_sequence: 4,
+    gesture_action: "offering_church",
+    decision: gestureDecisions.offering_church,
+    related_actor_ids: [state.locals.clergy.id]
+  });
+
+  for (const gesture of [liegeGesture, churchGesture]) {
+    if (gesture.blocked_reason === "zero_requested_amount") continue;
+    if (gesture.applied && gesture.paid_amount > 0) {
+      reportNotes.push(
+        `${gestureLabel(gesture.gesture_action)} paid ${gesture.paid_amount} ${paymentModeLabel(gesture.selected_payment_mode)}.`
+      );
+      continue;
+    }
+
+    const blockedReason =
+      gesture.blocked_reason === "budget_exhausted"
+        ? "court decision budget exhausted"
+        : gesture.blocked_reason === "unsupported_payment_mode"
+          ? `payment mode ${paymentModeLabel(gesture.selected_payment_mode)} unsupported`
+          : "no supported payment asset available";
+    reportNotes.push(`${gestureLabel(gesture.gesture_action)} blocked: ${blockedReason}.`);
   }
 
   if (ob.war_levy_due && ob.war_levy_due.kind === "men_or_coin") {
@@ -116,11 +151,52 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
   }
 
   refreshEconomyPortfolioState(state);
+  syncEconomyFiscalReceiptSnapshots(state);
 }
 
 function obligationStatusNote(label: string, amount: number, assetLabel: string): string {
   if (amount <= 0) return `${label} clear`;
   return `${label} arrears ${amount} ${assetLabel}`;
+}
+
+function gestureLabel(action: EconomyObligationGestureActionV1): string {
+  return action === "gift_liege" ? "Liege gift" : "Church offering";
+}
+
+function paymentModeLabel(mode: FiscalPaymentModeV1): string {
+  switch (mode) {
+    case "coin":
+      return "coin";
+    case "food_stores":
+      return "food stores";
+    case "meat_stores":
+      return "meat stores";
+    case "service_placeholder":
+      return "service placeholder";
+    default:
+      return String(mode);
+  }
+}
+
+function normalizeObligationGestureDecision(
+  value: Partial<EconomyObligationGestureDecisionV1> | undefined,
+  fallbackPaymentMode: FiscalPaymentModeV1
+): EconomyObligationGestureDecisionV1 {
+  return {
+    amount: Math.max(0, Math.trunc(Number(value?.amount ?? 0))),
+    payment_mode:
+      typeof value?.payment_mode === "string"
+        ? (value.payment_mode as FiscalPaymentModeV1)
+        : fallbackPaymentMode
+  };
+}
+
+function resolveObligationGestureDecisions(decisions: TurnDecisions): Record<EconomyObligationGestureActionV1, EconomyObligationGestureDecisionV1> {
+  const gestures = decisions.obligations.gestures;
+  return {
+    gift_liege: normalizeObligationGestureDecision(gestures?.gift_liege, "coin"),
+    offering_church: normalizeObligationGestureDecision(gestures?.offering_church, "food_stores")
+  };
 }
 
 export function applyCloseTurnObligationsPhase(state: RunState, reportNotes: string[]): void {
@@ -151,4 +227,5 @@ export function applyCloseTurnObligationsPhase(state: RunState, reportNotes: str
     consumption_shortage_bushels: Boolean((state.flags as Record<string, unknown>).Shortage) ? 1 : 0
   });
   refreshEconomyPortfolioState(state);
+  syncEconomyFiscalReceiptSnapshots(state);
 }

@@ -67,7 +67,16 @@ function relationshipEdge(state: RunState, fromId: string, toId: string): Relati
 const DECISIONS: TurnDecisions = {
   labor: { kind: "labor", desired_farmers: 10, desired_builders: 2 },
   sell: { kind: "sell", sell_bushels: 0 },
-  obligations: { kind: "pay_obligations", pay_coin: 6, pay_bushels: 5, war_levy_choice: "ignore" },
+  obligations: {
+    kind: "pay_obligations",
+    pay_coin: 6,
+    pay_bushels: 5,
+    war_levy_choice: "ignore",
+    gestures: {
+      gift_liege: { amount: 0, payment_mode: "coin" },
+      offering_church: { amount: 0, payment_mode: "food_stores" }
+    }
+  },
   construction: { kind: "construction", action: "none" },
   marriage: { kind: "marriage", action: "none" },
   prospects: { kind: "prospects", actions: [] }

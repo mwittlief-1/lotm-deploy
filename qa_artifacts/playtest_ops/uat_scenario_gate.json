@@ -1,0 +1,43 @@
+{
+  "gate": "uat_scenario_gate_v1",
+  "started_at": "2026-04-10T13:06:24.535Z",
+  "failed": 0,
+  "passed": 3,
+  "failures": [],
+  "scenarios": [
+    {
+      "scenario_id": "uat_meat_hunting_proxy",
+      "seed": "lotm_v026_seed_001_baseline",
+      "policy_id": "prudent-builder",
+      "turns": 2,
+      "hunting_yield_max": 7,
+      "grant_turn": null,
+      "arrears_turn": null,
+      "failures": []
+    },
+    {
+      "scenario_id": "uat_arrears_enforcement",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "policy_id": "builder-forward",
+      "turns": 3,
+      "hunting_yield_max": 3,
+      "grant_turn": null,
+      "arrears_turn": 3,
+      "failures": []
+    },
+    {
+      "scenario_id": "uat_grant_visibility",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "policy_id": "builder-forward",
+      "turns": 4,
+      "hunting_yield_max": 3,
+      "grant_turn": 4,
+      "arrears_turn": 3,
+      "failures": []
+    }
+  ],
+  "notes": [
+    "scenario uat_meat_hunting_proxy uses fallback visibility: Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead."
+  ],
+  "completed_at": "2026-04-10T13:06:25.612Z"
+}
