@@ -40,6 +40,15 @@ export type ReceiptLine = {
   line: string;
   phase: PhaseNameV0;
   phaseLabel: string;
+  structured?: {
+    asset: string;
+    category: string;
+    counterpartyLabel: string;
+    delta: number;
+    receiptId: string;
+    ruleLabel: string;
+    summary: string;
+  };
   tags: ReceiptFocusTag[];
 };
 
@@ -117,13 +126,28 @@ const RECEIPT_KEYWORDS: Record<ReceiptFocusTag, string[]> = {
   coin: ["coin", "coins", "tax", "market", "price", "sell cap", "dowry", "grant"],
   unrest: ["unrest", "arrears", "festival", "stability", "riot", "rebellion", "pressure"]
 };
+const STRUCTURED_RECEIPT_ASSET_TAGS: Partial<Record<string, ReceiptFocusTag[]>> = {
+  arrears_bushels: ["food", "unrest"],
+  arrears_coin: ["coin", "unrest"],
+  coin: ["coin"],
+  food_stores: ["food"],
+  meat_stores: ["food"],
+  tax_due_coin: ["coin"],
+  tithe_due_bushels: ["food"]
+};
 
-function classifyReceiptTags(phase: PhaseNameV0, line: string): ReceiptFocusTag[] {
+type FiscalReceiptRow = NonNullable<PhaseResultV0["fiscal_receipts_v1"]>[number];
+
+function classifyReceiptTags(phase: PhaseNameV0, line: string, asset?: string): ReceiptFocusTag[] {
   const lower = line.toLowerCase();
   const tags = new Set<ReceiptFocusTag>();
 
   if (phase === "consumption") tags.add("food");
   if (phase === "events") tags.add("unrest");
+
+  for (const assetTag of STRUCTURED_RECEIPT_ASSET_TAGS[asset ?? ""] ?? []) {
+    tags.add(assetTag);
+  }
 
   for (const [tag, keywords] of Object.entries(RECEIPT_KEYWORDS) as Array<[ReceiptFocusTag, string[]]>) {
     if (keywords.some((keyword) => lower.includes(keyword))) tags.add(tag);
@@ -152,6 +176,65 @@ function normalizeReceiptLine(
   };
 }
 
+function formatReceiptDelta(delta: number): string {
+  return delta > 0 ? `+${delta}` : `${delta}`;
+}
+
+function buildStructuredReceiptLine(receipt: FiscalReceiptRow): string {
+  const summary = typeof receipt.summary === "string" ? receipt.summary.trim() : "";
+  if (summary) return summary;
+
+  const ruleLabel = typeof receipt.rule_id === "string" ? receipt.rule_id.trim() : "";
+  if (ruleLabel) return ruleLabel;
+
+  const category = typeof receipt.category === "string" ? receipt.category.trim() : "receipt";
+  const asset = typeof receipt.asset === "string" ? receipt.asset.trim() : "asset";
+  const counterpartyLabel = typeof receipt.counterparty_label === "string" ? receipt.counterparty_label.trim() : "";
+  const delta = typeof receipt.delta === "number" && Number.isFinite(receipt.delta) ? formatReceiptDelta(Math.trunc(receipt.delta)) : "0";
+
+  return [counterpartyLabel, `${category} · ${asset} ${delta}`].filter((part) => part.length > 0).join(" — ");
+}
+
+function normalizeStructuredReceiptLine(
+  phase: PhaseNameV0,
+  receipt: FiscalReceiptRow,
+  index: number,
+  obligationsContract: ObligationsCounterpartyContract | null
+): ReceiptLine | null {
+  const receiptId = typeof receipt.receipt_id === "string" && receipt.receipt_id.trim().length > 0
+    ? receipt.receipt_id.trim()
+    : `${phase}_fiscal_${String(index).padStart(2, "0")}`;
+  const category = typeof receipt.category === "string" ? receipt.category.trim() : "";
+  const asset = typeof receipt.asset === "string" ? receipt.asset.trim() : "";
+  const counterpartyLabel = typeof receipt.counterparty_label === "string" ? receipt.counterparty_label.trim() : "";
+  const summary = typeof receipt.summary === "string" ? receipt.summary.trim() : "";
+  const ruleLabel = typeof receipt.rule_id === "string" ? receipt.rule_id.trim() : "";
+  const delta = typeof receipt.delta === "number" && Number.isFinite(receipt.delta) ? Math.trunc(receipt.delta) : 0;
+  const line = buildStructuredReceiptLine(receipt);
+  if (!line) return null;
+
+  const searchText = [line, counterpartyLabel, category, asset, ruleLabel].filter((value) => value.length > 0).join(" ");
+
+  return {
+    counterpartyTags: classifyReceiptCounterpartyTags(searchText, obligationsContract),
+    id: receiptId,
+    kind: "summary",
+    line,
+    phase,
+    phaseLabel: PHASE_LABELS[phase],
+    structured: {
+      asset,
+      category,
+      counterpartyLabel,
+      delta,
+      receiptId,
+      ruleLabel,
+      summary
+    },
+    tags: classifyReceiptTags(phase, searchText, asset)
+  };
+}
+
 function highlightForMetric(diffLedgerItems: LedgerItem[], metric: ReceiptFocusTag): ReceiptHighlight[] {
   const item = diffLedgerItems.find((candidate) => candidate.id === metric);
   if (!item) return [];
@@ -167,11 +250,17 @@ export function buildReceiptViewerData(args: {
   const rawPhases: RawReceiptPhase[] = [];
 
   for (const phaseResult of Array.isArray(phaseResults) ? phaseResults : []) {
-    const receipts = Array.isArray(phaseResult?.receipts)
+    const structuredReceipts = Array.isArray(phaseResult?.fiscal_receipts_v1)
+      ? phaseResult.fiscal_receipts_v1
+          .map((receipt, index) => normalizeStructuredReceiptLine(phaseResult.phase, receipt, index, obligationsContract))
+          .filter((receipt): receipt is ReceiptLine => receipt !== null)
+      : [];
+    const legacyReceipts = Array.isArray(phaseResult?.receipts)
       ? phaseResult.receipts
           .map((receipt, index) => normalizeReceiptLine(phaseResult.phase, receipt, index, obligationsContract))
           .filter((receipt): receipt is ReceiptLine => receipt !== null)
       : [];
+    const receipts = structuredReceipts.length > 0 ? structuredReceipts : legacyReceipts;
     if (receipts.length === 0) continue;
     rawPhases.push({
       phase: phaseResult.phase,
