@@ -1,0 +1,1899 @@
+{
+  "app_version": "v0.2.9",
+  "baseline_match_count": 0,
+  "baseline_mismatch_count": 16,
+  "baseline_path": "docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "golden_seeds_path": "docs/golden_seeds_v0.2.7.2.json",
+  "hash": "dd59f9d84d354c720c97dfda1595b775877a279d1db4dabc60918f0254bee449",
+  "kind": "seed_replay_batch_v1",
+  "mode": "batch",
+  "policies": [
+    "prudent-builder",
+    "builder-forward"
+  ],
+  "policy_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "run_count": 16,
+  "runs": [
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_001_baseline_extworld.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 5,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 444,
+          "arrears_coin": 6,
+          "builders": 8,
+          "bushels_stored": 402,
+          "coin": 0,
+          "farmers": 33,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade",
+            "retinue_drills"
+          ],
+          "population": 41,
+          "unrest": 52
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 444,
+          "arrears_coin": 6,
+          "bushels": 402,
+          "coin": 0,
+          "unrest": 52
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_001_baseline_extworld",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "1efe5db881ac896081c8040d84948ceedee1b969d113c2745c479a7a379e13ee",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "snapshot_max_bytes": 321241,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_002_relationship_edges.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 5,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 225,
+          "arrears_coin": 4,
+          "builders": 4,
+          "bushels_stored": 477,
+          "coin": 0,
+          "farmers": 33,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade",
+            "village_feast"
+          ],
+          "population": 37,
+          "unrest": 45
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 225,
+          "arrears_coin": 4,
+          "bushels": 477,
+          "coin": 0,
+          "unrest": 45
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_002_relationship_edges",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "e4aaaffeda8aa4e9db53e7591b53d6525cb1be73d899c216a78d6494936bfc68",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "snapshot_max_bytes": 330358,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_003_succession_pressure.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 3,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 185,
+          "arrears_coin": 6,
+          "builders": 4,
+          "bushels_stored": 1218,
+          "coin": 140,
+          "farmers": 32,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation"
+          ],
+          "population": 36,
+          "unrest": 56
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 185,
+          "arrears_coin": 6,
+          "bushels": 1218,
+          "coin": 140,
+          "unrest": 56
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_003_succession_pressure",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "e2029e1abb4a31b9b4c18eaa18530b8747205bcdac7899e218424c3fdf856d69",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "snapshot_max_bytes": 418362,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_004_widow_line.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 5,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 5,
+          "builders": 9,
+          "bushels_stored": 588,
+          "coin": 2,
+          "farmers": 38,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 47,
+          "unrest": 13
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 5,
+          "bushels": 588,
+          "coin": 2,
+          "unrest": 13
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_004_widow_line",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "da3af1d4c941a27897b95dec85900e8c53b5037067c867d8b748cfe31e2917be",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_004_widow_line",
+      "snapshot_max_bytes": 320956,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_005_unrest_pressure.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 5,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 163,
+          "arrears_coin": 5,
+          "builders": 8,
+          "bushels_stored": 566,
+          "coin": 1,
+          "farmers": 33,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 41,
+          "unrest": 36
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 163,
+          "arrears_coin": 5,
+          "bushels": 566,
+          "coin": 1,
+          "unrest": 36
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_005_unrest_pressure",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "92996011a1f3b0176fdc616ed57115e0ec80956c18735a8a76c8f1685b2442fb",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_005_unrest_pressure",
+      "snapshot_max_bytes": 314107,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_006_construction_path.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 9,
+          "builders": 11,
+          "bushels_stored": 176,
+          "coin": 0,
+          "farmers": 39,
+          "improvements": [
+            "field_rotation",
+            "granary_upgrade",
+            "village_feast"
+          ],
+          "population": 50,
+          "unrest": 17
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 9,
+          "bushels": 176,
+          "coin": 0,
+          "unrest": 17
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_006_construction_path",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "0bf31ae6423a11f0e320a79f004ba2b117081b32a36947c4619bc0232b91fd3b",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_006_construction_path",
+      "snapshot_max_bytes": 345406,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_007_weather_volatility.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 334,
+          "arrears_coin": 8,
+          "builders": 7,
+          "bushels_stored": 0,
+          "coin": 0,
+          "farmers": 32,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "village_feast"
+          ],
+          "population": 39,
+          "unrest": 65
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 334,
+          "arrears_coin": 8,
+          "bushels": 0,
+          "coin": 0,
+          "unrest": 65
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_007_weather_volatility",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "1d82f2d2ddd23501c812c85a2e9d5556f969141402b914a2ea97ac6332adb4ca",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "snapshot_max_bytes": 303242,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/builder-forward/lotm_v022_seed_008_long_tail_check.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 14,
+          "builders": 10,
+          "bushels_stored": 368,
+          "coin": 0,
+          "farmers": 42,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "village_feast"
+          ],
+          "population": 52,
+          "unrest": 17
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 14,
+          "bushels": 368,
+          "coin": 0,
+          "unrest": 17
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_008_long_tail_check",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "5299bf4f2b28e62fbaca680314b4c07bb996c55bf44f76a2c963cfd5d59fbf75",
+      "policy": "builder-forward",
+      "seed": "lotm_v022_seed_008_long_tail_check",
+      "snapshot_max_bytes": 409001,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_001_baseline_extworld.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 3,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 2,
+          "bushels_stored": 1192,
+          "coin": 118,
+          "farmers": 45,
+          "improvements": [
+            "granary_upgrade"
+          ],
+          "population": 47,
+          "unrest": 3
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 1192,
+          "coin": 118,
+          "unrest": 3
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_001_baseline_extworld",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "cb96e8fcae3267e5bea8855b8e7fd3ae45500bebf91a5494aef538c3bf381e8f",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "snapshot_max_bytes": 321265,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_002_relationship_edges.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 3,
+          "bushels_stored": 903,
+          "coin": 19,
+          "farmers": 42,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 45,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 903,
+          "coin": 19,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_002_relationship_edges",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "afe1850de1dd1a5e47a45da1921073b6c1f5517a72c521be5dd42464a3b3f676",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "snapshot_max_bytes": 330333,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_003_succession_pressure.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 1,
+          "bushels_stored": 819,
+          "coin": 64,
+          "farmers": 36,
+          "improvements": [
+            "granary_upgrade"
+          ],
+          "population": 37,
+          "unrest": 34
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 819,
+          "coin": 64,
+          "unrest": 34
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_003_succession_pressure",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "3720cb191c3aca0e87ea180050821034a45776c29a5da8294fb0c18aad38c151",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "snapshot_max_bytes": 418243,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_004_widow_line.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 1,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 1,
+          "bushels_stored": 1158,
+          "coin": 132,
+          "farmers": 46,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 47,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 1158,
+          "coin": 132,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_004_widow_line",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "715163497679bb795cb7636731bc4af3d3b76d653cfe605fd386f7105f58c003",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_004_widow_line",
+      "snapshot_max_bytes": 321026,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_005_unrest_pressure.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 3,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 5,
+          "bushels_stored": 1174,
+          "coin": 207,
+          "farmers": 43,
+          "improvements": [
+            "granary_upgrade"
+          ],
+          "population": 48,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 1174,
+          "coin": 207,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_005_unrest_pressure",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "7246c5edbfd09f0a5e3c6f975c023813d50d247eab8f4cefd05164c9830d0cf8",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_005_unrest_pressure",
+      "snapshot_max_bytes": 314148,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_006_construction_path.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 3,
+          "bushels_stored": 1111,
+          "coin": 173,
+          "farmers": 47,
+          "improvements": [
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 50,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 1111,
+          "coin": 173,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_006_construction_path",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "b61fa2dc2b9649348cb7727f666bc8021621e0d4b47349cdb0ab5198949803b6",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_006_construction_path",
+      "snapshot_max_bytes": 345446,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_007_weather_volatility.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 0,
+          "bushels_stored": 327,
+          "coin": 102,
+          "farmers": 48,
+          "improvements": [
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 48,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 327,
+          "coin": 102,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_007_weather_volatility",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "9bf7bed14f9935fa17673335fdda9e34e95f7c101d36fbcea727551c18043f04",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "snapshot_max_bytes": 304776,
+      "turns": 15
+    },
+    {
+      "artifact_relpath": "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/runs/prudent-builder/lotm_v022_seed_008_long_tail_check.json",
+      "baseline_match": false,
+      "final_signature": {
+        "energy": {
+          "available": 4,
+          "max": 5
+        },
+        "game_over_reason": null,
+        "manor": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "builders": 2,
+          "bushels_stored": 820,
+          "coin": 199,
+          "farmers": 50,
+          "improvements": [
+            "drainage_ditches",
+            "field_rotation",
+            "granary_upgrade"
+          ],
+          "population": 52,
+          "unrest": 0
+        },
+        "turn_index": 15
+      },
+      "final_summary": {
+        "app_version": "v0.2.9",
+        "bounded_registry_manifest": {
+          "entries": [
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "economy",
+              "registry_schema_version": "economy_registry_placeholder_v1",
+              "state_path": "economy"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "flags",
+              "registry_schema_version": null,
+              "state_path": "flags"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "houses",
+              "registry_schema_version": null,
+              "state_path": "houses"
+            },
+            {
+              "entry_kind": "edge_list",
+              "legacy_paths": [
+                "kinship"
+              ],
+              "migration_tracked": true,
+              "registry_id": "kinship_edges",
+              "registry_schema_version": null,
+              "state_path": "kinship_edges"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "people",
+              "registry_schema_version": null,
+              "state_path": "people"
+            },
+            {
+              "entry_kind": "pointer",
+              "migration_tracked": true,
+              "registry_id": "player_house_id",
+              "registry_schema_version": null,
+              "state_path": "player_house_id"
+            },
+            {
+              "entry_kind": "record",
+              "migration_tracked": true,
+              "registry_id": "portfolio",
+              "registry_schema_version": "portfolio_registry_placeholder_v1",
+              "state_path": "portfolio"
+            },
+            {
+              "entry_kind": "edge_list",
+              "migration_tracked": true,
+              "registry_id": "relationships",
+              "registry_schema_version": null,
+              "state_path": "relationships"
+            }
+          ],
+          "schema_version": "bounded_registry_manifest_v1"
+        },
+        "ending_resources": {
+          "arrears_bushels": 0,
+          "arrears_coin": 0,
+          "bushels": 820,
+          "coin": 199,
+          "unrest": 0
+        },
+        "game_over_reason": null,
+        "key_flags": [
+          "marriage_reservations",
+          "demography_next_person_seq",
+          "demography_person_id_prefix",
+          "demography_person_id_joiner"
+        ],
+        "seed": "lotm_v022_seed_008_long_tail_check",
+        "sim_version": "mvp_v0_1",
+        "state_schema_version": "run_state_schema_v0.3.1",
+        "turns_played": 15
+      },
+      "hash": "d1d155162681e58974a1f483b72850d598aa0d170158915f248bf0721336b4a5",
+      "policy": "prudent-builder",
+      "seed": "lotm_v022_seed_008_long_tail_check",
+      "snapshot_max_bytes": 409000,
+      "turns": 15
+    }
+  ],
+  "seed_source": "baseline:docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  "seeds": [
+    "lotm_v022_seed_001_baseline_extworld",
+    "lotm_v022_seed_002_relationship_edges",
+    "lotm_v022_seed_003_succession_pressure",
+    "lotm_v022_seed_004_widow_line",
+    "lotm_v022_seed_005_unrest_pressure",
+    "lotm_v022_seed_006_construction_path",
+    "lotm_v022_seed_007_weather_volatility",
+    "lotm_v022_seed_008_long_tail_check"
+  ],
+  "sim_version": "v0.2.7.2",
+  "snapshot_budget_bytes_per_turn": 524288,
+  "turn_time_soft_ceiling_ms_per_seed": 250,
+  "turns": 15
+}

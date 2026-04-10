@@ -1,0 +1,6341 @@
+{
+  "app_version": "v0.2.9",
+  "baseline_expected_signature": {
+    "energy": {
+      "available": 5,
+      "max": 5
+    },
+    "game_over_reason": null,
+    "manor": {
+      "arrears_bushels": 0,
+      "arrears_coin": 0,
+      "builders": 0,
+      "bushels_stored": 1053,
+      "coin": 133,
+      "farmers": 45,
+      "improvements": [
+        "field_rotation",
+        "granary_upgrade"
+      ],
+      "population": 45,
+      "unrest": 0
+    },
+    "turn_index": 15
+  },
+  "baseline_match": false,
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "final_signature": {
+    "energy": {
+      "available": 4,
+      "max": 5
+    },
+    "game_over_reason": null,
+    "manor": {
+      "arrears_bushels": 0,
+      "arrears_coin": 0,
+      "builders": 0,
+      "bushels_stored": 327,
+      "coin": 102,
+      "farmers": 48,
+      "improvements": [
+        "field_rotation",
+        "granary_upgrade"
+      ],
+      "population": 48,
+      "unrest": 0
+    },
+    "turn_index": 15
+  },
+  "final_summary": {
+    "app_version": "v0.2.9",
+    "bounded_registry_manifest": {
+      "entries": [
+        {
+          "entry_kind": "record",
+          "migration_tracked": true,
+          "registry_id": "economy",
+          "registry_schema_version": "economy_registry_placeholder_v1",
+          "state_path": "economy"
+        },
+        {
+          "entry_kind": "record",
+          "migration_tracked": true,
+          "registry_id": "flags",
+          "registry_schema_version": null,
+          "state_path": "flags"
+        },
+        {
+          "entry_kind": "record",
+          "migration_tracked": true,
+          "registry_id": "houses",
+          "registry_schema_version": null,
+          "state_path": "houses"
+        },
+        {
+          "entry_kind": "edge_list",
+          "legacy_paths": [
+            "kinship"
+          ],
+          "migration_tracked": true,
+          "registry_id": "kinship_edges",
+          "registry_schema_version": null,
+          "state_path": "kinship_edges"
+        },
+        {
+          "entry_kind": "record",
+          "migration_tracked": true,
+          "registry_id": "people",
+          "registry_schema_version": null,
+          "state_path": "people"
+        },
+        {
+          "entry_kind": "pointer",
+          "migration_tracked": true,
+          "registry_id": "player_house_id",
+          "registry_schema_version": null,
+          "state_path": "player_house_id"
+        },
+        {
+          "entry_kind": "record",
+          "migration_tracked": true,
+          "registry_id": "portfolio",
+          "registry_schema_version": "portfolio_registry_placeholder_v1",
+          "state_path": "portfolio"
+        },
+        {
+          "entry_kind": "edge_list",
+          "migration_tracked": true,
+          "registry_id": "relationships",
+          "registry_schema_version": null,
+          "state_path": "relationships"
+        }
+      ],
+      "schema_version": "bounded_registry_manifest_v1"
+    },
+    "ending_resources": {
+      "arrears_bushels": 0,
+      "arrears_coin": 0,
+      "bushels": 327,
+      "coin": 102,
+      "unrest": 0
+    },
+    "game_over_reason": null,
+    "key_flags": [
+      "marriage_reservations",
+      "demography_next_person_seq",
+      "demography_person_id_prefix",
+      "demography_person_id_joiner"
+    ],
+    "seed": "lotm_v022_seed_007_weather_volatility",
+    "sim_version": "mvp_v0_1",
+    "state_schema_version": "run_state_schema_v0.3.1",
+    "turns_played": 15
+  },
+  "hash": "9bf7bed14f9935fa17673335fdda9e34e95f7c101d36fbcea727551c18043f04",
+  "kind": "seed_replay_run_v1",
+  "policy": "prudent-builder",
+  "seed": "lotm_v022_seed_007_weather_volatility",
+  "sim_version": "v0.2.7.2",
+  "turn_trace": [
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 0,
+          "desired_farmers": 45,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "accept",
+          "child_id": "p_child1",
+          "kind": "marriage",
+          "offer_index": 0
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 91,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": -160,
+        "coin": 0,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 0,
+        "bushels_stored": 740,
+        "coin": 10,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 45,
+        "population": 45,
+        "unrest": 8
+      },
+      "event_ids": [],
+      "house_log": [
+        {
+          "heir_name": "Giles",
+          "kind": "heir_selected",
+          "turn_index": 0
+        }
+      ],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 45, builders 0.",
+        "Marriage accepted for Giles: dowry +1 coin.",
+        "Court budget remaining 5/6; spent 1; actions gift_liege 0, offering_church 0, marriage_inbound 1, marriage_scout 0.",
+        "Paid current dues: tax -1 coin, tithe -91 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 91 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Heir selected: Giles.",
+              "kind": "heir_selected"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Heir selected: Giles.",
+              "kind": "heir_selected"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "note",
+              "line": "Heir selected: Giles."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.80; market 0.13 coin/bushel; sell cap 434."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -41; production +1827; consumption -1855."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "0 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Glenholt (p_ext_44_child1)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_44_child1"
+              ]
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Glenholt (p_ext_44_child2)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_44_child2"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "House Glenholt (p_ext_44_child1)",
+              "kind": "marriage_offer"
+            },
+            {
+              "detail": "House Glenholt (p_ext_44_child2)",
+              "kind": "marriage_offer"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 1; offers 2."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospect generated: marriage (pros_marriage_0_5ol8tv).",
+              "kind": "prospect_generated",
+              "subject_ids": [
+                "p_child1",
+                "p_ext_44_child1"
+              ]
+            },
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospect generated: marriage (pros_marriage_0_5ol8tv).",
+              "kind": "prospect_generated"
+            },
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect generated: marriage (pros_marriage_0_5ol8tv)."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "from_house_id": "h_ext_44",
+          "kind": "prospect_generated",
+          "prospect": {
+            "actions": [
+              "accept",
+              "reject"
+            ],
+            "costs": {},
+            "expires_turn": 2,
+            "from_house_id": "h_ext_44",
+            "id": "pros_marriage_0_5ol8tv",
+            "predicted_effects": {
+              "coin_delta": 1,
+              "flags_set": [],
+              "relationship_deltas": [
+                {
+                  "allegiance_delta": 3,
+                  "from_id": "p_head",
+                  "respect_delta": 6,
+                  "scope": "person",
+                  "threat_delta": -2,
+                  "to_id": "p_ext_44_child1"
+                },
+                {
+                  "allegiance_delta": 6,
+                  "from_id": "h_player",
+                  "respect_delta": 4,
+                  "scope": "house",
+                  "threat_delta": -3,
+                  "to_id": "h_ext_44"
+                },
+                {
+                  "allegiance_delta": 6,
+                  "from_id": "h_ext_44",
+                  "respect_delta": 4,
+                  "scope": "house",
+                  "threat_delta": -3,
+                  "to_id": "h_player"
+                }
+              ]
+            },
+            "requirements": [],
+            "spouse_person_id": "p_ext_44_child1",
+            "subject_person_id": "p_child1",
+            "summary": "Marriage proposal",
+            "to_house_id": "h_player",
+            "type": "marriage",
+            "uncertainty": "known"
+          },
+          "prospect_id": "pros_marriage_0_5ol8tv",
+          "subject_person_id": "p_child1",
+          "to_house_id": "h_player",
+          "turn_index": 0,
+          "type": "marriage"
+        },
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_0_5ol8tv"
+          ],
+          "turn_index": 0
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 45; builders 0."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 45, builders 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Marriage accepted for Giles: dowry +1 coin.",
+              "kind": "note"
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Court budget remaining 5/6; spent 1; actions gift_liege 0, offering_church 0, marriage_inbound 1, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Marriage accepted for Giles: dowry +1 coin.",
+              "kind": "note"
+            },
+            {
+              "detail": "Court budget remaining 5/6; spent 1; actions gift_liege 0, offering_church 0, marriage_inbound 1, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action accept."
+            },
+            {
+              "kind": "note",
+              "line": "Marriage accepted for Giles: dowry +1 coin."
+            },
+            {
+              "kind": "note",
+              "line": "Court budget remaining 5/6; spent 1; actions gift_liege 0, offering_church 0, marriage_inbound 1, marriage_scout 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -91 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -91 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 91; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -91 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 0 resolved. Labor plan set (takes effect next turn's production): farmers 45, builders 0. Marriage accepted for Giles: dowry +1 coin.",
+      "top_drivers": [
+        "Food: prod +1827, cons -1855, spoil -41, net -69.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 91, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 0
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "start",
+          "improvement_id": "granary_upgrade",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 0,
+          "desired_farmers": 46,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "accept",
+          "child_id": "p_child2",
+          "kind": "marriage",
+          "offer_index": 1
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 125,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 401,
+        "coin": -7,
+        "pop": 1,
+        "unrest": -1
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 0,
+        "bushels_stored": 1141,
+        "coin": 3,
+        "energy_available": 1,
+        "energy_max": 5,
+        "farmers": 46,
+        "population": 46,
+        "unrest": 7
+      },
+      "event_ids": [
+        "evt_traveling_merchant",
+        "evt_hard_winter"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 46, builders 0.",
+        "Started construction: Granary Upgrade (cost 6 coin).",
+        "Marriage accepted for Giles: dowry -3 coin.",
+        "Court budget remaining 4/6; spent 2; actions gift_liege 0, offering_church 0, marriage_inbound 2, marriage_scout 0.",
+        "Paid current dues: tax -1 coin, tithe -125 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 125 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Thomas (p36)",
+              "kind": "birth"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Thomas (p36)",
+              "kind": "birth"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 1; deaths 0; population delta 1."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.10; market 0.13 coin/bushel; sell cap 557."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -34; production +2511; consumption -1951."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "economic",
+              "confidence": "known",
+              "detail": "Traveling Merchant",
+              "kind": "event_applied"
+            },
+            {
+              "category": "weather",
+              "confidence": "known",
+              "detail": "Hard Winter",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Traveling Merchant",
+              "kind": "event_applied"
+            },
+            {
+              "detail": "Hard Winter",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "2 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Evershaw (p_ext_22_child1)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_22_child1"
+              ]
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Hartwyck (p_ext_60_child2)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_60_child2"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "House Evershaw (p_ext_22_child1)",
+              "kind": "marriage_offer"
+            },
+            {
+              "detail": "House Hartwyck (p_ext_60_child2)",
+              "kind": "marriage_offer"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 1; offers 2."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_0_5ol8tv"
+          ],
+          "turn_index": 1
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 46, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 46, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 46; builders 0."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 46, builders 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "construction",
+              "confidence": "known",
+              "detail": "Started construction: Granary Upgrade (cost 6 coin).",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Started construction: Granary Upgrade (cost 6 coin).",
+              "kind": "note"
+            }
+          ],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action start."
+            },
+            {
+              "kind": "note",
+              "line": "Started construction: Granary Upgrade (cost 6 coin)."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Marriage accepted for Giles: dowry -3 coin.",
+              "kind": "note"
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Court budget remaining 4/6; spent 2; actions gift_liege 0, offering_church 0, marriage_inbound 2, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Marriage accepted for Giles: dowry -3 coin.",
+              "kind": "note"
+            },
+            {
+              "detail": "Court budget remaining 4/6; spent 2; actions gift_liege 0, offering_church 0, marriage_inbound 2, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action accept."
+            },
+            {
+              "kind": "note",
+              "line": "Marriage accepted for Giles: dowry -3 coin."
+            },
+            {
+              "kind": "note",
+              "line": "Court budget remaining 4/6; spent 2; actions gift_liege 0, offering_church 0, marriage_inbound 2, marriage_scout 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -125 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -125 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 125; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -125 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 1 resolved. Labor plan set (takes effect next turn's production): farmers 46, builders 0. Started construction: Granary Upgrade (cost 6 coin).",
+      "top_drivers": [
+        "Food: prod +2511, cons -1951, spoil -34, net +526.",
+        "Coin: net +3.",
+        "Unrest: net +1 (threshold dispossession at 100)."
+      ],
+      "turn_index": 1
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 2,
+          "desired_farmers": 44,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 69,
+          "pay_coin": 0
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 1,
+        "bushels": -768,
+        "coin": -3,
+        "pop": 1,
+        "unrest": 4
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 1,
+        "builders": 2,
+        "bushels_stored": 373,
+        "coin": 0,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 44,
+        "population": 47,
+        "unrest": 11
+      },
+      "event_ids": [
+        "evt_funeral_procession",
+        "evt_boundary_dispute"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 44, builders 2.",
+        "Paid current dues: tax -0 coin, tithe -69 bushels.",
+        "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege arrears 1 coin; church clear; unrest unchanged."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 69 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Thomas (p49)",
+              "kind": "birth"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Thomas (p49)",
+              "kind": "birth"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 1; deaths 0; population delta 1."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.60; market 0.12 coin/bushel; sell cap 643."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -52; production +1399; consumption -2046."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "social",
+              "confidence": "known",
+              "detail": "Funeral Procession",
+              "kind": "event_applied"
+            },
+            {
+              "category": "political",
+              "confidence": "known",
+              "detail": "Boundary Dispute",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Funeral Procession",
+              "kind": "event_applied"
+            },
+            {
+              "detail": "Boundary Dispute",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "2 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_0_5ol8tv"
+          ],
+          "turn_index": 2
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 44, builders 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 44, builders 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 44; builders 2."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 44, builders 2."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -0 coin, tithe -69 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -0 coin, tithe -69 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 0; bushels 69; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -0 coin, tithe -69 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege arrears 1 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege arrears 1 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege arrears 1 coin; church clear; unrest unchanged."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 2 resolved. Labor plan set (takes effect next turn's production): farmers 44, builders 2. Paid current dues: tax -0 coin, tithe -69 bushels.",
+      "top_drivers": [
+        "Food: prod +1399, cons -2046, spoil -52, net -699.",
+        "Unrest: net +4 (threshold dispossession at 100).",
+        "Coin: net -3."
+      ],
+      "turn_index": 2
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 4,
+          "desired_farmers": 42,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 139,
+          "pay_coin": 0
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 1,
+        "bushels": 637,
+        "coin": 0,
+        "pop": 0,
+        "unrest": 2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 2,
+        "builders": 4,
+        "bushels_stored": 1010,
+        "coin": 0,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 42,
+        "population": 47,
+        "unrest": 13
+      },
+      "event_ids": [],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 42, builders 4.",
+        "Paid arrears: coin -0, bushels -0.",
+        "Paid current dues: tax -0 coin, tithe -139 bushels.",
+        "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege arrears 2 coin; church clear; unrest unchanged."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 139 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 1; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Robert (p_court_steward)",
+              "kind": "death"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Robert (p_court_steward)",
+              "kind": "death"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 1; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.25; market 0.07 coin/bushel; sell cap 582."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -17; production +2786; consumption -1993."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "0 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospect expired: marriage (pros_marriage_0_5ol8tv).",
+              "kind": "prospect_expired",
+              "subject_ids": [
+                "p_child1"
+              ]
+            },
+            {
+              "category": "prospects",
+              "confidence": "likely",
+              "detail": "Prospect generated: grant (pros_grant_3_csnli8).",
+              "kind": "prospect_generated"
+            },
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 0, hidden 1.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospect expired: marriage (pros_marriage_0_5ol8tv).",
+              "kind": "prospect_expired"
+            },
+            {
+              "detail": "Prospect generated: grant (pros_grant_3_csnli8).",
+              "kind": "prospect_generated"
+            },
+            {
+              "detail": "Prospects window built: shown 0, hidden 1.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 1; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect expired: marriage (pros_marriage_0_5ol8tv)."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect generated: grant (pros_grant_3_csnli8)."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 0, hidden 1."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "effects_applied": {},
+          "from_house_id": "h_ext_44",
+          "kind": "prospect_expired",
+          "prospect_id": "pros_marriage_0_5ol8tv",
+          "subject_person_id": "p_child1",
+          "to_house_id": "h_player",
+          "turn_index": 3,
+          "type": "marriage"
+        },
+        {
+          "from_house_id": "h_ext_04",
+          "kind": "prospect_generated",
+          "prospect": {
+            "actions": [
+              "accept",
+              "reject"
+            ],
+            "costs": {},
+            "expires_turn": 5,
+            "from_house_id": "h_ext_04",
+            "id": "pros_grant_3_csnli8",
+            "predicted_effects": {
+              "coin_delta": 2,
+              "flags_set": [],
+              "relationship_deltas": [
+                {
+                  "allegiance_delta": 1,
+                  "from_id": "p_liege",
+                  "respect_delta": -1,
+                  "scope": "person",
+                  "threat_delta": 3,
+                  "to_id": "p_head"
+                }
+              ]
+            },
+            "requirements": [],
+            "subject_person_id": null,
+            "summary": "Grant offer",
+            "to_house_id": "h_player",
+            "type": "grant",
+            "uncertainty": "likely"
+          },
+          "prospect_id": "pros_grant_3_csnli8",
+          "subject_person_id": null,
+          "to_house_id": "h_player",
+          "turn_index": 3,
+          "type": "grant"
+        },
+        {
+          "hidden_ids": [
+            "pros_grant_3_csnli8"
+          ],
+          "kind": "prospects_window_built",
+          "shown_ids": [],
+          "turn_index": 3
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 42, builders 4.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 42, builders 4.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 42; builders 4."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 42, builders 4."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid arrears: coin -0, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -0 coin, tithe -139 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid arrears: coin -0, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "detail": "Paid current dues: tax -0 coin, tithe -139 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 0; bushels 139; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid arrears: coin -0, bushels -0."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -0 coin, tithe -139 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege arrears 2 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege arrears 2 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege arrears 2 coin; church clear; unrest unchanged."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 3 resolved. Labor plan set (takes effect next turn's production): farmers 42, builders 4. Paid arrears: coin -0, bushels -0.",
+      "top_drivers": [
+        "Food: prod +2786, cons -1993, spoil -17, net +776.",
+        "Unrest: net +2 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 139, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 3
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 5,
+          "desired_farmers": 43,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 128,
+          "pay_coin": 0
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 177
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 1,
+        "bushels": 162,
+        "coin": 18,
+        "pop": 1,
+        "unrest": 3
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 3,
+        "builders": 5,
+        "bushels_stored": 1172,
+        "coin": 18,
+        "energy_available": 3,
+        "energy_max": 5,
+        "farmers": 43,
+        "population": 48,
+        "unrest": 16
+      },
+      "event_ids": [
+        "evt_liege_inspection"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+        "Sold 177 bushels (cap 563) for +18 coin at 0.10/bushel.",
+        "Paid arrears: coin -0, bushels -0.",
+        "Paid current dues: tax -0 coin, tithe -128 bushels.",
+        "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege arrears 3 coin; church clear; unrest unchanged."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 128 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 2; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Thomas (p71)",
+              "kind": "birth"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Thomas (p71)",
+              "kind": "birth"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 1; deaths 0; population delta 1."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.21; market 0.10 coin/bushel; sell cap 563."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -46; production +2568; consumption -2055."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "political",
+              "confidence": "known",
+              "detail": "Liege Inspection",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Liege Inspection",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 0, hidden 1.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 0, hidden 1.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 1; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 0, hidden 1."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [
+            "pros_grant_3_csnli8"
+          ],
+          "kind": "prospects_window_built",
+          "shown_ids": [],
+          "turn_index": 4
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 43; builders 5."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 43, builders 5."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "economy",
+              "confidence": "known",
+              "detail": "Sold 177 bushels (cap 563) for +18 coin at 0.10/bushel.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Sold 177 bushels (cap 563) for +18 coin at 0.10/bushel.",
+              "kind": "note"
+            }
+          ],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 177 bushels."
+            },
+            {
+              "kind": "note",
+              "line": "Sold 177 bushels (cap 563) for +18 coin at 0.10/bushel."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid arrears: coin -0, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -0 coin, tithe -128 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid arrears: coin -0, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "detail": "Paid current dues: tax -0 coin, tithe -128 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 0; bushels 128; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid arrears: coin -0, bushels -0."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -0 coin, tithe -128 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege arrears 3 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege arrears 3 coin; church clear; unrest unchanged.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +1 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege arrears 3 coin; church clear; unrest unchanged."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 4 resolved. Labor plan set (takes effect next turn's production): farmers 43, builders 5. Sold 177 bushels (cap 563) for +18 coin at 0.10/bushel.",
+      "top_drivers": [
+        "Food: prod +2568, cons -2055, spoil -46, net +467.",
+        "Unrest: net +3 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 128, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 4
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 3,
+          "desired_farmers": 45,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 132,
+          "pay_coin": 4
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 476
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": -3,
+        "bushels": -4,
+        "coin": 37,
+        "pop": 0,
+        "unrest": -1
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 3,
+        "bushels_stored": 1168,
+        "coin": 55,
+        "energy_available": 3,
+        "energy_max": 5,
+        "farmers": 45,
+        "population": 48,
+        "unrest": 15
+      },
+      "event_ids": [
+        "evt_late_rains"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+        "Sold 476 bushels (cap 657) for +41 coin at 0.09/bushel.",
+        "Paid arrears: coin -3, bushels -0.",
+        "Paid current dues: tax -1 coin, tithe -132 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Preview obligations applied arrears pressure.",
+              "kind": "arrears_pressure"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 132 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 3; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Oswin (p_clergy)",
+              "kind": "death"
+            },
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Robert (p_liege)",
+              "kind": "death"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Oswin (p_clergy)",
+              "kind": "death"
+            },
+            {
+              "detail": "Robert (p_liege)",
+              "kind": "death"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 2; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "construction",
+              "confidence": "known",
+              "detail": "granary_upgrade",
+              "kind": "construction_completed"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "granary_upgrade",
+              "kind": "construction_completed"
+            }
+          ],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.22; market 0.09 coin/bushel; sell cap 657."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -53; production +2653; consumption -1996."
+            },
+            {
+              "kind": "note",
+              "line": "Construction completed: granary_upgrade."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "weather",
+              "confidence": "known",
+              "detail": "Late Rains",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Late Rains",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_grant_3_csnli8"
+          ],
+          "turn_index": 5
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 45; builders 3."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 45, builders 3."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "economy",
+              "confidence": "known",
+              "detail": "Sold 476 bushels (cap 657) for +41 coin at 0.09/bushel.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Sold 476 bushels (cap 657) for +41 coin at 0.09/bushel.",
+              "kind": "note"
+            }
+          ],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 476 bushels."
+            },
+            {
+              "kind": "note",
+              "line": "Sold 476 bushels (cap 657) for +41 coin at 0.09/bushel."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid arrears: coin -3, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -132 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid arrears: coin -3, bushels -0.",
+              "kind": "note"
+            },
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -132 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 4; bushels 132; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid arrears: coin -3, bushels -0."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -132 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 5 resolved. Labor plan set (takes effect next turn's production): farmers 45, builders 3. Sold 476 bushels (cap 657) for +41 coin at 0.09/bushel.",
+      "top_drivers": [
+        "Food: prod +2653, cons -1996, spoil -53, net +604.",
+        "Unrest: net +1 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 132, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 5
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 1,
+          "desired_farmers": 47,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 100,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": -72,
+        "coin": -1,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 1,
+        "bushels_stored": 1096,
+        "coin": 54,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 47,
+        "population": 48,
+        "unrest": 13
+      },
+      "event_ids": [],
+      "house_log": [
+        {
+          "deceased_age": 51,
+          "deceased_id": "p_spouse",
+          "deceased_name": "Joan",
+          "kind": "widowed",
+          "spouse_name": "Joan",
+          "survivor_id": "p_head",
+          "survivor_name": "Hugh",
+          "survivor_sex": "M",
+          "turn_index": 6
+        }
+      ],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+        "Paid current dues: tax -1 coin, tithe -100 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 100 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Joan (p_spouse)",
+              "kind": "death"
+            },
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Widowed: Hugh lost Joan.",
+              "kind": "widowed",
+              "subject_ids": [
+                "p_head",
+                "p_spouse"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Joan (p_spouse)",
+              "kind": "death"
+            },
+            {
+              "detail": "Widowed: Hugh lost Joan.",
+              "kind": "widowed"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 1; population delta 0."
+            },
+            {
+              "kind": "note",
+              "line": "Widowed: Hugh lost Joan."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.89; market 0.10 coin/bushel; sell cap 636."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -24; production +2019; consumption -1967."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "0 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospect expired: grant (pros_grant_3_csnli8).",
+              "kind": "prospect_expired"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospect expired: grant (pros_grant_3_csnli8).",
+              "kind": "prospect_expired"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect expired: grant (pros_grant_3_csnli8)."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "effects_applied": {},
+          "from_house_id": "h_ext_04",
+          "kind": "prospect_expired",
+          "prospect_id": "pros_grant_3_csnli8",
+          "subject_person_id": null,
+          "to_house_id": "h_player",
+          "turn_index": 6,
+          "type": "grant"
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 47; builders 1."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 47, builders 1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -100 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -100 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 100; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -100 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 6 resolved. Labor plan set (takes effect next turn's production): farmers 47, builders 1. Paid current dues: tax -1 coin, tithe -100 bushels.",
+      "top_drivers": [
+        "Food: prod +2019, cons -1967, spoil -24, net +28.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 100, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 6
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "start",
+          "improvement_id": "field_rotation",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 0,
+          "desired_farmers": 48,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 135,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 510
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 69,
+        "coin": 45,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 0,
+        "bushels_stored": 1165,
+        "coin": 99,
+        "energy_available": 1,
+        "energy_max": 5,
+        "farmers": 48,
+        "population": 48,
+        "unrest": 11
+      },
+      "event_ids": [
+        "evt_market_shortage"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+        "Sold 510 bushels (cap 675) for +51 coin at 0.10/bushel.",
+        "Started construction: Field Rotation (cost 5 coin).",
+        "Paid current dues: tax -1 coin, tithe -135 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 135 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.13; market 0.10 coin/bushel; sell cap 675."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -22; production +2702; consumption -1966."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "economic",
+              "confidence": "known",
+              "detail": "Market Shortage",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Market Shortage",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 48; builders 0."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 48, builders 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "economy",
+              "confidence": "known",
+              "detail": "Sold 510 bushels (cap 675) for +51 coin at 0.10/bushel.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Sold 510 bushels (cap 675) for +51 coin at 0.10/bushel.",
+              "kind": "note"
+            }
+          ],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 510 bushels."
+            },
+            {
+              "kind": "note",
+              "line": "Sold 510 bushels (cap 675) for +51 coin at 0.10/bushel."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "construction",
+              "confidence": "known",
+              "detail": "Started construction: Field Rotation (cost 5 coin).",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Started construction: Field Rotation (cost 5 coin).",
+              "kind": "note"
+            }
+          ],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action start."
+            },
+            {
+              "kind": "note",
+              "line": "Started construction: Field Rotation (cost 5 coin)."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -135 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -135 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 135; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -135 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 7 resolved. Labor plan set (takes effect next turn's production): farmers 48, builders 0. Sold 510 bushels (cap 675) for +51 coin at 0.10/bushel.",
+      "top_drivers": [
+        "Food: prod +2702, cons -1966, spoil -22, net +714.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 135, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 7
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 2,
+          "desired_farmers": 46,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 74,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": -547,
+        "coin": -1,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 2,
+        "bushels_stored": 618,
+        "coin": 98,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 46,
+        "population": 48,
+        "unrest": 9
+      },
+      "event_ids": [
+        "evt_drought"
+      ],
+      "house_log": [
+        {
+          "kind": "succession",
+          "new_ruler_name": "Giles",
+          "turn_index": 8
+        },
+        {
+          "heir_name": "Thomas",
+          "kind": "heir_selected",
+          "turn_index": 8
+        }
+      ],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 46, builders 2.",
+        "Paid current dues: tax -1 coin, tithe -74 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+        "Succession resolved."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 74 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "household",
+              "confidence": "known",
+              "detail": "Hugh (p_head)",
+              "kind": "death"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Hugh (p_head)",
+              "kind": "death"
+            }
+          ],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 1; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p_child1; head p_head."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.61; market 0.12 coin/bushel; sell cap 464."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -24; production +1484; consumption -1933."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "weather",
+              "confidence": "known",
+              "detail": "Dry Summer",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Dry Summer",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 46, builders 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 46, builders 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 46; builders 2."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 46, builders 2."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -74 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -74 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 74; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -74 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Succession resolved.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Succession: Giles assumes rule.",
+              "kind": "succession"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Heir selected: Thomas.",
+              "kind": "heir_selected"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            },
+            {
+              "detail": "Succession resolved.",
+              "kind": "note"
+            },
+            {
+              "detail": "Succession: Giles assumes rule.",
+              "kind": "succession"
+            },
+            {
+              "detail": "Heir selected: Thomas.",
+              "kind": "heir_selected"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            },
+            {
+              "kind": "note",
+              "line": "Succession resolved."
+            },
+            {
+              "kind": "note",
+              "line": "Succession: Giles assumes rule."
+            },
+            {
+              "kind": "note",
+              "line": "Heir selected: Thomas."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 8 resolved. Labor plan set (takes effect next turn's production): farmers 46, builders 2. Paid current dues: tax -1 coin, tithe -74 bushels.",
+      "top_drivers": [
+        "Food: prod +1484, cons -1933, spoil -24, net -473.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 74, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 8
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 4,
+          "desired_farmers": 44,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "accept",
+          "child_id": "p_child1",
+          "kind": "marriage",
+          "offer_index": 1
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 127,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 457,
+        "coin": 5,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 4,
+        "bushels_stored": 1075,
+        "coin": 103,
+        "energy_available": 3,
+        "energy_max": 5,
+        "farmers": 44,
+        "population": 48,
+        "unrest": 7
+      },
+      "event_ids": [],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 44, builders 4.",
+        "Marriage accepted for Giles: dowry +6 coin.",
+        "Court budget remaining 3/6; spent 3; actions gift_liege 0, offering_church 0, marriage_inbound 3, marriage_scout 0.",
+        "Paid current dues: tax -1 coin, tithe -127 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 127 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 1.09; market 0.10 coin/bushel; sell cap 690."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -13; production +2541; consumption -1944."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "0 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Ketterby (p13)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p13"
+              ]
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Hartwyck (p_ext_27_child1)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_27_child1"
+              ]
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Ketterby (p_ext_49_child1)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_49_child1"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "House Ketterby (p13)",
+              "kind": "marriage_offer"
+            },
+            {
+              "detail": "House Hartwyck (p_ext_27_child1)",
+              "kind": "marriage_offer"
+            },
+            {
+              "detail": "House Ketterby (p_ext_49_child1)",
+              "kind": "marriage_offer"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 1; offers 3."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospect generated: marriage (pros_marriage_9_7rxrm8).",
+              "kind": "prospect_generated",
+              "subject_ids": [
+                "p_child1",
+                "p_ext_27_child1"
+              ]
+            },
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospect generated: marriage (pros_marriage_9_7rxrm8).",
+              "kind": "prospect_generated"
+            },
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect generated: marriage (pros_marriage_9_7rxrm8)."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "from_house_id": "h_ext_27",
+          "kind": "prospect_generated",
+          "prospect": {
+            "actions": [
+              "accept",
+              "reject"
+            ],
+            "costs": {},
+            "expires_turn": 11,
+            "from_house_id": "h_ext_27",
+            "id": "pros_marriage_9_7rxrm8",
+            "predicted_effects": {
+              "coin_delta": 6,
+              "flags_set": [],
+              "relationship_deltas": [
+                {
+                  "allegiance_delta": 4,
+                  "from_id": "p_child1",
+                  "respect_delta": 7,
+                  "scope": "person",
+                  "threat_delta": -2,
+                  "to_id": "p_ext_27_child1"
+                },
+                {
+                  "allegiance_delta": 6,
+                  "from_id": "h_player",
+                  "respect_delta": 4,
+                  "scope": "house",
+                  "threat_delta": -3,
+                  "to_id": "h_ext_27"
+                },
+                {
+                  "allegiance_delta": 6,
+                  "from_id": "h_ext_27",
+                  "respect_delta": 4,
+                  "scope": "house",
+                  "threat_delta": -3,
+                  "to_id": "h_player"
+                }
+              ]
+            },
+            "requirements": [],
+            "spouse_person_id": "p_ext_27_child1",
+            "subject_person_id": "p_child1",
+            "summary": "Marriage proposal",
+            "to_house_id": "h_player",
+            "type": "marriage",
+            "uncertainty": "known"
+          },
+          "prospect_id": "pros_marriage_9_7rxrm8",
+          "subject_person_id": "p_child1",
+          "to_house_id": "h_player",
+          "turn_index": 9,
+          "type": "marriage"
+        },
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_9_7rxrm8"
+          ],
+          "turn_index": 9
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 44, builders 4.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 44, builders 4.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 44; builders 4."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 44, builders 4."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Marriage accepted for Giles: dowry +6 coin.",
+              "kind": "note"
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Court budget remaining 3/6; spent 3; actions gift_liege 0, offering_church 0, marriage_inbound 3, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Marriage accepted for Giles: dowry +6 coin.",
+              "kind": "note"
+            },
+            {
+              "detail": "Court budget remaining 3/6; spent 3; actions gift_liege 0, offering_church 0, marriage_inbound 3, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action accept."
+            },
+            {
+              "kind": "note",
+              "line": "Marriage accepted for Giles: dowry +6 coin."
+            },
+            {
+              "kind": "note",
+              "line": "Court budget remaining 3/6; spent 3; actions gift_liege 0, offering_church 0, marriage_inbound 3, marriage_scout 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -127 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -127 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 127; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -127 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 9 resolved. Labor plan set (takes effect next turn's production): farmers 44, builders 4. Marriage accepted for Giles: dowry +6 coin.",
+      "top_drivers": [
+        "Food: prod +2541, cons -1944, spoil -13, net +584.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 127, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 9
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 5,
+          "desired_farmers": 43,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "accept",
+          "child_id": "p36",
+          "kind": "marriage",
+          "offer_index": 1
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 107,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 22,
+        "coin": 5,
+        "pop": 0,
+        "unrest": 0
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 5,
+        "bushels_stored": 1097,
+        "coin": 108,
+        "energy_available": 3,
+        "energy_max": 5,
+        "farmers": 43,
+        "population": 48,
+        "unrest": 7
+      },
+      "event_ids": [
+        "evt_peasant_petition"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+        "Marriage accepted for Thomas: dowry +6 coin.",
+        "Court budget remaining 2/6; spent 4; actions gift_liege 0, offering_church 0, marriage_inbound 4, marriage_scout 0.",
+        "Paid current dues: tax -1 coin, tithe -107 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 107 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.96; market 0.10 coin/bushel; sell cap 645."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -22; production +2143; consumption -1992."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "social",
+              "confidence": "known",
+              "detail": "Peasant Petition",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Peasant Petition",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Ivydale (p56)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p56"
+              ]
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "House Ashford (p_ext_57_child2)",
+              "kind": "marriage_offer",
+              "subject_ids": [
+                "p_ext_57_child2"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "House Ivydale (p56)",
+              "kind": "marriage_offer"
+            },
+            {
+              "detail": "House Ashford (p_ext_57_child2)",
+              "kind": "marriage_offer"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 1; offers 2."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_9_7rxrm8"
+          ],
+          "turn_index": 10
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 43; builders 5."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 43, builders 5."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Marriage accepted for Thomas: dowry +6 coin.",
+              "kind": "note"
+            },
+            {
+              "category": "marriage",
+              "confidence": "known",
+              "detail": "Court budget remaining 2/6; spent 4; actions gift_liege 0, offering_church 0, marriage_inbound 4, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Marriage accepted for Thomas: dowry +6 coin.",
+              "kind": "note"
+            },
+            {
+              "detail": "Court budget remaining 2/6; spent 4; actions gift_liege 0, offering_church 0, marriage_inbound 4, marriage_scout 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action accept."
+            },
+            {
+              "kind": "note",
+              "line": "Marriage accepted for Thomas: dowry +6 coin."
+            },
+            {
+              "kind": "note",
+              "line": "Court budget remaining 2/6; spent 4; actions gift_liege 0, offering_church 0, marriage_inbound 4, marriage_scout 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -107 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -107 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 107; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -107 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 10 resolved. Labor plan set (takes effect next turn's production): farmers 43, builders 5. Marriage accepted for Thomas: dowry +6 coin.",
+      "top_drivers": [
+        "Food: prod +2143, cons -1992, spoil -22, net +129.",
+        "Unrest: net +2 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 107, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 10
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 5,
+          "desired_farmers": 43,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 76,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": -813,
+        "coin": -3,
+        "pop": 0,
+        "unrest": 1
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 5,
+        "bushels_stored": 284,
+        "coin": 105,
+        "energy_available": 5,
+        "energy_max": 5,
+        "farmers": 43,
+        "population": 48,
+        "unrest": 8
+      },
+      "event_ids": [
+        "evt_fire"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+        "Paid current dues: tax -1 coin, tithe -76 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 76 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.70; market 0.06 coin/bushel; sell cap 661."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -22; production +1527; consumption -2031."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "security",
+              "confidence": "known",
+              "detail": "Manor Fire",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Manor Fire",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospects window built: shown 1, hidden 0.",
+              "kind": "prospects_window_built"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 1; hidden 0; total 1."
+            },
+            {
+              "kind": "note",
+              "line": "Prospects window built: shown 1, hidden 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "hidden_ids": [],
+          "kind": "prospects_window_built",
+          "shown_ids": [
+            "pros_marriage_9_7rxrm8"
+          ],
+          "turn_index": 11
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 43, builders 5.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 43; builders 5."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 43, builders 5."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -76 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -76 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 76; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -76 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 11 resolved. Labor plan set (takes effect next turn's production): farmers 43, builders 5. Paid current dues: tax -1 coin, tithe -76 bushels.",
+      "top_drivers": [
+        "Food: prod +1527, cons -2031, spoil -22, net -737.",
+        "Unrest: net +3 (threshold dispossession at 100).",
+        "Coin: net -2."
+      ],
+      "turn_index": 11
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 3,
+          "desired_farmers": 45,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 94,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": -250,
+        "coin": -1,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 3,
+        "bushels_stored": 34,
+        "coin": 104,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 45,
+        "population": 48,
+        "unrest": 6
+      },
+      "event_ids": [],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+        "Paid current dues: tax -1 coin, tithe -94 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 94 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "construction",
+              "confidence": "known",
+              "detail": "field_rotation",
+              "kind": "construction_completed"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "field_rotation",
+              "kind": "construction_completed"
+            }
+          ],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.86; market 0.08 coin/bushel; sell cap 572."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -6; production +1881; consumption -2031."
+            },
+            {
+              "kind": "note",
+              "line": "Construction completed: field_rotation."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "0 events applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "prospects",
+              "confidence": "known",
+              "detail": "Prospect expired: marriage (pros_marriage_9_7rxrm8).",
+              "kind": "prospect_expired",
+              "subject_ids": [
+                "p_child1"
+              ]
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Prospect expired: marriage (pros_marriage_9_7rxrm8).",
+              "kind": "prospect_expired"
+            }
+          ],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            },
+            {
+              "kind": "note",
+              "line": "Prospect expired: marriage (pros_marriage_9_7rxrm8)."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [
+        {
+          "effects_applied": {},
+          "from_house_id": "h_ext_27",
+          "kind": "prospect_expired",
+          "prospect_id": "pros_marriage_9_7rxrm8",
+          "subject_person_id": "p_child1",
+          "to_house_id": "h_player",
+          "turn_index": 12,
+          "type": "marriage"
+        }
+      ],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 45, builders 3.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 45; builders 3."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 45, builders 3."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -94 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -94 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 94; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -94 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 12 resolved. Labor plan set (takes effect next turn's production): farmers 45, builders 3. Paid current dues: tax -1 coin, tithe -94 bushels.",
+      "top_drivers": [
+        "Food: prod +1881, cons -2031, spoil -6, net -156.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 94, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 12
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 1,
+          "desired_farmers": 47,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 110,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 75,
+        "coin": -1,
+        "pop": 0,
+        "unrest": -2
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 1,
+        "bushels_stored": 109,
+        "coin": 103,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 47,
+        "population": 48,
+        "unrest": 4
+      },
+      "event_ids": [
+        "evt_skilled_mason"
+      ],
+      "house_log": [],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+        "Paid current dues: tax -1 coin, tithe -110 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 110 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.91; market 0.06 coin/bushel; sell cap 584."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -1; production +2211; consumption -2025."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "construction",
+              "confidence": "known",
+              "detail": "Skilled Mason Arrives",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Skilled Mason Arrives",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 47, builders 1.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 47; builders 1."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 47, builders 1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -110 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -110 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 110; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -110 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 13 resolved. Labor plan set (takes effect next turn's production): farmers 47, builders 1. Paid current dues: tax -1 coin, tithe -110 bushels.",
+      "top_drivers": [
+        "Food: prod +2211, cons -2025, spoil -1, net +185.",
+        "Unrest: net +0 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 110, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 13
+    },
+    {
+      "decisions": {
+        "construction": {
+          "action": "none",
+          "kind": "construction"
+        },
+        "labor": {
+          "desired_builders": 0,
+          "desired_farmers": 48,
+          "kind": "labor"
+        },
+        "marriage": {
+          "action": "none",
+          "kind": "marriage"
+        },
+        "obligations": {
+          "kind": "pay_obligations",
+          "pay_bushels": 115,
+          "pay_coin": 1
+        },
+        "sell": {
+          "kind": "sell",
+          "sell_bushels": 0
+        }
+      },
+      "deltas": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels": 218,
+        "coin": -1,
+        "pop": 0,
+        "unrest": -4
+      },
+      "ending": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "builders": 0,
+        "bushels_stored": 327,
+        "coin": 102,
+        "energy_available": 4,
+        "energy_max": 5,
+        "farmers": 48,
+        "population": 48,
+        "unrest": 0
+      },
+      "event_ids": [
+        "evt_clergy_mediation"
+      ],
+      "house_log": [
+        {
+          "kind": "succession",
+          "new_ruler_name": "Thomas",
+          "turn_index": 14
+        },
+        {
+          "heir_name": "Giles",
+          "kind": "heir_selected",
+          "turn_index": 14
+        }
+      ],
+      "notes": [
+        "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+        "Paid current dues: tax -1 coin, tithe -115 bushels.",
+        "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+        "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+        "Succession resolved."
+      ],
+      "phase_results_v0": [
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Tax due 1 coin; tithe due 115 bushels."
+            },
+            {
+              "kind": "summary",
+              "line": "Arrears coin 0; arrears bushels 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "demography",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Household births 0; deaths 0; population delta 0."
+            }
+          ],
+          "rng_keys_used": [
+            "household:mortality",
+            "household:birth",
+            "household:birth_family",
+            "demography:marriage",
+            "demography:mortality",
+            "demography:fertility"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Heir p36; head p_child1."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "consumption",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Weather 0.92; market 0.12 coin/bushel; sell cap 665."
+            },
+            {
+              "kind": "summary",
+              "line": "Spoilage -3; production +2319; consumption -1983."
+            }
+          ],
+          "rng_keys_used": [
+            "weather:macro",
+            "market:macro",
+            "household:shortage"
+          ]
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "religious",
+              "confidence": "known",
+              "detail": "Clergy Mediation",
+              "kind": "event_applied"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Clergy Mediation",
+              "kind": "event_applied"
+            }
+          ],
+          "phase": "events",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "1 event applied."
+            }
+          ],
+          "rng_keys_used": [
+            "events:select"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage window eligible 0; offers 0."
+            }
+          ],
+          "rng_keys_used": [
+            "marriage:offers"
+          ]
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospects shown 0; hidden 0; total 0."
+            }
+          ],
+          "rng_keys_used": [
+            "prospects:id"
+          ]
+        }
+      ],
+      "prospects_log": [],
+      "resolution_phase_results_v0": [
+        {
+          "evidence_events_v0": [
+            {
+              "category": "labor",
+              "confidence": "known",
+              "detail": "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Labor plan set (takes effect next turn's production): farmers 48, builders 0.",
+              "kind": "note"
+            }
+          ],
+          "phase": "labor",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Labor desired farmers 48; builders 0."
+            },
+            {
+              "kind": "note",
+              "line": "Labor plan set (takes effect next turn's production): farmers 48, builders 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "sell",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Sell requested 0 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "construction",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Construction action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "marriage",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Marriage action none."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [],
+          "log_events": [],
+          "phase": "prospects",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Prospect decisions queued 0."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "obligations",
+              "confidence": "known",
+              "detail": "Paid current dues: tax -1 coin, tithe -115 bushels.",
+              "kind": "note"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Paid current dues: tax -1 coin, tithe -115 bushels.",
+              "kind": "note"
+            }
+          ],
+          "phase": "obligations",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Obligation payments coin 1; bushels 115; levy ignore."
+            },
+            {
+              "kind": "note",
+              "line": "Paid current dues: tax -1 coin, tithe -115 bushels."
+            }
+          ],
+          "rng_keys_used": []
+        },
+        {
+          "evidence_events_v0": [
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Succession resolved.",
+              "kind": "note"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Succession: Thomas assumes rule.",
+              "kind": "succession"
+            },
+            {
+              "category": "succession",
+              "confidence": "known",
+              "detail": "Heir selected: Giles.",
+              "kind": "heir_selected"
+            }
+          ],
+          "log_events": [
+            {
+              "detail": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears.",
+              "kind": "note"
+            },
+            {
+              "detail": "Obligation enforcement: liege clear; church clear; unrest eased by 2.",
+              "kind": "note"
+            },
+            {
+              "detail": "Succession resolved.",
+              "kind": "note"
+            },
+            {
+              "detail": "Succession: Thomas assumes rule.",
+              "kind": "succession"
+            },
+            {
+              "detail": "Heir selected: Giles.",
+              "kind": "heir_selected"
+            }
+          ],
+          "phase": "succession",
+          "receipts": [
+            {
+              "kind": "summary",
+              "line": "Close turn phase applied."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation carry: tax +0 coin to arrears; tithe +0 bushels to arrears."
+            },
+            {
+              "kind": "note",
+              "line": "Obligation enforcement: liege clear; church clear; unrest eased by 2."
+            },
+            {
+              "kind": "note",
+              "line": "Succession resolved."
+            },
+            {
+              "kind": "note",
+              "line": "Succession: Thomas assumes rule."
+            },
+            {
+              "kind": "note",
+              "line": "Heir selected: Giles."
+            }
+          ],
+          "rng_keys_used": []
+        }
+      ],
+      "summary": "Turn 14 resolved. Labor plan set (takes effect next turn's production): farmers 48, builders 0. Paid current dues: tax -1 coin, tithe -115 bushels.",
+      "top_drivers": [
+        "Food: prod +2319, cons -1983, spoil -3, net +333.",
+        "Unrest: net -3 (threshold dispossession at 100).",
+        "Obligations: tax due 1, tithe due 115, arrears Δ coin +0, bushels +0."
+      ],
+      "turn_index": 14
+    }
+  ],
+  "turns_played": 15,
+  "turns_requested": 15
+}

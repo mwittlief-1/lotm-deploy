@@ -1,0 +1,48 @@
+{
+  "schema_version": "uat_scenario_pack_v0.3",
+  "created_at": "2026-04-10T08:53:17-0400",
+  "notes": [
+    "Deterministic UAT scenario pack for v0.3 playtest ops.",
+    "Scenarios are policy-driven unless explicit decision overrides are listed."
+  ],
+  "scenarios": [
+    {
+      "id": "uat_meat_hunting_proxy",
+      "title": "Hunting yield proxy (labor idle)",
+      "seed": "lotm_v026_seed_001_baseline",
+      "policy_id": "prudent-builder",
+      "turns": 2,
+      "decision_overrides": [
+        {
+          "turn_index": 0,
+          "labor": { "desired_farmers": 41, "desired_builders": 0 }
+        }
+      ],
+      "expectations": {
+        "hunting_yield_min": 1
+      },
+      "visibility_status": "fallback",
+      "visibility_note": "Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead."
+    },
+    {
+      "id": "uat_arrears_enforcement",
+      "title": "Arrears + enforcement visibility (short run)",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "policy_id": "builder-forward",
+      "turns": 3,
+      "expectations": {
+        "arrears_enforcement_by_turn": 3
+      }
+    },
+    {
+      "id": "uat_grant_visibility",
+      "title": "Grant prospect visibility",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "policy_id": "builder-forward",
+      "turns": 4,
+      "expectations": {
+        "grant_window_by_turn": 4
+      }
+    }
+  ]
+}

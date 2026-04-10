@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R3-001-T05
+  current_task_id: V03-R4-005-T01
+  last_completed_task_id: V03-R4-004-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-tooling-qa
-  git_commit: 4bb86a93447ac6d71efebcd90d302cf071523dc3
+  git_commit: ''
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -15,14 +15,15 @@ last_run:
   gates:
     qa: pass
     preflight: pass
-    repo_duplicates: pass
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
-    run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+    run1: dd59f9d84d354c720c97dfda1595b775877a279d1db4dabc60918f0254bee449
+    run2: dd59f9d84d354c720c97dfda1595b775877a279d1db4dabc60918f0254bee449
 notes: >-
-  Completed Tooling V03-R3-001-T05 by closing the
-  replay-hardening epic and recording reliability
-  quota completion. No tooling lane claims remain
-  active after the handoff.
+  Completed Tooling V03-R4-004-T01 by adding the deterministic UAT scenario
+  pack, validation script, and operator notes. Hunting/meat visibility remains
+  a fallback proxy based on deterministic hunting yield; arrears/enforcement and
+  grant scenarios are seeded off lotm_v026_seed_003_market_tight. Seed replay
+  batches emitted soft time ceiling warnings but hashes matched.
 active_claims: {}
