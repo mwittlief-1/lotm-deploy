@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: ''
-  last_completed_task_id: V03-R4-003-T04
+  last_completed_task_id: V03-R1-006-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-lane-ui-experience
-  git_commit: 3b5b33453e2d069a67285acb78c0fd6c04b6ac3b
+  git_commit: a12dbe7aae2353da49a30e188703d0294437502b
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,11 +18,10 @@ last_run:
     repo_duplicates: pass
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
-    run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+    run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
+    run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Closed UI V03-R4-003-T04 after wiring the playtest packet handoff into the
-  live gameplay shell, refreshing the playtest docs, and publishing the epic
-  closeout notes for later v0.3 hardening. No next ready UI lane task remains
-  on this refreshed branch state.
+  Accepted Social V03-R1-006-T01 through V03-R1-006-T05, closed epic
+  V03-R1-006, and completed the remaining v0.3 backlog with the
+  residence-manor assignment baseline on the accepted replay line.
 active_claims: {}

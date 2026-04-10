@@ -11,7 +11,7 @@ import {
   SUCCESSION_LINE_SCHEMA_VERSION,
 } from "../../src/sim/domains/people/successionRegistry";
 import { buildProspectsWindowPhase } from "../../src/sim/phases/phase_prospects";
-import { computeHeirId } from "../../src/sim/phases/phase_succession";
+import { computeAdultSuccessorId, computeHeirId } from "../../src/sim/phases/phase_succession";
 import type { Person, RunState } from "../../src/sim/types";
 import { SIM_VERSION } from "../../src/sim/version";
 
@@ -177,6 +177,17 @@ describe("succession registry schema", () => {
     });
   });
 
+  it("repairs a stale persisted heir pointer back to the canonical primogeniture heir", () => {
+    const state = mkBaseState();
+    state.house.heir_id = "p_daughter";
+
+    const registry = buildClaimantRegistry(state, { limit: 4 });
+
+    expect(registry.current_heir_id).toBe("p_son_old");
+    expect(computeHeirId(state)).toBe("p_son_old");
+    expect(state.house.heir_id).toBe("p_son_old");
+  });
+
   it("falls back to adult household members when no kinship line exists", () => {
     const state = mkBaseState();
     state.house.heir_id = null;
@@ -191,6 +202,7 @@ describe("succession registry schema", () => {
     const registry = buildClaimantRegistry(state);
 
     expect(line.entries).toEqual([]);
+    expect(computeAdultSuccessorId(state)).toBe("p_spouse");
     expect(registry.claim_window_open).toBe(true);
     expect(registry.adult_successor_id).toBe("p_spouse");
     expect(registry.entries[0]).toMatchObject({
@@ -200,6 +212,30 @@ describe("succession registry schema", () => {
       basis_kind: "household_member_fallback",
       relation_group: "fallback_household",
     });
+  });
+
+  it("reopens inheritance claims when a stale non-canonical heir pointer is repaired away", () => {
+    const state = mkBaseState();
+    state.house.heir_id = "p_stale_claimant";
+    state.house.children = [];
+    state.kinship_edges = [{ kind: "spouse_of", a_id: state.house.head.id, b_id: state.house.spouse!.id }];
+    state.houses!.h_player.child_ids = [];
+    state.houses!.h_player.member_person_ids = [state.house.head.id, state.house.spouse!.id];
+    state.people!.p_stale_claimant = mkPerson("p_stale_claimant", "M", 33, {
+      house_id: "h_other",
+      residence_house_id: "h_other",
+    });
+
+    expect(computeHeirId(state)).toBeNull();
+    expect(state.house.heir_id).toBeNull();
+
+    const registry = buildClaimantRegistry(state, { limit: 4 });
+    const prospectLog: any[] = [];
+    const window = buildProspectsWindowPhase(state, null, prospectLog, { computeHeirId });
+
+    expect(registry.current_heir_id).toBeNull();
+    expect(registry.claim_window_open).toBe(true);
+    expect(window.prospects.some((entry) => entry.type === "inheritance_claim")).toBe(true);
   });
 
   it("builds the current placeholder inheritance claim prospect from the domain seam", () => {

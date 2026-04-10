@@ -246,4 +246,71 @@ describe("v0.2.7.2 DevB P0 regressions", () => {
     const hid = findHouseIdForPerson(s1, extSpouseId);
     expect(hid).toBeTruthy();
   });
+
+  it("succession ignores ended spouse edges and keeps the active spouse", () => {
+    const s0: any = createNewRun("TEST_v0272_succession_ended_spouse_edge");
+
+    s0.house.head.alive = false;
+
+    const heir = s0.house.children[0];
+    heir.sex = "M";
+    heir.age = 18;
+    heir.alive = true;
+
+    const endedSpouseId = "p_000_ended_spouse";
+    const activeSpouseId = "p_100_active_spouse";
+    const activeHouseHeadId = "p_100_active_house_head";
+    const activeHouseId = "h_ext_test_active_succ";
+
+    s0.people = s0.people ?? {};
+    s0.houses = s0.houses ?? {};
+
+    s0.people[endedSpouseId] = {
+      id: endedSpouseId,
+      name: "Ended Spouse",
+      sex: "F",
+      age: 19,
+      alive: true,
+      married: false,
+      traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+    };
+    s0.people[activeHouseHeadId] = {
+      id: activeHouseHeadId,
+      name: "Active Head",
+      sex: "M",
+      age: 42,
+      alive: true,
+      married: false,
+      traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+    };
+    s0.people[activeSpouseId] = {
+      id: activeSpouseId,
+      name: "Active Spouse",
+      sex: "F",
+      age: 18,
+      alive: true,
+      married: false,
+      traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 }
+    };
+    s0.houses[activeHouseId] = {
+      id: activeHouseId,
+      name: "Activeford",
+      tier: "Knight",
+      holdings_count: 1,
+      head_id: activeHouseHeadId,
+      spouse_id: null,
+      child_ids: [activeSpouseId]
+    };
+
+    s0.kinship_edges = s0.kinship_edges ?? [];
+    s0.kinship_edges.push({ kind: "spouse_of", a_id: heir.id, b_id: endedSpouseId, end_turn_index: 1 });
+    s0.kinship_edges.push({ kind: "spouse_of", a_id: heir.id, b_id: activeSpouseId });
+
+    const ctx: any = proposeTurn(s0);
+    const s1: any = ctx.preview_state;
+
+    expect(s1.house.head.id).toBe(heir.id);
+    expect(s1.house.spouse?.id).toBe(activeSpouseId);
+    expect(s1.house.spouse?.id).not.toBe(endedSpouseId);
+  });
 });

@@ -1,4 +1,5 @@
 import { SIM_VERSION } from "./version";
+import type { FiscalReceiptSnapshotV1 } from "./domains/economy/receipts";
 import type { WorldTopologySnapshotV1 } from "./domains/world/types";
 
 export type SimVersion = typeof SIM_VERSION;
@@ -643,6 +644,7 @@ export interface BeliefRegistryV0 {
 export interface PhaseResultV0 {
   phase: PhaseNameV0;
   receipts: PhaseReceiptV0[];
+  fiscal_receipts_v1?: FiscalReceiptSnapshotV1[];
   log_events: PhaseLogEventV0[];
   evidence_events_v0: EvidenceEventV0[];
   rng_keys_used: string[];
@@ -651,11 +653,21 @@ export interface PhaseResultV0 {
 
 export type LaborDecision = { kind: "labor"; desired_farmers: number; desired_builders: number };
 export type SellDecision = { kind: "sell"; sell_bushels: number };
+export type ObligationsGesturePaymentMode = "coin" | "food_stores" | "meat_stores" | "none";
+export interface ObligationsGestureDecision {
+  amount: number;
+  payment_mode: ObligationsGesturePaymentMode;
+}
+export interface ObligationsGestureSet {
+  gift_liege: ObligationsGestureDecision;
+  offering_church: ObligationsGestureDecision;
+}
 export type ObligationsDecision = {
   kind: "pay_obligations";
   pay_coin: number;
   pay_bushels: number;
   war_levy_choice?: "coin" | "men" | "ignore";
+  gestures?: ObligationsGestureSet;
 };
 export type ConstructionDecision =
   | { kind: "construction"; action: "none" }
