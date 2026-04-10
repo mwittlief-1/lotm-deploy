@@ -4,6 +4,15 @@ import type {
   ObligationsCounterpartyContractSection,
   ObligationsModalFocus
 } from "../playScreenObligations";
+import {
+  clearObligationGestureDecision,
+  obligationGesturePaymentModeLabel,
+  obligationGesturePaymentModeOptions,
+  queueDefaultObligationGesture,
+  readObligationGestureDecision,
+  updateObligationGestureAmount,
+  updateObligationGesturePaymentMode
+} from "../playScreenObligations";
 import type { EconomyPricingSurface } from "../playViewModel";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
@@ -63,6 +72,45 @@ type DecisionsPanelProps = {
   turnYears: number;
   arrearsCarried: OblAmount;
 };
+
+function gestureBudgetStatus(
+  section: ObligationsCounterpartyContractSection,
+  courtDecisionBudget: CourtDecisionBudgetSurface | null
+): { availableNow: boolean; summary: string } {
+  if (!section.gestureGroup.availableInBudget) {
+    return {
+      availableNow: false,
+      summary: "Court budget availability is not exposed for this gesture in the current snapshot."
+    };
+  }
+
+  if (!courtDecisionBudget) {
+    return {
+      availableNow: true,
+      summary:
+        section.gestureGroup.cost === null
+          ? "Court budget cost is not exposed in the current snapshot."
+          : `Court budget cost ${section.gestureGroup.cost}.`
+    };
+  }
+
+  const costSummary =
+    section.gestureGroup.cost === null
+      ? "No court budget cost recorded."
+      : `Cost ${section.gestureGroup.cost}; ${courtDecisionBudget.remaining} remaining.`;
+  const spentSummary =
+    section.gestureGroup.spent !== null && section.gestureGroup.spent > 0
+      ? ` Visible snapshot used ${section.gestureGroup.spent}.`
+      : "";
+  const availableNow =
+    !courtDecisionBudget.exhausted &&
+    (section.gestureGroup.cost === null || courtDecisionBudget.remaining >= section.gestureGroup.cost);
+
+  return {
+    availableNow,
+    summary: `${availableNow ? "Court budget available now." : "Court budget unavailable now."} ${costSummary}${spentSummary}`
+  };
+}
 
 function LegacyMarriageWindowPanel({
   eligibleMaidensLocalRaw,
@@ -409,6 +457,106 @@ export function DecisionsPanel({
           sections={obligationsSections}
           surface="decisions"
         />
+
+        {obligationsSections.length > 0 ? (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75, textTransform: "uppercase" }}>
+              Gift & offering controls
+            </div>
+            <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>
+              Keep dues payments below for tax and tithe settlement. Use these separate gesture controls when you want a gift or offering to show up in the next turn plan explicitly.
+            </div>
+            <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", marginTop: 10 }}>
+              {obligationsSections.map((section) => {
+                const actionId = section.gestureGroup.actionId;
+                const gestureDecision = readObligationGestureDecision(decisions, actionId);
+                const budgetStatus = gestureBudgetStatus(section, courtDecisionBudget);
+                const queueLabel = actionId === "gift_liege" ? "Queue gift" : "Queue offering";
+                const queued = gestureDecision.amount > 0 && gestureDecision.payment_mode !== "none";
+
+                return (
+                  <div
+                    data-obligation-gesture-control={actionId}
+                    key={actionId}
+                    style={{
+                      ...PLAY_SCREEN_SUBCARD_STYLE,
+                      padding: 12,
+                      display: "grid",
+                      gap: 10
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
+                      <div style={{ fontWeight: 700 }}>{section.gestureGroup.title}</div>
+                      <div style={{ fontSize: 11, opacity: 0.72 }}>{queued ? "Queued" : "Not queued"}</div>
+                    </div>
+
+                    <div style={{ fontSize: 12, lineHeight: 1.45, opacity: 0.82 }}>{section.gestureGroup.detail}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.45, opacity: 0.82 }}>{section.gestureGroup.leverSummary}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.45 }}>
+                      Amount {gestureDecision.amount}. Payment mode {obligationGesturePaymentModeLabel(gestureDecision.payment_mode)}.{" "}
+                      {budgetStatus.summary}
+                    </div>
+
+                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)" }}>
+                      <label style={{ display: "grid", gap: 4 }}>
+                        <span>Amount</span>
+                        <input
+                          aria-label={`${section.gestureGroup.title} amount`}
+                          min={0}
+                          onChange={(e) => {
+                            const raw = Number(e.target.value);
+                            setDecisions((current) => updateObligationGestureAmount(current, actionId, raw));
+                          }}
+                          style={{ width: "100%" }}
+                          type="number"
+                          value={gestureDecision.amount}
+                        />
+                      </label>
+
+                      <label style={{ display: "grid", gap: 4 }}>
+                        <span>Payment mode</span>
+                        <select
+                          aria-label={`${section.gestureGroup.title} payment mode`}
+                          onChange={(e) =>
+                            setDecisions((current) =>
+                              updateObligationGesturePaymentMode(current, actionId, e.target.value as any)
+                            )
+                          }
+                          value={gestureDecision.payment_mode}
+                        >
+                          {obligationGesturePaymentModeOptions(actionId).map((mode) => (
+                            <option key={mode} value={mode}>
+                              {obligationGesturePaymentModeLabel(mode)}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button
+                        disabled={!budgetStatus.availableNow}
+                        onClick={() => setDecisions((current) => queueDefaultObligationGesture(current, actionId))}
+                        style={PLAY_SCREEN_ACTION_BUTTON_STYLE}
+                        title={budgetStatus.availableNow ? "" : budgetStatus.summary}
+                        type="button"
+                      >
+                        {queueLabel}
+                      </button>
+                      <button
+                        onClick={() => setDecisions((current) => clearObligationGestureDecision(current, actionId))}
+                        style={PLAY_SCREEN_SECONDARY_BUTTON_STYLE}
+                        type="button"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10, fontSize: 12 }}>
           <div>

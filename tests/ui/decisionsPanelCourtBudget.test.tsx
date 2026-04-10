@@ -251,5 +251,10 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Open detail sheet");
     expect(html).toContain("House Liege");
     expect(html).toContain("Parish Church");
+    expect(html).toContain("Gift &amp; offering controls");
+    expect(html).toContain("Queue gift");
+    expect(html).toContain("Queue offering");
+    expect(html).toContain("Amount 0. Payment mode None.");
+    expect(html).toContain("Court budget available now.");
   });
 });

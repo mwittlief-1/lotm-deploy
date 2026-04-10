@@ -130,6 +130,59 @@ const PHASE_RESULTS: PhaseResultV0[] = [
   }
 ];
 
+const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
+  {
+    phase: "obligations",
+    receipts: [{ kind: "summary", line: "Legacy obligation receipt that should stay hidden when structured rows are present." }],
+    fiscal_receipts_v1: [
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:obligations:p5:coin:0001",
+        turn: 7,
+        phase: "obligations",
+        phase_sequence: 5,
+        category: "gift.liege",
+        counterparty_kind: "liege",
+        counterparty_id: "p_liege",
+        counterparty_label: "House Liege",
+        asset: "coin",
+        delta: -2,
+        balance_after: 5,
+        summary: "Sent a coin gift to House Liege.",
+        rule_id: "obligations.liege_gift",
+        related_actor_ids: ["p_head", "p_liege"]
+      },
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:obligations:p6:food_stores:0002",
+        turn: 7,
+        phase: "obligations",
+        phase_sequence: 6,
+        category: "offering.church",
+        counterparty_kind: "church",
+        counterparty_id: "p_clergy",
+        counterparty_label: "Parish Church",
+        asset: "food_stores",
+        delta: -4,
+        balance_after: 101,
+        summary: "Delivered a grain offering to the Parish Church.",
+        rule_id: "obligations.church_offering",
+        related_actor_ids: ["p_head", "p_clergy"]
+      }
+    ],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  },
+  {
+    phase: "events",
+    receipts: [{ kind: "summary", line: "2 events applied." }],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  }
+];
+
 describe("playScreenReceipts", () => {
   it("creates deterministic routes for explain-changes and resource chips", () => {
     expect(createExplainChangesRoute()).toEqual({
@@ -259,6 +312,52 @@ describe("playScreenReceipts", () => {
           }
         ]
       }
+    ]);
+  });
+
+  it("prefers structured fiscal receipts in raw mode while preserving grouped and counterparty tagging", () => {
+    const data = buildReceiptViewerData({
+      diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
+      phaseResults: STRUCTURED_PHASE_RESULTS
+    });
+
+    expect(data.rawPhases.map((phase) => phase.phase)).toEqual(["obligations", "events"]);
+    expect(data.rawPhases[0]?.receipts.map((receipt) => receipt.id)).toEqual([
+      "ledger:t7:obligations:p5:coin:0001",
+      "ledger:t7:obligations:p6:food_stores:0002"
+    ]);
+    expect(data.rawPhases[0]?.receipts[0]?.line).toBe("Sent a coin gift to House Liege.");
+    expect(data.rawPhases[0]?.receipts[0]?.structured).toEqual({
+      asset: "coin",
+      category: "gift.liege",
+      counterpartyLabel: "House Liege",
+      delta: -2,
+      receiptId: "ledger:t7:obligations:p5:coin:0001",
+      ruleLabel: "obligations.liege_gift",
+      summary: "Sent a coin gift to House Liege."
+    });
+    expect(data.rawPhases[0]?.receipts[1]?.structured).toEqual({
+      asset: "food_stores",
+      category: "offering.church",
+      counterpartyLabel: "Parish Church",
+      delta: -4,
+      receiptId: "ledger:t7:obligations:p6:food_stores:0002",
+      ruleLabel: "obligations.church_offering",
+      summary: "Delivered a grain offering to the Parish Church."
+    });
+
+    expect(data.groupedSections.find((section) => section.id === "coin")?.receipts.map((receipt) => receipt.line)).toEqual([
+      "Sent a coin gift to House Liege."
+    ]);
+    expect(data.groupedSections.find((section) => section.id === "food")?.receipts.map((receipt) => receipt.line)).toEqual([
+      "Delivered a grain offering to the Parish Church."
+    ]);
+    expect(data.counterpartySections.find((section) => section.id === "liege")?.receipts.map((receipt) => receipt.id)).toEqual([
+      "ledger:t7:obligations:p5:coin:0001"
+    ]);
+    expect(data.counterpartySections.find((section) => section.id === "church")?.receipts.map((receipt) => receipt.id)).toEqual([
+      "ledger:t7:obligations:p6:food_stores:0002"
     ]);
   });
 });

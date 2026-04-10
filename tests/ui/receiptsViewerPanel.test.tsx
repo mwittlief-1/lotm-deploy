@@ -32,6 +32,35 @@ const PHASE_RESULTS: PhaseResultV0[] = [
   }
 ];
 
+const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
+  {
+    phase: "obligations",
+    receipts: [{ kind: "summary", line: "Legacy obligation receipt that should stay hidden when structured rows are present." }],
+    fiscal_receipts_v1: [
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:obligations:p5:coin:0001",
+        turn: 7,
+        phase: "obligations",
+        phase_sequence: 5,
+        category: "gift.liege",
+        counterparty_kind: "liege",
+        counterparty_id: "p_liege",
+        counterparty_label: "House Liege",
+        asset: "coin",
+        delta: -2,
+        balance_after: 5,
+        summary: "Sent a coin gift to House Liege.",
+        rule_id: "obligations.liege_gift",
+        related_actor_ids: ["p_head", "p_liege"]
+      }
+    ],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  }
+];
+
 const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
   courtDecisionBudget: {
     limit: 6,
@@ -121,5 +150,60 @@ describe("ReceiptsViewerPanel", () => {
     expect(markup).toContain("Offering to church");
     expect(markup).toContain("Stage 1 active");
     expect(markup).toContain("Matched receipts");
+  });
+
+  it("renders structured fiscal receipt fields in raw mode when present", () => {
+    const data = buildReceiptViewerData({
+      diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
+      phaseResults: STRUCTURED_PHASE_RESULTS
+    });
+
+    const markup = renderToStaticMarkup(
+      <ReceiptsViewerPanel
+        counterpartySections={data.counterpartySections}
+        groupedSections={data.groupedSections}
+        mode="raw"
+        onModeChange={() => undefined}
+        rawPhases={data.rawPhases}
+      />
+    );
+
+    expect(markup).toContain("Receipt ID");
+    expect(markup).toContain("ledger:t7:obligations:p5:coin:0001");
+    expect(markup).toContain("Category");
+    expect(markup).toContain("gift.liege");
+    expect(markup).toContain("Asset");
+    expect(markup).toContain("coin");
+    expect(markup).toContain("Delta");
+    expect(markup).toContain("-2");
+    expect(markup).toContain("Counterparty");
+    expect(markup).toContain("House Liege");
+    expect(markup).toContain("Summary / rule");
+    expect(markup).toContain("Sent a coin gift to House Liege.");
+    expect(markup).toContain("Rule: obligations.liege_gift");
+    expect(markup).not.toContain("Legacy obligation receipt that should stay hidden when structured rows are present.");
+  });
+
+  it("falls back to legacy raw receipt lines when no structured fiscal rows are present", () => {
+    const data = buildReceiptViewerData({
+      diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
+      phaseResults: PHASE_RESULTS
+    });
+
+    const markup = renderToStaticMarkup(
+      <ReceiptsViewerPanel
+        counterpartySections={data.counterpartySections}
+        groupedSections={data.groupedSections}
+        mode="raw"
+        onModeChange={() => undefined}
+        rawPhases={data.rawPhases}
+      />
+    );
+
+    expect(markup).toContain("summary");
+    expect(markup).toContain("Tax due 2 coin; tithe due 60 bushels.");
+    expect(markup).not.toContain("Receipt ID");
   });
 });
