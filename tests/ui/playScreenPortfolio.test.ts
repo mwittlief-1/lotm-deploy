@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { buildBoundedWorldTopologyView } from "../../src/sim/domains/world";
 import {
   buildPortfolioEvidenceScope,
   buildPortfolioMapCheckpoint,
@@ -7,6 +8,7 @@ import {
   buildPortfolioScopeContract,
   selectPortfolioManor
 } from "../../src/ui/playScreenPortfolio";
+import { buildTopologyDebugSurface } from "../../src/ui/playScreenTopology";
 
 const PREVIEW_STATE = {
   world_topology_view: {
@@ -455,8 +457,8 @@ describe("playScreenPortfolio", () => {
         }
       })
     ).toEqual({
-      buttonLabel: "Center on selected holding",
-      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
+      buttonLabel: "Open kingdom map",
+      helper: "Open the kingdom map and Manor View for the selected holding without changing the holdings selector or evidence scope.",
       state: "ready",
       statusLabel: "Ready",
       target: {
@@ -466,6 +468,106 @@ describe("playScreenPortfolio", () => {
         manorLabel: "Current manor"
       }
     });
+  });
+
+  it("upgrades selected-manor targets through the accepted world selector seam when live preview data is available", () => {
+    const livePreviewState = {
+      player_house_id: "h_player",
+      houses: {
+        h_player: {
+          tier: "Knight"
+        }
+      },
+      world_topology_view: buildBoundedWorldTopologyView(),
+      portfolio: {
+        schema_version: "economy_portfolio_analysis_v1",
+        manor_keys: [
+          "portfolio:player_portfolio:manor:manor_hx_26597",
+          "portfolio:player_portfolio:manor:manor_hx_28840"
+        ],
+        totals_by_asset: {
+          coin: 18,
+          food_stores: 112,
+          meat_stores: 7
+        },
+        totals_by_category: {
+          "obligations.current_due.coin": 2,
+          "obligations.current_due.food_stores": 4,
+          "obligations.arrears.coin": 1,
+          "obligations.arrears.food_stores": 0
+        },
+        manor_rows_by_key: {
+          "portfolio:player_portfolio:manor:manor_hx_26597": {
+            manor_id: "manor_hx_26597",
+            manor_key: "portfolio:player_portfolio:manor:manor_hx_26597",
+            asset_totals: {
+              coin: 14,
+              food_stores: 90,
+              meat_stores: 4
+            },
+            category_totals: {
+              "obligations.current_due.coin": 2,
+              "obligations.current_due.food_stores": 4,
+              "obligations.arrears.coin": 1,
+              "obligations.arrears.food_stores": 0
+            },
+            net_values: {
+              "net.coin": 11,
+              "net.food_stores": 86,
+              "net.meat_stores": 4
+            }
+          },
+          "portfolio:player_portfolio:manor:manor_hx_28840": {
+            manor_id: "manor_hx_28840",
+            manor_key: "portfolio:player_portfolio:manor:manor_hx_28840",
+            asset_totals: {
+              coin: 4,
+              food_stores: 22,
+              meat_stores: 3
+            },
+            category_totals: {
+              "obligations.current_due.coin": 0,
+              "obligations.current_due.food_stores": 0,
+              "obligations.arrears.coin": 0,
+              "obligations.arrears.food_stores": 0
+            },
+            net_values: {
+              "net.coin": 4,
+              "net.food_stores": 22,
+              "net.meat_stores": 3
+            }
+          }
+        },
+        outliers_by_metric: {}
+      }
+    } as const;
+    const contract = buildPortfolioScopeContract(livePreviewState);
+    const topologySurface = buildTopologyDebugSurface(livePreviewState);
+
+    if (!contract || !topologySurface) {
+      throw new Error("Expected live holdings and topology surfaces.");
+    }
+
+    const checkpoint = buildPortfolioMapCheckpoint({
+      contract,
+      mapCheckpointAvailable: true,
+      previewState: livePreviewState as any,
+      scopeMode: "selected_manor",
+      selectedManorId: "manor_hx_28840",
+      topologySurface
+    });
+
+    expect(checkpoint).toMatchObject({
+      buttonLabel: "Open kingdom map",
+      state: "ready",
+      statusLabel: "Ready",
+      target: {
+        manorId: "manor_hx_28840",
+        manorLabel: "Hx 28840"
+      }
+    });
+    expect(checkpoint?.target.holdingId).toBeTruthy();
+    expect(checkpoint?.target.countyId).toBeTruthy();
   });
 
   it("keeps the overview surface projection stable while the scope contract grows", () => {

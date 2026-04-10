@@ -1,4 +1,6 @@
 import type { TopologyDebugSurface } from "./playScreenTopology";
+import { getMapViewSelectorRow } from "../sim/domains/world";
+import type { RunState } from "../sim/types";
 
 type PortfolioValueKind = "coin" | "food" | "meat" | "count";
 type PortfolioCardTone = "neutral" | "caution" | "danger";
@@ -763,23 +765,38 @@ export function buildPortfolioEvidenceScope(args: {
 export function buildPortfolioMapCheckpoint(args: {
   contract: PortfolioScopeContract | null;
   mapCheckpointAvailable: boolean;
+  previewState?: RunState | null;
   scopeMode: PortfolioScopeMode;
   selectedManorId: string | null | undefined;
   topologySurface: TopologyDebugSurface | null;
 }): PortfolioMapCheckpoint | null {
-  const { contract, mapCheckpointAvailable, scopeMode, selectedManorId, topologySurface } = args;
+  const { contract, mapCheckpointAvailable, previewState, scopeMode, selectedManorId, topologySurface } = args;
 
   if (!contract || scopeMode !== "selected_manor" || !topologySurface) {
     return null;
   }
 
   const selectedManor = selectPortfolioManor(contract, selectedManorId);
-  const target: PortfolioMapTarget = {
+  let target: PortfolioMapTarget = {
     countyId: selectedManor.isAnchorManor ? topologySurface.anchorCountyId : null,
     holdingId: selectedManor.isAnchorManor ? topologySurface.anchorHoldingId : null,
     manorId: selectedManor.manorId,
     manorLabel: selectedManor.title
   };
+
+  if (previewState) {
+    try {
+      const selectorRow = getMapViewSelectorRow(selectedManor.manorId);
+      target = {
+        countyId: selectorRow.map_checkpoint_target.county_id,
+        holdingId: selectorRow.map_checkpoint_target.holding_id,
+        manorId: selectorRow.map_checkpoint_target.manor_id,
+        manorLabel: selectorRow.map_checkpoint_target.manor_label
+      };
+    } catch {
+      // Leave the deterministic topology-only fallback in place for synthetic fixtures.
+    }
+  }
 
   if (!mapCheckpointAvailable) {
     return {
@@ -794,8 +811,8 @@ export function buildPortfolioMapCheckpoint(args: {
 
   if (target.holdingId) {
     return {
-      buttonLabel: "Center on selected holding",
-      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
+      buttonLabel: "Open kingdom map",
+      helper: "Open the kingdom map and Manor View for the selected holding without changing the holdings selector or evidence scope.",
       state: "ready",
       statusLabel: "Ready",
       target

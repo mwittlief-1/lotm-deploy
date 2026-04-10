@@ -115,6 +115,6 @@ export function buildExternalMapRendererSurface(target: PortfolioMapTarget | nul
       county_label: targetCounty?.name ?? targetCountyId
     },
     helper_text:
-      "External renderer seam is attached to the frozen xmap_alpha_v1 bundle. Live overlays and manor drill-in land in V03-R5-001-T04."
+      "Frozen xmap_alpha_v1 routing is active here. The route now drives the kingdom map and Manor View through accepted world seams."
   };
 }

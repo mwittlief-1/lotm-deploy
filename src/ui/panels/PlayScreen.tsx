@@ -523,6 +523,7 @@ export function PlayScreen({
       buildPortfolioMapCheckpoint({
         contract: portfolioContract,
         mapCheckpointAvailable: typeof onCenterSelectedHolding === "function",
+        previewState: ctx.preview_state,
         scopeMode: portfolioScopeMode,
         selectedManorId: selectedPortfolioManorId,
         topologySurface: topologyDebugSurface

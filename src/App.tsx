@@ -475,13 +475,15 @@ export default function App() {
       );
     }
   } else if (screen === "map") {
-    content = (
-      <WorldMapScreen
-        appVersion={APP_VERSION}
-        onBack={() => setScreen(state ? "play" : "new")}
-        surface={buildExternalMapRendererSurface(worldMapTarget)}
-      />
-    );
+      content = (
+        <WorldMapScreen
+          appVersion={APP_VERSION}
+          onBack={() => setScreen(state ? "play" : "new")}
+          onSelectManor={(target) => setWorldMapTarget(target)}
+          previewState={ctx?.preview_state ?? state}
+          surface={buildExternalMapRendererSurface(worldMapTarget)}
+        />
+      );
   } else {
     if (!state || !ctx) {
       content = (
