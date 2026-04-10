@@ -26,7 +26,8 @@
     "demography:audit": "tsx scripts/demographyAudit.ts",
     "repo:duplicates": "node scripts/repoDuplicateAudit.mjs",
     "seed:replay": "tsx scripts/seedReplay.ts --mode=single",
-    "seed:replay:batch": "tsx scripts/seedReplay.ts --mode=batch"
+    "seed:replay:batch": "tsx scripts/seedReplay.ts --mode=batch",
+    "playability:preset:pack": "tsx scripts/playabilityPresetPack.ts"
   },
   "dependencies": {
     "react": "^18.3.1",

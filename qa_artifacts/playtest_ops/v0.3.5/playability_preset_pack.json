@@ -1,0 +1,346 @@
+{
+  "acceptance_targets": [
+    {
+      "acceptance_id": "baseline_packet_review",
+      "kind": "packet_review",
+      "summary": "Low-pressure packet review for naming, readability, and calm-turn evidence flow."
+    },
+    {
+      "acceptance_id": "counterparty_packet_review",
+      "kind": "packet_review",
+      "summary": "Counterparty-heavy packet review where grouped receipts and follow-up context stay legible."
+    },
+    {
+      "acceptance_id": "shortage_packet_review",
+      "kind": "packet_review",
+      "summary": "High-pressure shortage packet review that exercises raw evidence follow-up."
+    },
+    {
+      "acceptance_id": "obligations_visibility",
+      "kind": "uat_lock",
+      "summary": "Arrears and enforcement pressure appear on the expected short-run timeline."
+    },
+    {
+      "acceptance_id": "grant_visibility",
+      "kind": "uat_lock",
+      "summary": "Grant prospects surface quickly enough for deterministic UAT without seed hunting."
+    },
+    {
+      "acceptance_id": "hunting_visibility",
+      "kind": "uat_lock",
+      "summary": "Hunting stays observable through one deterministic fallback proxy until direct runtime visibility lands."
+    },
+    {
+      "acceptance_id": "kpi_prudent_baseline",
+      "kind": "kpi_band",
+      "summary": "Prudent baseline scenarios remain inside the accepted v0.3.5 KPI bands."
+    },
+    {
+      "acceptance_id": "kpi_arrears_pressure",
+      "kind": "kpi_band",
+      "summary": "Builder pressure scenarios anchor arrears and unrest acceptance bands."
+    },
+    {
+      "acceptance_id": "kpi_dispossession_reference",
+      "kind": "kpi_band",
+      "summary": "The long-run dispossession reference stays available for compare-against-baseline review."
+    },
+    {
+      "acceptance_id": "kpi_manor_count_baseline",
+      "kind": "kpi_band",
+      "summary": "Single-manor expectations remain explicit before later manor-growth work lands."
+    },
+    {
+      "acceptance_id": "runaway_coin_runaway",
+      "kind": "runaway_detector",
+      "summary": "Detect unexpected coin accumulation or collapse relative to the accepted calm baseline."
+    },
+    {
+      "acceptance_id": "runaway_food_collapse",
+      "kind": "runaway_detector",
+      "summary": "Detect starvation spiral and food-collapse drift before final UAT lock."
+    },
+    {
+      "acceptance_id": "runaway_arrears_soft",
+      "kind": "runaway_detector",
+      "summary": "Catch arrears pressure becoming too soft to surface on schedule."
+    },
+    {
+      "acceptance_id": "runaway_arrears_hard",
+      "kind": "runaway_detector",
+      "summary": "Catch arrears pressure becoming too punishing relative to the accepted baseline."
+    },
+    {
+      "acceptance_id": "runaway_manor_growth_frozen",
+      "kind": "runaway_detector",
+      "summary": "Catch manor-count drift or freeze against the single-manor baseline reference."
+    }
+  ],
+  "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+  "init_contract": {
+    "current_mode": "seed_only",
+    "entrypoint": "createNewRun",
+    "future_adapter": "applyPlayabilityPreset",
+    "rules": [
+      "Resolve every preset selection into one canonical init payload before createNewRun runs worldgen, migrations, or registry wiring.",
+      "Do not add a preset-specific initializer or a parallel worldgen path.",
+      "When preset application starts mutating initial state, stamp run_seed and preset_id into the run shell and exported summaries."
+    ],
+    "seam_id": "canonical_new_run_init_v1"
+  },
+  "kind": "playability_preset_pack_v1",
+  "presets": [
+    {
+      "acceptance_ids": [
+        "baseline_packet_review",
+        "kpi_prudent_baseline",
+        "kpi_manor_count_baseline",
+        "runaway_coin_runaway",
+        "runaway_manor_growth_frozen"
+      ],
+      "focus": [
+        "packet_review",
+        "baseline_kpi",
+        "manor_count"
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "baseline_low_pressure_prudent",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "source_refs": [
+        {
+          "pack_id": "playtest_ops_receipt_bundle_seed_pack",
+          "scenario_id": "baseline_low_pressure_prudent"
+        },
+        {
+          "pack_id": "economy_fiscal_regression_seed_pack",
+          "scenario_id": "single_manor_distribution_baseline"
+        }
+      ],
+      "summary": "Calm baseline preset for packet readability, stable naming, and single-manor review.",
+      "title": "Low-pressure prudent baseline",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "kpi_prudent_baseline",
+        "runaway_coin_runaway"
+      ],
+      "focus": [
+        "stable_baseline",
+        "stores",
+        "comparison"
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "stable_clear_prudent",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "source_refs": [
+        {
+          "pack_id": "economy_fiscal_regression_seed_pack",
+          "scenario_id": "stable_clear_prudent_turns_15"
+        }
+      ],
+      "summary": "Clean prudent comparison point for stores and coin stability outside the extworld baseline seed.",
+      "title": "Stable-clear prudent comparison",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "obligations_visibility",
+        "kpi_arrears_pressure",
+        "runaway_arrears_soft",
+        "runaway_arrears_hard"
+      ],
+      "focus": [
+        "arrears",
+        "unrest",
+        "packet_review"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "arrears_pressure_builder",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "source_refs": [
+        {
+          "pack_id": "playtest_ops_receipt_bundle_seed_pack",
+          "scenario_id": "arrears_pressure_builder"
+        },
+        {
+          "pack_id": "economy_fiscal_regression_seed_pack",
+          "scenario_id": "arrears_pressure_builder_turns_15"
+        }
+      ],
+      "summary": "Short builder-forward pressure preset for arrears visibility, unrest review, and detector baselines.",
+      "title": "Arrears-pressure builder",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "counterparty_packet_review"
+      ],
+      "focus": [
+        "counterparties",
+        "receipts",
+        "follow_up"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "relationship_edges_builder",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "source_refs": [
+        {
+          "pack_id": "playtest_ops_receipt_bundle_seed_pack",
+          "scenario_id": "relationship_edges_builder"
+        }
+      ],
+      "summary": "Counterparty-oriented builder packet for grouped receipt review and follow-up evidence.",
+      "title": "Relationship-edges builder packet",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "shortage_packet_review",
+        "runaway_food_collapse"
+      ],
+      "focus": [
+        "shortage",
+        "food_pressure",
+        "raw_evidence"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "weather_shortage_builder",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "source_refs": [
+        {
+          "pack_id": "playtest_ops_receipt_bundle_seed_pack",
+          "scenario_id": "weather_shortage_builder"
+        }
+      ],
+      "summary": "High-noise shortage preset for raw evidence review and food-collapse monitoring.",
+      "title": "Weather-shortage builder packet",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "kpi_dispossession_reference",
+        "runaway_food_collapse",
+        "runaway_arrears_hard"
+      ],
+      "focus": [
+        "dispossession",
+        "long_run",
+        "arrears"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "dispossession_builder",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "source_refs": [
+        {
+          "pack_id": "economy_fiscal_regression_seed_pack",
+          "scenario_id": "dispossession_builder_turns_30"
+        }
+      ],
+      "summary": "Long-run builder comparison point for dispossession timing and hard-pressure drift.",
+      "title": "Dispossession long-run builder",
+      "turns": 30
+    },
+    {
+      "acceptance_ids": [
+        "obligations_visibility"
+      ],
+      "focus": [
+        "uat",
+        "short_run",
+        "obligations"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "uat_arrears_enforcement",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "source_refs": [
+        {
+          "pack_id": "uat_scenario_pack",
+          "scenario_id": "uat_arrears_enforcement"
+        }
+      ],
+      "summary": "Three-turn market-tight UAT preset for explicit arrears and enforcement visibility.",
+      "title": "UAT arrears enforcement",
+      "turns": 3
+    },
+    {
+      "acceptance_ids": [
+        "grant_visibility"
+      ],
+      "focus": [
+        "uat",
+        "short_run",
+        "prospects"
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "uat_grant_visibility",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "source_refs": [
+        {
+          "pack_id": "uat_scenario_pack",
+          "scenario_id": "uat_grant_visibility"
+        }
+      ],
+      "summary": "Four-turn market-tight UAT preset for deterministic grant-surface checks.",
+      "title": "UAT grant visibility",
+      "turns": 4
+    },
+    {
+      "acceptance_ids": [
+        "hunting_visibility"
+      ],
+      "focus": [
+        "uat",
+        "fallback_proxy",
+        "hunting"
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "uat_hunting_proxy",
+      "seed": "lotm_v026_seed_001_baseline",
+      "source_refs": [
+        {
+          "pack_id": "uat_scenario_pack",
+          "scenario_id": "uat_meat_hunting_proxy"
+        }
+      ],
+      "summary": "Two-turn prudent UAT preset that keeps the deterministic hunting fallback visible until direct meat outputs land.",
+      "title": "UAT hunting proxy",
+      "turns": 2
+    }
+  ],
+  "qa_flow": {
+    "commands": [
+      "npm run qa",
+      "npm run preflight",
+      "npm run seed:replay:batch",
+      "node node_modules/tsx/dist/cli.mjs scripts/fiscalRegressionSeeds.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/playabilityPresetPack.ts"
+    ],
+    "note": "Refresh the accepted deterministic gates first, then rebuild the upstream regression and UAT seed packs before rewriting this v0.3.5 preset crosswalk."
+  },
+  "release": "v0.3.5",
+  "source_packs": [
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+      "hash": "fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7",
+      "kind": "economy_fiscal_regression_seed_pack_v1",
+      "pack_id": "economy_fiscal_regression_seed_pack",
+      "scenario_count": 4
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+      "hash": "2ef80e7c39bae835befdc9adc5b18549774d9822a664e9c498985298e145d5af",
+      "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
+      "pack_id": "playtest_ops_receipt_bundle_seed_pack",
+      "scenario_count": 4
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
+      "hash": "aec150374b1c1278cc7e709bbb7752e9705b4bb1685d750b5f3fbd9ed8e6d9f6",
+      "kind": "uat_scenario_pack_v0.3",
+      "pack_id": "uat_scenario_pack",
+      "scenario_count": 3
+    }
+  ]
+}
