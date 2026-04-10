@@ -10,7 +10,7 @@ import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisit
 import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { ensureResidenceManorBindings } from "../people/residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
-import { buildBoundedWorldTopologyView } from "../world";
+import { buildBoundedMapViewSnapshot, buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
   const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
@@ -18,6 +18,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   const residenceSurfaces = ensureResidenceManorBindings(state);
   const delegationView = buildCourtDelegationView(state);
+  const worldTopologyView = buildBoundedWorldTopologyView();
+  const mapViewSnapshot = buildBoundedMapViewSnapshot();
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
@@ -35,7 +37,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     economy_pricing_view: buildEconomyPricingView(state),
     court_delegation_view: delegationView,
     portfolio: (state as any).portfolio,
-    world_topology_view: buildBoundedWorldTopologyView(),
+    world_topology_view: worldTopologyView,
+    map_view_snapshot: mapViewSnapshot,
     known_houses: experienceSurfaces.known_houses,
     house_dossiers: experienceSurfaces.house_dossiers,
     flags: state.flags,

@@ -8,6 +8,10 @@ export const CANONICAL_NUMERIC_DISTANCE_METRIC = "travel_cost_distance" as const
 export const ROUTE_HOP_DISTANCE_METRIC = "route_hop_distance" as const;
 export const WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION = "world_topology_snapshot_v1" as const;
 export const WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION = "world_scope_cap_table_v1" as const;
+export const MAP_VIEW_SUPPORT_SCHEMA_VERSION = "map_view_support_v1" as const;
+export const MAP_VIEW_SNAPSHOT_SCHEMA_VERSION = "map_view_snapshot_v1" as const;
+export const MANOR_DETAIL_VIEW_SCHEMA_VERSION = "manor_detail_view_v1" as const;
+export const ACTION_SCOPE_RESOLUTION_SCHEMA_VERSION = "action_scope_resolution_v1" as const;
 
 export type XMapFranchiseBundleV1 = {
   market_right: string;
@@ -292,6 +296,31 @@ export interface XMapImportSurfaceV1 {
   world_topology: XMapWorldTopologyFileV1;
 }
 
+export interface MapViewSupportHexV1 {
+  hex_id: string;
+  q: number;
+  r: number;
+  tile_kind: string;
+  terrain: string;
+  elevation: number | null;
+  river_tags: string[];
+  road_route_tiers: string[];
+  base_arable_capacity: number | null;
+  base_pasture_capacity: number | null;
+  net_productive_capacity: number | null;
+  water_access_score: number | null;
+  buildability_score: number | null;
+}
+
+export interface MapViewSupportFileV1 {
+  schema_version: typeof MAP_VIEW_SUPPORT_SCHEMA_VERSION;
+  map_schema_version: string;
+  mapgen_seed: string;
+  source_config_sha256: string;
+  hex_count: number;
+  hexes: MapViewSupportHexV1[];
+}
+
 export interface WorldNumericDistanceV1 {
   travel_cost_distance: number;
   route_hop_distance: number;
@@ -388,12 +417,155 @@ export interface WorldTopologySnapshotV1 {
   distance_samples: WorldTopologySnapshotDistanceSampleV1[];
 }
 
+export interface MapViewCheckpointTargetV1 {
+  county_id: string | null;
+  holding_id: string | null;
+  manor_id: string;
+  manor_label: string;
+}
+
+export interface MapViewRoadExposureV1 {
+  state: "present" | "none";
+  hex_count: number;
+  route_tiers: string[];
+}
+
+export interface MapViewRiverExposureV1 {
+  state: "present" | "none";
+  hex_count: number;
+  river_tags: string[];
+}
+
+export interface MapViewRowV1 {
+  manor_id: string;
+  manor_label: string;
+  is_anchor_manor: boolean;
+  seat_hex_id: string;
+  seat_q: number;
+  seat_r: number;
+  owner_actor_id: string;
+  owner_label: string;
+  holding_id: string;
+  holding_label: string;
+  county_id: string;
+  county_label: string;
+  map_checkpoint_target: MapViewCheckpointTargetV1;
+  road_exposure: MapViewRoadExposureV1;
+  river_exposure: MapViewRiverExposureV1;
+}
+
+export interface MapViewSnapshotRowV1 {
+  manor_id: string;
+  manor_label: string;
+  is_anchor_manor: boolean;
+  seat_hex_id: string;
+  seat_q: number;
+  seat_r: number;
+  owner_actor_id: string;
+  holding_id: string;
+  county_id: string;
+}
+
+export interface MapViewSnapshotV1 {
+  schema_version: typeof MAP_VIEW_SNAPSHOT_SCHEMA_VERSION;
+  anchor_manor_id: string;
+  anchor_holding_id: string;
+  anchor_county_id: string;
+  row_ordering: "anchor_first_then_manor_id";
+  rows: MapViewSnapshotRowV1[];
+}
+
+export interface ManorDetailArabilitySummaryV1 {
+  arable_hex_count: number;
+  total_base_arable_capacity: number;
+  average_base_arable_capacity: number;
+  total_base_pasture_capacity: number;
+  average_net_productive_capacity: number;
+}
+
+export interface ManorDetailTerrainMixRowV1 {
+  terrain: string;
+  hex_count: number;
+  share_of_hexes: number;
+}
+
+export interface ManorDetailNearestManorRowV1 extends WorldNumericDistanceV1 {
+  manor_id: string;
+  manor_label: string;
+  holding_label: string;
+  county_label: string;
+  distance_band: WorldDistanceBandV1 | null;
+}
+
+export interface ManorDetailHexRowV1 {
+  hex_id: string;
+  q: number;
+  r: number;
+  terrain: string;
+  tile_kind: string;
+  elevation: number | null;
+  river_tags: string[];
+  road_route_tiers: string[];
+  base_arable_capacity: number | null;
+  base_pasture_capacity: number | null;
+  net_productive_capacity: number | null;
+  water_access_score: number | null;
+  buildability_score: number | null;
+}
+
+export interface ManorDetailViewV1 {
+  schema_version: typeof MANOR_DETAIL_VIEW_SCHEMA_VERSION;
+  manor_id: string;
+  manor_label: string;
+  seat_hex_id: string;
+  seat_q: number;
+  seat_r: number;
+  owner_actor_id: string;
+  owner_label: string;
+  holding_id: string;
+  holding_label: string;
+  county_id: string;
+  county_label: string;
+  hex_count: number;
+  nearest_manor_limit: number;
+  arability_summary: ManorDetailArabilitySummaryV1;
+  terrain_mix: ManorDetailTerrainMixRowV1[];
+  nearest_manors: ManorDetailNearestManorRowV1[];
+  hex_rows: ManorDetailHexRowV1[];
+}
+
+export const WORLD_ACTION_SCOPE_ACTIONS = [
+  "gift_liege",
+  "offering_church",
+  "marriage_scout",
+  "maintenance"
+] as const;
+
+export type WorldActionScopeActionV1 = (typeof WORLD_ACTION_SCOPE_ACTIONS)[number];
+export type WorldActionScopeModeV1 = "anchor_only" | "topology_cap";
+
+export interface WorldActionScopeResolutionV1 {
+  schema_version: typeof ACTION_SCOPE_RESOLUTION_SCHEMA_VERSION;
+  action_type: WorldActionScopeActionV1;
+  anchor_manor_id: string;
+  scope_mode: WorldActionScopeModeV1;
+  tier_label: string | null;
+  far_threshold: number | null;
+  residence_manor_ids: string[];
+  kinship_manor_ids: string[];
+  admitted_manor_ids: string[];
+  rejected_manor_ids: string[];
+  candidates: WorldScopedManorCandidateV1[];
+  cap_evaluation: WorldScopeCapEvaluationV1 | null;
+}
+
 export interface WorldDomainV1 {
   schema_version: typeof WORLD_DOMAIN_SCHEMA_VERSION;
   manifest: XMapAlphaManifestV1;
   manor_units: XMapManorUnitsFileV1;
   holding_fabric: XMapHoldingFabricFileV1;
   world_topology: XMapWorldTopologyFileV1;
+  map_view_support: MapViewSupportFileV1;
   manors: readonly XMapManorUnitV1[];
   holdings: readonly XMapHoldingRecordV1[];
   counties: readonly XMapCountyOverlayV1[];
@@ -406,6 +578,7 @@ export interface WorldDomainV1 {
   bishoprics_by_id: ReadonlyMap<string, XMapBishopricOverlayV1>;
   archbishoprics_by_id: ReadonlyMap<string, XMapArchbishopricOverlayV1>;
   manor_assignments_by_manor_id: ReadonlyMap<string, XMapManorAssignmentV1>;
+  map_hexes_by_id: ReadonlyMap<string, MapViewSupportHexV1>;
   territorial_adjacency_by_manor_id: ReadonlyMap<string, readonly XMapTerritorialNeighborV1[]>;
   route_adjacency_by_manor_id: ReadonlyMap<string, readonly XMapRouteNeighborV1[]>;
   route_edges_by_id: ReadonlyMap<string, XMapWeightedRouteEdgeV1>;

@@ -91,6 +91,17 @@ describe("bounded snapshot contract", () => {
       distance_sample_limit: 8,
       distance_sample_total: 387
     });
+    expect(serialized.map_view_snapshot).toMatchObject({
+      schema_version: "map_view_snapshot_v1",
+      anchor_manor_id: "manor_hx_26597",
+      row_ordering: "anchor_first_then_manor_id"
+    });
+    expect(serialized.map_view_snapshot?.rows?.[0]).toMatchObject({
+      manor_id: "manor_hx_26597",
+      seat_q: 183,
+      seat_r: 94,
+      owner_actor_id: "actor_abbey_hx_28841"
+    });
     expect(serialized.portfolio).toEqual(state.portfolio);
     expect(serialized.log).toBeUndefined();
     expect(serialized.institutions).toBeUndefined();

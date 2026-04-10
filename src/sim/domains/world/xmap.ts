@@ -1,21 +1,41 @@
 import holdingFabricJson from "../../../../data/map/xmap_alpha_v1/holding_fabric_v1.json";
+import mapViewSupportJson from "../../../../data/map/xmap_alpha_v1/map_view_support_v1.json";
 import manorUnitsJson from "../../../../data/map/xmap_alpha_v1/manor_units_v1.json";
 import manifestJson from "../../../../data/map/xmap_alpha_v1/xmap_alpha_manifest_v1.json";
 import worldTopologyJson from "../../../../data/map/xmap_alpha_v1/world_topology_v1.json";
 
 import {
+  ACTION_SCOPE_RESOLUTION_SCHEMA_VERSION,
   CANONICAL_NUMERIC_DISTANCE_METRIC,
   HOLDING_FABRIC_LEGAL_RULE_VERSION,
   HOLDING_FABRIC_SCHEMA_VERSION,
+  MANOR_DETAIL_VIEW_SCHEMA_VERSION,
   MANOR_UNITS_SCHEMA_VERSION,
+  MAP_VIEW_SNAPSHOT_SCHEMA_VERSION,
+  MAP_VIEW_SUPPORT_SCHEMA_VERSION,
   ROUTE_HOP_DISTANCE_METRIC,
   WORLD_DOMAIN_SCHEMA_VERSION,
   WORLD_SCOPE_CAP_TABLE_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SNAPSHOT_SCHEMA_VERSION,
   WORLD_TOPOLOGY_SCHEMA_VERSION,
   XMAP_ALPHA_MANIFEST_SCHEMA_VERSION,
+  type ManorDetailArabilitySummaryV1,
+  type ManorDetailHexRowV1,
+  type ManorDetailNearestManorRowV1,
+  type ManorDetailTerrainMixRowV1,
+  type ManorDetailViewV1,
+  type MapViewCheckpointTargetV1,
+  type MapViewRoadExposureV1,
+  type MapViewRiverExposureV1,
+  type MapViewRowV1,
+  type MapViewSnapshotRowV1,
+  type MapViewSnapshotV1,
+  type MapViewSupportFileV1,
+  type MapViewSupportHexV1,
   type WorldDistanceBandOptionsV1,
   type WorldDistanceBandV1,
+  type WorldActionScopeActionV1,
+  type WorldActionScopeResolutionV1,
   type WorldScopeCapBucketV1,
   type WorldScopeCapCandidateV1,
   type WorldScopeCapDecisionV1,
@@ -55,11 +75,14 @@ const BUNDLED_IMPORT_SURFACE = {
   holding_fabric: holdingFabricJson,
   world_topology: worldTopologyJson
 } as XMapImportSurfaceV1;
+const BUNDLED_MAP_VIEW_SUPPORT = mapViewSupportJson as MapViewSupportFileV1;
 
 const EMPTY_TERRITORIAL_NEIGHBORS: readonly XMapTerritorialNeighborV1[] = [];
 const EMPTY_ROUTE_NEIGHBORS: readonly XMapRouteNeighborV1[] = [];
 const DISTANCE_SCALE = 1000;
 const WORLD_TOPOLOGY_DISTANCE_SAMPLE_LIMIT = 8;
+const MAP_VIEW_ROW_ORDERING = "anchor_first_then_manor_id" as const;
+const MANOR_DETAIL_NEAREST_MANOR_LIMIT = 5;
 const WORLD_SCOPE_CAP_BUCKET_ORDER = [
   "kinship",
   "territorial_adjacent",
@@ -158,6 +181,38 @@ function compareStrings(left: string, right: string): number {
   if (left < right) return -1;
   if (left > right) return 1;
   return 0;
+}
+
+function numericSuffix(value: string, prefix: string): number | null {
+  if (!value.startsWith(prefix)) return null;
+  const numeric = Number(value.slice(prefix.length));
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function compareHexIds(left: string, right: string): number {
+  const leftNumeric = numericSuffix(left, "hx_");
+  const rightNumeric = numericSuffix(right, "hx_");
+  if (leftNumeric !== null && rightNumeric !== null && leftNumeric !== rightNumeric) {
+    return leftNumeric - rightNumeric;
+  }
+  return compareStrings(left, right);
+}
+
+function titleCaseTokens(value: string): string {
+  return value
+    .split(/[\s_]+/)
+    .filter((token) => token.length > 0)
+    .map((token) => token.charAt(0).toUpperCase() + token.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function hexLabelFromId(hexId: string): string {
+  const numeric = numericSuffix(hexId, "hx_");
+  return numeric === null ? titleCaseTokens(hexId) : `Hx ${numeric}`;
+}
+
+function roundToFour(value: number): number {
+  return Number(value.toFixed(4));
 }
 
 function assertWorld(condition: unknown, message: string): asserts condition {
@@ -378,6 +433,22 @@ function validateManifestSurface(surface: XMapImportSurfaceV1): void {
   );
 }
 
+function validateMapViewSupportSurface(surface: XMapImportSurfaceV1, support: MapViewSupportFileV1): void {
+  assertWorld(support.schema_version === MAP_VIEW_SUPPORT_SCHEMA_VERSION, "unexpected map_view_support schema_version");
+  assertWorld(support.map_schema_version === surface.manor_units.map_schema_version, "map view support map schema drifted");
+  assertWorld(support.mapgen_seed === surface.manor_units.mapgen_seed, "map view support mapgen_seed drifted");
+  assertWorld(support.hex_count === support.hexes.length, "map view support hex_count drifted");
+
+  const hexIndex = buildUniqueIndex(support.hexes, (row) => row.hex_id, "map view support hex");
+
+  for (const manor of surface.manor_units.manors) {
+    assertWorld(hexIndex.has(manor.seat_hex_id), `map view support missing seat hex ${manor.seat_hex_id}`);
+    for (const hexId of manor.hex_ids) {
+      assertWorld(hexIndex.has(hexId), `map view support missing manor hex ${hexId}`);
+    }
+  }
+}
+
 function validateCrossReferences(surface: XMapImportSurfaceV1): void {
   const manorIndex = buildUniqueIndex(surface.manor_units.manors, (row) => row.manor_id, "manor");
   const holdingIndex = buildUniqueIndex(
@@ -490,6 +561,7 @@ function validateCrossReferences(surface: XMapImportSurfaceV1): void {
 function validateImportSurface(surface: XMapImportSurfaceV1): void {
   validateSchemas(surface);
   validateManifestSurface(surface);
+  validateMapViewSupportSurface(surface, BUNDLED_MAP_VIEW_SUPPORT);
   validateCrossReferences(surface);
 }
 
@@ -502,6 +574,7 @@ function buildWorldDomain(surface: XMapImportSurfaceV1): WorldDomainV1 {
     manor_units: surface.manor_units,
     holding_fabric: surface.holding_fabric,
     world_topology: surface.world_topology,
+    map_view_support: BUNDLED_MAP_VIEW_SUPPORT,
     manors: surface.manor_units.manors,
     holdings,
     counties: surface.holding_fabric.counties,
@@ -522,10 +595,171 @@ function buildWorldDomain(surface: XMapImportSurfaceV1): WorldDomainV1 {
       (row) => row.manor_id,
       "manor assignment"
     ),
+    map_hexes_by_id: buildUniqueIndex(BUNDLED_MAP_VIEW_SUPPORT.hexes, (row) => row.hex_id, "map view support hex"),
     territorial_adjacency_by_manor_id: buildAdjacencyIndex(surface.world_topology.territorial_adjacency, "territorial adjacency"),
     route_adjacency_by_manor_id: buildAdjacencyIndex(surface.world_topology.route_adjacency, "route adjacency"),
     route_edges_by_id: buildUniqueIndex(surface.world_topology.weighted_route_edges, (row) => row.edge_id, "route edge")
   };
+}
+
+function getDefaultAnchorManorId(domain: WorldDomainV1): string {
+  const anchorRow = domain.world_topology.distance_preview_rows[0];
+  assertWorld(anchorRow, "distance preview rows missing anchor manor");
+  return anchorRow.manor_id;
+}
+
+function getMapHexById(domain: WorldDomainV1, hexId: string): MapViewSupportHexV1 {
+  const row = domain.map_hexes_by_id.get(hexId);
+  assertWorld(row, `map view support missing hex ${hexId}`);
+  return row;
+}
+
+function manorLabelForId(manorId: string, domain: WorldDomainV1): string {
+  const manor = getManorById(domain, manorId);
+  return manor ? hexLabelFromId(manor.seat_hex_id) : titleCaseTokens(manorId);
+}
+
+function holdingSeatHexId(holding: XMapHoldingRecordV1): string {
+  return "seat_hex_id" in holding && typeof holding.seat_hex_id === "string" ? holding.seat_hex_id : holding.hex_ids[0] ?? holding.holding_id;
+}
+
+function humanizeHoldingType(holdingType: string): string {
+  return titleCaseTokens(holdingType);
+}
+
+function holdingLabelForRecord(holding: XMapHoldingRecordV1): string {
+  const seatLabel = hexLabelFromId(holdingSeatHexId(holding));
+  return `${humanizeHoldingType(holding.holding_type)} · ${seatLabel}`;
+}
+
+function ownerLabelForRecord(args: {
+  countyLabel: string;
+  holderActorId: string;
+  holderActorType: string;
+  seatHexId: string;
+}): string {
+  const { countyLabel, holderActorId, holderActorType, seatHexId } = args;
+  const seatLabel = hexLabelFromId(seatHexId);
+
+  if (holderActorId === "actor_crown") return "Crown";
+  if (holderActorType === "count") return `Count of ${countyLabel}`;
+  if (holderActorType === "baron") return `Baron of ${seatLabel}`;
+  if (holderActorType === "abbey") return `Abbey of ${seatLabel}`;
+  if (holderActorType === "bishop") return `Bishop of ${seatLabel}`;
+  if (holderActorType === "archbishop") return `Archbishop of ${seatLabel}`;
+  return `${titleCaseTokens(holderActorType)} · ${seatLabel}`;
+}
+
+function compareTerrainMix(left: ManorDetailTerrainMixRowV1, right: ManorDetailTerrainMixRowV1): number {
+  if (left.hex_count !== right.hex_count) {
+    return right.hex_count - left.hex_count;
+  }
+  return compareStrings(left.terrain, right.terrain);
+}
+
+function compareNearestManors(left: ManorDetailNearestManorRowV1, right: ManorDetailNearestManorRowV1): number {
+  if (left.travel_cost_distance !== right.travel_cost_distance) {
+    return left.travel_cost_distance - right.travel_cost_distance;
+  }
+  if (left.route_hop_distance !== right.route_hop_distance) {
+    return left.route_hop_distance - right.route_hop_distance;
+  }
+  return compareStrings(left.manor_id, right.manor_id);
+}
+
+function buildRoadExposure(hexRows: readonly MapViewSupportHexV1[]): MapViewRoadExposureV1 {
+  const routeTiers = new Set<string>();
+  let hexCount = 0;
+
+  for (const hex of hexRows) {
+    if (hex.road_route_tiers.length === 0) continue;
+    hexCount += 1;
+    for (const routeTier of hex.road_route_tiers) {
+      routeTiers.add(routeTier);
+    }
+  }
+
+  return {
+    state: hexCount > 0 ? "present" : "none",
+    hex_count: hexCount,
+    route_tiers: [...routeTiers].sort(compareStrings)
+  };
+}
+
+function buildRiverExposure(hexRows: readonly MapViewSupportHexV1[]): MapViewRiverExposureV1 {
+  const riverTags = new Set<string>();
+  let hexCount = 0;
+
+  for (const hex of hexRows) {
+    if (hex.river_tags.length === 0) continue;
+    hexCount += 1;
+    for (const riverTag of hex.river_tags) {
+      riverTags.add(riverTag);
+    }
+  }
+
+  return {
+    state: hexCount > 0 ? "present" : "none",
+    hex_count: hexCount,
+    river_tags: [...riverTags].sort(compareStrings)
+  };
+}
+
+type ResidenceSelectorSummaryLike = {
+  person_ids: string[];
+  entries_by_person_id: Record<string, { residence_manor_id?: string | null; selector_contexts?: string[] | null }>;
+};
+
+function readResidenceSelectorSummaryLike(state: unknown): ResidenceSelectorSummaryLike | null {
+  if (!state || typeof state !== "object") return null;
+  const anyState = state as Record<string, unknown>;
+  const summaryCandidate = anyState.residence_selector_summary ?? (anyState.house as Record<string, unknown> | undefined)?.residence_selector_summary;
+  if (!summaryCandidate || typeof summaryCandidate !== "object") return null;
+
+  const summary = summaryCandidate as ResidenceSelectorSummaryLike;
+  return Array.isArray(summary.person_ids) && summary.entries_by_person_id && typeof summary.entries_by_person_id === "object"
+    ? summary
+    : null;
+}
+
+function collectResidenceManorIds(summary: ResidenceSelectorSummaryLike | null): string[] {
+  if (!summary) return [];
+  const manorIds = new Set<string>();
+
+  for (const personId of summary.person_ids) {
+    const entry = summary.entries_by_person_id[personId];
+    const manorId = typeof entry?.residence_manor_id === "string" ? entry.residence_manor_id.trim() : "";
+    if (manorId) manorIds.add(manorId);
+  }
+
+  return [...manorIds].sort(compareStrings);
+}
+
+function collectKinshipResidenceManorIds(summary: ResidenceSelectorSummaryLike | null, anchorManorId: string): string[] {
+  if (!summary) return [];
+  const manorIds = new Set<string>();
+
+  for (const personId of summary.person_ids) {
+    const entry = summary.entries_by_person_id[personId];
+    const manorId = typeof entry?.residence_manor_id === "string" ? entry.residence_manor_id.trim() : "";
+    if (!manorId || manorId === anchorManorId) continue;
+
+    const contexts = Array.isArray(entry?.selector_contexts) ? entry.selector_contexts : [];
+    if (contexts.includes("household")) {
+      manorIds.add(manorId);
+    }
+  }
+
+  return [...manorIds].sort(compareStrings);
+}
+
+function readTierLabelFromState(state: unknown): string | null {
+  if (!state || typeof state !== "object") return null;
+  const anyState = state as Record<string, unknown>;
+  const playerHouseId = typeof anyState.player_house_id === "string" ? anyState.player_house_id : null;
+  const houses = anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, unknown>) : null;
+  const playerHouse = playerHouseId && houses ? (houses[playerHouseId] as Record<string, unknown> | undefined) : null;
+  return typeof playerHouse?.tier === "string" && playerHouse.tier.trim().length > 0 ? playerHouse.tier.trim() : null;
 }
 
 function getTravelDistanceCache(domain: WorldDomainV1): Map<string, Map<string, number>> {
@@ -972,6 +1206,275 @@ export function evaluateWorldScopeCapsForAnchor(
     far_threshold: getFarThreshold(domain, options),
     candidates,
     cap_evaluation: evaluateWorldScopeCaps(tierLabel, candidates)
+  };
+}
+
+function buildMapCheckpointTarget(manor: XMapManorUnitV1, isAnchorManor: boolean): MapViewCheckpointTargetV1 {
+  return {
+    county_id: manor.county_id,
+    holding_id: manor.holding_id,
+    manor_id: manor.manor_id,
+    manor_label: isAnchorManor ? "Current manor" : hexLabelFromId(manor.seat_hex_id)
+  };
+}
+
+function buildMapViewRow(domain: WorldDomainV1, anchorManorId: string, manor: XMapManorUnitV1): MapViewRowV1 {
+  const holding = getHoldingById(domain, manor.holding_id);
+  const county = getCountyForManor(domain, manor.manor_id);
+  assertWorld(holding, `holding ${manor.holding_id} missing for map row ${manor.manor_id}`);
+  assertWorld(county, `county ${manor.county_id} missing for map row ${manor.manor_id}`);
+
+  const isAnchorManor = manor.manor_id === anchorManorId;
+  const seatHex = getMapHexById(domain, manor.seat_hex_id);
+  const manorHexRows = manor.hex_ids.map((hexId) => getMapHexById(domain, hexId));
+
+  return {
+    manor_id: manor.manor_id,
+    manor_label: hexLabelFromId(manor.seat_hex_id),
+    is_anchor_manor: isAnchorManor,
+    seat_hex_id: manor.seat_hex_id,
+    seat_q: seatHex.q,
+    seat_r: seatHex.r,
+    owner_actor_id: manor.holder_actor_id,
+    owner_label: ownerLabelForRecord({
+      countyLabel: county.name,
+      holderActorId: manor.holder_actor_id,
+      holderActorType: manor.holder_actor_type,
+      seatHexId: holdingSeatHexId(holding)
+    }),
+    holding_id: manor.holding_id,
+    holding_label: holdingLabelForRecord(holding),
+    county_id: county.county_id,
+    county_label: county.name,
+    map_checkpoint_target: buildMapCheckpointTarget(manor, isAnchorManor),
+    road_exposure: buildRoadExposure(manorHexRows),
+    river_exposure: buildRiverExposure(manorHexRows)
+  };
+}
+
+function compactMapViewRow(row: MapViewRowV1): MapViewSnapshotRowV1 {
+  return {
+    manor_id: row.manor_id,
+    manor_label: row.manor_label,
+    is_anchor_manor: row.is_anchor_manor,
+    seat_hex_id: row.seat_hex_id,
+    seat_q: row.seat_q,
+    seat_r: row.seat_r,
+    owner_actor_id: row.owner_actor_id,
+    holding_id: row.holding_id,
+    county_id: row.county_id
+  };
+}
+
+export function getMapViewSelectorRow(
+  manorId: string,
+  domain: WorldDomainV1 = loadBundledWorldDomain()
+): MapViewRowV1 {
+  const anchorManorId = getDefaultAnchorManorId(domain);
+  const manor = getManorById(domain, manorId);
+  assertWorld(manor, `manor ${manorId} missing from world domain`);
+  return buildMapViewRow(domain, anchorManorId, manor);
+}
+
+export function buildBoundedMapViewSnapshot(domain: WorldDomainV1 = loadBundledWorldDomain()): MapViewSnapshotV1 {
+  const anchorManorId = getDefaultAnchorManorId(domain);
+  const anchorManor = getManorById(domain, anchorManorId);
+  assertWorld(anchorManor, `anchor manor ${anchorManorId} missing from world domain`);
+
+  const rows = domain.manors
+    .map((manor) => compactMapViewRow(buildMapViewRow(domain, anchorManorId, manor)))
+    .sort((left, right) => {
+      if (left.is_anchor_manor !== right.is_anchor_manor) {
+        return left.is_anchor_manor ? -1 : 1;
+      }
+      return compareStrings(left.manor_id, right.manor_id);
+    });
+
+  return {
+    schema_version: MAP_VIEW_SNAPSHOT_SCHEMA_VERSION,
+    anchor_manor_id: anchorManorId,
+    anchor_holding_id: anchorManor.holding_id,
+    anchor_county_id: anchorManor.county_id,
+    row_ordering: MAP_VIEW_ROW_ORDERING,
+    rows
+  };
+}
+
+export function buildManorDetailView(
+  manorId?: string,
+  domain: WorldDomainV1 = loadBundledWorldDomain()
+): ManorDetailViewV1 {
+  const resolvedManorId = manorId ?? getDefaultAnchorManorId(domain);
+  const manor = getManorById(domain, resolvedManorId);
+  assertWorld(manor, `manor ${resolvedManorId} missing from world domain`);
+
+  const holding = getHoldingById(domain, manor.holding_id);
+  const county = getCountyForManor(domain, resolvedManorId);
+  assertWorld(holding, `holding ${manor.holding_id} missing for manor detail ${resolvedManorId}`);
+  assertWorld(county, `county ${manor.county_id} missing for manor detail ${resolvedManorId}`);
+
+  const seatHex = getMapHexById(domain, manor.seat_hex_id);
+  const hexRows = [...manor.hex_ids]
+    .sort(compareHexIds)
+    .map<ManorDetailHexRowV1>((hexId) => {
+      const hex = getMapHexById(domain, hexId);
+      return {
+        hex_id: hex.hex_id,
+        q: hex.q,
+        r: hex.r,
+        terrain: hex.terrain,
+        tile_kind: hex.tile_kind,
+        elevation: hex.elevation,
+        river_tags: [...hex.river_tags],
+        road_route_tiers: [...hex.road_route_tiers],
+        base_arable_capacity: hex.base_arable_capacity,
+        base_pasture_capacity: hex.base_pasture_capacity,
+        net_productive_capacity: hex.net_productive_capacity,
+        water_access_score: hex.water_access_score,
+        buildability_score: hex.buildability_score
+      };
+    });
+
+  const totalBaseArableCapacity = roundToFour(
+    hexRows.reduce((total, row) => total + (row.base_arable_capacity ?? 0), 0)
+  );
+  const totalBasePastureCapacity = roundToFour(
+    hexRows.reduce((total, row) => total + (row.base_pasture_capacity ?? 0), 0)
+  );
+  const averageBaseArableCapacity = roundToFour(totalBaseArableCapacity / Math.max(1, hexRows.length));
+  const averageNetProductiveCapacity = roundToFour(
+    hexRows.reduce((total, row) => total + (row.net_productive_capacity ?? 0), 0) / Math.max(1, hexRows.length)
+  );
+
+  const arabilitySummary: ManorDetailArabilitySummaryV1 = {
+    arable_hex_count: hexRows.filter((row) => (row.base_arable_capacity ?? 0) > 0).length,
+    total_base_arable_capacity: totalBaseArableCapacity,
+    average_base_arable_capacity: averageBaseArableCapacity,
+    total_base_pasture_capacity: totalBasePastureCapacity,
+    average_net_productive_capacity: averageNetProductiveCapacity
+  };
+
+  const terrainMix = [...hexRows.reduce<Map<string, number>>((counts, row) => {
+    counts.set(row.terrain, (counts.get(row.terrain) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>()).entries()]
+    .map<ManorDetailTerrainMixRowV1>(([terrain, hexCount]) => ({
+      terrain,
+      hex_count: hexCount,
+      share_of_hexes: roundToFour(hexCount / Math.max(1, hexRows.length))
+    }))
+    .sort(compareTerrainMix);
+
+  const nearestManors = domain.world_topology.manor_ids
+    .filter((candidateManorId) => candidateManorId !== resolvedManorId)
+    .map<ManorDetailNearestManorRowV1 | null>((candidateManorId) => {
+      const metrics = getNumericDistanceMetrics(domain, resolvedManorId, candidateManorId);
+      const candidateManor = getManorById(domain, candidateManorId);
+      if (!metrics || !candidateManor) return null;
+
+      const candidateHolding = getHoldingById(domain, candidateManor.holding_id);
+      const candidateCounty = getCountyForManor(domain, candidateManorId);
+      if (!candidateHolding || !candidateCounty) return null;
+
+      return {
+        manor_id: candidateManorId,
+        manor_label: hexLabelFromId(candidateManor.seat_hex_id),
+        holding_label: holdingLabelForRecord(candidateHolding),
+        county_label: candidateCounty.name,
+        travel_cost_distance: metrics.travel_cost_distance,
+        route_hop_distance: metrics.route_hop_distance,
+        distance_band: classifyTravelDistance(domain, resolvedManorId, candidateManorId)
+      };
+    })
+    .filter((row): row is ManorDetailNearestManorRowV1 => row !== null)
+    .sort(compareNearestManors)
+    .slice(0, MANOR_DETAIL_NEAREST_MANOR_LIMIT);
+
+  return {
+    schema_version: MANOR_DETAIL_VIEW_SCHEMA_VERSION,
+    manor_id: resolvedManorId,
+    manor_label: hexLabelFromId(manor.seat_hex_id),
+    seat_hex_id: manor.seat_hex_id,
+    seat_q: seatHex.q,
+    seat_r: seatHex.r,
+    owner_actor_id: manor.holder_actor_id,
+    owner_label: ownerLabelForRecord({
+      countyLabel: county.name,
+      holderActorId: manor.holder_actor_id,
+      holderActorType: manor.holder_actor_type,
+      seatHexId: holdingSeatHexId(holding)
+    }),
+    holding_id: manor.holding_id,
+    holding_label: holdingLabelForRecord(holding),
+    county_id: county.county_id,
+    county_label: county.name,
+    hex_count: hexRows.length,
+    nearest_manor_limit: MANOR_DETAIL_NEAREST_MANOR_LIMIT,
+    arability_summary: arabilitySummary,
+    terrain_mix: terrainMix,
+    nearest_manors: nearestManors,
+    hex_rows: hexRows
+  };
+}
+
+export function resolveActionScope(
+  manorId: string,
+  actionType: WorldActionScopeActionV1,
+  options?: {
+    domain?: WorldDomainV1;
+    far_threshold?: number | null;
+    state?: unknown;
+    tier_label?: string | null;
+  }
+): WorldActionScopeResolutionV1 {
+  const domain = options?.domain ?? loadBundledWorldDomain();
+  const residenceSummary = readResidenceSelectorSummaryLike(options?.state);
+  const residenceManorIds = collectResidenceManorIds(residenceSummary);
+  const kinshipManorIds = collectKinshipResidenceManorIds(residenceSummary, manorId);
+  const tierLabel = options?.tier_label ?? readTierLabelFromState(options?.state);
+
+  if (actionType !== "marriage_scout" || !domain.manors_by_id.has(manorId)) {
+    return {
+      schema_version: ACTION_SCOPE_RESOLUTION_SCHEMA_VERSION,
+      action_type: actionType,
+      anchor_manor_id: manorId,
+      scope_mode: "anchor_only",
+      tier_label: tierLabel,
+      far_threshold: null,
+      residence_manor_ids: residenceManorIds,
+      kinship_manor_ids: kinshipManorIds,
+      admitted_manor_ids: domain.manors_by_id.has(manorId) ? [manorId] : [],
+      rejected_manor_ids: [],
+      candidates: [],
+      cap_evaluation: null
+    };
+  }
+
+  const evaluation = evaluateWorldScopeCapsForAnchor(domain, manorId, tierLabel, {
+    far_threshold: options?.far_threshold,
+    kinship_manor_ids: kinshipManorIds
+  });
+
+  return {
+    schema_version: ACTION_SCOPE_RESOLUTION_SCHEMA_VERSION,
+    action_type: actionType,
+    anchor_manor_id: manorId,
+    scope_mode: "topology_cap",
+    tier_label: tierLabel,
+    far_threshold: evaluation.far_threshold,
+    residence_manor_ids: residenceManorIds,
+    kinship_manor_ids: kinshipManorIds,
+    admitted_manor_ids: [...evaluation.cap_evaluation.admitted_ids],
+    rejected_manor_ids: [...evaluation.cap_evaluation.rejected_ids],
+    candidates: evaluation.candidates.map((candidate) => ({ ...candidate })),
+    cap_evaluation: {
+      ...evaluation.cap_evaluation,
+      bucket_order: [...evaluation.cap_evaluation.bucket_order],
+      rules: cloneScopeCapRules(evaluation.cap_evaluation.rules),
+      admitted_ids: [...evaluation.cap_evaluation.admitted_ids],
+      rejected_ids: [...evaluation.cap_evaluation.rejected_ids],
+      decisions: evaluation.cap_evaluation.decisions.map((decision) => ({ ...decision }))
+    }
   };
 }
 

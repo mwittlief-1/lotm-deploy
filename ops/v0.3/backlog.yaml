@@ -9006,7 +9006,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Expose map selectors from frozen topology and economic profile data
-  status: ready
+  status: done
   priority: 98
   tranche: 6
   change_type: behavior_change
@@ -9051,7 +9051,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Expose map_view_snapshot_v1 through bounded snapshots
-  status: todo
+  status: done
   priority: 97
   tranche: 6
   change_type: behavior_change
@@ -9095,7 +9095,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Render kingdom map with holdings, liege seat, and manor routing
-  status: todo
+  status: ready
   priority: 96
   tranche: 6
   change_type: behavior_change
@@ -9181,7 +9181,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Expose manor_detail_view_v1 from world topology data
-  status: todo
+  status: done
   priority: 94
   tranche: 6
   change_type: behavior_change
@@ -9268,7 +9268,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Render Manor View player and debug tabs
-  status: todo
+  status: ready
   priority: 92
   tranche: 6
   change_type: behavior_change
@@ -9652,7 +9652,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Expose resolveActionScope(manor_id, action_type) from topology
-  status: todo
+  status: done
   priority: 83
   tranche: 6
   change_type: behavior_change
@@ -10001,7 +10001,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Implement auditable maintenance labor-pressure helper seam
-  status: ready
+  status: done
   priority: 75
   tranche: 6
   change_type: behavior_change
@@ -10044,7 +10044,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Wire maintenance labor drag into allocatable labor ordering
-  status: todo
+  status: ready
   priority: 74
   tranche: 6
   change_type: behavior_change

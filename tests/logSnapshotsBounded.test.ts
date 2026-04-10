@@ -23,6 +23,7 @@ const ALLOWED_KEYS = new Set([
   "houses",
   "player_house_id",
   "world_topology_view",
+  "map_view_snapshot",
   "kinship",
   "kinship_edges",
   "known_houses",

@@ -1,6 +1,8 @@
 export * from "./types";
 export {
+  buildBoundedMapViewSnapshot,
   buildBoundedWorldTopologyView,
+  buildManorDetailView,
   classifyTravelDistance,
   classifyWorldScopeBucket,
   createWorldDomain,
@@ -19,6 +21,7 @@ export {
   getHoldingFabricFile,
   getHoldingImmediateLordActorId,
   getHoldingSuperiorLordActorId,
+  getMapViewSelectorRow,
   getManifest,
   getManorAssignment,
   getManorById,
@@ -38,5 +41,6 @@ export {
   getWorldTopologyFile,
   listWorldScopeCandidatesForAnchor,
   loadBundledWorldDomain,
-  normalizeWorldScopeCapTierKey
+  normalizeWorldScopeCapTierKey,
+  resolveActionScope
 } from "./xmap";

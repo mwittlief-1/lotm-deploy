@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-001-T02
-  last_completed_task_id: V03-R5-001-T01
+  current_task_id: V03-R5-001-T04
+  last_completed_task_id: V03-R5-006-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: b636eff
+  git_commit: a13db78
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,14 +18,15 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
-    run2: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
+    run1: 06954e214d0486ef1546375ef7697428df426fe585b78b615f1a8d48071568c7
+    run2: 06954e214d0486ef1546375ef7697428df426fe585b78b615f1a8d48071568c7
 notes: >-
-  Accepted the packaged economy and tooling opening-wave commits plus
-  integrator task V03-R5-001-T01 onto the v0.3.5 control-plane line. The new
-  external map route seam passed qa and replay twice with matching hashes
-  while preserving the standing preflight baseline blocker
-  (test3_mismatches=16). The next ready task is V03-R5-001-T02 on
-  world-topology, and social-mechanics still owes its opening-wave correction
-  pass before acceptance.
+  Accepted the engine helper seam plus the opening world map/topology seams
+  onto the v0.3.5 control-plane line. The accepted world integration keeps a
+  rich selector seam in the world domain while compacting serialized
+  `map_view_snapshot_v1` rows so replay snapshots stay under the byte cap.
+  Targeted QA over all affected suites passed, preflight still shows the
+  standing `test3_mismatches=16` blocker, and replay passed twice with matching
+  hashes. The next ready task is V03-R5-001-T04 on ui-experience; social still
+  owes its opening-wave rebase/correction handoff.
 active_claims: {}

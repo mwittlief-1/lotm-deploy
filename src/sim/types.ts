@@ -1,7 +1,7 @@
 import { SIM_VERSION } from "./version";
 import type { FiscalReceiptSnapshotV1 } from "./domains/economy/receipts";
 import type { FiscalPaymentModeV1 } from "./domains/economy/schema";
-import type { WorldTopologySnapshotV1 } from "./domains/world/types";
+import type { ManorDetailViewV1, MapViewSnapshotV1, WorldTopologySnapshotV1 } from "./domains/world/types";
 
 export type SimVersion = typeof SIM_VERSION;
 
@@ -300,6 +300,8 @@ export interface RunSnapshot {
   economy_obligations_view?: { schema_version: string; [key: string]: unknown };
   portfolio?: PortfolioRegistryPlaceholderV1;
   world_topology_view?: WorldTopologySnapshotV1;
+  map_view_snapshot?: MapViewSnapshotV1;
+  manor_detail_view?: ManorDetailViewV1;
   known_houses?: KnownHouseSummary[];
   house_dossiers?: HouseDossierSummary[];
   flags: Record<string, unknown>;
