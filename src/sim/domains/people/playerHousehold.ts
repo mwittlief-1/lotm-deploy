@@ -3,6 +3,7 @@ import { getLivingSpouse } from "../../kinship";
 import type { HouseholdRoster, Person, RunState } from "../../types";
 import { buildGrantAcquisitionExperienceSurfaces } from "./grantAcquisitionRegistry";
 import { buildKnownHouseExperienceSurfaces } from "./knownHouseSummaries";
+import { attachPersonCardRegistry, buildPersonCardRegistry } from "./personCardRegistry";
 import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "./successionSummaries";
 
@@ -20,6 +21,7 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   ensureResidenceManorBindings(state);
+  const personCardRegistry = buildPersonCardRegistry(state);
   (state as any).known_houses = experienceSurfaces.known_houses;
   (state as any).house_dossiers = experienceSurfaces.house_dossiers;
   (state as any).succession_line_summary = successionSurfaces.succession_line_summary;
@@ -36,6 +38,7 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   attachHiddenSurface(state.house as object, "grant_source_registry", grantAcquisitionSurfaces.grant_source_registry);
   attachHiddenSurface(state.house as object, "grant_dossier_summaries", grantAcquisitionSurfaces.grant_dossier_summaries);
   attachHiddenSurface(state.house as object, "acquisition_prospects_window", grantAcquisitionSurfaces.acquisition_prospects_window);
+  attachPersonCardRegistry(state, personCardRegistry);
 
   const heirId = state.house.heir_id ?? null;
   const spouse = state.house.spouse ?? null;

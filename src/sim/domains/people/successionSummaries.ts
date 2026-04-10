@@ -14,6 +14,7 @@ type SuccessionLineSummaryEntry = {
   person_id: string;
   person_name: string;
   line_position: number;
+  adult_line_position: number | null;
   basis_kind: string;
   relation_group: string;
   adult_eligible: boolean;
@@ -104,6 +105,8 @@ export function buildSuccessionExperienceSurfaces(
       : SUCCESSION_SUMMARY_LIMIT_DEFAULT;
 
   const line = buildSuccessionLine(state, { limit: lineLimit });
+  const adultLine = buildSuccessionLine(state, { limit: lineLimit, min_age: 15 });
+  const adultLinePositions = new Map(adultLine.entries.map((entry) => [entry.person_id, entry.line_position]));
   const registry = buildClaimantRegistry(state, { limit: claimantLimit });
   const houseId = playerHouseIdOf(state);
 
@@ -120,6 +123,7 @@ export function buildSuccessionExperienceSurfaces(
         person_id: entry.person_id,
         person_name: registryPersonFor(state, entry.person_id)?.name ?? entry.person_id,
         line_position: entry.line_position,
+        adult_line_position: adultLinePositions.get(entry.person_id) ?? null,
         basis_kind: entry.basis_kind,
         relation_group: entry.relation_group,
         adult_eligible: entry.adult_eligible,

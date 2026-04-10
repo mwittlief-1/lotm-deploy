@@ -25,6 +25,7 @@ describe("succession summary surfaces", () => {
         }),
       ]),
     });
+    expect(one.succession_line_summary.entries[0]).toHaveProperty("adult_line_position");
     expect(one.claimant_summary).toMatchObject({
       schema_version: CLAIMANT_SUMMARY_SCHEMA_VERSION,
       house_id: "h_player",
@@ -58,6 +59,7 @@ describe("succession summary surfaces", () => {
       person_name: expect.any(String),
       line_position: expect.any(Number),
     });
+    expect(previewState.succession_line_summary.entries[0]).toHaveProperty("adult_line_position");
   });
 
   it("attaches succession summaries to bounded snapshots without changing the serialized snapshot contract", () => {

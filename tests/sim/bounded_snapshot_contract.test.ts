@@ -99,8 +99,17 @@ describe("bounded snapshot contract", () => {
         }),
       ]),
     });
+    expect((snapshot as any).person_card_registry).toMatchObject({
+      schema_version: "person_card_registry_v1",
+      person_ids: expect.any(Array),
+    });
+    expect((snapshot as any).people.p_head.person_card_view).toMatchObject({
+      schema_version: "person_card_view_v1",
+      person_id: "p_head",
+    });
     expect(serialized.succession_line_summary).toBeUndefined();
     expect(serialized.claimant_summary).toBeUndefined();
+    expect(serialized.person_card_registry).toBeUndefined();
     expect(serialized.world_topology_view).toMatchObject({
       schema_version: "world_topology_snapshot_v1",
       anchor_manor_id: "manor_hx_26597",
@@ -150,6 +159,7 @@ describe("bounded snapshot contract", () => {
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "ai_rail_debug_packet")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "succession_line_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "person_card_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_eligibility")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_source_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_dossier_summaries")).toBe(false);

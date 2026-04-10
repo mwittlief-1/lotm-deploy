@@ -8,6 +8,7 @@ import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
 import { buildBoundedKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { attachPersonCardRegistry, buildPersonCardRegistry } from "../people/personCardRegistry";
 import { ensureResidenceManorBindings } from "../people/residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
 import { buildBoundedMapViewSnapshot, buildBoundedWorldTopologyView } from "../world";
@@ -20,6 +21,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   const delegationView = buildCourtDelegationView(state);
   const worldTopologyView = buildBoundedWorldTopologyView();
   const mapViewSnapshot = buildBoundedMapViewSnapshot();
+  const personCardRegistry = buildPersonCardRegistry(state);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
@@ -44,6 +46,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     flags: state.flags,
     game_over: state.game_over ?? null
   }) as unknown as RunSnapshot;
+  attachPersonCardRegistry(snapshot as unknown as Record<string, unknown>, deepCopy(personCardRegistry));
   if ((state as any).beliefs) {
     Object.defineProperty(snapshot, "beliefs", {
       value: deepCopy((state as any).beliefs),
