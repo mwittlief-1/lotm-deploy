@@ -1352,7 +1352,7 @@ epics:
 - id: V03-R4-006
   title: Player-visible activation for gestures and raw receipts
   release: v0.3.4
-  status: ready
+  status: done
   priority: 26
   tranche: 5
   change_type: behavior_change
@@ -8563,7 +8563,7 @@ tasks:
   parent_epic: V03-R4-006
   release: v0.3.4
   title: Expose gesture actions and structured raw receipts in the UI
-  status: ready
+  status: done
   priority: 93
   tranche: 5
   change_type: behavior_change
