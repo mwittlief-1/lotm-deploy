@@ -21,7 +21,7 @@ last_run:
     run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
     run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Added a tooling addendum for the v0.3 UAT scenario pack so the tooling lane
-  has a legal ready task again. Current frontier is V03-R4-004-T01 for
-  deterministic scenario-pack and operator-guidance work.
+  Added activation-pass addendum tasks so the economy, UI, and tooling lanes
+  each have a legal ready task again. Current frontiers are V03-R4-004-T01,
+  V03-R4-005-T01, and V03-R4-006-T01.
 active_claims: {}
