@@ -61,6 +61,23 @@
 - Same-lane task chains should continue without an extra operator pause once the integrator accepts the prior task and no explicit checkpoint rule applies.
 - Same-lane chains should also avoid scheduler-promotion stalls: when the only remaining unmet dependency is the current same-lane task, pre-promote the successor to `ready` so the lane can continue after local closeout.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
+- For `v0.3.5` closure work, prefer reusing the canonical lanes above instead of inventing new lane branches unless the control plane is explicitly revised first.
+- For `v0.3.5` closure work, lane ownership defaults are:
+  - `codex/v0.3-refactor-kickoff`: carry-over gate reconciliation, backlog decomposition, integrator-only orchestration seams, control-plane updates, and final acceptance merges
+  - `codex/v0.3-lane-world-topology`: map snapshots, manor detail projections, topology-backed selectors, and action-scope resolution
+  - `codex/v0.3-lane-economy-fiscal`: receipt-grade settlement paths, maintenance registry, stipend and provisioning fiscal writes, and obligations payload expansion
+  - `codex/v0.3-lane-social-mechanics`: dossier and person-card semantics, outbound marriage scouting and offer pipeline, and person-anchored court surfaces
+  - `codex/v0.3-lane-ui-experience`: map, manor, dossier, person-card, provisioning, obligations, and preset-selection presentation surfaces
+  - `codex/v0.3-lane-engine-core`: narrow runtime seams that must touch phase-adjacent allocation logic, especially auditable maintenance labor drag
+  - `codex/v0.3-lane-tooling-qa`: fixtures, preset packs, UAT packs, DOE acceptance bands, and runaway detectors
+- Integrator owns proactive orchestration: after any accepted lane task, reconcile backlog truth, pre-promote same-lane successors when safe, and dispatch the next unblocked lane work without waiting for an operator nudge.
+- Cross-lane checkpoints for `v0.3.5` should stay rare and explicit. Default checkpoint list:
+  - carry-over gate closeout for `V03-R4-004-T01`, `V03-R4-005-T01`, and `V03-R4-006-T01`
+  - map renderer attachment before topology and UI map work fan out
+  - maintenance registry availability before engine-core labor-drag and downstream UI explain surfaces
+  - preset-pack freeze before final UAT lockability pass
+  - final balance and stability closure before release lock
+- Minimize operator touchpoints by decomposing work into lane-local chains, not isolated singletons, whenever the write scope and dependency graph allow safe self-chaining.
 
 ## Claim Policy
 - Default claim TTL is 4 hours unless a task-specific exception is documented in the control plane.
