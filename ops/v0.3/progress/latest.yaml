@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: V03-R5-001-T01
-  last_completed_task_id: V03-R4-006-T01
+  last_completed_task_id: V03-R5-009-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -13,17 +13,18 @@ runtime:
   pr_status: ''
 last_run:
   gates:
-    qa: not_run
+    qa: fail
     preflight: fail
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
-    run2: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
+    run1: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
+    run2: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
 notes: >-
-  Activated the v0.3.5 control plane on top of the locked v0.3.4 baseline.
-  Canonical R5 backlog entries now exist, with opening ready tasks on kickoff,
-  social, economy, and tooling lanes. World map work remains queued behind the
-  kickoff-owned renderer attachment checkpoint, and later lane work stays todo
-  until the first-wave chain unlocks it.
+  Accepted the packaged economy and tooling opening-wave commits onto the
+  v0.3.5 control-plane line. Full replay passed twice with matching hashes.
+  The current qa and preflight failures match the untouched control-plane base
+  branch and are being treated as pre-existing repo-baseline blockers rather
+  than regressions from the accepted commits. The next integrator-owned task
+  remains V03-R5-001-T01.
 active_claims: {}

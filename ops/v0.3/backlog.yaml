@@ -9225,7 +9225,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Project manor maintenance, buildings, and rights summary
-  status: todo
+  status: done
   priority: 93
   tranche: 6
   change_type: behavior_change
@@ -9912,7 +9912,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Audit live maintenance-bearing surfaces and define maintenance_registry_v1
-  status: ready
+  status: done
   priority: 77
   tranche: 6
   change_type: behavior_change
@@ -9958,7 +9958,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Implement recurring maintenance coin and labor requirements
-  status: todo
+  status: done
   priority: 76
   tranche: 6
   change_type: behavior_change
@@ -10342,7 +10342,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Extend economy_obligations_view with payment modes and terminal-risk fields
-  status: todo
+  status: done
   priority: 68
   tranche: 6
   change_type: behavior_change
@@ -10473,7 +10473,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Define playability_preset_pack_v1 and stable scenario mapping
-  status: ready
+  status: done
   priority: 65
   tranche: 6
   change_type: behavior_change
