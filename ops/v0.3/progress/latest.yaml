@@ -1,19 +1,19 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-001-T01
-  last_completed_task_id: V03-R5-009-T01
+  current_task_id: V03-R5-001-T02
+  last_completed_task_id: V03-R5-001-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: d89903a
+  git_commit: b636eff
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: fail
+    qa: pass
     preflight: fail
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
@@ -21,10 +21,11 @@ last_run:
     run1: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
     run2: 16086f3ecab924af303be7e4e8ddbe539e5460ff2271f53f6473f3d18b2a0b91
 notes: >-
-  Accepted the packaged economy and tooling opening-wave commits onto the
-  v0.3.5 control-plane line. Full replay passed twice with matching hashes.
-  The current qa and preflight failures match the untouched control-plane base
-  branch and are being treated as pre-existing repo-baseline blockers rather
-  than regressions from the accepted commits. The next integrator-owned task
-  remains V03-R5-001-T01.
+  Accepted the packaged economy and tooling opening-wave commits plus
+  integrator task V03-R5-001-T01 onto the v0.3.5 control-plane line. The new
+  external map route seam passed qa and replay twice with matching hashes
+  while preserving the standing preflight baseline blocker
+  (test3_mismatches=16). The next ready task is V03-R5-001-T02 on
+  world-topology, and social-mechanics still owes its opening-wave correction
+  pass before acceptance.
 active_claims: {}

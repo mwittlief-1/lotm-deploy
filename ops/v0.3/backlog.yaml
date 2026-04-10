@@ -8960,7 +8960,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Attach approved external map renderer seam and route entry point
-  status: ready
+  status: done
   priority: 99
   tranche: 6
   change_type: refactor
@@ -9006,7 +9006,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Expose map selectors from frozen topology and economic profile data
-  status: todo
+  status: ready
   priority: 98
   tranche: 6
   change_type: behavior_change
@@ -10001,7 +10001,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Implement auditable maintenance labor-pressure helper seam
-  status: todo
+  status: ready
   priority: 75
   tranche: 6
   change_type: behavior_change

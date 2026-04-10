@@ -6,9 +6,12 @@ import { buildRunSummary } from "./sim/exports";
 import { NewRunScreen } from "./ui/panels/NewRunScreen";
 import { PlayScreen } from "./ui/panels/PlayScreen";
 import { RunLogScreen } from "./ui/panels/RunLogScreen";
+import { WorldMapScreen } from "./ui/panels/WorldMapScreen";
+import type { PortfolioMapTarget } from "./ui/playScreenPortfolio";
+import { buildAppRouteHash, buildExternalMapRendererSurface, readAppRouteState } from "./ui/worldMapRoute";
 import { TURN_YEARS } from "./sim/constants";
 
-type Screen = "new" | "play" | "log";
+type Screen = "new" | "play" | "log" | "map";
 
 function downloadJson(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -312,13 +315,27 @@ const defaultDecisions: DecisionsState = {
 };
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("new");
+  const [screen, setScreen] = useState<Screen>(() => {
+    if (typeof window === "undefined") return "new";
+    return readAppRouteState(window.location.hash).screen;
+  });
   const [seed, setSeed] = useState<string>(() => `run_${Math.random().toString(36).slice(2, 10)}`);
   const [state, setState] = useState<RunState | null>(null);
   const [decisions, setDecisions] = useState<DecisionsState>(defaultDecisions);
   const [showHouseholdDetails, setShowHouseholdDetails] = useState<boolean>(false);
   const [showAllKnownHouses, setShowAllKnownHouses] = useState<boolean>(false);
   const [allPeopleFilter, setAllPeopleFilter] = useState<string>("");
+  const [worldMapTarget, setWorldMapTarget] = useState<PortfolioMapTarget | null>(() => {
+    if (typeof window === "undefined") return null;
+    const route = readAppRouteState(window.location.hash);
+    if (!route.target_manor_id) return null;
+    return {
+      countyId: null,
+      holdingId: null,
+      manorId: route.target_manor_id,
+      manorLabel: route.target_manor_id
+    };
+  });
   const [relationshipDrawerTab, setRelationshipDrawerTab] = useState<"house" | "person">("house");
   const [relationshipDrawerQuery, setRelationshipDrawerQuery] = useState<string>("");
 
@@ -331,6 +348,38 @@ export default function App() {
     const t = window.setTimeout(() => setToast(null), 2500);
     return () => window.clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const nextHash = buildAppRouteHash(screen, screen === "map" ? worldMapTarget : null);
+    if (window.location.hash !== nextHash) {
+      window.location.hash = nextHash;
+    }
+  }, [screen, worldMapTarget]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    function syncFromHash() {
+      const route = readAppRouteState(window.location.hash);
+      setScreen(route.screen);
+      if (route.screen !== "map") return;
+
+      setWorldMapTarget((current) => {
+        if (!route.target_manor_id) return current;
+        if (current?.manorId === route.target_manor_id) return current;
+        return {
+          countyId: null,
+          holdingId: null,
+          manorId: route.target_manor_id,
+          manorLabel: route.target_manor_id
+        };
+      });
+    }
+
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
+  }, []);
 
   const ctx = useMemo(() => (state ? proposeTurn(state) : null), [state]);
 
@@ -370,6 +419,7 @@ export default function App() {
       labor: { kind: "labor", desired_farmers: s.manor.farmers, desired_builders: s.manor.builders }
     });
     setScreen("play");
+    setWorldMapTarget(null);
     setShowHouseholdDetails(false);
   }
 
@@ -424,6 +474,14 @@ export default function App() {
         />
       );
     }
+  } else if (screen === "map") {
+    content = (
+      <WorldMapScreen
+        appVersion={APP_VERSION}
+        onBack={() => setScreen(state ? "play" : "new")}
+        surface={buildExternalMapRendererSurface(worldMapTarget)}
+      />
+    );
   } else {
     if (!state || !ctx) {
       content = (
@@ -441,6 +499,10 @@ export default function App() {
           onAdvanceTurn={advanceTurn}
           onExportFullRunJson={() => downloadJson(`run_export_${state.run_seed}.json`, state)}
           onExportRunSummary={() => downloadJson(`run_summary_${state.run_seed}.json`, buildRunSummary(state))}
+          onCenterSelectedHolding={(target) => {
+            setWorldMapTarget(target);
+            setScreen("map");
+          }}
           onOpenLog={() => setScreen("log")}
           onOpenNewRun={() => setScreen("new")}
           relationshipDrawerQuery={relationshipDrawerQuery}
