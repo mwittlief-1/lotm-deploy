@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R4-004-T01
-  last_completed_task_id: V03-R4-006-T01
+  current_task_id: ''
+  last_completed_task_id: V03-R4-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -13,16 +13,17 @@ runtime:
   pr_status: ''
 last_run:
   gates:
-    qa: pass
-    preflight: pass
-    repo_duplicates: pass
+    qa: not_run
+    preflight: fail
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
-    run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
+    run1: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
+    run2: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
 notes: >-
-  Accepted UI V03-R4-006-T01 on the activation pass. Tooling V03-R4-004-T01
-  and Economy V03-R4-005-T01 remain the live ready frontiers. Integrated UI
-  tests and production build passed; preflight still shows the broader 16-case
-  activation-line mismatch and qa did not return a clean exit.
+  Accepted Tooling V03-R4-004-T01 and Economy V03-R4-005-T01, then wired
+  structured fiscal receipt transport through the kickoff-owned obligations phase
+  result path. Focused economy and UI receipt tests, build, UAT scenario gate,
+  and replay twice passed on the new activation line; preflight still shows the
+  broader 16-case mismatch.
 active_claims: {}

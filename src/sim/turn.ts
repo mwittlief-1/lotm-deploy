@@ -724,6 +724,10 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
   applyDecisionObligationsPhase(working, decisions, notes);
   const obligationsNotes = notes.slice(notesCursor);
   const obligationsResolutionEvidence = noteEvidenceEvents("obligations", obligationsNotes);
+  const obligationsFiscalReceipts =
+    Array.isArray(working.economy_fiscal_receipts) && working.economy_fiscal_receipts.length > 0
+      ? working.economy_fiscal_receipts
+      : undefined;
   resolutionPhaseResults.push(makePhaseResult({
     phase: "obligations",
     receipts: [
@@ -732,6 +736,7 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
       ),
       ...noteReceipts(obligationsNotes)
     ],
+    fiscal_receipts_v1: obligationsFiscalReceipts,
     log_events: phaseLogEventsFromEvidence(obligationsResolutionEvidence),
     evidence_events_v0: obligationsResolutionEvidence,
     rng_keys_used: []
