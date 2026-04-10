@@ -204,6 +204,27 @@ export type KnownHouseRelevanceTier = "tier0" | "tier1";
 export type HouseDossierKinshipSummary = "none" | "blood_tie" | "marriage_tie" | "blood_and_marriage_tie";
 export type HouseDossierRelationshipBand = "unknown" | "favorable" | "steady" | "wary" | "hostile";
 export type HouseDossierHouseholdScope = "head_only" | "household_seeded";
+export type HouseDossierKnownness = "known_house" | "prospect_house" | "known_house_and_prospect";
+export type HouseDossierKnownnessSource = "relevance" | "marriage_offer" | "prospect";
+export type HouseDossierLedgerBand = "distressed" | "tight" | "stable" | "flush" | "unknown";
+export type HouseDossierLedgerTrend = "declining" | "flat" | "rising" | "unknown";
+export type HouseDossierHoldingsBand = "single_holding" | "minor_cluster" | "broad_domain";
+
+export interface HouseDossierRelationshipSummary {
+  allegiance: number;
+  respect: number;
+  threat: number;
+  favor_score: number;
+  standing_band: HouseDossierRelationshipBand;
+}
+
+export interface HouseDossierHoldingsFootprint {
+  holdings_count: number;
+  holdings_band: HouseDossierHoldingsBand;
+  anchor_manor_id: string | null;
+  known_manor_ids: string[];
+  source_kind: "player_portfolio" | "house_seed";
+}
 
 export interface KnownHouseSummary {
   house_id: string;
@@ -223,20 +244,27 @@ export interface KnownHouseSummary {
 }
 
 export interface HouseDossierSummary {
-  schema_version: "house_dossier_summary_v1";
+  schema_version: "house_dossier_summary_v2";
   house_id: string;
   house_name: string;
   tier: string;
   relevance_tier: KnownHouseRelevanceTier;
   relevance_reasons: KnownHouseRelevanceReason[];
+  knownness: HouseDossierKnownness;
+  knownness_sources: HouseDossierKnownnessSource[];
   kinship_summary: HouseDossierKinshipSummary;
+  kinship_tags: KnownHouseRelevanceReason[];
   relationship_band: HouseDossierRelationshipBand;
+  relationship_summary: HouseDossierRelationshipSummary | null;
   household_scope: HouseDossierHouseholdScope;
   household_member_count: number;
   living_member_count: number;
   child_count: number;
   has_male_heir: boolean;
   heiress_possible: boolean;
+  holdings_footprint: HouseDossierHoldingsFootprint;
+  ledger_band: HouseDossierLedgerBand;
+  ledger_trend: HouseDossierLedgerTrend;
 }
 
 export interface RunState {

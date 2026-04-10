@@ -1,27 +1,52 @@
-import { allHouseMemberIds, playerHouseIdOf, registryPersonFor, resolveCurrentHouseHeadId } from "../../actors";
+import { allHouseMemberIds, playerHouseIdOf, registryPersonFor, resolveCurrentHouseHeadId, structuredHouseIdForPerson } from "../../actors";
 import type {
+  HouseDossierHoldingsBand,
+  HouseDossierHoldingsFootprint,
   HouseDossierHouseholdScope,
   HouseDossierKinshipSummary,
+  HouseDossierKnownness,
+  HouseDossierKnownnessSource,
+  HouseDossierLedgerBand,
+  HouseDossierLedgerTrend,
   HouseDossierRelationshipBand,
+  HouseDossierRelationshipSummary,
   HouseDossierSummary,
   KnownHouseSummary,
   RunState,
 } from "../../types";
+import { buildBoundedWorldTopologyView } from "../world";
+import { buildMarriageWindow } from "./marriage";
+import { classifyRelationshipStanding, readRelationshipVector, relationshipFavorScore } from "./relationshipEngine";
 import { buildKnownHouseRelevanceSnapshot, listRelevantTier1HouseIds } from "./knownHouseRelevance";
 
-export const HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION = "house_dossier_summary_v1" as const;
+export const HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION = "house_dossier_summary_v2" as const;
 
 type KnownHouseExperienceSurfaces = {
   known_houses: KnownHouseSummary[];
   house_dossiers: HouseDossierSummary[];
 };
 
+function compareText(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+function sortStrings(values: Iterable<string>): string[] {
+  return [...values].sort(compareText);
+}
+
 function housesMap(state: RunState): Record<string, any> {
   const anyState: any = state as any;
   return anyState?.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
 }
 
-function readHouseName(houseId: string, house: any): string {
+function normalizeOptionalId(value: unknown): string | null {
+  const normalized = typeof value === "string" ? value.trim() : "";
+  return normalized.length > 0 ? normalized : null;
+}
+
+export function readHouseName(houseId: string, house: any): string {
   const raw =
     typeof house?.house_name === "string"
       ? house.house_name
@@ -34,31 +59,31 @@ function readHouseName(houseId: string, house: any): string {
   return value || houseId;
 }
 
-function readTier(house: any): string {
+export function readHouseNameForId(state: RunState, houseId: string | null): string | null {
+  if (!houseId) return null;
+  const house = housesMap(state)[houseId];
+  return readHouseName(houseId, house);
+}
+
+export function readTier(house: any): string {
   return typeof house?.tier === "string" && house.tier.trim().length > 0 ? String(house.tier).trim() : "";
+}
+
+export function readTierForHouseId(state: RunState, houseId: string | null): string | null {
+  if (!houseId) return null;
+  return readTier(housesMap(state)[houseId]) || null;
 }
 
 function readRelationshipToPlayer(state: RunState, houseId: string): KnownHouseSummary["relationship"] {
   const playerHeadId = state.house?.head?.id ?? null;
   const headId = resolveCurrentHouseHeadId(state, houseId);
   if (!playerHeadId || !headId) return null;
-
-  const edge = (state.relationships ?? []).find((entry) => entry.from_id === headId && entry.to_id === playerHeadId);
-  if (!edge) return null;
-
-  return {
-    allegiance: edge.allegiance,
-    respect: edge.respect,
-    threat: edge.threat,
-  };
+  return readRelationshipVector(state, headId, playerHeadId);
 }
 
 function classifyRelationshipBand(relationship: KnownHouseSummary["relationship"]): HouseDossierRelationshipBand {
   if (!relationship) return "unknown";
-  if (relationship.threat >= 26 || relationship.allegiance <= 42 || relationship.respect <= 44) return "hostile";
-  if (relationship.allegiance >= 60 && relationship.respect >= 56 && relationship.threat <= 16) return "favorable";
-  if (relationship.allegiance >= 48 && relationship.respect >= 48 && relationship.threat <= 22) return "steady";
-  return "wary";
+  return classifyRelationshipStanding(relationship);
 }
 
 function kinshipSummaryForReasons(reasons: KnownHouseSummary["relevance_reasons"]): HouseDossierKinshipSummary {
@@ -97,15 +122,180 @@ function heirSignalsForHouse(state: RunState, house: any): {
   };
 }
 
+function extractPortfolioManorId(position: unknown): string | null {
+  if (typeof position !== "string") return null;
+  const trimmed = position.trim();
+  if (trimmed.length === 0) return null;
+  const manorToken = ":manor:";
+  const manorIndex = trimmed.indexOf(manorToken);
+  if (manorIndex >= 0) {
+    const manorId = trimmed.slice(manorIndex + manorToken.length).trim();
+    return manorId.length > 0 ? manorId : null;
+  }
+  return trimmed.startsWith("manor_") ? trimmed : null;
+}
+
+function knownManorIdsForHouse(state: RunState, houseId: string): string[] {
+  if (houseId !== playerHouseIdOf(state)) return [];
+  const topology = buildBoundedWorldTopologyView();
+  const manorIds = new Set<string>();
+  const anchorManorId = normalizeOptionalId(topology.anchor_manor_id);
+  if (anchorManorId) manorIds.add(anchorManorId);
+  const positions = Array.isArray(state.portfolio?.positions) ? state.portfolio.positions : [];
+  for (const position of positions) {
+    const manorId = extractPortfolioManorId(position);
+    if (manorId) manorIds.add(manorId);
+  }
+  return sortStrings(manorIds);
+}
+
+function holdingsBandForCount(count: number): HouseDossierHoldingsBand {
+  if (count >= 4) return "broad_domain";
+  if (count >= 2) return "minor_cluster";
+  return "single_holding";
+}
+
+function holdingsFootprintForHouse(state: RunState, houseId: string, house: any): HouseDossierHoldingsFootprint {
+  const holdingsCount =
+    typeof house?.holdings_count === "number" && Number.isFinite(house.holdings_count)
+      ? Math.max(1, Math.trunc(house.holdings_count))
+      : 1;
+  const knownManorIds = knownManorIdsForHouse(state, houseId);
+  const anchorManorId = knownManorIds[0] ?? null;
+  return {
+    holdings_count: holdingsCount,
+    holdings_band: holdingsBandForCount(holdingsCount),
+    anchor_manor_id: anchorManorId,
+    known_manor_ids: knownManorIds,
+    source_kind: houseId === playerHouseIdOf(state) ? "player_portfolio" : "house_seed",
+  };
+}
+
+function ledgerBandForPlayerHouse(state: RunState): HouseDossierLedgerBand {
+  const coin = Math.max(0, Math.trunc(state.manor?.coin ?? 0));
+  const taxDueCoin = Math.max(0, Math.trunc(state.manor?.obligations?.tax_due_coin ?? 0));
+  const titheDueBushels = Math.max(0, Math.trunc(state.manor?.obligations?.tithe_due_bushels ?? 0));
+  const arrearsCoin = Math.max(0, Math.trunc(state.manor?.obligations?.arrears?.coin ?? 0));
+  const arrearsBushels = Math.max(0, Math.trunc(state.manor?.obligations?.arrears?.bushels ?? 0));
+
+  if (arrearsCoin > 12 || arrearsBushels > 120 || coin <= 1) return "distressed";
+  if (taxDueCoin > 8 || titheDueBushels > 120 || coin <= 4) return "tight";
+  if (coin >= 16 && taxDueCoin === 0 && titheDueBushels === 0 && arrearsCoin === 0 && arrearsBushels === 0) return "flush";
+  return "stable";
+}
+
+function ledgerTrendForPlayerHouse(state: RunState): HouseDossierLedgerTrend {
+  const coin = Math.max(0, Math.trunc(state.manor?.coin ?? 0));
+  const taxDueCoin = Math.max(0, Math.trunc(state.manor?.obligations?.tax_due_coin ?? 0));
+  const titheDueBushels = Math.max(0, Math.trunc(state.manor?.obligations?.tithe_due_bushels ?? 0));
+  const arrearsCoin = Math.max(0, Math.trunc(state.manor?.obligations?.arrears?.coin ?? 0));
+  const arrearsBushels = Math.max(0, Math.trunc(state.manor?.obligations?.arrears?.bushels ?? 0));
+
+  if (arrearsCoin > 0 || arrearsBushels > 0 || taxDueCoin > 8 || titheDueBushels > 120) return "declining";
+  if (coin >= 12 && taxDueCoin === 0 && titheDueBushels === 0) return "rising";
+  return "flat";
+}
+
+function coarseExternalLedgerBand(house: any): HouseDossierLedgerBand {
+  const holdingsCount =
+    typeof house?.holdings_count === "number" && Number.isFinite(house.holdings_count)
+      ? Math.max(1, Math.trunc(house.holdings_count))
+      : 1;
+  if (holdingsCount >= 4) return "flush";
+  if (holdingsCount >= 2) return "stable";
+  return "tight";
+}
+
+function ledgerBandForHouse(state: RunState, houseId: string, house: any): HouseDossierLedgerBand {
+  return houseId === playerHouseIdOf(state) ? ledgerBandForPlayerHouse(state) : coarseExternalLedgerBand(house);
+}
+
+function ledgerTrendForHouse(state: RunState, houseId: string): HouseDossierLedgerTrend {
+  return houseId === playerHouseIdOf(state) ? ledgerTrendForPlayerHouse(state) : "flat";
+}
+
+function relationshipSummaryForHouse(
+  state: RunState,
+  houseId: string
+): { relationship: KnownHouseSummary["relationship"]; summary: HouseDossierRelationshipSummary | null } {
+  const relationship = readRelationshipToPlayer(state, houseId);
+  if (!relationship) return { relationship: null, summary: null };
+  return {
+    relationship,
+    summary: {
+      allegiance: relationship.allegiance,
+      respect: relationship.respect,
+      threat: relationship.threat,
+      favor_score: relationshipFavorScore(relationship),
+      standing_band: classifyRelationshipBand(relationship),
+    },
+  };
+}
+
+function collectProspectHouseSources(state: RunState): Map<string, Set<HouseDossierKnownnessSource>> {
+  const sourcesByHouseId = new Map<string, Set<HouseDossierKnownnessSource>>();
+  const playerHouseId = playerHouseIdOf(state);
+  const addSource = (houseId: string | null, source: HouseDossierKnownnessSource) => {
+    if (!houseId || houseId === playerHouseId) return;
+    let sources = sourcesByHouseId.get(houseId);
+    if (!sources) {
+      sources = new Set<HouseDossierKnownnessSource>();
+      sourcesByHouseId.set(houseId, sources);
+    }
+    sources.add(source);
+  };
+
+  const marriageWindow = buildMarriageWindow(state);
+  for (const offer of marriageWindow?.offers ?? []) {
+    const offerHouseId = structuredHouseIdForPerson(state, offer.house_person_id);
+    addSource(offerHouseId, "marriage_offer");
+  }
+
+  const prospectsWindow = (state as any)?.prospects_window;
+  const prospects = Array.isArray(prospectsWindow?.prospects) ? prospectsWindow.prospects : [];
+  for (const prospect of prospects) {
+    addSource(normalizeOptionalId(prospect?.from_house_id), "prospect");
+    addSource(normalizeOptionalId(prospect?.to_house_id), "prospect");
+  }
+
+  return sourcesByHouseId;
+}
+
+function knownnessForHouse(
+  relevanceReasons: KnownHouseSummary["relevance_reasons"],
+  prospectSources: ReadonlySet<HouseDossierKnownnessSource> | undefined
+): { knownness: HouseDossierKnownness; knownness_sources: HouseDossierKnownnessSource[] } {
+  const sources: HouseDossierKnownnessSource[] = [];
+  const isProspectHouse = !!prospectSources && prospectSources.size > 0;
+  if (relevanceReasons.length > 0) sources.push("relevance");
+  if (prospectSources?.has("marriage_offer")) sources.push("marriage_offer");
+  if (prospectSources?.has("prospect")) sources.push("prospect");
+
+  if (relevanceReasons.length > 0 && isProspectHouse) return { knownness: "known_house_and_prospect", knownness_sources: sources };
+  if (isProspectHouse) return { knownness: "prospect_house", knownness_sources: sources };
+  return { knownness: "known_house", knownness_sources: sources.length > 0 ? sources : ["relevance"] };
+}
+
 export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseExperienceSurfaces {
   const houses = housesMap(state);
   const playerHouseId = playerHouseIdOf(state);
   const relevance = buildKnownHouseRelevanceSnapshot(state);
   const relevanceByHouseId = new Map(relevance.entries.map((entry) => [entry.house_id, entry]));
-  const selectedHouseIds = listRelevantTier1HouseIds(
+  const selectedKnownHouseIds = listRelevantTier1HouseIds(
     state,
     Object.keys(houses).filter((houseId) => houseId !== playerHouseId)
   );
+  const prospectSourcesByHouseId = collectProspectHouseSources(state);
+  const prospectHouseIds = sortStrings(prospectSourcesByHouseId.keys());
+  const selectedHouseIds: string[] = [];
+  const seenHouseIds = new Set<string>();
+  const pushHouseId = (houseId: string) => {
+    if (!houseId || houseId === playerHouseId || seenHouseIds.has(houseId)) return;
+    seenHouseIds.add(houseId);
+    selectedHouseIds.push(houseId);
+  };
+  for (const houseId of selectedKnownHouseIds) pushHouseId(houseId);
+  for (const houseId of prospectHouseIds) pushHouseId(houseId);
 
   const known_houses: KnownHouseSummary[] = [];
   const house_dossiers: HouseDossierSummary[] = [];
@@ -117,7 +307,7 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
     const relevanceEntry = relevanceByHouseId.get(houseId);
     const headId = resolveCurrentHouseHeadId(state, houseId);
     const head = registryPersonFor(state, headId);
-    const relationship = readRelationshipToPlayer(state, houseId);
+    const { relationship, summary: relationshipSummary } = relationshipSummaryForHouse(state, houseId);
     const heirSignals = heirSignalsForHouse(state, house);
     const memberIds = allHouseMemberIds(state, houseId);
     const householdMemberCount = memberIds.length;
@@ -128,6 +318,8 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
     const reasons = relevanceEntry?.reasons ?? [];
     const houseName = readHouseName(houseId, house);
     const tier = readTier(house);
+    const knownness = knownnessForHouse(reasons, prospectSourcesByHouseId.get(houseId));
+    const holdingsFootprint = holdingsFootprintForHouse(state, houseId, house);
 
     known_houses.push({
       house_id: houseId,
@@ -153,14 +345,21 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
       tier,
       relevance_tier: relevanceEntry?.tier ?? "tier1",
       relevance_reasons: [...reasons],
+      knownness: knownness.knownness,
+      knownness_sources: [...knownness.knownness_sources],
       kinship_summary: kinshipSummaryForReasons(reasons),
+      kinship_tags: [...reasons],
       relationship_band: classifyRelationshipBand(relationship),
+      relationship_summary: relationshipSummary,
       household_scope: householdScopeForHouse(house, householdMemberCount, childCount),
       household_member_count: householdMemberCount,
       living_member_count: livingMemberCount,
       child_count: childCount,
       has_male_heir: heirSignals.has_male_heir,
       heiress_possible: heirSignals.heiress_possible,
+      holdings_footprint: holdingsFootprint,
+      ledger_band: ledgerBandForHouse(state, houseId, house),
+      ledger_trend: ledgerTrendForHouse(state, houseId),
     });
   }
 

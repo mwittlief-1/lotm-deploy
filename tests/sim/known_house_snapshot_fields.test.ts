@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { structuredHouseIdForPerson } from "../../src/sim/actors";
 import { createNewRun, proposeTurn } from "../../src/sim";
 import {
   HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION,
   buildKnownHouseExperienceSurfaces,
 } from "../../src/sim/domains/people/knownHouseSummaries";
+import { buildMarriageWindow } from "../../src/sim/domains/people/marriage";
 import { getKnownHouses } from "../../src/ui/playViewModel";
 
 describe("known-house snapshot fields", () => {
@@ -25,9 +27,35 @@ describe("known-house snapshot fields", () => {
     });
     expect(one.house_dossiers[0]).toMatchObject({
       schema_version: HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION,
+      knownness: expect.any(String),
+      knownness_sources: expect.any(Array),
       relationship_band: expect.any(String),
+      relationship_summary: expect.objectContaining({
+        favor_score: expect.any(Number),
+        allegiance: expect.any(Number),
+        respect: expect.any(Number),
+        threat: expect.any(Number),
+      }),
       kinship_summary: expect.any(String),
+      holdings_footprint: expect.objectContaining({
+        holdings_count: expect.any(Number),
+        holdings_band: expect.any(String),
+      }),
+      ledger_band: expect.any(String),
+      ledger_trend: expect.any(String),
     });
+  });
+
+  it("keeps active prospect houses backed by matching dossier rows", () => {
+    const state = createNewRun("known_house_prospect_invariant_v035");
+    const surfaces = buildKnownHouseExperienceSurfaces(state);
+    const marriageWindow = buildMarriageWindow(state);
+
+    for (const offer of marriageWindow?.offers ?? []) {
+      const offerHouseId = structuredHouseIdForPerson(state, offer.house_person_id);
+      expect(offerHouseId).toBeTruthy();
+      expect(surfaces.house_dossiers.some((dossier) => dossier.house_id === offerHouseId)).toBe(true);
+    }
   });
 
   it("attaches known-house summaries to preview_state so the view-model can consume them directly", () => {

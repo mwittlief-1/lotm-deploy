@@ -54,10 +54,15 @@ describe("bounded snapshot contract", () => {
     expect(serialized.house_dossiers).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          schema_version: "house_dossier_summary_v1",
+          schema_version: "house_dossier_summary_v2",
           house_id: expect.any(String),
           relationship_band: expect.any(String),
-          kinship_summary: expect.any(String)
+          kinship_summary: expect.any(String),
+          knownness: expect.any(String),
+          relationship_summary: expect.any(Object),
+          holdings_footprint: expect.any(Object),
+          ledger_band: expect.any(String),
+          ledger_trend: expect.any(String)
         })
       ])
     );
