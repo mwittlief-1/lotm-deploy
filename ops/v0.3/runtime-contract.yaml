@@ -13,7 +13,37 @@ control_plane_rules:
   default_claim_ttl_hours: 4
   scheduler_mode: "lane_parallel"
   progress_active_claims_field: "active_claims"
-  same_lane_continuation: "integrator_chains_safe_same_lane_follow_ons_in_same_reconciliation_pass"
+  same_lane_continuation: "lane_may_self_chain_safe_same_lane_follow_ons_until_cross_lane_or_integrator_boundary"
+  same_lane_prepromotion:
+    allowed: true
+    purpose: "avoid scheduler-promotion stalls on clean same-lane chains"
+    conditions:
+      - "next task is in the same lane"
+      - "next task requires_integrator is false"
+      - "the only unmet deps are the currently active same-lane predecessor tasks"
+      - "no cross-lane blocker, checkpoint, or integrator-only boundary applies"
+    effect:
+      - "integrator may mark the successor task ready before the predecessor is reconciled"
+      - "lane may self-claim the successor after locally closing the predecessor"
+  lane_local_self_advance:
+    allowed: true
+    kickoff_remains_authoritative_for_cross_lane_coordination: true
+    conditions:
+      - "next task is in the same lane"
+      - "next task requires_integrator is false"
+      - "all cross-lane deps are already done in kickoff truth"
+      - "only same-lane deps may be satisfied by lane-local completed tasks not yet integrated"
+      - "scheduler promotion is not required when same_lane_prepromotion conditions are met"
+      - "no checkpoint, escalation, or integrator-only boundary applies"
+      - "lane keeps at most one active task at a time"
+    required_records:
+      - "close current task in the lane-local run log"
+      - "record the local claim transition for the next task in the lane-local run log"
+      - "update lane-local backlog/progress state so integrator can reconcile the chain later"
+    prohibited:
+      - "skip over decomposed tasks"
+      - "advance across requires_integrator true tasks"
+      - "use lane-local provisional claims as cross-lane scheduling authority"
   non_checkpoint_tasks_require_parent_epic: true
   external_checkpoint_parent_epic_optional: true
   current_task_must_reference_task_id: true
@@ -66,5 +96,5 @@ run_logging_required:
   - pr_url
   - pr_status
 budgets:
-  snapshot_cap_bytes_per_turn: 204800
+  snapshot_cap_bytes_per_turn: 524288
   turn_time_soft_ceiling_ms_per_seed: 250

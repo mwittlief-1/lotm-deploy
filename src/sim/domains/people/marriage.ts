@@ -1,6 +1,7 @@
 import { structuredHouseIdForPerson } from "../../actors";
 import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../../court";
 import { chargeCourtDecisionBudget } from "../court/decisionBudget";
+import { resolveCourtDelegationEntry, resolveDelegatedBudgetCost } from "../court/delegationRegistry";
 import { canSpendEnergy, spendEnergy } from "../court/energy";
 import { applyCoinDelta, canAffordCoin, spendCoin } from "../economy/ledger";
 import { listEligibleCandidates } from "../../marriageMarket";
@@ -8,13 +9,19 @@ import { Rng } from "../../rng";
 import type { TierSets } from "../../tiers";
 import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
 import { clampInt } from "../../util";
+import { getLivingSpouse } from "../../kinship";
+import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
 import { listRelevantTier1HouseIds } from "./knownHouseRelevance";
 import { applyRelationshipDelta } from "./relationshipEngine";
+import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 
 const MARRIAGE_INBOUND_DECISION_COST = 1;
 const MARRIAGE_SCOUT_DECISION_COST = 2;
+const MARRIAGE_SCOUT_MIN_DELEGATED_COST = 1;
+const SPOUSE_EDGE_A_KEYS = ["a_id", "from_person_id", "from", "a"] as const;
+const SPOUSE_EDGE_B_KEYS = ["b_id", "to_person_id", "to", "b"] as const;
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
@@ -22,10 +29,46 @@ function modsObj(state: RunState): Record<string, number> {
   return anyFlags._mods as Record<string, number>;
 }
 
+export function resolveMarriageScoutDecisionCost(state: RunState): number {
+  const entry = resolveCourtDelegationEntry(state, "marriage_scout");
+  if (!entry.delegated) return MARRIAGE_SCOUT_DECISION_COST;
+  return Math.max(
+    MARRIAGE_SCOUT_MIN_DELEGATED_COST,
+    resolveDelegatedBudgetCost(MARRIAGE_SCOUT_DECISION_COST, entry)
+  );
+}
+
 function reserveMarriageDecisionBudget(state: RunState, action: "scout" | "inbound"): boolean {
-  return action === "scout"
-    ? chargeCourtDecisionBudget(state, "marriage_scout", MARRIAGE_SCOUT_DECISION_COST).applied
-    : chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
+  if (action === "scout") {
+    return chargeCourtDecisionBudget(state, "marriage_scout", resolveMarriageScoutDecisionCost(state)).applied;
+  }
+  return chargeCourtDecisionBudget(state, "marriage_inbound", MARRIAGE_INBOUND_DECISION_COST).applied;
+}
+
+function marriageWindowSubjectIds(marriageWindow: MarriageWindow | null | undefined): string[] {
+  if (!marriageWindow) return [];
+  return [
+    ...new Set(
+      [...marriageWindow.eligible_child_ids, ...marriageWindow.offers.map((offer) => offer.house_person_id)]
+        .filter((id): id is string => typeof id === "string" && id.length > 0)
+    )
+  ].sort((a, b) => a.localeCompare(b));
+}
+
+function recordMarriageFlowEvidence(
+  state: RunState,
+  kind: string,
+  detail: string,
+  subjectIds: Array<string | null | undefined>
+): void {
+  recordRuntimeDomainEvidence(state, "marriage", [
+    makeEvidenceEvent({
+      kind,
+      detail,
+      category: "marriage",
+      subject_ids: subjectIds
+    })
+  ]);
 }
 
 export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: string): void {
@@ -39,6 +82,94 @@ export function ensureMarriageKinshipEdge(state: RunState, aId: string, bId: str
       ((edge.a_id === aId && edge.b_id === bId) || (edge.a_id === bId && edge.b_id === aId))
   );
   if (!exists) edges.push({ kind: "spouse_of", a_id: aId, b_id: bId });
+}
+
+function readEdgeIdByKeys(edge: any, keys: readonly string[]): string | null {
+  if (!edge || typeof edge !== "object") return null;
+  for (const key of keys) {
+    const value = edge[key];
+    if (typeof value === "string" && value.length > 0) return value;
+  }
+  return null;
+}
+
+function spouseEdgeEndpoints(edge: any): { a: string | null; b: string | null } {
+  if (!edge || typeof edge !== "object" || edge.kind !== "spouse_of") return { a: null, b: null };
+  return {
+    a: readEdgeIdByKeys(edge, SPOUSE_EDGE_A_KEYS),
+    b: readEdgeIdByKeys(edge, SPOUSE_EDGE_B_KEYS),
+  };
+}
+
+function spouseEdgeIsActive(edge: any): boolean {
+  if (!edge || typeof edge !== "object") return false;
+  if (edge.is_active === false) return false;
+  if (edge.end_turn_index != null) return false;
+  if (edge.ended_turn_index != null) return false;
+  if (edge.end_turn != null) return false;
+  if (edge.ended_turn != null) return false;
+  if (edge.end_year != null) return false;
+  if (edge.ended_year != null) return false;
+  return true;
+}
+
+function hasActiveSpouseEdge(state: RunState, personId: string): boolean {
+  const edges = Array.isArray((state as any).kinship_edges) ? ((state as any).kinship_edges as any[]) : [];
+  for (const edge of edges) {
+    if (!spouseEdgeIsActive(edge)) continue;
+    const { a, b } = spouseEdgeEndpoints(edge);
+    if (a === personId || b === personId) return true;
+  }
+  return false;
+}
+
+function householdWidowMarkerApplies(state: RunState, personId: string): boolean {
+  if (state.house.spouse_status !== "widow") return false;
+  if (personId === state.house.head.id && state.house.head.alive && !getLivingSpouse(state as any, personId)) return true;
+  if (state.house.spouse?.id === personId && state.house.spouse.alive && !getLivingSpouse(state as any, personId)) return true;
+  return false;
+}
+
+function canSeekMarriage(state: RunState, person: Person | undefined | null): boolean {
+  if (!person || !person.alive || person.age < 15) return false;
+  if (getLivingSpouse(state as any, person.id)) return false;
+  if (!person.married) return true;
+  if (householdWidowMarkerApplies(state, person.id)) return true;
+  return hasActiveSpouseEdge(state, person.id);
+}
+
+function syncMarriedFlag(state: RunState, personId: string): void {
+  const nextMarried = Boolean(getLivingSpouse(state as any, personId));
+  const anyState: any = state as any;
+
+  if (anyState.people?.[personId]) anyState.people[personId].married = nextMarried;
+  if (state.house.head.id === personId) state.house.head.married = nextMarried;
+  if (state.house.spouse?.id === personId) state.house.spouse.married = nextMarried;
+
+  const child = state.house.children.find((entry) => entry.id === personId);
+  if (child) child.married = nextMarried;
+}
+
+function retireObsoleteSpouseEdges(state: RunState, personId: string, keepPartnerId: string): string[] {
+  const edges = Array.isArray((state as any).kinship_edges) ? ((state as any).kinship_edges as any[]) : [];
+  const affected = new Set<string>();
+
+  for (const edge of edges) {
+    if (!spouseEdgeIsActive(edge)) continue;
+    const { a, b } = spouseEdgeEndpoints(edge);
+    if (!a || !b) continue;
+
+    let otherId: string | null = null;
+    if (a === personId) otherId = b;
+    else if (b === personId) otherId = a;
+    if (!otherId || otherId === keepPartnerId) continue;
+
+    edge.end_turn_index = state.turn_index;
+    affected.add(personId);
+    affected.add(otherId);
+  }
+
+  return [...affected].sort((left, right) => left.localeCompare(right));
 }
 
 export function bestMarriageOfferIndexPolicy(state: RunState, marriageWindow: MarriageWindow): number | null {
@@ -72,12 +203,12 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
 
   const eligibleAll: Person[] = [];
   const pushEligible = (person: Person | undefined | null) => {
-    if (!person || !person.alive || person.married || person.age < 15) return;
+    if (!canSeekMarriage(state, person)) return;
     if (eligibleAll.some((candidate) => candidate.id === person.id)) return;
     eligibleAll.push(person);
   };
 
-  if (!state.house.spouse && state.house.spouse_status !== "widow") pushEligible(state.house.head);
+  pushEligible(state.house.head);
   for (const child of state.house.children) pushEligible(child);
   if (!forced && eligibleAll.length === 0) return null;
   if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
@@ -152,12 +283,20 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   if (!marriageWindow || decision.action === "none") return;
 
   if (!canSpendEnergy(state, 1)) {
+    recordMarriageFlowEvidence(state, "marriage_blocked_energy", "No energy for marriage action.", [
+      state.house.head.id,
+      ...marriageWindowSubjectIds(marriageWindow)
+    ]);
     reportNotes.push("No energy for marriage action.");
     return;
   }
 
   if (decision.action === "scout") {
+    const scoutCost = resolveMarriageScoutDecisionCost(state);
     if (!reserveMarriageDecisionBudget(state, "scout")) {
+      recordMarriageFlowEvidence(state, "marriage_scout_blocked_budget", "No court budget for marriage scouting.", [
+        state.house.head.id
+      ]);
       reportNotes.push("No court budget for marriage scouting.");
       return;
     }
@@ -165,17 +304,42 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     spendCoin(state, 1);
     const mods = modsObj(state);
     mods["marriage_quality"] = (mods["marriage_quality"] ?? 1) * 1.05;
+    if (scoutCost !== MARRIAGE_SCOUT_DECISION_COST) {
+      recordMarriageFlowEvidence(
+        state,
+        "marriage_scout_delegated",
+        `Delegated scouting used ${scoutCost} court decision${scoutCost === 1 ? "" : "s"}.`,
+        [state.house.head.id]
+      );
+      reportNotes.push(`Delegated scouting used ${scoutCost} court decision${scoutCost === 1 ? "" : "s"}.`);
+    }
+    recordMarriageFlowEvidence(
+      state,
+      "marriage_scouted",
+      "Scouted prospects; next marriage window slightly improved.",
+      [state.house.head.id]
+    );
     reportNotes.push("Scouted prospects; next marriage window slightly improved.");
     return;
   }
 
   if (decision.action === "reject_all") {
     if (!reserveMarriageDecisionBudget(state, "inbound")) {
+      recordMarriageFlowEvidence(state, "marriage_inbound_blocked_budget", "No court budget for inbound marriage handling.", [
+        state.house.head.id,
+        ...marriageWindowSubjectIds(marriageWindow)
+      ]);
       reportNotes.push("No court budget for inbound marriage handling.");
       return;
     }
     spendEnergy(state, 1);
     state.manor.unrest = clampInt(state.manor.unrest + 1, 0, 100);
+    recordMarriageFlowEvidence(
+      state,
+      "marriage_rejected_all",
+      "Rejected all offers; slight social friction (+1 unrest).",
+      [state.house.head.id, ...marriageWindowSubjectIds(marriageWindow)]
+    );
     reportNotes.push("Rejected all offers; slight social friction (+1 unrest).");
     return;
   }
@@ -186,6 +350,7 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   const child = isHeadSubject ? state.house.head : state.house.children.find((person) => person.id === decision.child_id);
   const offer = marriageWindow.offers[decision.offer_index];
   if (!child || !offer) {
+    recordMarriageFlowEvidence(state, "marriage_invalid_selection", "Invalid marriage selection.", [state.house.head.id]);
     reportNotes.push("Invalid marriage selection.");
     return;
   }
@@ -195,6 +360,10 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     const people: Record<string, Person> | undefined = anyState.people as any;
     const spousePerson = people ? people[offer.house_person_id] : null;
     if (spousePerson && spousePerson.sex === child.sex) {
+      recordMarriageFlowEvidence(state, "marriage_accept_blocked", "Cannot accept: same-sex marriage is disallowed.", [
+        child.id,
+        offer.house_person_id
+      ]);
       reportNotes.push("Cannot accept: same-sex marriage is disallowed.");
       return;
     }
@@ -202,11 +371,19 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
 
   const dowry = offer.dowry_coin_net;
   if (dowry < 0 && !canAffordCoin(state, Math.abs(dowry))) {
+    recordMarriageFlowEvidence(state, "marriage_accept_blocked", "Cannot accept: insufficient coin for negative dowry.", [
+      child.id,
+      offer.house_person_id
+    ]);
     reportNotes.push("Cannot accept: insufficient coin for negative dowry.");
     return;
   }
 
   if (!reserveMarriageDecisionBudget(state, "inbound")) {
+    recordMarriageFlowEvidence(state, "marriage_inbound_blocked_budget", "No court budget for inbound marriage handling.", [
+      child.id,
+      offer.house_person_id
+    ]);
     reportNotes.push("No court budget for inbound marriage handling.");
     return;
   }
@@ -214,14 +391,13 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
   spendEnergy(state, 1);
   applyCoinDelta(state, dowry);
 
-  child.married = true;
-  {
-    const anyState: any = state as any;
-    if (anyState.people && anyState.people[child.id]) anyState.people[child.id].married = true;
-    if (anyState.people && anyState.people[offer.house_person_id]) anyState.people[offer.house_person_id].married = true;
-  }
-
+  const affectedIds = new Set<string>();
+  for (const personId of retireObsoleteSpouseEdges(state, child.id, offer.house_person_id)) affectedIds.add(personId);
+  for (const personId of retireObsoleteSpouseEdges(state, offer.house_person_id, child.id)) affectedIds.add(personId);
   ensureMarriageKinshipEdge(state, child.id, offer.house_person_id);
+  affectedIds.add(child.id);
+  affectedIds.add(offer.house_person_id);
+  for (const personId of [...affectedIds].sort((left, right) => left.localeCompare(right))) syncMarriedFlag(state, personId);
 
   const spouseJoinsCourt = isHeadSubject ? true : child.sex === "M";
   if (spouseJoinsCourt) {
@@ -286,5 +462,12 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
 
   const mods = modsObj(state);
   mods["birth_bonus"] = (mods["birth_bonus"] ?? 1) * 1.03;
+  recordMarriageFlowEvidence(
+    state,
+    "marriage_accepted",
+    `Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`,
+    [child.id, offer.house_person_id]
+  );
+  ensureResidenceManorBindings(state);
   reportNotes.push(`Marriage accepted for ${child.name}: dowry ${dowry >= 0 ? "+" : ""}${dowry} coin.`);
 }

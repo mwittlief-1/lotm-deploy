@@ -1,5 +1,6 @@
 import type { Person, PhaseNameV0, RunState } from "../../types";
 import { asNonNegInt } from "../../util";
+import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import {
   arrearsBushels,
   arrearsCoin,
@@ -166,6 +167,22 @@ function personRef(person: Person | undefined, fallbackLabel: string): EconomyOb
           ? person.id
           : fallbackLabel
   };
+}
+
+function recordObligationFlowEvidence(
+  state: RunState,
+  kind: string,
+  detail: string,
+  counterpartyId: string
+): void {
+  recordRuntimeDomainEvidence(state, "obligations", [
+    makeEvidenceEvent({
+      kind,
+      detail,
+      category: "obligations",
+      subject_ids: [state.house.head.id, counterpartyId]
+    })
+  ]);
 }
 
 function emptyRuntimeMeta(): EconomyObligationRuntimeMetaV1 {
@@ -435,10 +452,17 @@ export function settleEconomyObligationCounterparty(
   const spec = counterpartySpec(input.counterparty_kind);
   const meta = runtimeMetaFor(state, input.counterparty_kind);
   const paymentMode = selectedPaymentMode(input.counterparty_kind, input.payment_mode);
+  const counterparty = spec.counterparty_ref(state);
 
   assertSupportedPaymentMode(input.counterparty_kind, paymentMode);
 
   if (meta.last_settled_turn_index === normalizeInteger(state.turn_index)) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_settlement_already_settled_this_turn",
+      `${counterparty.counterparty_label}: settlement already applied this turn.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       contract_id: spec.contract_id,
@@ -456,6 +480,12 @@ export function settleEconomyObligationCounterparty(
 
   const scaffold = makeEconomyObligationSettlementScaffold(state, input);
   if (outstandingAmount(state, input.counterparty_kind) <= 0) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_settlement_nothing_due",
+      `${counterparty.counterparty_label}: nothing due.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       contract_id: spec.contract_id,
@@ -472,6 +502,12 @@ export function settleEconomyObligationCounterparty(
   }
 
   if (scaffold.amount <= 0) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_settlement_zero_requested",
+      `${counterparty.counterparty_label}: settlement requested zero amount.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       contract_id: spec.contract_id,
@@ -489,6 +525,12 @@ export function settleEconomyObligationCounterparty(
 
   const paidAmount = normalizeNonNegative(applyFiscalSettlementScaffold(state, scaffold));
   if (paidAmount <= 0) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_settlement_insufficient_asset",
+      `${counterparty.counterparty_label}: settlement could not draw a payment asset.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       contract_id: spec.contract_id,
@@ -522,6 +564,12 @@ export function settleEconomyObligationCounterparty(
   );
 
   meta.last_settled_turn_index = normalizeInteger(state.turn_index);
+  recordObligationFlowEvidence(
+    state,
+    "obligation_settlement_applied",
+    `${scaffold.counterparty_label}: settled ${paidToArrears + paidToDue} via ${scaffold.selected_payment_mode}.`,
+    scaffold.counterparty_id
+  );
 
   return {
     counterparty_kind: input.counterparty_kind,
@@ -543,7 +591,14 @@ export function carryEconomyObligationCounterpartyIntoArrears(
   input: EconomyObligationCarryInputV1
 ): EconomyObligationCarryResultV1 {
   const meta = runtimeMetaFor(state, input.counterparty_kind);
+  const counterparty = counterpartySpec(input.counterparty_kind).counterparty_ref(state);
   if (meta.last_carried_turn_index === normalizeInteger(state.turn_index)) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_carry_already_applied",
+      `${counterparty.counterparty_label}: arrears carry already applied this turn.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       carried_amount: 0,
@@ -554,6 +609,12 @@ export function carryEconomyObligationCounterpartyIntoArrears(
   }
 
   if (counterpartySpec(input.counterparty_kind).due_amount(state) <= 0) {
+    recordObligationFlowEvidence(
+      state,
+      "obligation_carry_nothing_due",
+      `${counterparty.counterparty_label}: no current due remained for arrears carry.`,
+      counterparty.counterparty_id
+    );
     return {
       counterparty_kind: input.counterparty_kind,
       carried_amount: 0,
@@ -565,6 +626,12 @@ export function carryEconomyObligationCounterpartyIntoArrears(
 
   const carriedAmount = normalizeNonNegative(counterpartySpec(input.counterparty_kind).carry_due_into_arrears(state, input));
   meta.last_carried_turn_index = normalizeInteger(state.turn_index);
+  recordObligationFlowEvidence(
+    state,
+    "obligation_arrears_carried",
+    `${counterparty.counterparty_label}: carried ${carriedAmount} into arrears.`,
+    counterparty.counterparty_id
+  );
 
   return {
     counterparty_kind: input.counterparty_kind,

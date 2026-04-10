@@ -1,5 +1,12 @@
 import type { RunState } from "../sim/types";
 import type { CourtDecisionBudgetSurface } from "./playScreenCourtBudget";
+import {
+  getObligationCounterpartyTemplate,
+  renderObligationGestureOutcome,
+  renderObligationResolvedSummary,
+  renderObligationResponseSummary,
+  renderObligationStageLabel
+} from "../content/experienceContent";
 
 export const PLAY_SCREEN_OBLIGATIONS_CONTRACT_SCHEMA_VERSION = "play_screen_obligations_contract_v1" as const;
 export const PLAY_SCREEN_OBLIGATION_COUNTERPARTY_ORDER = ["liege", "church"] as const;
@@ -25,8 +32,12 @@ export type ObligationsContractGroup = {
 
 export type ObligationsContractPenaltyGroup = ObligationsContractGroup & {
   carriedThisTurn: boolean;
+  enforcementStage: number | null;
   enforcementState: "clear" | "arrears";
   enforcementSummary: string;
+  responseSummary: string;
+  resolvedSummary: string;
+  stageLabel: string;
   settledThisTurn: boolean;
 };
 
@@ -35,6 +46,7 @@ export type ObligationsContractGestureGroup = {
   availableInBudget: boolean;
   cost: number | null;
   detail: string;
+  leverSummary: string;
   receiptCategories: ObligationReceiptCategory[];
   spent: number | null;
   title: string;
@@ -66,6 +78,7 @@ type ParsedObligationsViewSummary = {
   counterpartyKind: ObligationsCounterpartyId;
   counterpartyLabel: string;
   dueAmount: number;
+  enforcementStage: number | null;
   enforcementState: "clear" | "arrears";
   enforcementSummary: string;
   settlementStatus: string;
@@ -75,36 +88,17 @@ type ParsedObligationsViewSummary = {
 
 const COUNTERPARTY_META: Record<
   ObligationsCounterpartyId,
-  {
-    defaultGestureDetail: string;
-    dueTitle: string;
-    fallbackTitle: string;
-    helper: string;
-    keywordHints: string[];
-    penaltyTitle: string;
+  ReturnType<typeof getObligationCounterpartyTemplate> & {
     receiptCategoryOrder: ObligationReceiptCategory[];
-    shortTitle: string;
   }
 > = {
   liege: {
-    defaultGestureDetail: "Court favor spent on noble gifts.",
-    dueTitle: "Tax due",
-    fallbackTitle: "House Liege",
-    helper: "Keeps liege dues, arrears pressure, and gift language aligned with coin-first receipts.",
-    keywordHints: ["liege", "tax", "gift", "coin arrears", "tax due", "liege tax"],
-    penaltyTitle: "Arrears & liege pressure",
+    ...getObligationCounterpartyTemplate("liege"),
     receiptCategoryOrder: ["coin", "unrest"],
-    shortTitle: "Liege"
   },
   church: {
-    defaultGestureDetail: "Court effort spent on religious offerings.",
-    dueTitle: "Tithe due",
-    fallbackTitle: "Parish Church",
-    helper: "Keeps church dues, arrears pressure, and offering language aligned with food-first receipts.",
-    keywordHints: ["church", "tithe", "offering", "bushels arrears", "tithe due", "church tithe"],
-    penaltyTitle: "Arrears & church pressure",
+    ...getObligationCounterpartyTemplate("church"),
     receiptCategoryOrder: ["food", "unrest"],
-    shortTitle: "Church"
   }
 };
 
@@ -124,6 +118,11 @@ function readBoolean(value: unknown): boolean {
   return value === true;
 }
 
+function readStage(value: unknown): number | null {
+  const parsed = readNumber(value);
+  return parsed !== null && parsed > 0 ? parsed : null;
+}
+
 function formatAmount(amount: number, counterpartyId: ObligationsCounterpartyId): string {
   if (counterpartyId === "liege") return `${amount} coin`;
   return `${amount} ${amount === 1 ? "bushel" : "bushels"}`;
@@ -135,6 +134,36 @@ function gestureActionId(counterpartyId: ObligationsCounterpartyId): "gift_liege
 
 function gestureReceiptCategory(counterpartyId: ObligationsCounterpartyId): ObligationReceiptCategory[] {
   return counterpartyId === "liege" ? ["coin"] : ["food"];
+}
+
+function gestureRelationshipSummary(counterpartyId: ObligationsCounterpartyId, summary: ParsedObligationsViewSummary): string {
+  return renderObligationGestureOutcome(counterpartyId, summary.enforcementState);
+}
+
+function enforcementStageLabel(summary: ParsedObligationsViewSummary): string {
+  return renderObligationStageLabel({
+    enforcementStage: summary.enforcementStage,
+    enforcementState: summary.enforcementState
+  });
+}
+
+function resolvedPressureSummary(summary: ParsedObligationsViewSummary): string {
+  return renderObligationResolvedSummary({
+    arrearsAmount: summary.arrearsAmount,
+    carriedThisTurn: summary.carriedThisTurn,
+    counterpartyId: summary.counterpartyKind,
+    enforcementStage: summary.enforcementStage,
+    settledThisTurn: summary.settledThisTurn
+  });
+}
+
+function responsePressureSummary(summary: ParsedObligationsViewSummary): string {
+  return renderObligationResponseSummary({
+    arrearsAmount: summary.arrearsAmount,
+    counterpartyId: summary.counterpartyKind,
+    dueAmount: summary.dueAmount,
+    enforcementStage: summary.enforcementStage
+  });
 }
 
 function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCounterpartyId, ParsedObligationsViewSummary> | null {
@@ -160,6 +189,7 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
       counterpartyKind,
       counterpartyLabel,
       dueAmount: readNumber(summary.due_amount) ?? 0,
+      enforcementStage: readStage(summary.enforcement_stage),
       enforcementState: summary.enforcement_state === "arrears" ? "arrears" : "clear",
       enforcementSummary: readString(summary.enforcement_summary) ?? `${counterpartyLabel}: clear.`,
       settlementStatus: readString(summary.settlement_status) ?? "clear",
@@ -216,8 +246,12 @@ export function buildObligationsCounterpartyContract(args: {
         amountLabel: formatAmount(summary.arrearsAmount, counterpartyId),
         summary: summary.arrearsAmount > 0 ? summary.settlementSummary : `${summary.counterpartyLabel}: no carried arrears.`,
         receiptCategories: [...meta.receiptCategoryOrder],
+        enforcementStage: summary.enforcementStage,
         enforcementState: summary.enforcementState,
         enforcementSummary: summary.enforcementSummary,
+        responseSummary: responsePressureSummary(summary),
+        resolvedSummary: resolvedPressureSummary(summary),
+        stageLabel: enforcementStageLabel(summary),
         carriedThisTurn: summary.carriedThisTurn,
         settledThisTurn: summary.settledThisTurn
       },
@@ -225,6 +259,7 @@ export function buildObligationsCounterpartyContract(args: {
         actionId: gestureActionId(counterpartyId),
         title: gestureEntry?.label ?? (counterpartyId === "liege" ? "Gift to liege" : "Offering to church"),
         detail: gestureEntry?.detail ?? meta.defaultGestureDetail,
+        leverSummary: gestureRelationshipSummary(counterpartyId, summary),
         cost: gestureEntry?.cost ?? null,
         spent: gestureEntry?.spent ?? null,
         availableInBudget: gestureEntry !== null,
@@ -289,14 +324,14 @@ export function obligationsModalTitle(focus: ObligationsModalFocus): string {
 export function obligationsModalSubtitle(origin: ObligationsModalOrigin, focus: ObligationsModalFocus): string {
   const routeHint =
     origin === "decisions"
-      ? "Use the payment controls just below to respond after you review the resolved dues."
+      ? "Use the payment controls just below to respond after you review the already-resolved stage state."
       : "Jump to Decisions below when you are ready to respond with coin, bushels, or court attention.";
 
   if (focus === "liege") {
-    return `Track tax due, coin arrears, and gifts to the liege in one place. ${routeHint}`;
+    return `Track tax due, coin arrears, and the current liege pressure stage in one place. ${routeHint}`;
   }
   if (focus === "church") {
-    return `Track tithe due, bushel arrears, and church offerings in one place. ${routeHint}`;
+    return `Track tithe due, bushel arrears, and the current church pressure stage in one place. ${routeHint}`;
   }
-  return `Compare liege and church pressure side by side before you set the next turn's response. ${routeHint}`;
+  return `Compare liege and church pressure side by side, including any carried arrears stage, before you set the next turn's response. ${routeHint}`;
 }

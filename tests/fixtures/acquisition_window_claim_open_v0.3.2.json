@@ -1,0 +1,88 @@
+{
+  "schema_version": "acquisition_prospects_window_v0",
+  "turn_index": 0,
+  "generated_at_turn_index": 0,
+  "prospect_ids": [
+    "acq_grant:grant_source:liege_demesne:manor_hx_43741",
+    "acq_inheritance_claim:p_head"
+  ],
+  "prospects": [
+    {
+      "id": "acq_grant:grant_source:liege_demesne:manor_hx_43741",
+      "type": "grant",
+      "from_house_id": "p_liege",
+      "to_house_id": "h_player",
+      "subject_person_id": "p_head",
+      "spouse_person_id": null,
+      "summary": "Grant offer",
+      "requirements": [
+        {
+          "kind": "custom",
+          "value": "favor>=95",
+          "text": "Liege favor must stay above the bounded grant threshold."
+        },
+        {
+          "kind": "custom",
+          "value": "manors<3",
+          "text": "Portfolio must retain manor-capacity headroom."
+        },
+        {
+          "kind": "custom",
+          "value": "ledger=stable",
+          "text": "Household ledger standing must remain inside the grant tolerance bands."
+        }
+      ],
+      "costs": {},
+      "predicted_effects": {
+        "coin_delta": 5,
+        "relationship_deltas": [
+          {
+            "scope": "person",
+            "from_id": "p_liege",
+            "to_id": "p_head",
+            "allegiance_delta": 1,
+            "respect_delta": 0,
+            "threat_delta": 2
+          }
+        ],
+        "flags_set": []
+      },
+      "uncertainty": "likely",
+      "expires_turn": 2,
+      "actions": [
+        "accept",
+        "reject"
+      ]
+    },
+    {
+      "id": "acq_inheritance_claim:p_head",
+      "type": "inheritance_claim",
+      "from_house_id": "h_player",
+      "to_house_id": "h_player",
+      "subject_person_id": "p_head",
+      "spouse_person_id": null,
+      "summary": "Inheritance claim",
+      "requirements": [],
+      "costs": {},
+      "predicted_effects": {
+        "coin_delta": null,
+        "relationship_deltas": [],
+        "flags_set": [
+          "inheritance_claim_active"
+        ]
+      },
+      "uncertainty": "possible",
+      "expires_turn": 2,
+      "actions": [
+        "accept",
+        "reject"
+      ]
+    }
+  ],
+  "shown_ids": [
+    "acq_grant:grant_source:liege_demesne:manor_hx_43741",
+    "acq_inheritance_claim:p_head"
+  ],
+  "hidden_ids": [],
+  "overflow_count": 0
+}

@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { proposeTurn } from "../../src/sim";
 import { createBeliefRegistry } from "../../src/sim/domains/ai/beliefs";
-import { buildPolicyIntelMap, npcPolicyScore, summarizeBeliefsForSubject } from "../../src/sim/domains/ai/policy";
+import {
+  POLICY_HOOK_DEBUG_SCHEMA_VERSION,
+  buildPolicyHookDebugView,
+  buildPolicyIntelMap,
+  npcPolicyScore,
+  summarizeBeliefsForSubject
+} from "../../src/sim/domains/ai/policy";
 import { bestMarriageOfferIndexPolicy } from "../../src/sim/domains/people/marriage";
 import { decide } from "../../src/sim/policies";
 import { SIM_VERSION } from "../../src/sim/version";
@@ -294,5 +300,51 @@ describe("ai policy hook", () => {
       ai_prospect_intel_bonus_scale: 1
     };
     expect(bestMarriageOfferIndexPolicy(state, marriageWindow as any)).toBe(0);
+  });
+
+  it("keeps policy hooks neutral without belief intel and exposes their read-only debug contract", () => {
+    const state = mkPolicyState();
+    delete (state.beliefs as any).by_subject.p_cand;
+    (state.flags as any)._tuning = {
+      ai_marriage_intel_bonus_scale: 0.5,
+      ai_prospect_intel_bonus_scale: 0
+    };
+
+    expect(npcPolicyScore({
+      hook: "marriage_offer",
+      base_score: 17,
+      state,
+      subject_id: "p_cand"
+    })).toBe(17);
+    expect(npcPolicyScore({
+      hook: "prospect",
+      base_score: 9,
+      state,
+      subject_id: "p_cand"
+    })).toBe(9);
+    expect(buildPolicyHookDebugView(state)).toEqual({
+      schema_version: POLICY_HOOK_DEBUG_SCHEMA_VERSION,
+      hook_order: ["marriage_offer", "prospect"],
+      entries_by_hook: {
+        marriage_offer: {
+          hook: "marriage_offer",
+          activation_mode: "belief_backed_bonus_only",
+          neutral_without_intel: true,
+          subject_scope: "explicit_subject_only",
+          current_scale: 0.5,
+          min_bonus: -0.25,
+          max_bonus: 0.75
+        },
+        prospect: {
+          hook: "prospect",
+          activation_mode: "belief_backed_bonus_only",
+          neutral_without_intel: true,
+          subject_scope: "explicit_subject_only",
+          current_scale: 0,
+          min_bonus: -0.15,
+          max_bonus: 0.4
+        }
+      }
+    });
   });
 });

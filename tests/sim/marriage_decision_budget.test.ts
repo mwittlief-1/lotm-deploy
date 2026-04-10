@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { buildCourtDelegationRegistry } from "../../src/sim/domains/court/delegationRegistry";
 import {
   chargeCourtDecisionBudget,
   ensureCourtDecisionBudgetRegistry
@@ -237,6 +238,85 @@ describe("marriage decision budget costs", () => {
         marriage_inbound: 1,
         marriage_scout: 0
       }
+    });
+  });
+
+  it("lets delegated scouting use one remaining court decision", () => {
+    const state = mkState();
+    chargeCourtDecisionBudget(state, "gift_liege", 5);
+    (state.house as any).court_delegation_registry = buildCourtDelegationRegistry([
+      {
+        action: "marriage_scout",
+        delegated: true,
+        effect: {
+          budget_cost_delta: -1,
+          budget_cost_floor: 0,
+        },
+      },
+    ]);
+    const notes: string[] = [];
+
+    applyMarriageDecision(
+      state,
+      { marriage_window: mkMarriageWindow() } as any,
+      { marriage: { kind: "marriage", action: "scout" } } as any,
+      notes
+    );
+
+    expect(state.house.energy.available).toBe(2);
+    expect(state.manor.coin).toBe(11);
+    expect((state.flags as any)?._mods?.marriage_quality).toBe(1.05);
+    expect(notes).toEqual([
+      "Delegated scouting used 1 court decision.",
+      "Scouted prospects; next marriage window slightly improved.",
+    ]);
+    expect(ensureCourtDecisionBudgetRegistry(state)).toMatchObject({
+      spent: 6,
+      remaining: 0,
+      exhausted: true,
+      spent_by_action: {
+        gift_liege: 5,
+        marriage_inbound: 0,
+        marriage_scout: 1,
+      },
+    });
+  });
+
+  it("keeps delegated scouting above zero court decisions", () => {
+    const state = mkState();
+    chargeCourtDecisionBudget(state, "gift_liege", 5);
+    (state.house as any).court_delegation_registry = buildCourtDelegationRegistry([
+      {
+        action: "marriage_scout",
+        delegated: true,
+        effect: {
+          budget_cost_delta: -2,
+          budget_cost_floor: 0,
+        },
+      },
+    ]);
+    const notes: string[] = [];
+
+    applyMarriageDecision(
+      state,
+      { marriage_window: mkMarriageWindow() } as any,
+      { marriage: { kind: "marriage", action: "scout" } } as any,
+      notes
+    );
+
+    expect(notes).toEqual([
+      "Delegated scouting used 1 court decision.",
+      "Scouted prospects; next marriage window slightly improved.",
+    ]);
+    expect(ensureCourtDecisionBudgetRegistry(state)).toMatchObject({
+      spent: 6,
+      remaining: 0,
+      exhausted: true,
+      spent_by_action: {
+        gift_liege: 5,
+        marriage_inbound: 0,
+        marriage_scout: 1,
+      },
     });
   });
 });

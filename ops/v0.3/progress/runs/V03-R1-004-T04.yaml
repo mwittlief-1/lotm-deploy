@@ -1,0 +1,42 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round25
+task_id: V03-R1-004-T04
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: cb2942027833578db1c4469d8f76f7524494cc60
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: pass
+replay_hashes:
+  run1: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+  run2: fec2597e55528776bf3eb186e061a3622a678b8734007aa56fc692c0c72751b1
+artifacts:
+  succession_registry_module: src/sim/domains/people/successionRegistry.ts
+  succession_registry_test: tests/sim/succession_registry.test.ts
+findings:
+  - Succession ordering now adds deterministic cadet-branch and marriage-link relevance after the canonical heir line is exhausted.
+  - The claimant registry mirrors the richer ordering metadata without changing the serialized inheritance-claim placeholder surface.
+  - Replay stayed on the accepted kickoff hash after integrating the claimant relevance seam.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-004-T05
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 is accepted on kickoff and the same-lane chain continued into the summary-surface task.
+

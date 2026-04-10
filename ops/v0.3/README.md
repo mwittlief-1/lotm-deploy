@@ -22,7 +22,8 @@
 15. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
 16. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
 17. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
-18. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+18. For longer same-lane runs, integrator may pre-promote the immediate successor task to `ready` when its only unmet dependency is the currently active same-lane predecessor and no cross-lane blocker applies; the lane may self-claim that successor after locally closing the predecessor without waiting for another scheduler promotion pass.
+19. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
 
 ## Backlog model
 - `releases[]` define the roadmap containers.
@@ -58,6 +59,7 @@
 - Bootstrap local lane branches from `codex/v0.3-refactor-kickoff` before dispatch.
 - `progress/latest.yaml.active_claims` is the source of truth for in-flight lane work.
 - Same-lane task chains should continue without an extra operator pause once the integrator accepts the prior task and no explicit checkpoint rule applies.
+- Same-lane chains should also avoid scheduler-promotion stalls: when the only remaining unmet dependency is the current same-lane task, pre-promote the successor to `ready` so the lane can continue after local closeout.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
 
 ## Claim Policy

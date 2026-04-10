@@ -1,0 +1,42 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round26
+task_id: V03-R3-003-T04
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: eaa251e81c72b5bc9d2c3866ee103d84eb17f664
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+  run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+artifacts:
+  play_screen_model: src/ui/playScreenModel.ts
+  agenda_panel: src/ui/panels/CouncilAgendaPanel.tsx
+  ui_test: tests/ui/playScreenAgenda.test.ts
+findings:
+  - Replaced the legacy mixed shortlist in the play-screen model with registry-backed agenda items so the UI renders domain-selected sources instead of recomputing priority from unrelated shell heuristics.
+  - Added bounded note rendering and explicit source-safe anchor routing, including direct portfolio links for outlier items and empty-state handling when no agenda items surface.
+  - Kept the agenda cards deterministic by formatting from bounded obligations, prospect, office, and portfolio summaries already present on preview state.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R3-003-T05
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 closed on the refreshed same-lane chain, and T05 was already promoted for immediate docs and determinism follow-through.

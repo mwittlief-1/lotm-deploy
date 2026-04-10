@@ -48,12 +48,16 @@ export type CounterpartyReceiptSection = {
   gestureCost: number | null;
   gestureDetail: string;
   gestureLabel: string;
+  gestureSummary: string;
   gestureSpent: number | null;
   helper: string;
   id: ReceiptCounterpartyTag;
   penaltySummary: string;
   receiptCategoryOrder: ReceiptFocusTag[];
+  resolvedSummary: string;
+  responseSummary: string;
   receipts: ReceiptLine[];
+  stageLabel: string;
   title: string;
 };
 
@@ -102,7 +106,7 @@ const GROUPED_SECTION_META: Record<ReceiptViewerFocus, { title: string; helper: 
 };
 
 const FOCUS_SUBTITLES: Record<ReceiptViewerFocus, string> = {
-  overview: "Grouped mode keeps the headline story first. Raw mode preserves the exact phase receipt trail underneath it.",
+  overview: "Grouped mode keeps counterparties and relationship levers first, then the resource story beneath them. Raw mode preserves the exact phase receipt trail underneath it.",
   food: "Food details keep the resource chip aligned with the receipt trail behind harvest, stores, and dues.",
   coin: "Coin details keep the resource chip aligned with the receipt trail behind market context and obligations.",
   unrest: "Unrest details keep stability pressure and its supporting receipt trail in one focused surface."
@@ -217,10 +221,14 @@ export function buildReceiptViewerData(args: {
         penaltySummary: section.penaltyGroup.enforcementSummary,
         gestureLabel: section.gestureGroup.title,
         gestureDetail: section.gestureGroup.detail,
+        gestureSummary: section.gestureGroup.leverSummary,
         gestureCost: section.gestureGroup.cost,
         gestureSpent: section.gestureGroup.spent,
         receiptCategoryOrder: [...section.receiptCategoryOrder],
-        receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.counterpartyTags.includes(section.id)))
+        resolvedSummary: section.penaltyGroup.resolvedSummary,
+        responseSummary: section.penaltyGroup.responseSummary,
+        receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.counterpartyTags.includes(section.id))),
+        stageLabel: section.penaltyGroup.stageLabel
       }))
     : [];
 
@@ -249,6 +257,14 @@ export function selectGroupedReceiptSections(
 ): GroupedReceiptSection[] {
   if (focus === "overview") return groupedSections;
   return groupedSections.filter((section) => section.id === focus);
+}
+
+export function selectCounterpartyReceiptSections(
+  counterpartySections: CounterpartyReceiptSection[],
+  focus: ReceiptViewerFocus
+): CounterpartyReceiptSection[] {
+  if (focus === "overview") return counterpartySections;
+  return counterpartySections.filter((section) => section.receiptCategoryOrder.includes(focus));
 }
 
 export function selectRawReceiptPhases(rawPhases: RawReceiptPhase[], focus: ReceiptViewerFocus): RawReceiptPhase[] {

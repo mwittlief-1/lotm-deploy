@@ -1,0 +1,42 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round26
+task_id: V03-R3-003-T05
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-social-mechanics
+commit: eaa251e81c72b5bc9d2c3866ee103d84eb17f664
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+  run2: b10c4c9fba4590c1ef2835a25c2ad426f89ad90b8a6e3649624824daf199bc87
+artifacts:
+  closeout_doc: docs/ux/v0.3.3_court_agenda_closeout.md
+  ui_test: tests/ui/playScreenAgenda.test.ts
+  epic_report: ops/v0.3/progress/runs/V03-R3-003.md
+findings:
+  - Added explicit determinism coverage for agenda population, selection, and UI stub routing so the court agenda baseline now has both contract and behavior regression protection.
+  - Published the v0.3.3 court agenda closeout as the release-facing summary of locked source families, conflict rules, bounded notes, and non-goals for later energy work.
+  - The court agenda scaffolding epic is now ready to remain done in backlog state after the kickoff-truth refresh and same-lane execution chain.
+stop_reason: no_same_lane_follow_on
+next_task_cursor: ''
+next_task_ready: false
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 closed the social court agenda chain, and no next same-lane follow-on is ready in the current refreshed backlog snapshot.

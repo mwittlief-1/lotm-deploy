@@ -1,0 +1,40 @@
+{
+  "kind": "playtest_ops_kpi_snapshot_v1",
+  "release": "v0.3.4",
+  "packet_file_name": "kpi_snapshot.json",
+  "report_file_template": "bug_report_<NN>_<short_slug>.md",
+  "packet_id": null,
+  "scenario_id": null,
+  "policy": null,
+  "seed": null,
+  "replay_hash": null,
+  "artifact_completeness": {
+    "run_summary_json": false,
+    "full_run_json": false,
+    "turn_report_notes": false,
+    "receipts_grouped_notes": false,
+    "receipts_raw_notes": null,
+    "replay_batch_reference": false
+  },
+  "discoverability": {
+    "export_entrypoint_found_without_debug": null,
+    "run_log_needed_for_primary_report": null,
+    "open_questions_count": null
+  },
+  "legibility": {
+    "turn_report_clarity_score_1_to_5": null,
+    "receipts_grouped_clarity_score_1_to_5": null,
+    "counterparty_path_clarity_score_1_to_5": null,
+    "raw_receipts_needed": null
+  },
+  "triage": {
+    "bug_reports_filed": 0,
+    "clarity_reports_filed": 0,
+    "balance_signals_flagged": 0,
+    "ops_gaps_flagged": 0
+  },
+  "handoff": {
+    "packet_ready_for_review": false,
+    "notes": null
+  }
+}

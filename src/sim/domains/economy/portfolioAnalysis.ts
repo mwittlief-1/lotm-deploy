@@ -13,6 +13,8 @@ import {
   type EconomyPortfolioAggregateV1,
   type EconomyPortfolioManorTotalsV1
 } from "./portfolioAggregation";
+import { buildBoundedWorldTopologyView } from "../world";
+import type { RunState } from "../../types";
 
 export const ECONOMY_PORTFOLIO_ANALYSIS_SCHEMA_VERSION = "economy_portfolio_analysis_v1" as const;
 export const ECONOMY_PORTFOLIO_MANOR_ANALYSIS_SCHEMA_VERSION = "economy_portfolio_manor_analysis_v1" as const;
@@ -48,6 +50,16 @@ export interface EconomyPortfolioAnalysisV1 {
   outliers_by_metric: Record<EconomyPortfolioOutlierMetricKeyV1, EconomyPortfolioOutlierEntryV1[]>;
 }
 
+export interface EconomyPortfolioPhaseHintsV1 {
+  production_food_delta?: number;
+  production_meat_delta?: number;
+  consumption_food_stores?: number;
+  consumption_meat_stores?: number;
+  consumption_shortage_bushels?: number;
+}
+
+const ECONOMY_PORTFOLIO_PHASE_HINTS_FLAG = "_economy_portfolio_phase_hints_v1" as const;
+
 type OutlierDirection = "highest" | "lowest";
 
 function compareText(a: string, b: string): number {
@@ -58,6 +70,11 @@ function compareText(a: string, b: string): number {
 
 function normalizeInteger(value: number): number {
   return Math.trunc(value);
+}
+
+function normalizeNonNegativeInteger(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.trunc(value));
 }
 
 function buildOrderedRecord<K extends string, V>(keys: readonly K[], valueFor: (key: K) => V): Record<K, V> {
@@ -249,4 +266,90 @@ export function serializeEconomyPortfolioAnalysis(analysis: EconomyPortfolioAnal
       (metricKey) => analysis.outliers_by_metric[metricKey]
     )
   });
+}
+
+function portfolioPhaseHintsFor(state: RunState): EconomyPortfolioPhaseHintsV1 {
+  const flags = state.flags as Record<string, unknown>;
+  const raw = flags[ECONOMY_PORTFOLIO_PHASE_HINTS_FLAG];
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return {};
+  }
+
+  const row = raw as Record<string, unknown>;
+  return {
+    production_food_delta: normalizeNonNegativeInteger(row.production_food_delta),
+    production_meat_delta: normalizeNonNegativeInteger(row.production_meat_delta),
+    consumption_food_stores: normalizeNonNegativeInteger(row.consumption_food_stores),
+    consumption_meat_stores: normalizeNonNegativeInteger(row.consumption_meat_stores),
+    consumption_shortage_bushels: normalizeNonNegativeInteger(row.consumption_shortage_bushels)
+  };
+}
+
+export function recordEconomyPortfolioPhaseHints(
+  state: RunState,
+  hints: EconomyPortfolioPhaseHintsV1
+): EconomyPortfolioPhaseHintsV1 {
+  const flags = state.flags as Record<string, unknown>;
+  const current = portfolioPhaseHintsFor(state);
+  const next: EconomyPortfolioPhaseHintsV1 = {
+    production_food_delta:
+      hints.production_food_delta === undefined
+        ? current.production_food_delta
+        : normalizeNonNegativeInteger(hints.production_food_delta),
+    production_meat_delta:
+      hints.production_meat_delta === undefined
+        ? current.production_meat_delta
+        : normalizeNonNegativeInteger(hints.production_meat_delta),
+    consumption_food_stores:
+      hints.consumption_food_stores === undefined
+        ? current.consumption_food_stores
+        : normalizeNonNegativeInteger(hints.consumption_food_stores),
+    consumption_meat_stores:
+      hints.consumption_meat_stores === undefined
+        ? current.consumption_meat_stores
+        : normalizeNonNegativeInteger(hints.consumption_meat_stores),
+    consumption_shortage_bushels:
+      hints.consumption_shortage_bushels === undefined
+        ? current.consumption_shortage_bushels
+        : normalizeNonNegativeInteger(hints.consumption_shortage_bushels)
+  };
+  flags[ECONOMY_PORTFOLIO_PHASE_HINTS_FLAG] = next;
+  return next;
+}
+
+export function buildEconomyPortfolioAnalysisFromState(state: RunState): EconomyPortfolioAnalysisV1 {
+  const anchor = buildBoundedWorldTopologyView();
+  const hints = portfolioPhaseHintsFor(state);
+  const manor = state.manor;
+
+  return buildEconomyPortfolioAnalysis({
+    manors: [
+      {
+        manor_id: anchor.anchor_manor_id,
+        asset_totals: {
+          coin: normalizeNonNegativeInteger(manor.coin),
+          food_stores: normalizeNonNegativeInteger(manor.bushels_stored),
+          meat_stores: normalizeNonNegativeInteger(manor.meat_stores ?? 0)
+        },
+        category_totals: {
+          "obligations.current_due.coin": normalizeNonNegativeInteger(manor.obligations.tax_due_coin),
+          "obligations.current_due.food_stores": normalizeNonNegativeInteger(manor.obligations.tithe_due_bushels),
+          "obligations.arrears.coin": normalizeNonNegativeInteger(manor.obligations.arrears.coin),
+          "obligations.arrears.food_stores": normalizeNonNegativeInteger(manor.obligations.arrears.bushels),
+          "obligations.enforcement.war_levy": manor.obligations.war_levy_due ? 1 : 0,
+          "production.food_delta": normalizeNonNegativeInteger(hints.production_food_delta ?? 0),
+          "production.meat_delta": normalizeNonNegativeInteger(hints.production_meat_delta ?? 0),
+          "consumption.food_stores": normalizeNonNegativeInteger(hints.consumption_food_stores ?? 0),
+          "consumption.meat_stores": normalizeNonNegativeInteger(hints.consumption_meat_stores ?? 0),
+          "consumption.shortage_bushels": normalizeNonNegativeInteger(hints.consumption_shortage_bushels ?? 0)
+        }
+      }
+    ]
+  });
+}
+
+export function refreshEconomyPortfolioState(state: RunState): EconomyPortfolioAnalysisV1 {
+  const analysis = buildEconomyPortfolioAnalysisFromState(state);
+  (state as RunState & { portfolio?: unknown }).portfolio = analysis;
+  return analysis;
 }

@@ -16,6 +16,7 @@ const ALLOWED_KEYS = new Set([
   "economy",
   "economy_obligations_view",
   "economy_pricing_view",
+  "court_delegation_view",
   "portfolio",
   "people",
   "houses",

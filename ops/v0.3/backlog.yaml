@@ -345,7 +345,7 @@ epics:
 - id: V03-R0-001
   title: Determinism and receipts v1 hardening
   release: v0.3.0
-  status: ready
+  status: done
   priority: 60
   tranche: 1
   change_type: behavior_change
@@ -442,7 +442,7 @@ epics:
 - id: V03-R0-004
   title: Gameplay screen UX v0 and receipts viewer shell
   release: v0.3.0
-  status: ready
+  status: done
   priority: 58
   tranche: 1
   change_type: behavior_change
@@ -476,7 +476,7 @@ epics:
 - id: V03-R0-005
   title: Relationship seeding and known-world baseline
   release: v0.3.0
-  status: ready
+  status: done
   priority: 57
   tranche: 1
   change_type: behavior_change
@@ -509,7 +509,7 @@ epics:
 - id: V03-R0-006
   title: Multi-asset fiscal baseline for food, meat, hunting, and receipts
   release: v0.3.0
-  status: ready
+  status: done
   priority: 56
   tranche: 1
   change_type: behavior_change
@@ -552,7 +552,7 @@ epics:
   - V03-R0-003
   - V03-XMAP-001
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
   allowed_paths:
   - src/sim/domains/world/**
   - src/ui/**
@@ -637,7 +637,7 @@ epics:
 - id: V03-R1-004
   title: Claims and succession baseline
   release: v0.3.1
-  status: todo
+  status: done
   priority: 50
   tranche: 2
   change_type: behavior_change
@@ -670,7 +670,7 @@ epics:
 - id: V03-R1-005
   title: Obligations and counterparty legibility UX
   release: v0.3.1
-  status: todo
+  status: done
   priority: 49
   tranche: 2
   change_type: behavior_change
@@ -705,7 +705,7 @@ epics:
 - id: V03-R1-006
   title: World person-to-manor assignment baseline
   release: v0.3.1
-  status: blocked
+  status: done
   priority: 48
   tranche: 2
   change_type: behavior_change
@@ -716,7 +716,7 @@ epics:
   - V03-XMAP-001
   - V03-R1-001
   requires_integrator: false
-  blocked_reason: Waiting for map topology merge and manor geography contract.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -774,7 +774,7 @@ epics:
 - id: V03-R2-002
   title: Tier scope caps and deterministic debug outputs
   release: v0.3.2
-  status: todo
+  status: done
   priority: 46
   tranche: 3
   change_type: behavior_change
@@ -806,7 +806,7 @@ epics:
 - id: V03-R2-003
   title: Delegation mechanics v0
   release: v0.3.2
-  status: todo
+  status: done
   priority: 45
   tranche: 3
   change_type: behavior_change
@@ -840,7 +840,7 @@ epics:
 - id: V03-R2-004
   title: Service records, offices, and seat-filling baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 44
   tranche: 3
   change_type: behavior_change
@@ -873,7 +873,7 @@ epics:
 - id: V03-R2-005
   title: Portfolio UX stub and manor selector baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 43
   tranche: 3
   change_type: behavior_change
@@ -908,7 +908,7 @@ epics:
 - id: V03-R2-006
   title: Multi-manor acquisition and grant prospects baseline
   release: v0.3.2
-  status: todo
+  status: done
   priority: 42
   tranche: 3
   change_type: behavior_change
@@ -944,7 +944,7 @@ epics:
 - id: V03-R3-001
   title: Replay hardening and reliability quota
   release: v0.3.3
-  status: todo
+  status: done
   priority: 44
   tranche: 4
   change_type: refactor
@@ -977,7 +977,7 @@ epics:
 - id: V03-R3-002
   title: Clergy placement and institution holder baseline
   release: v0.3.3
-  status: todo
+  status: done
   priority: 42
   tranche: 4
   change_type: behavior_change
@@ -1009,7 +1009,7 @@ epics:
 - id: V03-R3-003
   title: Court pre-agenda scaffolding and agenda items
   release: v0.3.3
-  status: todo
+  status: done
   priority: 38
   tranche: 4
   change_type: behavior_change
@@ -1077,7 +1077,7 @@ epics:
 - id: V03-R3-005
   title: Realm political weather scaffolding
   release: v0.3.3
-  status: todo
+  status: done
   priority: 36
   tranche: 4
   change_type: behavior_change
@@ -1110,7 +1110,7 @@ epics:
 - id: V03-R3-006
   title: AI belief registry and evidence rails
   release: v0.3.3
-  status: todo
+  status: done
   priority: 35
   tranche: 4
   change_type: behavior_change
@@ -1146,7 +1146,7 @@ epics:
 - id: V03-R3-007
   title: Experience content v0 for fiscal, grant, and marriage flows
   release: v0.3.3
-  status: todo
+  status: done
   priority: 34
   tranche: 4
   change_type: behavior_change
@@ -1180,7 +1180,7 @@ epics:
 - id: V03-R4-001
   title: v0.3.4 hardening and docs refresh
   release: v0.3.4
-  status: todo
+  status: done
   priority: 40
   tranche: 5
   change_type: refactor
@@ -1252,7 +1252,7 @@ epics:
 - id: V03-R4-003
   title: Experience playtest ops and export conventions
   release: v0.3.4
-  status: todo
+  status: done
   priority: 29
   tranche: 5
   change_type: behavior_change
@@ -2741,7 +2741,7 @@ tasks:
   parent_epic: V03-R0-005
   release: v0.3.0
   title: Close epic and refresh relationship seeding docs
-  status: ready
+  status: done
   priority: 94
   tranche: 1
   change_type: refactor
@@ -2772,11 +2772,11 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R0-005-T06.yaml
   claim:
-    status: claimed
-    claimed_by: manual-social-lane
-    claimed_at: '2026-04-04T17:04:23-0400'
-    claim_expires_at: '2026-04-04T21:04:23-0400'
-    run_id: manual-social-v03-r0-005-t06-20260404T170423-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R0-006-T01
   parent_epic: V03-R0-006
   release: v0.3.0
@@ -3964,7 +3964,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Audit current heir, claimant, and succession-order surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4005,7 +4005,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Define next-in-line map and claimant registry schema
-  status: todo
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4045,7 +4045,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Implement inheritance_claim prospect type and bounded generation rules
-  status: todo
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4085,7 +4085,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Apply marriage-edge effects to succession ordering and claimant relevance
-  status: todo
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4126,7 +4126,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Expose succession line outputs and claimant summaries to view-model surfaces
-  status: todo
+  status: done
   priority: 95
   tranche: 2
   change_type: behavior_change
@@ -4168,7 +4168,7 @@ tasks:
   parent_epic: V03-R1-004
   release: v0.3.1
   title: Close epic and refresh claims and succession docs
-  status: todo
+  status: done
   priority: 94
   tranche: 2
   change_type: refactor
@@ -4335,7 +4335,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render arrears stage and enforcement state legibility flows
-  status: ready
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4368,16 +4368,16 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R1-005-T04.yaml
   claim:
-    status: claimed
-    claimed_by: manual-ui-lane
-    claimed_at: '2026-04-04T17:04:23-0400'
-    claim_expires_at: '2026-04-04T21:04:23-0400'
-    run_id: manual-ui-v03-r1-005-t04-20260404T170423-0400
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
 - id: V03-R1-005-T05
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Render gifts and offerings as explicit relationship levers in receipts and summaries
-  status: todo
+  status: done
   priority: 95
   tranche: 2
   change_type: behavior_change
@@ -4418,7 +4418,7 @@ tasks:
   parent_epic: V03-R1-005
   release: v0.3.1
   title: Close epic and refresh obligations legibility docs
-  status: todo
+  status: done
   priority: 94
   tranche: 2
   change_type: refactor
@@ -4459,7 +4459,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Audit people lacking residence_manor_id across relevant roles and surfaces
-  status: blocked
+  status: done
   priority: 99
   tranche: 2
   change_type: refactor
@@ -4470,7 +4470,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4502,7 +4502,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Define residence_manor_id rules for household, prospects, clergy, and offices
-  status: blocked
+  status: done
   priority: 98
   tranche: 2
   change_type: refactor
@@ -4512,7 +4512,7 @@ tasks:
   deps:
   - V03-R1-006-T01
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4543,7 +4543,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Implement world-init person-to-manor assignment and transition handlers
-  status: blocked
+  status: done
   priority: 97
   tranche: 2
   change_type: behavior_change
@@ -4553,7 +4553,7 @@ tasks:
   deps:
   - V03-R1-006-T02
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/world/**
@@ -4584,7 +4584,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Expose residence selectors and numeric-distance hooks to snapshots
-  status: blocked
+  status: done
   priority: 96
   tranche: 2
   change_type: behavior_change
@@ -4594,7 +4594,7 @@ tasks:
   deps:
   - V03-R1-006-T03
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/experience/**
@@ -4626,7 +4626,7 @@ tasks:
   parent_epic: V03-R1-006
   release: v0.3.1
   title: Add person-to-manor assignment invariants and docs
-  status: blocked
+  status: done
   priority: 95
   tranche: 2
   change_type: refactor
@@ -4636,7 +4636,7 @@ tasks:
   deps:
   - V03-R1-006-T04
   requires_integrator: false
-  blocked_reason: Waiting for topology merge prerequisites.
+  blocked_reason: ''
   allowed_paths:
   - tests/**
   - docs/releases/**
@@ -5027,7 +5027,7 @@ tasks:
   title: Audit current relevance and tier-scope rules against topology selectors
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: done
   priority: 68
   tranche: 3
   change_type: refactor
@@ -5039,7 +5039,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T07
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5076,7 +5076,7 @@ tasks:
   title: Implement deterministic tier-scope cap table
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: done
   priority: 66
   tranche: 3
   change_type: behavior_change
@@ -5088,7 +5088,7 @@ tasks:
   - V03-XMAP-001
   - V03-R2-002-T01
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5121,7 +5121,7 @@ tasks:
   title: Apply numeric distance and far-threshold selectors to scope capping
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: done
   priority: 64
   tranche: 3
   change_type: behavior_change
@@ -5134,7 +5134,7 @@ tasks:
   - V03-R1-001-T03
   - V03-R2-002-T02
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5167,7 +5167,7 @@ tasks:
   title: Expose deterministic distance and scope debug outputs
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: done
   priority: 62
   tranche: 3
   change_type: refactor
@@ -5179,7 +5179,7 @@ tasks:
   - V03-XMAP-001
   - V03-R2-002-T03
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/ui/**
   - tests/**
@@ -5212,7 +5212,7 @@ tasks:
   title: Add tier-scope regression fixtures and close epic
   release: v0.3.2
   parent_epic: V03-R2-002
-  status: blocked
+  status: done
   priority: 60
   tranche: 3
   change_type: refactor
@@ -5225,7 +5225,7 @@ tasks:
   - V03-R2-002-T03
   - V03-R2-002-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map topology surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/sim/domains/world/**
   - tests/**
@@ -5260,7 +5260,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Audit budget-consuming actions and candidate delegation surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5303,7 +5303,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Define delegation registry and efficiency-only effect contract
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -5343,7 +5343,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Implement delegated settlement, maintenance, and gift execution hooks
-  status: todo
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5384,7 +5384,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Implement delegated scouting and budget-cost reduction rules
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5425,7 +5425,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Expose delegation outputs to court and portfolio snapshots
-  status: todo
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5467,7 +5467,7 @@ tasks:
   parent_epic: V03-R2-003
   release: v0.3.2
   title: Close epic and refresh delegation docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5507,7 +5507,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Audit role surfaces, seat requirements, and current holder transitions
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5549,7 +5549,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Define office registry, service record schema, and one-turn vacancy cap
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -5590,7 +5590,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement house-court seat filling and non-family retainer cost hooks
-  status: todo
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5631,7 +5631,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement realm-office holder registry and tenure transitions
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5671,7 +5671,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Implement service placement persistence and holder succession hooks
-  status: todo
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5713,7 +5713,7 @@ tasks:
   parent_epic: V03-R2-004
   release: v0.3.2
   title: Add office and seat-filling invariants and docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -5753,7 +5753,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Audit holdings and ledger surfaces for manor-versus-portfolio scope
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -5796,7 +5796,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Define portfolio view-model, manor selector, and outlier summary contract
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -5838,7 +5838,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render portfolio summary, outliers list, and manor-scope toggle
-  status: todo
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -5879,7 +5879,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Render manor selector and receipts scope filter
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -5920,7 +5920,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Wire center-on-selected-holding affordance behind the map checkpoint
-  status: blocked
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -5932,7 +5932,7 @@ tasks:
   - V03-XMAP-001
   - V03-R1-001-T04
   requires_integrator: false
-  blocked_reason: Waiting for V03-XMAP-001 and merged map surfaces.
+  blocked_reason: ''
   allowed_paths:
   - src/App.tsx
   - src/ui/**
@@ -5963,7 +5963,7 @@ tasks:
   parent_epic: V03-R2-005
   release: v0.3.2
   title: Close epic and refresh portfolio UX docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -6003,7 +6003,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Audit current prospect surfaces against inheritance, marriage, and grant acquisition sources
-  status: todo
+  status: done
   priority: 99
   tranche: 3
   change_type: refactor
@@ -6047,7 +6047,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Define grant prospect schema, origin types, and dossier summary fields
-  status: todo
+  status: done
   priority: 98
   tranche: 3
   change_type: refactor
@@ -6087,7 +6087,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Implement grant eligibility rules from relationship score, fiscal standing, and portfolio capacity
-  status: todo
+  status: done
   priority: 97
   tranche: 3
   change_type: behavior_change
@@ -6130,7 +6130,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Implement dispossessed manor pool and liege demesne grant sources
-  status: todo
+  status: done
   priority: 96
   tranche: 3
   change_type: behavior_change
@@ -6171,7 +6171,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Integrate acquisition prospect generation and deterministic bounded ranking
-  status: todo
+  status: done
   priority: 95
   tranche: 3
   change_type: behavior_change
@@ -6212,7 +6212,7 @@ tasks:
   parent_epic: V03-R2-006
   release: v0.3.2
   title: Add acquisition and grant regression fixtures and docs
-  status: todo
+  status: done
   priority: 94
   tranche: 3
   change_type: refactor
@@ -6253,7 +6253,7 @@ tasks:
   title: Audit replay coverage against v0.3 registries and quotas
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 58
   tranche: 4
   change_type: refactor
@@ -6300,7 +6300,7 @@ tasks:
   title: Add at least two new invariants tests for fiscal and portfolio surfaces
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 56
   tranche: 4
   change_type: refactor
@@ -6345,7 +6345,7 @@ tasks:
   title: Add replay-hash, snapshot-cap, and turn-budget guards
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 54
   tranche: 4
   change_type: refactor
@@ -6391,7 +6391,7 @@ tasks:
   title: Refresh mandatory replay command and reliability docs
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 52
   tranche: 4
   change_type: refactor
@@ -6433,7 +6433,7 @@ tasks:
   title: Close epic and record reliability quota completion
   release: v0.3.3
   parent_epic: V03-R3-001
-  status: todo
+  status: done
   priority: 50
   tranche: 4
   change_type: refactor
@@ -6473,7 +6473,7 @@ tasks:
   title: Audit person-placement surfaces for clergy and institution holders
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: done
   priority: 58
   tranche: 4
   change_type: refactor
@@ -6521,7 +6521,7 @@ tasks:
   title: Add clergy-track schema and eligibility rules
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: done
   priority: 56
   tranche: 4
   change_type: behavior_change
@@ -6565,7 +6565,7 @@ tasks:
   title: Add minimal institution-holder registry and persistence surfaces
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: done
   priority: 54
   tranche: 4
   change_type: behavior_change
@@ -6612,7 +6612,7 @@ tasks:
   title: Integrate clergy placement persistence into phase wrappers
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: done
   priority: 52
   tranche: 4
   change_type: behavior_change
@@ -6659,7 +6659,7 @@ tasks:
   title: Close epic and refresh clergy placement docs
   release: v0.3.3
   parent_epic: V03-R3-002
-  status: todo
+  status: done
   priority: 50
   tranche: 4
   change_type: refactor
@@ -6699,7 +6699,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Audit current agenda-worthy events and court-facing summary surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -6743,7 +6743,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Define agenda_item schema, typed tags, and source mappings
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -6783,7 +6783,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Populate agenda items from obligations, prospects, offices, and portfolio outliers
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -6825,7 +6825,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Capture what-mattered notes and render court agenda stubs
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -6866,7 +6866,7 @@ tasks:
   parent_epic: V03-R3-003
   release: v0.3.3
   title: Add agenda determinism coverage and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7109,7 +7109,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Audit existing liege, church, and realm pressure surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7151,7 +7151,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Define realm pressure registry and read-only political weather schema
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7191,7 +7191,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Seed crown-magnate-church latent pressure baselines deterministically
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7231,7 +7231,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Expose political weather outputs to snapshots and content hooks
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7272,7 +7272,7 @@ tasks:
   parent_epic: V03-R3-005
   release: v0.3.3
   title: Add realm-pressure fixtures and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7313,7 +7313,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Audit AI rail baseline and identify missing evidence emitters
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7357,7 +7357,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Define belief payload for known, likely, and possible states
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: refactor
@@ -7397,7 +7397,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Emit evidence events from marriage, obligations, and grant flows
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7439,7 +7439,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Expose belief and evidence debug outputs with neutral policy hook coverage
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7480,7 +7480,7 @@ tasks:
   parent_epic: V03-R3-006
   release: v0.3.3
   title: Close epic and refresh AI rail docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: refactor
@@ -7520,7 +7520,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Inventory content slots for obligations, offerings, grants, marriage, and dispossession warnings
-  status: todo
+  status: done
   priority: 99
   tranche: 4
   change_type: refactor
@@ -7563,7 +7563,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for obligations settlement and gifts or offerings outcomes
-  status: todo
+  status: done
   priority: 98
   tranche: 4
   change_type: behavior_change
@@ -7604,7 +7604,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for grants received or denied and marriage accept or reject
-  status: todo
+  status: done
   priority: 97
   tranche: 4
   change_type: behavior_change
@@ -7645,7 +7645,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Add content templates for arrears and dispossession ladder warnings
-  status: todo
+  status: done
   priority: 96
   tranche: 4
   change_type: behavior_change
@@ -7686,7 +7686,7 @@ tasks:
   parent_epic: V03-R3-007
   release: v0.3.3
   title: Wire content references into current UI surfaces and docs
-  status: todo
+  status: done
   priority: 95
   tranche: 4
   change_type: behavior_change
@@ -7728,7 +7728,7 @@ tasks:
   title: Audit widowhood, remarriage, heir, and orphan-edge bug backlog
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 58
   tranche: 5
   change_type: refactor
@@ -7747,6 +7747,7 @@ tasks:
   - src/sim/domains/people/**
   - src/sim/domains/court/**
   - tests/**
+  - docs/qa/**
   - docs/releases/**
   forbidden_paths:
   - src/sim/turn.ts
@@ -7780,7 +7781,7 @@ tasks:
   title: Fix widowhood and remarriage edge handling
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 56
   tranche: 5
   change_type: behavior_change
@@ -7827,7 +7828,7 @@ tasks:
   title: Fix multiple-heir and orphaned-edge graph integrity bugs
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 54
   tranche: 5
   change_type: behavior_change
@@ -7874,7 +7875,7 @@ tasks:
   title: Simplify v0.3 hotspots without intended outcome drift
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 52
   tranche: 5
   change_type: refactor
@@ -7923,7 +7924,7 @@ tasks:
   title: Refresh v0.3 docs, playtest instructions, and bug report template
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 50
   tranche: 5
   change_type: refactor
@@ -7963,7 +7964,7 @@ tasks:
   title: Final release scrub and close v0.3.4 hardening epic
   release: v0.3.4
   parent_epic: V03-R4-001
-  status: todo
+  status: done
   priority: 48
   tranche: 5
   change_type: refactor
@@ -8212,7 +8213,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Inventory export, reporting, and playtest pain surfaces
-  status: todo
+  status: done
   priority: 99
   tranche: 5
   change_type: refactor
@@ -8255,7 +8256,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Define receipt bundle export conventions and seed-pack instructions
-  status: todo
+  status: done
   priority: 98
   tranche: 5
   change_type: refactor
@@ -8296,7 +8297,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Add bug-report template and KPI placeholder conventions
-  status: todo
+  status: done
   priority: 97
   tranche: 5
   change_type: refactor
@@ -8336,7 +8337,7 @@ tasks:
   parent_epic: V03-R4-003
   release: v0.3.4
   title: Refresh playtest docs and UI hooks for export access
-  status: todo
+  status: done
   priority: 96
   tranche: 5
   change_type: behavior_change

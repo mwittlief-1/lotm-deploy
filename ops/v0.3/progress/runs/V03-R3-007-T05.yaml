@@ -1,0 +1,35 @@
+version: 1
+run_id: manual-ui-v03-r3-007-t05-20260408T163303-0400
+task_id: V03-R3-007-T05
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-ui-experience
+commit: 7d2d4aad4bfe7d7203a92ef6693a91c13dc7131b
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+  run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+artifacts:
+  content_registry: src/content/experienceContent.ts
+  gameplay_copy_seam: src/ui/playScreenExperienceCopy.ts
+  implementation_notes: docs/ux/v0.3.3_experience_content_implementation_notes.md
+  inventory_doc: docs/ux/v0.3.3_experience_content_inventory.md
+findings:
+  - Routed the live grant and marriage confirm or toast flows through a dedicated UI copy seam that consumes the shared content registry instead of assembling those strings locally in the gameplay shell.
+  - Wired the grant helper surface, the dispossession game-over label, and the unrest-threshold warning onto the shared v0.3.3 content slots so the live shell now references one deterministic experience copy spine.
+  - Added implementation notes and updated the inventory doc so playtest ops can see both the canonical content home and the exact gameplay surfaces that now consume it.
+stop_reason: no_next_ready_same_lane_task
+next_task_cursor: ''
+next_task_ready: false
+control_plane_notes:
+  reason: T05 closed cleanly after the required gates passed, and no next ready UI lane task remained on this branch state.

@@ -1,5 +1,6 @@
 import type { PhaseNameV0, RunState } from "../../types";
 import { clampInt } from "../../util";
+import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { applyRelationshipDelta } from "../people/relationshipEngine";
 import {
   buildEconomyObligationRegistryFromState,
@@ -163,6 +164,19 @@ export function applyEconomyObligationStageOnePenalties(
   if (result.stable_unrest_delta !== 0) {
     state.manor.unrest = clampInt(state.manor.unrest + normalizeInteger(result.stable_unrest_delta), 0, 100);
   }
+
+  recordRuntimeDomainEvidence(
+    state,
+    "obligations",
+    result.entries.map((entry) =>
+      makeEvidenceEvent({
+        kind: entry.arrears_amount > 0 ? "obligation_enforcement_arrears" : "obligation_enforcement_clear",
+        detail: entry.summary,
+        category: "obligations",
+        subject_ids: [state.house.head.id, entry.counterparty_id]
+      })
+    )
+  );
 
   return result;
 }

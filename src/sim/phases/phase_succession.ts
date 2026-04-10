@@ -1,43 +1,14 @@
-import { playerHouseIdOf, registryPersonFor } from "../actors";
+import { registryPersonFor } from "../actors";
 import { TURN_YEARS } from "../constants";
 import { addCourtExtraId, removeCourtExcludeId } from "../court";
-import { getChildren as kinChildren, getParents as kinParents, isAlive as kinIsAlive } from "../kinship";
+import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
+import { buildCanonicalSuccessionSelection } from "../domains/people/successionRegistry";
+import { getLivingSpouse } from "../kinship";
 import { applyCloseTurnObligationsPhase } from "./phase_obligations";
 import type { HouseLogEvent, Person, RunState } from "../types";
-import { asNonNegInt } from "../util";
-
-const SUCCESSION_MIN_AGE = 15;
 
 export function spouseIdFromKinship(state: RunState, personId: string): string | null {
-  const anyState: any = state as any;
-  const edges = (anyState.kinship_edges ?? []) as any[];
-
-  const matches = new Set<string>();
-  for (const e of edges) {
-    if (!e || e.kind !== "spouse_of") continue;
-    if (e.a_id === personId && typeof e.b_id === "string") matches.add(e.b_id);
-    else if (e.b_id === personId && typeof e.a_id === "string") matches.add(e.a_id);
-  }
-
-  const sorted = [...matches].sort((a, b) => a.localeCompare(b));
-  return sorted[0] ?? null;
-}
-
-function fallbackHeirIdFromHouseMembers(state: RunState): string | null {
-  const anyState: any = state as any;
-  const playerHouseId = playerHouseIdOf(state);
-  const houseRec: any = (anyState.houses && typeof anyState.houses === "object") ? anyState.houses[playerHouseId] : null;
-  const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
-  const memberIds: string[] = Array.isArray(houseRec?.member_person_ids)
-    ? houseRec.member_person_ids.filter((x: any): x is string => typeof x === "string" && x.length > 0)
-    : [];
-  const candidates = memberIds
-    .map((id) => reg[id])
-    .filter((p) => p && p.alive !== false)
-    .filter((p) => typeof p.id === "string" && p.id !== state.house.head.id)
-    .filter((p) => typeof p.age === "number" && p.age >= SUCCESSION_MIN_AGE)
-    .sort((a, b) => Number(b.age ?? 0) - Number(a.age ?? 0) || String(a.id).localeCompare(String(b.id)));
-  return candidates[0]?.id ?? null;
+  return getLivingSpouse(state as any, personId);
 }
 
 export function rebaseHeadRelationships(state: RunState, oldHeadId: string | null, newHeadId: string): void {
@@ -65,122 +36,14 @@ export function rebaseHeadRelationships(state: RunState, oldHeadId: string | nul
   state.relationships = [...kept.values()];
 }
 
-function computeHeirIdInternal(state: RunState, minAge: number, persist = true): string | null {
-  const headId = state.house.head?.id;
-
-  const byPrimogeniture = (a: Person, b: Person) => {
-    if (b.age !== a.age) return b.age - a.age;
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-    return 0;
-  };
-
-  const alive = (id: string): boolean => {
-    const p = registryPersonFor(state, id);
-    if (p) return !!p.alive;
-    return kinIsAlive(state as any, id);
-  };
-
-  const malesByIds = (ids: string[]): Person[] =>
-    ids
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p && p.alive && p.sex === "M" && typeof p.age === "number" && p.age >= minAge)
-      .sort(byPrimogeniture);
-
-  const childBranchOrder = (ids: string[], sex: "M" | "F"): string[] =>
-    ids
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p && p.sex === sex)
-      .sort(byPrimogeniture)
-      .map((p) => p.id);
-
-  const firstEligibleInBranch = (branchRootId: string, seen: Set<string>): string | null => {
-    if (seen.has(branchRootId)) return null;
-    seen.add(branchRootId);
-
-    const root = registryPersonFor(state, branchRootId);
-    if (root && root.alive && typeof root.age === "number" && root.age >= minAge) return root.id;
-
-    const childIds = kinChildren(state as any, branchRootId)
-      .map((id) => registryPersonFor(state, id))
-      .filter((p): p is Person => !!p)
-      .sort(byPrimogeniture)
-      .map((p) => p.id);
-    for (const childId of childIds) {
-      const found = firstEligibleInBranch(childId, seen);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  const childIds = headId ? kinChildren(state as any, headId) : [];
-  const sonBranches = childBranchOrder(childIds, "M");
-  const daughterBranches = childBranchOrder(childIds, "F");
-  for (const branchId of [...sonBranches, ...daughterBranches]) {
-    const found = firstEligibleInBranch(branchId, new Set<string>(headId ? [headId] : []));
-    if (found) {
-      if (persist) state.house.heir_id = found;
-      return found;
-    }
-  }
-
-  if (headId) {
-    const seen = new Set<string>([headId]);
-
-    let maleAncestors = kinParents(state as any, headId)
-      .filter((pid) => {
-        const p = registryPersonFor(state, pid);
-        return !!p && p.sex === "M";
-      })
-      .sort((a, b) => a.localeCompare(b));
-
-    for (let up = 1; up <= 4 && maleAncestors.length > 0; up++) {
-      const nextAncestors: string[] = [];
-      for (const ancId of maleAncestors) {
-        seen.add(ancId);
-
-        let layer = kinChildren(state as any, ancId)
-          .filter((cid) => !seen.has(cid))
-          .sort((a, b) => a.localeCompare(b));
-
-        for (let down = 1; down <= 4 && layer.length > 0; down++) {
-          const males = malesByIds(layer).filter((p) => p.id !== headId && alive(p.id));
-          if (males.length > 0) {
-            if (persist) state.house.heir_id = males[0].id;
-            return males[0].id;
-          }
-
-          const nextLayer: string[] = [];
-          for (const id of layer) {
-            seen.add(id);
-            const p = registryPersonFor(state, id);
-            if (!p || p.sex !== "M") continue;
-            for (const kid of kinChildren(state as any, id)) {
-              if (!seen.has(kid)) nextLayer.push(kid);
-            }
-          }
-          layer = nextLayer.sort((a, b) => a.localeCompare(b));
-        }
-
-        for (const pid of kinParents(state as any, ancId)) {
-          const pp = registryPersonFor(state, pid);
-          if (pp && pp.sex === "M") nextAncestors.push(pid);
-        }
-      }
-      maleAncestors = Array.from(new Set(nextAncestors)).sort((a, b) => a.localeCompare(b));
-    }
-  }
-
-  if (persist) state.house.heir_id = null;
-  return null;
-}
-
 export function computeHeirId(state: RunState): string | null {
-  return computeHeirIdInternal(state, 0, true);
+  const heirId = buildCanonicalSuccessionSelection(state).current_heir_id;
+  state.house.heir_id = heirId;
+  return heirId;
 }
 
 export function computeAdultSuccessorId(state: RunState): string | null {
-  return computeHeirIdInternal(state, SUCCESSION_MIN_AGE, false);
+  return buildCanonicalSuccessionSelection(state).adult_successor_id;
 }
 
 type SuccessionDeps = {
@@ -199,7 +62,8 @@ export function resolveSuccessionPhase(
   if (state.house.head.alive) return;
 
   const priorHeadId = state.house.head?.id ?? null;
-  let heirId = deps.computeAdultSuccessorId(state) ?? fallbackHeirIdFromHouseMembers(state);
+  // The people-domain seam owns claimant ordering and household fallback now.
+  let heirId = deps.computeAdultSuccessorId(state);
   if (!heirId) {
     const anyState: any = state as any;
     const reg: Record<string, any> = (anyState.people && typeof anyState.people === "object") ? anyState.people : {};
@@ -302,4 +166,5 @@ export function closeTurnPhase(
   }
 
   state.turn_index += 1;
+  syncClergyPlacementPersistence(state);
 }
