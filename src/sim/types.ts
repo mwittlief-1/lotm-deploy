@@ -296,6 +296,7 @@ export interface RunSnapshot {
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
   economy?: EconomyRegistryPlaceholderV1;
+  economy_maintenance_view?: { schema_version: string; [key: string]: unknown };
   economy_obligations_view?: { schema_version: string; [key: string]: unknown };
   portfolio?: PortfolioRegistryPlaceholderV1;
   world_topology_view?: WorldTopologySnapshotV1;

@@ -3,6 +3,7 @@ import type { RunSnapshot, RunState, TurnReport } from "../../types";
 import { deepCopy } from "../../util";
 import { buildAiRailDebugPacket } from "../ai/debug";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
+import { buildEconomyMaintenanceView } from "../economy/maintenance";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
@@ -29,6 +30,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     player_house_id: (state as any).player_house_id,
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
     economy: (state as any).economy,
+    economy_maintenance_view: buildEconomyMaintenanceView(state),
     economy_obligations_view: buildEconomyObligationsView(state),
     economy_pricing_view: buildEconomyPricingView(state),
     court_delegation_view: delegationView,
@@ -38,7 +40,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     house_dossiers: experienceSurfaces.house_dossiers,
     flags: state.flags,
     game_over: state.game_over ?? null
-  }) as RunSnapshot;
+  }) as unknown as RunSnapshot;
   if ((state as any).beliefs) {
     Object.defineProperty(snapshot, "beliefs", {
       value: deepCopy((state as any).beliefs),

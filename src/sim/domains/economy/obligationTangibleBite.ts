@@ -15,8 +15,10 @@ import {
   type EconomyObligationRegistryV1
 } from "./obligationRegistry";
 import { spendTrackedStoreWithReceiptWriter } from "./storeReceiptWriters";
+import { buildEconomyFiscalTuningTableSnapshot } from "./tuningTable";
 
 export const ECONOMY_OBLIGATION_TANGIBLE_BITE_SCHEMA_VERSION = "economy_obligation_tangible_bite_v1" as const;
+export const ECONOMY_OBLIGATION_TANGIBLE_BITE_PREVIEW_SCHEMA_VERSION = "economy_obligation_tangible_bite_preview_v1" as const;
 export const ECONOMY_OBLIGATION_TANGIBLE_BITE_STAGE = 2 as const;
 export const ECONOMY_OBLIGATION_TANGIBLE_BITE_CATEGORIES = [
   "enforcement.seizure",
@@ -65,6 +67,22 @@ export interface EconomyObligationTangibleBiteResultV1 {
   rule_id: string;
   summary: string;
   registry: EconomyObligationRegistryV1;
+}
+
+export interface EconomyObligationTangibleBitePreviewV1 {
+  schema_version: typeof ECONOMY_OBLIGATION_TANGIBLE_BITE_PREVIEW_SCHEMA_VERSION;
+  stage: typeof ECONOMY_OBLIGATION_TANGIBLE_BITE_STAGE;
+  category: EconomyObligationTangibleBiteCategoryV1;
+  counterparty_kind: EconomyObligationCounterpartyKindV1;
+  counterparty_id: string;
+  counterparty_label: string;
+  payment_mode: "coin" | TrackedStoreAsset;
+  outstanding_amount: number;
+  preview_amount: number;
+  turn_cap_amount: number | null;
+  turn_cap_tuning_key: "enterprise_seizure_turn_cap_coin" | "forced_church_food_turn_cap";
+  rule_id: string;
+  summary: string;
 }
 
 interface EconomyObligationTangibleBiteCounterpartyUsageV1 {
@@ -273,6 +291,63 @@ function assertForcedStorePaymentSupported(
       "Forced store payment is only implemented for bushel-backed church dues until store-to-coin valuation work lands."
     );
   }
+}
+
+function previewCap(
+  counterpartyKind: EconomyObligationCounterpartyKindV1
+): {
+  turn_cap_amount: number | null;
+  turn_cap_tuning_key: EconomyObligationTangibleBitePreviewV1["turn_cap_tuning_key"];
+} {
+  const tuning = buildEconomyFiscalTuningTableSnapshot().obligations.stage_two_placeholder_caps;
+  if (counterpartyKind === "liege") {
+    return {
+      turn_cap_amount: tuning.enterprise_seizure_turn_cap_coin,
+      turn_cap_tuning_key: "enterprise_seizure_turn_cap_coin"
+    };
+  }
+
+  return {
+    turn_cap_amount: tuning.forced_church_food_turn_cap,
+    turn_cap_tuning_key: "forced_church_food_turn_cap"
+  };
+}
+
+export function buildEconomyObligationTangibleBitePreviewFromState(
+  state: RunState,
+  counterpartyKind: EconomyObligationCounterpartyKindV1
+): EconomyObligationTangibleBitePreviewV1 {
+  const entry = counterpartyEntry(state, counterpartyKind);
+  const outstandingAmountValue = outstandingAmount(entry);
+  const cap = previewCap(counterpartyKind);
+  const paymentMode = counterpartyKind === "liege" ? "coin" : "food_stores";
+  const category = counterpartyKind === "liege" ? "enforcement.seizure" : "enforcement.forced_payment_stores";
+  const previewAmount = cap.turn_cap_amount == null
+    ? outstandingAmountValue
+    : Math.min(outstandingAmountValue, cap.turn_cap_amount);
+
+  return {
+    schema_version: ECONOMY_OBLIGATION_TANGIBLE_BITE_PREVIEW_SCHEMA_VERSION,
+    stage: ECONOMY_OBLIGATION_TANGIBLE_BITE_STAGE,
+    category,
+    counterparty_kind: entry.counterparty_kind,
+    counterparty_id: entry.counterparty_id,
+    counterparty_label: entry.counterparty_label,
+    payment_mode: paymentMode,
+    outstanding_amount: outstandingAmountValue,
+    preview_amount: previewAmount,
+    turn_cap_amount: cap.turn_cap_amount,
+    turn_cap_tuning_key: cap.turn_cap_tuning_key,
+    rule_id: `enforcement.preview.stage_two.${entry.counterparty_kind}`,
+    summary:
+      counterpartyKind === "liege"
+        ? cap.turn_cap_amount == null
+          ? `Stage-two preview: enterprise seizure can force coin out of the manor for ${entry.counterparty_label}; the per-turn cap is still unset in tuning.`
+          : `Stage-two preview: enterprise seizure can force up to ${previewAmount} coin for ${entry.counterparty_label} this turn.`
+        : cap.turn_cap_amount == null
+          ? `Stage-two preview: forced food-store payment can clear dues for ${entry.counterparty_label}; the per-turn cap is still unset in tuning.`
+          : `Stage-two preview: forced food-store payment can clear up to ${previewAmount} bushels for ${entry.counterparty_label} this turn.`
+  };
 }
 
 export function applyEconomyObligationEnterpriseSeizure(

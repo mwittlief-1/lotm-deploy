@@ -7,18 +7,80 @@ import type {
 } from "../economy/obligationRegistry";
 import { buildEconomyObligationRegistryFromState } from "../economy/obligationRegistry";
 import {
-  ECONOMY_OBLIGATION_PENALTY_STAGE,
   type EconomyObligationPenaltyStageEntryV1,
   buildEconomyObligationPenaltyStageFromState
 } from "../economy/obligationEnforcement";
+import {
+  buildEconomyObligationTangibleBitePreviewFromState,
+  type EconomyObligationTangibleBitePreviewV1
+} from "../economy/obligationTangibleBite";
+import { readLedgerReceiptSnapshots } from "../economy/ledger";
+import type { FiscalReceiptSnapshotV1 } from "../economy/receipts";
 import type { FiscalPaymentModeV1 } from "../economy/schema";
-import type { RunState } from "../../types";
+import type { GameOverState, RunState } from "../../types";
 
 export const ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION = "economy_obligations_view_v1" as const;
 export const ECONOMY_OBLIGATIONS_VIEW_COUNTERPARTY_ORDER = ["liege", "church"] as const;
+export const ECONOMY_OBLIGATIONS_VIEW_RECEIPT_ROW_SCHEMA_VERSION = "economy_obligations_view_receipt_row_v1" as const;
+export const ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_SCHEMA_VERSION = "economy_obligations_view_receipt_group_v1" as const;
+export const ECONOMY_OBLIGATIONS_VIEW_TRIGGER_SCHEMA_VERSION = "economy_obligations_view_trigger_v1" as const;
+export const ECONOMY_OBLIGATIONS_VIEW_TERMINAL_RISK_SCHEMA_VERSION = "economy_obligations_view_terminal_risk_v1" as const;
+export const ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER = ["payment", "penalty", "seizure"] as const;
 
 export type EconomyObligationsViewSettlementStatusV1 = "clear" | "due_only" | "arrears_only" | "due_and_arrears";
 export type EconomyObligationsViewEnforcementStateV1 = "clear" | "arrears";
+export type EconomyObligationsViewReceiptGroupKindV1 = typeof ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER[number];
+export type EconomyObligationsViewTriggerKindV1 = "arrears_persist";
+export type EconomyObligationsViewStageLabelV1 = "tangible_bite" | "dispossession_danger";
+
+export interface EconomyObligationsViewReceiptRowV1 {
+  schema_version: typeof ECONOMY_OBLIGATIONS_VIEW_RECEIPT_ROW_SCHEMA_VERSION;
+  receipt_id: string;
+  category: string;
+  asset: string;
+  delta: number;
+  balance_after: number;
+  summary: string;
+  rule_id: string;
+}
+
+export interface EconomyObligationsViewReceiptGroupV1 {
+  schema_version: typeof ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_SCHEMA_VERSION;
+  group_kind: EconomyObligationsViewReceiptGroupKindV1;
+  label: string;
+  category_order: string[];
+  receipt_count: number;
+  receipts: EconomyObligationsViewReceiptRowV1[];
+}
+
+export interface EconomyObligationsViewStageTriggerV1 {
+  schema_version: typeof ECONOMY_OBLIGATIONS_VIEW_TRIGGER_SCHEMA_VERSION;
+  current_stage: number;
+  next_stage: 2 | 3;
+  next_stage_label: EconomyObligationsViewStageLabelV1;
+  trigger_kind: EconomyObligationsViewTriggerKindV1;
+  trigger_source_path: string;
+  trigger_threshold: number;
+  current_value: number;
+  armed: boolean;
+  rule_id: string;
+  summary: string;
+}
+
+export interface EconomyObligationsViewTerminalRiskV1 {
+  schema_version: typeof ECONOMY_OBLIGATIONS_VIEW_TERMINAL_RISK_SCHEMA_VERSION;
+  stage: 3;
+  stage_label: "dispossession_danger";
+  armed: boolean;
+  active: boolean;
+  game_over_reason: GameOverState["reason"];
+  trigger_source_path: "manor.unrest";
+  trigger_threshold: 100;
+  current_value: number;
+  remaining_to_threshold: number;
+  rule_id: string;
+  summary: string;
+}
 
 export interface EconomyObligationsViewCounterpartySummaryV1 {
   schema_version: typeof ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION;
@@ -38,10 +100,15 @@ export interface EconomyObligationsViewCounterpartySummaryV1 {
   carried_this_turn: boolean;
   settlement_status: EconomyObligationsViewSettlementStatusV1;
   settlement_summary: string;
-  enforcement_stage: typeof ECONOMY_OBLIGATION_PENALTY_STAGE;
+  enforcement_stage: number;
   enforcement_state: EconomyObligationsViewEnforcementStateV1;
   enforcement_rule_id: string;
   enforcement_summary: string;
+  next_stage_trigger: EconomyObligationsViewStageTriggerV1 | null;
+  terminal_risk: EconomyObligationsViewTerminalRiskV1;
+  tangible_bite_preview: EconomyObligationTangibleBitePreviewV1 | null;
+  receipt_group_order: EconomyObligationsViewReceiptGroupKindV1[];
+  receipt_groups: EconomyObligationsViewReceiptGroupV1[];
   relationship_delta: {
     respect: number;
     threat: number;
@@ -64,8 +131,39 @@ export interface EconomyObligationsViewV1 {
     bushels: number;
   };
   counterparty_order: EconomyObligationCounterpartyKindV1[];
+  receipt_group_order: EconomyObligationsViewReceiptGroupKindV1[];
   counterparty_summaries: EconomyObligationsViewCounterpartySummaryV1[];
 }
+
+const RECEIPT_GROUP_META = {
+  payment: {
+    label: "Payments",
+    category_order: [
+      "obligation.liege_settlement",
+      "obligation.church_settlement",
+      "obligation.extraordinary_levy",
+      "gift.liege",
+      "offering.church"
+    ]
+  },
+  penalty: {
+    label: "Penalty trail",
+    category_order: [
+      "obligation.arrears_carry",
+      "enforcement.penalty"
+    ]
+  },
+  seizure: {
+    label: "Seizures & forced payment",
+    category_order: [
+      "enforcement.seizure",
+      "enforcement.forced_payment_stores"
+    ]
+  }
+} as const satisfies Record<
+  EconomyObligationsViewReceiptGroupKindV1,
+  { label: string; category_order: string[] }
+>;
 
 function normalizeInteger(value: number): number {
   return Math.trunc(value);
@@ -101,14 +199,200 @@ function settlementSummary(entry: EconomyObligationCounterpartyEntryV1): string 
   return `${entry.counterparty_label}: clear.`;
 }
 
+function totalForAsset(
+  registry: EconomyObligationRegistryV1,
+  assetKey: "due_asset" | "arrears_asset",
+  assetValue: EconomyObligationDueAssetV1 | EconomyObligationArrearsAssetV1,
+  amountKey: "due_amount" | "arrears_amount"
+): number {
+  let total = 0;
+  for (const counterpartyKind of registry.counterparty_keys) {
+    const entry = registry.counterparties_by_key[counterpartyKind];
+    if (entry[assetKey] === assetValue) {
+      total += entry[amountKey];
+    }
+  }
+  return normalizeInteger(total);
+}
+
+function receiptGroupKind(category: string): EconomyObligationsViewReceiptGroupKindV1 | null {
+  for (const groupKind of ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER) {
+    if ((RECEIPT_GROUP_META[groupKind].category_order as readonly string[]).includes(category)) return groupKind;
+  }
+  return null;
+}
+
+function obligationReceiptPool(state: RunState, turn: number): FiscalReceiptSnapshotV1[] {
+  const source = [
+    ...(Array.isArray(state.economy_fiscal_receipts) ? state.economy_fiscal_receipts : []),
+    ...readLedgerReceiptSnapshots(state)
+  ];
+  const dedupedByReceiptId = new Map<string, FiscalReceiptSnapshotV1>();
+
+  for (const receipt of source) {
+    if (!receipt || typeof receipt.receipt_id !== "string") continue;
+    dedupedByReceiptId.set(receipt.receipt_id, receipt);
+  }
+
+  return [...dedupedByReceiptId.values()].filter((receipt) => {
+    return (
+      receipt.turn === turn &&
+      (receipt.counterparty_kind === "liege" || receipt.counterparty_kind === "church") &&
+      receiptGroupKind(receipt.category) !== null
+    );
+  });
+}
+
+function receiptRow(receipt: FiscalReceiptSnapshotV1): EconomyObligationsViewReceiptRowV1 {
+  return {
+    schema_version: ECONOMY_OBLIGATIONS_VIEW_RECEIPT_ROW_SCHEMA_VERSION,
+    receipt_id: receipt.receipt_id,
+    category: receipt.category,
+    asset: receipt.asset,
+    delta: normalizeInteger(receipt.delta),
+    balance_after: normalizeInteger(receipt.balance_after),
+    summary: receipt.summary,
+    rule_id: receipt.rule_id
+  };
+}
+
+function buildReceiptGroups(
+  receipts: readonly FiscalReceiptSnapshotV1[],
+  counterpartyKind: EconomyObligationCounterpartyKindV1
+): EconomyObligationsViewReceiptGroupV1[] {
+  return ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER.map((groupKind) => {
+    const rows = receipts
+      .filter((receipt) => receipt.counterparty_kind === counterpartyKind && receiptGroupKind(receipt.category) === groupKind)
+      .map((receipt) => receiptRow(receipt));
+
+    return {
+      schema_version: ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_SCHEMA_VERSION,
+      group_kind: groupKind,
+      label: RECEIPT_GROUP_META[groupKind].label,
+      category_order: [...RECEIPT_GROUP_META[groupKind].category_order],
+      receipt_count: rows.length,
+      receipts: rows
+    };
+  });
+}
+
+function arrearsSourcePath(entry: EconomyObligationCounterpartyEntryV1): string {
+  return entry.arrears_asset === "arrears_coin"
+    ? "manor.obligations.arrears.coin"
+    : "manor.obligations.arrears.bushels";
+}
+
+function derivedEnforcementStage(
+  state: RunState,
+  entry: EconomyObligationCounterpartyEntryV1,
+  penalty: EconomyObligationPenaltyStageEntryV1,
+  receiptGroups: readonly EconomyObligationsViewReceiptGroupV1[]
+): number {
+  const seizureGroup = receiptGroups.find((group) => group.group_kind === "seizure");
+  if (entry.arrears_amount > 0 && (state.game_over?.reason === "Dispossessed" || state.manor.unrest >= 100)) {
+    return 3;
+  }
+  if ((seizureGroup?.receipt_count ?? 0) > 0) {
+    return 2;
+  }
+  return penalty.stage;
+}
+
+function derivedEnforcementRuleId(
+  state: RunState,
+  entry: EconomyObligationCounterpartyEntryV1,
+  penalty: EconomyObligationPenaltyStageEntryV1,
+  stage: number
+): string {
+  if (stage >= 3 && entry.arrears_amount > 0 && (state.game_over?.reason === "Dispossessed" || state.manor.unrest >= 100)) {
+    return `enforcement.dispossession.stage_three.${entry.counterparty_kind}`;
+  }
+  if (stage >= 2 && entry.arrears_amount > 0) {
+    return `enforcement.tangible_bite.stage_two.${entry.counterparty_kind}`;
+  }
+  return penalty.rule_id;
+}
+
+function derivedEnforcementSummary(
+  state: RunState,
+  entry: EconomyObligationCounterpartyEntryV1,
+  penalty: EconomyObligationPenaltyStageEntryV1,
+  stage: number
+): string {
+  if (stage >= 3 && entry.arrears_amount > 0 && (state.game_over?.reason === "Dispossessed" || state.manor.unrest >= 100)) {
+    return `Stage-three dispossession danger is active for ${entry.counterparty_label}; unrest is ${normalizeInteger(state.manor.unrest)}/100 while arrears remain open.`;
+  }
+  if (stage >= 2 && entry.arrears_amount > 0) {
+    return `Stage-two tangible bite is active for ${entry.counterparty_label}; forced collection receipts are already landing against open arrears.`;
+  }
+  return penalty.summary;
+}
+
+function nextStageTrigger(
+  entry: EconomyObligationCounterpartyEntryV1,
+  stage: number
+): EconomyObligationsViewStageTriggerV1 | null {
+  if (entry.arrears_amount <= 0 || stage >= 3) return null;
+
+  const nextStage = stage >= 2 ? 3 : 2;
+  const nextStageLabel = nextStage === 2 ? "tangible_bite" : "dispossession_danger";
+
+  return {
+    schema_version: ECONOMY_OBLIGATIONS_VIEW_TRIGGER_SCHEMA_VERSION,
+    current_stage: stage,
+    next_stage: nextStage,
+    next_stage_label: nextStageLabel,
+    trigger_kind: "arrears_persist",
+    trigger_source_path: arrearsSourcePath(entry),
+    trigger_threshold: 1,
+    current_value: normalizeInteger(entry.arrears_amount),
+    armed: entry.arrears_amount > 0,
+    rule_id: `enforcement.trigger.${nextStageLabel}.${entry.counterparty_kind}`,
+    summary:
+      nextStage === 2
+        ? `If ${entry.counterparty_label} arrears remain open into the next collection step, stage-two tangible bite can start.`
+        : `If ${entry.counterparty_label} arrears remain open after stage-two collections, stage-three dispossession danger can start.`
+  };
+}
+
+function terminalRisk(
+  state: RunState,
+  entry: EconomyObligationCounterpartyEntryV1,
+  stage: number
+): EconomyObligationsViewTerminalRiskV1 {
+  const currentValue = normalizeInteger(state.manor.unrest);
+  const active = entry.arrears_amount > 0 && stage >= 3;
+
+  return {
+    schema_version: ECONOMY_OBLIGATIONS_VIEW_TERMINAL_RISK_SCHEMA_VERSION,
+    stage: 3,
+    stage_label: "dispossession_danger",
+    armed: entry.arrears_amount > 0,
+    active,
+    game_over_reason: "Dispossessed",
+    trigger_source_path: "manor.unrest",
+    trigger_threshold: 100,
+    current_value: currentValue,
+    remaining_to_threshold: Math.max(0, 100 - currentValue),
+    rule_id: "succession.dispossession.unrest_threshold",
+    summary: active
+      ? `Dispossession danger is active while ${entry.counterparty_label} arrears remain open; unrest is ${currentValue}/100.`
+      : `Dispossession occurs if unrest reaches 100 at end of turn; current unrest is ${currentValue}.`
+  };
+}
+
 function buildCounterpartySummary(
+  state: RunState,
   turn: number,
   registry: EconomyObligationRegistryV1,
   penaltyByKind: Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1>,
+  obligationReceipts: readonly FiscalReceiptSnapshotV1[],
   counterpartyKind: EconomyObligationCounterpartyKindV1
 ): EconomyObligationsViewCounterpartySummaryV1 {
   const entry = registry.counterparties_by_key[counterpartyKind];
   const penalty = penaltyByKind[counterpartyKind];
+  const receiptGroups = buildReceiptGroups(obligationReceipts, counterpartyKind);
+  const enforcementStage = derivedEnforcementStage(state, entry, penalty, receiptGroups);
 
   return {
     schema_version: ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION,
@@ -128,31 +412,21 @@ function buildCounterpartySummary(
     carried_this_turn: entry.last_carried_turn_index === turn,
     settlement_status: settlementStatus(entry),
     settlement_summary: settlementSummary(entry),
-    enforcement_stage: penalty.stage,
+    enforcement_stage: enforcementStage,
     enforcement_state: penalty.arrears_amount > 0 ? "arrears" : "clear",
-    enforcement_rule_id: penalty.rule_id,
-    enforcement_summary: penalty.summary,
+    enforcement_rule_id: derivedEnforcementRuleId(state, entry, penalty, enforcementStage),
+    enforcement_summary: derivedEnforcementSummary(state, entry, penalty, enforcementStage),
+    next_stage_trigger: nextStageTrigger(entry, enforcementStage),
+    terminal_risk: terminalRisk(state, entry, enforcementStage),
+    tangible_bite_preview:
+      entry.arrears_amount > 0 ? buildEconomyObligationTangibleBitePreviewFromState(state, counterpartyKind) : null,
+    receipt_group_order: [...ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER],
+    receipt_groups: receiptGroups,
     relationship_delta: {
       respect: penalty.relationship_delta.respect,
       threat: penalty.relationship_delta.threat
     }
   };
-}
-
-function totalForAsset(
-  registry: EconomyObligationRegistryV1,
-  assetKey: "due_asset" | "arrears_asset",
-  assetValue: EconomyObligationDueAssetV1 | EconomyObligationArrearsAssetV1,
-  amountKey: "due_amount" | "arrears_amount"
-): number {
-  let total = 0;
-  for (const counterpartyKind of registry.counterparty_keys) {
-    const entry = registry.counterparties_by_key[counterpartyKind];
-    if (entry[assetKey] === assetValue) {
-      total += entry[amountKey];
-    }
-  }
-  return normalizeInteger(total);
 }
 
 export function buildEconomyObligationsView(state: RunState): EconomyObligationsViewV1 {
@@ -163,6 +437,7 @@ export function buildEconomyObligationsView(state: RunState): EconomyObligations
     penaltyStage.entries.map((entry) => [entry.counterparty_kind, entry])
   ) as Record<EconomyObligationCounterpartyKindV1, EconomyObligationPenaltyStageEntryV1>;
   const counterpartyOrder = [...ECONOMY_OBLIGATIONS_VIEW_COUNTERPARTY_ORDER];
+  const obligationReceipts = obligationReceiptPool(state, turn);
 
   return {
     schema_version: ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION,
@@ -180,8 +455,9 @@ export function buildEconomyObligationsView(state: RunState): EconomyObligations
       bushels: totalForAsset(registry, "arrears_asset", "arrears_bushels", "arrears_amount")
     },
     counterparty_order: counterpartyOrder,
+    receipt_group_order: [...ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_ORDER],
     counterparty_summaries: counterpartyOrder.map((counterpartyKind) =>
-      buildCounterpartySummary(turn, registry, penaltyByKind, counterpartyKind)
+      buildCounterpartySummary(state, turn, registry, penaltyByKind, obligationReceipts, counterpartyKind)
     )
   };
 }

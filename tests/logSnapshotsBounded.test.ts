@@ -14,6 +14,7 @@ const ALLOWED_KEYS = new Set([
   "flags",
   "game_over",
   "economy",
+  "economy_maintenance_view",
   "economy_obligations_view",
   "economy_pricing_view",
   "court_delegation_view",

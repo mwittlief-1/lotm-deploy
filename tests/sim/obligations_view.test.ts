@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { resolveEconomyObligationGesture } from "../../src/sim/domains/economy/obligationGestures";
 import { settleEconomyObligationCounterparty } from "../../src/sim/domains/economy/obligationRegistry";
 import { applyEconomyObligationCloseTurnStage } from "../../src/sim/domains/economy/obligationEnforcement";
+import { applyEconomyObligationEnterpriseSeizure } from "../../src/sim/domains/economy/obligationTangibleBite";
 import { boundedSnapshot } from "../../src/sim/domains/experience/reporting";
 import {
   ECONOMY_OBLIGATIONS_VIEW_COUNTERPARTY_ORDER,
@@ -115,6 +117,15 @@ describe("economy obligations view", () => {
       enforcement_state: "clear",
       enforcement_rule_id: "enforcement.penalty.stage_one.liege_clear"
     });
+    expect(viewA.receipt_group_order).toEqual(["payment", "penalty", "seizure"]);
+    expect(viewA.counterparty_summaries[0]?.receipt_groups.map((group) => group.group_kind)).toEqual([
+      "payment",
+      "penalty",
+      "seizure"
+    ]);
+    expect(viewA.counterparty_summaries[0]?.receipt_groups[0]?.receipt_count).toBeGreaterThan(0);
+    expect(viewA.counterparty_summaries[0]?.next_stage_trigger).toBeNull();
+    expect(viewA.counterparty_summaries[0]?.tangible_bite_preview).toBeNull();
     expect(viewA.counterparty_summaries[1]).toMatchObject({
       counterparty_kind: "church",
       counterparty_label: "Parish Church",
@@ -128,6 +139,9 @@ describe("economy obligations view", () => {
       enforcement_state: "clear",
       enforcement_rule_id: "enforcement.penalty.stage_one.church_clear"
     });
+    expect(viewA.counterparty_summaries[1]?.receipt_groups[0]?.receipt_count).toBeGreaterThan(0);
+    expect(viewA.counterparty_summaries[1]?.next_stage_trigger).toBeNull();
+    expect(viewA.counterparty_summaries[1]?.tangible_bite_preview).toBeNull();
   });
 
   it("projects the obligations view into bounded snapshots with carried arrears and enforcement summaries", () => {
@@ -143,8 +157,10 @@ describe("economy obligations view", () => {
     });
 
     const snapshot = boundedSnapshot(state) as any;
+    const liegeSummary = snapshot.economy_obligations_view.counterparty_summaries[0];
+    const churchSummary = snapshot.economy_obligations_view.counterparty_summaries[1];
 
-    expect(snapshot.economy_obligations_view).toEqual({
+    expect(snapshot.economy_obligations_view).toMatchObject({
       schema_version: "economy_obligations_view_v1",
       turn: 1,
       shortage_active: false,
@@ -154,6 +170,7 @@ describe("economy obligations view", () => {
       total_due: { coin: 0, bushels: 0 },
       total_arrears: { coin: 7, bushels: 9 },
       counterparty_order: ["liege", "church"],
+      receipt_group_order: ["payment", "penalty", "seizure"],
       counterparty_summaries: [
         {
           schema_version: "economy_obligations_view_v1",
@@ -205,5 +222,98 @@ describe("economy obligations view", () => {
         }
       ]
     });
+    expect(liegeSummary.next_stage_trigger).toMatchObject({
+      next_stage: 2,
+      next_stage_label: "tangible_bite",
+      trigger_kind: "arrears_persist",
+      trigger_source_path: "manor.obligations.arrears.coin",
+      current_value: 7,
+      armed: true
+    });
+    expect(liegeSummary.terminal_risk).toMatchObject({
+      stage: 3,
+      stage_label: "dispossession_danger",
+      armed: true,
+      active: false,
+      current_value: 12,
+      remaining_to_threshold: 88,
+      trigger_threshold: 100,
+      rule_id: "succession.dispossession.unrest_threshold"
+    });
+    expect(liegeSummary.tangible_bite_preview).toMatchObject({
+      stage: 2,
+      category: "enforcement.seizure",
+      payment_mode: "coin",
+      outstanding_amount: 7,
+      preview_amount: 7,
+      turn_cap_amount: null
+    });
+    expect(liegeSummary.receipt_groups[0]).toMatchObject({ group_kind: "payment", receipt_count: 0 });
+    expect(liegeSummary.receipt_groups[1]).toMatchObject({ group_kind: "penalty", receipt_count: 2 });
+    expect(liegeSummary.receipt_groups[2]).toMatchObject({ group_kind: "seizure", receipt_count: 0 });
+    expect(churchSummary.next_stage_trigger).toMatchObject({
+      next_stage: 2,
+      next_stage_label: "tangible_bite",
+      trigger_kind: "arrears_persist",
+      trigger_source_path: "manor.obligations.arrears.bushels",
+      current_value: 9,
+      armed: true
+    });
+    expect(churchSummary.tangible_bite_preview).toMatchObject({
+      stage: 2,
+      category: "enforcement.forced_payment_stores",
+      payment_mode: "food_stores",
+      outstanding_amount: 9,
+      preview_amount: 9,
+      turn_cap_amount: null
+    });
+    expect(churchSummary.receipt_groups[0]).toMatchObject({ group_kind: "payment", receipt_count: 0 });
+    expect(churchSummary.receipt_groups[1]).toMatchObject({ group_kind: "penalty", receipt_count: 2 });
+    expect(churchSummary.receipt_groups[2]).toMatchObject({ group_kind: "seizure", receipt_count: 0 });
+  });
+
+  it("groups payment and seizure receipts deterministically for later obligations playback", () => {
+    const state = mkState();
+    state.manor.coin = 10;
+    state.manor.obligations.tax_due_coin = 5;
+    state.manor.obligations.arrears.coin = 2;
+
+    settleEconomyObligationCounterparty(state, {
+      phase: "obligations",
+      phase_sequence: 4,
+      counterparty_kind: "liege",
+      requested_amount: 1,
+      rule_id: "obligations.liege_partial",
+      related_actor_ids: ["p_liege", "p_head"]
+    });
+    resolveEconomyObligationGesture(state, {
+      phase: "obligations",
+      phase_sequence: 5,
+      gesture_action: "gift_liege",
+      decision: {
+        amount: 2,
+        payment_mode: "coin"
+      },
+      related_actor_ids: ["p_liege", "p_head"]
+    });
+    applyEconomyObligationEnterpriseSeizure(state, {
+      phase: "obligations",
+      phase_sequence: 6,
+      counterparty_kind: "liege",
+      requested_amount: 3,
+      cap_amount: 3,
+      rule_id: "enforcement.seizure.liege_followup",
+      related_actor_ids: ["p_liege", "p_head"]
+    });
+
+    const liegeSummary = buildEconomyObligationsView(state).counterparty_summaries[0]!;
+    const paymentGroup = liegeSummary.receipt_groups.find((group) => group.group_kind === "payment");
+    const seizureGroup = liegeSummary.receipt_groups.find((group) => group.group_kind === "seizure");
+
+    expect(paymentGroup?.receipts.map((receipt) => receipt.category)).toEqual(
+      expect.arrayContaining(["obligation.liege_settlement", "gift.liege"])
+    );
+    expect(seizureGroup?.receipt_count).toBeGreaterThan(0);
+    expect(seizureGroup?.receipts.every((receipt) => receipt.category === "enforcement.seizure")).toBe(true);
   });
 });
