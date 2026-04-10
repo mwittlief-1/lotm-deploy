@@ -1,5 +1,7 @@
 import { SIM_VERSION } from "./version";
 import type { WorldTopologySnapshotV1 } from "./domains/world/types";
+import type { FiscalReceiptSnapshotV1 } from "./domains/economy/receipts";
+import type { FiscalPaymentModeV1 } from "./domains/economy/schema";
 
 export type SimVersion = typeof SIM_VERSION;
 
@@ -259,6 +261,7 @@ export interface RunState {
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
   economy?: EconomyRegistryPlaceholderV1;
+  economy_fiscal_receipts?: FiscalReceiptSnapshotV1[];
   portfolio?: PortfolioRegistryPlaceholderV1;
   known_houses?: KnownHouseSummary[];
   house_dossiers?: HouseDossierSummary[];
@@ -656,6 +659,16 @@ export type ObligationsDecision = {
   pay_coin: number;
   pay_bushels: number;
   war_levy_choice?: "coin" | "men" | "ignore";
+  gestures?: {
+    gift_liege: {
+      amount: number;
+      payment_mode: FiscalPaymentModeV1;
+    };
+    offering_church: {
+      amount: number;
+      payment_mode: FiscalPaymentModeV1;
+    };
+  };
 };
 export type ConstructionDecision =
   | { kind: "construction"; action: "none" }
