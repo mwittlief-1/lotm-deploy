@@ -64,6 +64,15 @@ function stagePillStyle(label: string): React.CSSProperties {
   };
 }
 
+function rawReceiptFieldLabelStyle(): React.CSSProperties {
+  return {
+    fontSize: 11,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    opacity: 0.65
+  };
+}
+
 export function ReceiptsViewerPanel({
   counterpartySections,
   groupedSections,
@@ -305,8 +314,45 @@ export function ReceiptsViewerPanel({
                       background: "#fdfbf7"
                     }}
                   >
-                    <div style={{ fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase", opacity: 0.65 }}>{receipt.kind}</div>
-                    <div style={{ marginTop: 4 }}>{receipt.line}</div>
+                    {receipt.structured ? (
+                      <div data-raw-structured-receipt={receipt.structured.receiptId} style={{ display: "grid", gap: 10 }}>
+                        <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
+                          <div>
+                            <div style={rawReceiptFieldLabelStyle()}>Receipt ID</div>
+                            <div style={{ marginTop: 4 }}>{receipt.structured.receiptId}</div>
+                          </div>
+                          <div>
+                            <div style={rawReceiptFieldLabelStyle()}>Category</div>
+                            <div style={{ marginTop: 4 }}>{receipt.structured.category || "Unknown"}</div>
+                          </div>
+                          <div>
+                            <div style={rawReceiptFieldLabelStyle()}>Asset</div>
+                            <div style={{ marginTop: 4 }}>{receipt.structured.asset || "Unknown"}</div>
+                          </div>
+                          <div>
+                            <div style={rawReceiptFieldLabelStyle()}>Delta</div>
+                            <div style={{ marginTop: 4 }}>{receipt.structured.delta > 0 ? `+${receipt.structured.delta}` : `${receipt.structured.delta}`}</div>
+                          </div>
+                          <div>
+                            <div style={rawReceiptFieldLabelStyle()}>Counterparty</div>
+                            <div style={{ marginTop: 4 }}>{receipt.structured.counterpartyLabel || "Unknown"}</div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div style={rawReceiptFieldLabelStyle()}>Summary / rule</div>
+                          <div style={{ marginTop: 4 }}>{receipt.structured.summary || receipt.structured.ruleLabel || receipt.line}</div>
+                          {receipt.structured.summary && receipt.structured.ruleLabel ? (
+                            <div style={{ marginTop: 4, fontSize: 12, opacity: 0.76 }}>Rule: {receipt.structured.ruleLabel}</div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div style={{ fontSize: 11, letterSpacing: 0.4, textTransform: "uppercase", opacity: 0.65 }}>{receipt.kind}</div>
+                        <div style={{ marginTop: 4 }}>{receipt.line}</div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

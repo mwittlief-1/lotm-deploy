@@ -1,3 +1,4 @@
+import type { FiscalReceiptSnapshotV1 } from "../domains/economy/receipts";
 import type { EvidenceEventV0, PhaseLogEventV0, PhaseNameV0, PhaseReceiptV0, PhaseResultV0 } from "../types";
 
 export function makePhaseReceipt(line: string, kind: PhaseReceiptV0["kind"] = "summary"): PhaseReceiptV0 {
@@ -11,6 +12,7 @@ export function makePhaseLogEvent(kind: string, detail: string): PhaseLogEventV0
 export function makePhaseResult(args: {
   phase: PhaseNameV0;
   receipts?: PhaseReceiptV0[];
+  fiscal_receipts_v1?: FiscalReceiptSnapshotV1[];
   log_events?: PhaseLogEventV0[];
   evidence_events_v0?: EvidenceEventV0[];
   rng_keys_used?: string[];
@@ -19,6 +21,7 @@ export function makePhaseResult(args: {
   return {
     phase: args.phase,
     receipts: args.receipts ?? [],
+    fiscal_receipts_v1: args.fiscal_receipts_v1,
     log_events: args.log_events ?? [],
     evidence_events_v0: args.evidence_events_v0 ?? [],
     rng_keys_used: args.rng_keys_used ?? [],

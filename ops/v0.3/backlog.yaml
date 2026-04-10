@@ -1282,6 +1282,104 @@ epics:
   - playtest operations are ready before v0.3 final hardening
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003.md
+- id: V03-R4-004
+  title: UAT scenario pack and operator guidance
+  release: v0.3.4
+  status: ready
+  priority: 28
+  tranche: 5
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  deps:
+  - V03-R4-003
+  - V03-R4-002
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - docs/qa/**
+  - qa_artifacts/playtest_ops/**
+  - docs/releases/**
+  forbidden_paths:
+  - src/**
+  - tests/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - deterministic UAT scenarios are documented with exact run instructions
+  - at least one scenario makes meat or hunting visible
+  - at least one scenario makes arrears or enforcement visible within a short run
+  - operator notes define pass or fail expectations for UAT
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-004.md
+- id: V03-R4-005
+  title: Obligations gesture activation and structured fiscal receipts
+  release: v0.3.4
+  status: ready
+  priority: 27
+  tranche: 5
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - tests/sim/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - domain-level liege gift and church offering settlement helpers exist through canonical fiscal paths
+  - structured fiscal receipt snapshots exist for gesture outcomes at the domain layer
+  - domain-focused tests cover budget and relationship side-effect scaffolds
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-005.md
+- id: V03-R4-006
+  title: Player-visible activation for gestures and raw receipts
+  release: v0.3.4
+  status: done
+  priority: 26
+  tranche: 5
+  change_type: behavior_change
+  category: Experience/UI
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-ui-experience
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - src/content/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/sim/domains/economy/**
+  required_gates:
+  - qa
+  - preflight
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - gift and offering actions are visible in the player UI
+  - raw receipts prefer structured fiscal rows when present
+  - legacy receipt rendering remains as fallback
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-006.md
 tasks:
 - id: V03-R0-001-T01
   title: Audit economy mutation paths against ledger receipt ownership
@@ -8368,6 +8466,134 @@ tasks:
   - replay_mismatch
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-003-T04.yaml
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+- id: V03-R4-004-T01
+  parent_epic: V03-R4-004
+  release: v0.3.4
+  title: Author deterministic UAT scenario pack and operator notes
+  status: ready
+  priority: 95
+  tranche: 5
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Create a deterministic v0.3 UAT scenario pack and operator-facing guidance so visible fiscal, enforcement, and multi-manor or grant-adjacent behavior can be exercised quickly during UAT.
+  deps:
+  - V03-R4-003-T04
+  - V03-R4-002-T05
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - docs/qa/**
+  - qa_artifacts/playtest_ops/**
+  - docs/releases/**
+  forbidden_paths:
+  - src/**
+  - tests/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  done_conditions:
+  - a deterministic UAT scenario pack exists with exact seed, policy, and turn-count instructions
+  - operator notes call out the scenario that surfaces meat or hunting activity
+  - operator notes call out the scenario that surfaces arrears or enforcement within a short run
+  - if multi-manor or grant visibility cannot be guaranteed, the nearest deterministic fallback is documented explicitly
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-004-T01.md
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+- id: V03-R4-005-T01
+  parent_epic: V03-R4-005
+  release: v0.3.4
+  title: Implement gesture fiscal primitives and structured receipt scaffolds
+  status: ready
+  priority: 94
+  tranche: 5
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Implement the economy-domain settlement helpers and structured receipt scaffolds needed for liege gifts and church offerings, leaving phase and turn wiring to the integrator branch.
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - tests/sim/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  done_conditions:
+  - canonical economy-domain helpers exist for gift_liege and offering_church settlement
+  - structured fiscal receipt snapshots are emitted by those helpers
+  - focused tests cover success, blocked payment mode, and budget or relationship effect scaffolds
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-005-T01.md
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+- id: V03-R4-006-T01
+  parent_epic: V03-R4-006
+  release: v0.3.4
+  title: Expose gesture actions and structured raw receipts in the UI
+  status: done
+  priority: 93
+  tranche: 5
+  change_type: behavior_change
+  category: Experience/UI
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Make gift and offering actions visible to the player and upgrade the Raw receipts view to render structured fiscal rows when they are present.
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - src/content/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/sim/domains/economy/**
+  required_gates:
+  - qa
+  - preflight
+  requires_golden_change: false
+  done_conditions:
+  - gift and offering controls are visible in the live decisions UI
+  - raw receipts render structured fiscal rows when available
+  - legacy string receipts still render as fallback
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R4-006-T01.md
   claim:
     status: unclaimed
     claimed_by: ''

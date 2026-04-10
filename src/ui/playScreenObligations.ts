@@ -1,4 +1,9 @@
-import type { RunState } from "../sim/types";
+import type {
+  ObligationsGestureDecision,
+  ObligationsGesturePaymentMode,
+  RunState,
+  TurnDecisions
+} from "../sim/types";
 import type { CourtDecisionBudgetSurface } from "./playScreenCourtBudget";
 import {
   getObligationCounterpartyTemplate,
@@ -11,11 +16,20 @@ import {
 export const PLAY_SCREEN_OBLIGATIONS_CONTRACT_SCHEMA_VERSION = "play_screen_obligations_contract_v1" as const;
 export const PLAY_SCREEN_OBLIGATION_COUNTERPARTY_ORDER = ["liege", "church"] as const;
 export const PLAY_SCREEN_OBLIGATION_RECEIPT_CATEGORY_ORDER = ["coin", "food", "unrest"] as const;
+const OBLIGATION_GESTURE_PAYMENT_MODE_OPTIONS = {
+  gift_liege: ["coin", "food_stores", "meat_stores", "none"],
+  offering_church: ["food_stores", "coin", "meat_stores", "none"]
+} as const satisfies Record<string, readonly ObligationsGesturePaymentMode[]>;
+const OBLIGATION_GESTURE_DEFAULT_PAYMENT_MODES = {
+  gift_liege: "coin",
+  offering_church: "food_stores"
+} as const satisfies Record<string, Exclude<ObligationsGesturePaymentMode, "none">>;
 
 export type ObligationsCounterpartyId = (typeof PLAY_SCREEN_OBLIGATION_COUNTERPARTY_ORDER)[number];
 export type ObligationReceiptCategory = (typeof PLAY_SCREEN_OBLIGATION_RECEIPT_CATEGORY_ORDER)[number];
 export type ObligationsModalFocus = "overview" | ObligationsCounterpartyId;
 export type ObligationsModalOrigin = "turn_report" | "decisions";
+export type ObligationsGestureActionId = "gift_liege" | "offering_church";
 
 export type ObligationsModalRoute = {
   focus: ObligationsModalFocus;
@@ -130,6 +144,51 @@ function formatAmount(amount: number, counterpartyId: ObligationsCounterpartyId)
 
 function gestureActionId(counterpartyId: ObligationsCounterpartyId): "gift_liege" | "offering_church" {
   return counterpartyId === "liege" ? "gift_liege" : "offering_church";
+}
+
+function normalizeGestureAmount(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function defaultGestureDecision(actionId: ObligationsGestureActionId): ObligationsGestureDecision {
+  return {
+    amount: 0,
+    payment_mode: "none"
+  };
+}
+
+function normalizedGesturePaymentMode(
+  actionId: ObligationsGestureActionId,
+  value: unknown
+): ObligationsGesturePaymentMode {
+  return obligationGesturePaymentModeOptions(actionId).includes(value as ObligationsGesturePaymentMode)
+    ? (value as ObligationsGesturePaymentMode)
+    : defaultGestureDecision(actionId).payment_mode;
+}
+
+function readGestureMap(decisions: TurnDecisions) {
+  return decisions.obligations.gestures ?? {
+    gift_liege: defaultGestureDecision("gift_liege"),
+    offering_church: defaultGestureDecision("offering_church")
+  };
+}
+
+function writeGestureDecision(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId,
+  decision: ObligationsGestureDecision
+): TurnDecisions {
+  const gestures = readGestureMap(decisions);
+  return {
+    ...decisions,
+    obligations: {
+      ...decisions.obligations,
+      gestures: {
+        ...gestures,
+        [actionId]: decision
+      }
+    }
+  };
 }
 
 function gestureReceiptCategory(counterpartyId: ObligationsCounterpartyId): ObligationReceiptCategory[] {
@@ -304,6 +363,81 @@ export function createObligationsModalRoute(
   focus: ObligationsModalFocus = "overview"
 ): ObligationsModalRoute {
   return { origin, focus };
+}
+
+export function obligationGesturePaymentModeOptions(
+  actionId: ObligationsGestureActionId
+): ObligationsGesturePaymentMode[] {
+  return [...OBLIGATION_GESTURE_PAYMENT_MODE_OPTIONS[actionId]];
+}
+
+export function obligationGesturePaymentModeLabel(mode: ObligationsGesturePaymentMode): string {
+  if (mode === "coin") return "Coin";
+  if (mode === "food_stores") return "Food stores";
+  if (mode === "meat_stores") return "Meat stores";
+  return "None";
+}
+
+export function readObligationGestureDecision(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId
+): ObligationsGestureDecision {
+  const gesture = decisions.obligations.gestures?.[actionId];
+  return {
+    amount: normalizeGestureAmount(gesture?.amount),
+    payment_mode: normalizedGesturePaymentMode(actionId, gesture?.payment_mode)
+  };
+}
+
+export function updateObligationGestureAmount(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId,
+  amount: number
+): TurnDecisions {
+  const current = readObligationGestureDecision(decisions, actionId);
+  const normalizedAmount = normalizeGestureAmount(amount);
+  const nextPaymentMode =
+    normalizedAmount > 0
+      ? current.payment_mode === "none"
+        ? OBLIGATION_GESTURE_DEFAULT_PAYMENT_MODES[actionId]
+        : current.payment_mode
+      : "none";
+  return writeGestureDecision(decisions, actionId, {
+    amount: normalizedAmount,
+    payment_mode: nextPaymentMode
+  });
+}
+
+export function updateObligationGesturePaymentMode(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId,
+  paymentMode: ObligationsGesturePaymentMode
+): TurnDecisions {
+  const current = readObligationGestureDecision(decisions, actionId);
+  const normalizedMode = normalizedGesturePaymentMode(actionId, paymentMode);
+  return writeGestureDecision(decisions, actionId, {
+    amount: normalizedMode === "none" ? 0 : current.amount,
+    payment_mode: normalizedMode
+  });
+}
+
+export function queueDefaultObligationGesture(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId
+): TurnDecisions {
+  const current = readObligationGestureDecision(decisions, actionId);
+  return writeGestureDecision(decisions, actionId, {
+    amount: current.amount > 0 ? current.amount : 1,
+    payment_mode:
+      current.payment_mode === "none" ? OBLIGATION_GESTURE_DEFAULT_PAYMENT_MODES[actionId] : current.payment_mode
+  });
+}
+
+export function clearObligationGestureDecision(
+  decisions: TurnDecisions,
+  actionId: ObligationsGestureActionId
+): TurnDecisions {
+  return writeGestureDecision(decisions, actionId, defaultGestureDecision(actionId));
 }
 
 export function selectObligationsCounterpartySections(

@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R1-006-T05
+  current_task_id: V03-R4-004-T01
+  last_completed_task_id: V03-R4-006-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,7 +21,8 @@ last_run:
     run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
     run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted Social V03-R1-006-T01 through V03-R1-006-T05, closed epic
-  V03-R1-006, and completed the remaining v0.3 backlog with the residence-manor
-  assignment baseline on the accepted replay line.
+  Accepted UI V03-R4-006-T01 on the activation pass. Tooling V03-R4-004-T01
+  and Economy V03-R4-005-T01 remain the live ready frontiers. Integrated UI
+  tests and production build passed; preflight still shows the broader 16-case
+  activation-line mismatch and qa did not return a clean exit.
 active_claims: {}

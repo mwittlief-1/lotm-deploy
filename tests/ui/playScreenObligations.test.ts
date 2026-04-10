@@ -3,10 +3,16 @@ import { describe, expect, it } from "vitest";
 import {
   buildObligationsCounterpartyContract,
   classifyReceiptCounterpartyTags,
+  clearObligationGestureDecision,
   createObligationsModalRoute,
   obligationsModalSubtitle,
   obligationsModalTitle,
-  selectObligationsCounterpartySections
+  obligationGesturePaymentModeOptions,
+  queueDefaultObligationGesture,
+  readObligationGestureDecision,
+  selectObligationsCounterpartySections,
+  updateObligationGestureAmount,
+  updateObligationGesturePaymentMode
 } from "../../src/ui/playScreenObligations";
 
 const PREVIEW_STATE = {
@@ -223,6 +229,39 @@ describe("playScreenObligations", () => {
     expect(obligationsModalSubtitle("decisions", "church")).toBe(
       "Track tithe due, bushel arrears, and the current church pressure stage in one place. Use the payment controls just below to respond after you review the already-resolved stage state."
     );
+  });
+
+  it("normalizes gift and offering gesture decisions for the live planning surface", () => {
+    const baseDecisions: any = {
+      labor: { kind: "labor", desired_farmers: 6, desired_builders: 2 },
+      sell: { kind: "sell", sell_bushels: 0 },
+      obligations: { kind: "pay_obligations", pay_coin: 0, pay_bushels: 0, war_levy_choice: "ignore" },
+      construction: { kind: "construction", action: "none" },
+      marriage: { kind: "marriage", action: "none" }
+    };
+
+    expect(obligationGesturePaymentModeOptions("gift_liege")).toEqual(["coin", "food_stores", "meat_stores", "none"]);
+    expect(obligationGesturePaymentModeOptions("offering_church")).toEqual(["food_stores", "coin", "meat_stores", "none"]);
+    expect(readObligationGestureDecision(baseDecisions, "gift_liege")).toEqual({ amount: 0, payment_mode: "none" });
+
+    const queuedGift = queueDefaultObligationGesture(baseDecisions, "gift_liege");
+    expect(readObligationGestureDecision(queuedGift, "gift_liege")).toEqual({ amount: 1, payment_mode: "coin" });
+
+    const foodGift = updateObligationGesturePaymentMode(queuedGift, "gift_liege", "food_stores");
+    expect(readObligationGestureDecision(foodGift, "gift_liege")).toEqual({ amount: 1, payment_mode: "food_stores" });
+
+    const largerGift = updateObligationGestureAmount(foodGift, "gift_liege", 3);
+    expect(readObligationGestureDecision(largerGift, "gift_liege")).toEqual({ amount: 3, payment_mode: "food_stores" });
+
+    const clearedGift = clearObligationGestureDecision(largerGift, "gift_liege");
+    expect(readObligationGestureDecision(clearedGift, "gift_liege")).toEqual({ amount: 0, payment_mode: "none" });
+
+    const queuedOffering = queueDefaultObligationGesture(baseDecisions, "offering_church");
+    expect(readObligationGestureDecision(queuedOffering, "offering_church")).toEqual({ amount: 1, payment_mode: "food_stores" });
+
+    const coinOffering = updateObligationGesturePaymentMode(queuedOffering, "offering_church", "coin");
+    const zeroedOffering = updateObligationGestureAmount(coinOffering, "offering_church", 0);
+    expect(readObligationGestureDecision(zeroedOffering, "offering_church")).toEqual({ amount: 0, payment_mode: "none" });
   });
 
   it("surfaces stage-three dispossession danger through the obligations contract", () => {
