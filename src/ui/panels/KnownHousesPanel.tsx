@@ -3,18 +3,22 @@ import { Tip, formatNameParts } from "../viewHelpers";
 
 type KnownHousesPanelProps = {
   copy: any;
+  dossierHouseIds?: Set<string>;
   hasMoreKnownHouses: boolean;
   knownHouses: any[];
   knownHousesMain: any[];
+  onOpenHouseDossier?: (houseId: string) => void;
   onToggleShowAll: () => void;
   showAllKnownHouses: boolean;
 };
 
 export function KnownHousesPanel({
   copy,
+  dossierHouseIds,
   hasMoreKnownHouses,
   knownHouses,
   knownHousesMain,
+  onOpenHouseDossier,
   onToggleShowAll,
   showAllKnownHouses
 }: KnownHousesPanelProps) {
@@ -26,8 +30,10 @@ export function KnownHousesPanel({
       ) : (
         <div style={{ display: "grid", gap: 8 }}>
           {knownHousesMain.map((h, idx) => {
+            const houseId = String(h?.house_id ?? h?.id ?? "").trim();
             const houseName = String(h?.house_name ?? h?.houseName ?? h?.name ?? "").trim();
             const tier = String(h?.tier ?? "").trim();
+            const canOpenDossier = Boolean(houseId && dossierHouseIds?.has(houseId) && onOpenHouseDossier);
 
             const headNameRaw = h?.head_name ?? h?.head?.head_name ?? h?.head?.name ?? "";
             const headAgeRaw = h?.head_age ?? h?.head?.head_age ?? h?.head?.age;
@@ -65,8 +71,15 @@ export function KnownHousesPanel({
             const showRel = a !== null && r !== null && t !== null;
 
             return (
-              <div key={idx} style={{ padding: 10, border: "1px solid #eee", background: "#fff" }}>
-                {houseName ? <div style={{ fontWeight: 700 }}>{copy.housePrefix(houseName)}</div> : null}
+              <div key={houseId || idx} style={{ padding: 10, border: "1px solid #eee", background: "#fff" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start", flexWrap: "wrap" }}>
+                  {houseName ? <div style={{ fontWeight: 700 }}>{copy.housePrefix(houseName)}</div> : <div />}
+                  {canOpenDossier ? (
+                    <button onClick={() => onOpenHouseDossier?.(houseId)} style={{ fontSize: 12 }} type="button">
+                      Open dossier
+                    </button>
+                  ) : null}
+                </div>
 
                 {tier ? (
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.95 }}>

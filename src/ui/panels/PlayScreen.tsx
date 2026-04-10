@@ -35,6 +35,7 @@ import {
   summarizePopulationChange,
   uncertaintyLabel as labelUncertainty
 } from "../playViewModel";
+import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
 import {
   PLAY_ANCHORS,
   buildCouncilAgendaItems,
@@ -98,6 +99,7 @@ import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
 import { EventsPanel } from "./EventsPanel";
+import { HouseDossierPanel } from "./HouseDossierPanel";
 import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
@@ -166,6 +168,7 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
+  const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
@@ -223,7 +226,12 @@ export function PlayScreen({
   const knownHouses: any[] = getKnownHouses(ctx.preview_state, knownHousesRaw);
   const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
   const hasMoreKnownHouses = knownHouses.length > 5;
+  const knownHouseDossierIds = useMemo(() => new Set(listHouseDossierIds(ctx.preview_state)), [ctx.preview_state]);
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
+  const activeHouseDossierSurface = useMemo(
+    () => (activeHouseDossierId ? buildHouseDossierSurface(ctx.preview_state, activeHouseDossierId) : null),
+    [activeHouseDossierId, ctx.preview_state]
+  );
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
@@ -650,6 +658,14 @@ export function PlayScreen({
     setSelectedPortfolioManorId(manorId);
   }
 
+  function openHouseDossier(houseId: string) {
+    setActiveHouseDossierId(houseId);
+  }
+
+  function closeHouseDossier() {
+    setActiveHouseDossierId(null);
+  }
+
   function closeReceiptViewer() {
     setReceiptViewerRoute(null);
   }
@@ -796,9 +812,11 @@ export function PlayScreen({
     known_houses: (
       <KnownHousesPanel
         copy={copy}
+        dossierHouseIds={knownHouseDossierIds}
         hasMoreKnownHouses={hasMoreKnownHouses}
         knownHouses={knownHouses}
         knownHousesMain={knownHousesMain}
+        onOpenHouseDossier={openHouseDossier}
         onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
         showAllKnownHouses={showAllKnownHouses}
       />
@@ -946,6 +964,15 @@ export function PlayScreen({
           ) : null
         )}
       </div>
+
+      <ModalSheet
+        onClose={closeHouseDossier}
+        open={activeHouseDossierSurface !== null}
+        subtitle={activeHouseDossierSurface?.subtitle}
+        title={activeHouseDossierSurface ? `House ${activeHouseDossierSurface.houseName}` : "House dossier"}
+      >
+        {activeHouseDossierSurface ? <HouseDossierPanel surface={activeHouseDossierSurface} /> : null}
+      </ModalSheet>
 
       <ModalSheet
         onClose={closeObligationsDetails}
