@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R4-005-T01
+  current_task_id: V03-R5-001-T01
+  last_completed_task_id: V03-R4-006-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,9 +21,9 @@ last_run:
     run1: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
     run2: 165a6eea4b1d996713a16d8aa612baf70f0b0bead5add0be2a033898d14076ea
 notes: >-
-  Accepted Tooling V03-R4-004-T01 and Economy V03-R4-005-T01, then wired
-  structured fiscal receipt transport through the kickoff-owned obligations phase
-  result path. Focused economy and UI receipt tests, build, UAT scenario gate,
-  and replay twice passed on the new activation line; preflight still shows the
-  broader 16-case mismatch.
+  Activated the v0.3.5 control plane on top of the locked v0.3.4 baseline.
+  Canonical R5 backlog entries now exist, with opening ready tasks on kickoff,
+  social, economy, and tooling lanes. World map work remains queued behind the
+  kickoff-owned renderer attachment checkpoint, and later lane work stays todo
+  until the first-wave chain unlocks it.
 active_claims: {}

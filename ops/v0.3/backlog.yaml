@@ -44,6 +44,9 @@ releases:
 - id: v0.3.4
   title: Hardening
   status: planned
+- id: v0.3.5
+  title: Playability closure
+  status: active
 epics:
 - id: V03-K0-001
   title: Kickoff docs bundle and codemap guidance established
@@ -1380,6 +1383,359 @@ epics:
   - legacy receipt rendering remains as fallback
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R4-006.md
+- id: V03-R5-001
+  title: Map view v0 and renderer attachment
+  release: v0.3.5
+  status: ready
+  priority: 25
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-lane-world-topology
+  deps:
+  - V03-R4-004
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - data/map/xmap_alpha_v1/**
+  - src/sim/domains/world/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - renderer attachment and map snapshot seam exist without sim-logic regressions
+  - map UI can render holdings and liege seat from bounded contracts
+  - deterministic tests cover map routing and stable selection ordering
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001.md
+- id: V03-R5-002
+  title: Manor view v0
+  release: v0.3.5
+  status: todo
+  priority: 24
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-lane-world-topology
+  deps:
+  - V03-R5-001
+  - V03-R5-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/world/**
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - manor detail projection exists with deterministic row ordering
+  - manor view surfaces maintenance, rights, and nearby-manor data through canonical read models
+  - UI and snapshot coverage exist for player and debug tabs
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-002.md
+- id: V03-R5-003
+  title: House dossier modal
+  release: v0.3.5
+  status: ready
+  priority: 23
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R4-004
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - dossier read model exists for known houses and prospect houses
+  - dossier modal replaces summary-only drilldown
+  - fixtures and tests prove dossier completeness for grant and marriage prospects
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-003.md
+- id: V03-R5-004
+  title: Person cards
+  release: v0.3.5
+  status: todo
+  priority: 22
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R5-003
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - person-card projections exist for family, claims, lands, and service
+  - tap-any-name routing reaches one canonical modal surface
+  - deterministic fixtures and route tests cover overview and debug tabs
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-004.md
+- id: V03-R5-005
+  title: Outbound marriage scouting and offers
+  release: v0.3.5
+  status: todo
+  priority: 21
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R5-001
+  - V03-R5-003
+  - V03-R5-004
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/world/**
+  - src/sim/domains/people/**
+  - src/sim/domains/economy/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - scoped outbound scouting and candidate ranking exist
+  - outbound offer pipeline resolves through canonical relationship and fiscal seams
+  - UI and replay guards cover deterministic candidate sets and offer outcomes
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005.md
+- id: V03-R5-006
+  title: Maintenance realism and labor pressure
+  release: v0.3.5
+  status: ready
+  priority: 20
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  deps:
+  - V03-R4-004
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - src/sim/phases/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - maintenance registry and receipt taxonomy exist for live holdings and rights
+  - maintenance coin and labor pressure are auditable through canonical seams
+  - UI and DOE coverage explain maintenance pressure without hidden magic
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006.md
+- id: V03-R5-007
+  title: Court provisioning and stipends
+  release: v0.3.5
+  status: todo
+  priority: 19
+  tranche: 6
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R5-004
+  - V03-R5-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/economy/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - provisioning view and stipend registry exist on stable person ids
+  - ration and stipend effects flow through canonical fiscal paths
+  - UI and deterministic fixtures cover overrides and debug surfaces
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-007.md
+- id: V03-R5-008
+  title: Obligations deep modal and enforcement transparency
+  release: v0.3.5
+  status: todo
+  priority: 18
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  deps:
+  - V03-R5-006
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - obligations view exposes accepted payment modes, bite preview, and terminal-risk transparency
+  - UI explains the full enforcement ladder and the game-over evaluation boundary
+  - tests cover arrears carry, forced payment, seizure preview, and terminal-stage visibility
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-008.md
+- id: V03-R5-009
+  title: Preset pack and lockability UAT
+  release: v0.3.5
+  status: ready
+  priority: 17
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  deps:
+  - V03-R4-004
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - src/sim/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - playability preset pack exists with one deterministic control-plane seam
+  - new-run flow shows preset provenance without bypassing canonical initialization
+  - UAT pack and operator docs treat the preset pack as the v0.3.5 closure checklist
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009.md
+- id: V03-R5-010
+  title: Balance closure and stability guards
+  release: v0.3.5
+  status: todo
+  priority: 16
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: balance
+  lane_branch: codex/v0.3-lane-tooling-qa
+  deps:
+  - V03-R4-002
+  - V03-R5-009
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - src/sim/domains/economy/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - KPI acceptance bands are explicit for the shipped DOE baseline
+  - runaway detectors exist for fiscal and starvation failure modes
+  - balance review flow compares against deterministic baseline artifacts instead of ad hoc judgement
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-010.md
 tasks:
 - id: V03-R0-001-T01
   title: Audit economy mutation paths against ledger receipt ownership
@@ -8600,3 +8956,1865 @@ tasks:
     claimed_at: ''
     claim_expires_at: ''
     run_id: ''
+- id: V03-R5-001-T01
+  parent_epic: V03-R5-001
+  release: v0.3.5
+  title: Attach approved external map renderer seam and route entry point
+  status: ready
+  priority: 99
+  tranche: 6
+  change_type: refactor
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Attach the approved external renderer seam and a minimal route entry point without changing simulation semantics.
+  deps:
+  - V03-R4-004-T01
+  - V03-R4-005-T01
+  - V03-R4-006-T01
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - data/map/xmap_alpha_v1/**
+  - docs/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - external renderer seam is attached without introducing a second map data source
+  - map route entry point exists for the later UI task
+  - no sim-domain logic is moved into the UI attachment layer
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001-T01.md
+- id: V03-R5-001-T02
+  parent_epic: V03-R5-001
+  release: v0.3.5
+  title: Expose map selectors from frozen topology and economic profile data
+  status: todo
+  priority: 98
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-lane-world-topology
+  goal: Add world-owned selectors for manor seat coordinates, labels, and optional transport exposure from the frozen map bundle.
+  deps:
+  - V03-R5-001-T01
+  - V03-XMAP-001
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - data/map/xmap_alpha_v1/**
+  - src/sim/domains/world/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - manor seat q,r lookup exists
+  - owner, holding, and county label selectors exist
+  - optional road or river exposure reports explicit empty states
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001-T02.md
+- id: V03-R5-001-T03
+  parent_epic: V03-R5-001
+  release: v0.3.5
+  title: Expose map_view_snapshot_v1 through bounded snapshots
+  status: todo
+  priority: 97
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-lane-world-topology
+  goal: Publish a deterministic bounded map snapshot that the UI can consume without raw state spelunking.
+  deps:
+  - V03-R5-001-T02
+  - V03-XMAP-001
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/world/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - map_view_snapshot_v1 exists in bounded snapshot outputs
+  - stable ordering rules are explicit and test-covered
+  - snapshot uses canonical topology and holdings selectors only
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001-T03.md
+- id: V03-R5-001-T04
+  parent_epic: V03-R5-001
+  release: v0.3.5
+  title: Render kingdom map with holdings, liege seat, and manor routing
+  status: todo
+  priority: 96
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: map
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render the first player-facing map view using the canonical bounded snapshot and route manor clicks into the manor view.
+  deps:
+  - V03-R5-001-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - src/content/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - map highlights player holdings and liege seat
+  - manor clicks route into Manor View v0
+  - debug overlay is sorted by manor_id
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001-T04.md
+- id: V03-R5-001-T05
+  parent_epic: V03-R5-001
+  release: v0.3.5
+  title: Add deterministic map fixtures, route tests, and replay guards
+  status: todo
+  priority: 95
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: map
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the map view seam with deterministic fixtures and routing guards before later UI deepening.
+  deps:
+  - V03-R5-001-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  - scripts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - map snapshot fixtures exist
+  - click-route tests cover stable map selection behavior
+  - replay guards protect deterministic ordering for map view data
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-001-T05.md
+- id: V03-R5-002-T01
+  parent_epic: V03-R5-002
+  release: v0.3.5
+  title: Expose manor_detail_view_v1 from world topology data
+  status: todo
+  priority: 94
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: map
+  lane_branch: codex/v0.3-lane-world-topology
+  goal: Build a deterministic manor detail projection from the frozen topology bundle.
+  deps:
+  - V03-R5-001-T03
+  - V03-XMAP-001
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/world/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - manor_detail_view_v1 includes hex_count, arability, terrain mix, nearby manors, and per-hex rows
+  - row ordering is deterministic
+  - projection is bounded and UI-safe
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-002-T01.md
+- id: V03-R5-002-T02
+  parent_epic: V03-R5-002
+  release: v0.3.5
+  title: Project manor maintenance, buildings, and rights summary
+  status: todo
+  priority: 93
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Add a read-only manor projection for maintenance, buildings, and rights keyed by the canonical maintenance registry.
+  deps:
+  - V03-R5-006-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - manor maintenance summary projection exists
+  - buildings and rights data reuse maintenance_registry_v1 instead of ad hoc lookups
+  - projection is deterministic and test-covered
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-002-T02.md
+- id: V03-R5-002-T03
+  parent_epic: V03-R5-002
+  release: v0.3.5
+  title: Render Manor View player and debug tabs
+  status: todo
+  priority: 92
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: map
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render a clickable manor view from the canonical world and economy read models.
+  deps:
+  - V03-R5-002-T01
+  - V03-R5-002-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - manor view is reachable from map and holdings selector
+  - player and debug tabs render nearby-manor and hex-table data
+  - UI ordering matches deterministic projection ordering
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-002-T03.md
+- id: V03-R5-002-T04
+  parent_epic: V03-R5-002
+  release: v0.3.5
+  title: Add manor view snapshot and component coverage
+  status: todo
+  priority: 91
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: map
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the manor view seam with deterministic snapshot and UI tests.
+  deps:
+  - V03-R5-002-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - manor view fixtures exist for player and debug tabs
+  - component tests assert deterministic row ordering
+  - regressions on manor routing and tab surfaces are covered
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-002-T04.md
+- id: V03-R5-003-T01
+  parent_epic: V03-R5-003
+  release: v0.3.5
+  title: Extend known-house surfaces to house_dossier_v2
+  status: ready
+  priority: 90
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Build the canonical house dossier read model for known houses and prospect houses.
+  deps:
+  - V03-R4-004-T01
+  - V03-R4-005-T01
+  - V03-R4-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - house_dossier_v2 includes knownness, A/R/T summary, holdings footprint, kinship tags, and coarse ledger band or trend
+  - prospect houses always resolve to populated dossiers
+  - dossier ordering and invariants are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-003-T01.md
+- id: V03-R5-003-T02
+  parent_epic: V03-R5-003
+  release: v0.3.5
+  title: Replace summary drilldown with dossier modal and debug tab
+  status: todo
+  priority: 89
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: none
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render the dossier modal as the canonical drilldown surface for houses.
+  deps:
+  - V03-R5-003-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - dossier modal replaces the summary-only drilldown
+  - debug table tab is available from the same modal
+  - routing uses canonical dossier data only
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-003-T02.md
+- id: V03-R5-003-T03
+  parent_epic: V03-R5-003
+  release: v0.3.5
+  title: Add dossier fixtures and prospect completeness tests
+  status: todo
+  priority: 88
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: none
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the dossier contract with fixtures and completeness checks for grant and marriage flows.
+  deps:
+  - V03-R5-003-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - dossier fixtures exist
+  - every grant or marriage prospect house resolves to a populated dossier in tests
+  - deterministic snapshot coverage exists for the dossier contract
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-003-T03.md
+- id: V03-R5-004-T01
+  parent_epic: V03-R5-004
+  release: v0.3.5
+  title: Define person_card_view_v1 from registries and summaries
+  status: todo
+  priority: 87
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Build the canonical person card read model from people, residence, office, and succession registries.
+  deps:
+  - V03-R5-003-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - person_card_view_v1 exists
+  - person cards include family, residence, offices, and succession summaries
+  - projection shape and ordering are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-004-T01.md
+- id: V03-R5-004-T02
+  parent_epic: V03-R5-004
+  release: v0.3.5
+  title: Add stable family, succession, lands, and service projections
+  status: todo
+  priority: 86
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Deepen person-card projections with deterministic family, claims, lands, and service timeline data.
+  deps:
+  - V03-R5-004-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - family, claims, married-out, lands-held, and service-timeline projections exist
+  - stable person ids anchor all rows and references
+  - debug projection output is deterministic and test-covered
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-004-T02.md
+- id: V03-R5-004-T03
+  parent_epic: V03-R5-004
+  release: v0.3.5
+  title: Wire tap-any-name person-card modal across live surfaces
+  status: todo
+  priority: 85
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: none
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Route names across the play surfaces into one canonical person-card modal.
+  deps:
+  - V03-R5-004-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - household, roster, prospects, known houses, and dossier surfaces open the same person-card modal
+  - modal tabs cover overview, family, offices or service, relationships, and debug
+  - route tests cover the tap-any-name flows
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-004-T03.md
+- id: V03-R5-004-T04
+  parent_epic: V03-R5-004
+  release: v0.3.5
+  title: Add person-card fixtures and routing tests
+  status: todo
+  priority: 84
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: none
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the person-card contract and modal routing with fixtures and deterministic tests.
+  deps:
+  - V03-R5-004-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - person-card fixtures exist for all major tabs
+  - modal-routing tests cover live entry points
+  - deterministic contract snapshots protect schema drift
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-004-T04.md
+- id: V03-R5-005-T01
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Expose resolveActionScope(manor_id, action_type) from topology
+  status: todo
+  priority: 83
+  tranche: 6
+  change_type: behavior_change
+  category: World
+  phase: marriage
+  lane_branch: codex/v0.3-lane-world-topology
+  goal: Expose one generic action-scope resolver from topology and residence hooks for outward-facing actions.
+  deps:
+  - V03-R5-001-T03
+  - V03-XMAP-001
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/world/**
+  - src/sim/domains/people/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - resolveActionScope(manor_id, action_type) exists
+  - resolver uses existing topology caps and residence hooks
+  - scope output is deterministic and test-covered
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T01.md
+- id: V03-R5-005-T02
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Build outbound scouting registry and candidate ranking
+  status: todo
+  priority: 82
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Replace scout-buff-only behavior with a deterministic outbound scouting registry and candidate ranking surface.
+  deps:
+  - V03-R5-005-T01
+  - V03-R5-003-T01
+  - V03-R5-004-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - outbound scouting registry exists
+  - candidate ranking includes deterministic include and exclude reasons
+  - scouting output is bounded and replay-safe
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T02.md
+- id: V03-R5-005-T03
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Add canonical dowry and dower receipt placeholders
+  status: todo
+  priority: 81
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: marriage
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Add placeholder fiscal paths for outbound marriage transfers through canonical receipts only.
+  deps:
+  - V03-R5-005-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - canonical dowry or dower receipt placeholders exist for coin, food, and meat
+  - placeholders do not bypass existing ledger or receipt ownership
+  - receipt ordering and shapes are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T03.md
+- id: V03-R5-005-T04
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Implement outbound offer accept and reject pipeline
+  status: todo
+  priority: 80
+  tranche: 6
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Resolve outbound marriage offers through canonical relationship and evidence paths without integrator-orchestrator edits.
+  deps:
+  - V03-R5-005-T02
+  - V03-R5-005-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/economy/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - outbound offer accept or reject pipeline exists
+  - relationship deltas and evidence events flow through canonical APIs
+  - focused tests cover deterministic outcomes and blocked cases
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T04.md
+- id: V03-R5-005-T05
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Render outbound scout table and offer composer
+  status: todo
+  priority: 79
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: marriage
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render the outward marriage scouting and offer flow on top of the canonical social and economy contracts.
+  deps:
+  - V03-R5-005-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - scout action, candidate table, offer composer, and debug eligibility table render
+  - UI uses canonical include and exclude reasons
+  - deterministic routing and selection behavior are covered
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T05.md
+- id: V03-R5-005-T06
+  parent_epic: V03-R5-005
+  release: v0.3.5
+  title: Add outbound marriage fixtures, replay guards, and preset coverage
+  status: todo
+  priority: 78
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: marriage
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the outbound marriage flow with deterministic fixtures and short preset-driven coverage.
+  deps:
+  - V03-R5-005-T05
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  - scripts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - deterministic candidate-set fixtures exist
+  - replay guards cover outbound scouting and offer resolution
+  - preset coverage exercises the flow in a short deterministic window
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-005-T06.md
+- id: V03-R5-006-T01
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Audit live maintenance-bearing surfaces and define maintenance_registry_v1
+  status: ready
+  priority: 77
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Define the maintenance registry and receipt taxonomy from the live building, rights, and court-maintenance surfaces.
+  deps:
+  - V03-R4-004-T01
+  - V03-R4-005-T01
+  - V03-R4-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - maintenance_registry_v1 exists
+  - receipt taxonomy exists for maintenance coin and labor pressure
+  - live maintenance-bearing surfaces are enumerated against canonical APIs
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T01.md
+- id: V03-R5-006-T02
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Implement recurring maintenance coin and labor requirements
+  status: todo
+  priority: 76
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Implement recurring maintenance requirements through canonical economy APIs without UI-owned writes.
+  deps:
+  - V03-R5-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - recurring maintenance coin cost exists per building or right
+  - recurring maintenance labor requirement exists per building or right
+  - writes flow through canonical economy-owned APIs
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T02.md
+- id: V03-R5-006-T03
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Implement auditable maintenance labor-pressure helper seam
+  status: todo
+  priority: 75
+  tranche: 6
+  change_type: behavior_change
+  category: SimCore
+  phase: consumption
+  lane_branch: codex/v0.3-lane-engine-core
+  goal: Implement the engine-core helper seam for maintenance labor pressure without taking ownership of integrator-only orchestration.
+  deps:
+  - V03-R5-006-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/sim/phases/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - maintenance labor-pressure helper seam exists
+  - helper exposes typed receipts or deterministic capacity-pressure output
+  - helper contract is ready for integrator wiring without redefining maintenance semantics
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T03.md
+- id: V03-R5-006-T03A
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Wire maintenance labor drag into allocatable labor ordering
+  status: todo
+  priority: 74
+  tranche: 6
+  change_type: behavior_change
+  category: SimCore
+  phase: consumption
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Wire the maintenance labor-pressure helper into the canonical allocatable labor ordering on the integrator branch.
+  deps:
+  - V03-R5-006-T03
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/turn.ts
+  - src/sim/phases/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - maintenance labor drag is applied before allocatable labor is consumed
+  - wiring preserves deterministic ordering and replay behavior
+  - integrator-owned phase or orchestration changes remain minimal and explicit
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T03A.md
+- id: V03-R5-006-T04
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Surface maintenance rows in manor, portfolio, receipts, and explain views
+  status: todo
+  priority: 74
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: balance
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Explain maintenance pressure to the player through the existing receipt and explain surfaces.
+  deps:
+  - V03-R5-006-T03A
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - src/content/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - maintenance rows render in manor, portfolio, receipts, and explain surfaces
+  - UI surfaces auditable maintenance pressure instead of hidden output loss
+  - copy and table ordering are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T04.md
+- id: V03-R5-006-T05
+  parent_epic: V03-R5-006
+  release: v0.3.5
+  title: Add maintenance-pressure DOE scenarios and invariants
+  status: todo
+  priority: 73
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: balance
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Add deterministic maintenance-pressure scenarios and invariants to the QA and balance toolchain.
+  deps:
+  - V03-R5-006-T03A
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - DOE scenarios exist for maintenance pressure
+  - replay or invariant coverage protects the maintenance labor seam
+  - artifacts make maintenance pressure comparable across runs
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-006-T05.md
+- id: V03-R5-007-T01
+  parent_epic: V03-R5-007
+  release: v0.3.5
+  title: Define court provisioning view and stipend registry
+  status: todo
+  priority: 72
+  tranche: 6
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Define provisioning and stipend surfaces keyed to stable person ids and prior-turn defaults.
+  deps:
+  - V03-R5-004-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - per-court-member provisioning view exists
+  - stipend registry is keyed to stable person ids
+  - defaults can carry deterministically from the prior turn
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-007-T01.md
+- id: V03-R5-007-T02
+  parent_epic: V03-R5-007
+  release: v0.3.5
+  title: Implement ration and stipend effects through canonical fiscal paths
+  status: todo
+  priority: 71
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Implement provisioning outputs, stipend receipts, and placeholder undernourishment badges through canonical fiscal paths.
+  deps:
+  - V03-R5-007-T01
+  - V03-R5-006-T03A
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/people/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - ration-policy outputs exist
+  - stipend receipts flow through canonical fiscal paths
+  - placeholder undernourish or risk badges are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-007-T02.md
+- id: V03-R5-007-T03
+  parent_epic: V03-R5-007
+  release: v0.3.5
+  title: Render court provisioning modal with overrides and debug table
+  status: todo
+  priority: 70
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: none
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render the player-facing court provisioning and stipend control surface.
+  deps:
+  - V03-R5-007-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - court provisioning modal renders ration policy, overrides, stipend table, and debug data
+  - UI uses the canonical provisioning read model
+  - modal behavior and ordering are deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-007-T03.md
+- id: V03-R5-007-T04
+  parent_epic: V03-R5-007
+  release: v0.3.5
+  title: Add provisioning fixtures and UAT coverage
+  status: todo
+  priority: 69
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: none
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the provisioning flow with deterministic fixtures and UAT scenarios.
+  deps:
+  - V03-R5-007-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - deterministic provisioning fixtures exist
+  - UAT scenarios cover provisioning behavior and debug visibility
+  - replay-safe coverage exists for stipend and ration control surfaces
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-007-T04.md
+- id: V03-R5-008-T01
+  parent_epic: V03-R5-008
+  release: v0.3.5
+  title: Extend economy_obligations_view with payment modes and terminal-risk fields
+  status: todo
+  priority: 68
+  tranche: 6
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Deepen the obligations read model with payment-mode, bite-preview, and terminal-risk transparency fields.
+  deps:
+  - V03-R5-002-T02
+  - V03-R4-005-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  - src/ui/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - accepted payment modes, next-stage trigger fields, and bite-preview data exist
+  - structured payment, penalty, and seizure receipt groupings are exposed
+  - terminal-stage transparency fields make game-over explanation possible in UI
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-008-T01.md
+- id: V03-R5-008-T02
+  parent_epic: V03-R5-008
+  release: v0.3.5
+  title: Deepen obligations modal into full ladder and tangible-bite preview
+  status: todo
+  priority: 67
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: obligations
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Render the obligations modal as a transparent explanation surface for dues, bites, and terminal risk.
+  deps:
+  - V03-R5-008-T01
+  - V03-R4-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - src/content/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - modal shows mode-aware payments and full enforcement ladder
+  - stage thresholds include terminal-risk visibility and the evaluation boundary
+  - tangible bite preview is player-visible and deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-008-T02.md
+- id: V03-R5-008-T03
+  parent_epic: V03-R5-008
+  release: v0.3.5
+  title: Add obligations fixtures and UAT scripts for enforcement transparency
+  status: todo
+  priority: 66
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: obligations
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Lock the obligations transparency contract with deterministic fixtures and UAT scripts.
+  deps:
+  - V03-R5-008-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/qa/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - obligations-table fixtures exist
+  - UAT scripts cover arrears carry, forced payment, seizure preview, and terminal-stage visibility
+  - replay-safe coverage protects the new obligations contract
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-008-T03.md
+- id: V03-R5-009-T01
+  parent_epic: V03-R5-009
+  release: v0.3.5
+  title: Define playability_preset_pack_v1 and stable scenario mapping
+  status: ready
+  priority: 65
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Define the canonical preset pack and scenario mapping without creating a second control plane.
+  deps:
+  - V03-R4-004-T01
+  - V03-R4-005-T01
+  - V03-R4-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - playability_preset_pack_v1 exists
+  - preset ids and scenario-to-acceptance mapping are stable and documented
+  - existing seed-pack conventions are extended instead of forked
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009-T01.md
+- id: V03-R5-009-T02
+  parent_epic: V03-R5-009
+  release: v0.3.5
+  title: Add one deterministic preset-application seam for new runs
+  status: todo
+  priority: 64
+  tranche: 6
+  change_type: behavior_change
+  category: SimCore
+  phase: none
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Add one canonical preset-application seam for new runs without creating a second initialization path.
+  deps:
+  - V03-R5-009-T01
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/sim/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - one deterministic preset-application seam exists for createNewRun and applyPlayabilityPreset
+  - presets do not bypass canonical worldgen, migrations, or registry wiring
+  - seed and preset provenance are available for later shell and export surfaces
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009-T02.md
+- id: V03-R5-009-T03
+  parent_epic: V03-R5-009
+  release: v0.3.5
+  title: Author locked preset scenarios and expected visible outcomes
+  status: todo
+  priority: 63
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Author the locked preset scenarios that exercise the visible v0.3.5 closure surfaces.
+  deps:
+  - V03-R5-009-T02
+  - V03-R5-005-T05
+  - V03-R5-006-T05
+  - V03-R5-007-T04
+  - V03-R5-008-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - locked presets exist with exact seed, policy, turn count, and expected visible surfaces
+  - preset scenarios cover the targeted playability closure outcomes
+  - scenario ids and expectations are deterministic and documented
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009-T03.md
+- id: V03-R5-009-T04
+  parent_epic: V03-R5-009
+  release: v0.3.5
+  title: Add preset selection and provenance to the new-run shell
+  status: todo
+  priority: 62
+  tranche: 6
+  change_type: behavior_change
+  category: Experience/UI
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Surface preset selection and provenance in the new-run UI and shell.
+  deps:
+  - V03-R5-009-T02
+  - V03-R5-009-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/App.tsx
+  - src/ui/**
+  - tests/ui/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - NewRunScreen uses repo-relative canonical surface wiring for preset selection
+  - run shell shows seed and preset provenance
+  - preset UI does not create a second initialization path
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009-T04.md
+- id: V03-R5-009-T05
+  parent_epic: V03-R5-009
+  release: v0.3.5
+  title: Refresh UAT gate and operator docs around the preset pack
+  status: todo
+  priority: 61
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Make the preset pack the canonical v0.3.5 closure checklist for UAT and operators.
+  deps:
+  - V03-R5-009-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - docs/**
+  - qa_artifacts/**
+  - scripts/**
+  forbidden_paths:
+  - src/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - uat:gate and playtest docs treat the preset pack as the closure checklist
+  - operator notes are refreshed for preset-driven review
+  - deterministic run instructions and expectations are explicit
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-009-T05.md
+- id: V03-R5-010-T01
+  parent_epic: V03-R5-010
+  release: v0.3.5
+  title: Define KPI acceptance bands from the locked DOE baseline
+  status: todo
+  priority: 60
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: balance
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Turn the locked DOE and regression artifacts into explicit acceptance bands for v0.3.5 closeout.
+  deps:
+  - V03-R4-002-T05
+  - V03-R5-009-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - docs/**
+  - qa_artifacts/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - KPI acceptance bands exist for net coin, arrears incidence, dispossession, shortages, and manor-count growth
+  - acceptance bands are anchored to deterministic baseline artifacts
+  - docs make clear which values are targets versus comparison rails
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-010-T01.md
+- id: V03-R5-010-T02
+  parent_epic: V03-R5-010
+  release: v0.3.5
+  title: Add runaway detectors for fiscal and starvation failure modes
+  status: todo
+  priority: 59
+  tranche: 6
+  change_type: behavior_change
+  category: Tooling
+  phase: balance
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Add deterministic runaway detectors that flag too-soft or too-hard fiscal and food pressure.
+  deps:
+  - V03-R5-010-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - src/sim/domains/economy/**
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - runaway detectors exist for coin runaway, starvation spiral, arrears too soft, arrears too hard, and frozen manor-count growth
+  - detector output is deterministic and reviewable
+  - detector coverage integrates with the existing DOE or regression flow
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-010-T02.md
+- id: V03-R5-010-T03
+  parent_epic: V03-R5-010
+  release: v0.3.5
+  title: Close balance review flow against baseline artifacts
+  status: todo
+  priority: 58
+  tranche: 6
+  change_type: refactor
+  category: Tooling
+  phase: balance
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Close the v0.3.5 balance-review loop by making baseline comparison the canonical review path.
+  deps:
+  - V03-R5-010-T02
+  - V03-R5-009-T05
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - docs/**
+  - scripts/**
+  - qa_artifacts/**
+  forbidden_paths:
+  - src/**
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - balance review flow points to deterministic baseline comparisons first
+  - operator docs explain how to use acceptance bands and detectors together
+  - v0.3.5 closeout has an explicit stability-review checklist
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R5-010-T03.md
