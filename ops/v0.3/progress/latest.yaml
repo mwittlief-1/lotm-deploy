@@ -1,6 +1,6 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R4-004-T01
   last_completed_task_id: V03-R1-006-T05
 runtime:
   node_version: v24.13.1
@@ -21,7 +21,7 @@ last_run:
     run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
     run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
 notes: >-
-  Accepted Social V03-R1-006-T01 through V03-R1-006-T05, closed epic
-  V03-R1-006, and completed the remaining v0.3 backlog with the residence-manor
-  assignment baseline on the accepted replay line.
+  Added a tooling addendum for the v0.3 UAT scenario pack so the tooling lane
+  has a legal ready task again. Current frontier is V03-R4-004-T01 for
+  deterministic scenario-pack and operator-guidance work.
 active_claims: {}
