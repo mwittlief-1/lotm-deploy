@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R4-004-T01
-  last_completed_task_id: V03-R4-006-T01
+  last_completed_task_id: V03-R4-005-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: d89903a
+  git_branch: codex/v0.3-lane-economy-fiscal
+  git_commit: c1b8367
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -14,15 +14,17 @@ runtime:
 last_run:
   gates:
     qa: pass
-    preflight: pass
-    repo_duplicates: pass
+    preflight: fail
+    repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
-    run2: f850077e9f6a7338869f9861a6db0fc7e27f3c8cae56b6589e09b42dcc0d67f1
+    run1: 7cc94d5e3c4c70046b13a82b7bdc7e1daa1319dbdc5e44165301b0b3a65f63ea
+    run2: 7cc94d5e3c4c70046b13a82b7bdc7e1daa1319dbdc5e44165301b0b3a65f63ea
 notes: >-
-  Accepted UI V03-R4-006-T01 on the activation pass. Tooling V03-R4-004-T01
-  and Economy V03-R4-005-T01 remain the live ready frontiers. Integrated UI
-  tests and production build passed; preflight still shows the broader 16-case
-  activation-line mismatch and qa did not return a clean exit.
+  Economy closed V03-R4-005-T01 on April 10, 2026 after refreshing the lane
+  worktree from local kickoff truth at commit 46f5086 and validating the
+  existing gesture settlement seam with direct domain coverage. Replay stayed
+  deterministic at hash 7cc94d5e3c4c70046b13a82b7bdc7e1daa1319dbdc5e44165301b0b3a65f63ea.
+  Preflight still fails on the shared activation-line 16-case mismatch, and
+  there is no same-lane claimable follow-on task.
 active_claims: {}

@@ -1321,7 +1321,7 @@ epics:
 - id: V03-R4-005
   title: Obligations gesture activation and structured fiscal receipts
   release: v0.3.4
-  status: ready
+  status: done
   priority: 27
   tranche: 5
   change_type: behavior_change
@@ -8522,7 +8522,7 @@ tasks:
   parent_epic: V03-R4-005
   release: v0.3.4
   title: Implement gesture fiscal primitives and structured receipt scaffolds
-  status: ready
+  status: done
   priority: 94
   tranche: 5
   change_type: behavior_change
