@@ -9353,7 +9353,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Extend known-house surfaces to house_dossier_v2
-  status: ready
+  status: done
   priority: 90
   tranche: 6
   change_type: behavior_change
@@ -9398,7 +9398,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Replace summary drilldown with dossier modal and debug tab
-  status: todo
+  status: ready
   priority: 89
   tranche: 6
   change_type: behavior_change
@@ -9482,7 +9482,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Define person_card_view_v1 from registries and summaries
-  status: todo
+  status: ready
   priority: 87
   tranche: 6
   change_type: behavior_change

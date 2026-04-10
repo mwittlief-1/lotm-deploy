@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: V03-R5-001-T04
-  last_completed_task_id: V03-R5-006-T03
+  last_completed_task_id: V03-R5-003-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -18,15 +18,16 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 06954e214d0486ef1546375ef7697428df426fe585b78b615f1a8d48071568c7
-    run2: 06954e214d0486ef1546375ef7697428df426fe585b78b615f1a8d48071568c7
+    run1: cfe26ffcdf8315644abdc2b71f2a98f1a3bf438749411f19102c4c28e524fa65
+    run2: 1dda22781bf223b87b8b94c242c0097fa56798596f68c8aa58b129a816a2a70b
 notes: >-
-  Accepted the engine helper seam plus the opening world map/topology seams
-  onto the v0.3.5 control-plane line. The accepted world integration keeps a
-  rich selector seam in the world domain while compacting serialized
-  `map_view_snapshot_v1` rows so replay snapshots stay under the byte cap.
-  Targeted QA over all affected suites passed, preflight still shows the
-  standing `test3_mismatches=16` blocker, and replay passed twice with matching
-  hashes. The next ready task is V03-R5-001-T04 on ui-experience; social still
-  owes its opening-wave rebase/correction handoff.
+  Accepted `V03-R5-003-T01` onto the v0.3.5 control-plane line. The live
+  social dossier surface stays rich, while bounded replay snapshots now keep a
+  deterministic 24-row dossier subset that leans on `known_houses[]` for
+  duplicated identity data so the snapshot cap stays intact. `npm run qa`
+  passed, `npm run preflight` still shows the standing `test3_mismatches=16`
+  blocker, and both replay batches passed; their normalized summaries matched
+  exactly once path-shaped artifact metadata was stripped. The next ready task
+  remains `V03-R5-001-T04` on ui-experience, and `V03-R5-004-T01` is now open
+  on social-mechanics.
 active_claims: {}

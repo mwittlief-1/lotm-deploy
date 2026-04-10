@@ -222,7 +222,7 @@ export interface HouseDossierHoldingsFootprint {
   holdings_count: number;
   holdings_band: HouseDossierHoldingsBand;
   anchor_manor_id: string | null;
-  known_manor_ids: string[];
+  known_manor_ids?: string[];
   source_kind: "player_portfolio" | "house_seed";
 }
 
@@ -251,7 +251,7 @@ export interface HouseDossierSummary {
   relevance_tier: KnownHouseRelevanceTier;
   relevance_reasons: KnownHouseRelevanceReason[];
   knownness: HouseDossierKnownness;
-  knownness_sources: HouseDossierKnownnessSource[];
+  knownness_sources?: HouseDossierKnownnessSource[];
   kinship_summary: HouseDossierKinshipSummary;
   kinship_tags: KnownHouseRelevanceReason[];
   relationship_band: HouseDossierRelationshipBand;
@@ -262,6 +262,19 @@ export interface HouseDossierSummary {
   child_count: number;
   has_male_heir: boolean;
   heiress_possible: boolean;
+  holdings_footprint: HouseDossierHoldingsFootprint;
+  ledger_band: HouseDossierLedgerBand;
+  ledger_trend: HouseDossierLedgerTrend;
+}
+
+export interface BoundedHouseDossierSummary {
+  schema_version: "house_dossier_summary_v2";
+  house_id: string;
+  knownness: HouseDossierKnownness;
+  kinship_summary: HouseDossierKinshipSummary;
+  kinship_tags: KnownHouseRelevanceReason[];
+  relationship_band: HouseDossierRelationshipBand;
+  relationship_summary: HouseDossierRelationshipSummary | null;
   holdings_footprint: HouseDossierHoldingsFootprint;
   ledger_band: HouseDossierLedgerBand;
   ledger_trend: HouseDossierLedgerTrend;
@@ -292,7 +305,7 @@ export interface RunState {
   economy_fiscal_receipts?: FiscalReceiptSnapshotV1[];
   portfolio?: PortfolioRegistryPlaceholderV1;
   known_houses?: KnownHouseSummary[];
-  house_dossiers?: HouseDossierSummary[];
+  house_dossiers?: BoundedHouseDossierSummary[];
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];

@@ -7,13 +7,13 @@ import { buildEconomyMaintenanceView } from "../economy/maintenance";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
-import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { buildBoundedKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
 import { ensureResidenceManorBindings } from "../people/residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
 import { buildBoundedMapViewSnapshot, buildBoundedWorldTopologyView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
-  const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const experienceSurfaces = buildBoundedKnownHouseExperienceSurfaces(state);
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   const residenceSurfaces = ensureResidenceManorBindings(state);

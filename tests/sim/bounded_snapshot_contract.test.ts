@@ -66,6 +66,18 @@ describe("bounded snapshot contract", () => {
         })
       ])
     );
+    expect(serialized.house_dossiers.length).toBeLessThanOrEqual(24);
+    const dossierWithRelationship = serialized.house_dossiers.find((dossier: any) => dossier.relationship_summary);
+    const dossierWithHoldings = serialized.house_dossiers.find((dossier: any) => dossier.holdings_footprint);
+    expect(dossierWithRelationship?.knownness_sources).toBeUndefined();
+    expect(dossierWithRelationship?.relationship_summary).toMatchObject({
+      favor_score: expect.any(Number),
+      allegiance: expect.any(Number),
+      respect: expect.any(Number),
+      threat: expect.any(Number)
+    });
+    expect(dossierWithHoldings?.holdings_footprint?.known_manor_ids).toBeUndefined();
+    expect(dossierWithHoldings?.kinship_tags).toEqual(expect.any(Array));
     expect((snapshot as any).succession_line_summary).toMatchObject({
       schema_version: "succession_line_summary_v0",
       house_id: "h_player",

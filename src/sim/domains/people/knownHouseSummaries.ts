@@ -1,5 +1,6 @@
 import { allHouseMemberIds, playerHouseIdOf, registryPersonFor, resolveCurrentHouseHeadId, structuredHouseIdForPerson } from "../../actors";
 import type {
+  BoundedHouseDossierSummary,
   HouseDossierHoldingsBand,
   HouseDossierHoldingsFootprint,
   HouseDossierHouseholdScope,
@@ -20,10 +21,16 @@ import { classifyRelationshipStanding, readRelationshipVector, relationshipFavor
 import { buildKnownHouseRelevanceSnapshot, listRelevantTier1HouseIds } from "./knownHouseRelevance";
 
 export const HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION = "house_dossier_summary_v2" as const;
+const BOUNDED_HOUSE_DOSSIER_SNAPSHOT_LIMIT = 24;
 
 type KnownHouseExperienceSurfaces = {
   known_houses: KnownHouseSummary[];
   house_dossiers: HouseDossierSummary[];
+};
+
+type BoundedKnownHouseExperienceSurfaces = {
+  known_houses: KnownHouseSummary[];
+  house_dossiers: BoundedHouseDossierSummary[];
 };
 
 function compareText(a: string, b: string): number {
@@ -276,6 +283,51 @@ function knownnessForHouse(
   return { knownness: "known_house", knownness_sources: sources.length > 0 ? sources : ["relevance"] };
 }
 
+function compactHoldingsFootprintForBoundedSnapshot(
+  holdingsFootprint: HouseDossierHoldingsFootprint
+): HouseDossierHoldingsFootprint {
+  const { known_manor_ids: _knownManorIds, ...boundedFootprint } = holdingsFootprint;
+  return boundedFootprint;
+}
+
+function compactHouseDossierForBoundedSnapshot(dossier: HouseDossierSummary): BoundedHouseDossierSummary {
+  return {
+    schema_version: dossier.schema_version,
+    house_id: dossier.house_id,
+    knownness: dossier.knownness,
+    kinship_summary: dossier.kinship_summary,
+    kinship_tags: [...dossier.kinship_tags],
+    relationship_band: dossier.relationship_band,
+    relationship_summary: dossier.relationship_summary ? { ...dossier.relationship_summary } : null,
+    holdings_footprint: compactHoldingsFootprintForBoundedSnapshot(dossier.holdings_footprint),
+    ledger_band: dossier.ledger_band,
+    ledger_trend: dossier.ledger_trend,
+  };
+}
+
+function selectBoundedHouseDossiersForSnapshot(dossiers: HouseDossierSummary[]): HouseDossierSummary[] {
+  const prospectIds = new Set(
+    dossiers
+      .filter((dossier) => dossier.knownness !== "known_house")
+      .map((dossier) => dossier.house_id)
+  );
+  const selectedIds = new Set<string>();
+
+  for (const dossier of dossiers) {
+    if (prospectIds.has(dossier.house_id)) selectedIds.add(dossier.house_id);
+  }
+
+  if (selectedIds.size < BOUNDED_HOUSE_DOSSIER_SNAPSHOT_LIMIT) {
+    for (const dossier of dossiers) {
+      if (selectedIds.has(dossier.house_id)) continue;
+      selectedIds.add(dossier.house_id);
+      if (selectedIds.size >= BOUNDED_HOUSE_DOSSIER_SNAPSHOT_LIMIT) break;
+    }
+  }
+
+  return dossiers.filter((dossier) => selectedIds.has(dossier.house_id)).slice(0, BOUNDED_HOUSE_DOSSIER_SNAPSHOT_LIMIT);
+}
+
 export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseExperienceSurfaces {
   const houses = housesMap(state);
   const playerHouseId = playerHouseIdOf(state);
@@ -364,4 +416,13 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
   }
 
   return { known_houses, house_dossiers };
+}
+
+export function buildBoundedKnownHouseExperienceSurfaces(state: RunState): BoundedKnownHouseExperienceSurfaces {
+  const surfaces = buildKnownHouseExperienceSurfaces(state);
+  return {
+    known_houses: surfaces.known_houses,
+    // Keep replay snapshots under cap by leaning on known_houses for duplicated identity fields.
+    house_dossiers: selectBoundedHouseDossiersForSnapshot(surfaces.house_dossiers).map(compactHouseDossierForBoundedSnapshot),
+  };
 }
