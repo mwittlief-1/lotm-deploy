@@ -6,9 +6,10 @@ import {
   type ObligationsCounterpartyContract,
   type ObligationsCounterpartyId
 } from "./playScreenObligations";
+import { buildMaintenancePressureSurface } from "./maintenancePressureView";
 
 export type ReceiptViewerMode = "grouped" | "raw";
-export type ReceiptViewerFocus = "overview" | StickyResourceChip["id"];
+export type ReceiptViewerFocus = "overview" | StickyResourceChip["id"] | "maintenance";
 type ReceiptFocusTag = Exclude<ReceiptViewerFocus, "overview">;
 export type ReceiptCounterpartyTag = ObligationsCounterpartyId;
 
@@ -108,6 +109,10 @@ const GROUPED_SECTION_META: Record<ReceiptViewerFocus, { title: string; helper: 
     title: "Coin & dues",
     helper: "Coin movement, market context, and obligation pressure stay grouped together here."
   },
+  maintenance: {
+    title: "Maintenance pressure",
+    helper: "Upkeep rows stay visible here so maintenance labor and coin pressure do not disappear into lower output."
+  },
   unrest: {
     title: "Unrest & stability",
     helper: "Stability pressure stays grouped here so rising risk has one obvious explanation surface."
@@ -118,12 +123,14 @@ const FOCUS_SUBTITLES: Record<ReceiptViewerFocus, string> = {
   overview: "Grouped mode keeps counterparties and relationship levers first, then the resource story beneath them. Raw mode preserves the exact phase receipt trail underneath it.",
   food: "Food details keep the resource chip aligned with the receipt trail behind harvest, stores, and dues.",
   coin: "Coin details keep the resource chip aligned with the receipt trail behind market context and obligations.",
+  maintenance: "Maintenance details keep upkeep rows and any live labor-drag notes visible without hiding them inside lower harvest or build output.",
   unrest: "Unrest details keep stability pressure and its supporting receipt trail in one focused surface."
 };
 
 const RECEIPT_KEYWORDS: Record<ReceiptFocusTag, string[]> = {
   food: ["bushel", "bushels", "tithe", "spoilage", "production", "consumption", "weather", "harvest", "stores"],
   coin: ["coin", "coins", "tax", "market", "price", "sell cap", "dowry", "grant"],
+  maintenance: ["maintenance", "upkeep", "effective builders", "effective farmers", "reserved"],
   unrest: ["unrest", "arrears", "festival", "stability", "riot", "rebellion", "pressure"]
 };
 const STRUCTURED_RECEIPT_ASSET_TAGS: Partial<Record<string, ReceiptFocusTag[]>> = {
@@ -241,12 +248,41 @@ function highlightForMetric(diffLedgerItems: LedgerItem[], metric: ReceiptFocusT
   return [{ id: item.id, primary: item.primary, source: item.source, why: item.why }];
 }
 
+function buildMaintenanceGroupedReceipts(previewState: unknown, report: unknown): ReceiptLine[] {
+  const surface = buildMaintenancePressureSurface({ previewState, report });
+  if (!surface || !surface.currentManorRow) return [];
+
+  const noteLines = surface.noteLines.map((line, index) => ({
+    counterpartyTags: [],
+    id: `maintenance_note_${String(index).padStart(2, "0")}`,
+    kind: "summary" as const,
+    line,
+    phase: "consumption" as const,
+    phaseLabel: "Consumption",
+    tags: ["maintenance"] as ReceiptFocusTag[]
+  }));
+
+  const rowLines = surface.currentManorRow.rows.map((row, index) => ({
+    counterpartyTags: [],
+    id: `maintenance_row_${String(index).padStart(2, "0")}`,
+    kind: "summary" as const,
+    line: `${row.label} — ${row.kindLabel}; ${row.coinCost} coin; ${row.laborRequired} labor; ${row.stateLabel}.`,
+    phase: "events" as const,
+    phaseLabel: "Maintenance view",
+    tags: (row.coinCost > 0 ? ["coin", "maintenance"] : ["maintenance"]) as ReceiptFocusTag[]
+  }));
+
+  return [...noteLines, ...rowLines];
+}
+
 export function buildReceiptViewerData(args: {
   diffLedgerItems: LedgerItem[];
   obligationsContract?: ObligationsCounterpartyContract | null;
   phaseResults: PhaseResultV0[] | null | undefined;
+  previewState?: unknown;
+  report?: unknown;
 }): ReceiptViewerData {
-  const { diffLedgerItems, obligationsContract = null, phaseResults } = args;
+  const { diffLedgerItems, obligationsContract = null, phaseResults, previewState, report } = args;
   const rawPhases: RawReceiptPhase[] = [];
 
   for (const phaseResult of Array.isArray(phaseResults) ? phaseResults : []) {
@@ -268,6 +304,9 @@ export function buildReceiptViewerData(args: {
       receipts
     });
   }
+
+  const maintenanceHighlights = highlightForMetric(diffLedgerItems, "maintenance");
+  const maintenanceReceipts = buildMaintenanceGroupedReceipts(previewState, report);
 
   const groupedSections: GroupedReceiptSection[] = [
     {
@@ -300,6 +339,15 @@ export function buildReceiptViewerData(args: {
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("unrest")))
     }
   ];
+
+  if (maintenanceHighlights.length > 0 || maintenanceReceipts.length > 0) {
+    groupedSections.splice(3, 0, {
+      id: "maintenance",
+      ...GROUPED_SECTION_META.maintenance,
+      highlights: maintenanceHighlights,
+      receipts: maintenanceReceipts
+    });
+  }
 
   const counterpartySections: CounterpartyReceiptSection[] = obligationsContract
     ? obligationsContract.counterpartySections.map((section) => ({

@@ -107,6 +107,82 @@ const PREVIEW_STATE = {
   }
 } as const;
 
+const MAINTENANCE_PRESSURE = {
+  currentManorId: "manor_hx_26597",
+  currentManorRow: {
+    buildingCount: 0,
+    coinCost: 4,
+    entryCount: 2,
+    laborRequired: 7,
+    manorId: "manor_hx_26597",
+    manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
+    manorLabel: "Current manor",
+    rightCount: 2,
+    rows: [
+      {
+        coinCost: 1,
+        entryId: "right_bridge",
+        kindLabel: "Right",
+        laborRequired: 3,
+        label: "Bridge & crossing revenue",
+        manorId: "manor_hx_26597",
+        manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
+        stateLabel: "Active"
+      }
+    ]
+  },
+  explainPrimary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
+  explainWhy: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
+  helperText: "Maintenance pressure should remain visible in holdings.",
+  manorRows: [
+    {
+      buildingCount: 0,
+      coinCost: 4,
+      entryCount: 2,
+      laborRequired: 7,
+      manorId: "manor_hx_26597",
+      manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
+      manorLabel: "Current manor",
+      rightCount: 2,
+      rows: [
+        {
+          coinCost: 1,
+          entryId: "right_bridge",
+          kindLabel: "Right",
+          laborRequired: 3,
+          label: "Bridge & crossing revenue",
+          manorId: "manor_hx_26597",
+          manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
+          stateLabel: "Active"
+        }
+      ]
+    },
+    {
+      buildingCount: 1,
+      coinCost: 2,
+      entryCount: 1,
+      laborRequired: 5,
+      manorId: "manor_hx_30001",
+      manorKey: "portfolio:player_portfolio:manor:manor_hx_30001",
+      manorLabel: "Hx 30001",
+      rightCount: 0,
+      rows: [
+        {
+          coinCost: 2,
+          entryId: "building_granary",
+          kindLabel: "Building",
+          laborRequired: 5,
+          label: "Granary maintenance",
+          manorId: "manor_hx_30001",
+          manorKey: "portfolio:player_portfolio:manor:manor_hx_30001",
+          stateLabel: "Operational"
+        }
+      ]
+    }
+  ],
+  noteLines: ["Maintenance reserved 7 labor before output was applied."]
+} as const;
+
 describe("PortfolioOverviewPanel", () => {
   it("renders the portfolio summary and scope toggle without expanding into a second ledger", () => {
     const contract = buildPortfolioScopeContract(PREVIEW_STATE);
@@ -118,6 +194,7 @@ describe("PortfolioOverviewPanel", () => {
     const html = renderToStaticMarkup(
       <PortfolioOverviewPanel
         contract={contract}
+        maintenancePressure={MAINTENANCE_PRESSURE}
         onScopeModeChange={() => undefined}
         onSelectManor={() => undefined}
         selectedManor={contract.selectedManor}
@@ -133,6 +210,8 @@ describe("PortfolioOverviewPanel", () => {
     expect(html).toContain("Portfolio active");
     expect(html).toContain("Outlier exceptions");
     expect(html).toContain("Current manor");
+    expect(html).toContain("Maintenance pressure");
+    expect(html).toContain("Maintenance pressure should remain visible in holdings.");
     expect(html).toContain("Most food arrears: 12 bushels");
   });
 
@@ -162,6 +241,7 @@ describe("PortfolioOverviewPanel", () => {
             samples: []
           }
         })}
+        maintenancePressure={MAINTENANCE_PRESSURE}
         onScopeModeChange={() => undefined}
         onSelectManor={() => undefined}
         selectedManor={selectPortfolioManor(contract, "manor_hx_30001")}
@@ -181,5 +261,7 @@ describe("PortfolioOverviewPanel", () => {
     expect(html).toContain("Map checkpoint");
     expect(html).toContain("Center on selected holding");
     expect(html).toContain("Dormant");
+    expect(html).toContain("Selected manor upkeep rows");
+    expect(html).toContain("Granary maintenance");
   });
 });

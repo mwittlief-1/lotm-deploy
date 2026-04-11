@@ -6,6 +6,7 @@ import {
 } from "../sim/domains/court/agendaRegistry";
 import { buildEconomyPortfolioAnalysisFromState } from "../sim/domains/economy/portfolioAnalysis";
 import { buildEconomyObligationsView } from "../sim/domains/experience/obligationsView";
+import { buildMaintenancePressureSurface } from "./maintenancePressureView";
 import { formatPersonName } from "./viewHelpers";
 
 export const PLAY_ANCHORS = {
@@ -124,6 +125,43 @@ function whyForMetric(args: {
   return { why: copy.diffLedgerMultipleCauses, source: "system_pressure" };
 }
 
+function appendMaintenanceLedgerItem(
+  items: LedgerItem[],
+  args: {
+    copy: any;
+    previewState: RunState;
+    report: any;
+  }
+): LedgerItem[] {
+  if (items.some((item) => item.id === "maintenance")) return items;
+
+  const maintenanceSurface = buildMaintenancePressureSurface({
+    previewState: args.previewState,
+    report: args.report
+  });
+  const currentManorRow = maintenanceSurface?.currentManorRow ?? null;
+  if (!maintenanceSurface || !currentManorRow || currentManorRow.entryCount <= 0) return items;
+
+  return [
+    ...items,
+    {
+      id: "maintenance",
+      sort_mag: currentManorRow.laborRequired + currentManorRow.coinCost,
+      tie_key: "04_maintenance",
+      primary:
+        maintenanceSurface.explainPrimary ??
+        (typeof args.copy?.diffLedgerLine_maintenance === "function"
+          ? args.copy.diffLedgerLine_maintenance(currentManorRow.laborRequired, currentManorRow.coinCost, currentManorRow.entryCount)
+          : `Maintenance: ${currentManorRow.laborRequired} labor, ${currentManorRow.coinCost} coin across ${currentManorRow.entryCount} upkeep rows.`),
+      why:
+        maintenanceSurface.explainWhy ??
+        args.copy?.diffLedgerWhy_maintenance ??
+        "Maintenance pressure stays visible here so output loss never feels like hidden magic.",
+      source: "system_pressure"
+    }
+  ];
+}
+
 export function buildDiffLedgerItems(args: {
   beforeManor: any;
   copy: any;
@@ -202,7 +240,11 @@ export function buildDiffLedgerItems(args: {
         source: normalizeSource(item.source ?? item.source_tag ?? item.sourceTag ?? item.kind)
       });
     }
-    if (parsed.length) return parsed;
+    if (parsed.length) {
+      const withMaintenance = appendMaintenanceLedgerItem(parsed, { copy, previewState, report });
+      withMaintenance.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+      return withMaintenance;
+    }
   }
 
   const items: LedgerItem[] = [];
@@ -385,8 +427,9 @@ export function buildDiffLedgerItems(args: {
     });
   }
 
-  items.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
-  return items;
+  const withMaintenance = appendMaintenanceLedgerItem(items, { copy, previewState, report });
+  withMaintenance.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+  return withMaintenance;
 }
 
 function noteTagValue(item: CourtAgendaItemV0, prefix: string): string | null {

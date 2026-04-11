@@ -7,6 +7,7 @@ import type {
   PortfolioSelectedManorSurface,
   PortfolioSummaryCard
 } from "../playScreenPortfolio";
+import type { MaintenancePressureSurface } from "../maintenancePressureView";
 import {
   PLAY_SCREEN_ACTION_BUTTON_STYLE,
   PLAY_SCREEN_PANEL_ACCENT_STYLE,
@@ -21,6 +22,7 @@ type PortfolioOverviewPanelProps = {
   anchorId?: string;
   contract: PortfolioScopeContract;
   mapCheckpoint?: PortfolioMapCheckpoint | null;
+  maintenancePressure?: MaintenancePressureSurface | null;
   onCenterSelectedHolding?: () => void;
   onScopeModeChange: (mode: PortfolioScopeMode) => void;
   onSelectManor: (manorId: string) => void;
@@ -89,6 +91,7 @@ export function PortfolioOverviewPanel({
   anchorId,
   contract,
   mapCheckpoint = null,
+  maintenancePressure = null,
   onCenterSelectedHolding,
   onScopeModeChange,
   onSelectManor,
@@ -100,6 +103,7 @@ export function PortfolioOverviewPanel({
   const activeScope = contract.scopeOptions.find((option) => option.id === scopeMode) ?? contract.scopeOptions[0];
   const assetCards = selectedManor.summaryCards.slice(0, 3);
   const pressureCards = selectedManor.summaryCards.slice(3);
+  const selectedMaintenanceRow = maintenancePressure?.manorRows.find((row) => row.manorId === selectedManorId) ?? null;
 
   return (
     <div id={anchorId} style={{ ...PLAY_SCREEN_PANEL_ACCENT_STYLE, marginBottom: 12 }}>
@@ -120,6 +124,79 @@ export function PortfolioOverviewPanel({
       >
         {renderSummaryCards(surface.summaryCards, 24)}
       </div>
+
+      {maintenancePressure?.manorRows.length ? (
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10, marginTop: 12, background: "#fcfaf5" }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>
+            Maintenance pressure
+          </div>
+          <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
+            {maintenancePressure.helperText}
+          </div>
+
+          <div style={{ overflowX: "auto", marginTop: 10 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr>
+                  <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
+                    Manor
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
+                    Coin
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
+                    Labor
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
+                    Rows
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {maintenancePressure.manorRows.map((row) => (
+                  <tr key={row.manorKey}>
+                    <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.manorLabel}</td>
+                    <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.coinCost}</td>
+                    <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.laborRequired}</td>
+                    <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>
+                      {row.entryCount} ({row.buildingCount} buildings / {row.rightCount} rights)
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {scopeMode === "selected_manor" ? (
+            selectedMaintenanceRow ? (
+              <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+                <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>
+                  Selected manor upkeep rows
+                </div>
+                {selectedMaintenanceRow.rows.map((row) => (
+                  <div
+                    key={row.entryId}
+                    style={{
+                      ...PLAY_SCREEN_SUBCARD_STYLE,
+                      padding: 10,
+                      background: PLAY_SCREEN_THEME.surfaceRaised
+                    }}
+                  >
+                    <div style={{ fontWeight: 700 }}>{row.label}</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
+                      {row.kindLabel} · {row.stateLabel} · {row.coinCost} coin · {row.laborRequired} labor
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 10 }}>
+                Maintenance rows remain anchored to the current manor chronicle in this read model, so the selected holding only inherits the portfolio rollup above.
+              </div>
+            )
+          ) : null}
+        </div>
+      ) : null}
 
       <div style={{ marginTop: 14 }}>
         <div style={{ fontSize: 11, letterSpacing: 0.8, textTransform: "uppercase", color: PLAY_SCREEN_THEME.inkMuted }}>

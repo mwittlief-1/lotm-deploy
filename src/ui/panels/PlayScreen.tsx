@@ -36,6 +36,7 @@ import {
   uncertaintyLabel as labelUncertainty
 } from "../playViewModel";
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
+import { buildMaintenancePressureSurface } from "../maintenancePressureView";
 import {
   PLAY_ANCHORS,
   buildCouncilAgendaItems,
@@ -610,6 +611,14 @@ export function PlayScreen({
     previewState: ctx.preview_state,
     report: ctx.report,
   });
+  const maintenancePressureSurface = useMemo(
+    () =>
+      buildMaintenancePressureSurface({
+        previewState: ctx.preview_state,
+        report: ctx.report
+      }),
+    [ctx.preview_state, ctx.report]
+  );
 
   const resourceChips = buildStickyResourceChips({
     manor: m,
@@ -623,9 +632,11 @@ export function PlayScreen({
       buildReceiptViewerData({
         diffLedgerItems,
         obligationsContract,
-        phaseResults: ctx.phase_results_v0
+        phaseResults: ctx.phase_results_v0,
+        previewState: ctx.preview_state,
+        report: ctx.report
       }),
-    [ctx.phase_results_v0, diffLedgerItems, obligationsContract]
+    [ctx.phase_results_v0, ctx.preview_state, ctx.report, diffLedgerItems, obligationsContract]
   );
   const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
@@ -718,6 +729,7 @@ export function PlayScreen({
         desiredBuilders={decisions.labor.desired_builders}
         fmtSigned={fmtSigned}
         improvements={IMPROVEMENTS}
+        maintenancePressure={maintenancePressureSurface}
         manor={m}
         onAbandonProject={() => setDecisions((current: any) => ({ ...current, construction: { kind: "construction", action: "abandon", confirm: true } }))}
         popChangeSummary={popChangeSummary}
@@ -767,6 +779,7 @@ export function PlayScreen({
         anchorId={PLAY_ANCHORS.portfolio}
         contract={portfolioContract}
         mapCheckpoint={portfolioMapCheckpoint}
+        maintenancePressure={maintenancePressureSurface}
         onCenterSelectedHolding={
           portfolioMapCheckpoint?.state === "ready" && onCenterSelectedHolding
             ? () => onCenterSelectedHolding(portfolioMapCheckpoint.target)

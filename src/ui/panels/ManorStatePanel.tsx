@@ -1,6 +1,7 @@
 import React from "react";
 import { renderDispossessionThresholdTip } from "../../content/experienceContent";
 import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
+import type { MaintenancePressureSurface } from "../maintenancePressureView";
 import { Tip } from "../viewHelpers";
 import { SectionHeading } from "./SectionHeading";
 
@@ -20,6 +21,7 @@ type ManorStatePanelProps = {
   fmtSigned: (value: number) => string;
   improvements: Record<string, { name: string }>;
   manor: any;
+  maintenancePressure?: MaintenancePressureSurface | null;
   onAbandonProject: () => void;
   popChangeSummary: string | null;
   report: any;
@@ -44,6 +46,7 @@ export function ManorStatePanel({
   fmtSigned,
   improvements,
   manor,
+  maintenancePressure = null,
   onAbandonProject,
   popChangeSummary,
   report,
@@ -51,6 +54,8 @@ export function ManorStatePanel({
   turnYears,
   unrestBreakdown
 }: ManorStatePanelProps) {
+  const currentMaintenance = maintenancePressure?.currentManorRow ?? null;
+
   return (
     <div style={PLAY_SCREEN_PANEL_STYLE}>
       <SectionHeading
@@ -121,6 +126,63 @@ export function ManorStatePanel({
             )}
           </div>
         </details>
+      ) : null}
+
+      {currentMaintenance ? (
+        <>
+          <h4 style={{ marginTop: 12 }}>Maintenance pressure</h4>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>{maintenancePressure?.helperText}</div>
+          <ul style={{ marginTop: 8 }}>
+            <li>
+              Current manor upkeep: {currentMaintenance.coinCost} coin and {currentMaintenance.laborRequired} labor across{" "}
+              {currentMaintenance.entryCount} rows.
+            </li>
+            <li>
+              Buildings: {currentMaintenance.buildingCount}; rights: {currentMaintenance.rightCount}.
+            </li>
+          </ul>
+          {maintenancePressure?.noteLines.length ? (
+            <ul style={{ marginTop: 6 }}>
+              {maintenancePressure.noteLines.map((line, index) => (
+                <li key={`maintenance_note_${index}`}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+          <div style={{ overflowX: "auto", marginTop: 8 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr>
+                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
+                    Row
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
+                    Kind
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
+                    State
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
+                    Coin
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
+                    Labor
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentMaintenance.rows.map((row) => (
+                  <tr key={row.entryId}>
+                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.label}</td>
+                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.kindLabel}</td>
+                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.stateLabel}</td>
+                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.coinCost}</td>
+                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.laborRequired}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       ) : null}
 
       <h4>Construction</h4>

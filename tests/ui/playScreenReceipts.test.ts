@@ -183,6 +183,57 @@ const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
   }
 ];
 
+const MAINTENANCE_PREVIEW_STATE = {
+  world_topology_view: {
+    anchor_manor_id: "manor_hx_26597"
+  },
+  economy_maintenance_view: {
+    schema_version: "economy_maintenance_view_v1",
+    manor_keys: ["portfolio:player_portfolio:manor:manor_hx_26597"],
+    manor_summaries_by_key: {
+      "portfolio:player_portfolio:manor:manor_hx_26597": {
+        manor_id: "manor_hx_26597",
+        manor_key: "portfolio:player_portfolio:manor:manor_hx_26597",
+        totals: {
+          building_count: 0,
+          coin_cost: 4,
+          entry_count: 2,
+          labor_required: 7,
+          right_count: 2
+        },
+        active_project: null,
+        building_entries: [],
+        right_entries: [
+          {
+            entry_id: "right_bridge",
+            entry_kind: "right",
+            source_id: "bridge_crossing",
+            source_kind: "right",
+            source_label: "Bridge & crossing revenue",
+            source_state: "active",
+            coin_cost: 1,
+            labor_required: 3
+          },
+          {
+            entry_id: "right_market",
+            entry_kind: "right",
+            source_id: "market_right",
+            source_kind: "right",
+            source_label: "Market right",
+            source_state: "active",
+            coin_cost: 3,
+            labor_required: 4
+          }
+        ]
+      }
+    }
+  }
+} as const;
+
+const MAINTENANCE_REPORT = {
+  notes: ["Maintenance reserved 7 labor before output was applied."]
+} as const;
+
 describe("playScreenReceipts", () => {
   it("creates deterministic routes for explain-changes and resource chips", () => {
     expect(createExplainChangesRoute()).toEqual({
@@ -359,5 +410,69 @@ describe("playScreenReceipts", () => {
     expect(data.counterpartySections.find((section) => section.id === "church")?.receipts.map((receipt) => receipt.id)).toEqual([
       "ledger:t7:obligations:p6:food_stores:0002"
     ]);
+  });
+
+  it("adds a maintenance grouped section when the upkeep read model resolves", () => {
+    const data = buildReceiptViewerData({
+      diffLedgerItems: [
+        ...DIFF_LEDGER_ITEMS,
+        {
+          id: "maintenance",
+          sort_mag: 11,
+          tie_key: "04_maintenance",
+          primary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
+          why: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
+          source: "system_pressure"
+        }
+      ],
+      obligationsContract: OBLIGATIONS_CONTRACT,
+      phaseResults: PHASE_RESULTS,
+      previewState: MAINTENANCE_PREVIEW_STATE,
+      report: MAINTENANCE_REPORT
+    });
+
+    expect(data.groupedSections.map((section) => section.id)).toEqual(["overview", "food", "coin", "maintenance", "unrest"]);
+    expect(data.groupedSections.find((section) => section.id === "maintenance")).toEqual({
+      id: "maintenance",
+      title: "Maintenance pressure",
+      helper: "Upkeep rows stay visible here so maintenance labor and coin pressure do not disappear into lower output.",
+      highlights: [
+        {
+          id: "maintenance",
+          primary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
+          why: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
+          source: "system_pressure"
+        }
+      ],
+      receipts: [
+        {
+          counterpartyTags: [],
+          id: "maintenance_note_00",
+          kind: "summary",
+          line: "Maintenance reserved 7 labor before output was applied.",
+          phase: "consumption",
+          phaseLabel: "Consumption",
+          tags: ["maintenance"]
+        },
+        {
+          counterpartyTags: [],
+          id: "maintenance_row_00",
+          kind: "summary",
+          line: "Bridge & crossing revenue — Right; 1 coin; 3 labor; Active.",
+          phase: "events",
+          phaseLabel: "Maintenance view",
+          tags: ["coin", "maintenance"]
+        },
+        {
+          counterpartyTags: [],
+          id: "maintenance_row_01",
+          kind: "summary",
+          line: "Market right — Right; 3 coin; 4 labor; Active.",
+          phase: "events",
+          phaseLabel: "Maintenance view",
+          tags: ["coin", "maintenance"]
+        }
+      ]
+    });
   });
 });
