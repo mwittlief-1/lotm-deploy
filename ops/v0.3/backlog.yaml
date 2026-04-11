@@ -10044,7 +10044,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Wire maintenance labor drag into allocatable labor ordering
-  status: ready
+  status: done
   priority: 74
   tranche: 6
   change_type: behavior_change
@@ -10085,7 +10085,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Surface maintenance rows in manor, portfolio, receipts, and explain views
-  status: todo
+  status: ready
   priority: 74
   tranche: 6
   change_type: behavior_change
@@ -10128,7 +10128,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Add maintenance-pressure DOE scenarios and invariants
-  status: todo
+  status: ready
   priority: 73
   tranche: 6
   change_type: behavior_change

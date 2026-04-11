@@ -18,6 +18,7 @@ import {
   maxLaborDeltaPerTurn,
 } from "./constants";
 import { refreshEnergy } from "./domains/court/energy";
+import { buildMaintenanceLaborPressure, maintenanceLaborPressureSummaryLines } from "./domains/court/maintenance";
 import { LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN, PREVIEW_LOAD_STATE_MIGRATION_PLAN, runStateMigrationPlan } from "./migrations";
 import { normalizeState } from "./normalize";
 import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
@@ -120,6 +121,12 @@ function noteReceipts(lines: string[]): PhaseReceiptV0[] {
 
 function evidenceReceipts(events: EvidenceEventV0[]): PhaseReceiptV0[] {
   return events.map((event) => makePhaseReceipt(event.detail, "note"));
+}
+
+function previewMods(state: RunState): Record<string, number> {
+  const anyFlags: any = state.flags;
+  if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
+  return anyFlags._mods as Record<string, number>;
 }
 
 const LEGACY_IMPROVEMENT_ALIASES: Record<string, string> = {
@@ -225,6 +232,16 @@ export function proposeTurn(state: RunState): TurnContext {
   decrementEventCooldowns(working);
   const spoil = applySpoilagePhase(working);
   const macro = computeWeatherMarketPhase(working);
+
+  const maintenanceLaborPressure = buildMaintenanceLaborPressure(working);
+  const maintenanceLaborNotes = maintenanceLaborPressure ? maintenanceLaborPressureSummaryLines(maintenanceLaborPressure) : [];
+  if (maintenanceLaborPressure) {
+    const mods = previewMods(working);
+    mods.farmer_penalty =
+      asNonNegInt(mods.farmer_penalty ?? 0) + Math.max(0, working.manor.farmers - maintenanceLaborPressure.effective_farmers);
+    mods.builder_penalty =
+      asNonNegInt(mods.builder_penalty ?? 0) + Math.max(0, working.manor.builders - maintenanceLaborPressure.effective_builders);
+  }
 
   // 3) production (+ construction progress)
   const prod = applyProductionAndConstructionPhase(working, macro.weather_multiplier);
@@ -349,6 +366,7 @@ export function proposeTurn(state: RunState): TurnContext {
     receipts: [
       makePhaseReceipt(`Weather ${macro.weather_multiplier.toFixed(2)}; market ${macro.market.price_per_bushel.toFixed(2)} coin/bushel; sell cap ${macro.market.sell_cap_bushels}.`),
       makePhaseReceipt(`Spoilage -${spoil.loss_bushels}; production +${prod.production_bushels}; consumption -${cons.total_consumption_bushels}.`),
+      ...maintenanceLaborNotes.map((line) => makePhaseReceipt(line, "note")),
       ...(prod.completed_improvement_id ? [makePhaseReceipt(`Construction completed: ${prod.completed_improvement_id}.`, "note")] : []),
       ...(cons.shortage_bushels > 0 ? [makePhaseReceipt(`Shortage ${cons.shortage_bushels} bushels; population ${cons.population_delta}.`, "note")] : [])
     ],
@@ -448,7 +466,7 @@ export function proposeTurn(state: RunState): TurnContext {
     house_log: houseLog,
     events,
     top_drivers: [],
-    notes: []
+    notes: [...maintenanceLaborNotes]
   };
 
   report.top_drivers = computeTopDrivers(report, state, working);

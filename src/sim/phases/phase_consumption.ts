@@ -109,7 +109,9 @@ export function applyProductionAndConstructionPhase(
   weather_multiplier: number
 ): { production_bushels: number; construction_progress_added: number; completed_improvement_id?: string } {
   const farmerPenalty = Math.trunc(consumeMod(state, "farmer_penalty", 0));
+  const builderPenalty = Math.trunc(consumeMod(state, "builder_penalty", 0));
   const effectiveFarmers = Math.max(0, state.manor.farmers - farmerPenalty);
+  const effectiveBuilders = Math.max(0, state.manor.builders - builderPenalty);
 
   const baseProduction = effectiveFarmers * BUSHELS_PER_FARMER_PER_YEAR * TURN_YEARS;
   const prodMult = weather_multiplier
@@ -123,7 +125,7 @@ export function applyProductionAndConstructionPhase(
   let progressAdded = 0;
   let completed: string | undefined;
   if (hasActiveConstruction(state)) {
-    const outcome = applyConstructionWork(state, state.manor.builders * BUILD_RATE_PER_BUILDER_PER_TURN);
+    const outcome = applyConstructionWork(state, effectiveBuilders * BUILD_RATE_PER_BUILDER_PER_TURN);
     progressAdded = outcome.progress_added;
     completed = outcome.completed_improvement_id;
     if (completed === "village_feast") {

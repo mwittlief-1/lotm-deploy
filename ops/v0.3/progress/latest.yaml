@@ -1,7 +1,7 @@
 version: 2
 cursor:
   current_task_id: V03-R5-001-T04
-  last_completed_task_id: V03-R5-003-T01
+  last_completed_task_id: V03-R5-006-T03A
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -18,16 +18,19 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: cfe26ffcdf8315644abdc2b71f2a98f1a3bf438749411f19102c4c28e524fa65
-    run2: 1dda22781bf223b87b8b94c242c0097fa56798596f68c8aa58b129a816a2a70b
+    run1: 8d8156f44921e1de76135f63fc9a12f824bd49b7ad3a9e327ca44e949c38ff84
+    run2: 7417d258e460bb99592ff96fe227b4142d006b19e13a42ef5d8a4b5845c980e2
 notes: >-
-  Accepted `V03-R5-003-T01` onto the v0.3.5 control-plane line. The live
-  social dossier surface stays rich, while bounded replay snapshots now keep a
-  deterministic 24-row dossier subset that leans on `known_houses[]` for
-  duplicated identity data so the snapshot cap stays intact. `npm run qa`
-  passed, `npm run preflight` still shows the standing `test3_mismatches=16`
-  blocker, and both replay batches passed; their normalized summaries matched
-  exactly once path-shaped artifact metadata was stripped. The next ready task
-  remains `V03-R5-001-T04` on ui-experience, and `V03-R5-004-T01` is now open
-  on social-mechanics.
+  Accepted `V03-R5-006-T03A` onto the v0.3.5 control-plane line. The accepted
+  integrator seam applies builder-first maintenance labor drag before harvest
+  and construction consume allocatable labor, while keeping planned labor rows
+  unchanged and emitting the helper summary lines into preview receipts and
+  report notes for auditability. `npm run qa` passed, `npm run preflight`
+  still shows the standing `test3_mismatches=16` blocker, and both replay
+  batches passed; their normalized summaries matched exactly once path-shaped
+  artifact metadata was stripped, with normalized hash
+  `82a13540a5939d973347810ae3f75089b1a18d25c195c39889b7afa32b3182bb`. The
+  next ready task remains `V03-R5-001-T04` on ui-experience; `V03-R5-004-T01`
+  remains open on social-mechanics; and `V03-R5-006-T05` is now open on
+  tooling-qa.
 active_claims: {}
