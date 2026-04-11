@@ -395,6 +395,7 @@ export interface RunState {
   version: SimVersion;
   app_version: string;
   run_seed: string;
+  run_preset_id?: string | null;
   state_schema_version?: RunStateSchemaVersion;
   bounded_registry_manifest?: BoundedRegistryManifest;
   turn_index: number;
@@ -875,6 +876,7 @@ export interface TurnLogEntry {
 
 export interface RunSummaryExport {
   seed: string;
+  preset_id: string | null;
   app_version: string;
   sim_version: SimVersion;
   state_schema_version: RunStateSchemaVersion;

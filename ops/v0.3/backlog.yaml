@@ -10518,7 +10518,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add one deterministic preset-application seam for new runs
-  status: ready
+  status: done
   priority: 64
   tranche: 6
   change_type: behavior_change

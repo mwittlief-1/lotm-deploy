@@ -41,6 +41,8 @@ describe("state schema scaffold", () => {
     });
 
     const summary = buildRunSummary(state);
+    expect(state.run_preset_id).toBeNull();
+    expect(summary.preset_id).toBeNull();
     expect(summary.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
     expect(summary.bounded_registry_manifest).toEqual(state.bounded_registry_manifest);
   });

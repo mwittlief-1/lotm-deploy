@@ -7,6 +7,19 @@ import { Rng } from "./rng";
 import { normalizeState } from "./normalize";
 import { DEFAULT_DEMOGRAPHY_TUNING } from "./constants";
 
+export const NEW_RUN_INIT_SEAM_ID = "canonical_new_run_init_v1" as const;
+
+export type NewRunInitV1 = {
+  seam_id: typeof NEW_RUN_INIT_SEAM_ID;
+  run_seed: string;
+  preset_id: string | null;
+};
+
+export type PlayabilityPresetApplication = {
+  preset_id: string;
+  seed: string;
+};
+
 function traitLevel(rng: Rng): number {
   const r = rng.next();
   if (r < 0.03) return 1;
@@ -47,8 +60,40 @@ function mkPerson(rng: Rng, id: string, sex: Sex, age: number): Person {
   };
 }
 
-export function createNewRun(run_seed: string): RunState {
-  const rng = new Rng(run_seed, "household", 0, "init");
+export function buildNewRunInit(run_seed: string): NewRunInitV1 {
+  return {
+    seam_id: NEW_RUN_INIT_SEAM_ID,
+    run_seed,
+    preset_id: null
+  };
+}
+
+export function applyPlayabilityPreset(
+  init: NewRunInitV1,
+  preset: PlayabilityPresetApplication | null | undefined
+): NewRunInitV1 {
+  if (!preset) return { ...init, preset_id: null };
+  return {
+    ...init,
+    run_seed: preset.seed,
+    preset_id: preset.preset_id
+  };
+}
+
+function normalizeNewRunInit(input: string | NewRunInitV1): NewRunInitV1 {
+  if (typeof input === "string") return buildNewRunInit(input);
+  return {
+    seam_id: NEW_RUN_INIT_SEAM_ID,
+    run_seed: input.run_seed,
+    preset_id: input.preset_id ?? null
+  };
+}
+
+export function createNewRun(run_seed: string): RunState;
+export function createNewRun(init: NewRunInitV1): RunState;
+export function createNewRun(input: string | NewRunInitV1): RunState {
+  const init = normalizeNewRunInit(input);
+  const rng = new Rng(init.run_seed, "household", 0, "init");
   // v0.2.3.2 age sanity (LOCK): first child at husband age 22, wife age 18.
   // Keep deterministic starter ages (no randomness yet).
   const head = mkPerson(rng, "p_head", "M", 34);
@@ -79,7 +124,8 @@ export function createNewRun(run_seed: string): RunState {
   const state: RunState = {
     version: SIM_VERSION,
     app_version: APP_VERSION,
-    run_seed,
+    run_seed: init.run_seed,
+    run_preset_id: init.preset_id,
     turn_index: 0,
     manor: {
       population: 45,

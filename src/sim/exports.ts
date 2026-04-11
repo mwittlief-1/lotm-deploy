@@ -9,6 +9,7 @@ export function buildRunSummary(state: RunState): RunSummaryExport {
   }
   return {
     seed: state.run_seed,
+    preset_id: state.run_preset_id ?? null,
     app_version: state.app_version,
     sim_version: state.version,
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { APP_VERSION } from "./version";
-import { createNewRun, proposeTurn, applyDecisions } from "./sim";
+import { buildNewRunInit, createNewRun, proposeTurn, applyDecisions } from "./sim";
 import type { GameOverState, RunState, TurnDecisions } from "./sim/types";
 import { buildRunSummary } from "./sim/exports";
 import { NewRunScreen } from "./ui/panels/NewRunScreen";
@@ -412,7 +412,7 @@ export default function App() {
   }, [screen, state?.run_seed, state?.game_over, ctx?.report.turn_index]);
 
   function newRun() {
-    const s = createNewRun(seed.trim() || `run_${Date.now()}`);
+    const s = createNewRun(buildNewRunInit(seed.trim() || `run_${Date.now()}`));
     setState(s);
     setDecisions({
       ...defaultDecisions,
