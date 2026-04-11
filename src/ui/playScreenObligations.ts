@@ -66,16 +66,67 @@ export type ObligationsContractGestureGroup = {
   title: string;
 };
 
+export type ObligationsContractPaymentModes = {
+  acceptedLabels: string[];
+  preferredLabel: string;
+  supportedLabels: string[];
+};
+
+export type ObligationsContractStageRow = {
+  boundaryLabel: string;
+  detail: string;
+  id: "stage_1" | "stage_2" | "stage_3";
+  statusLabel: string;
+  title: string;
+};
+
+export type ObligationsContractReceiptRow = {
+  assetLabel: string;
+  balanceAfterLabel: string;
+  category: string;
+  deltaLabel: string;
+  id: string;
+  ruleLabel: string;
+  summary: string;
+};
+
+export type ObligationsContractReceiptGroup = {
+  categoryOrder: string[];
+  id: "payment" | "penalty" | "seizure";
+  label: string;
+  receiptCount: number;
+  rows: ObligationsContractReceiptRow[];
+};
+
+export type ObligationsContractTangibleBitePreview = {
+  categoryLabel: string;
+  paymentModeLabel: string;
+  previewAmountLabel: string;
+  summary: string;
+  turnCapLabel: string;
+};
+
+export type ObligationsContractTerminalRisk = {
+  boundaryLabel: string;
+  statusLabel: string;
+  summary: string;
+};
+
 export type ObligationsCounterpartyContractSection = {
   dueGroup: ObligationsContractGroup;
   gestureGroup: ObligationsContractGestureGroup;
   helper: string;
   id: ObligationsCounterpartyId;
+  paymentModes: ObligationsContractPaymentModes;
   penaltyGroup: ObligationsContractPenaltyGroup;
+  receiptGroups: ObligationsContractReceiptGroup[];
   receiptCategoryOrder: ObligationReceiptCategory[];
   receiptKeywords: string[];
   settlementStatus: string;
+  stageRows: ObligationsContractStageRow[];
   shortTitle: string;
+  tangibleBitePreview: ObligationsContractTangibleBitePreview | null;
+  terminalRisk: ObligationsContractTerminalRisk;
   title: string;
 };
 
@@ -87,6 +138,7 @@ export type ObligationsCounterpartyContract = {
 };
 
 type ParsedObligationsViewSummary = {
+  acceptedPaymentModes: string[];
   arrearsAmount: number;
   carriedThisTurn: boolean;
   counterpartyKind: ObligationsCounterpartyId;
@@ -95,9 +147,15 @@ type ParsedObligationsViewSummary = {
   enforcementStage: number | null;
   enforcementState: "clear" | "arrears";
   enforcementSummary: string;
+  nextStageTrigger: Record<string, unknown> | null;
+  preferredPaymentMode: string | null;
+  receiptGroups: Record<string, unknown>[];
   settlementStatus: string;
   settlementSummary: string;
   settledThisTurn: boolean;
+  supportedPaymentModes: string[];
+  tangibleBitePreview: Record<string, unknown> | null;
+  terminalRisk: Record<string, unknown> | null;
 };
 
 const COUNTERPARTY_META: Record<
@@ -128,8 +186,33 @@ function readNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
 }
 
+function formatToken(value: string | null | undefined): string {
+  const token = typeof value === "string" ? value.trim() : "";
+  if (!token) return "Unknown";
+  return token
+    .split(/[._]/u)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function readBoolean(value: unknown): boolean {
   return value === true;
+}
+
+function readStringArray(value: unknown): string[] {
+  const values = Array.isArray(value) ? value : [];
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const entry of values) {
+    const item = readString(entry);
+    if (!item || seen.has(item)) continue;
+    seen.add(item);
+    result.push(item);
+  }
+
+  return result;
 }
 
 function readStage(value: unknown): number | null {
@@ -225,6 +308,136 @@ function responsePressureSummary(summary: ParsedObligationsViewSummary): string 
   });
 }
 
+function receiptGroupRows(summary: ParsedObligationsViewSummary): ObligationsContractReceiptGroup[] {
+  return summary.receiptGroups
+    .map((group) => {
+      const groupRecord = asRecord(group);
+      const id = readString(groupRecord?.group_kind);
+      if (id !== "payment" && id !== "penalty" && id !== "seizure") return null;
+
+      const rawRows = Array.isArray(groupRecord?.receipts) ? groupRecord.receipts : [];
+      const rows = rawRows
+        .map((row) => {
+          const rowRecord = asRecord(row);
+          if (!rowRecord) return null;
+          const receiptId = readString(rowRecord.receipt_id);
+          if (!receiptId) return null;
+          const delta = readNumber(rowRecord.delta) ?? 0;
+          const balanceAfter = readNumber(rowRecord.balance_after) ?? 0;
+
+          return {
+            assetLabel: formatToken(readString(rowRecord.asset)),
+            balanceAfterLabel: String(balanceAfter),
+            category: readString(rowRecord.category) ?? "receipt",
+            deltaLabel: delta > 0 ? `+${delta}` : `${delta}`,
+            id: receiptId,
+            ruleLabel: readString(rowRecord.rule_id) ?? "Unavailable",
+            summary: readString(rowRecord.summary) ?? receiptId
+          };
+        })
+        .filter((row): row is ObligationsContractReceiptRow => row !== null);
+
+      return {
+        categoryOrder: readStringArray(groupRecord?.category_order),
+        id,
+        label: readString(groupRecord?.label) ?? formatToken(id),
+        receiptCount: readNumber(groupRecord?.receipt_count) ?? rows.length,
+        rows
+      };
+    })
+    .filter((group): group is ObligationsContractReceiptGroup => group !== null);
+}
+
+function paymentModes(summary: ParsedObligationsViewSummary): ObligationsContractPaymentModes {
+  return {
+    acceptedLabels: summary.acceptedPaymentModes.map((mode) => obligationGesturePaymentModeLabel(mode as ObligationsGesturePaymentMode)),
+    preferredLabel: obligationGesturePaymentModeLabel((summary.preferredPaymentMode ?? "none") as ObligationsGesturePaymentMode),
+    supportedLabels: summary.supportedPaymentModes.map((mode) => obligationGesturePaymentModeLabel(mode as ObligationsGesturePaymentMode))
+  };
+}
+
+function stageRows(summary: ParsedObligationsViewSummary): ObligationsContractStageRow[] {
+  const trigger = summary.nextStageTrigger;
+  const triggerStage = readStage(trigger?.next_stage);
+  const triggerSummary = readString(trigger?.summary);
+  const triggerBoundary =
+    triggerStage !== null
+      ? `${formatToken(readString(trigger?.next_stage_label))} boundary: ${readNumber(trigger?.current_value) ?? 0}/${readNumber(trigger?.trigger_threshold) ?? 0} on ${readString(trigger?.trigger_source_path) ?? "unknown"}`
+      : "No next-stage boundary recorded.";
+
+  const terminalRisk = summary.terminalRisk;
+  const terminalSummary = readString(terminalRisk?.summary) ?? "No terminal-risk summary recorded.";
+  const terminalBoundary = terminalRisk
+    ? `Unrest ${readNumber(terminalRisk.current_value) ?? 0}/${readNumber(terminalRisk.trigger_threshold) ?? 0}; remaining ${readNumber(terminalRisk.remaining_to_threshold) ?? 0}.`
+    : "Terminal risk is not exposed in the current snapshot.";
+  const terminalActive = readBoolean(terminalRisk?.active);
+  const terminalArmed = readBoolean(terminalRisk?.armed);
+
+  return [
+    {
+      boundaryLabel: summary.settlementSummary,
+      detail: summary.enforcementSummary,
+      id: "stage_1",
+      statusLabel:
+        summary.enforcementState === "clear" ? "Clear" : summary.enforcementStage === 1 ? "Current" : "Passed",
+      title: "Stage 1 · Arrears carry"
+    },
+    {
+      boundaryLabel: triggerBoundary,
+      detail:
+        readString(summary.tangibleBitePreview?.summary) ??
+        (triggerStage === 2 ? triggerSummary ?? "Stage-two trigger is present." : "No stage-two trigger recorded."),
+      id: "stage_2",
+      statusLabel:
+        summary.enforcementStage !== null && summary.enforcementStage >= 2 && !terminalActive
+          ? "Current"
+          : triggerStage === 2
+            ? readBoolean(trigger?.armed)
+              ? "Armed"
+              : "Dormant"
+            : "Dormant",
+      title: "Stage 2 · Tangible bite"
+    },
+    {
+      boundaryLabel: terminalBoundary,
+      detail: terminalActive ? terminalSummary : triggerStage === 3 ? triggerSummary ?? terminalSummary : terminalSummary,
+      id: "stage_3",
+      statusLabel: terminalActive ? "Active" : terminalArmed ? "Armed" : "Dormant",
+      title: "Stage 3 · Dispossession danger"
+    }
+  ];
+}
+
+function tangibleBitePreview(summary: ParsedObligationsViewSummary): ObligationsContractTangibleBitePreview | null {
+  const preview = summary.tangibleBitePreview;
+  if (!preview) return null;
+
+  return {
+    categoryLabel: formatToken(readString(preview.category)),
+    paymentModeLabel: obligationGesturePaymentModeLabel((readString(preview.payment_mode) ?? "none") as ObligationsGesturePaymentMode),
+    previewAmountLabel: String(readNumber(preview.preview_amount) ?? 0),
+    summary: readString(preview.summary) ?? "No tangible-bite preview summary recorded.",
+    turnCapLabel:
+      readNumber(preview.turn_cap_amount) === null
+        ? "No per-turn cap"
+        : `${readNumber(preview.turn_cap_amount)} via ${readString(preview.turn_cap_tuning_key) ?? "cap"}`
+  };
+}
+
+function terminalRisk(summary: ParsedObligationsViewSummary): ObligationsContractTerminalRisk {
+  const risk = summary.terminalRisk;
+  const active = readBoolean(risk?.active);
+  const armed = readBoolean(risk?.armed);
+
+  return {
+    boundaryLabel: risk
+      ? `Boundary ${readNumber(risk.current_value) ?? 0}/${readNumber(risk.trigger_threshold) ?? 0} on ${readString(risk.trigger_source_path) ?? "unknown"}`
+      : "No terminal-risk boundary recorded.",
+    statusLabel: active ? "Active" : armed ? "Armed" : "Dormant",
+    summary: readString(risk?.summary) ?? "No terminal-risk summary recorded."
+  };
+}
+
 function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCounterpartyId, ParsedObligationsViewSummary> | null {
   const previewRecord = previewState as RunState & { economy_obligations_view?: unknown };
   const obligationsView = asRecord(previewRecord.economy_obligations_view);
@@ -243,6 +456,7 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
     const counterpartyLabel = readString(summary.counterparty_label) ?? COUNTERPARTY_META[counterpartyKind].fallbackTitle;
 
     summaries.set(counterpartyKind, {
+      acceptedPaymentModes: readStringArray(summary.accepted_payment_modes),
       arrearsAmount: readNumber(summary.arrears_amount) ?? 0,
       carriedThisTurn: readBoolean(summary.carried_this_turn),
       counterpartyKind,
@@ -251,9 +465,19 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
       enforcementStage: readStage(summary.enforcement_stage),
       enforcementState: summary.enforcement_state === "arrears" ? "arrears" : "clear",
       enforcementSummary: readString(summary.enforcement_summary) ?? `${counterpartyLabel}: clear.`,
+      nextStageTrigger: asRecord(summary.next_stage_trigger),
+      preferredPaymentMode: readString(summary.preferred_payment_mode),
+      receiptGroups: Array.isArray(summary.receipt_groups)
+        ? summary.receipt_groups
+            .map((entry) => asRecord(entry))
+            .filter((entry): entry is Record<string, unknown> => entry !== null)
+        : [],
       settlementStatus: readString(summary.settlement_status) ?? "clear",
       settlementSummary: readString(summary.settlement_summary) ?? `${counterpartyLabel}: clear.`,
-      settledThisTurn: readBoolean(summary.settled_this_turn)
+      settledThisTurn: readBoolean(summary.settled_this_turn),
+      supportedPaymentModes: readStringArray(summary.supported_payment_modes),
+      tangibleBitePreview: asRecord(summary.tangible_bite_preview),
+      terminalRisk: asRecord(summary.terminal_risk)
     });
   }
 
@@ -289,8 +513,11 @@ export function buildObligationsCounterpartyContract(args: {
       title: summary.counterpartyLabel,
       shortTitle: meta.shortTitle,
       helper: meta.helper,
+      paymentModes: paymentModes(summary),
       settlementStatus: summary.settlementStatus,
+      stageRows: stageRows(summary),
       receiptCategoryOrder: [...meta.receiptCategoryOrder],
+      receiptGroups: receiptGroupRows(summary),
       receiptKeywords: buildReceiptKeywords(counterpartyId, summary.counterpartyLabel),
       dueGroup: {
         title: meta.dueTitle,
@@ -323,7 +550,9 @@ export function buildObligationsCounterpartyContract(args: {
         spent: gestureEntry?.spent ?? null,
         availableInBudget: gestureEntry !== null,
         receiptCategories: gestureReceiptCategory(counterpartyId)
-      }
+      },
+      tangibleBitePreview: tangibleBitePreview(summary),
+      terminalRisk: terminalRisk(summary)
     };
   }).filter((section): section is ObligationsCounterpartyContractSection => section !== null);
 
@@ -375,6 +604,7 @@ export function obligationGesturePaymentModeLabel(mode: ObligationsGesturePaymen
   if (mode === "coin") return "Coin";
   if (mode === "food_stores") return "Food stores";
   if (mode === "meat_stores") return "Meat stores";
+  if (mode === "service_placeholder") return "Service placeholder";
   return "None";
 }
 
