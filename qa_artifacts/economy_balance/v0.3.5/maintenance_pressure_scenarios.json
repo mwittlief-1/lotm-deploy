@@ -1,0 +1,383 @@
+{
+  "hash": "6ee57a1b37d0468b501e6f8c04637b9c1454a3372b05fef45ef5b476e65a4b1f",
+  "kind": "maintenance_pressure_scenarios_v1",
+  "qa_flow": {
+    "commands": [
+      "node node_modules/tsx/dist/cli.mjs scripts/maintenancePressureScenarios.ts",
+      "npx vitest run tests/sim/maintenance_pressure_scenarios.test.ts tests/sim/maintenance_labor_helper.test.ts tests/sim/maintenance_labor_wiring.test.ts"
+    ],
+    "note": "Use this pack as the deterministic maintenance-pressure comparison surface until later KPI bands and runaway detectors attach numeric thresholds."
+  },
+  "release": "v0.3.5",
+  "scenarios": [
+    {
+      "control_preview": {
+        "construction_progress_added": 24,
+        "production_bushels": 459
+      },
+      "delegation_multiplier_pct": 100,
+      "deltas_vs_control": {
+        "construction_progress_added": -24,
+        "production_bushels": -33
+      },
+      "planned_labor": {
+        "builders": 6,
+        "farmers": 14,
+        "population": 20
+      },
+      "pressure": {
+        "allocatable_after": 13,
+        "allocatable_before": 20,
+        "applied_drag": 7,
+        "delegated": false,
+        "delegated_multiplier_pct": 100,
+        "effective_builders": 0,
+        "effective_farmers": 13,
+        "ordering_rule": "builders_first",
+        "required_labor_after_delegation": 7,
+        "required_labor_before_delegation": 7,
+        "schema_version": "maintenance_labor_pressure_v1",
+        "source_keys": [
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "total_sources": 7,
+        "unmet_labor": 0
+      },
+      "preview": {
+        "construction_progress_added": 0,
+        "maintenance_note_lines": [
+          "Maintenance required 7 labor across 7 sources; reserved 7 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 13, builders 0."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 7 labor across 7 sources; reserved 7 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 13, builders 0."
+        ],
+        "production_bushels": 426
+      },
+      "registry": {
+        "building_count": 0,
+        "coin_cost": 4,
+        "entry_count": 7,
+        "entry_ids": [
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "labor_required": 7,
+        "manor_key": "portfolio:player_portfolio:manor:manor_hx_26597",
+        "right_count": 7
+      },
+      "resolved": {
+        "maintenance_note_lines": [
+          "Maintenance required 7 labor across 7 sources; reserved 7 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 13, builders 0."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 7 labor across 7 sources; reserved 7 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 13, builders 0."
+        ],
+        "turn_index": 1
+      },
+      "scenario_id": "rights_only_builder_capacity",
+      "seed": "v035_maintenance_rights_only",
+      "state_improvements": [],
+      "title": "Rights-only maintenance pressure"
+    },
+    {
+      "control_preview": {
+        "construction_progress_added": 24,
+        "production_bushels": 436
+      },
+      "delegation_multiplier_pct": 100,
+      "deltas_vs_control": {
+        "construction_progress_added": -24,
+        "production_bushels": -125
+      },
+      "planned_labor": {
+        "builders": 6,
+        "farmers": 14,
+        "population": 20
+      },
+      "pressure": {
+        "allocatable_after": 10,
+        "allocatable_before": 20,
+        "applied_drag": 10,
+        "delegated": false,
+        "delegated_multiplier_pct": 100,
+        "effective_builders": 0,
+        "effective_farmers": 10,
+        "ordering_rule": "builders_first",
+        "required_labor_after_delegation": 10,
+        "required_labor_before_delegation": 10,
+        "schema_version": "maintenance_labor_pressure_v1",
+        "source_keys": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "total_sources": 9,
+        "unmet_labor": 0
+      },
+      "preview": {
+        "construction_progress_added": 0,
+        "maintenance_note_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 10 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 10, builders 0."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 10 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 10, builders 0."
+        ],
+        "production_bushels": 311
+      },
+      "registry": {
+        "building_count": 2,
+        "coin_cost": 8,
+        "entry_count": 9,
+        "entry_ids": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "labor_required": 10,
+        "manor_key": "portfolio:player_portfolio:manor:manor_hx_26597",
+        "right_count": 7
+      },
+      "resolved": {
+        "maintenance_note_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 10 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 10, builders 0."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 10 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 10, builders 0."
+        ],
+        "turn_index": 1
+      },
+      "scenario_id": "full_holdings_builder_capacity",
+      "seed": "v035_maintenance_full_holdings",
+      "state_improvements": [
+        "granary_upgrade",
+        "watch_ward"
+      ],
+      "title": "Full holdings maintenance pressure"
+    },
+    {
+      "control_preview": {
+        "construction_progress_added": 24,
+        "production_bushels": 549
+      },
+      "delegation_multiplier_pct": 40,
+      "deltas_vs_control": {
+        "construction_progress_added": -16,
+        "production_bushels": 0
+      },
+      "planned_labor": {
+        "builders": 6,
+        "farmers": 14,
+        "population": 20
+      },
+      "pressure": {
+        "allocatable_after": 16,
+        "allocatable_before": 20,
+        "applied_drag": 4,
+        "delegated": true,
+        "delegated_multiplier_pct": 40,
+        "effective_builders": 2,
+        "effective_farmers": 14,
+        "ordering_rule": "builders_first",
+        "required_labor_after_delegation": 4,
+        "required_labor_before_delegation": 10,
+        "schema_version": "maintenance_labor_pressure_v1",
+        "source_keys": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "total_sources": 9,
+        "unmet_labor": 0
+      },
+      "preview": {
+        "construction_progress_added": 8,
+        "maintenance_note_lines": [
+          "Delegated maintenance scaled labor from 10 to 4 (40%).",
+          "Maintenance required 4 labor across 9 sources; reserved 4 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 14, builders 2."
+        ],
+        "maintenance_receipt_lines": [
+          "Delegated maintenance scaled labor from 10 to 4 (40%).",
+          "Maintenance required 4 labor across 9 sources; reserved 4 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 14, builders 2."
+        ],
+        "production_bushels": 549
+      },
+      "registry": {
+        "building_count": 2,
+        "coin_cost": 8,
+        "entry_count": 9,
+        "entry_ids": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "labor_required": 10,
+        "manor_key": "portfolio:player_portfolio:manor:manor_hx_26597",
+        "right_count": 7
+      },
+      "resolved": {
+        "maintenance_note_lines": [
+          "Delegated maintenance scaled labor from 10 to 4 (40%).",
+          "Maintenance required 4 labor across 9 sources; reserved 4 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 14, builders 2."
+        ],
+        "maintenance_receipt_lines": [
+          "Delegated maintenance scaled labor from 10 to 4 (40%).",
+          "Maintenance required 4 labor across 9 sources; reserved 4 before harvest/build output.",
+          "Planned farmers 14, builders 6; effective farmers 14, builders 2."
+        ],
+        "turn_index": 1
+      },
+      "scenario_id": "full_holdings_delegated_relief",
+      "seed": "v035_maintenance_full_holdings_delegated",
+      "state_improvements": [
+        "granary_upgrade",
+        "watch_ward"
+      ],
+      "title": "Delegated maintenance relief"
+    },
+    {
+      "control_preview": {
+        "construction_progress_added": 4,
+        "production_bushels": 149
+      },
+      "delegation_multiplier_pct": 100,
+      "deltas_vs_control": {
+        "construction_progress_added": -4,
+        "production_bushels": -149
+      },
+      "planned_labor": {
+        "builders": 1,
+        "farmers": 4,
+        "population": 12
+      },
+      "pressure": {
+        "allocatable_after": 0,
+        "allocatable_before": 5,
+        "applied_drag": 5,
+        "delegated": false,
+        "delegated_multiplier_pct": 100,
+        "effective_builders": 0,
+        "effective_farmers": 0,
+        "ordering_rule": "builders_first",
+        "required_labor_after_delegation": 10,
+        "required_labor_before_delegation": 10,
+        "schema_version": "maintenance_labor_pressure_v1",
+        "source_keys": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "total_sources": 9,
+        "unmet_labor": 5
+      },
+      "preview": {
+        "construction_progress_added": 0,
+        "maintenance_note_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 5 before harvest/build output.",
+          "Planned farmers 4, builders 1; effective farmers 0, builders 0.",
+          "Maintenance demand exceeded allocatable labor by 5."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 5 before harvest/build output.",
+          "Planned farmers 4, builders 1; effective farmers 0, builders 0.",
+          "Maintenance demand exceeded allocatable labor by 5."
+        ],
+        "production_bushels": 0
+      },
+      "registry": {
+        "building_count": 2,
+        "coin_cost": 8,
+        "entry_count": 9,
+        "entry_ids": [
+          "maintenance:building:granary_upgrade",
+          "maintenance:building:watch_ward",
+          "maintenance:right:franchise:bridge_or_crossing_revenue",
+          "maintenance:right:franchise:fair_right",
+          "maintenance:right:franchise:market_right",
+          "maintenance:right:franchise:toll_right",
+          "maintenance:right:service:court_attendance",
+          "maintenance:right:service:servitium_regis",
+          "maintenance:right:service:temporal_service"
+        ],
+        "labor_required": 10,
+        "manor_key": "portfolio:player_portfolio:manor:manor_hx_26597",
+        "right_count": 7
+      },
+      "resolved": {
+        "maintenance_note_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 5 before harvest/build output.",
+          "Planned farmers 4, builders 1; effective farmers 0, builders 0.",
+          "Maintenance demand exceeded allocatable labor by 5."
+        ],
+        "maintenance_receipt_lines": [
+          "Maintenance required 10 labor across 9 sources; reserved 5 before harvest/build output.",
+          "Planned farmers 4, builders 1; effective farmers 0, builders 0.",
+          "Maintenance demand exceeded allocatable labor by 5."
+        ],
+        "turn_index": 1
+      },
+      "scenario_id": "full_holdings_low_capacity_overflow",
+      "seed": "v035_maintenance_low_capacity",
+      "state_improvements": [
+        "granary_upgrade",
+        "watch_ward"
+      ],
+      "title": "Low-capacity maintenance overflow"
+    }
+  ],
+  "source_contracts": {
+    "maintenance_labor_pressure_schema_version": "maintenance_labor_pressure_v1",
+    "maintenance_registry_schema_version": "economy_maintenance_registry_v1"
+  }
+}
