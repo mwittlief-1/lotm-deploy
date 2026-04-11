@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { createNewRun, proposeTurn } from "../../src/sim";
-import { buildHouseDossierSurface } from "../../src/ui/houseDossierView";
+import { buildHouseDossierSurface, listHouseDossierIds } from "../../src/ui/houseDossierView";
 import { HouseDossierPanel } from "../../src/ui/panels/HouseDossierPanel";
 
 describe("HouseDossierPanel", () => {
@@ -41,5 +41,32 @@ describe("HouseDossierPanel", () => {
     expect(html).toContain("schema_version");
     expect(html).toContain(surface.schemaVersion);
     expect(html.indexOf("schema_version")).toBeLessThan(html.indexOf("house_id"));
+  });
+
+  it("renders known-people person-card triggers when the dossier surface resolves them canonically", () => {
+    const state = createNewRun("house_dossier_panel_people");
+    const ctx = proposeTurn(state);
+    const dossierId = listHouseDossierIds(ctx.preview_state).find((houseId) => {
+      return (buildHouseDossierSurface(ctx.preview_state, houseId)?.relatedPeople.length ?? 0) > 0;
+    });
+
+    if (!dossierId) {
+      throw new Error("Expected a dossier surface with related people.");
+    }
+
+    const surface = buildHouseDossierSurface(ctx.preview_state, dossierId);
+    const person = surface?.relatedPeople[0];
+
+    if (!surface || !person) {
+      throw new Error("Expected a known person on the dossier surface.");
+    }
+
+    const html = renderToStaticMarkup(
+      <HouseDossierPanel initialTab="player" onOpenPersonCard={() => undefined} surface={surface} />
+    );
+
+    expect(html).toContain("Known people");
+    expect(html).toContain(person.title);
+    expect(html).toContain(`data-person-card-open="${person.personId}"`);
   });
 });

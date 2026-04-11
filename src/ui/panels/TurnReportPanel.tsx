@@ -28,7 +28,10 @@ type TurnReportPanelProps = {
   hasConsumptionSplit: boolean;
   idle: number;
   manor: any;
+  onOpenHouseholdPersonCard?: (personId: string) => void;
+  onOpenRosterPersonCard?: (personId: string) => void;
   peasantConsumptionBushels: number | null;
+  personCardIds?: Set<string>;
   previewState: RunState;
   report: any;
   showHouseholdDetails: boolean;
@@ -59,7 +62,10 @@ export function TurnReportPanel({
   hasConsumptionSplit,
   idle,
   manor,
+  onOpenHouseholdPersonCard,
+  onOpenRosterPersonCard,
   peasantConsumptionBushels,
+  personCardIds,
   previewState,
   report,
   showHouseholdDetails,
@@ -82,6 +88,8 @@ export function TurnReportPanel({
         anchorId={anchorHousehold}
         copy={copy}
         courtSize={courtSize}
+        onOpenPersonCard={onOpenHouseholdPersonCard}
+        personCardIds={personCardIds}
         previewState={previewState}
         state={state}
         showDetails={showHouseholdDetails}
@@ -200,6 +208,8 @@ export function TurnReportPanel({
           currentHouseLog={currentHouseLog}
           courtRosterEntries={courtRosterEntries}
           courtSize={courtSize}
+          onOpenPersonCard={onOpenRosterPersonCard}
+          personCardIds={personCardIds}
           previewState={previewState}
           state={state}
         />

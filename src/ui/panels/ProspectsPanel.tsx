@@ -2,6 +2,7 @@ import React from "react";
 import { getGrantProspectTemplate } from "../../content/experienceContent";
 import type { RunState } from "../../sim/types";
 import { Tip, formatParentsLine } from "../viewHelpers";
+import { PersonCardTrigger } from "./PersonCardTrigger";
 
 type ProspectDecision = "accept" | "reject" | null;
 type ProspectLogLine = { turn_index: number; line: string };
@@ -18,7 +19,9 @@ type ProspectsPanelProps = {
   hiddenIds: string[];
   hiddenCount: number;
   houseLabel: (houseId: string | null | undefined) => string;
+  onOpenPersonCard?: (personId: string) => void;
   personNameFromRegistry: (personId: string | null | undefined) => string | null;
+  personCardIds?: Set<string>;
   pfHouseLabelById: Map<string, string>;
   pfParentsByChild: Map<string, string[]>;
   pfPeopleRec: Record<string, any>;
@@ -47,7 +50,9 @@ export function ProspectsPanel({
   hiddenIds,
   hiddenCount,
   houseLabel,
+  onOpenPersonCard,
   personNameFromRegistry,
+  personCardIds,
   pfHouseLabelById,
   pfParentsByChild,
   pfPeopleRec,
@@ -161,7 +166,14 @@ export function ProspectsPanel({
                     {partiesLine ? <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>{partiesLine}</div> : null}
                     {subject ? (
                       <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
-                        {copy.prospectSubjectLabel} {subject}
+                        {copy.prospectSubjectLabel}{" "}
+                        {subjectId && personCardIds?.has(subjectId) && onOpenPersonCard ? (
+                          <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={subjectId}>
+                            {subject}
+                          </PersonCardTrigger>
+                        ) : (
+                          subject
+                        )}
                       </div>
                     ) : null}
 
@@ -212,7 +224,14 @@ export function ProspectsPanel({
                         return spouseText ? (
                           <>
                             <div style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
-                              {label}: {spouseText}
+                              {label}:{" "}
+                              {spouseId && personCardIds?.has(spouseId) && onOpenPersonCard ? (
+                                <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={spouseId}>
+                                  {spouseText}
+                                </PersonCardTrigger>
+                              ) : (
+                                spouseText
+                              )}
                               {fromHouse ? ` — House ${fromHouse}` : ""}
                             </div>
                             {spouseParentsLine ? (

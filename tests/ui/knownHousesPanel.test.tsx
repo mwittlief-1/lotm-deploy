@@ -28,20 +28,24 @@ describe("KnownHousesPanel", () => {
         dossierHouseIds={new Set(["h_ext_01"])}
         hasMoreKnownHouses={false}
         knownHouses={[
-          { head_name: "Aveline", house_id: "h_ext_01", house_name: "Falkmere", tier: "Count" },
-          { head_name: "Roland", house_id: "h_ext_02", house_name: "Ashford", tier: "Baron" }
+          { head_id: "p_ext_01_head", head_name: "Aveline", house_id: "h_ext_01", house_name: "Falkmere", tier: "Count" },
+          { head_id: "p_ext_02_head", head_name: "Roland", house_id: "h_ext_02", house_name: "Ashford", tier: "Baron" }
         ]}
         knownHousesMain={[
-          { head_name: "Aveline", house_id: "h_ext_01", house_name: "Falkmere", tier: "Count" },
-          { head_name: "Roland", house_id: "h_ext_02", house_name: "Ashford", tier: "Baron" }
+          { head_id: "p_ext_01_head", head_name: "Aveline", house_id: "h_ext_01", house_name: "Falkmere", tier: "Count" },
+          { head_id: "p_ext_02_head", head_name: "Roland", house_id: "h_ext_02", house_name: "Ashford", tier: "Baron" }
         ]}
         onOpenHouseDossier={() => undefined}
+        onOpenPersonCard={() => undefined}
         onToggleShowAll={() => undefined}
+        personCardIds={new Set(["p_ext_01_head"])}
         showAllKnownHouses={false}
       />
     );
 
     expect(html).toContain("Open dossier");
+    expect(html).toContain('data-person-card-open="p_ext_01_head"');
+    expect(html).not.toContain('data-person-card-open="p_ext_02_head"');
     expect(html.indexOf("Open dossier")).toBeLessThan(html.indexOf("House Ashford"));
   });
 });

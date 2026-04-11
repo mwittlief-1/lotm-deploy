@@ -2,12 +2,15 @@ import React from "react";
 import type { RunState } from "../../sim/types";
 import { findLastSuccession, getAllHouseLogEntries, getPlayerHousehold } from "../stateSelectors";
 import { Badge, formatNameParts, formatPersonName, Tip } from "../viewHelpers";
+import { PersonCardTrigger } from "./PersonCardTrigger";
 
 type HouseholdDetailsPanelProps = {
   copy: any;
   currentHouseLog: any[];
   courtRosterEntries: any[];
   courtSize: number | null;
+  onOpenPersonCard?: (personId: string) => void;
+  personCardIds?: Set<string>;
   previewState: RunState;
   state: RunState;
 };
@@ -17,6 +20,8 @@ export function HouseholdDetailsPanel({
   currentHouseLog,
   courtRosterEntries,
   courtSize,
+  onOpenPersonCard,
+  personCardIds,
   previewState,
   state
 }: HouseholdDetailsPanelProps) {
@@ -85,7 +90,15 @@ export function HouseholdDetailsPanel({
     <div style={{ display: "grid", gap: 16 }}>
       <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fffdf8" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700 }}>{formatPersonName(household.head)}</div>
+          <div style={{ fontWeight: 700 }}>
+            {household.head?.id && personCardIds?.has(household.head.id) && onOpenPersonCard ? (
+              <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={household.head.id}>
+                {formatPersonName(household.head)}
+              </PersonCardTrigger>
+            ) : (
+              formatPersonName(household.head)
+            )}
+          </div>
           <div style={{ fontSize: 12, opacity: 0.78 }}>
             {lastSuccession
               ? `${copy.lastSuccessionLabel} Turn ${lastSuccession.turn_index} — ${copy.logOutcome_succession(lastSuccession.new_ruler_name)}`
@@ -100,12 +113,29 @@ export function HouseholdDetailsPanel({
                   const heir = household.children.find((child: any) => child.id === household.heir_id)
                     ?? (previewState as any)?.people?.[household.heir_id]
                     ?? null;
-                  return heir ? formatPersonName(heir) : copy.none;
+                  return heir ? (
+                    personCardIds?.has(household.heir_id) && onOpenPersonCard ? (
+                      <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={household.heir_id}>
+                        {formatPersonName(heir)}
+                      </PersonCardTrigger>
+                    ) : (
+                      formatPersonName(heir)
+                    )
+                  ) : copy.none;
                 })()
               : copy.none}
           </div>
           <div>
-            <b>{copy.spouseLabel}</b> {household.spouse ? formatPersonName(household.spouse) : copy.none}
+            <b>{copy.spouseLabel}</b>{" "}
+            {household.spouse ? (
+              household.spouse.id && personCardIds?.has(household.spouse.id) && onOpenPersonCard ? (
+                <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={household.spouse.id}>
+                  {formatPersonName(household.spouse)}
+                </PersonCardTrigger>
+              ) : (
+                formatPersonName(household.spouse)
+              )
+            ) : copy.none}
           </div>
           <div>
             <b>{copy.childrenLabel}</b> {household.children.length ? household.children.length : copy.none}
@@ -127,7 +157,13 @@ export function HouseholdDetailsPanel({
               return (
                 <li key={entry.person.id} style={{ marginBottom: 6 }}>
                   <div>
-                    <span>{formatPersonName(entry.person)}</span>
+                    {personCardIds?.has(entry.person.id) && onOpenPersonCard ? (
+                      <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={entry.person.id}>
+                        {formatPersonName(entry.person)}
+                      </PersonCardTrigger>
+                    ) : (
+                      <span>{formatPersonName(entry.person)}</span>
+                    )}
                     {entry.badges.map((badge: string) => (
                       <Badge key={`${entry.person.id}:${badge}`} text={badge} />
                     ))}

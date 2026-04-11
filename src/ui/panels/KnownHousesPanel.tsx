@@ -1,5 +1,6 @@
 import React from "react";
 import { Tip, formatNameParts } from "../viewHelpers";
+import { PersonCardTrigger } from "./PersonCardTrigger";
 
 type KnownHousesPanelProps = {
   copy: any;
@@ -8,7 +9,9 @@ type KnownHousesPanelProps = {
   knownHouses: any[];
   knownHousesMain: any[];
   onOpenHouseDossier?: (houseId: string) => void;
+  onOpenPersonCard?: (personId: string) => void;
   onToggleShowAll: () => void;
+  personCardIds?: Set<string>;
   showAllKnownHouses: boolean;
 };
 
@@ -19,7 +22,9 @@ export function KnownHousesPanel({
   knownHouses,
   knownHousesMain,
   onOpenHouseDossier,
+  onOpenPersonCard,
   onToggleShowAll,
+  personCardIds,
   showAllKnownHouses
 }: KnownHousesPanelProps) {
   return (
@@ -43,6 +48,7 @@ export function KnownHousesPanel({
               (typeof h?.head?.alive === "boolean" ? (h.head.alive ? "Alive" : "Deceased") : "");
             const headShortIdRaw = h?.head_short_id ?? h?.head?.short_id;
             const headIdRaw = h?.head_id ?? h?.head?.id;
+            const headPersonId = typeof headIdRaw === "string" ? headIdRaw : null;
 
             const headParts = formatNameParts(headNameRaw, headAgeRaw, headShortIdRaw, headIdRaw);
 
@@ -89,7 +95,14 @@ export function KnownHousesPanel({
 
                 {headParts.displayName ? (
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.95 }}>
-                    <b>{copy.headLabel}</b> {headParts.displayName}
+                    <b>{copy.headLabel}</b>{" "}
+                    {headPersonId && personCardIds?.has(headPersonId) && onOpenPersonCard ? (
+                      <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={headPersonId}>
+                        {headParts.displayName}
+                      </PersonCardTrigger>
+                    ) : (
+                      headParts.displayName
+                    )}
                     {headParts.ageText ? ` (${headParts.ageText})` : ""}
                     {headStatusRaw ? ` — ${headStatusRaw}` : ""}
                   </div>

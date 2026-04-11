@@ -8,6 +8,12 @@ export type HouseDossierDebugRowSurface = {
   value: string;
 };
 
+export type HouseDossierRelatedPersonSurface = {
+  detail: string;
+  personId: string;
+  title: string;
+};
+
 export type HouseDossierSurface = {
   debugRows: HouseDossierDebugRowSurface[];
   dossier: HouseDossierRecord;
@@ -31,6 +37,7 @@ export type HouseDossierSurface = {
   ledgerTrendLabel: string;
   relevanceReasons: string[];
   relevanceTierLabel: string;
+  relatedPeople: HouseDossierRelatedPersonSurface[];
   relationshipBandLabel: string;
   relationshipSummary:
     | {
@@ -122,6 +129,22 @@ function readRelationshipSummary(dossier: HouseDossierRecord): HouseDossierSurfa
   };
 }
 
+function readKnownHouse(previewState: RunState | null | undefined, houseId: string): Record<string, unknown> | null {
+  const knownHouses = Array.isArray((previewState as any)?.known_houses) ? ((previewState as any).known_houses as unknown[]) : [];
+  return (
+    knownHouses.find((entry) => {
+      const record = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : null;
+      return record && record.house_id === houseId;
+    }) as Record<string, unknown> | undefined
+  ) ?? null;
+}
+
+function hasPersonCard(previewState: RunState | null | undefined, personId: string | null): boolean {
+  if (!personId) return false;
+  const registry = (previewState as any)?.person_card_registry;
+  return Boolean(registry?.entries_by_person_id?.[personId]);
+}
+
 export function listHouseDossierIds(previewState: RunState | null | undefined): string[] {
   return readHouseDossiers(previewState).map((dossier) => dossier.house_id);
 }
@@ -179,6 +202,28 @@ export function buildHouseDossierSurface(
     : heiressPossible
       ? "Heiress line remains possible."
       : "No direct heir signal is recorded.";
+  const knownHouseRecord = readKnownHouse(previewState, dossier.house_id);
+  const knownHeadId = typeof knownHouseRecord?.head_id === "string" ? knownHouseRecord.head_id : null;
+  const knownHeadName =
+    typeof knownHouseRecord?.head_name === "string" && knownHouseRecord.head_name.trim().length > 0
+      ? knownHouseRecord.head_name.trim()
+      : null;
+  const relatedPeople: HouseDossierRelatedPersonSurface[] =
+    knownHeadId && hasPersonCard(previewState, knownHeadId)
+      ? [
+          {
+            detail: [
+              "Known head",
+              typeof knownHouseRecord?.head_status === "string" ? String(knownHouseRecord.head_status) : null,
+              typeof knownHouseRecord?.head_age === "number" ? `Age ${Math.trunc(knownHouseRecord.head_age)}` : null
+            ]
+              .filter((value): value is string => typeof value === "string" && value.length > 0)
+              .join(" · "),
+            personId: knownHeadId,
+            title: knownHeadName ?? knownHeadId
+          }
+        ]
+      : [];
 
   const debugRows: HouseDossierDebugRowSurface[] = [
     { key: "schema_version", label: "schema_version", value: dossier.schema_version },
@@ -238,6 +283,7 @@ export function buildHouseDossierSurface(
     ledgerTrendLabel,
     relevanceReasons,
     relevanceTierLabel,
+    relatedPeople,
     relationshipBandLabel,
     relationshipSummary,
     schemaVersion: dossier.schema_version,

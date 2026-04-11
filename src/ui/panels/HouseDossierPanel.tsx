@@ -8,11 +8,13 @@ import {
   PLAY_SCREEN_SUBCARD_STYLE,
   PLAY_SCREEN_THEME
 } from "../playScreenTheme";
+import { PersonCardTrigger } from "./PersonCardTrigger";
 
 type HouseDossierTab = "player" | "debug";
 
 type HouseDossierPanelProps = {
   initialTab?: HouseDossierTab;
+  onOpenPersonCard?: (personId: string) => void;
   surface: HouseDossierSurface;
 };
 
@@ -20,7 +22,7 @@ function tabButtonStyle(isActive: boolean): React.CSSProperties {
   return isActive ? PLAY_SCREEN_ACTION_BUTTON_STYLE : PLAY_SCREEN_SECONDARY_BUTTON_STYLE;
 }
 
-export function HouseDossierPanel({ initialTab = "player", surface }: HouseDossierPanelProps) {
+export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, surface }: HouseDossierPanelProps) {
   const [activeTab, setActiveTab] = useState<HouseDossierTab>(initialTab);
 
   useEffect(() => {
@@ -100,6 +102,26 @@ export function HouseDossierPanel({ initialTab = "player", surface }: HouseDossi
           </div>
 
           <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            {surface.relatedPeople.length > 0 ? (
+              <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+                <div style={PLAY_SCREEN_EYEBROW_STYLE}>Known people</div>
+                <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                  {surface.relatedPeople.map((person) => (
+                    <div key={person.personId} style={{ display: "grid", gap: 4 }}>
+                      {onOpenPersonCard ? (
+                        <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={person.personId}>
+                          {person.title}
+                        </PersonCardTrigger>
+                      ) : (
+                        <div style={{ fontWeight: 700 }}>{person.title}</div>
+                      )}
+                      <div style={{ fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>{person.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
               <div style={PLAY_SCREEN_EYEBROW_STYLE}>Kinship & Reasons</div>
               <div style={{ marginTop: 8, fontWeight: 700 }}>{surface.kinshipSummaryLabel}</div>
