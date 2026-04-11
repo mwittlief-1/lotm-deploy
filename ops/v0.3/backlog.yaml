@@ -9095,7 +9095,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Render kingdom map with holdings, liege seat, and manor routing
-  status: ready
+  status: done
   priority: 96
   tranche: 6
   change_type: behavior_change
@@ -9138,7 +9138,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Add deterministic map fixtures, route tests, and replay guards
-  status: todo
+  status: ready
   priority: 95
   tranche: 6
   change_type: behavior_change
@@ -9268,7 +9268,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Render Manor View player and debug tabs
-  status: ready
+  status: done
   priority: 92
   tranche: 6
   change_type: behavior_change
@@ -9311,7 +9311,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Add manor view snapshot and component coverage
-  status: todo
+  status: ready
   priority: 91
   tranche: 6
   change_type: behavior_change
@@ -9398,7 +9398,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Replace summary drilldown with dossier modal and debug tab
-  status: ready
+  status: done
   priority: 89
   tranche: 6
   change_type: behavior_change
@@ -9440,7 +9440,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Add dossier fixtures and prospect completeness tests
-  status: todo
+  status: ready
   priority: 88
   tranche: 6
   change_type: behavior_change
@@ -9482,7 +9482,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Define person_card_view_v1 from registries and summaries
-  status: ready
+  status: done
   priority: 87
   tranche: 6
   change_type: behavior_change
@@ -9525,7 +9525,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Add stable family, succession, lands, and service projections
-  status: todo
+  status: done
   priority: 86
   tranche: 6
   change_type: behavior_change
@@ -9568,7 +9568,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Wire tap-any-name person-card modal across live surfaces
-  status: todo
+  status: ready
   priority: 85
   tranche: 6
   change_type: behavior_change
@@ -9696,7 +9696,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Build outbound scouting registry and candidate ranking
-  status: todo
+  status: ready
   priority: 82
   tranche: 6
   change_type: behavior_change
@@ -10085,7 +10085,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Surface maintenance rows in manor, portfolio, receipts, and explain views
-  status: ready
+  status: done
   priority: 74
   tranche: 6
   change_type: behavior_change
@@ -10128,7 +10128,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Add maintenance-pressure DOE scenarios and invariants
-  status: ready
+  status: done
   priority: 73
   tranche: 6
   change_type: behavior_change
@@ -10171,7 +10171,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Define court provisioning view and stipend registry
-  status: todo
+  status: ready
   priority: 72
   tranche: 6
   change_type: behavior_change
@@ -10387,7 +10387,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Deepen obligations modal into full ladder and tangible-bite preview
-  status: todo
+  status: ready
   priority: 67
   tranche: 6
   change_type: behavior_change
@@ -10518,7 +10518,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add one deterministic preset-application seam for new runs
-  status: todo
+  status: ready
   priority: 64
   tranche: 6
   change_type: behavior_change
@@ -10691,7 +10691,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Define KPI acceptance bands from the locked DOE baseline
-  status: todo
+  status: ready
   priority: 60
   tranche: 6
   change_type: behavior_change

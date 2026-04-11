@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-001-T04
-  last_completed_task_id: V03-R5-006-T03A
+  current_task_id: V03-R5-001-T05
+  last_completed_task_id: V03-R5-006-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -21,16 +21,17 @@ last_run:
     run1: 8d8156f44921e1de76135f63fc9a12f824bd49b7ad3a9e327ca44e949c38ff84
     run2: 7417d258e460bb99592ff96fe227b4142d006b19e13a42ef5d8a4b5845c980e2
 notes: >-
-  Accepted `V03-R5-006-T03A` onto the v0.3.5 control-plane line. The accepted
-  integrator seam applies builder-first maintenance labor drag before harvest
-  and construction consume allocatable labor, while keeping planned labor rows
-  unchanged and emitting the helper summary lines into preview receipts and
-  report notes for auditability. `npm run qa` passed, `npm run preflight`
-  still shows the standing `test3_mismatches=16` blocker, and both replay
-  batches passed; their normalized summaries matched exactly once path-shaped
-  artifact metadata was stripped, with normalized hash
-  `82a13540a5939d973347810ae3f75089b1a18d25c195c39889b7afa32b3182bb`. The
-  next ready task remains `V03-R5-001-T04` on ui-experience; `V03-R5-004-T01`
-  remains open on social-mechanics; and `V03-R5-006-T05` is now open on
-  tooling-qa.
+  Accepted the combined UI/social/tooling opening wave onto the v0.3.5
+  control-plane line: `V03-R5-001-T04`, `V03-R5-002-T03`, `V03-R5-003-T02`,
+  `V03-R5-004-T01`, `V03-R5-004-T02`, `V03-R5-006-T04`, and
+  `V03-R5-006-T05`. The accepted bundle lands the player-facing kingdom map,
+  manor view, house dossier modal, person-card projection deepening, and
+  maintenance-pressure explain surfaces, then promotes the next fixture,
+  person-card modal, outbound scouting, provisioning, obligations, preset-seam,
+  and balance-band tasks. `npm run qa` remained green across the fresh vitest
+  tranche plus a fresh `npm run uat:gate`; `npm run preflight` still shows the
+  standing `test3_mismatches=16` blocker; and both replay batches passed. Their
+  raw summary hashes differed because of path-shaped metadata, but the
+  normalized summaries matched exactly with hash
+  `b81bffa111387f7dec9a4e1a0ab13834cc6374e0dbca86a18ac458cbe8c283de`.
 active_claims: {}
