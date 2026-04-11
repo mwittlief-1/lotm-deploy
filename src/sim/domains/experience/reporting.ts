@@ -6,8 +6,14 @@ import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { buildEconomyMaintenanceView } from "../economy/maintenance";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
+import {
+  attachCourtProvisioningSurfaces,
+  buildCourtProvisioningView,
+  buildCourtStipendRegistry,
+} from "../people/courtProvisioningRegistry";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
 import { buildBoundedKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { attachOutboundMarriageScoutingRegistry, buildOutboundMarriageScoutingRegistry } from "../people/marriage";
 import { attachPersonCardRegistry, buildPersonCardRegistry } from "../people/personCardRegistry";
 import { ensureResidenceManorBindings } from "../people/residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries";
@@ -22,6 +28,9 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   const worldTopologyView = buildBoundedWorldTopologyView();
   const mapViewSnapshot = buildBoundedMapViewSnapshot();
   const personCardRegistry = buildPersonCardRegistry(state);
+  const outboundMarriageScoutingRegistry = buildOutboundMarriageScoutingRegistry(state);
+  const courtProvisioningView = buildCourtProvisioningView(state, personCardRegistry);
+  const courtStipendRegistry = buildCourtStipendRegistry(state, courtProvisioningView);
   const snapshot = deepCopy({
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
@@ -47,6 +56,15 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     game_over: state.game_over ?? null
   }) as unknown as RunSnapshot;
   attachPersonCardRegistry(snapshot as unknown as Record<string, unknown>, deepCopy(personCardRegistry));
+  attachOutboundMarriageScoutingRegistry(
+    snapshot as unknown as Record<string, unknown>,
+    outboundMarriageScoutingRegistry ? deepCopy(outboundMarriageScoutingRegistry) : null
+  );
+  attachCourtProvisioningSurfaces(
+    snapshot as unknown as Record<string, unknown>,
+    deepCopy(courtProvisioningView),
+    deepCopy(courtStipendRegistry)
+  );
   if ((state as any).beliefs) {
     Object.defineProperty(snapshot, "beliefs", {
       value: deepCopy((state as any).beliefs),

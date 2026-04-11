@@ -1,10 +1,10 @@
-import { structuredHouseIdForPerson } from "../../actors";
+import { registryPersonFor, resolveCurrentHouseHeadId, structuredHouseIdForPerson } from "../../actors";
 import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../../court";
 import { chargeCourtDecisionBudget } from "../court/decisionBudget";
 import { resolveCourtDelegationEntry, resolveDelegatedBudgetCost } from "../court/delegationRegistry";
 import { canSpendEnergy, spendEnergy } from "../court/energy";
 import { applyCoinDelta, canAffordCoin, spendCoin } from "../economy/ledger";
-import { listEligibleCandidates } from "../../marriageMarket";
+import { isReserved, listEligibleCandidates } from "../../marriageMarket";
 import { Rng } from "../../rng";
 import type { TierSets } from "../../tiers";
 import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
@@ -13,20 +13,116 @@ import { getLivingSpouse } from "../../kinship";
 import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
 import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
-import { listRelevantTier1HouseIds } from "./knownHouseRelevance";
-import { applyRelationshipDelta } from "./relationshipEngine";
+import { buildKnownHouseRelevanceSnapshot, listRelevantTier1HouseIds } from "./knownHouseRelevance";
+import { applyRelationshipDelta, readRelationshipVector, relationshipFavorScore } from "./relationshipEngine";
 import { ensureResidenceManorBindings } from "./residenceManorRegistry";
+import { resolveActionScope, type WorldActionScopeResolutionV1, type WorldScopeCapBucketV1 } from "../world";
 
 const MARRIAGE_INBOUND_DECISION_COST = 1;
 const MARRIAGE_SCOUT_DECISION_COST = 2;
 const MARRIAGE_SCOUT_MIN_DELEGATED_COST = 1;
+export const OUTBOUND_MARRIAGE_SCOUTING_REGISTRY_SCHEMA_VERSION = "outbound_marriage_scouting_registry_v1" as const;
+export const OUTBOUND_MARRIAGE_SCOUTING_ENTRY_SCHEMA_VERSION = "outbound_marriage_scouting_candidate_v1" as const;
+const OUTBOUND_MARRIAGE_SCOUTING_SHOW_LIMIT = 12;
+const OUTBOUND_MARRIAGE_SCOUTING_HELD_OUT_LIMIT = 12;
+const OUTBOUND_MARRIAGE_SCOUTING_MIN_AGE = 15;
+const OUTBOUND_MARRIAGE_SCOUTING_MAX_AGE = 45;
 const SPOUSE_EDGE_A_KEYS = ["a_id", "from_person_id", "from", "a"] as const;
 const SPOUSE_EDGE_B_KEYS = ["b_id", "to_person_id", "to", "b"] as const;
+
+export type OutboundMarriageScoutingScopeStatus = "admitted" | "rejected" | "unmapped";
+
+export type OutboundMarriageScoutingCandidateEntry = {
+  schema_version: typeof OUTBOUND_MARRIAGE_SCOUTING_ENTRY_SCHEMA_VERSION;
+  candidate_person_id: string;
+  candidate_person_name: string;
+  candidate_house_id: string | null;
+  candidate_house_name: string | null;
+  residence_manor_id: string | null;
+  scope_status: OutboundMarriageScoutingScopeStatus;
+  scope_bucket: WorldScopeCapBucketV1 | null;
+  selector_contexts: string[];
+  travel_cost_distance: number | null;
+  route_hop_distance: number | null;
+  distance_band: "near" | "far" | null;
+  ranking_score: number;
+  rank_group: "shown" | "held_out";
+  match_ready: boolean;
+  include_reasons: string[];
+  exclude_reasons: string[];
+  relevance_reasons: string[];
+};
+
+export type OutboundMarriageScoutingRegistry = {
+  schema_version: typeof OUTBOUND_MARRIAGE_SCOUTING_REGISTRY_SCHEMA_VERSION;
+  generated_at_turn_index: number;
+  subject_person_id: string;
+  subject_house_id: string | null;
+  anchor_manor_id: string | null;
+  scope_mode: string;
+  admitted_manor_ids: string[];
+  rejected_manor_ids: string[];
+  candidate_ids: string[];
+  shown_candidate_ids: string[];
+  held_out_candidate_ids: string[];
+  total_candidates_considered: number;
+  total_shown_candidates: number;
+  total_held_out_candidates: number;
+  entries_by_candidate_id: Record<string, OutboundMarriageScoutingCandidateEntry>;
+};
+
+type OutboundMarriageScoutingBuildOptions = {
+  action_scope?: WorldActionScopeResolutionV1 | null;
+  residence_selector_summary?: ReturnType<typeof ensureResidenceManorBindings>["selector_summary"];
+  subject_person_id?: string | null;
+  tierSets?: TierSets | null;
+};
 
 function modsObj(state: RunState): Record<string, number> {
   const anyFlags: any = state.flags;
   if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
   return anyFlags._mods as Record<string, number>;
+}
+
+function attachHiddenSurface(target: object | null | undefined, key: string, value: unknown): void {
+  if (!target || typeof target !== "object") return;
+  Object.defineProperty(target, key, {
+    value,
+    enumerable: false,
+    writable: true,
+    configurable: true,
+  });
+}
+
+function compareText(a: string, b: string): number {
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+}
+
+function sortStrings(values: Iterable<string>): string[] {
+  return [...values].sort(compareText);
+}
+
+function normalizeOptionalId(value: unknown): string | null {
+  const normalized = typeof value === "string" ? value.trim() : "";
+  return normalized.length > 0 ? normalized : null;
+}
+
+function readHouseNameForCandidate(state: RunState, houseId: string | null): string | null {
+  if (!houseId) return null;
+  const house = (state as any)?.houses?.[houseId];
+  if (!house || typeof house !== "object") return houseId;
+  const raw =
+    typeof house.house_name === "string"
+      ? house.house_name
+      : typeof house.houseName === "string"
+        ? house.houseName
+        : typeof house.name === "string"
+          ? house.name
+          : houseId;
+  const normalized = String(raw ?? "").trim();
+  return normalized.length > 0 ? normalized : houseId;
 }
 
 export function resolveMarriageScoutDecisionCost(state: RunState): number {
@@ -138,6 +234,290 @@ function canSeekMarriage(state: RunState, person: Person | undefined | null): bo
   return hasActiveSpouseEdge(state, person.id);
 }
 
+function collectMarriageEligibleSubjects(state: RunState): Person[] {
+  const eligibleAll: Person[] = [];
+  const pushEligible = (person: Person | undefined | null) => {
+    if (!canSeekMarriage(state, person)) return;
+    if (eligibleAll.some((candidate) => candidate.id === person.id)) return;
+    eligibleAll.push(person);
+  };
+
+  pushEligible(state.house.head);
+  for (const child of state.house.children) pushEligible(child);
+  return eligibleAll;
+}
+
+function selectMarriageSubject(state: RunState): Person | null {
+  const eligibleAll = collectMarriageEligibleSubjects(state);
+  if (eligibleAll.length === 0) return null;
+  return [...eligibleAll].sort((a, b) => (b.age - a.age) || a.id.localeCompare(b.id))[0] ?? null;
+}
+
+function marriageScoutScopeWeight(
+  scopeStatus: OutboundMarriageScoutingScopeStatus,
+  scopeBucket: WorldScopeCapBucketV1 | null
+): number {
+  if (scopeStatus === "rejected") return -1000;
+  if (scopeStatus === "unmapped") return 80;
+  if (scopeBucket === "kinship") return 500;
+  if (scopeBucket === "territorial_adjacent") return 420;
+  if (scopeBucket === "route_adjacent") return 340;
+  if (scopeBucket === "near") return 260;
+  if (scopeBucket === "far") return 180;
+  return 120;
+}
+
+function marriageScoutRelevanceBonus(reasons: string[]): number {
+  let bonus = 0;
+  for (const reason of reasons) {
+    if (reason === "blood_tie") bonus += 60;
+    else if (reason === "marriage_tie") bonus += 40;
+  }
+  return bonus;
+}
+
+function marriageScoutRankingScore(
+  state: RunState,
+  subject: Person,
+  candidatePersonId: string,
+  candidateHouseId: string | null,
+  scopeStatus: OutboundMarriageScoutingScopeStatus,
+  scopeBucket: WorldScopeCapBucketV1 | null,
+  relevanceReasons: string[]
+): number {
+  const candidate = registryPersonFor(state, candidatePersonId);
+  const ageGapPenalty =
+    candidate && typeof candidate.age === "number" && typeof subject.age === "number"
+      ? Math.abs(candidate.age - subject.age)
+      : 32;
+  const houseHeadId = candidateHouseId ? resolveCurrentHouseHeadId(state, candidateHouseId) : null;
+  const relationship = houseHeadId ? readRelationshipVector(state, houseHeadId, state.house.head.id) : null;
+  const favorScore = relationship ? relationshipFavorScore(relationship) : 0;
+
+  return (
+    marriageScoutScopeWeight(scopeStatus, scopeBucket) +
+    marriageScoutRelevanceBonus(relevanceReasons) +
+    favorScore * 6 -
+    ageGapPenalty
+  );
+}
+
+function compareScoutingEntries(
+  left: OutboundMarriageScoutingCandidateEntry,
+  right: OutboundMarriageScoutingCandidateEntry
+): number {
+  if (left.match_ready !== right.match_ready) return left.match_ready ? -1 : 1;
+  if (left.ranking_score !== right.ranking_score) return right.ranking_score - left.ranking_score;
+  const house = compareText(left.candidate_house_id ?? "", right.candidate_house_id ?? "");
+  if (house !== 0) return house;
+  return compareText(left.candidate_person_id, right.candidate_person_id);
+}
+
+function buildCandidateEntry(
+  state: RunState,
+  subject: Person,
+  candidatePersonId: string,
+  candidateHouseId: string,
+  actionScope: WorldActionScopeResolutionV1 | null,
+  relevanceReasons: string[],
+  rejectCooldowns: Record<string, number>,
+  residenceSummary: ReturnType<typeof ensureResidenceManorBindings>["selector_summary"]
+): OutboundMarriageScoutingCandidateEntry | null {
+  const candidate = registryPersonFor(state, candidatePersonId);
+  if (!candidate || candidate.alive === false || candidate.id === subject.id) return null;
+  if (candidate.sex !== (subject.sex === "M" ? "F" : subject.sex === "F" ? "M" : null)) return null;
+
+  const residenceEntry = residenceSummary.entries_by_person_id[candidatePersonId] ?? null;
+  const residenceManorId = normalizeOptionalId(residenceEntry?.residence_manor_id);
+  const candidateScope = residenceManorId
+    ? (actionScope?.candidates ?? []).find((row) => row.manor_id === residenceManorId) ?? null
+    : null;
+
+  let scopeStatus: OutboundMarriageScoutingScopeStatus = "unmapped";
+  if (residenceManorId && actionScope?.admitted_manor_ids.includes(residenceManorId)) scopeStatus = "admitted";
+  else if (residenceManorId && actionScope?.rejected_manor_ids.includes(residenceManorId)) scopeStatus = "rejected";
+
+  const includeReasons = new Set<string>();
+  const excludeReasons = new Set<string>();
+  if (candidate.age >= OUTBOUND_MARRIAGE_SCOUTING_MIN_AGE && candidate.age <= OUTBOUND_MARRIAGE_SCOUTING_MAX_AGE) {
+    includeReasons.add("age_band_match");
+  } else {
+    excludeReasons.add("outside_age_band");
+  }
+
+  const livingSpouse = getLivingSpouse(state as any, candidatePersonId);
+  if (livingSpouse) {
+    excludeReasons.add("has_living_spouse");
+  } else {
+    includeReasons.add("no_living_spouse");
+  }
+
+  if (candidate.married && !livingSpouse && !hasActiveSpouseEdge(state, candidatePersonId)) {
+    excludeReasons.add("married_flag_uncleared");
+  }
+
+  if (isReserved(state, candidatePersonId, state.turn_index)) {
+    excludeReasons.add("candidate_reserved");
+  } else {
+    includeReasons.add("not_reserved");
+  }
+
+  const pairingKey = makeMarriageOfferPairingKey({
+    subject_person_id: subject.id,
+    candidate_person_id: candidatePersonId,
+  });
+  if (rejectCooldowns[pairingKey]) {
+    excludeReasons.add("reject_cooldown_active");
+  } else {
+    includeReasons.add("not_on_reject_cooldown");
+  }
+
+  if (scopeStatus === "admitted") {
+    includeReasons.add(candidateScope?.bucket ? `scope_${candidateScope.bucket}` : "scope_admitted");
+  } else if (scopeStatus === "unmapped") {
+    includeReasons.add("scope_unmapped_fallback");
+  } else {
+    excludeReasons.add("scope_rejected");
+  }
+
+  for (const reason of relevanceReasons) includeReasons.add(`house_${reason}`);
+
+  const rankingScore = marriageScoutRankingScore(
+    state,
+    subject,
+    candidatePersonId,
+    candidateHouseId,
+    scopeStatus,
+    candidateScope?.bucket ?? null,
+    relevanceReasons
+  );
+
+  return {
+    schema_version: OUTBOUND_MARRIAGE_SCOUTING_ENTRY_SCHEMA_VERSION,
+    candidate_person_id: candidatePersonId,
+    candidate_person_name: candidate.name,
+    candidate_house_id: candidateHouseId,
+    candidate_house_name: readHouseNameForCandidate(state, candidateHouseId),
+    residence_manor_id: residenceManorId,
+    scope_status: scopeStatus,
+    scope_bucket: candidateScope?.bucket ?? null,
+    selector_contexts: residenceEntry?.selector_contexts ? [...residenceEntry.selector_contexts] : [],
+    travel_cost_distance: residenceEntry?.travel_cost_distance ?? null,
+    route_hop_distance: residenceEntry?.route_hop_distance ?? null,
+    distance_band: residenceEntry?.distance_band ?? null,
+    ranking_score: rankingScore,
+    rank_group: "held_out",
+    match_ready: excludeReasons.size === 0,
+    include_reasons: sortStrings(includeReasons),
+    exclude_reasons: sortStrings(excludeReasons),
+    relevance_reasons: [...relevanceReasons].sort(compareText),
+  };
+}
+
+export function buildOutboundMarriageScoutingRegistry(
+  state: RunState,
+  options?: OutboundMarriageScoutingBuildOptions
+): OutboundMarriageScoutingRegistry | null {
+  const subject =
+    (options?.subject_person_id ? registryPersonFor(state, options.subject_person_id) : null) ?? selectMarriageSubject(state);
+  if (!subject) return null;
+
+  const anyState: any = state as any;
+  const houses: Record<string, any> =
+    anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
+  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  const residenceSummary = options?.residence_selector_summary ?? ensureResidenceManorBindings(state).selector_summary;
+  const scope =
+    options?.action_scope ??
+    (residenceSummary.anchor_manor_id
+      ? resolveActionScope(residenceSummary.anchor_manor_id, "marriage_scout", { state })
+      : null);
+  const relevanceSnapshot = buildKnownHouseRelevanceSnapshot(state);
+  const relevanceByHouseId = new Map(relevanceSnapshot.entries.map((entry) => [entry.house_id, entry.reasons]));
+  const tier1HouseIds = options?.tierSets
+    ? listRelevantTier1HouseIds(
+        state,
+        [...options.tierSets.tier1.houses].filter((houseId) => houseId !== playerHouseId)
+      )
+    : Object.keys(houses).filter((houseId) => houseId !== playerHouseId).sort((a, b) => a.localeCompare(b));
+  const rejectCooldowns = buildMarriageRejectCooldownsFromState(state);
+
+  const entries = tier1HouseIds.flatMap((houseId) => {
+    const house = houses[houseId];
+    if (!house || typeof house !== "object") return [];
+    const memberIds = Array.isArray(house.member_person_ids)
+      ? [...house.member_person_ids].filter((personId): personId is string => typeof personId === "string" && personId.length > 0)
+      : [];
+    const uniqueMemberIds = sortStrings(new Set(memberIds));
+    return uniqueMemberIds
+      .map((candidatePersonId) =>
+        buildCandidateEntry(
+          state,
+          subject,
+          candidatePersonId,
+          houseId,
+          scope,
+          relevanceByHouseId.get(houseId) ?? [],
+          rejectCooldowns,
+          residenceSummary
+        )
+      )
+      .filter((entry): entry is OutboundMarriageScoutingCandidateEntry => entry !== null);
+  });
+
+  entries.sort(compareScoutingEntries);
+
+  const shown = entries
+    .filter((entry) => entry.match_ready)
+    .slice(0, OUTBOUND_MARRIAGE_SCOUTING_SHOW_LIMIT)
+    .map((entry) => ({ ...entry, rank_group: "shown" as const }));
+  const shownIds = shown.map((entry) => entry.candidate_person_id);
+  const heldOut = entries
+    .filter((entry) => !shownIds.includes(entry.candidate_person_id))
+    .slice(0, OUTBOUND_MARRIAGE_SCOUTING_HELD_OUT_LIMIT)
+    .map((entry) => ({ ...entry, rank_group: "held_out" as const }));
+  const kept = [...shown, ...heldOut];
+  const candidateIds = kept.map((entry) => entry.candidate_person_id);
+
+  return {
+    schema_version: OUTBOUND_MARRIAGE_SCOUTING_REGISTRY_SCHEMA_VERSION,
+    generated_at_turn_index: Math.trunc(state.turn_index),
+    subject_person_id: subject.id,
+    subject_house_id: structuredHouseIdForPerson(state, subject.id),
+    anchor_manor_id: residenceSummary.anchor_manor_id,
+    scope_mode: scope?.scope_mode ?? "anchor_only",
+    admitted_manor_ids: scope?.admitted_manor_ids ? [...scope.admitted_manor_ids] : [],
+    rejected_manor_ids: scope?.rejected_manor_ids ? [...scope.rejected_manor_ids] : [],
+    candidate_ids: candidateIds,
+    shown_candidate_ids: shown.map((entry) => entry.candidate_person_id),
+    held_out_candidate_ids: heldOut.map((entry) => entry.candidate_person_id),
+    total_candidates_considered: entries.length,
+    total_shown_candidates: shown.length,
+    total_held_out_candidates: heldOut.length,
+    entries_by_candidate_id: Object.fromEntries(
+      kept.map((entry) => [entry.candidate_person_id, entry] satisfies [string, OutboundMarriageScoutingCandidateEntry])
+    ),
+  };
+}
+
+export function attachOutboundMarriageScoutingRegistry(
+  target: RunState | Record<string, unknown>,
+  registry: OutboundMarriageScoutingRegistry | null
+): void {
+  attachHiddenSurface(target as object, "outbound_marriage_scouting_registry", registry);
+  attachHiddenSurface((target as any)?.house as object, "outbound_marriage_scouting_registry", registry);
+  if (!registry) return;
+
+  const people = (target as any)?.people;
+  if (people && typeof people === "object") {
+    attachHiddenSurface(
+      people[registry.subject_person_id] as object,
+      "outbound_marriage_scouting_subject",
+      registry
+    );
+  }
+}
+
 function syncMarriedFlag(state: RunState, personId: string): void {
   const nextMarried = Boolean(getLivingSpouse(state as any, personId));
   const anyState: any = state as any;
@@ -200,20 +580,11 @@ export function bestMarriageOfferIndexPolicy(state: RunState, marriageWindow: Ma
 export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null): MarriageWindow | null {
   const anyFlags: any = state.flags;
   const forced = Boolean(anyFlags.MarriageOffer);
-
-  const eligibleAll: Person[] = [];
-  const pushEligible = (person: Person | undefined | null) => {
-    if (!canSeekMarriage(state, person)) return;
-    if (eligibleAll.some((candidate) => candidate.id === person.id)) return;
-    eligibleAll.push(person);
-  };
-
-  pushEligible(state.house.head);
-  for (const child of state.house.children) pushEligible(child);
+  const eligibleAll = collectMarriageEligibleSubjects(state);
   if (!forced && eligibleAll.length === 0) return null;
   if (eligibleAll.length === 0) return { eligible_child_ids: [], offers: [] };
-
-  const subject = [...eligibleAll].sort((a, b) => (b.age - a.age) || a.id.localeCompare(b.id))[0]!;
+  const subject = selectMarriageSubject(state);
+  if (!subject) return forced ? { eligible_child_ids: [], offers: [] } : null;
   const anyState: any = state as any;
   const houses: Record<string, any> =
     anyState.houses && typeof anyState.houses === "object" ? (anyState.houses as Record<string, any>) : {};
@@ -239,7 +610,15 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
   });
 
   if (poolIds.length === 0) {
-    if (forced) return { eligible_child_ids: [subject.id], offers: [] };
+    if (forced) {
+      const forcedWindow = { eligible_child_ids: [subject.id], offers: [] };
+      attachHiddenSurface(
+        forcedWindow,
+        "outbound_marriage_scouting_registry",
+        buildOutboundMarriageScoutingRegistry(state, { subject_person_id: subject.id, tierSets })
+      );
+      return forcedWindow;
+    }
     return null;
   }
 
@@ -274,7 +653,13 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
     });
   }
 
-  return { eligible_child_ids: [subject.id], offers };
+  const window = { eligible_child_ids: [subject.id], offers };
+  attachHiddenSurface(
+    window,
+    "outbound_marriage_scouting_registry",
+    buildOutboundMarriageScoutingRegistry(state, { subject_person_id: subject.id, tierSets })
+  );
+  return window;
 }
 
 export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: TurnDecisions, reportNotes: string[]): void {
@@ -304,6 +689,9 @@ export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisio
     spendCoin(state, 1);
     const mods = modsObj(state);
     mods["marriage_quality"] = (mods["marriage_quality"] ?? 1) * 1.05;
+    const scoutingRegistry = buildOutboundMarriageScoutingRegistry(state);
+    attachOutboundMarriageScoutingRegistry(state, scoutingRegistry);
+    attachHiddenSurface(ctx.marriage_window as object, "outbound_marriage_scouting_registry", scoutingRegistry);
     if (scoutCost !== MARRIAGE_SCOUT_DECISION_COST) {
       recordMarriageFlowEvidence(
         state,

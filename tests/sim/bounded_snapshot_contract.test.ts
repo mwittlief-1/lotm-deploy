@@ -103,13 +103,35 @@ describe("bounded snapshot contract", () => {
       schema_version: "person_card_registry_v1",
       person_ids: expect.any(Array),
     });
+    expect(Object.prototype.hasOwnProperty.call(snapshot, "outbound_marriage_scouting_registry")).toBe(true);
+    if ((snapshot as any).outbound_marriage_scouting_registry) {
+      expect((snapshot as any).outbound_marriage_scouting_registry).toMatchObject({
+        schema_version: "outbound_marriage_scouting_registry_v1",
+        candidate_ids: expect.any(Array),
+      });
+    }
+    expect((snapshot as any).court_provisioning_view).toMatchObject({
+      schema_version: "court_provisioning_view_v1",
+      person_ids: expect.any(Array),
+    });
+    expect((snapshot as any).court_stipend_registry).toMatchObject({
+      schema_version: "court_stipend_registry_v1",
+      stipend_keys: expect.any(Array),
+    });
     expect((snapshot as any).people.p_head.person_card_view).toMatchObject({
       schema_version: "person_card_view_v1",
+      person_id: "p_head",
+    });
+    expect((snapshot as any).people.p_head.court_provisioning_entry).toMatchObject({
+      schema_version: "court_provisioning_entry_v1",
       person_id: "p_head",
     });
     expect(serialized.succession_line_summary).toBeUndefined();
     expect(serialized.claimant_summary).toBeUndefined();
     expect(serialized.person_card_registry).toBeUndefined();
+    expect(serialized.outbound_marriage_scouting_registry).toBeUndefined();
+    expect(serialized.court_provisioning_view).toBeUndefined();
+    expect(serialized.court_stipend_registry).toBeUndefined();
     expect(serialized.world_topology_view).toMatchObject({
       schema_version: "world_topology_snapshot_v1",
       anchor_manor_id: "manor_hx_26597",
@@ -160,6 +182,9 @@ describe("bounded snapshot contract", () => {
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "succession_line_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "person_card_registry")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "outbound_marriage_scouting_registry")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "court_provisioning_view")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "court_stipend_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_eligibility")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_source_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_dossier_summaries")).toBe(false);

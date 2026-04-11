@@ -129,6 +129,11 @@ describe("marriage decision budget costs", () => {
 
     expect(scoutState.house.energy.available).toBe(2);
     expect((scoutState.flags as any)?._mods?.marriage_quality).toBe(1.05);
+    expect((scoutState as any).outbound_marriage_scouting_registry).toMatchObject({
+      schema_version: "outbound_marriage_scouting_registry_v1",
+      subject_person_id: "p_child_1",
+      shown_candidate_ids: ["p_cand_a"],
+    });
     expect(scoutNotes).toEqual(["Scouted prospects; next marriage window slightly improved."]);
     expect(ensureCourtDecisionBudgetRegistry(scoutState)).toMatchObject({
       spent: 2,
