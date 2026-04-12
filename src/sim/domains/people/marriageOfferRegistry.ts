@@ -3,6 +3,7 @@ import type { MarriageOffer, MarriageWindow, Prospect, RunState } from "../../ty
 
 export const MARRIAGE_OFFER_REGISTRY_SCHEMA_VERSION = "marriage_offer_registry_v0" as const;
 export const MARRIAGE_REJECT_COOLDOWN_TURNS = 3 as const;
+export const OUTBOUND_MARRIAGE_OFFER_HISTORY_SCHEMA_VERSION = "outbound_marriage_offer_history_v1" as const;
 
 export const MARRIAGE_OFFER_DIRECTIONS = ["inbound", "outbound"] as const;
 export type MarriageOfferDirection = (typeof MARRIAGE_OFFER_DIRECTIONS)[number];
@@ -98,6 +99,11 @@ export type MarriageOfferRegistryEntryDraft = {
   relationship_delta: { respect: number; allegiance: number; threat: number };
   liege_delta?: { respect: number; threat: number } | null;
   risk_tags: string[];
+};
+
+type OutboundMarriageOfferHistoryV1 = {
+  schema_version: typeof OUTBOUND_MARRIAGE_OFFER_HISTORY_SCHEMA_VERSION;
+  entries: MarriageOfferRegistryEntry[];
 };
 
 function sortStrings(values: Iterable<string>): string[] {
@@ -514,6 +520,86 @@ function updatedEntryState(
   };
 }
 
+function outboundMarriageOfferHistory(state: RunState): OutboundMarriageOfferHistoryV1 {
+  const anyFlags: any = state.flags as any;
+  const raw = anyFlags?._outbound_marriage_offer_history_v1;
+  if (
+    raw &&
+    typeof raw === "object" &&
+    raw.schema_version === OUTBOUND_MARRIAGE_OFFER_HISTORY_SCHEMA_VERSION &&
+    Array.isArray(raw.entries)
+  ) {
+    return raw as OutboundMarriageOfferHistoryV1;
+  }
+
+  const created: OutboundMarriageOfferHistoryV1 = {
+    schema_version: OUTBOUND_MARRIAGE_OFFER_HISTORY_SCHEMA_VERSION,
+    entries: [],
+  };
+  anyFlags._outbound_marriage_offer_history_v1 = created;
+  return created;
+}
+
+function canonicalizeOutboundMarriageOfferEntry(
+  input: MarriageOfferRegistryEntry | MarriageOfferRegistryEntryDraft
+): MarriageOfferRegistryEntry {
+  if ("offer_key" in input) {
+    return createMarriageOfferRegistryEntry({
+      direction: "outbound",
+      state: input.state,
+      subject_person_id: input.subject_person_id,
+      subject_house_id: input.subject_house_id,
+      candidate_person_id: input.candidate_person_id,
+      candidate_house_id: input.candidate_house_id,
+      candidate_house_label: input.candidate_house_label,
+      created_turn: input.created_turn,
+      last_state_change_turn: input.last_state_change_turn,
+      offer_rank: input.offer_rank,
+      dowry_coin_net: input.dowry_coin_net,
+      relationship_delta: input.relationship_delta,
+      liege_delta: input.liege_delta,
+      risk_tags: input.risk_tags,
+    });
+  }
+
+  return createMarriageOfferRegistryEntry({
+    ...input,
+    direction: "outbound",
+  });
+}
+
+export function readPersistedOutboundMarriageOfferEntries(state: RunState): MarriageOfferRegistryEntry[] {
+  const history = outboundMarriageOfferHistory(state);
+  const byKey = new Map<string, MarriageOfferRegistryEntry>();
+
+  for (const rawEntry of history.entries) {
+    if (!rawEntry || typeof rawEntry !== "object") continue;
+    const entry = canonicalizeOutboundMarriageOfferEntry(rawEntry);
+    const existing = byKey.get(entry.offer_key);
+    if (
+      !existing ||
+      entry.last_state_change_turn > existing.last_state_change_turn ||
+      (entry.last_state_change_turn === existing.last_state_change_turn && entry.created_turn > existing.created_turn)
+    ) {
+      byKey.set(entry.offer_key, entry);
+    }
+  }
+
+  return [...byKey.values()].sort((left, right) => left.offer_key.localeCompare(right.offer_key));
+}
+
+export function recordPersistedOutboundMarriageOfferEntry(
+  state: RunState,
+  input: MarriageOfferRegistryEntry | MarriageOfferRegistryEntryDraft
+): MarriageOfferRegistryEntry {
+  const nextEntry = canonicalizeOutboundMarriageOfferEntry(input);
+  const history = outboundMarriageOfferHistory(state);
+  const byKey = new Map(readPersistedOutboundMarriageOfferEntries(state).map((entry) => [entry.offer_key, entry] as const));
+  byKey.set(nextEntry.offer_key, nextEntry);
+  history.entries = [...byKey.values()].sort((left, right) => left.offer_key.localeCompare(right.offer_key));
+  return nextEntry;
+}
+
 export function buildMarriageRejectCooldowns(
   registry: MarriageOfferRegistry,
   currentTurn: number
@@ -635,6 +721,10 @@ export function buildMarriageOfferRegistryFromState(state: RunState): MarriageOf
     if (!entry) continue;
     if (isMarriageOfferTerminalState(entry.state)) continue;
     entriesByKey.set(offerKey, updatedEntryState(entry, "pending", entry.created_turn));
+  }
+
+  for (const entry of readPersistedOutboundMarriageOfferEntries(state)) {
+    entriesByKey.set(entry.offer_key, entry);
   }
 
   const pendingByCandidate = new Map<string, MarriageOfferRegistryEntry[]>();

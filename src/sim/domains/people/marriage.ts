@@ -3,16 +3,38 @@ import { addCourtExcludeId, addCourtExtraId, removeCourtExcludeId } from "../../
 import { chargeCourtDecisionBudget } from "../court/decisionBudget";
 import { resolveCourtDelegationEntry, resolveDelegatedBudgetCost } from "../court/delegationRegistry";
 import { canSpendEnergy, spendEnergy } from "../court/energy";
-import { applyCoinDelta, canAffordCoin, spendCoin } from "../economy/ledger";
+import { applyCoinDelta, canAffordCoin, coinBalance, foodStoreBalance, meatStoreBalance, spendCoin } from "../economy/ledger";
+import {
+  applyMarriageSettlementScaffold,
+  makeMarriageSettlementScaffold,
+  type MarriageSettlementApplyResultV1,
+  type MarriageSettlementAssetV1,
+} from "../economy/marriageSettlement";
 import { isReserved, listEligibleCandidates } from "../../marriageMarket";
 import { Rng } from "../../rng";
 import type { TierSets } from "../../tiers";
-import type { MarriageOffer, MarriageWindow, Person, RunState, TurnContext, TurnDecisions } from "../../types";
+import type {
+  EvidenceEventV0,
+  FiscalReceiptSnapshotV1,
+  MarriageOffer,
+  MarriageWindow,
+  Person,
+  PhaseNameV0,
+  RunState,
+  TurnContext,
+  TurnDecisions,
+} from "../../types";
 import { clampInt } from "../../util";
 import { getLivingSpouse } from "../../kinship";
 import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
 import { buildPolicyIntelMap, npcPolicyScore } from "../ai/policy";
-import { buildMarriageRejectCooldownsFromState, makeMarriageOfferPairingKey } from "./marriageOfferRegistry";
+import {
+  buildMarriageRejectCooldownsFromState,
+  getMarriageRejectCooldown,
+  recordPersistedOutboundMarriageOfferEntry,
+  type MarriageOfferRegistryEntry,
+  makeMarriageOfferPairingKey,
+} from "./marriageOfferRegistry";
 import { buildKnownHouseRelevanceSnapshot, listRelevantTier1HouseIds } from "./knownHouseRelevance";
 import { applyRelationshipDelta, readRelationshipVector, relationshipFavorScore } from "./relationshipEngine";
 import { ensureResidenceManorBindings } from "./residenceManorRegistry";
@@ -23,10 +45,13 @@ const MARRIAGE_SCOUT_DECISION_COST = 2;
 const MARRIAGE_SCOUT_MIN_DELEGATED_COST = 1;
 export const OUTBOUND_MARRIAGE_SCOUTING_REGISTRY_SCHEMA_VERSION = "outbound_marriage_scouting_registry_v1" as const;
 export const OUTBOUND_MARRIAGE_SCOUTING_ENTRY_SCHEMA_VERSION = "outbound_marriage_scouting_candidate_v1" as const;
+export const OUTBOUND_MARRIAGE_OFFER_RESOLUTION_SCHEMA_VERSION = "outbound_marriage_offer_resolution_v1" as const;
+export const OUTBOUND_MARRIAGE_OFFER_ACCEPTANCE_DEBUG_SCHEMA_VERSION = "outbound_marriage_offer_acceptance_debug_v1" as const;
 const OUTBOUND_MARRIAGE_SCOUTING_SHOW_LIMIT = 12;
 const OUTBOUND_MARRIAGE_SCOUTING_HELD_OUT_LIMIT = 12;
 const OUTBOUND_MARRIAGE_SCOUTING_MIN_AGE = 15;
 const OUTBOUND_MARRIAGE_SCOUTING_MAX_AGE = 45;
+const OUTBOUND_MARRIAGE_ACCEPTANCE_THRESHOLD = 86;
 const SPOUSE_EDGE_A_KEYS = ["a_id", "from_person_id", "from", "a"] as const;
 const SPOUSE_EDGE_B_KEYS = ["b_id", "to_person_id", "to", "b"] as const;
 
@@ -69,6 +94,56 @@ export type OutboundMarriageScoutingRegistry = {
   total_shown_candidates: number;
   total_held_out_candidates: number;
   entries_by_candidate_id: Record<string, OutboundMarriageScoutingCandidateEntry>;
+};
+
+export type OutboundMarriageOfferSettlementRequest = Partial<Record<MarriageSettlementAssetV1, number>>;
+
+export type OutboundMarriageOfferBlockedReason =
+  | "subject_missing"
+  | "candidate_missing"
+  | "subject_ineligible"
+  | "candidate_not_scoutable"
+  | "same_sex_disallowed"
+  | "reject_cooldown_active"
+  | "insufficient_settlement_assets";
+
+export type OutboundMarriageOfferAcceptanceDebug = {
+  schema_version: typeof OUTBOUND_MARRIAGE_OFFER_ACCEPTANCE_DEBUG_SCHEMA_VERSION;
+  acceptance_score: number;
+  acceptance_threshold: number;
+  recipient_favor_score: number;
+  settlement_score: number;
+  relationship_delta_score: number;
+  risk_tag_score: number;
+  scope_score: number;
+};
+
+export type OutboundMarriageOfferResolutionInput = {
+  subject_person_id: string;
+  offer: MarriageOffer;
+  phase?: PhaseNameV0;
+  phase_sequence?: number;
+  scouting_registry?: OutboundMarriageScoutingRegistry | null;
+  dowry_requested_delta_by_asset?: OutboundMarriageOfferSettlementRequest;
+  dower_requested_delta_by_asset?: OutboundMarriageOfferSettlementRequest;
+};
+
+export type OutboundMarriageOfferResolutionResult = {
+  schema_version: typeof OUTBOUND_MARRIAGE_OFFER_RESOLUTION_SCHEMA_VERSION;
+  outcome: "accepted" | "rejected" | "blocked";
+  applied: boolean;
+  blocked_reason: OutboundMarriageOfferBlockedReason | null;
+  subject_person_id: string;
+  candidate_person_id: string;
+  candidate_house_id: string | null;
+  candidate_house_label: string;
+  offer_entry: MarriageOfferRegistryEntry | null;
+  receipt_snapshots: FiscalReceiptSnapshotV1[];
+  dowry_settlement_result: MarriageSettlementApplyResultV1 | null;
+  dower_settlement_result: MarriageSettlementApplyResultV1 | null;
+  evidence_events: EvidenceEventV0[];
+  acceptance_debug: OutboundMarriageOfferAcceptanceDebug | null;
+  notes: string[];
 };
 
 type OutboundMarriageScoutingBuildOptions = {
@@ -123,6 +198,146 @@ function readHouseNameForCandidate(state: RunState, houseId: string | null): str
           : houseId;
   const normalized = String(raw ?? "").trim();
   return normalized.length > 0 ? normalized : houseId;
+}
+
+function normalizeSettlementRequest(
+  fallbackCoinDelta: number,
+  request: OutboundMarriageOfferSettlementRequest | null | undefined
+): Record<MarriageSettlementAssetV1, number> {
+  return {
+    coin: Math.trunc(request?.coin ?? fallbackCoinDelta),
+    food_stores: Math.trunc(request?.food_stores ?? 0),
+    meat_stores: Math.trunc(request?.meat_stores ?? 0),
+  };
+}
+
+function settlementBalanceForAsset(state: RunState, asset: MarriageSettlementAssetV1): number {
+  if (asset === "coin") return coinBalance(state);
+  return asset === "food_stores" ? foodStoreBalance(state) : meatStoreBalance(state);
+}
+
+function canAffordSettlementRequest(
+  state: RunState,
+  request: Record<MarriageSettlementAssetV1, number>
+): boolean {
+  return (["coin", "food_stores", "meat_stores"] as const).every((asset) => {
+    const delta = Math.trunc(request[asset] ?? 0);
+    return delta >= 0 || settlementBalanceForAsset(state, asset) >= Math.abs(delta);
+  });
+}
+
+function settlementAppealScore(request: Record<MarriageSettlementAssetV1, number>): number {
+  return Math.trunc(-(request.coin + request.food_stores + request.meat_stores));
+}
+
+function outboundMarriageRiskTagScore(tags: readonly string[]): number {
+  let score = 0;
+  for (const tag of tags) {
+    if (tag === "prestige") score += 2;
+    else if (tag === "costly") score += 2;
+    else if (tag === "profitable") score -= 2;
+    else if (tag === "shady") score -= 4;
+  }
+  return score;
+}
+
+function houseAllianceDelta() {
+  return {
+    allegiance: 6,
+    respect: 4,
+    threat: -3,
+  };
+}
+
+function candidateHouseLabel(
+  state: RunState,
+  offer: MarriageOffer,
+  candidateHouseId: string | null
+): string {
+  const rawLabel = typeof offer.house_label === "string" ? offer.house_label.trim() : "";
+  if (rawLabel.length > 0) return rawLabel;
+  const houseName = readHouseNameForCandidate(state, candidateHouseId);
+  if (!houseName) return "Unknown";
+  return houseName.startsWith("House ") ? houseName : `House ${houseName}`;
+}
+
+function makeOutboundMarriageBlockedResult(
+  state: RunState,
+  input: OutboundMarriageOfferResolutionInput,
+  candidateHouseId: string | null,
+  candidateHouseLabel: string,
+  blockedReason: OutboundMarriageOfferBlockedReason,
+  detail: string
+): OutboundMarriageOfferResolutionResult {
+  const evidenceEvents = [
+    makeEvidenceEvent({
+      kind: "outbound_marriage_offer_blocked",
+      detail,
+      category: "marriage",
+      subject_ids: [input.subject_person_id, input.offer.house_person_id],
+    }),
+  ];
+  recordRuntimeDomainEvidence(state, input.phase ?? "marriage", evidenceEvents);
+
+  return {
+    schema_version: OUTBOUND_MARRIAGE_OFFER_RESOLUTION_SCHEMA_VERSION,
+    outcome: "blocked",
+    applied: false,
+    blocked_reason: blockedReason,
+    subject_person_id: input.subject_person_id,
+    candidate_person_id: input.offer.house_person_id,
+    candidate_house_id: candidateHouseId,
+    candidate_house_label: candidateHouseLabel,
+    offer_entry: null,
+    receipt_snapshots: [],
+    dowry_settlement_result: null,
+    dower_settlement_result: null,
+    evidence_events: evidenceEvents,
+    acceptance_debug: null,
+    notes: [detail],
+  };
+}
+
+function buildOutboundMarriageAcceptanceDebug(
+  state: RunState,
+  subjectId: string,
+  candidateId: string,
+  offer: MarriageOffer,
+  scoutingEntry: OutboundMarriageScoutingCandidateEntry,
+  dowryRequest: Record<MarriageSettlementAssetV1, number>,
+  dowerRequest: Record<MarriageSettlementAssetV1, number>
+): OutboundMarriageOfferAcceptanceDebug {
+  const recipientFavorScore = relationshipFavorScore(readRelationshipVector(state, candidateId, state.house.head.id));
+  const settlementScore = settlementAppealScore(dowryRequest) + settlementAppealScore(dowerRequest);
+  const relationshipDeltaScore =
+    Math.trunc(offer.relationship_delta.allegiance) +
+    Math.trunc(offer.relationship_delta.respect) -
+    Math.trunc(offer.relationship_delta.threat);
+  const riskTagScore = outboundMarriageRiskTagScore(offer.risk_tags);
+  const scopeScore =
+    scoutingEntry.scope_status === "admitted"
+      ? 2
+      : scoutingEntry.scope_status === "unmapped"
+        ? -1
+        : -4;
+
+  return {
+    schema_version: OUTBOUND_MARRIAGE_OFFER_ACCEPTANCE_DEBUG_SCHEMA_VERSION,
+    acceptance_score: Math.trunc(
+      npcPolicyScore({
+        hook: "marriage_offer",
+        base_score: recipientFavorScore + settlementScore + relationshipDeltaScore + riskTagScore + scopeScore,
+        state,
+        subject_id: subjectId,
+      })
+    ),
+    acceptance_threshold: OUTBOUND_MARRIAGE_ACCEPTANCE_THRESHOLD,
+    recipient_favor_score: recipientFavorScore,
+    settlement_score: settlementScore,
+    relationship_delta_score: relationshipDeltaScore,
+    risk_tag_score: riskTagScore,
+    scope_score: scopeScore,
+  };
 }
 
 export function resolveMarriageScoutDecisionCost(state: RunState): number {
@@ -660,6 +875,317 @@ export function buildMarriageWindow(state: RunState, tierSets?: TierSets | null)
     buildOutboundMarriageScoutingRegistry(state, { subject_person_id: subject.id, tierSets })
   );
   return window;
+}
+
+function applyMarriageAcceptanceOutcome(
+  state: RunState,
+  subjectPersonId: string,
+  candidatePersonId: string,
+  candidateHouseId: string | null
+): void {
+  const subject = registryPersonFor(state, subjectPersonId);
+  const candidate = registryPersonFor(state, candidatePersonId);
+  if (!subject || !candidate) return;
+
+  const isHeadSubject = state.house.head.id === subjectPersonId;
+  const affectedIds = new Set<string>();
+  for (const personId of retireObsoleteSpouseEdges(state, subjectPersonId, candidatePersonId)) affectedIds.add(personId);
+  for (const personId of retireObsoleteSpouseEdges(state, candidatePersonId, subjectPersonId)) affectedIds.add(personId);
+  ensureMarriageKinshipEdge(state, subjectPersonId, candidatePersonId);
+  affectedIds.add(subjectPersonId);
+  affectedIds.add(candidatePersonId);
+  for (const personId of [...affectedIds].sort((left, right) => left.localeCompare(right))) syncMarriedFlag(state, personId);
+
+  const subjectChild = state.house.children.find((person) => person.id === subjectPersonId) ?? null;
+  const spouseJoinsCourt = isHeadSubject ? true : Boolean(subjectChild) && subjectChild.sex === "M";
+
+  if (spouseJoinsCourt) {
+    addCourtExtraId(state, candidatePersonId);
+    const anyState: any = state as any;
+    const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+    if (anyState.people?.[candidatePersonId]) {
+      anyState.people[candidatePersonId].house_id = playerHouseId;
+      anyState.people[candidatePersonId].residence_house_id = playerHouseId;
+    }
+    if (anyState.houses?.[playerHouseId]) {
+      const house: any = anyState.houses[playerHouseId];
+      if (!Array.isArray(house.member_person_ids)) house.member_person_ids = [];
+      if (!house.member_person_ids.includes(candidatePersonId)) house.member_person_ids.push(candidatePersonId);
+    }
+
+    if (isHeadSubject) {
+      const spousePerson = anyState.people?.[candidatePersonId] ?? null;
+      if (spousePerson) {
+        state.house.spouse = spousePerson;
+        state.house.spouse_status = "spouse";
+        spousePerson.married = true;
+      }
+    } else {
+      removeCourtExcludeId(state, subjectPersonId);
+    }
+    return;
+  }
+
+  addCourtExcludeId(state, subjectPersonId);
+  const anyState: any = state as any;
+  const playerHouseId: string = typeof anyState.player_house_id === "string" ? anyState.player_house_id : "h_player";
+  if (anyState.people?.[subjectPersonId] && candidateHouseId) {
+    anyState.people[subjectPersonId].house_id = candidateHouseId;
+    anyState.people[subjectPersonId].residence_house_id = candidateHouseId;
+  }
+  const playerHouseRec: any = anyState.houses?.[playerHouseId];
+  if (playerHouseRec && Array.isArray(playerHouseRec.member_person_ids)) {
+    playerHouseRec.member_person_ids = playerHouseRec.member_person_ids.filter((id: any) => id !== subjectPersonId);
+  }
+  const destHouseRec: any = candidateHouseId ? anyState.houses?.[candidateHouseId] : null;
+  if (destHouseRec) {
+    if (!Array.isArray(destHouseRec.member_person_ids)) destHouseRec.member_person_ids = [];
+    if (!destHouseRec.member_person_ids.includes(subjectPersonId)) destHouseRec.member_person_ids.push(subjectPersonId);
+  }
+}
+
+export function resolveOutboundMarriageOffer(
+  state: RunState,
+  input: OutboundMarriageOfferResolutionInput
+): OutboundMarriageOfferResolutionResult {
+  const phase = input.phase ?? "marriage";
+  const phaseSequence = Math.max(0, Math.trunc(input.phase_sequence ?? 0));
+  const subject = registryPersonFor(state, input.subject_person_id) ?? null;
+  const candidate = registryPersonFor(state, input.offer.house_person_id) ?? null;
+  const candidateHouseId = candidate ? structuredHouseIdForPerson(state, candidate.id) : null;
+  const resolvedCandidateHouseLabel = candidateHouseLabel(state, input.offer, candidateHouseId);
+
+  if (!subject) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "subject_missing",
+      "Outbound marriage offer blocked: subject is unavailable."
+    );
+  }
+
+  if (!candidate) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "candidate_missing",
+      "Outbound marriage offer blocked: candidate is unavailable."
+    );
+  }
+
+  if (!canSeekMarriage(state, subject)) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "subject_ineligible",
+      `Outbound marriage offer blocked: ${subject.name} is not eligible to marry.`
+    );
+  }
+
+  const rejectCooldown = getMarriageRejectCooldown(state, subject.id, candidate.id);
+  if (rejectCooldown) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "reject_cooldown_active",
+      `Outbound marriage offer blocked: pairing cooldown remains for ${rejectCooldown.remaining_turns} turn${rejectCooldown.remaining_turns === 1 ? "" : "s"}.`
+    );
+  }
+
+  const scoutingRegistry =
+    input.scouting_registry ??
+    buildOutboundMarriageScoutingRegistry(state, {
+      subject_person_id: subject.id,
+    });
+  const scoutingEntry = scoutingRegistry?.entries_by_candidate_id[candidate.id] ?? null;
+  if (!scoutingEntry || !scoutingEntry.match_ready) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "candidate_not_scoutable",
+      `Outbound marriage offer blocked: ${candidate.name} is not currently scoutable.`
+    );
+  }
+
+  if (subject.sex === candidate.sex) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "same_sex_disallowed",
+      "Outbound marriage offer blocked: same-sex marriage is disallowed."
+    );
+  }
+
+  const dowryRequest = normalizeSettlementRequest(input.offer.dowry_coin_net, input.dowry_requested_delta_by_asset);
+  const dowerRequest = normalizeSettlementRequest(0, input.dower_requested_delta_by_asset);
+  if (!canAffordSettlementRequest(state, dowryRequest) || !canAffordSettlementRequest(state, dowerRequest)) {
+    return makeOutboundMarriageBlockedResult(
+      state,
+      input,
+      candidateHouseId,
+      resolvedCandidateHouseLabel,
+      "insufficient_settlement_assets",
+      "Outbound marriage offer blocked: insufficient assets for the requested settlement."
+    );
+  }
+
+  const acceptanceDebug = buildOutboundMarriageAcceptanceDebug(
+    state,
+    subject.id,
+    candidate.id,
+    input.offer,
+    scoutingEntry,
+    dowryRequest,
+    dowerRequest
+  );
+  const terminalState = acceptanceDebug.acceptance_score >= acceptanceDebug.acceptance_threshold ? "accepted" : "rejected";
+  const offerEntry = recordPersistedOutboundMarriageOfferEntry(state, {
+    direction: "outbound",
+    state: terminalState,
+    subject_person_id: subject.id,
+    subject_house_id: structuredHouseIdForPerson(state, subject.id),
+    candidate_person_id: candidate.id,
+    candidate_house_id: candidateHouseId,
+    candidate_house_label: resolvedCandidateHouseLabel,
+    created_turn: state.turn_index,
+    last_state_change_turn: state.turn_index,
+    offer_rank: 0,
+    dowry_coin_net: dowryRequest.coin,
+    relationship_delta: input.offer.relationship_delta,
+    liege_delta: input.offer.liege_delta ?? null,
+    risk_tags: input.offer.risk_tags,
+  });
+
+  if (terminalState === "rejected") {
+    const evidenceEvents = [
+      makeEvidenceEvent({
+        kind: "outbound_marriage_offer_rejected",
+        detail: `Outbound marriage offer rejected by ${resolvedCandidateHouseLabel} for ${subject.name}.`,
+        category: "marriage",
+        subject_ids: [subject.id, candidate.id],
+      }),
+    ];
+    recordRuntimeDomainEvidence(state, phase, evidenceEvents);
+    return {
+      schema_version: OUTBOUND_MARRIAGE_OFFER_RESOLUTION_SCHEMA_VERSION,
+      outcome: "rejected",
+      applied: true,
+      blocked_reason: null,
+      subject_person_id: subject.id,
+      candidate_person_id: candidate.id,
+      candidate_house_id: candidateHouseId,
+      candidate_house_label: resolvedCandidateHouseLabel,
+      offer_entry: offerEntry,
+      receipt_snapshots: [],
+      dowry_settlement_result: null,
+      dower_settlement_result: null,
+      evidence_events: evidenceEvents,
+      acceptance_debug: acceptanceDebug,
+      notes: [`Outbound marriage offer rejected by ${resolvedCandidateHouseLabel} for ${subject.name}.`],
+    };
+  }
+
+  const counterpartyId = `house:${candidateHouseId ?? candidate.id}`;
+  const relatedActorIds = [state.house.head.id, subject.id, candidate.id];
+  const dowrySettlementResult =
+    dowryRequest.coin !== 0 || dowryRequest.food_stores !== 0 || dowryRequest.meat_stores !== 0
+      ? applyMarriageSettlementScaffold(
+          state,
+          makeMarriageSettlementScaffold({
+            phase,
+            phase_sequence: phaseSequence,
+            settlement_kind: "dowry",
+            counterparty_id: counterpartyId,
+            counterparty_label: resolvedCandidateHouseLabel,
+            subject_person_id: subject.id,
+            candidate_person_id: candidate.id,
+            requested_delta_by_asset: dowryRequest,
+            related_actor_ids: relatedActorIds,
+          })
+        )
+      : null;
+  const dowerSettlementResult =
+    dowerRequest.coin !== 0 || dowerRequest.food_stores !== 0 || dowerRequest.meat_stores !== 0
+      ? applyMarriageSettlementScaffold(
+          state,
+          makeMarriageSettlementScaffold({
+            phase,
+            phase_sequence: phaseSequence + 1,
+            settlement_kind: "dower",
+            counterparty_id: counterpartyId,
+            counterparty_label: resolvedCandidateHouseLabel,
+            subject_person_id: subject.id,
+            candidate_person_id: candidate.id,
+            requested_delta_by_asset: dowerRequest,
+            related_actor_ids: relatedActorIds,
+          })
+        )
+      : null;
+
+  applyMarriageAcceptanceOutcome(state, subject.id, candidate.id, candidateHouseId);
+  applyRelationshipDelta(state, state.house.head.id, candidate.id, input.offer.relationship_delta, "outbound_marriage_accept");
+  const playerHouseId = normalizeOptionalId((state as any)?.player_house_id);
+  if (playerHouseId && candidateHouseId && candidateHouseId !== playerHouseId) {
+    const allianceDelta = houseAllianceDelta();
+    applyRelationshipDelta(state, playerHouseId, candidateHouseId, allianceDelta, "outbound_marriage_alliance");
+    applyRelationshipDelta(state, candidateHouseId, playerHouseId, allianceDelta, "outbound_marriage_alliance");
+  }
+  if (input.offer.liege_delta) {
+    applyRelationshipDelta(
+      state,
+      state.house.head.id,
+      state.locals.liege.id,
+      { respect: input.offer.liege_delta.respect, threat: input.offer.liege_delta.threat },
+      "outbound_marriage_accept_liege"
+    );
+  }
+
+  const mods = modsObj(state);
+  mods["birth_bonus"] = (mods["birth_bonus"] ?? 1) * 1.03;
+  ensureResidenceManorBindings(state);
+
+  const evidenceEvents = [
+    makeEvidenceEvent({
+      kind: "outbound_marriage_offer_accepted",
+      detail: `Outbound marriage offer accepted by ${resolvedCandidateHouseLabel} for ${subject.name}.`,
+      category: "marriage",
+      subject_ids: [subject.id, candidate.id],
+    }),
+  ];
+  recordRuntimeDomainEvidence(state, phase, evidenceEvents);
+
+  return {
+    schema_version: OUTBOUND_MARRIAGE_OFFER_RESOLUTION_SCHEMA_VERSION,
+    outcome: "accepted",
+    applied: true,
+    blocked_reason: null,
+    subject_person_id: subject.id,
+    candidate_person_id: candidate.id,
+    candidate_house_id: candidateHouseId,
+    candidate_house_label: resolvedCandidateHouseLabel,
+    offer_entry: offerEntry,
+    receipt_snapshots: [
+      ...(dowrySettlementResult?.receipt_snapshots ?? []),
+      ...(dowerSettlementResult?.receipt_snapshots ?? []),
+    ],
+    dowry_settlement_result: dowrySettlementResult,
+    dower_settlement_result: dowerSettlementResult,
+    evidence_events: evidenceEvents,
+    acceptance_debug: acceptanceDebug,
+    notes: [`Outbound marriage offer accepted by ${resolvedCandidateHouseLabel} for ${subject.name}.`],
+  };
 }
 
 export function applyMarriageDecision(state: RunState, ctx: TurnContext, decisions: TurnDecisions, reportNotes: string[]): void {
