@@ -9783,7 +9783,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Implement outbound offer accept and reject pipeline
-  status: ready
+  status: done
   priority: 80
   tranche: 6
   change_type: behavior_change
@@ -9827,7 +9827,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Render outbound scout table and offer composer
-  status: todo
+  status: ready
   priority: 79
   tranche: 6
   change_type: behavior_change
@@ -10258,7 +10258,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Render court provisioning modal with overrides and debug table
-  status: ready
+  status: done
   priority: 70
   tranche: 6
   change_type: behavior_change
@@ -10300,7 +10300,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Add provisioning fixtures and UAT coverage
-  status: todo
+  status: ready
   priority: 69
   tranche: 6
   change_type: behavior_change
