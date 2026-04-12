@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-001-T05
-  last_completed_task_id: V03-R5-009-T02
+  current_task_id: V03-R5-004-T04
+  last_completed_task_id: V03-R5-010-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -18,17 +18,20 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 1b5bc2b0a66c4e67130438900d1966bde9946844b3fc3df4bab9a03225bee790
-    run2: a4770b7fd8178f1fac8520f165b68ebedbe9de4ac06caf4b16651fbf83b3f978
+    run1: cb00d5d1b2d3f45b7ccab6ccf3fe659515e572ca4146d8404b9ff77eab88265a
+    run2: 56365fc60ad05fb94c1805c01954945bc6917c229c5283cf3610593eb3e60e20
 notes: >-
-  Accepted `V03-R5-009-T02` onto the v0.3.5 control-plane line. New runs now
-  flow through one canonical init payload before `createNewRun()` runs worldgen,
-  normalization, and migrations; `applyPlayabilityPreset()` mutates only that
-  payload, and run-state plus run-summary exports now carry `preset_id`
-  provenance without creating a second initialization path. Fresh full-suite
-  vitest (`423/423`) and a fresh `npm run uat:gate` both passed; `npm run
-  preflight` still shows the standing `test3_mismatches=16` blocker; and both
-  replay batches passed. Their raw summary hashes differed because of
-  path-shaped metadata, but the normalized summaries matched exactly with hash
+  Accepted the next combined UI/social/tooling wave onto the v0.3.5
+  control-plane line: `V03-R5-001-T05`, `V03-R5-002-T04`, `V03-R5-003-T03`,
+  `V03-R5-004-T03`, `V03-R5-005-T02`, `V03-R5-007-T01`, `V03-R5-008-T02`, and
+  `V03-R5-010-T01`. The accepted bundle locks the map/manor/dossier fixtures,
+  routes the shared person-card modal, deepens the obligations explanation
+  surface, adds the outbound scouting and court-provisioning contracts, and
+  introduces KPI acceptance bands anchored to the locked preset and DOE
+  artifacts. Fresh full-suite `qa` passed (`445/445` vitest plus a fresh
+  `npm run uat:gate`); `npm run preflight` still shows the standing
+  `test3_mismatches=16` blocker; and both replay batches passed. Their raw
+  summary hashes differed because of path-shaped metadata, but the normalized
+  summaries matched exactly with hash
   `9120b4cedf74d588c2da5295bfdce62bf342f5e6e99b035cb3981729965598f0`.
 active_claims: {}

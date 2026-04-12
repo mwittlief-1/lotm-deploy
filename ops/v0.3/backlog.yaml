@@ -9138,7 +9138,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Add deterministic map fixtures, route tests, and replay guards
-  status: ready
+  status: done
   priority: 95
   tranche: 6
   change_type: behavior_change
@@ -9311,7 +9311,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Add manor view snapshot and component coverage
-  status: ready
+  status: done
   priority: 91
   tranche: 6
   change_type: behavior_change
@@ -9440,7 +9440,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Add dossier fixtures and prospect completeness tests
-  status: ready
+  status: done
   priority: 88
   tranche: 6
   change_type: behavior_change
@@ -9568,7 +9568,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Wire tap-any-name person-card modal across live surfaces
-  status: ready
+  status: done
   priority: 85
   tranche: 6
   change_type: behavior_change
@@ -9610,7 +9610,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Add person-card fixtures and routing tests
-  status: todo
+  status: ready
   priority: 84
   tranche: 6
   change_type: behavior_change
@@ -9696,7 +9696,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Build outbound scouting registry and candidate ranking
-  status: ready
+  status: done
   priority: 82
   tranche: 6
   change_type: behavior_change
@@ -9741,7 +9741,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add canonical dowry and dower receipt placeholders
-  status: todo
+  status: ready
   priority: 81
   tranche: 6
   change_type: behavior_change
@@ -10171,7 +10171,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Define court provisioning view and stipend registry
-  status: ready
+  status: done
   priority: 72
   tranche: 6
   change_type: behavior_change
@@ -10214,7 +10214,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Implement ration and stipend effects through canonical fiscal paths
-  status: todo
+  status: ready
   priority: 71
   tranche: 6
   change_type: behavior_change
@@ -10387,7 +10387,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Deepen obligations modal into full ladder and tangible-bite preview
-  status: ready
+  status: done
   priority: 67
   tranche: 6
   change_type: behavior_change
@@ -10431,7 +10431,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Add obligations fixtures and UAT scripts for enforcement transparency
-  status: todo
+  status: ready
   priority: 66
   tranche: 6
   change_type: behavior_change
@@ -10691,7 +10691,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Define KPI acceptance bands from the locked DOE baseline
-  status: ready
+  status: done
   priority: 60
   tranche: 6
   change_type: behavior_change
@@ -10735,7 +10735,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Add runaway detectors for fiscal and starvation failure modes
-  status: todo
+  status: ready
   priority: 59
   tranche: 6
   change_type: behavior_change
