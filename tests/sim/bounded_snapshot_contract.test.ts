@@ -113,6 +113,10 @@ describe("bounded snapshot contract", () => {
     expect((snapshot as any).court_provisioning_view).toMatchObject({
       schema_version: "court_provisioning_view_v1",
       person_ids: expect.any(Array),
+      fiscal_policy: {
+        schema_version: "court_provisioning_fiscal_policy_v1",
+        person_ids: expect.any(Array),
+      },
     });
     expect((snapshot as any).court_stipend_registry).toMatchObject({
       schema_version: "court_stipend_registry_v1",
@@ -125,6 +129,9 @@ describe("bounded snapshot contract", () => {
     expect((snapshot as any).people.p_head.court_provisioning_entry).toMatchObject({
       schema_version: "court_provisioning_entry_v1",
       person_id: "p_head",
+      ration_policy: {
+        schema_version: "court_provisioning_ration_policy_v1",
+      },
     });
     expect(serialized.succession_line_summary).toBeUndefined();
     expect(serialized.claimant_summary).toBeUndefined();

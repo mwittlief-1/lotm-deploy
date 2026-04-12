@@ -1,4 +1,11 @@
 import type { RunState } from "../../types";
+import {
+  buildCourtProvisioningFiscalPolicy,
+  type CourtProvisioningFiscalPolicyV1,
+  type CourtProvisioningRationPolicyV1,
+  type CourtProvisioningRiskBadgeV1,
+  type CourtProvisioningStipendPolicyV1
+} from "../economy/courtProvisioningFiscal";
 import { buildPersonCardRegistry } from "./personCardRegistry";
 
 export const COURT_PROVISIONING_VIEW_SCHEMA_VERSION = "court_provisioning_view_v1" as const;
@@ -35,6 +42,9 @@ export type CourtProvisioningEntry = {
   active_service_record_ids: string[];
   active_seat_ids: string[];
   carried_forward_from_prior: boolean;
+  ration_policy: CourtProvisioningRationPolicyV1;
+  stipend_policy: CourtProvisioningStipendPolicyV1;
+  undernourishment_badges: CourtProvisioningRiskBadgeV1[];
 };
 
 export type CourtProvisioningView = {
@@ -42,6 +52,7 @@ export type CourtProvisioningView = {
   generated_at_turn_index: number;
   person_ids: string[];
   entries_by_person_id: Record<string, CourtProvisioningEntry>;
+  fiscal_policy: CourtProvisioningFiscalPolicyV1;
 };
 
 export type CourtStipendEntry = {
@@ -54,6 +65,10 @@ export type CourtStipendEntry = {
   service_record_ids: string[];
   active_seat_ids: string[];
   carry_forward_from_prior: boolean;
+  stipend_policy: CourtProvisioningStipendPolicyV1;
+  stipend_amount: number;
+  receipt_category: "expense.household_admin";
+  rule_id: string;
 };
 
 export type CourtStipendRegistry = {
@@ -63,10 +78,15 @@ export type CourtStipendRegistry = {
   stipend_keys: string[];
   stipend_key_by_person_id: Record<string, string | null>;
   entries_by_key: Record<string, CourtStipendEntry>;
+  total_requested_coin: number;
 };
 
 type PersonCardRegistry = ReturnType<typeof buildPersonCardRegistry>;
 type PersonCardView = PersonCardRegistry["entries_by_person_id"][string];
+type CourtProvisioningEntryDraft = Omit<
+  CourtProvisioningEntry,
+  "ration_policy" | "stipend_policy" | "undernourishment_badges"
+>;
 
 function compareText(a: string, b: string): number {
   if (a < b) return -1;
@@ -140,10 +160,11 @@ export function buildCourtProvisioningView(
   const personIds = personCards.person_ids
     .filter((personId) => personCards.entries_by_person_id[personId]?.court_member)
     .sort(compareText);
-  const entriesByPersonId: Record<string, CourtProvisioningEntry> = {};
+  const entriesByPersonId: Record<string, CourtProvisioningEntryDraft> = {};
 
   for (const personId of personIds) {
     const card = personCards.entries_by_person_id[personId];
+    if (!card) continue;
     const priorEntry = priorView?.entries_by_person_id?.[personId] ?? null;
     const stipendBasis = paymentBasisForCard(card);
     const provisioningClass = provisioningClassForCard(card, stipendBasis);
@@ -168,11 +189,32 @@ export function buildCourtProvisioningView(
     };
   }
 
-  return {
+  const provisionalView = {
     schema_version: COURT_PROVISIONING_VIEW_SCHEMA_VERSION,
     generated_at_turn_index: Math.trunc(state.turn_index),
     person_ids: personIds,
     entries_by_person_id: entriesByPersonId,
+  };
+  const fiscalPolicy = buildCourtProvisioningFiscalPolicy(state, provisionalView);
+
+  const finalizedEntriesByPersonId: Record<string, CourtProvisioningEntry> = {};
+
+  for (const personId of personIds) {
+    const entry = entriesByPersonId[personId];
+    const fiscalEntry = fiscalPolicy.entries_by_person_id[personId];
+    if (!entry || !fiscalEntry) continue;
+    finalizedEntriesByPersonId[personId] = {
+      ...entry,
+      ration_policy: fiscalEntry.ration_policy,
+      stipend_policy: fiscalEntry.stipend_policy,
+      undernourishment_badges: [...fiscalEntry.undernourishment_badges]
+    };
+  }
+
+  return {
+    ...provisionalView,
+    entries_by_person_id: finalizedEntriesByPersonId,
+    fiscal_policy: fiscalPolicy
   };
 }
 
@@ -201,6 +243,10 @@ export function buildCourtStipendRegistry(
       service_record_ids: [...provisioningEntry.active_service_record_ids],
       active_seat_ids: [...provisioningEntry.active_seat_ids],
       carry_forward_from_prior: Boolean(priorEntry),
+      stipend_policy: provisioningEntry.stipend_policy,
+      stipend_amount: provisioningEntry.stipend_policy.stipend_amount,
+      receipt_category: provisioningEntry.stipend_policy.receipt_category,
+      rule_id: provisioningEntry.stipend_policy.rule_id
     };
   }
 
@@ -211,6 +257,7 @@ export function buildCourtStipendRegistry(
     stipend_keys: sortStrings(stipendKeys),
     stipend_key_by_person_id: stipendKeyByPersonId,
     entries_by_key: entriesByKey,
+    total_requested_coin: provisioningView.fiscal_policy.total_requested_stipend_coin
   };
 }
 
