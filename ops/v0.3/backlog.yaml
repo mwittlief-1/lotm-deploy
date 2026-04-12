@@ -9827,7 +9827,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Render outbound scout table and offer composer
-  status: ready
+  status: done
   priority: 79
   tranche: 6
   change_type: behavior_change
@@ -10300,7 +10300,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Add provisioning fixtures and UAT coverage
-  status: ready
+  status: done
   priority: 69
   tranche: 6
   change_type: behavior_change
@@ -10559,7 +10559,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Author locked preset scenarios and expected visible outcomes
-  status: todo
+  status: ready
   priority: 63
   tranche: 6
   change_type: behavior_change

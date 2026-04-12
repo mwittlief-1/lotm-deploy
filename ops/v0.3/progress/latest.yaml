@@ -1,34 +1,36 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-005-T05
-  last_completed_task_id: V03-R5-007-T03
+  current_task_id: V03-R5-009-T03
+  last_completed_task_id: V03-R5-007-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: d8a9568
+  git_commit: 28afeb7
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: pass
+    qa: warning
     preflight: fail
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 0adfac59622ba5d164566153f4624e5208bc3ab949ff425f5cbe9870c6bb203b
-    run2: c7e9c63c8ecb0fc32d915f7944f30f0ecf5e1971739fd400faca7b5c5c7e4066
+    run1: 1a3b82ab4cdbe19049f2dea1a363bd5043cffb5be75821ec11b5e06bfaa7d9d9
+    run2: 47dafc7c5f5e5436c0bf9e56e314a913278e69c9b25d581630df1eea58524eb4
 notes: >-
-  Accepted the next social and UI wave onto the v0.3.5 control-plane line:
-  `V03-R5-005-T04` and `V03-R5-007-T03`. The accepted bundle lands
-  deterministic outbound marriage offer resolution on canonical relationship,
-  evidence, and fiscal seams, and adds a read-only court provisioning sheet on
-  top of the accepted provisioning and stipend contracts. Fresh full-suite `qa`
-  passed (`459/459` vitest plus a fresh UAT artifact), `npm run preflight`
-  still shows the standing `test3_mismatches=16` blocker, and both replay
-  batches passed. Their raw summary hashes differed because of path-shaped
-  metadata, but the normalized summaries matched exactly with hash
+  Accepted the next UI and tooling wave onto the v0.3.5 control-plane line:
+  `V03-R5-005-T05` and `V03-R5-007-T04`. The accepted bundle adds the outbound
+  marriage scouting and offer sheet plus the deterministic court-provisioning
+  fixture and UAT pack. Merged focused acceptance coverage passed (`23/23`);
+  `npm run preflight` still shows the standing `test3_mismatches=16` blocker;
+  and both replay batches passed. Their raw summary hashes differed because of
+  path-shaped metadata, but the normalized summaries matched exactly with hash
   `e519f5ce476960d955e228662db3b9d8e9f20594d60b7c217e72524b20bfb568`.
+  Fresh full-suite `qa` and direct `uatGate` reruns were attempted but both
+  runner paths hung in this environment without producing fresh artifacts, so
+  this acceptance rides on the merged focused bundle plus deterministic replay
+  evidence.
 active_claims: {}
