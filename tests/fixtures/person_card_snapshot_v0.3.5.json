@@ -1,0 +1,227 @@
+{
+  "overview": {
+    "person_id": "p_head",
+    "person_name": "Giles",
+    "subtitle": "Player house · Tier0",
+    "overview_cards": [
+      {
+        "id": "status",
+        "label": "Status",
+        "value": "Alive",
+        "detail": "M · Age 37"
+      },
+      {
+        "id": "house",
+        "label": "House",
+        "value": "Player house",
+        "detail": "Birth house: Player house"
+      },
+      {
+        "id": "residence",
+        "label": "Residence",
+        "value": "Hx 26597",
+        "detail": "Contexts household · Source Player Anchor Manor · Travel 0 · Hops 0"
+      },
+      {
+        "id": "roles",
+        "label": "Court & roles",
+        "value": "Court-linked",
+        "detail": "Head of House"
+      },
+      {
+        "id": "succession",
+        "label": "Succession",
+        "value": "No active claim",
+        "detail": "Current heir p_child1"
+      },
+      {
+        "id": "lands",
+        "label": "Lands held",
+        "value": "1 holding",
+        "detail": "Single Holding · Anchor Hx 26597 · Known Hx 26597"
+      }
+    ]
+  },
+  "family": {
+    "person_id": "p_head",
+    "sections": [
+      {
+        "id": "parents",
+        "title": "Parents",
+        "empty_label": "No parents recorded.",
+        "count": 0,
+        "first_entry": null
+      },
+      {
+        "id": "spouse",
+        "title": "Spouse",
+        "empty_label": "No living spouse recorded.",
+        "count": 1,
+        "first_entry": {
+          "detail": "F · Age 33 · Player house · Alive",
+          "personId": "p_spouse",
+          "title": "Edith"
+        }
+      },
+      {
+        "id": "siblings",
+        "title": "Siblings",
+        "empty_label": "No siblings recorded.",
+        "count": 0,
+        "first_entry": null
+      },
+      {
+        "id": "children",
+        "title": "Children",
+        "empty_label": "No children recorded.",
+        "count": 2,
+        "first_entry": {
+          "detail": "F · Age 15 · Player house · Alive",
+          "personId": "p_child1",
+          "title": "Edith"
+        }
+      }
+    ]
+  },
+  "offices_service": {
+    "person_id": "p_court_steward",
+    "person_name": "Hugh",
+    "office_assignments": [
+      {
+        "detail": "Scope House · Owner house:h_player · Holder Household Member · Payment Family Service · Service sr_h_player_steward",
+        "id": "house:house:h_player:steward",
+        "title": "Steward"
+      }
+    ],
+    "service_entries": [
+      {
+        "detail": "Active since turn 0 · Service record · At house:h_player",
+        "id": "sr_h_player_steward",
+        "title": "Steward"
+      }
+    ],
+    "selector_contexts": "household, office, service"
+  },
+  "relationships": {
+    "person_id": "p_head",
+    "total_count": 174,
+    "first_rows": [
+      {
+        "allegiance": 67,
+        "detail": "A 67 · R 59 · T 15",
+        "directionLabel": "From this person",
+        "id": "p_head|p_liege",
+        "personId": "p_liege",
+        "respect": 59,
+        "threat": 15,
+        "title": "Oswin",
+        "totalScore": 141
+      },
+      {
+        "allegiance": 57,
+        "detail": "A 57 · R 57 · T 17",
+        "directionLabel": "Toward this person",
+        "id": "p_liege|p_head",
+        "personId": "p_liege",
+        "respect": 57,
+        "threat": 17,
+        "title": "Oswin",
+        "totalScore": 131
+      },
+      {
+        "allegiance": 56,
+        "detail": "A 56 · R 55 · T 17",
+        "directionLabel": "From this person",
+        "id": "p_head|p_ext_66_head",
+        "personId": "p_ext_66_head",
+        "respect": 55,
+        "threat": 17,
+        "title": "Agnes Hartwyck",
+        "totalScore": 128
+      },
+      {
+        "allegiance": 56,
+        "detail": "A 56 · R 55 · T 17",
+        "directionLabel": "From this person",
+        "id": "p_head|p_ext_48_head",
+        "personId": "p_ext_48_head",
+        "respect": 55,
+        "threat": 17,
+        "title": "Aldric Dunwick",
+        "totalScore": 128
+      }
+    ]
+  },
+  "debug": {
+    "person_id": "p_head",
+    "schema_version": "person_card_view_v1",
+    "debug_keys": [
+      "schema_version",
+      "person_id",
+      "person_name",
+      "short_id",
+      "alive",
+      "sex",
+      "age",
+      "current_house",
+      "birth_house",
+      "court_member",
+      "court_roles",
+      "known_house_relevance",
+      "married_out",
+      "residence_manor_id",
+      "selector_contexts",
+      "source_kind",
+      "source_ref_id",
+      "distance",
+      "family_person_ids",
+      "succession_projection",
+      "office_assignments",
+      "service_entries",
+      "lands_held_projection",
+      "relationship_rows"
+    ],
+    "first_rows": [
+      {
+        "key": "schema_version",
+        "label": "schema_version",
+        "value": "person_card_view_v1"
+      },
+      {
+        "key": "person_id",
+        "label": "person_id",
+        "value": "p_head"
+      },
+      {
+        "key": "person_name",
+        "label": "person_name",
+        "value": "Giles"
+      },
+      {
+        "key": "short_id",
+        "label": "short_id",
+        "value": "None"
+      },
+      {
+        "key": "alive",
+        "label": "alive",
+        "value": "Yes"
+      },
+      {
+        "key": "sex",
+        "label": "sex",
+        "value": "M"
+      },
+      {
+        "key": "age",
+        "label": "age",
+        "value": "37"
+      },
+      {
+        "key": "current_house",
+        "label": "current_house",
+        "value": "Player house"
+      }
+    ]
+  }
+}

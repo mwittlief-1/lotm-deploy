@@ -1,0 +1,1001 @@
+{
+  "arrears_carry": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "House Liege",
+        "short_title": "Liege",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: 7 coin in arrears.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 7,
+          "amountLabel": "7 coin",
+          "summary": "House Liege: 7 coin in arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+          "resolvedSummary": "This turn: arrears carried, so stage 1 active now applies.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": true,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "House Liege: 7 coin in arrears.",
+            "detail": "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 7/1 on manor.obligations.arrears.coin",
+            "detail": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Seizure",
+          "paymentModeLabel": "Coin",
+          "previewAmountLabel": "7",
+          "summary": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Coin",
+                "balanceAfterLabel": "7",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "+7",
+                "id": "ledger:t1:succession:p9:arrears_coin:0003",
+                "ruleLabel": "obligations.close_turn.liege_arrears_carry.credit",
+                "summary": "Moved unpaid tax due into arrears for House Liege."
+              },
+              {
+                "assetLabel": "Tax Due Coin",
+                "balanceAfterLabel": "0",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "-7",
+                "id": "ledger:t1:succession:p9:tax_due_coin:0004",
+                "ruleLabel": "obligations.close_turn.liege_arrears_carry.debit",
+                "summary": "Moved unpaid current tax due out of the active ledger slot for House Liege."
+              }
+            ]
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "Parish Church",
+        "short_title": "Church",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: 9 bushels in arrears.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 9,
+          "amountLabel": "9 bushels",
+          "summary": "Parish Church: 9 bushels in arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for Parish Church because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.",
+          "resolvedSummary": "This turn: arrears carried, so stage 1 active now applies.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": true,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Parish Church: 9 bushels in arrears.",
+            "detail": "Stage-one enforcement pressure rose for Parish Church because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 9/1 on manor.obligations.arrears.bushels",
+            "detail": "Stage-two preview: forced food-store payment can clear dues for Parish Church; the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Forced Payment Stores",
+          "paymentModeLabel": "Food stores",
+          "previewAmountLabel": "9",
+          "summary": "Stage-two preview: forced food-store payment can clear dues for Parish Church; the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Bushels",
+                "balanceAfterLabel": "9",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "+9",
+                "id": "ledger:t1:succession:p9:arrears_bushels:0001",
+                "ruleLabel": "obligations.close_turn.church_arrears_carry.credit",
+                "summary": "Moved unpaid tithe due into arrears for Parish Church."
+              },
+              {
+                "assetLabel": "Tithe Due Bushels",
+                "balanceAfterLabel": "0",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "-9",
+                "id": "ledger:t1:succession:p9:tithe_due_bushels:0002",
+                "ruleLabel": "obligations.close_turn.church_arrears_carry.debit",
+                "summary": "Moved unpaid current tithe due out of the active ledger slot for Parish Church."
+              }
+            ]
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      }
+    ]
+  },
+  "forced_payment": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "House Liege",
+        "short_title": "Liege",
+        "settlement_status": "clear",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: clear.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: no carried arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "clear",
+          "enforcementSummary": "Stage-one enforcement stayed favorable for House Liege because arrears are clear after carry.",
+          "responseSummary": "Next turn: no liege arrears are carried right now, but coin payments and gifts remain your levers if pressure returns.",
+          "resolvedSummary": "This turn: pressure ended clear with no carried arrears.",
+          "stageLabel": "Pressure clear",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "House Liege: clear.",
+            "detail": "Stage-one enforcement stayed favorable for House Liege because arrears are clear after carry.",
+            "id": "stage_1",
+            "statusLabel": "Clear",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "No next-stage boundary recorded.",
+            "detail": "No stage-two trigger recorded.",
+            "id": "stage_2",
+            "statusLabel": "Dormant",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Dormant",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": null,
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Dormant",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "Parish Church",
+        "short_title": "Church",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: 7 bushels in arrears.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 7,
+          "amountLabel": "7 bushels",
+          "summary": "Parish Church: 7 bushels in arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 2,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-two tangible bite is active for Parish Church; forced collection receipts are already landing against open arrears.",
+          "responseSummary": "Next turn: tangible bite is active. Clear church arrears before more stores are forced out under church pressure.",
+          "resolvedSummary": "This turn: arrears remained open, so stage 2: tangible bite stayed in place.",
+          "stageLabel": "Stage 2: tangible bite",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Parish Church: 7 bushels in arrears.",
+            "detail": "Stage-two tangible bite is active for Parish Church; forced collection receipts are already landing against open arrears.",
+            "id": "stage_1",
+            "statusLabel": "Passed",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Dispossession Danger boundary: 7/1 on manor.obligations.arrears.bushels",
+            "detail": "Stage-two preview: forced food-store payment can clear dues for Parish Church; the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Current",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "If Parish Church arrears remain open after stage-two collections, stage-three dispossession danger can start.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Forced Payment Stores",
+          "paymentModeLabel": "Food stores",
+          "previewAmountLabel": "7",
+          "summary": "Stage-two preview: forced food-store payment can clear dues for Parish Church; the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Bushels",
+                "balanceAfterLabel": "7",
+                "category": "enforcement.forced_payment_stores",
+                "deltaLabel": "-2",
+                "id": "ledger:t1:obligations:p6:arrears_bushels:0002",
+                "ruleLabel": "enforcement.forced_payment.church_followup",
+                "summary": "Forced store payment cleared arrears owed to Parish Church."
+              },
+              {
+                "assetLabel": "Food Stores",
+                "balanceAfterLabel": "12",
+                "category": "enforcement.forced_payment_stores",
+                "deltaLabel": "-2",
+                "id": "ledger:t1:obligations:p6:food_stores:0001",
+                "ruleLabel": "enforcement.forced_payment.church_followup",
+                "summary": "Enforcement drew down food stores for Parish Church."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "seizure_preview": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "House Liege",
+        "short_title": "Liege",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: 4 coin in arrears.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 4,
+          "amountLabel": "4 coin",
+          "summary": "House Liege: 4 coin in arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+          "resolvedSummary": "This turn: arrears remained open, so stage 1 active stayed in place.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "House Liege: 4 coin in arrears.",
+            "detail": "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 4/1 on manor.obligations.arrears.coin",
+            "detail": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Seizure",
+          "paymentModeLabel": "Coin",
+          "previewAmountLabel": "4",
+          "summary": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "Parish Church",
+        "short_title": "Church",
+        "settlement_status": "clear",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: clear.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: no carried arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "clear",
+          "enforcementSummary": "Stage-one enforcement stayed favorable for Parish Church because arrears are clear after carry.",
+          "responseSummary": "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.",
+          "resolvedSummary": "This turn: pressure ended clear with no carried arrears.",
+          "stageLabel": "Pressure clear",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Parish Church: clear.",
+            "detail": "Stage-one enforcement stayed favorable for Parish Church because arrears are clear after carry.",
+            "id": "stage_1",
+            "statusLabel": "Clear",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "No next-stage boundary recorded.",
+            "detail": "No stage-two trigger recorded.",
+            "id": "stage_2",
+            "statusLabel": "Dormant",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Dormant",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": null,
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Dormant",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      }
+    ]
+  },
+  "terminal_stage_visibility": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "House Liege",
+        "short_title": "Liege",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: 6 coin in arrears.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 6,
+          "amountLabel": "6 coin",
+          "summary": "House Liege: 6 coin in arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 3,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-three dispossession danger is active for House Liege; unrest is 100/100 while arrears remain open.",
+          "responseSummary": "Next turn: dispossession danger is active. Clear liege arrears immediately or you can lose the seat.",
+          "resolvedSummary": "This turn: arrears remained open, so stage 3: dispossession danger stayed in place.",
+          "stageLabel": "Stage 3: dispossession danger",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "House Liege: 6 coin in arrears.",
+            "detail": "Stage-three dispossession danger is active for House Liege; unrest is 100/100 while arrears remain open.",
+            "id": "stage_1",
+            "statusLabel": "Passed",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "No next-stage boundary recorded.",
+            "detail": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Dormant",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 100/100; remaining 0.",
+            "detail": "Dispossession danger is active while House Liege arrears remain open; unrest is 100/100.",
+            "id": "stage_3",
+            "statusLabel": "Active",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Seizure",
+          "paymentModeLabel": "Coin",
+          "previewAmountLabel": "6",
+          "summary": "Stage-two preview: enterprise seizure can force coin out of the manor for House Liege; the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 100/100 on manor.unrest",
+          "statusLabel": "Active",
+          "summary": "Dispossession danger is active while House Liege arrears remain open; unrest is 100/100."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "Parish Church",
+        "short_title": "Church",
+        "settlement_status": "clear",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: clear.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Parish Church: no carried arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "clear",
+          "enforcementSummary": "Stage-one enforcement stayed favorable for Parish Church because arrears are clear after carry.",
+          "responseSummary": "Next turn: no church arrears are carried right now, but bushel payments and offerings remain your levers if pressure returns.",
+          "resolvedSummary": "This turn: pressure ended clear with no carried arrears.",
+          "stageLabel": "Pressure clear",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Parish Church: clear.",
+            "detail": "Stage-one enforcement stayed favorable for Parish Church because arrears are clear after carry.",
+            "id": "stage_1",
+            "statusLabel": "Clear",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "No next-stage boundary recorded.",
+            "detail": "No stage-two trigger recorded.",
+            "id": "stage_2",
+            "statusLabel": "Dormant",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 100/100; remaining 0.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 100.",
+            "id": "stage_3",
+            "statusLabel": "Dormant",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": null,
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 100/100 on manor.unrest",
+          "statusLabel": "Dormant",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 100."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      }
+    ]
+  }
+}

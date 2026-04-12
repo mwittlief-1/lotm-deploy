@@ -1,0 +1,93 @@
+{
+  "kind": "obligations_uat_pack_v1",
+  "release": "v0.3.5",
+  "acceptance_id": "obligations_visibility",
+  "cases": [
+    {
+      "scenario_id": "uat_obligations_arrears_carry",
+      "fixture_case_id": "arrears_carry",
+      "expected_focus": "overview",
+      "preset_ids": [
+        "arrears_pressure_builder",
+        "uat_arrears_enforcement"
+      ],
+      "steps": [
+        "Open the obligations modal from the turn report and keep the overview focus active.",
+        "Confirm that both liege and church sections show carried arrears, stage-one active copy, and armed stage-two and stage-three rows.",
+        "Check that the penalty trail includes the carry receipts that moved current due into arrears."
+      ],
+      "expected_cues": [
+        "Stage 1 active",
+        "Stage 2 · Tangible bite -> Armed",
+        "Stage 3 · Dispossession danger -> Armed"
+      ]
+    },
+    {
+      "scenario_id": "uat_obligations_forced_payment",
+      "fixture_case_id": "forced_payment",
+      "expected_focus": "church",
+      "preset_ids": [
+        "arrears_pressure_builder",
+        "uat_arrears_enforcement"
+      ],
+      "steps": [
+        "Open the obligations modal and switch focus to Church.",
+        "Confirm the church section is at stage two and that the Seizures & forced payment group contains the forced-store rows.",
+        "Verify the payment-mode card still lists Food stores as preferred and supported."
+      ],
+      "expected_cues": [
+        "Stage 2: tangible bite",
+        "enforcement.forced_payment_stores",
+        "Food stores"
+      ]
+    },
+    {
+      "scenario_id": "uat_obligations_seizure_preview",
+      "fixture_case_id": "seizure_preview",
+      "expected_focus": "liege",
+      "preset_ids": [
+        "arrears_pressure_builder",
+        "uat_arrears_enforcement"
+      ],
+      "steps": [
+        "Open the obligations modal and focus Liege.",
+        "Confirm the stage-two preview card is visible even before any seizure receipts land.",
+        "Check that the preview is tied to Enforcement Seizure and remains armed rather than current."
+      ],
+      "expected_cues": [
+        "Enforcement Seizure",
+        "Stage 2 · Tangible bite -> Armed",
+        "No per-turn cap"
+      ]
+    },
+    {
+      "scenario_id": "uat_obligations_terminal_stage",
+      "fixture_case_id": "terminal_stage_visibility",
+      "expected_focus": "liege",
+      "preset_ids": [
+        "arrears_pressure_builder",
+        "uat_arrears_enforcement"
+      ],
+      "steps": [
+        "Open the obligations modal and focus Liege.",
+        "Confirm the terminal-risk card is active at the unrest boundary and that stage three is active in the ladder.",
+        "Verify the liege response summary makes the terminal consequence explicit instead of hiding it behind summary math."
+      ],
+      "expected_cues": [
+        "Boundary 100/100 on manor.unrest",
+        "Stage 3 · Dispossession danger -> Active",
+        "Dispossession danger is active while House Liege arrears remain open"
+      ]
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact_relpath": "tests/fixtures/obligations_detail_snapshot_v0.3.5.json",
+      "label": "obligations transparency fixture"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "label": "preset-pack acceptance mapping"
+    }
+  ]
+}

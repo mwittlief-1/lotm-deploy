@@ -1,0 +1,363 @@
+{
+  "detectors": [
+    {
+      "acceptance_ids": [
+        "runaway_coin_runaway"
+      ],
+      "checks": [
+        {
+          "band": {
+            "max": 118,
+            "min": 19
+          },
+          "check_id": "baseline_coin_corridor",
+          "label": "Low-pressure prudent ending coin",
+          "note": "This is the high-water calm packet anchor for v0.3.5.",
+          "observed_value": 118,
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[baseline_low_pressure_prudent].expected_end_state.coin",
+            "scenario_id": "baseline_low_pressure_prudent"
+          },
+          "status": "pass",
+          "unit": "coin"
+        },
+        {
+          "band": {
+            "max": 118,
+            "min": 19
+          },
+          "check_id": "stable_clear_coin_corridor",
+          "label": "Stable-clear prudent comparison coin",
+          "note": "This is the lower-pressure floor for the same acceptance corridor.",
+          "observed_value": 19,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[stable_clear_prudent_turns_15].ending.coin",
+            "scenario_id": "stable_clear_prudent_turns_15"
+          },
+          "status": "pass",
+          "unit": "coin"
+        }
+      ],
+      "detector_id": "coin_runaway",
+      "label": "Coin runaway",
+      "preset_ids": [
+        "baseline_low_pressure_prudent",
+        "stable_clear_prudent"
+      ],
+      "status": "pass",
+      "summary": "Keep calm prudent scenarios inside the accepted coin corridor bounded by the stable-clear comparison rail and the low-pressure packet target."
+    },
+    {
+      "acceptance_ids": [
+        "runaway_food_collapse"
+      ],
+      "checks": [
+        {
+          "band": {
+            "max": 0,
+            "min": 0
+          },
+          "check_id": "shortage_packet_zero_food",
+          "label": "Weather-shortage packet ending food stores",
+          "note": "The explicit starvation packet should remain visibly collapsed.",
+          "observed_value": 0,
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[weather_shortage_builder].expected_end_state.bushels_stored",
+            "scenario_id": "weather_shortage_builder"
+          },
+          "status": "pass",
+          "unit": "count"
+        },
+        {
+          "band": {
+            "max": 1192,
+            "min": 402
+          },
+          "check_id": "arrears_packet_food_floor",
+          "label": "Arrears-pressure packet food-store floor",
+          "note": "The comparison rail should remain above the starvation collapse packet.",
+          "observed_value": 402,
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder].expected_end_state.bushels_stored",
+            "scenario_id": "arrears_pressure_builder"
+          },
+          "status": "pass",
+          "unit": "count"
+        }
+      ],
+      "detector_id": "starvation_spiral",
+      "label": "Starvation spiral",
+      "preset_ids": [
+        "dispossession_builder",
+        "weather_shortage_builder"
+      ],
+      "status": "pass",
+      "summary": "Keep one explicit shortage collapse packet at zero stores while the builder arrears packet stays above the accepted starvation floor."
+    },
+    {
+      "acceptance_ids": [
+        "runaway_arrears_soft"
+      ],
+      "checks": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "packet_arrears_visible",
+          "label": "Arrears-pressure packet visibility",
+          "note": "The short packet should still report that arrears occurred.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder_turns_15].indicators.any_arrears_seen",
+            "scenario_id": "arrears_pressure_builder_turns_15"
+          },
+          "status": "pass",
+          "unit": "share"
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "doe_arrears_share",
+          "label": "Builder-forward 15-turn arrears share",
+          "note": "The broader builder DOE should still show arrears across the accepted rail.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+            "field_path": "summary.by_policy[builder-forward].arrears.any_seen_share",
+            "policy_id": "builder-forward"
+          },
+          "status": "pass",
+          "unit": "share"
+        }
+      ],
+      "detector_id": "arrears_too_soft",
+      "label": "Arrears too soft",
+      "preset_ids": [
+        "arrears_pressure_builder"
+      ],
+      "status": "pass",
+      "summary": "Keep arrears visible on the short builder packet and on the 15-turn builder DOE share so enforcement does not fade out of review."
+    },
+    {
+      "acceptance_ids": [
+        "runaway_arrears_hard"
+      ],
+      "checks": [
+        {
+          "band": {
+            "max": 0,
+            "min": 0
+          },
+          "check_id": "short_run_not_dispossessed",
+          "label": "Arrears-pressure packet dispossession guard",
+          "note": "The short packet should not already be a terminal loss case.",
+          "observed_value": 0,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder_turns_15].indicators.dispossessed",
+            "scenario_id": "arrears_pressure_builder_turns_15"
+          },
+          "status": "pass",
+          "unit": "share"
+        },
+        {
+          "band": {
+            "max": 52,
+            "min": 0
+          },
+          "check_id": "short_run_unrest_ceiling",
+          "label": "Arrears-pressure packet unrest ceiling",
+          "note": "Short-run arrears pressure should stay below the accepted terminal boundary.",
+          "observed_value": 52,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder_turns_15].ending.unrest",
+            "scenario_id": "arrears_pressure_builder_turns_15"
+          },
+          "status": "pass",
+          "unit": "count"
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "long_run_dispossession_reference",
+          "label": "Dispossession builder terminal reference",
+          "note": "The long-run builder reference should still end in dispossession.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[dispossession_builder_turns_30].indicators.dispossessed",
+            "scenario_id": "dispossession_builder_turns_30"
+          },
+          "status": "pass",
+          "unit": "share"
+        },
+        {
+          "band": {
+            "max": 26,
+            "min": 26
+          },
+          "check_id": "long_run_game_over_turn",
+          "label": "Dispossession builder game-over timing",
+          "note": "The accepted long-run terminal rail should still land on turn 26.",
+          "observed_value": 26,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[dispossession_builder_turns_30].game_over_turn",
+            "scenario_id": "dispossession_builder_turns_30"
+          },
+          "status": "pass",
+          "unit": "turn"
+        }
+      ],
+      "detector_id": "arrears_too_hard",
+      "label": "Arrears too hard",
+      "preset_ids": [
+        "arrears_pressure_builder",
+        "dispossession_builder"
+      ],
+      "status": "pass",
+      "summary": "Keep the 15-turn arrears packet below terminal failure while the long-run dispossession reference remains explicitly terminal."
+    },
+    {
+      "acceptance_ids": [
+        "runaway_manor_growth_frozen"
+      ],
+      "checks": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "manor_target_1",
+          "label": "Single-manor distribution baseline",
+          "note": "Use the accepted single-manor regression scenario as the exact growth target.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[single_manor_distribution_baseline].ending.manor_count",
+            "scenario_id": "single_manor_distribution_baseline"
+          },
+          "status": "pass",
+          "unit": "count"
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "manor_target_2",
+          "label": "Stable-clear prudent manor-count rail",
+          "note": "Keep the secondary prudent regression point frozen at one manor as well.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[stable_clear_prudent_turns_15].ending.manor_count",
+            "scenario_id": "stable_clear_prudent_turns_15"
+          },
+          "status": "pass",
+          "unit": "count"
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "doe_15_single_manor_share",
+          "label": "Builder-forward 15-turn one-manor share",
+          "note": "The short-run DOE distribution should remain fully concentrated at one manor.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+            "field_path": "summary.by_policy[builder-forward].manor_count_distribution[manor_count=1].share",
+            "policy_id": "builder-forward"
+          },
+          "status": "pass",
+          "unit": "share"
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "check_id": "doe_30_single_manor_share",
+          "label": "Builder-forward 30-turn one-manor share",
+          "note": "The long-run DOE distribution should remain fully concentrated at one manor.",
+          "observed_value": 1,
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/summary.json",
+            "field_path": "summary.by_policy[builder-forward].manor_count_distribution[manor_count=1].share",
+            "policy_id": "builder-forward"
+          },
+          "status": "pass",
+          "unit": "share"
+        }
+      ],
+      "detector_id": "manor_count_growth_frozen",
+      "label": "Frozen manor-count growth",
+      "preset_ids": [
+        "baseline_low_pressure_prudent"
+      ],
+      "status": "pass",
+      "summary": "Keep the current one-manor baseline explicit across both prudent regression anchors and both accepted builder DOE rails."
+    }
+  ],
+  "hash": "80978d90140a69cc5e137f4c34308af2bdf3ce715bbe8ccc5931e603408478ee",
+  "kind": "runaway_detectors_v1",
+  "qa_flow": {
+    "commands": [
+      "npx tsx scripts/runawayDetectors.ts",
+      "npx vitest run tests/sim/runaway_detectors.test.ts tests/sim/kpi_acceptance_bands.test.ts"
+    ],
+    "note": "Detectors stay anchored to the preset pack, KPI bands, and locked regression or DOE artifacts so balance review does not fork into a second acceptance path."
+  },
+  "release": "v0.3.5",
+  "source_artifacts": [
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+      "kind": "playability_preset_pack_v1",
+      "label": "playability preset pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/kpi_acceptance_bands.json",
+      "hash": "aa95bb30f339b9696a2476346d64da1603bb8174d5c3d707a2027f49b1da44cf",
+      "kind": "kpi_acceptance_bands_v1",
+      "label": "kpi acceptance bands"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+      "hash": "fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7",
+      "kind": "economy_fiscal_regression_seed_pack_v1",
+      "label": "regression seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+      "hash": "2ef80e7c39bae835befdc9adc5b18549774d9822a664e9c498985298e145d5af",
+      "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
+      "label": "receipt bundle seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+      "hash": "580114e27c935040b8533cebc03bde8e1a0466102d900d6c77fc5fdcfe7cf8a2",
+      "kind": "economy_fiscal_doe_summary_v1",
+      "label": "15-turn doe summary"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/summary.json",
+      "hash": "2c5b5878bb7caee5f698723fafd78d15a760a69e98b46c0fcbd7f8792984a27f",
+      "kind": "economy_fiscal_doe_summary_v1",
+      "label": "30-turn doe summary"
+    }
+  ]
+}
