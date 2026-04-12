@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-004-T04
-  last_completed_task_id: V03-R5-010-T01
+  current_task_id: V03-R5-005-T04
+  last_completed_task_id: V03-R5-010-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: a13db78
+  git_commit: fbec293
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,20 +18,18 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: cb00d5d1b2d3f45b7ccab6ccf3fe659515e572ca4146d8404b9ff77eab88265a
-    run2: 56365fc60ad05fb94c1805c01954945bc6917c229c5283cf3610593eb3e60e20
+    run1: 88a1dc25b67f3909ae77ddff6eb98180ebcf7194bdc737f49cad70c1a812dc7a
+    run2: a001fb947ff1fe241604b92e808eb6375acbd44520943e26e3a0a8320c1bddc5
 notes: >-
-  Accepted the next combined UI/social/tooling wave onto the v0.3.5
-  control-plane line: `V03-R5-001-T05`, `V03-R5-002-T04`, `V03-R5-003-T03`,
-  `V03-R5-004-T03`, `V03-R5-005-T02`, `V03-R5-007-T01`, `V03-R5-008-T02`, and
-  `V03-R5-010-T01`. The accepted bundle locks the map/manor/dossier fixtures,
-  routes the shared person-card modal, deepens the obligations explanation
-  surface, adds the outbound scouting and court-provisioning contracts, and
-  introduces KPI acceptance bands anchored to the locked preset and DOE
-  artifacts. Fresh full-suite `qa` passed (`445/445` vitest plus a fresh
-  `npm run uat:gate`); `npm run preflight` still shows the standing
-  `test3_mismatches=16` blocker; and both replay batches passed. Their raw
-  summary hashes differed because of path-shaped metadata, but the normalized
-  summaries matched exactly with hash
+  Accepted the next economy and tooling wave onto the v0.3.5 control-plane
+  line: `V03-R5-004-T04`, `V03-R5-005-T03`, `V03-R5-007-T02`,
+  `V03-R5-008-T03`, and `V03-R5-010-T02`. The accepted bundle locks the
+  person-card and obligations fixture contracts, adds deterministic runaway
+  detectors, and lands the canonical dowry/dower placeholder plus court
+  provisioning fiscal-policy seams. Fresh full-suite vitest passed (`445/445`),
+  fresh UAT passed in the detached verification worktree, `npm run preflight`
+  still shows the standing `test3_mismatches=16` blocker, and both replay
+  batches passed. Their raw summary hashes differed because of path-shaped
+  metadata, but the normalized summaries matched exactly with hash
   `9120b4cedf74d588c2da5295bfdce62bf342f5e6e99b035cb3981729965598f0`.
 active_claims: {}

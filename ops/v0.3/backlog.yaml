@@ -9610,7 +9610,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Add person-card fixtures and routing tests
-  status: ready
+  status: done
   priority: 84
   tranche: 6
   change_type: behavior_change
@@ -9741,7 +9741,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add canonical dowry and dower receipt placeholders
-  status: ready
+  status: done
   priority: 81
   tranche: 6
   change_type: behavior_change
@@ -9783,7 +9783,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Implement outbound offer accept and reject pipeline
-  status: todo
+  status: ready
   priority: 80
   tranche: 6
   change_type: behavior_change
@@ -10214,7 +10214,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Implement ration and stipend effects through canonical fiscal paths
-  status: ready
+  status: done
   priority: 71
   tranche: 6
   change_type: behavior_change
@@ -10258,7 +10258,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Render court provisioning modal with overrides and debug table
-  status: todo
+  status: ready
   priority: 70
   tranche: 6
   change_type: behavior_change
@@ -10431,7 +10431,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Add obligations fixtures and UAT scripts for enforcement transparency
-  status: ready
+  status: done
   priority: 66
   tranche: 6
   change_type: behavior_change
@@ -10735,7 +10735,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Add runaway detectors for fiscal and starvation failure modes
-  status: ready
+  status: done
   priority: 59
   tranche: 6
   change_type: behavior_change
