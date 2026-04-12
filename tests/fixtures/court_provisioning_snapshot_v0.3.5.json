@@ -1,0 +1,686 @@
+{
+  "baseline_shortfall": {
+    "initial_tab": "player",
+    "source_seed": "lotm_v022_seed_001_baseline_extworld",
+    "source_turn_index": 0,
+    "surface": {
+      "schema_version": "court_provisioning_view_v1",
+      "subtitle": "8 court members · 14 food / 2 meat requested · 0 coin stipends",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "summary_cards": [
+        {
+          "detail": "Risk watch: Geoffrey, Alice",
+          "id": "court_members",
+          "label": "Court roster",
+          "value": "8 court members"
+        },
+        {
+          "detail": "8 entries in deterministic allocation order.",
+          "id": "ration_demand",
+          "label": "Ration demand",
+          "value": "14 food / 2 meat"
+        },
+        {
+          "detail": "2 people are currently flagged at risk.",
+          "id": "allocation_result",
+          "label": "Allocation result",
+          "value": "14 food / 0 meat"
+        },
+        {
+          "detail": "8 stipend keys remain available for receipt-backed follow-ons.",
+          "id": "stipend_coin",
+          "label": "Stipend coin",
+          "value": "0 coin"
+        }
+      ],
+      "allocation_rows": [
+        {
+          "allocationPriority": 0,
+          "badgeLabels": [
+            "undernourishment_risk"
+          ],
+          "personId": "p_head",
+          "personName": "Geoffrey",
+          "rationLevelLabel": "Full",
+          "requestLabel": "3 food / 1 meat",
+          "shortfallLabel": "0 food / 1 meat",
+          "statusLabel": "Shortfall"
+        },
+        {
+          "allocationPriority": 1,
+          "badgeLabels": [
+            "undernourishment_risk"
+          ],
+          "personId": "p_spouse",
+          "personName": "Alice",
+          "rationLevelLabel": "Full",
+          "requestLabel": "3 food / 1 meat",
+          "shortfallLabel": "0 food / 1 meat",
+          "statusLabel": "Shortfall"
+        },
+        {
+          "allocationPriority": 2,
+          "badgeLabels": [],
+          "personId": "p_child1",
+          "personName": "Edmund",
+          "rationLevelLabel": "Standard",
+          "requestLabel": "2 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "Covered"
+        },
+        {
+          "allocationPriority": 3,
+          "badgeLabels": [],
+          "personId": "p_child2",
+          "personName": "Oswin",
+          "rationLevelLabel": "Standard",
+          "requestLabel": "2 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "Covered"
+        },
+        {
+          "allocationPriority": 4,
+          "badgeLabels": [],
+          "personId": "p_child_0_3",
+          "personName": "Thomas",
+          "rationLevelLabel": "Standard",
+          "requestLabel": "2 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "Covered"
+        },
+        {
+          "allocationPriority": 5,
+          "badgeLabels": [],
+          "personId": "p_court_steward",
+          "personName": "Geoffrey",
+          "rationLevelLabel": "Standard",
+          "requestLabel": "2 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "Covered"
+        },
+        {
+          "allocationPriority": 6,
+          "badgeLabels": [],
+          "personId": "p_clergy",
+          "personName": "Robert",
+          "rationLevelLabel": "External",
+          "requestLabel": "0 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "External"
+        },
+        {
+          "allocationPriority": 7,
+          "badgeLabels": [],
+          "personId": "p_liege",
+          "personName": "Robert",
+          "rationLevelLabel": "External",
+          "requestLabel": "0 food / 0 meat",
+          "shortfallLabel": "No shortfall",
+          "statusLabel": "External"
+        }
+      ],
+      "focus_override_rows": [
+        {
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Manor House",
+          "personId": "p_head",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Head Of House",
+          "rationLevelLabel": "Full",
+          "roleSummary": "Head of House",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "Shortfall"
+        },
+        {
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Manor House",
+          "personId": "p_spouse",
+          "personName": "Alice",
+          "provisioningClassLabel": "Household Family",
+          "rationLevelLabel": "Full",
+          "roleSummary": "Spouse",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "Shortfall"
+        },
+        {
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Court Quarters",
+          "personId": "p_court_steward",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Retainer",
+          "rationLevelLabel": "Standard",
+          "roleSummary": "Steward",
+          "seatSummary": "house:house:h_player:steward",
+          "serviceSummary": "sr_h_player_steward",
+          "statusLabel": "Covered"
+        },
+        {
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "External",
+          "personId": "p_clergy",
+          "personName": "Robert",
+          "provisioningClassLabel": "Guest",
+          "rationLevelLabel": "External",
+          "roleSummary": "Resident",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "External"
+        },
+        {
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "External",
+          "personId": "p_liege",
+          "personName": "Robert",
+          "provisioningClassLabel": "Guest",
+          "rationLevelLabel": "External",
+          "roleSummary": "Resident",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "External"
+        }
+      ],
+      "focus_stipend_rows": [
+        {
+          "activeSeatSummary": "None",
+          "appliesReceiptLabel": "Placeholder only",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_head",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Head Of House",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "None",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_head"
+        },
+        {
+          "activeSeatSummary": "None",
+          "appliesReceiptLabel": "Placeholder only",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_spouse",
+          "personName": "Alice",
+          "provisioningClassLabel": "Household Family",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "None",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_spouse"
+        },
+        {
+          "activeSeatSummary": "house:house:h_player:steward",
+          "appliesReceiptLabel": "Placeholder only",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_court_steward",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Retainer",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "sr_h_player_steward",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_court_steward"
+        },
+        {
+          "activeSeatSummary": "None",
+          "appliesReceiptLabel": "Placeholder only",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "None",
+          "personId": "p_clergy",
+          "personName": "Robert",
+          "provisioningClassLabel": "Guest",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "None",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_clergy"
+        },
+        {
+          "activeSeatSummary": "None",
+          "appliesReceiptLabel": "Placeholder only",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "None",
+          "personId": "p_liege",
+          "personName": "Robert",
+          "provisioningClassLabel": "Guest",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "None",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_liege"
+        }
+      ],
+      "debug_keys": [
+        "provisioning_schema_version",
+        "stipend_registry_schema_version",
+        "generated_at_turn_index",
+        "person_ids",
+        "allocation_order",
+        "stipend_keys",
+        "total_requested_food_units",
+        "total_requested_meat_units",
+        "total_allocated_food_units",
+        "total_allocated_meat_units",
+        "total_requested_stipend_coin",
+        "at_risk_person_ids"
+      ],
+      "debug_rows": [
+        {
+          "key": "provisioning_schema_version",
+          "label": "provisioning_schema_version",
+          "value": "court_provisioning_view_v1"
+        },
+        {
+          "key": "stipend_registry_schema_version",
+          "label": "stipend_registry_schema_version",
+          "value": "court_stipend_registry_v1"
+        },
+        {
+          "key": "generated_at_turn_index",
+          "label": "generated_at_turn_index",
+          "value": "0"
+        },
+        {
+          "key": "person_ids",
+          "label": "person_ids",
+          "value": "p_child1, p_child2, p_child_0_3, p_clergy, p_court_steward, p_head, p_liege, p_spouse"
+        },
+        {
+          "key": "allocation_order",
+          "label": "allocation_order",
+          "value": "p_child1, p_child2, p_child_0_3, p_clergy, p_court_steward, p_head, p_liege, p_spouse"
+        },
+        {
+          "key": "stipend_keys",
+          "label": "stipend_keys",
+          "value": "stipend:p_child1, stipend:p_child2, stipend:p_child_0_3, stipend:p_clergy, stipend:p_court_steward, stipend:p_head, stipend:p_liege, stipend:p_spouse"
+        },
+        {
+          "key": "total_requested_food_units",
+          "label": "total_requested_food_units",
+          "value": "14"
+        },
+        {
+          "key": "total_requested_meat_units",
+          "label": "total_requested_meat_units",
+          "value": "2"
+        },
+        {
+          "key": "total_allocated_food_units",
+          "label": "total_allocated_food_units",
+          "value": "14"
+        },
+        {
+          "key": "total_allocated_meat_units",
+          "label": "total_allocated_meat_units",
+          "value": "0"
+        },
+        {
+          "key": "total_requested_stipend_coin",
+          "label": "total_requested_stipend_coin",
+          "value": "0"
+        },
+        {
+          "key": "at_risk_person_ids",
+          "label": "at_risk_person_ids",
+          "value": "p_head, p_spouse"
+        }
+      ]
+    },
+    "stipend_apply_result": null
+  },
+  "carry_forward_overrides": {
+    "initial_tab": "player",
+    "source_seed": "court_provisioning_prior_defaults_v035",
+    "source_turn_index": 0,
+    "surface": {
+      "schema_version": "court_provisioning_view_v1",
+      "subtitle": "7 court members · 11 food / 2 meat requested · 0 coin stipends",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "summary_cards": [
+        {
+          "detail": "Risk watch: Roger, Hugh, Agnes",
+          "id": "court_members",
+          "label": "Court roster",
+          "value": "7 court members"
+        },
+        {
+          "detail": "7 entries in deterministic allocation order.",
+          "id": "ration_demand",
+          "label": "Ration demand",
+          "value": "11 food / 2 meat"
+        },
+        {
+          "detail": "3 people are currently flagged at risk.",
+          "id": "allocation_result",
+          "label": "Allocation result",
+          "value": "11 food / 0 meat"
+        },
+        {
+          "detail": "7 stipend keys remain available for receipt-backed follow-ons.",
+          "id": "stipend_coin",
+          "label": "Stipend coin",
+          "value": "0 coin"
+        }
+      ],
+      "steward_override_row": {
+        "carryForwardLabel": "Carried from prior turn",
+        "lodgingLevelLabel": "Institution",
+        "personId": "p_court_steward",
+        "personName": "Roger",
+        "provisioningClassLabel": "Retainer",
+        "rationLevelLabel": "Light",
+        "roleSummary": "Steward",
+        "seatSummary": "house:house:h_player:steward",
+        "serviceSummary": "sr_h_player_steward",
+        "statusLabel": "Reduced"
+      },
+      "steward_debug_entry_row": {
+        "activeSeatSummary": "house:house:h_player:steward",
+        "badgeSummary": "undernourishment_watch",
+        "carryForwardLabel": "Carried from prior turn",
+        "lodgingLevelLabel": "Institution",
+        "personId": "p_court_steward",
+        "personName": "Roger",
+        "provisioningClassLabel": "Retainer",
+        "rationLevelLabel": "Light",
+        "rationRuleId": "court.provisioning.ration.light.p_court_steward",
+        "seatSummary": "house:house:h_player:steward",
+        "serviceSummary": "sr_h_player_steward",
+        "statusLabel": "Reduced",
+        "stipendAmountLabel": "0 coin",
+        "stipendBasisLabel": "Family Service",
+        "stipendKey": "stipend:p_court_steward"
+      },
+      "steward_debug_stipend_row": {
+        "appliesReceiptLabel": "No",
+        "carryForwardLabel": "Carried from prior turn",
+        "paymentBasisLabel": "Family Service",
+        "personId": "p_court_steward",
+        "personName": "Roger",
+        "receiptCategoryLabel": "Expense Household Admin",
+        "ruleId": "court.provisioning.stipend.placeholder.family_service.p_court_steward",
+        "stipendAmountLabel": "0 coin",
+        "stipendKey": "stipend:p_court_steward"
+      }
+    },
+    "stipend_apply_result": null
+  },
+  "stipend_receipt_modes": {
+    "initial_tab": "player",
+    "source_seed": "court_provisioning_stipend_apply_v035",
+    "source_turn_index": 4,
+    "surface": {
+      "schema_version": "court_provisioning_view_v1",
+      "subtitle": "7 court members · 12 food / 2 meat requested · 3 coin stipends",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "summary_cards": [
+        {
+          "detail": "Risk watch: Edmund, Margery",
+          "id": "court_members",
+          "label": "Court roster",
+          "value": "7 court members"
+        },
+        {
+          "detail": "7 entries in deterministic allocation order.",
+          "id": "ration_demand",
+          "label": "Ration demand",
+          "value": "12 food / 2 meat"
+        },
+        {
+          "detail": "2 people are currently flagged at risk.",
+          "id": "allocation_result",
+          "label": "Allocation result",
+          "value": "12 food / 0 meat"
+        },
+        {
+          "detail": "7 stipend keys remain available for receipt-backed follow-ons.",
+          "id": "stipend_coin",
+          "label": "Stipend coin",
+          "value": "3 coin"
+        }
+      ],
+      "receipt_stipend_rows": [
+        {
+          "activeSeatSummary": "None",
+          "appliesReceiptLabel": "Receipt applies",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Realm Stipend",
+          "personId": "p_child1",
+          "personName": "Hugh",
+          "provisioningClassLabel": "Household Child",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "None",
+          "stipendAmountLabel": "2 coin",
+          "stipendKey": "stipend:p_child1"
+        },
+        {
+          "activeSeatSummary": "house:house:h_player:steward",
+          "appliesReceiptLabel": "Receipt applies",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Retainer Upkeep",
+          "personId": "p_court_steward",
+          "personName": "Hugh",
+          "provisioningClassLabel": "Retainer",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "serviceSummary": "sr_h_player_steward",
+          "stipendAmountLabel": "1 coin",
+          "stipendKey": "stipend:p_court_steward"
+        }
+      ],
+      "receipt_debug_stipend_rows": [
+        {
+          "appliesReceiptLabel": "Yes",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Realm Stipend",
+          "personId": "p_child1",
+          "personName": "Hugh",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.realm_stipend.p_child1",
+          "stipendAmountLabel": "2 coin",
+          "stipendKey": "stipend:p_child1"
+        },
+        {
+          "appliesReceiptLabel": "Yes",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Retainer Upkeep",
+          "personId": "p_court_steward",
+          "personName": "Hugh",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.retainer_upkeep.p_court_steward",
+          "stipendAmountLabel": "1 coin",
+          "stipendKey": "stipend:p_court_steward"
+        }
+      ],
+      "focus_debug_rows": [
+        {
+          "key": "allocation_order",
+          "label": "allocation_order",
+          "value": "p_child1, p_child2, p_clergy, p_court_steward, p_head, p_liege, p_spouse"
+        },
+        {
+          "key": "stipend_keys",
+          "label": "stipend_keys",
+          "value": "stipend:p_child1, stipend:p_child2, stipend:p_clergy, stipend:p_court_steward, stipend:p_head, stipend:p_liege, stipend:p_spouse"
+        },
+        {
+          "key": "total_requested_stipend_coin",
+          "label": "total_requested_stipend_coin",
+          "value": "3"
+        }
+      ]
+    },
+    "stipend_apply_result": {
+      "applied_stipend_keys": [
+        "stipend:p_child1",
+        "stipend:p_court_steward"
+      ],
+      "total_requested_coin": 3,
+      "total_paid_coin": 2,
+      "total_shortfall_coin": 1,
+      "receipt_snapshots": [
+        {
+          "category": "expense.household_admin",
+          "counterparty_id": "stipend:p_child1",
+          "delta": -2,
+          "rule_id": "court.provisioning.stipend.realm_stipend.p_child1",
+          "summary": "Provisioning stipend placeholder paid 2 coin to Hugh."
+        }
+      ]
+    }
+  },
+  "debug_registry_order": {
+    "initial_tab": "debug",
+    "source_seed": "lotm_v022_seed_001_baseline_extworld",
+    "source_turn_index": 0,
+    "surface": {
+      "schema_version": "court_provisioning_view_v1",
+      "subtitle": "8 court members · 14 food / 2 meat requested · 0 coin stipends",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "debug_keys": [
+        "provisioning_schema_version",
+        "stipend_registry_schema_version",
+        "generated_at_turn_index",
+        "person_ids",
+        "allocation_order",
+        "stipend_keys",
+        "total_requested_food_units",
+        "total_requested_meat_units",
+        "total_allocated_food_units",
+        "total_allocated_meat_units",
+        "total_requested_stipend_coin",
+        "at_risk_person_ids"
+      ],
+      "first_debug_rows": [
+        {
+          "key": "provisioning_schema_version",
+          "label": "provisioning_schema_version",
+          "value": "court_provisioning_view_v1"
+        },
+        {
+          "key": "stipend_registry_schema_version",
+          "label": "stipend_registry_schema_version",
+          "value": "court_stipend_registry_v1"
+        },
+        {
+          "key": "generated_at_turn_index",
+          "label": "generated_at_turn_index",
+          "value": "0"
+        },
+        {
+          "key": "person_ids",
+          "label": "person_ids",
+          "value": "p_child1, p_child2, p_child_0_3, p_clergy, p_court_steward, p_head, p_liege, p_spouse"
+        },
+        {
+          "key": "allocation_order",
+          "label": "allocation_order",
+          "value": "p_child1, p_child2, p_child_0_3, p_clergy, p_court_steward, p_head, p_liege, p_spouse"
+        },
+        {
+          "key": "stipend_keys",
+          "label": "stipend_keys",
+          "value": "stipend:p_child1, stipend:p_child2, stipend:p_child_0_3, stipend:p_clergy, stipend:p_court_steward, stipend:p_head, stipend:p_liege, stipend:p_spouse"
+        }
+      ],
+      "focus_debug_entry_rows": [
+        {
+          "activeSeatSummary": "house:house:h_player:steward",
+          "badgeSummary": "None",
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Court Quarters",
+          "personId": "p_court_steward",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Retainer",
+          "rationLevelLabel": "Standard",
+          "rationRuleId": "court.provisioning.ration.standard.p_court_steward",
+          "seatSummary": "house:house:h_player:steward",
+          "serviceSummary": "sr_h_player_steward",
+          "statusLabel": "Covered",
+          "stipendAmountLabel": "0 coin",
+          "stipendBasisLabel": "Family Service",
+          "stipendKey": "stipend:p_court_steward"
+        },
+        {
+          "activeSeatSummary": "None",
+          "badgeSummary": "undernourishment_risk",
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Manor House",
+          "personId": "p_head",
+          "personName": "Geoffrey",
+          "provisioningClassLabel": "Head Of House",
+          "rationLevelLabel": "Full",
+          "rationRuleId": "court.provisioning.ration.full.p_head",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "Shortfall",
+          "stipendAmountLabel": "0 coin",
+          "stipendBasisLabel": "Family Service",
+          "stipendKey": "stipend:p_head"
+        },
+        {
+          "activeSeatSummary": "None",
+          "badgeSummary": "undernourishment_risk",
+          "carryForwardLabel": "Seeded this turn",
+          "lodgingLevelLabel": "Manor House",
+          "personId": "p_spouse",
+          "personName": "Alice",
+          "provisioningClassLabel": "Household Family",
+          "rationLevelLabel": "Full",
+          "rationRuleId": "court.provisioning.ration.full.p_spouse",
+          "seatSummary": "None",
+          "serviceSummary": "None",
+          "statusLabel": "Shortfall",
+          "stipendAmountLabel": "0 coin",
+          "stipendBasisLabel": "Family Service",
+          "stipendKey": "stipend:p_spouse"
+        }
+      ],
+      "focus_debug_stipend_rows": [
+        {
+          "appliesReceiptLabel": "No",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_child1",
+          "personName": "Edmund",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.placeholder.family_service.p_child1",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_child1"
+        },
+        {
+          "appliesReceiptLabel": "No",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_child2",
+          "personName": "Oswin",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.placeholder.family_service.p_child2",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_child2"
+        },
+        {
+          "appliesReceiptLabel": "No",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "Family Service",
+          "personId": "p_child_0_3",
+          "personName": "Thomas",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.placeholder.family_service.p_child_0_3",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_child_0_3"
+        },
+        {
+          "appliesReceiptLabel": "No",
+          "carryForwardLabel": "Seeded this turn",
+          "paymentBasisLabel": "None",
+          "personId": "p_clergy",
+          "personName": "Robert",
+          "receiptCategoryLabel": "Expense Household Admin",
+          "ruleId": "court.provisioning.stipend.placeholder.none.p_clergy",
+          "stipendAmountLabel": "0 coin",
+          "stipendKey": "stipend:p_clergy"
+        }
+      ]
+    },
+    "stipend_apply_result": null
+  }
+}

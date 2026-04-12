@@ -1,0 +1,80 @@
+{
+  "kind": "court_provisioning_uat_pack_v1",
+  "release": "v0.3.5",
+  "cases": [
+    {
+      "scenario_id": "uat_provisioning_baseline_shortfall",
+      "fixture_case_id": "baseline_shortfall",
+      "initial_tab": "player",
+      "source_seed": "lotm_v022_seed_001_baseline_extworld",
+      "steps": [
+        "Open the court provisioning sheet from Decisions and keep the Player tab active.",
+        "Confirm the ration table starts with the head and spouse shortfall rows and that both still carry the undernourishment risk badge.",
+        "Check that the focused stipend rows remain placeholder-only in this baseline packet and do not imply any live write controls."
+      ],
+      "expected_cues": [
+        "undernourishment_risk",
+        "Shortfall",
+        "Placeholder only"
+      ]
+    },
+    {
+      "scenario_id": "uat_provisioning_carry_forward_overrides",
+      "fixture_case_id": "carry_forward_overrides",
+      "initial_tab": "player",
+      "source_seed": "court_provisioning_prior_defaults_v035",
+      "steps": [
+        "Open the court provisioning sheet and stay on the Player tab.",
+        "Find the steward row and confirm it is carried from the prior turn instead of seeded this turn.",
+        "Verify the retained override stays visible as Light / Institution for p_court_steward."
+      ],
+      "expected_cues": [
+        "Carried from prior turn",
+        "Light / Institution",
+        "p_court_steward"
+      ]
+    },
+    {
+      "scenario_id": "uat_provisioning_stipend_receipt_modes",
+      "fixture_case_id": "stipend_receipt_modes",
+      "initial_tab": "player",
+      "source_seed": "court_provisioning_stipend_apply_v035",
+      "steps": [
+        "Open the court provisioning sheet and review the Player tab stipend section.",
+        "Confirm the receipt-backed rows expose Realm Stipend and Retainer Upkeep rather than placeholder-only copy.",
+        "Check that the summary card shows 3 coin requested while the fixture receipt evidence still records only the 2 coin payment that landed."
+      ],
+      "expected_cues": [
+        "Receipt applies",
+        "Realm Stipend",
+        "3 coin"
+      ]
+    },
+    {
+      "scenario_id": "uat_provisioning_debug_registry_order",
+      "fixture_case_id": "debug_registry_order",
+      "initial_tab": "debug",
+      "source_seed": "lotm_v022_seed_001_baseline_extworld",
+      "steps": [
+        "Open the court provisioning sheet and switch to the Debug tab.",
+        "Confirm the summary rows begin with provisioning schema, stipend registry schema, generated turn index, person ids, allocation order, and stipend keys in that order.",
+        "Check that the focused debug entry rows still expose the steward, head, and spouse with stable ids and rule ids."
+      ],
+      "expected_cues": [
+        "provisioning_schema_version",
+        "allocation_order",
+        "stipend_keys"
+      ]
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact_relpath": "tests/fixtures/court_provisioning_snapshot_v0.3.5.json",
+      "label": "court provisioning fixture"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "label": "accepted playability preset crosswalk"
+    }
+  ]
+}
