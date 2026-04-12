@@ -1,0 +1,63 @@
+{
+  "anchor": {
+    "manor_id": "manor_hx_26597",
+    "helper_text": "Player tab keeps the current manor's rights and upkeep honest while the debug tab exposes the frozen world rows directly.",
+    "maintenance_summary_note": "Maintenance, building, and rights summaries are sourced from the accepted economy maintenance read model.",
+    "maintenance_totals": {
+      "coin_cost": 4,
+      "labor_required": 7,
+      "building_coin_cost": 0,
+      "building_labor_required": 0,
+      "franchise_right_coin_cost": 4,
+      "franchise_right_labor_required": 4,
+      "service_right_coin_cost": 0,
+      "service_right_labor_required": 3,
+      "building_count": 0,
+      "right_count": 7,
+      "entry_count": 7
+    },
+    "nearest_manor_ids": [
+      "manor_hx_28840",
+      "manor_hx_28841",
+      "manor_hx_29126",
+      "manor_hx_30811",
+      "manor_hx_31093"
+    ],
+    "terrain_order": [
+      "forest",
+      "marsh",
+      "lake",
+      "plains"
+    ],
+    "first_hex_ids": [
+      "hx_25193",
+      "hx_25473",
+      "hx_25474",
+      "hx_25475",
+      "hx_25476",
+      "hx_25754"
+    ]
+  },
+  "routed": {
+    "manor_id": "manor_hx_27972",
+    "helper_text": "World detail is available for every routed manor here. Economy maintenance remains anchored to the current manor chronicle unless a later seam widens it.",
+    "maintenance_summary_note": "Maintenance, building, and rights summaries are only available for the current manor chronicle in this read model.",
+    "maintenance_totals": null,
+    "nearest_manor_ids": [
+      "manor_hx_27973",
+      "manor_hx_28811",
+      "manor_hx_29096",
+      "manor_hx_28538",
+      "manor_hx_29371"
+    ],
+    "terrain_order": [
+      "plains"
+    ],
+    "first_hex_ids": [
+      "hx_27972",
+      "hx_28252",
+      "hx_28253",
+      "hx_28532"
+    ]
+  }
+}

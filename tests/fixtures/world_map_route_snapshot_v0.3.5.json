@@ -1,0 +1,87 @@
+{
+  "route": {
+    "schema_version": "external_map_renderer_surface_v1",
+    "map_bundle_id": "xmap_alpha_v1",
+    "renderer_host_id": "world-map-renderer-host",
+    "manifest_schema_version": "xmap_alpha_manifest_v1",
+    "manor_count": 387,
+    "holding_count": 121,
+    "route_edge_count": 996,
+    "anchor_manor_id": "manor_hx_26597",
+    "target": {
+      "manor_id": "manor_hx_26597",
+      "manor_label": "Current manor",
+      "holding_id": "church_fief_hx_28841",
+      "holding_label": "church_fief_hx_28841",
+      "county_id": "c_2",
+      "county_label": "Larkspire"
+    },
+    "helper_text": "Frozen xmap_alpha_v1 routing is active here. The route now drives the kingdom map and Manor View through accepted world seams."
+  },
+  "routed_selection": {
+    "selected_manor_id": "manor_hx_27972",
+    "selected_manor_label": "Hx 27972",
+    "player_holding_manor_ids": [
+      "manor_hx_26597",
+      "manor_hx_28841"
+    ],
+    "liege_seat_manor_id": "manor_hx_42904",
+    "first_marker_ids": [
+      "manor_hx_26597",
+      "manor_hx_27972",
+      "manor_hx_27973",
+      "manor_hx_28538",
+      "manor_hx_28811",
+      "manor_hx_28840",
+      "manor_hx_28841",
+      "manor_hx_29096"
+    ],
+    "first_debug_row_ids": [
+      "manor_hx_26597",
+      "manor_hx_27972",
+      "manor_hx_27973",
+      "manor_hx_28538",
+      "manor_hx_28811",
+      "manor_hx_28840",
+      "manor_hx_28841",
+      "manor_hx_29096"
+    ],
+    "selected_marker": {
+      "countyLabel": "Wyrmford",
+      "holdingLabel": "Barony · Hx 27972",
+      "isAnchorManor": false,
+      "isLiegeSeat": false,
+      "isPlayerHolding": false,
+      "isSelected": true,
+      "leftPct": 30.851851851851844,
+      "manorId": "manor_hx_27972",
+      "manorLabel": "Hx 27972",
+      "ownerLabel": "Baron of Hx 27972",
+      "riverExposureLabel": "No mapped river exposure.",
+      "roadExposureLabel": "Roads: local (3 hexes).",
+      "seatHexId": "hx_27972",
+      "topPct": 9.963963963963964,
+      "target": {
+        "countyId": "c_6",
+        "holdingId": "barony_hx_27972",
+        "manorId": "manor_hx_27972",
+        "manorLabel": "Hx 27972"
+      }
+    },
+    "selected_debug_row": {
+      "countyLabel": "Wyrmford",
+      "flags": [
+        "Selected"
+      ],
+      "holdingLabel": "Barony · Hx 27972",
+      "manorId": "manor_hx_27972",
+      "manorLabel": "Hx 27972",
+      "ownerLabel": "Baron of Hx 27972",
+      "riverExposure": "No mapped river exposure.",
+      "roadExposure": "Roads: local (3 hexes).",
+      "seatHexId": "hx_27972",
+      "seatQ": 153,
+      "seatR": 99
+    }
+  }
+}

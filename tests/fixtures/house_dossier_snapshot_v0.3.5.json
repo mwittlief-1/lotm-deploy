@@ -1,0 +1,137 @@
+{
+  "known_house": {
+    "house_id": "h_ext_01",
+    "house_name": "Falkmere",
+    "knownness_label": "Known House",
+    "knownness_sources": [
+      "relevance"
+    ],
+    "tier_label": "Knight",
+    "relevance_tier_label": "Tier1",
+    "relationship_band_label": "Wary",
+    "holdings_count": 1,
+    "ledger_band_label": "Tight",
+    "household_member_count": 2,
+    "debug_keys": [
+      "schema_version",
+      "house_id",
+      "house_name",
+      "tier",
+      "relevance_tier",
+      "relevance_reasons",
+      "knownness",
+      "knownness_sources",
+      "kinship_summary",
+      "kinship_tags",
+      "relationship_band",
+      "relationship_summary",
+      "household_scope",
+      "household_member_count",
+      "living_member_count",
+      "child_count",
+      "has_male_heir",
+      "heiress_possible",
+      "holdings_count",
+      "holdings_band",
+      "anchor_manor_id",
+      "known_manor_ids",
+      "source_kind",
+      "ledger_band",
+      "ledger_trend"
+    ]
+  },
+  "marriage_prospect": {
+    "prospect": {
+      "from_house_id": "h_ext_15",
+      "to_house_id": "h_player"
+    },
+    "dossier": {
+      "house_id": "h_ext_15",
+      "house_name": "Caldwell",
+      "knownness_label": "Prospect House",
+      "knownness_sources": [
+        "prospect"
+      ],
+      "tier_label": "Knight",
+      "relevance_tier_label": "Tier1",
+      "relationship_band_label": "Hostile",
+      "holdings_count": 3,
+      "ledger_band_label": "Stable",
+      "household_member_count": 2,
+      "debug_keys": [
+        "schema_version",
+        "house_id",
+        "house_name",
+        "tier",
+        "relevance_tier",
+        "relevance_reasons",
+        "knownness",
+        "knownness_sources",
+        "kinship_summary",
+        "kinship_tags",
+        "relationship_band",
+        "relationship_summary",
+        "household_scope",
+        "household_member_count",
+        "living_member_count",
+        "child_count",
+        "has_male_heir",
+        "heiress_possible",
+        "holdings_count",
+        "holdings_band",
+        "anchor_manor_id",
+        "known_manor_ids",
+        "source_kind",
+        "ledger_band",
+        "ledger_trend"
+      ]
+    }
+  },
+  "grant_prospect": {
+    "prospect": {
+      "from_house_id": "h_ext_02",
+      "to_house_id": "h_player"
+    },
+    "dossier": {
+      "house_id": "h_ext_02",
+      "house_name": "Caldwell",
+      "knownness_label": "Prospect House",
+      "knownness_sources": [
+        "prospect"
+      ],
+      "tier_label": "Knight",
+      "relevance_tier_label": "Tier1",
+      "relationship_band_label": "Steady",
+      "holdings_count": 1,
+      "ledger_band_label": "Tight",
+      "household_member_count": 1,
+      "debug_keys": [
+        "schema_version",
+        "house_id",
+        "house_name",
+        "tier",
+        "relevance_tier",
+        "relevance_reasons",
+        "knownness",
+        "knownness_sources",
+        "kinship_summary",
+        "kinship_tags",
+        "relationship_band",
+        "relationship_summary",
+        "household_scope",
+        "household_member_count",
+        "living_member_count",
+        "child_count",
+        "has_male_heir",
+        "heiress_possible",
+        "holdings_count",
+        "holdings_band",
+        "anchor_manor_id",
+        "known_manor_ids",
+        "source_kind",
+        "ledger_band",
+        "ledger_trend"
+      ]
+    }
+  }
+}

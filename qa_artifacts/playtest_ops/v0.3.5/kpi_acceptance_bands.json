@@ -1,0 +1,321 @@
+{
+  "hash": "aa95bb30f339b9696a2476346d64da1603bb8174d5c3d707a2027f49b1da44cf",
+  "kind": "kpi_acceptance_bands_v1",
+  "metric_bands": [
+    {
+      "acceptance_ids": [
+        "kpi_prudent_baseline"
+      ],
+      "comparison_rails": [
+        {
+          "band": {
+            "max": 19,
+            "min": 19
+          },
+          "label": "Stable-clear prudent comparison",
+          "note": "Keep the alternate prudent scenario available as a lower-pressure coin rail rather than a replacement target.",
+          "preset_ids": [
+            "stable_clear_prudent"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[stable_clear_prudent_turns_15].ending.coin",
+            "scenario_id": "stable_clear_prudent_turns_15"
+          },
+          "unit": "coin",
+          "value": 19
+        }
+      ],
+      "metric_id": "net_coin",
+      "summary": "Net coin targets stay anchored to the calm prudent packet, while the stable-clear prudent scenario remains the lower-pressure comparison rail.",
+      "targets": [
+        {
+          "band": {
+            "max": 118,
+            "min": 118
+          },
+          "label": "Low-pressure prudent baseline",
+          "note": "Use the calm packet as the exact end-state coin target for v0.3.5 closeout review.",
+          "preset_ids": [
+            "baseline_low_pressure_prudent"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[baseline_low_pressure_prudent].expected_end_state.coin",
+            "scenario_id": "baseline_low_pressure_prudent"
+          },
+          "unit": "coin",
+          "value": 118
+        }
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "kpi_arrears_pressure"
+      ],
+      "comparison_rails": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Builder-forward 15-turn DOE share",
+          "note": "Keep the broader DOE share visible so a passing packet target does not hide softer aggregate drift.",
+          "preset_ids": [
+            "arrears_pressure_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+            "field_path": "summary.by_policy[builder-forward].arrears.any_seen_share",
+            "policy_id": "builder-forward"
+          },
+          "unit": "share",
+          "value": 1
+        }
+      ],
+      "metric_id": "arrears_incidence",
+      "summary": "Arrears pressure should stay explicit on the builder packet, with the accepted 15-turn builder DOE summary preserving the share-based comparison rail.",
+      "targets": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Arrears-pressure builder packet",
+          "note": "This short-run pressure packet should continue to surface arrears deterministically.",
+          "preset_ids": [
+            "arrears_pressure_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder_turns_15].indicators.any_arrears_seen",
+            "scenario_id": "arrears_pressure_builder_turns_15"
+          },
+          "unit": "share",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "kpi_dispossession_reference"
+      ],
+      "comparison_rails": [
+        {
+          "band": {
+            "max": 0.375,
+            "min": 0.375
+          },
+          "label": "Builder-forward 30-turn DOE rate",
+          "note": "The accepted long-run comparison rail keeps the median game-over turn at 26.",
+          "preset_ids": [
+            "dispossession_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/summary.json",
+            "field_path": "summary.by_policy[builder-forward].dispossession.dispossession_rate",
+            "policy_id": "builder-forward"
+          },
+          "unit": "share",
+          "value": 0.375
+        }
+      ],
+      "metric_id": "dispossession",
+      "summary": "The long-run dispossession reference stays locked to the accepted builder scenario, with the 30-turn DOE rate preserved as the comparison rail.",
+      "targets": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Dispossession long-run builder",
+          "note": "The exact target remains dispossession on the locked reference scenario at turn 26.",
+          "preset_ids": [
+            "dispossession_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[dispossession_builder_turns_30].indicators.dispossessed",
+            "scenario_id": "dispossession_builder_turns_30"
+          },
+          "unit": "share",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "kpi_arrears_pressure",
+        "kpi_dispossession_reference"
+      ],
+      "comparison_rails": [
+        {
+          "band": {
+            "max": 402,
+            "min": 402
+          },
+          "label": "Arrears-pressure builder packet",
+          "note": "Keep a non-zero comparison rail so shortage visibility stays distinguishable from arrears-only pressure.",
+          "preset_ids": [
+            "arrears_pressure_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[arrears_pressure_builder].expected_end_state.bushels_stored",
+            "scenario_id": "arrears_pressure_builder"
+          },
+          "unit": "count",
+          "value": 402
+        }
+      ],
+      "metric_id": "shortages",
+      "summary": "Shortage review stays anchored to the explicit weather packet target, while the arrears-pressure packet remains the less-severe comparison rail for food stores.",
+      "targets": [
+        {
+          "band": {
+            "max": 0,
+            "min": 0
+          },
+          "label": "Weather-shortage builder packet",
+          "note": "Treat zero ending food stores as the exact shortage target for the explicit high-pressure packet.",
+          "preset_ids": [
+            "weather_shortage_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+            "field_path": "scenarios[weather_shortage_builder].expected_end_state.bushels_stored",
+            "scenario_id": "weather_shortage_builder"
+          },
+          "unit": "count",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "acceptance_ids": [
+        "kpi_manor_count_baseline"
+      ],
+      "comparison_rails": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Builder-forward 15-turn DOE distribution",
+          "note": "The short-run DOE rail should remain fully concentrated on one manor.",
+          "preset_ids": [
+            "baseline_low_pressure_prudent"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+            "field_path": "summary.by_policy[builder-forward].manor_count_distribution[manor_count=1].share",
+            "policy_id": "builder-forward"
+          },
+          "unit": "count",
+          "value": 1
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Builder-forward 30-turn DOE distribution",
+          "note": "The long-run DOE rail should remain fully concentrated on one manor.",
+          "preset_ids": [
+            "dispossession_builder"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/summary.json",
+            "field_path": "summary.by_policy[builder-forward].manor_count_distribution[manor_count=1].share",
+            "policy_id": "builder-forward"
+          },
+          "unit": "count",
+          "value": 1
+        }
+      ],
+      "metric_id": "manor_count_growth",
+      "summary": "Manor-count growth remains frozen on the single-manor baseline targets, with both accepted DOE summaries preserving the same one-manor comparison rail.",
+      "targets": [
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Single-manor distribution baseline",
+          "note": "Use the accepted single-manor regression scenario as the exact growth target.",
+          "preset_ids": [
+            "baseline_low_pressure_prudent"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[single_manor_distribution_baseline].ending.manor_count",
+            "scenario_id": "single_manor_distribution_baseline"
+          },
+          "unit": "count",
+          "value": 1
+        },
+        {
+          "band": {
+            "max": 1,
+            "min": 1
+          },
+          "label": "Stable-clear prudent manor-count rail",
+          "note": "Keep the secondary prudent regression point frozen at one manor as well.",
+          "preset_ids": [
+            "stable_clear_prudent"
+          ],
+          "source": {
+            "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+            "field_path": "scenarios[stable_clear_prudent_turns_15].ending.manor_count",
+            "scenario_id": "stable_clear_prudent_turns_15"
+          },
+          "unit": "count",
+          "value": 1
+        }
+      ]
+    }
+  ],
+  "qa_flow": {
+    "commands": [
+      "npm run qa",
+      "npm run preflight",
+      "npm run seed:replay:batch",
+      "node node_modules/tsx/dist/cli.mjs scripts/playabilityPresetPack.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts"
+    ],
+    "note": "Refresh the accepted regression and preset artifacts first, then rebuild this band file so targets and comparison rails never drift onto a second scenario catalog."
+  },
+  "release": "v0.3.5",
+  "source_artifacts": [
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+      "kind": "playability_preset_pack_v1",
+      "label": "playability preset crosswalk"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+      "hash": "fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7",
+      "kind": "economy_fiscal_regression_seed_pack_v1",
+      "label": "locked regression seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+      "hash": "2ef80e7c39bae835befdc9adc5b18549774d9822a664e9c498985298e145d5af",
+      "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
+      "label": "locked receipt-bundle seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_15/summary.json",
+      "hash": "580114e27c935040b8533cebc03bde8e1a0466102d900d6c77fc5fdcfe7cf8a2",
+      "kind": "economy_fiscal_doe_summary_v1",
+      "label": "15-turn DOE summary"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/turns_30_builder-forward/summary.json",
+      "hash": "2c5b5878bb7caee5f698723fafd78d15a760a69e98b46c0fcbd7f8792984a27f",
+      "kind": "economy_fiscal_doe_summary_v1",
+      "label": "30-turn builder DOE summary"
+    }
+  ]
+}
