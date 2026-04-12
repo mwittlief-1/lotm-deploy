@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import type { CourtProvisioningSurface } from "../../src/ui/courtProvisioningView";
 import { DecisionsPanel } from "../../src/ui/panels/DecisionsPanel";
 import type { CourtDecisionBudgetSurface } from "../../src/ui/playScreenCourtBudget";
 import type { ObligationsCounterpartyContractSection } from "../../src/ui/playScreenObligations";
@@ -136,6 +137,85 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
   ];
 }
 
+function createCourtProvisioningSurface(): CourtProvisioningSurface {
+  return {
+    allocationRows: [
+      {
+        allocationPriority: 0,
+        badgeLabels: ["undernourishment_risk"],
+        personId: "p_head",
+        personName: "Roger",
+        rationLevelLabel: "Full",
+        requestLabel: "3 food / 1 meat",
+        shortfallLabel: "0 food / 1 meat",
+        statusLabel: "Shortfall"
+      }
+    ],
+    debugEntryRows: [],
+    debugRows: [],
+    debugStipendRows: [],
+    helperText:
+      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+    overrideRows: [
+      {
+        carryForwardLabel: "Seeded this turn",
+        lodgingLevelLabel: "Manor House",
+        personId: "p_head",
+        personName: "Roger",
+        provisioningClassLabel: "Head Of House",
+        rationLevelLabel: "Full",
+        roleSummary: "Head of House",
+        seatSummary: "None",
+        serviceSummary: "None",
+        statusLabel: "Shortfall"
+      }
+    ],
+    schemaVersion: "court_provisioning_view_v1",
+    stipendRows: [
+      {
+        activeSeatSummary: "None",
+        appliesReceiptLabel: "Placeholder only",
+        carryForwardLabel: "Seeded this turn",
+        paymentBasisLabel: "Family Service",
+        personId: "p_head",
+        personName: "Roger",
+        provisioningClassLabel: "Head Of House",
+        receiptCategoryLabel: "Expense Household Admin",
+        serviceSummary: "None",
+        stipendAmountLabel: "0 coin",
+        stipendKey: "stipend:p_head"
+      }
+    ],
+    subtitle: "1 court members · 3 food / 1 meat requested · 0 coin stipends",
+    summaryCards: [
+      {
+        detail: "Risk watch: Roger",
+        id: "court_members",
+        label: "Court roster",
+        value: "1 court members"
+      },
+      {
+        detail: "1 entries in deterministic allocation order.",
+        id: "ration_demand",
+        label: "Ration demand",
+        value: "3 food / 1 meat"
+      },
+      {
+        detail: "1 people are currently flagged at risk.",
+        id: "allocation_result",
+        label: "Allocation result",
+        value: "3 food / 0 meat"
+      },
+      {
+        detail: "1 stipend keys remain available for receipt-backed follow-ons.",
+        id: "stipend_coin",
+        label: "Stipend coin",
+        value: "0 coin"
+      }
+    ]
+  };
+}
+
 function createProps(): React.ComponentProps<typeof DecisionsPanel> {
   return {
     accruedThisTurn: null,
@@ -184,11 +264,13 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
       improvements: []
     },
     courtDecisionBudget: createCourtDecisionBudget(),
+    courtProvisioningSurface: createCourtProvisioningSurface(),
     marriageWindow: null,
     maxLaborShift: 2,
     obligations: { war_levy_due: null },
     obligationsSections: createObligationsSections(),
     onExportFullRunJson: () => undefined,
+    onOpenCourtProvisioning: () => undefined,
     onExportRunSummary: () => undefined,
     onOpenLog: () => undefined,
     onOpenObligationsDetails: () => undefined,
@@ -241,6 +323,10 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Cost 2");
     expect(html).toContain("Used 2");
     expect(html).toContain("Highest cost");
+    expect(html).toContain("Court provisioning");
+    expect(html).toContain("Open provisioning sheet");
+    expect(html).toContain("Ration demand");
+    expect(html).toContain("3 food / 1 meat");
     expect(html).toContain("Reference price:");
     expect(html).toContain("1 coin / 10 bushels");
     expect(html).toContain("Fixed reference cap: 240 bushels");

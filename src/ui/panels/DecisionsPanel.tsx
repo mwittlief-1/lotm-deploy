@@ -4,6 +4,7 @@ import type {
   ObligationsCounterpartyContractSection,
   ObligationsModalFocus
 } from "../playScreenObligations";
+import type { CourtProvisioningSurface } from "../courtProvisioningView";
 import {
   clearObligationGestureDecision,
   obligationGesturePaymentModeLabel,
@@ -50,11 +51,13 @@ type DecisionsPanelProps = {
   laborRequested: number;
   manor: any;
   courtDecisionBudget: CourtDecisionBudgetSurface | null;
+  courtProvisioningSurface: CourtProvisioningSurface | null;
   marriageWindow: MarriageWindow | null;
   maxLaborShift: number;
   obligations: any;
   obligationsSections: ObligationsCounterpartyContractSection[];
   onExportFullRunJson: () => void;
+  onOpenCourtProvisioning: () => void;
   onExportRunSummary: () => void;
   onOpenLog?: () => void;
   onOpenObligationsDetails: (focus: ObligationsModalFocus) => void;
@@ -265,11 +268,13 @@ export function DecisionsPanel({
   laborRequested,
   manor,
   courtDecisionBudget,
+  courtProvisioningSurface,
   marriageWindow,
   maxLaborShift,
   obligations,
   obligationsSections,
   onExportFullRunJson,
+  onOpenCourtProvisioning,
   onExportRunSummary,
   onOpenLog,
   onOpenObligationsDetails,
@@ -370,6 +375,42 @@ export function DecisionsPanel({
                 </div>
                 <div style={{ fontSize: 12, whiteSpace: "nowrap" }}>Cost {entry.cost}</div>
                 <div style={{ fontSize: 12, whiteSpace: "nowrap", fontWeight: entry.spent > 0 ? 700 : 500 }}>Used {entry.spent}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {courtProvisioningSurface ? (
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, marginTop: 12, padding: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75, textTransform: "uppercase" }}>
+                Court provisioning
+              </div>
+              <div style={{ marginTop: 4, fontSize: 24, fontWeight: 700 }}>{courtProvisioningSurface.summaryCards[0]?.value ?? "Provisioning available"}</div>
+            </div>
+            <button onClick={onOpenCourtProvisioning} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+              Open provisioning sheet
+            </button>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>
+            {courtProvisioningSurface.helperText}
+          </div>
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", marginTop: 10 }}>
+            {courtProvisioningSurface.summaryCards.slice(1).map((card) => (
+              <div
+                key={card.id}
+                style={{
+                  padding: "8px 10px",
+                  border: "1px solid rgba(172, 143, 100, 0.28)",
+                  borderRadius: 12,
+                  background: "rgba(255, 250, 241, 0.78)"
+                }}
+              >
+                <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.72, textTransform: "uppercase" }}>{card.label}</div>
+                <div style={{ marginTop: 4, fontWeight: 700 }}>{card.value}</div>
+                <div style={{ marginTop: 4, fontSize: 12, opacity: 0.78, lineHeight: 1.4 }}>{card.detail}</div>
               </div>
             ))}
           </div>

@@ -36,6 +36,7 @@ import {
   uncertaintyLabel as labelUncertainty
 } from "../playViewModel";
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
+import { buildCourtProvisioningSurface } from "../courtProvisioningView";
 import { buildMaintenancePressureSurface } from "../maintenancePressureView";
 import {
   buildPersonCardSurface,
@@ -103,6 +104,7 @@ import {
 } from "../playScreenTheme";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
+import { CourtProvisioningPanel } from "./CourtProvisioningPanel";
 import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
@@ -180,6 +182,7 @@ export function PlayScreen({
   const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
   const [personCardRoute, setPersonCardRoute] = useState<PersonCardRoute | null>(null);
+  const [showCourtProvisioning, setShowCourtProvisioning] = useState(false);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
@@ -247,6 +250,7 @@ export function PlayScreen({
     () => (personCardRoute ? buildPersonCardSurface(ctx.preview_state, personCardRoute.personId) : null),
     [ctx.preview_state, personCardRoute]
   );
+  const courtProvisioningSurface = useMemo(() => buildCourtProvisioningSurface(ctx.preview_state), [ctx.preview_state]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
@@ -699,6 +703,14 @@ export function PlayScreen({
     setPersonCardRoute(null);
   }
 
+  function openCourtProvisioning() {
+    setShowCourtProvisioning(true);
+  }
+
+  function closeCourtProvisioning() {
+    setShowCourtProvisioning(false);
+  }
+
   function closeReceiptViewer() {
     setReceiptViewerRoute(null);
   }
@@ -887,11 +899,13 @@ export function PlayScreen({
         laborRequested={laborRequested}
         manor={m}
         courtDecisionBudget={courtDecisionBudget}
+        courtProvisioningSurface={courtProvisioningSurface}
         marriageWindow={mw}
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
         obligationsSections={allObligationsSections}
         onExportFullRunJson={onExportFullRunJson}
+        onOpenCourtProvisioning={openCourtProvisioning}
         onExportRunSummary={onExportRunSummary}
         onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
@@ -1045,6 +1059,15 @@ export function PlayScreen({
           onJumpToDecisions={jumpToObligationsDecisions}
           sections={visibleObligationsSections}
         />
+      </ModalSheet>
+
+      <ModalSheet
+        onClose={closeCourtProvisioning}
+        open={showCourtProvisioning && courtProvisioningSurface !== null}
+        subtitle={courtProvisioningSurface?.subtitle}
+        title="Court provisioning"
+      >
+        {courtProvisioningSurface ? <CourtProvisioningPanel surface={courtProvisioningSurface} /> : null}
       </ModalSheet>
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
