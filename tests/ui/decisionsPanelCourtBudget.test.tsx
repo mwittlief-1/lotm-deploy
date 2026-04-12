@@ -2,7 +2,9 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { createNewRun, proposeTurn } from "../../src/sim";
 import type { CourtProvisioningSurface } from "../../src/ui/courtProvisioningView";
+import { buildOutboundMarriageSurface } from "../../src/ui/outboundMarriageView";
 import { DecisionsPanel } from "../../src/ui/panels/DecisionsPanel";
 import type { CourtDecisionBudgetSurface } from "../../src/ui/playScreenCourtBudget";
 import type { ObligationsCounterpartyContractSection } from "../../src/ui/playScreenObligations";
@@ -216,6 +218,12 @@ function createCourtProvisioningSurface(): CourtProvisioningSurface {
   };
 }
 
+function createOutboundMarriageSurface() {
+  const state = createNewRun("ui_r5005_t05_decisions_panel");
+  const ctx = proposeTurn(state as any);
+  return buildOutboundMarriageSurface(ctx.preview_state, ctx.marriage_window);
+}
+
 function createProps(): React.ComponentProps<typeof DecisionsPanel> {
   return {
     accruedThisTurn: null,
@@ -269,8 +277,10 @@ function createProps(): React.ComponentProps<typeof DecisionsPanel> {
     maxLaborShift: 2,
     obligations: { war_levy_due: null },
     obligationsSections: createObligationsSections(),
+    outboundMarriageSurface: createOutboundMarriageSurface(),
     onExportFullRunJson: () => undefined,
     onOpenCourtProvisioning: () => undefined,
+    onOpenOutboundMarriage: () => undefined,
     onExportRunSummary: () => undefined,
     onOpenLog: () => undefined,
     onOpenObligationsDetails: () => undefined,
@@ -325,6 +335,8 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Highest cost");
     expect(html).toContain("Court provisioning");
     expect(html).toContain("Open provisioning sheet");
+    expect(html).toContain("Outbound marriage");
+    expect(html).toContain("Open match sheet");
     expect(html).toContain("Ration demand");
     expect(html).toContain("3 food / 1 meat");
     expect(html).toContain("Reference price:");

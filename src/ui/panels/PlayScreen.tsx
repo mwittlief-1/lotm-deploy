@@ -38,6 +38,7 @@ import {
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
 import { buildCourtProvisioningSurface } from "../courtProvisioningView";
 import { buildMaintenancePressureSurface } from "../maintenancePressureView";
+import { buildOutboundMarriageSurface } from "../outboundMarriageView";
 import {
   buildPersonCardSurface,
   createPersonCardRoute,
@@ -115,6 +116,7 @@ import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
 import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
+import { OutboundMarriagePanel } from "./OutboundMarriagePanel";
 import { PersonCardPanel } from "./PersonCardPanel";
 import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
@@ -181,6 +183,7 @@ export function PlayScreen({
 }: PlayScreenProps) {
   const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
+  const [showOutboundMarriage, setShowOutboundMarriage] = useState(false);
   const [personCardRoute, setPersonCardRoute] = useState<PersonCardRoute | null>(null);
   const [showCourtProvisioning, setShowCourtProvisioning] = useState(false);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
@@ -251,6 +254,7 @@ export function PlayScreen({
     [ctx.preview_state, personCardRoute]
   );
   const courtProvisioningSurface = useMemo(() => buildCourtProvisioningSurface(ctx.preview_state), [ctx.preview_state]);
+  const outboundMarriageSurface = useMemo(() => buildOutboundMarriageSurface(ctx.preview_state, mw), [ctx.preview_state, mw]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
@@ -711,6 +715,14 @@ export function PlayScreen({
     setShowCourtProvisioning(false);
   }
 
+  function openOutboundMarriage() {
+    setShowOutboundMarriage(true);
+  }
+
+  function closeOutboundMarriage() {
+    setShowOutboundMarriage(false);
+  }
+
   function closeReceiptViewer() {
     setReceiptViewerRoute(null);
   }
@@ -904,8 +916,10 @@ export function PlayScreen({
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
         obligationsSections={allObligationsSections}
+        outboundMarriageSurface={outboundMarriageSurface}
         onExportFullRunJson={onExportFullRunJson}
         onOpenCourtProvisioning={openCourtProvisioning}
+        onOpenOutboundMarriage={openOutboundMarriage}
         onExportRunSummary={onExportRunSummary}
         onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
@@ -1068,6 +1082,22 @@ export function PlayScreen({
         title="Court provisioning"
       >
         {courtProvisioningSurface ? <CourtProvisioningPanel surface={courtProvisioningSurface} /> : null}
+      </ModalSheet>
+
+      <ModalSheet
+        onClose={closeOutboundMarriage}
+        open={showOutboundMarriage && outboundMarriageSurface !== null}
+        subtitle={outboundMarriageSurface?.subtitle}
+        title="Outbound marriage"
+      >
+        {outboundMarriageSurface ? (
+          <OutboundMarriagePanel
+            onClearScout={() => setDecisions((current: any) => ({ ...current, marriage: { kind: "marriage", action: "none" } }))}
+            onQueueScout={() => setDecisions((current: any) => ({ ...current, marriage: { kind: "marriage", action: "scout" } }))}
+            scoutQueued={decisions.marriage.action === "scout"}
+            surface={outboundMarriageSurface}
+          />
+        ) : null}
       </ModalSheet>
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>
