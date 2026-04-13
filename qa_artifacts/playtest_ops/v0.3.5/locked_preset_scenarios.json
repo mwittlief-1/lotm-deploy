@@ -1,0 +1,1828 @@
+{
+  "hash": "233e5f7958a90c157687786965ab501465513709dd503339dd582889998ee127",
+  "kind": "locked_preset_scenarios_v1",
+  "qa_flow": {
+    "commands": [
+      "npm run qa",
+      "npm run preflight",
+      "npm run seed:replay:batch",
+      "node node_modules/tsx/dist/cli.mjs scripts/maintenancePressureScenarios.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/lockedPresetScenarios.ts"
+    ],
+    "note": "Refresh the upstream preset, maintenance, and UAT seams first, then rebuild this manifest so direct seed-derived surfaces and checked-in review packets stay aligned without creating a second init path."
+  },
+  "release": "v0.3.5",
+  "scenarios": [
+    {
+      "acceptance_ids": [
+        "baseline_packet_review",
+        "kpi_prudent_baseline",
+        "kpi_manor_count_baseline",
+        "runaway_coin_runaway",
+        "runaway_manor_growth_frozen"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "8 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "14 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "14 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Beatrice Glenholt"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "baseline_low_pressure_prudent",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_bushels_stored",
+              "label": "Ending bushels stored",
+              "value": "1192"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "118"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "3"
+            },
+            {
+              "cue_id": "ending_arrears_bushels",
+              "label": "Ending arrears bushels",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_arrears_coin",
+              "label": "Ending arrears coin",
+              "value": "0"
+            }
+          ],
+          "expectation_id": "packet_review:baseline_low_pressure_prudent",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_ref": "baseline_low_pressure_prudent",
+          "summary": "Use this as the least noisy reference packet when checking whether the playtest bundle is easy to read and name correctly.",
+          "surface_ids": [
+            "gameplay_decisions_exports",
+            "turn_report_summary",
+            "run_log_screen"
+          ],
+          "visibility_mode": "packet_review"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "ending_food_stores",
+              "label": "Ending food stores",
+              "value": "1192"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "118"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "3"
+            },
+            {
+              "cue_id": "ending_manor_count",
+              "label": "Ending manor count",
+              "value": "1"
+            },
+            {
+              "cue_id": "game_over_turn",
+              "label": "Game-over turn",
+              "value": "none"
+            },
+            {
+              "cue_id": "game_over_reason",
+              "label": "Game-over reason",
+              "value": "none"
+            },
+            {
+              "cue_id": "dispossessed",
+              "label": "Dispossessed",
+              "value": "false"
+            }
+          ],
+          "expectation_id": "comparison:single_manor_distribution_baseline",
+          "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+          "source_ref": "single_manor_distribution_baseline",
+          "summary": "Use the report and run log as the stable comparison rail for this preset's accepted ending state.",
+          "surface_ids": [
+            "turn_report_summary",
+            "run_log_screen"
+          ],
+          "visibility_mode": "comparison_pack"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "baseline_shortfall"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "undernourishment_risk"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Shortfall"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Placeholder only"
+            }
+          ],
+          "expectation_id": "court_provisioning:uat_provisioning_baseline_shortfall",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/court_provisioning_uat_pack.json",
+          "source_ref": "baseline_shortfall",
+          "summary": "Open the court provisioning sheet from Decisions and keep the Player tab active.",
+          "surface_ids": [
+            "court_provisioning_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "debug_registry_order"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "debug"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "provisioning_schema_version"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "allocation_order"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "stipend_keys"
+            }
+          ],
+          "expectation_id": "court_provisioning:uat_provisioning_debug_registry_order",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/court_provisioning_uat_pack.json",
+          "source_ref": "debug_registry_order",
+          "summary": "Open the court provisioning sheet and switch to the Debug tab.",
+          "surface_ids": [
+            "court_provisioning_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
+        }
+      ],
+      "scenario_id": "baseline_low_pressure_prudent",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "title": "Low-pressure prudent baseline",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "kpi_prudent_baseline",
+        "runaway_coin_runaway"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "12 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "12 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Elinor"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Hugh Bramwell"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "stable_clear_prudent",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_food_stores",
+              "label": "Ending food stores",
+              "value": "903"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "19"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_manor_count",
+              "label": "Ending manor count",
+              "value": "1"
+            },
+            {
+              "cue_id": "game_over_turn",
+              "label": "Game-over turn",
+              "value": "none"
+            },
+            {
+              "cue_id": "game_over_reason",
+              "label": "Game-over reason",
+              "value": "none"
+            },
+            {
+              "cue_id": "dispossessed",
+              "label": "Dispossessed",
+              "value": "false"
+            }
+          ],
+          "expectation_id": "comparison:stable_clear_prudent_turns_15",
+          "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+          "source_ref": "stable_clear_prudent_turns_15",
+          "summary": "Use the report and run log as the stable comparison rail for this preset's accepted ending state.",
+          "surface_ids": [
+            "turn_report_summary",
+            "run_log_screen"
+          ],
+          "visibility_mode": "comparison_pack"
+        }
+      ],
+      "scenario_id": "stable_clear_prudent",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "title": "Stable-clear prudent comparison",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "obligations_visibility",
+        "kpi_arrears_pressure",
+        "runaway_arrears_soft",
+        "runaway_arrears_hard"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "8 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "14 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "14 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Beatrice Glenholt"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "arrears_pressure_builder",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_bushels_stored",
+              "label": "Ending bushels stored",
+              "value": "402"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "52"
+            },
+            {
+              "cue_id": "ending_arrears_bushels",
+              "label": "Ending arrears bushels",
+              "value": "444"
+            },
+            {
+              "cue_id": "ending_arrears_coin",
+              "label": "Ending arrears coin",
+              "value": "6"
+            }
+          ],
+          "expectation_id": "packet_review:arrears_pressure_builder",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_ref": "arrears_pressure_builder",
+          "summary": "Use this packet when the review needs visible arrears and enough pressure to compare summary, receipts, and raw exports side by side.",
+          "surface_ids": [
+            "gameplay_decisions_exports",
+            "turn_report_summary",
+            "receipts_viewer_modal",
+            "diff_ledger_summary"
+          ],
+          "visibility_mode": "packet_review"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "ending_food_stores",
+              "label": "Ending food stores",
+              "value": "402"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "52"
+            },
+            {
+              "cue_id": "ending_manor_count",
+              "label": "Ending manor count",
+              "value": "1"
+            },
+            {
+              "cue_id": "game_over_turn",
+              "label": "Game-over turn",
+              "value": "none"
+            },
+            {
+              "cue_id": "game_over_reason",
+              "label": "Game-over reason",
+              "value": "none"
+            },
+            {
+              "cue_id": "dispossessed",
+              "label": "Dispossessed",
+              "value": "false"
+            }
+          ],
+          "expectation_id": "comparison:arrears_pressure_builder_turns_15",
+          "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+          "source_ref": "arrears_pressure_builder_turns_15",
+          "summary": "Use the report and run log as the stable comparison rail for this preset's accepted ending state.",
+          "surface_ids": [
+            "turn_report_summary",
+            "run_log_screen"
+          ],
+          "visibility_mode": "comparison_pack"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "baseline_shortfall"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "undernourishment_risk"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Shortfall"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Placeholder only"
+            }
+          ],
+          "expectation_id": "court_provisioning:uat_provisioning_baseline_shortfall",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/court_provisioning_uat_pack.json",
+          "source_ref": "baseline_shortfall",
+          "summary": "Open the court provisioning sheet from Decisions and keep the Player tab active.",
+          "surface_ids": [
+            "court_provisioning_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "debug_registry_order"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "debug"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "provisioning_schema_version"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "allocation_order"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "stipend_keys"
+            }
+          ],
+          "expectation_id": "court_provisioning:uat_provisioning_debug_registry_order",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/court_provisioning_uat_pack.json",
+          "source_ref": "debug_registry_order",
+          "summary": "Open the court provisioning sheet and switch to the Debug tab.",
+          "surface_ids": [
+            "court_provisioning_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "arrears_carry"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "overview"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Stage 1 active"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 2 · Tangible bite -> Armed"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Stage 3 · Dispossession danger -> Armed"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_arrears_carry",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "arrears_carry",
+          "summary": "Open the obligations modal from the turn report and keep the overview focus active.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "forced_payment"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "church"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Stage 2: tangible bite"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "enforcement.forced_payment_stores"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Food stores"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_forced_payment",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "forced_payment",
+          "summary": "Open the obligations modal and switch focus to Church.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "seizure_preview"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "liege"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Enforcement Seizure"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 2 · Tangible bite -> Armed"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "No per-turn cap"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_seizure_preview",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "seizure_preview",
+          "summary": "Open the obligations modal and focus Liege.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "terminal_stage_visibility"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "liege"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Boundary 100/100 on manor.unrest"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 3 · Dispossession danger -> Active"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Dispossession danger is active while House Liege arrears remain open"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_terminal_stage",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "terminal_stage_visibility",
+          "summary": "Open the obligations modal and focus Liege.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        }
+      ],
+      "scenario_id": "arrears_pressure_builder",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "title": "Arrears-pressure builder",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "counterparty_packet_review"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "12 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "12 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Elinor"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Hugh Bramwell"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "relationship_edges_builder",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_bushels_stored",
+              "label": "Ending bushels stored",
+              "value": "477"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "45"
+            },
+            {
+              "cue_id": "ending_arrears_bushels",
+              "label": "Ending arrears bushels",
+              "value": "225"
+            },
+            {
+              "cue_id": "ending_arrears_coin",
+              "label": "Ending arrears coin",
+              "value": "4"
+            }
+          ],
+          "expectation_id": "packet_review:relationship_edges_builder",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_ref": "relationship_edges_builder",
+          "summary": "Use this packet when grouped receipts and counterparty follow-up need to stay legible for liege and church review.",
+          "surface_ids": [
+            "debug_accordion_exports",
+            "receipts_viewer_modal",
+            "diff_ledger_summary"
+          ],
+          "visibility_mode": "packet_review"
+        }
+      ],
+      "scenario_id": "relationship_edges_builder",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "title": "Relationship-edges builder packet",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "shortage_packet_review",
+        "runaway_food_collapse"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "12 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "12 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Giles"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "7"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Margery Hartwyck"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Hartwyck for Giles."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Hartwyck for Giles."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "weather_shortage_builder",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_bushels_stored",
+              "label": "Ending bushels stored",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "65"
+            },
+            {
+              "cue_id": "ending_arrears_bushels",
+              "label": "Ending arrears bushels",
+              "value": "334"
+            },
+            {
+              "cue_id": "ending_arrears_coin",
+              "label": "Ending arrears coin",
+              "value": "8"
+            }
+          ],
+          "expectation_id": "packet_review:weather_shortage_builder",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_ref": "weather_shortage_builder",
+          "summary": "Use this packet when grouped evidence becomes noisy enough that the raw receipt notes and run log should both be inspected.",
+          "surface_ids": [
+            "run_log_screen",
+            "receipts_viewer_modal",
+            "diff_ledger_summary",
+            "turn_report_summary"
+          ],
+          "visibility_mode": "packet_review"
+        }
+      ],
+      "scenario_id": "weather_shortage_builder",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "title": "Weather-shortage builder packet",
+      "turns": 15
+    },
+    {
+      "acceptance_ids": [
+        "kpi_dispossession_reference",
+        "runaway_food_collapse",
+        "runaway_arrears_hard"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "8 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "14 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "14 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Roger"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Matilda Hartwyck"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Hartwyck for Roger."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Hartwyck for Roger."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "dispossession_builder",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "ending_food_stores",
+              "label": "Ending food stores",
+              "value": "0"
+            },
+            {
+              "cue_id": "ending_coin",
+              "label": "Ending coin",
+              "value": "119"
+            },
+            {
+              "cue_id": "ending_unrest",
+              "label": "Ending unrest",
+              "value": "100"
+            },
+            {
+              "cue_id": "ending_manor_count",
+              "label": "Ending manor count",
+              "value": "1"
+            },
+            {
+              "cue_id": "game_over_turn",
+              "label": "Game-over turn",
+              "value": "26"
+            },
+            {
+              "cue_id": "game_over_reason",
+              "label": "Game-over reason",
+              "value": "Dispossessed"
+            },
+            {
+              "cue_id": "dispossessed",
+              "label": "Dispossessed",
+              "value": "true"
+            }
+          ],
+          "expectation_id": "comparison:dispossession_builder_turns_30",
+          "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+          "source_ref": "dispossession_builder_turns_30",
+          "summary": "Use the report and run log as the terminal comparison rail; this reference still ends on turn 26.",
+          "surface_ids": [
+            "turn_report_summary",
+            "run_log_screen",
+            "diff_ledger_summary"
+          ],
+          "visibility_mode": "comparison_pack"
+        }
+      ],
+      "scenario_id": "dispossession_builder",
+      "seed": "lotm_v022_seed_003_succession_pressure",
+      "title": "Dispossession long-run builder",
+      "turns": 30
+    },
+    {
+      "acceptance_ids": [
+        "obligations_visibility"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "14 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "14 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Alice Bramwell"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "uat_arrears_enforcement",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "required_turn",
+              "label": "Required arrears turn",
+              "value": "3"
+            },
+            {
+              "cue_id": "observed_turn",
+              "label": "Observed arrears turn",
+              "value": "3"
+            },
+            {
+              "cue_id": "failures",
+              "label": "Failures",
+              "value": "none"
+            }
+          ],
+          "expectation_id": "uat_gate:uat_arrears_enforcement",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+          "source_ref": "uat_arrears_enforcement",
+          "summary": "The obligations closure scenario still surfaces arrears enforcement on schedule in the accepted short run.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "live_gate"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "arrears_carry"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "overview"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Stage 1 active"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 2 · Tangible bite -> Armed"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Stage 3 · Dispossession danger -> Armed"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_arrears_carry",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "arrears_carry",
+          "summary": "Open the obligations modal from the turn report and keep the overview focus active.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "forced_payment"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "church"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Stage 2: tangible bite"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "enforcement.forced_payment_stores"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Food stores"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_forced_payment",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "forced_payment",
+          "summary": "Open the obligations modal and switch focus to Church.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "seizure_preview"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "liege"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Enforcement Seizure"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 2 · Tangible bite -> Armed"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "No per-turn cap"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_seizure_preview",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "seizure_preview",
+          "summary": "Open the obligations modal and focus Liege.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "fixture_case_id",
+              "label": "Fixture case",
+              "value": "terminal_stage_visibility"
+            },
+            {
+              "cue_id": "expected_focus",
+              "label": "Expected focus",
+              "value": "liege"
+            },
+            {
+              "cue_id": "expected_cue_1",
+              "label": "Expected cue 1",
+              "value": "Boundary 100/100 on manor.unrest"
+            },
+            {
+              "cue_id": "expected_cue_2",
+              "label": "Expected cue 2",
+              "value": "Stage 3 · Dispossession danger -> Active"
+            },
+            {
+              "cue_id": "expected_cue_3",
+              "label": "Expected cue 3",
+              "value": "Dispossession danger is active while House Liege arrears remain open"
+            }
+          ],
+          "expectation_id": "obligations:uat_obligations_terminal_stage",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+          "source_ref": "terminal_stage_visibility",
+          "summary": "Open the obligations modal and focus Liege.",
+          "surface_ids": [
+            "obligations_modal"
+          ],
+          "visibility_mode": "fixture_lock"
+        }
+      ],
+      "scenario_id": "uat_arrears_enforcement",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "title": "UAT arrears enforcement",
+      "turns": 3
+    },
+    {
+      "acceptance_ids": [
+        "grant_visibility"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "14 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "14 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Alice Bramwell"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "builder-forward",
+      "preset_id": "uat_grant_visibility",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "required_turn",
+              "label": "Required grant turn",
+              "value": "4"
+            },
+            {
+              "cue_id": "observed_turn",
+              "label": "Observed grant turn",
+              "value": "4"
+            },
+            {
+              "cue_id": "failures",
+              "label": "Failures",
+              "value": "none"
+            }
+          ],
+          "expectation_id": "uat_gate:uat_grant_visibility",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+          "source_ref": "uat_grant_visibility",
+          "summary": "Grant prospects remain visible within the locked short-run window, so reviewers do not have to seed-hunt.",
+          "surface_ids": [
+            "prospects_window"
+          ],
+          "visibility_mode": "live_gate"
+        }
+      ],
+      "scenario_id": "uat_grant_visibility",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "title": "UAT grant visibility",
+      "turns": 4
+    },
+    {
+      "acceptance_ids": [
+        "hunting_visibility"
+      ],
+      "live_seed_surfaces": [
+        {
+          "cues": [
+            {
+              "cue_id": "court_members",
+              "label": "Court members",
+              "value": "7 court members"
+            },
+            {
+              "cue_id": "ration_demand",
+              "label": "Ration demand",
+              "value": "12 food / 2 meat"
+            },
+            {
+              "cue_id": "allocation_result",
+              "label": "Allocation result",
+              "value": "12 food / 0 meat"
+            },
+            {
+              "cue_id": "stipend_coin",
+              "label": "Stipend coin",
+              "value": "0 coin"
+            },
+            {
+              "cue_id": "first_allocation_rows",
+              "label": "First allocation rows",
+              "value": "p_head:Shortfall | p_spouse:Shortfall"
+            }
+          ],
+          "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+          "surface_id": "court_provisioning_sheet"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person",
+              "label": "Subject person",
+              "value": "Oswin"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "first_candidate",
+              "label": "First shown candidate",
+              "value": "Matilda Glenholt"
+            },
+            {
+              "cue_id": "rejected_preview",
+              "label": "Rejected preview",
+              "value": "Outbound marriage offer rejected by House Glenholt for Oswin."
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Oswin."
+            },
+            {
+              "cue_id": "accepted_receipts",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+          "surface_id": "outbound_marriage_sheet"
+        }
+      ],
+      "policy_id": "prudent-builder",
+      "preset_id": "uat_hunting_proxy",
+      "review_expectations": [
+        {
+          "cues": [
+            {
+              "cue_id": "required_yield_min",
+              "label": "Required hunting yield min",
+              "value": "1"
+            },
+            {
+              "cue_id": "observed_yield_max",
+              "label": "Observed hunting yield max",
+              "value": "7"
+            },
+            {
+              "cue_id": "visibility_status",
+              "label": "Visibility status",
+              "value": "fallback"
+            },
+            {
+              "cue_id": "labor_override",
+              "label": "Turn-0 labor override",
+              "value": "41 farmers / 0 builders"
+            },
+            {
+              "cue_id": "failures",
+              "label": "Failures",
+              "value": "none"
+            }
+          ],
+          "expectation_id": "uat_gate:uat_meat_hunting_proxy",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+          "source_ref": "uat_meat_hunting_proxy",
+          "summary": "Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead.",
+          "surface_ids": [
+            "hunting_proxy"
+          ],
+          "visibility_mode": "fallback_proxy"
+        }
+      ],
+      "scenario_id": "uat_hunting_proxy",
+      "seed": "lotm_v026_seed_001_baseline",
+      "title": "UAT hunting proxy",
+      "turns": 2
+    }
+  ],
+  "shared_review_sources": [
+    {
+      "cues": [
+        {
+          "cue_id": "rights_only_builder_capacity",
+          "label": "Rights-only maintenance pressure",
+          "value": "drag=7; builders=0; farmers=13; unmet=0; Maintenance required 7 labor across 7 sources; reserved 7 before harvest/build output."
+        },
+        {
+          "cue_id": "full_holdings_builder_capacity",
+          "label": "Full holdings maintenance pressure",
+          "value": "drag=10; builders=0; farmers=10; unmet=0; Maintenance required 10 labor across 9 sources; reserved 10 before harvest/build output."
+        },
+        {
+          "cue_id": "full_holdings_delegated_relief",
+          "label": "Delegated maintenance relief",
+          "value": "drag=4; builders=2; farmers=14; unmet=0; Delegated maintenance scaled labor from 10 to 4 (40%)."
+        },
+        {
+          "cue_id": "full_holdings_low_capacity_overflow",
+          "label": "Low-capacity maintenance overflow",
+          "value": "drag=5; builders=0; farmers=0; unmet=5; Maintenance required 10 labor across 9 sources; reserved 5 before harvest/build output."
+        }
+      ],
+      "scenario_ids": [
+        "rights_only_builder_capacity",
+        "full_holdings_builder_capacity",
+        "full_holdings_delegated_relief",
+        "full_holdings_low_capacity_overflow"
+      ],
+      "source_artifact_relpath": "qa_artifacts/economy_balance/v0.3.5/maintenance_pressure_scenarios.json",
+      "source_id": "maintenance_pressure_reference_pack",
+      "summary": "Maintenance pressure remains a shared closure reference pack until a later preset-driven upkeep packet lands on live preset application."
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+      "kind": "playability_preset_pack_v1",
+      "label": "playability preset pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+      "hash": "2ef80e7c39bae835befdc9adc5b18549774d9822a664e9c498985298e145d5af",
+      "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
+      "label": "receipt-bundle seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
+      "hash": "fbf1261d33edc2109c6299435884acfa355a7f31e53b510b581bb13882b9c3c7",
+      "kind": "economy_fiscal_regression_seed_pack_v1",
+      "label": "regression seed pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/obligations_uat_pack.json",
+      "hash": "9683a9d053470f13b3bfe6c53b558590092bd9b88fe835ae127a7d9087eb3abe",
+      "kind": "obligations_uat_pack_v1",
+      "label": "obligations UAT pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/court_provisioning_uat_pack.json",
+      "hash": "3b2243e070246acd44939805e0ce9f7f81608bb2dc90e5a95266e4cd83cdd5b5",
+      "kind": "court_provisioning_uat_pack_v1",
+      "label": "court provisioning UAT pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
+      "hash": "aec150374b1c1278cc7e709bbb7752e9705b4bb1685d750b5f3fbd9ed8e6d9f6",
+      "kind": "uat_scenario_pack_v0.3",
+      "label": "UAT scenario pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+      "hash": "f56861b32607c51ef28219e2abcdfc012f575039b4c219edd0e42f9777d5208d",
+      "kind": "uat_scenario_gate_v1",
+      "label": "UAT scenario gate"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/economy_balance/v0.3.5/maintenance_pressure_scenarios.json",
+      "hash": "6ee57a1b37d0468b501e6f8c04637b9c1454a3372b05fef45ef5b476e65a4b1f",
+      "kind": "maintenance_pressure_scenarios_v1",
+      "label": "maintenance pressure scenarios"
+    }
+  ]
+}
