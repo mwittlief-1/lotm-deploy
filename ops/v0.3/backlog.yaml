@@ -10559,7 +10559,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Author locked preset scenarios and expected visible outcomes
-  status: ready
+  status: done
   priority: 63
   tranche: 6
   change_type: behavior_change
@@ -10606,7 +10606,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add preset selection and provenance to the new-run shell
-  status: todo
+  status: ready
   priority: 62
   tranche: 6
   change_type: behavior_change

@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-009-T03
-  last_completed_task_id: V03-R5-007-T04
+  current_task_id: V03-R5-009-T04
+  last_completed_task_id: V03-R5-009-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 28afeb7
+  git_commit: 16e6c80
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,19 +18,17 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 1a3b82ab4cdbe19049f2dea1a363bd5043cffb5be75821ec11b5e06bfaa7d9d9
-    run2: 47dafc7c5f5e5436c0bf9e56e314a913278e69c9b25d581630df1eea58524eb4
+    run1: e3f852e8e6083c328d585815516e50ba671c94d8f628308d666679f28f3d8eb0
+    run2: 49a8b9a46da835de95dc0d78c9e94f35927fb6cbe5bb9cb5883869aeb70f6132
 notes: >-
-  Accepted the next UI and tooling wave onto the v0.3.5 control-plane line:
-  `V03-R5-005-T05` and `V03-R5-007-T04`. The accepted bundle adds the outbound
-  marriage scouting and offer sheet plus the deterministic court-provisioning
-  fixture and UAT pack. Merged focused acceptance coverage passed (`23/23`);
-  `npm run preflight` still shows the standing `test3_mismatches=16` blocker;
-  and both replay batches passed. Their raw summary hashes differed because of
-  path-shaped metadata, but the normalized summaries matched exactly with hash
+  Accepted the tooling-owned locked preset scenario manifest onto the v0.3.5
+  control-plane line as `V03-R5-009-T03`. The accepted bundle keeps one
+  deterministic row per preset, derives live court-provisioning and outbound
+  marriage review cues from canonical run init, and anchors packet, fixture,
+  UAT, and maintenance expectations to already-accepted artifacts. Merged
+  focused acceptance coverage passed (`16/16`), `npm run preflight` still shows
+  the standing `test3_mismatches=16` blocker, and both replay batches passed.
+  Their raw summary hashes differed because of path-shaped metadata, but the
+  normalized summaries matched exactly with hash
   `e519f5ce476960d955e228662db3b9d8e9f20594d60b7c217e72524b20bfb568`.
-  Fresh full-suite `qa` and direct `uatGate` reruns were attempted but both
-  runner paths hung in this environment without producing fresh artifacts, so
-  this acceptance rides on the merged focused bundle plus deterministic replay
-  evidence.
 active_claims: {}
