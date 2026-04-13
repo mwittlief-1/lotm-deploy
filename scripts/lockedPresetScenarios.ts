@@ -19,6 +19,7 @@ import {
 } from "../src/ui/outboundMarriageView";
 import { PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH } from "../src/ui/playtestOpsPacket";
 import { MAINTENANCE_PRESSURE_SCENARIO_PACK_RELPATH } from "./maintenancePressureScenarios";
+import { OUTBOUND_MARRIAGE_PRESET_COVERAGE_RELPATH } from "./outboundMarriagePresetCoverage";
 import { writeStableArtifact } from "./seed_replay/artifactWriter";
 import { sha256, stableStringify } from "./seed_replay/hash";
 
@@ -54,6 +55,7 @@ type ReviewSurfaceId =
   | "diff_ledger_summary"
   | "hunting_proxy"
   | "obligations_modal"
+  | "outbound_marriage_sheet"
   | "prospects_window"
   | "receipts_viewer_modal"
   | "run_log_screen"
@@ -176,6 +178,32 @@ type CourtProvisioningUatCase = {
 
 type CourtProvisioningUatPack = {
   cases: CourtProvisioningUatCase[];
+  hash?: string;
+  kind: string;
+};
+
+type OutboundMarriagePresetCoverageCase = {
+  accepted_preview: string;
+  accepted_receipt_summary: string;
+  expected_cues: string[];
+  first_held_out_candidate: string;
+  first_shown_candidate: string;
+  fixture_case_id: string;
+  held_out_count: number;
+  initial_tab: string;
+  preset_ids: PlayabilityPresetId[];
+  rejected_preview: string;
+  scenario_id: string;
+  scope_summary: string;
+  shown_count: number;
+  source_seed: string;
+  source_turn_index: number;
+  steps: string[];
+  subject_person_name: string;
+};
+
+type OutboundMarriagePresetCoverageArtifact = {
+  cases: OutboundMarriagePresetCoverageCase[];
   hash?: string;
   kind: string;
 };
@@ -458,6 +486,30 @@ function obligationsFixtureExpectation(row: ObligationsUatCase): LockedReviewExp
   };
 }
 
+function outboundMarriagePresetCoverageExpectation(row: OutboundMarriagePresetCoverageCase): LockedReviewExpectation {
+  return {
+    expectation_id: `outbound_marriage:${row.scenario_id}`,
+    source_artifact_relpath: OUTBOUND_MARRIAGE_PRESET_COVERAGE_RELPATH,
+    source_ref: row.fixture_case_id,
+    summary:
+      row.steps[0] ??
+      `${row.fixture_case_id} keeps the outbound marriage sheet tied to the accepted preset launch window and candidate order.`,
+    surface_ids: ["outbound_marriage_sheet"],
+    visibility_mode: "fixture_lock",
+    cues: [
+      cue("subject_person_name", "Subject person", row.subject_person_name),
+      cue("first_shown_candidate", "First shown candidate", row.first_shown_candidate),
+      cue("first_held_out_candidate", "First held-out candidate", row.first_held_out_candidate),
+      cue("shown_count", "Shown candidates", row.shown_count),
+      cue("held_out_count", "Held-out candidates", row.held_out_count),
+      cue("scope_summary", "Scope summary", row.scope_summary),
+      cue("initial_tab", "Initial tab", row.initial_tab),
+      cue("accepted_preview", "Accepted preview", row.accepted_preview),
+      cue("accepted_receipt_summary", "Accepted receipt preview", row.accepted_receipt_summary)
+    ]
+  };
+}
+
 function uatGateExpectation(scenario: UatScenarioPackRow, finding: UatScenarioFinding): LockedReviewExpectation {
   switch (scenario.id) {
     case "uat_arrears_enforcement":
@@ -538,6 +590,9 @@ export function buildLockedPresetScenariosArtifact(): LockedPresetScenariosArtif
   const regressionPack = readJson<RegressionSeedPack>(REGRESSION_SEED_PACK_RELPATH);
   const obligationsPack = readJson<ObligationsUatPack>(OBLIGATIONS_UAT_PACK_RELPATH);
   const courtProvisioningPack = readJson<CourtProvisioningUatPack>(COURT_PROVISIONING_UAT_PACK_RELPATH);
+  const outboundMarriageCoveragePack = readJson<OutboundMarriagePresetCoverageArtifact>(
+    OUTBOUND_MARRIAGE_PRESET_COVERAGE_RELPATH
+  );
   const uatScenarioPack = readJson<UatScenarioPack>(UAT_SCENARIO_PACK_RELPATH);
   const uatScenarioGate = readJson<UatScenarioGate>(UAT_SCENARIO_GATE_RELPATH);
   const maintenancePack = readJson<MaintenancePressureScenarioPack>(MAINTENANCE_PRESSURE_SCENARIO_PACK_RELPATH);
@@ -572,6 +627,12 @@ export function buildLockedPresetScenariosArtifact(): LockedPresetScenariosArtif
       hash: deriveArtifactHash(courtProvisioningPack as Record<string, unknown>),
       kind: courtProvisioningPack.kind,
       label: "court provisioning UAT pack"
+    },
+    {
+      artifact_relpath: OUTBOUND_MARRIAGE_PRESET_COVERAGE_RELPATH,
+      hash: deriveArtifactHash(outboundMarriageCoveragePack as Record<string, unknown>),
+      kind: outboundMarriageCoveragePack.kind,
+      label: "outbound marriage preset coverage"
     },
     {
       artifact_relpath: UAT_SCENARIO_PACK_RELPATH,
@@ -617,6 +678,10 @@ export function buildLockedPresetScenariosArtifact(): LockedPresetScenariosArtif
       review_expectations.push(courtProvisioningFixtureExpectation(row));
     }
 
+    for (const row of outboundMarriageCoveragePack.cases.filter((entry) => entry.preset_ids.includes(preset.preset_id))) {
+      review_expectations.push(outboundMarriagePresetCoverageExpectation(row));
+    }
+
     for (const row of obligationsPack.cases.filter((entry) => entry.preset_ids.includes(preset.preset_id))) {
       review_expectations.push(obligationsFixtureExpectation(row));
     }
@@ -646,6 +711,7 @@ export function buildLockedPresetScenariosArtifact(): LockedPresetScenariosArtif
         "npm run preflight",
         "npm run seed:replay:batch",
         "node node_modules/tsx/dist/cli.mjs scripts/maintenancePressureScenarios.ts",
+        "node node_modules/tsx/dist/cli.mjs scripts/outboundMarriagePresetCoverage.ts",
         "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts",
         "node node_modules/tsx/dist/cli.mjs scripts/lockedPresetScenarios.ts"
       ],

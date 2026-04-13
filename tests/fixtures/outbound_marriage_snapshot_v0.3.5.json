@@ -1,0 +1,1367 @@
+{
+  "baseline_seed_candidate_set": {
+    "scenario_id": "outbound_marriage_baseline_seed_candidate_set",
+    "initial_tab": "player",
+    "representative_preset_id": "baseline_low_pressure_prudent",
+    "preset_ids": [
+      "baseline_low_pressure_prudent",
+      "arrears_pressure_builder"
+    ],
+    "source_seed": "lotm_v022_seed_001_baseline_extworld",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the representative preset through the canonical New Run preset path and open the outbound marriage sheet.",
+      "Stay on the Player tab and confirm Edmund still anchors the shown shortlist with Beatrice Glenholt first.",
+      "Check that the accepted preview still writes one receipt-backed settlement row without mutating live preview state."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Edmund · 12 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Edmund"
+        },
+        {
+          "detail": "16 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "12 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 88 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Edmund",
+      "shown_count": 12,
+      "held_out_count": 12,
+      "total_candidates": 24,
+      "total_candidates_considered": 88,
+      "shown_candidate_ids": [
+        "p_ext_38_child1",
+        "p_ext_14_child1",
+        "p_ext_50_child2",
+        "p_ext_56_child3",
+        "p_ext_48_child1",
+        "p_ext_56_child1"
+      ],
+      "held_out_candidate_ids": [
+        "p_ext_31_child1",
+        "p_ext_01_head",
+        "p_ext_59_child1",
+        "p_ext_66_child1",
+        "p_ext_12_child1",
+        "p_ext_12_child2"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_38_child1",
+        "candidate_person_name": "Beatrice Glenholt",
+        "candidate_house_label": "House Glenholt",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 631,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_ext_31_child1",
+        "candidate_person_name": "Isolde Evershaw",
+        "candidate_house_label": "House Evershaw",
+        "rank_group_label": "Held out",
+        "rank_index": 13,
+        "ranking_score": 466,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_38_child1",
+          "candidate_person_name": "Beatrice Glenholt",
+          "candidate_house_label": "House Glenholt",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 631,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_14_child1",
+          "candidate_person_name": "Elinor Ivydale",
+          "candidate_house_label": "House Ivydale",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 613,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_50_child2",
+          "candidate_person_name": "Joan Ketterby",
+          "candidate_house_label": "House Ketterby",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 610,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_56_child3",
+          "candidate_person_name": "Cecily Ashford",
+          "candidate_house_label": "House Ashford",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 609,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Glenholt for Edmund.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Glenholt for Edmund.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  },
+  "relationship_edges_candidate_set": {
+    "scenario_id": "outbound_marriage_relationship_edges_candidate_set",
+    "initial_tab": "player",
+    "representative_preset_id": "stable_clear_prudent",
+    "preset_ids": [
+      "stable_clear_prudent",
+      "relationship_edges_builder"
+    ],
+    "source_seed": "lotm_v022_seed_002_relationship_edges",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the representative relationship-edges preset and open the outbound marriage sheet.",
+      "Keep the Player tab active and confirm Elinor remains the subject with Hugh Bramwell first in the shown ordering.",
+      "Verify the accepted preview copy still resolves against House Bramwell with the receipt-backed settlement note."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Elinor · 12 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Elinor"
+        },
+        {
+          "detail": "23 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "12 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 84 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Elinor",
+      "shown_count": 12,
+      "held_out_count": 12,
+      "total_candidates": 24,
+      "total_candidates_considered": 84,
+      "shown_candidate_ids": [
+        "p_ext_14_child1",
+        "p_ext_12_child1",
+        "p_ext_58_child1",
+        "p_ext_16_child1",
+        "p_noble2",
+        "p_ext_18_head"
+      ],
+      "held_out_candidate_ids": [
+        "p_ext_01_child1",
+        "p_ext_59_child2",
+        "p_ext_11_head",
+        "p_ext_05_head",
+        "p_ext_53_child1",
+        "p_ext_59_child1"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_14_child1",
+        "candidate_person_name": "Hugh Bramwell",
+        "candidate_house_label": "House Bramwell",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 613,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_ext_01_child1",
+        "candidate_person_name": "Oswin Evershaw",
+        "candidate_house_label": "House Evershaw",
+        "rank_group_label": "Held out",
+        "rank_index": 13,
+        "ranking_score": 469,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_14_child1",
+          "candidate_person_name": "Hugh Bramwell",
+          "candidate_house_label": "House Bramwell",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 613,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_12_child1",
+          "candidate_person_name": "Hugh Dunwick",
+          "candidate_house_label": "House Dunwick",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 608,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_58_child1",
+          "candidate_person_name": "Roger Evershaw",
+          "candidate_house_label": "House Evershaw",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 608,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_16_child1",
+          "candidate_person_name": "Oswin Falkmere",
+          "candidate_house_label": "House Falkmere",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 606,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Bramwell for Elinor.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Bramwell for Elinor.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  },
+  "weather_shortage_shortlist": {
+    "scenario_id": "outbound_marriage_weather_shortage_shortlist",
+    "initial_tab": "debug",
+    "representative_preset_id": "weather_shortage_builder",
+    "preset_ids": [
+      "weather_shortage_builder"
+    ],
+    "source_seed": "lotm_v022_seed_007_weather_volatility",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the shortage preset and switch the outbound marriage sheet to the Debug tab.",
+      "Confirm the registry summary still shows a reduced shortlist of seven shown candidates with held-out rows preserved for review.",
+      "Check that Margery Hartwyck remains the first shown candidate and the first held-out candidate stays deterministic."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Giles · 7 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Giles"
+        },
+        {
+          "detail": "7 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "7 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 79 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Giles",
+      "shown_count": 7,
+      "held_out_count": 12,
+      "total_candidates": 19,
+      "total_candidates_considered": 79,
+      "shown_candidate_ids": [
+        "p_ext_60_child2",
+        "p_ext_28_child3",
+        "p_ext_28_child1",
+        "p_ext_44_child2",
+        "p_ext_39_child2",
+        "p_ext_39_child1"
+      ],
+      "held_out_candidate_ids": [
+        "p_ext_22_child1",
+        "p_ext_22_child2",
+        "p_ext_58_spouse",
+        "p_ext_26_spouse",
+        "p_ext_26_child1",
+        "p_ext_56_child1"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_60_child2",
+        "candidate_person_name": "Margery Hartwyck",
+        "candidate_house_label": "House Hartwyck",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 614,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_ext_22_child1",
+        "candidate_person_name": "Edith Evershaw",
+        "candidate_house_label": "House Evershaw",
+        "rank_group_label": "Held out",
+        "rank_index": 8,
+        "ranking_score": 613,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "Outside Age Band",
+        "readiness_label": "Not ready",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_60_child2",
+          "candidate_person_name": "Margery Hartwyck",
+          "candidate_house_label": "House Hartwyck",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 614,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_28_child3",
+          "candidate_person_name": "Cecily Ashford",
+          "candidate_house_label": "House Ashford",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 613,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_28_child1",
+          "candidate_person_name": "Edith Ashford",
+          "candidate_house_label": "House Ashford",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 608,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_44_child2",
+          "candidate_person_name": "Agnes Glenholt",
+          "candidate_house_label": "House Glenholt",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 603,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_39_child2",
+          "candidate_person_name": "Cecily Ashford",
+          "candidate_house_label": "House Ashford",
+          "rank_group_label": "Shown",
+          "rank_index": 5,
+          "ranking_score": 468,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Hartwyck for Giles.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Hartwyck for Giles.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  },
+  "succession_pressure_candidate_set": {
+    "scenario_id": "outbound_marriage_succession_pressure_candidate_set",
+    "initial_tab": "debug",
+    "representative_preset_id": "dispossession_builder",
+    "preset_ids": [
+      "dispossession_builder"
+    ],
+    "source_seed": "lotm_v022_seed_003_succession_pressure",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the dispossession reference preset and open the outbound marriage sheet on the Debug tab.",
+      "Confirm Roger remains the subject and House Hartwyck still anchors the top shown candidate row.",
+      "Verify the advanced contract preview keeps the accepted-receipt note stable before any live decision resolves."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Roger · 12 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Roger"
+        },
+        {
+          "detail": "17 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "12 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 114 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Roger",
+      "shown_count": 12,
+      "held_out_count": 12,
+      "total_candidates": 24,
+      "total_candidates_considered": 114,
+      "shown_candidate_ids": [
+        "p_ext_30_child1",
+        "p_ext_20_child1",
+        "p_ext_54_child2",
+        "p_ext_68_child2",
+        "p_ext_54_child1",
+        "p_ext_60_child3"
+      ],
+      "held_out_candidate_ids": [
+        "p_ext_41_child1",
+        "p_ext_21_child1",
+        "p_ext_17_child1",
+        "p_ext_61_child2",
+        "p_ext_42_child1",
+        "p_ext_69_child1"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_30_child1",
+        "candidate_person_name": "Matilda Hartwyck",
+        "candidate_house_label": "House Hartwyck",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 626,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_ext_41_child1",
+        "candidate_person_name": "Isolde Bramwell",
+        "candidate_house_label": "House Bramwell",
+        "rank_group_label": "Held out",
+        "rank_index": 13,
+        "ranking_score": 468,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_30_child1",
+          "candidate_person_name": "Matilda Hartwyck",
+          "candidate_house_label": "House Hartwyck",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 626,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_20_child1",
+          "candidate_person_name": "Edith Glenholt",
+          "candidate_house_label": "House Glenholt",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 614,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_54_child2",
+          "candidate_person_name": "Joan Bramwell",
+          "candidate_house_label": "House Bramwell",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 612,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_68_child2",
+          "candidate_person_name": "Isolde Ashford",
+          "candidate_house_label": "House Ashford",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 611,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Hartwyck for Roger.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Hartwyck for Roger.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  },
+  "uat_baseline_launch_window": {
+    "scenario_id": "outbound_marriage_uat_baseline_launch_window",
+    "initial_tab": "player",
+    "representative_preset_id": "uat_hunting_proxy",
+    "preset_ids": [
+      "uat_hunting_proxy"
+    ],
+    "source_seed": "lotm_v026_seed_001_baseline",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the short baseline UAT preset and open the outbound marriage sheet immediately from the first gameplay shell.",
+      "Confirm Oswin remains the subject with Matilda Glenholt first in the shown list.",
+      "Check that the accepted preview still stays on the cloned snapshot path and reports one receipt-backed settlement row."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Oswin · 12 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Oswin"
+        },
+        {
+          "detail": "13 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "12 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 88 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Oswin",
+      "shown_count": 12,
+      "held_out_count": 12,
+      "total_candidates": 24,
+      "total_candidates_considered": 88,
+      "shown_candidate_ids": [
+        "p_ext_08_child1",
+        "p_ext_54_child1",
+        "p_ext_48_child1",
+        "p_ext_46_child2",
+        "p_ext_52_child1",
+        "p_ext_58_child1"
+      ],
+      "held_out_candidate_ids": [
+        "p_ext_57_child1",
+        "p_ext_22_child2",
+        "p_ext_48_child3",
+        "p_ext_12_spouse",
+        "p_ext_16_child2",
+        "p_ext_36_child1"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_08_child1",
+        "candidate_person_name": "Matilda Glenholt",
+        "candidate_house_label": "House Glenholt",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 613,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_ext_57_child1",
+        "candidate_person_name": "Edith Hartwyck",
+        "candidate_house_label": "House Hartwyck",
+        "rank_group_label": "Held out",
+        "rank_index": 13,
+        "ranking_score": 441,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_08_child1",
+          "candidate_person_name": "Matilda Glenholt",
+          "candidate_house_label": "House Glenholt",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 613,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_54_child1",
+          "candidate_person_name": "Agnes Bramwell",
+          "candidate_house_label": "House Bramwell",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 612,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_48_child1",
+          "candidate_person_name": "Agnes Hartwyck",
+          "candidate_house_label": "House Hartwyck",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 611,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_46_child2",
+          "candidate_person_name": "Margery Dunwick",
+          "candidate_house_label": "House Dunwick",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 608,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Glenholt for Oswin.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Glenholt for Oswin.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  },
+  "market_tight_launch_window": {
+    "scenario_id": "outbound_marriage_market_tight_launch_window",
+    "initial_tab": "player",
+    "representative_preset_id": "uat_grant_visibility",
+    "preset_ids": [
+      "uat_arrears_enforcement",
+      "uat_grant_visibility"
+    ],
+    "source_seed": "lotm_v026_seed_003_market_tight",
+    "source_turn_index": 0,
+    "steps": [
+      "Launch the short market-tight preset through preset selection and open the outbound marriage sheet before advancing turns.",
+      "Confirm Edmund remains the subject with Alice Bramwell first in the shown ordering.",
+      "Verify the accepted preview still resolves against House Bramwell with one receipt-backed settlement row."
+    ],
+    "surface": {
+      "schema_version": "ui_outbound_marriage_view_v1",
+      "subtitle": "Edmund · 12 shown · 12 held out",
+      "helper_text": "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
+      "summary_cards": [
+        {
+          "detail": "Subject person_id p_child1.",
+          "id": "subject",
+          "label": "Subject",
+          "value": "Edmund"
+        },
+        {
+          "detail": "16 rows are currently match-ready.",
+          "id": "shown",
+          "label": "Shown",
+          "value": "12 shown"
+        },
+        {
+          "detail": "12 additional rows are retained for deterministic debug review.",
+          "id": "held_out",
+          "label": "Held out",
+          "value": "12 held out"
+        },
+        {
+          "detail": "Anchor manor_hx_26597 · 98 candidates considered.",
+          "id": "scope",
+          "label": "Scope",
+          "value": "Topology Cap · 6 admitted · 0 rejected"
+        }
+      ],
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "subject_person_id": "p_child1",
+      "subject_person_name": "Edmund",
+      "shown_count": 12,
+      "held_out_count": 12,
+      "total_candidates": 24,
+      "total_candidates_considered": 98,
+      "shown_candidate_ids": [
+        "p_ext_34_child1",
+        "p_ext_30_child1",
+        "p_ext_66_spouse",
+        "p_ext_62_spouse",
+        "p_ext_64_child1",
+        "p_ext_50_child1"
+      ],
+      "held_out_candidate_ids": [
+        "p_noble3",
+        "p_ext_72_child1",
+        "p_ext_45_child1",
+        "p_ext_77_spouse",
+        "p_ext_62_child2",
+        "p_ext_78_child1"
+      ],
+      "first_shown_row": {
+        "candidate_person_id": "p_ext_34_child1",
+        "candidate_person_name": "Alice Bramwell",
+        "candidate_house_label": "House Bramwell",
+        "rank_group_label": "Shown",
+        "rank_index": 1,
+        "ranking_score": 623,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "first_held_out_row": {
+        "candidate_person_id": "p_noble3",
+        "candidate_person_name": "Cecily of Falkmere",
+        "candidate_house_label": "House Falkmere",
+        "rank_group_label": "Held out",
+        "rank_index": 13,
+        "ranking_score": 456,
+        "scope_label": "Unmapped",
+        "distance_label": "Route not mapped",
+        "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+        "exclude_reason_label": "None",
+        "readiness_label": "Ready now",
+        "selector_label": "External House"
+      },
+      "focus_candidate_rows": [
+        {
+          "candidate_person_id": "p_ext_34_child1",
+          "candidate_person_name": "Alice Bramwell",
+          "candidate_house_label": "House Bramwell",
+          "rank_group_label": "Shown",
+          "rank_index": 1,
+          "ranking_score": 623,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_30_child1",
+          "candidate_person_name": "Edith Falkmere",
+          "candidate_house_label": "House Falkmere",
+          "rank_group_label": "Shown",
+          "rank_index": 2,
+          "ranking_score": 610,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_66_spouse",
+          "candidate_person_name": "Elinor Hartwyck",
+          "candidate_house_label": "House Hartwyck",
+          "rank_group_label": "Shown",
+          "rank_index": 3,
+          "ranking_score": 608,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        },
+        {
+          "candidate_person_id": "p_ext_62_spouse",
+          "candidate_person_name": "Isolde Glenholt",
+          "candidate_house_label": "House Glenholt",
+          "rank_group_label": "Shown",
+          "rank_index": 4,
+          "ranking_score": 607,
+          "include_reason_label": "Age Band Match, No Living Spouse, Not On Reject Cooldown, Not Reserved, Scope Unmapped Fallback",
+          "exclude_reason_label": "None",
+          "scope_label": "Unmapped",
+          "readiness_label": "Ready now"
+        }
+      ]
+    },
+    "rejected_preview": {
+      "outcome": "rejected",
+      "outcome_label": "Rejected preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer rejected by House Bramwell for Edmund.",
+      "receipt_summary": "No settlement receipts would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "79"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "0"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "0"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "0"
+        }
+      ]
+    },
+    "accepted_preview": {
+      "outcome": "accepted",
+      "outcome_label": "Accepted preview",
+      "blocked_reason_label": null,
+      "summary": "Outbound marriage offer accepted by House Bramwell for Edmund.",
+      "receipt_summary": "1 receipt-backed settlement row would be written.",
+      "debug_rows": [
+        {
+          "key": "acceptance_score",
+          "label": "Acceptance score",
+          "value": "94"
+        },
+        {
+          "key": "acceptance_threshold",
+          "label": "Acceptance threshold",
+          "value": "86"
+        },
+        {
+          "key": "recipient_favor_score",
+          "label": "Recipient favor",
+          "value": "80"
+        },
+        {
+          "key": "settlement_score",
+          "label": "Settlement score",
+          "value": "3"
+        },
+        {
+          "key": "relationship_delta_score",
+          "label": "Relationship delta score",
+          "value": "8"
+        },
+        {
+          "key": "risk_tag_score",
+          "label": "Risk tag score",
+          "value": "4"
+        }
+      ]
+    }
+  }
+}

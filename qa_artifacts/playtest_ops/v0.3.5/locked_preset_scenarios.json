@@ -1,5 +1,5 @@
 {
-  "hash": "e193b70c9cd62ae82de6d59fb70ccdf0365543b17aa192cdceb9ad2758353380",
+  "hash": "e62dba53e1ed016be2ff2ae37b2483e5b3c5a6befb7aa09fb3c9197622264603",
   "kind": "locked_preset_scenarios_v1",
   "qa_flow": {
     "commands": [
@@ -7,6 +7,7 @@
       "npm run preflight",
       "npm run seed:replay:batch",
       "node node_modules/tsx/dist/cli.mjs scripts/maintenancePressureScenarios.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/outboundMarriagePresetCoverage.ts",
       "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts",
       "node node_modules/tsx/dist/cli.mjs scripts/lockedPresetScenarios.ts"
     ],
@@ -264,6 +265,63 @@
             "court_provisioning_sheet"
           ],
           "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Beatrice Glenholt"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Isolde Evershaw"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_baseline_seed_candidate_set",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "baseline_seed_candidate_set",
+          "summary": "Launch the representative preset through the canonical New Run preset path and open the outbound marriage sheet.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "baseline_low_pressure_prudent",
@@ -405,6 +463,63 @@
             "run_log_screen"
           ],
           "visibility_mode": "comparison_pack"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Elinor"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Hugh Bramwell"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Oswin Evershaw"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_relationship_edges_candidate_set",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "relationship_edges_candidate_set",
+          "summary": "Launch the representative relationship-edges preset and open the outbound marriage sheet.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "stable_clear_prudent",
@@ -660,6 +775,63 @@
           "summary": "Open the court provisioning sheet and switch to the Debug tab.",
           "surface_ids": [
             "court_provisioning_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Beatrice Glenholt"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Isolde Evershaw"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_baseline_seed_candidate_set",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "baseline_seed_candidate_set",
+          "summary": "Launch the representative preset through the canonical New Run preset path and open the outbound marriage sheet.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
           ],
           "visibility_mode": "fixture_lock"
         },
@@ -941,6 +1113,63 @@
             "diff_ledger_summary"
           ],
           "visibility_mode": "packet_review"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Elinor"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Hugh Bramwell"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Oswin Evershaw"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Elinor."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_relationship_edges_candidate_set",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "relationship_edges_candidate_set",
+          "summary": "Launch the representative relationship-edges preset and open the outbound marriage sheet.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "relationship_edges_builder",
@@ -1074,6 +1303,63 @@
             "turn_report_summary"
           ],
           "visibility_mode": "packet_review"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Giles"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Margery Hartwyck"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Edith Evershaw"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "7"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "debug"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Hartwyck for Giles."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_weather_shortage_shortlist",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "weather_shortage_shortlist",
+          "summary": "Launch the shortage preset and switch the outbound marriage sheet to the Debug tab.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "weather_shortage_builder",
@@ -1217,6 +1503,63 @@
             "diff_ledger_summary"
           ],
           "visibility_mode": "comparison_pack"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Roger"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Matilda Hartwyck"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Isolde Bramwell"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "debug"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Hartwyck for Roger."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_succession_pressure_candidate_set",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "succession_pressure_candidate_set",
+          "summary": "Launch the dispossession reference preset and open the outbound marriage sheet on the Debug tab.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "dispossession_builder",
@@ -1336,6 +1679,63 @@
             "obligations_modal"
           ],
           "visibility_mode": "live_gate"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Alice Bramwell"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Cecily of Falkmere"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_market_tight_launch_window",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "market_tight_launch_window",
+          "summary": "Launch the short market-tight preset through preset selection and open the outbound marriage sheet before advancing turns.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         },
         {
           "cues": [
@@ -1603,6 +2003,63 @@
             "prospects_window"
           ],
           "visibility_mode": "live_gate"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Edmund"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Alice Bramwell"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Cecily of Falkmere"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Bramwell for Edmund."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_market_tight_launch_window",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "market_tight_launch_window",
+          "summary": "Launch the short market-tight preset through preset selection and open the outbound marriage sheet before advancing turns.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "uat_grant_visibility",
@@ -1732,6 +2189,63 @@
             "hunting_proxy"
           ],
           "visibility_mode": "fallback_proxy"
+        },
+        {
+          "cues": [
+            {
+              "cue_id": "subject_person_name",
+              "label": "Subject person",
+              "value": "Oswin"
+            },
+            {
+              "cue_id": "first_shown_candidate",
+              "label": "First shown candidate",
+              "value": "Matilda Glenholt"
+            },
+            {
+              "cue_id": "first_held_out_candidate",
+              "label": "First held-out candidate",
+              "value": "Edith Hartwyck"
+            },
+            {
+              "cue_id": "shown_count",
+              "label": "Shown candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "held_out_count",
+              "label": "Held-out candidates",
+              "value": "12"
+            },
+            {
+              "cue_id": "scope_summary",
+              "label": "Scope summary",
+              "value": "Topology Cap · 6 admitted · 0 rejected"
+            },
+            {
+              "cue_id": "initial_tab",
+              "label": "Initial tab",
+              "value": "player"
+            },
+            {
+              "cue_id": "accepted_preview",
+              "label": "Accepted preview",
+              "value": "Outbound marriage offer accepted by House Glenholt for Oswin."
+            },
+            {
+              "cue_id": "accepted_receipt_summary",
+              "label": "Accepted receipt preview",
+              "value": "1 receipt-backed settlement row would be written."
+            }
+          ],
+          "expectation_id": "outbound_marriage:outbound_marriage_uat_baseline_launch_window",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+          "source_ref": "uat_baseline_launch_window",
+          "summary": "Launch the short baseline UAT preset and open the outbound marriage sheet immediately from the first gameplay shell.",
+          "surface_ids": [
+            "outbound_marriage_sheet"
+          ],
+          "visibility_mode": "fixture_lock"
         }
       ],
       "scenario_id": "uat_hunting_proxy",
@@ -1805,6 +2319,12 @@
       "hash": "3b2243e070246acd44939805e0ce9f7f81608bb2dc90e5a95266e4cd83cdd5b5",
       "kind": "court_provisioning_uat_pack_v1",
       "label": "court provisioning UAT pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+      "hash": "358d1ddd814df535ca64930ce27353fb99c8ff94e0bcab8ccf56fb965e0e9e92",
+      "kind": "outbound_marriage_preset_coverage_v1",
+      "label": "outbound marriage preset coverage"
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",

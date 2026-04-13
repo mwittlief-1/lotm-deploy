@@ -1,0 +1,194 @@
+{
+  "cases": [
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Glenholt for Edmund.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "Edmund",
+        "Beatrice Glenholt",
+        "1 receipt-backed settlement row would be written."
+      ],
+      "first_held_out_candidate": "Isolde Evershaw",
+      "first_shown_candidate": "Beatrice Glenholt",
+      "fixture_case_id": "baseline_seed_candidate_set",
+      "held_out_count": 12,
+      "initial_tab": "player",
+      "preset_ids": [
+        "baseline_low_pressure_prudent",
+        "arrears_pressure_builder"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Glenholt for Edmund.",
+      "scenario_id": "outbound_marriage_baseline_seed_candidate_set",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 12,
+      "source_seed": "lotm_v022_seed_001_baseline_extworld",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the representative preset through the canonical New Run preset path and open the outbound marriage sheet.",
+        "Stay on the Player tab and confirm Edmund still anchors the shown shortlist with Beatrice Glenholt first.",
+        "Check that the accepted preview still writes one receipt-backed settlement row without mutating live preview state."
+      ],
+      "subject_person_name": "Edmund"
+    },
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Bramwell for Elinor.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "Elinor",
+        "Hugh Bramwell",
+        "1 receipt-backed settlement row would be written."
+      ],
+      "first_held_out_candidate": "Oswin Evershaw",
+      "first_shown_candidate": "Hugh Bramwell",
+      "fixture_case_id": "relationship_edges_candidate_set",
+      "held_out_count": 12,
+      "initial_tab": "player",
+      "preset_ids": [
+        "stable_clear_prudent",
+        "relationship_edges_builder"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Bramwell for Elinor.",
+      "scenario_id": "outbound_marriage_relationship_edges_candidate_set",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 12,
+      "source_seed": "lotm_v022_seed_002_relationship_edges",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the representative relationship-edges preset and open the outbound marriage sheet.",
+        "Keep the Player tab active and confirm Elinor remains the subject with Hugh Bramwell first in the shown ordering.",
+        "Verify the accepted preview copy still resolves against House Bramwell with the receipt-backed settlement note."
+      ],
+      "subject_person_name": "Elinor"
+    },
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Hartwyck for Giles.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "7 shown",
+        "12 held out",
+        "Edith Evershaw"
+      ],
+      "first_held_out_candidate": "Edith Evershaw",
+      "first_shown_candidate": "Margery Hartwyck",
+      "fixture_case_id": "weather_shortage_shortlist",
+      "held_out_count": 12,
+      "initial_tab": "debug",
+      "preset_ids": [
+        "weather_shortage_builder"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Hartwyck for Giles.",
+      "scenario_id": "outbound_marriage_weather_shortage_shortlist",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 7,
+      "source_seed": "lotm_v022_seed_007_weather_volatility",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the shortage preset and switch the outbound marriage sheet to the Debug tab.",
+        "Confirm the registry summary still shows a reduced shortlist of seven shown candidates with held-out rows preserved for review.",
+        "Check that Margery Hartwyck remains the first shown candidate and the first held-out candidate stays deterministic."
+      ],
+      "subject_person_name": "Giles"
+    },
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Hartwyck for Roger.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "12 shown",
+        "12 held out",
+        "Isolde Bramwell"
+      ],
+      "first_held_out_candidate": "Isolde Bramwell",
+      "first_shown_candidate": "Matilda Hartwyck",
+      "fixture_case_id": "succession_pressure_candidate_set",
+      "held_out_count": 12,
+      "initial_tab": "debug",
+      "preset_ids": [
+        "dispossession_builder"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Hartwyck for Roger.",
+      "scenario_id": "outbound_marriage_succession_pressure_candidate_set",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 12,
+      "source_seed": "lotm_v022_seed_003_succession_pressure",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the dispossession reference preset and open the outbound marriage sheet on the Debug tab.",
+        "Confirm Roger remains the subject and House Hartwyck still anchors the top shown candidate row.",
+        "Verify the advanced contract preview keeps the accepted-receipt note stable before any live decision resolves."
+      ],
+      "subject_person_name": "Roger"
+    },
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Glenholt for Oswin.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "Oswin",
+        "Matilda Glenholt",
+        "1 receipt-backed settlement row would be written."
+      ],
+      "first_held_out_candidate": "Edith Hartwyck",
+      "first_shown_candidate": "Matilda Glenholt",
+      "fixture_case_id": "uat_baseline_launch_window",
+      "held_out_count": 12,
+      "initial_tab": "player",
+      "preset_ids": [
+        "uat_hunting_proxy"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Glenholt for Oswin.",
+      "scenario_id": "outbound_marriage_uat_baseline_launch_window",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 12,
+      "source_seed": "lotm_v026_seed_001_baseline",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the short baseline UAT preset and open the outbound marriage sheet immediately from the first gameplay shell.",
+        "Confirm Oswin remains the subject with Matilda Glenholt first in the shown list.",
+        "Check that the accepted preview still stays on the cloned snapshot path and reports one receipt-backed settlement row."
+      ],
+      "subject_person_name": "Oswin"
+    },
+    {
+      "accepted_preview": "Outbound marriage offer accepted by House Bramwell for Edmund.",
+      "accepted_receipt_summary": "1 receipt-backed settlement row would be written.",
+      "expected_cues": [
+        "Edmund",
+        "Alice Bramwell",
+        "1 receipt-backed settlement row would be written."
+      ],
+      "first_held_out_candidate": "Cecily of Falkmere",
+      "first_shown_candidate": "Alice Bramwell",
+      "fixture_case_id": "market_tight_launch_window",
+      "held_out_count": 12,
+      "initial_tab": "player",
+      "preset_ids": [
+        "uat_arrears_enforcement",
+        "uat_grant_visibility"
+      ],
+      "rejected_preview": "Outbound marriage offer rejected by House Bramwell for Edmund.",
+      "scenario_id": "outbound_marriage_market_tight_launch_window",
+      "scope_summary": "Topology Cap · 6 admitted · 0 rejected",
+      "shown_count": 12,
+      "source_seed": "lotm_v026_seed_003_market_tight",
+      "source_turn_index": 0,
+      "steps": [
+        "Launch the short market-tight preset through preset selection and open the outbound marriage sheet before advancing turns.",
+        "Confirm Edmund remains the subject with Alice Bramwell first in the shown ordering.",
+        "Verify the accepted preview still resolves against House Bramwell with one receipt-backed settlement row."
+      ],
+      "subject_person_name": "Edmund"
+    }
+  ],
+  "hash": "358d1ddd814df535ca64930ce27353fb99c8ff94e0bcab8ccf56fb965e0e9e92",
+  "kind": "outbound_marriage_preset_coverage_v1",
+  "release": "v0.3.5",
+  "source_artifacts": [
+    {
+      "artifact_relpath": "tests/fixtures/outbound_marriage_snapshot_v0.3.5.json",
+      "label": "outbound marriage fixture"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "label": "preset-pack canonical launch map"
+    }
+  ]
+}

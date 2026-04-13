@@ -8,6 +8,7 @@ It keeps the preset checklist in one place by combining:
 
 - the stable preset ids from `playability_preset_pack_v1`
 - live seed-derived surface cues for court provisioning and outbound marriage
+- the outbound marriage preset-coverage packet
 - the already-landed packet, fixture, UAT, and comparison artifacts
 
 The goal is to lock visible review outcomes without adding a second init path or a parallel preset catalog.
@@ -35,6 +36,7 @@ The manifest then layers in the already-accepted review rails where they apply:
 
 - receipt-bundle packet review expectations for `baseline_low_pressure_prudent`, `arrears_pressure_builder`, `relationship_edges_builder`, and `weather_shortage_builder`
 - regression comparison expectations for the prudent stable-clear rail, the single-manor baseline rail, and the long-run dispossession rail
+- outbound marriage preset-coverage expectations for every preset seed that currently launches the marriage sheet
 - obligations fixture locks for `arrears_pressure_builder` and `uat_arrears_enforcement`
 - court provisioning fixture locks for seeds already covered by the provisioning UAT pack
 - UAT gate expectations for `uat_arrears_enforcement`, `uat_grant_visibility`, and `uat_hunting_proxy`
@@ -60,5 +62,5 @@ node node_modules/tsx/dist/cli.mjs scripts/lockedPresetScenarios.ts
 Focused verification:
 
 ```bash
-npx vitest run tests/ui/lockedPresetScenarios.test.ts tests/ui/outboundMarriageView.test.ts tests/ui/outboundMarriagePanel.test.tsx tests/ui/courtProvisioningFixtures.test.tsx tests/ui/obligationsFixtures.test.tsx tests/ui/playabilityPresetPack.test.ts
+npx vitest run tests/ui/lockedPresetScenarios.test.ts tests/ui/outboundMarriageFixtures.test.tsx tests/sim/outbound_marriage_replay_guards.test.ts tests/ui/outboundMarriageView.test.ts tests/ui/outboundMarriagePanel.test.tsx tests/ui/courtProvisioningFixtures.test.tsx tests/ui/obligationsFixtures.test.tsx tests/ui/playabilityPresetPack.test.ts
 ```

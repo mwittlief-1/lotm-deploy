@@ -86,6 +86,7 @@ describe("locked preset scenarios", () => {
 
     const arrears = artifact.scenarios.find((scenario) => scenario.scenario_id === "arrears_pressure_builder");
     const stableClear = artifact.scenarios.find((scenario) => scenario.scenario_id === "stable_clear_prudent");
+    const weather = artifact.scenarios.find((scenario) => scenario.scenario_id === "weather_shortage_builder");
     const grant = artifact.scenarios.find((scenario) => scenario.scenario_id === "uat_grant_visibility");
     const hunting = artifact.scenarios.find((scenario) => scenario.scenario_id === "uat_hunting_proxy");
 
@@ -108,6 +109,19 @@ describe("locked preset scenarios", () => {
       expectation_id: "comparison:stable_clear_prudent_turns_15",
       source_artifact_relpath: "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json",
       surface_ids: ["turn_report_summary", "run_log_screen"]
+    });
+
+    expect(
+      weather?.review_expectations.find(
+        (entry) => entry.expectation_id === "outbound_marriage:outbound_marriage_weather_shortage_shortlist"
+      )
+    ).toMatchObject({
+      source_artifact_relpath: "qa_artifacts/playtest_ops/v0.3.5/outbound_marriage_preset_coverage.json",
+      surface_ids: ["outbound_marriage_sheet"],
+      cues: expect.arrayContaining([
+        { cue_id: "shown_count", label: "Shown candidates", value: "7" },
+        { cue_id: "first_held_out_candidate", label: "First held-out candidate", value: "Edith Evershaw" }
+      ])
     });
 
     expect(grant?.review_expectations[0]).toMatchObject({
