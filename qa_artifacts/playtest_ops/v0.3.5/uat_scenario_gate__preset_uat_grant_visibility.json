@@ -87,11 +87,11 @@
       "turns": 4
     }
   ],
-  "completed_at": "2026-04-13T14:33:02.919Z",
+  "completed_at": "2026-04-13T14:35:33.080Z",
   "failed": 0,
   "failures": [],
   "gate": "uat_scenario_gate_v1",
-  "hash": "877c41f55837110b7389cd31ebbfcbf5d9c8f098418e9f6cbee75c11a6a45c5f",
+  "hash": "b44a8b0d4968cea5ff318f838e2126f051c67d315c4c4f9b92e82dd94dc7c18b",
   "notes": [],
   "operator_flow": {
     "commands": [
@@ -145,7 +145,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json",
-      "hash": "c6a48249121e3f56f33c87499dad04ae1d19855bc8501cf7c4de32b29e86c7b8",
+      "hash": "b72fb1f7f1d0416a7c283904b64bfb5ef6ae15261cd2f2c880a1d772fd7b6c2c",
       "kind": "locked_preset_scenarios_v1",
       "label": "locked preset manifest"
     },
@@ -156,5 +156,5 @@
       "label": "uat scenario pack"
     }
   ],
-  "started_at": "2026-04-13T14:33:01.779Z"
+  "started_at": "2026-04-13T14:35:31.899Z"
 }

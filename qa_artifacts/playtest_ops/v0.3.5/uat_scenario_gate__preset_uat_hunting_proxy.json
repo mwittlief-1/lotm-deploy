@@ -97,11 +97,11 @@
       "turns": 2
     }
   ],
-  "completed_at": "2026-04-13T14:33:42.551Z",
+  "completed_at": "2026-04-13T14:35:37.519Z",
   "failed": 0,
   "failures": [],
   "gate": "uat_scenario_gate_v1",
-  "hash": "f4103c51e0fc9af03fb71790e0cb4464269301449a8e834a1a12cd39c5a9497a",
+  "hash": "fe0b2f63352dc146149f02d02685231774cc56ef8bed9087ea17bae2cb4b0db5",
   "notes": [
     "scenario uat_meat_hunting_proxy uses fallback visibility: Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead."
   ],
@@ -157,7 +157,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json",
-      "hash": "c6a48249121e3f56f33c87499dad04ae1d19855bc8501cf7c4de32b29e86c7b8",
+      "hash": "b72fb1f7f1d0416a7c283904b64bfb5ef6ae15261cd2f2c880a1d772fd7b6c2c",
       "kind": "locked_preset_scenarios_v1",
       "label": "locked preset manifest"
     },
@@ -168,5 +168,5 @@
       "label": "uat scenario pack"
     }
   ],
-  "started_at": "2026-04-13T14:33:42.152Z"
+  "started_at": "2026-04-13T14:35:37.113Z"
 }

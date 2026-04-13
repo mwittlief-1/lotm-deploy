@@ -9869,7 +9869,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add outbound marriage fixtures, replay guards, and preset coverage
-  status: todo
+  status: ready
   priority: 78
   tranche: 6
   change_type: behavior_change
@@ -10649,7 +10649,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Refresh UAT gate and operator docs around the preset pack
-  status: ready
+  status: done
   priority: 61
   tranche: 6
   change_type: behavior_change

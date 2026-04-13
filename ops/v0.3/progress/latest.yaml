@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-009-T05
-  last_completed_task_id: V03-R5-009-T04
+  current_task_id: V03-R5-005-T06
+  last_completed_task_id: V03-R5-009-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 5a257ed
+  git_commit: 014fbba
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,18 +18,18 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 982b7787fbe8eea5e4bc3a1cfeeaadcc7d2371a34d27b85cba4ec00b743222ec
-    run2: a49e8c31fef7b0888001c1d5e3a836ddcfe29546f34f939c54c0e92a97b9fd72
+    run1: ae452936059c6c24c4870f14f9a9bab98bb1747cbc2b2297d7646906ce2b09d7
+    run2: 99ad5e28eabfa942b813e5f7dd12f3c4437626e07949c200373823c05bb0faef
 notes: >-
-  Accepted the UI-owned preset selection and provenance shell onto the v0.3.5
-  control-plane line as `V03-R5-009-T04`. The accepted bundle keeps preset
-  selection on the canonical new-run init path, surfaces preset and seed
-  provenance in the new-run shell, play shell, and run log, and avoids a second
-  initialization seam. Merged focused acceptance coverage passed (`12/12`),
-  `npm run preflight` still shows the standing `test3_mismatches=16` blocker,
-  and both replay batches passed. The fresh full `qa` runner was attempted but
-  hung in this environment and was terminated without new artifacts. Their raw
-  summary hashes differed because of path-shaped metadata, but the normalized
-  summaries matched exactly with hash
+  Accepted the tooling-owned preset UAT closure checklist onto the v0.3.5
+  control-plane line as `V03-R5-009-T05`. The accepted bundle makes the preset
+  pack the operator-facing closeout checklist, teaches `uatScenarioGate` to
+  emit canonical `closure_checklist[]` rows plus preset-filtered artifacts, and
+  refreshes the playtest docs around preset-first provenance review. Merged
+  focused script validation passed, `npm run preflight` still shows the
+  standing `test3_mismatches=16` blocker, and both replay batches passed. The
+  fresh full `qa` runner was attempted but hung in this environment and was
+  terminated without a fresh merge-side result. Their raw summary hashes
+  differed because of path-shaped metadata, but the normalized summaries matched exactly with hash
   `e519f5ce476960d955e228662db3b9d8e9f20594d60b7c217e72524b20bfb568`.
 active_claims: {}
