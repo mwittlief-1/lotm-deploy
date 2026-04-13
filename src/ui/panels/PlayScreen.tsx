@@ -38,6 +38,7 @@ import {
   summarizePopulationChange,
   uncertaintyLabel as labelUncertainty
 } from "../playViewModel";
+import { buildRunProvenanceSurface } from "../runProvenanceView";
 import {
   PLAY_ANCHORS,
   buildCouncilAgendaItems,
@@ -112,6 +113,7 @@ import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
+import { RunProvenanceBanner } from "./RunProvenanceBanner";
 import { StickyResourceChips } from "./StickyResourceChips";
 import { TopologyDebugPanel } from "./TopologyDebugPanel";
 import { TurnReportPanel } from "./TurnReportPanel";
@@ -233,6 +235,7 @@ export function PlayScreen({
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
+  const provenanceSurface = useMemo(() => buildRunProvenanceSurface(state), [state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
   const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
   const portfolioEvidenceScope = buildPortfolioEvidenceScope({
@@ -955,6 +958,7 @@ export function PlayScreen({
         <div style={PLAY_SCREEN_HEADER_HELPER_STYLE}>
           {copy.gameplayOverviewHelper ?? "Resolved above: the last 3 years. Choose below: the next turn's response."}
         </div>
+        <RunProvenanceBanner surface={provenanceSurface} />
       </div>
 
       {state.game_over ? (
