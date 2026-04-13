@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { APP_VERSION } from "./version";
-import { buildNewRunInit, createNewRun, proposeTurn, applyDecisions } from "./sim";
+import { createNewRun, proposeTurn, applyDecisions } from "./sim";
 import type { GameOverState, RunState, TurnDecisions } from "./sim/types";
 import { buildRunSummary } from "./sim/exports";
 import { NewRunScreen } from "./ui/panels/NewRunScreen";
 import { PlayScreen } from "./ui/panels/PlayScreen";
 import { RunLogScreen } from "./ui/panels/RunLogScreen";
 import { WorldMapScreen } from "./ui/panels/WorldMapScreen";
+import { buildCanonicalNewRunInit, buildNewRunPresetSurface } from "./ui/newRunPresetView";
+import type { PlayabilityPresetId } from "./ui/playabilityPresetPack";
 import type { PortfolioMapTarget } from "./ui/playScreenPortfolio";
 import { buildAppRouteHash, buildExternalMapRendererSurface, readAppRouteState } from "./ui/worldMapRoute";
 import { TURN_YEARS } from "./sim/constants";
@@ -320,6 +322,7 @@ export default function App() {
     return readAppRouteState(window.location.hash).screen;
   });
   const [seed, setSeed] = useState<string>(() => `run_${Math.random().toString(36).slice(2, 10)}`);
+  const [selectedPresetId, setSelectedPresetId] = useState<PlayabilityPresetId | null>(null);
   const [state, setState] = useState<RunState | null>(null);
   const [decisions, setDecisions] = useState<DecisionsState>(defaultDecisions);
   const [showHouseholdDetails, setShowHouseholdDetails] = useState<boolean>(false);
@@ -382,6 +385,7 @@ export default function App() {
   }, []);
 
   const ctx = useMemo(() => (state ? proposeTurn(state) : null), [state]);
+  const newRunPresetSurface = useMemo(() => buildNewRunPresetSurface(selectedPresetId), [selectedPresetId]);
 
   // v0.2.7.1 hotfix: default obligation payments to due entering the turn (bounded by available stores).
   useEffect(() => {
@@ -411,8 +415,19 @@ export default function App() {
     }));
   }, [screen, state?.run_seed, state?.game_over, ctx?.report.turn_index]);
 
+  function generateSeed() {
+    setSelectedPresetId(null);
+    setSeed(`run_${Date.now()}`);
+  }
+
+  function handlePresetChange(presetId: PlayabilityPresetId | null) {
+    setSelectedPresetId(presetId);
+    const nextSurface = buildNewRunPresetSurface(presetId);
+    if (nextSurface.selectedPreset) setSeed(nextSurface.selectedPreset.seed);
+  }
+
   function newRun() {
-    const s = createNewRun(buildNewRunInit(seed.trim() || `run_${Date.now()}`));
+    const s = createNewRun(buildCanonicalNewRunInit(seed, selectedPresetId));
     setState(s);
     setDecisions({
       ...defaultDecisions,
@@ -444,17 +459,20 @@ export default function App() {
 
   let content: React.ReactNode = null;
 
-  if (screen === "new") {
-    content = (
-      <NewRunScreen
-        appVersion={APP_VERSION}
-        onGenerateSeed={() => setSeed(`run_${Date.now()}`)}
-        onNewRun={newRun}
-        onSeedChange={setSeed}
-        seed={seed}
-        turnYears={TURN_YEARS}
-      />
-    );
+    if (screen === "new") {
+      content = (
+        <NewRunScreen
+          appVersion={APP_VERSION}
+          onGenerateSeed={generateSeed}
+          onNewRun={newRun}
+          onPresetChange={handlePresetChange}
+          onSeedChange={setSeed}
+          presetSurface={newRunPresetSurface}
+          seed={seed}
+          seedLocked={selectedPresetId !== null}
+          turnYears={TURN_YEARS}
+        />
+      );
   } else if (screen === "log") {
     if (!state) {
       content = (

@@ -1,7 +1,9 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
 import { buildPlaytestOpsExportCopy } from "../playtestOpsExport";
+import { buildRunProvenanceSurface } from "../runProvenanceView";
 import { AllPeopleRegistryPanel } from "./AllPeopleRegistryPanel";
+import { RunProvenanceBanner } from "./RunProvenanceBanner";
 
 type RunLogScreenProps = {
   filter: string;
@@ -21,6 +23,7 @@ export function RunLogScreen({
   state
 }: RunLogScreenProps) {
   const exportCopy = buildPlaytestOpsExportCopy(state.run_seed);
+  const provenanceSurface = buildRunProvenanceSurface(state);
 
   return (
     <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>
@@ -35,6 +38,7 @@ export function RunLogScreen({
         {state.log.length} turns logged. Game over: {state.game_over ? state.game_over.reason : "no"}.
       </p>
       <p style={{ opacity: 0.8, marginTop: 8 }}>{exportCopy.runLogHelper}</p>
+      <RunProvenanceBanner surface={provenanceSurface} />
 
       <pre style={{ background: "#111", color: "#eee", padding: 12, overflow: "auto", maxHeight: 600 }}>
         {JSON.stringify(
