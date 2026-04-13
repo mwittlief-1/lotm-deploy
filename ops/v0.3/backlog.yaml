@@ -9869,7 +9869,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add outbound marriage fixtures, replay guards, and preset coverage
-  status: ready
+  status: done
   priority: 78
   tranche: 6
   change_type: behavior_change
@@ -10779,7 +10779,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Close balance review flow against baseline artifacts
-  status: todo
+  status: ready
   priority: 58
   tranche: 6
   change_type: refactor

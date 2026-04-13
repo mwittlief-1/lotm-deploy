@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-005-T06
-  last_completed_task_id: V03-R5-009-T05
+  current_task_id: V03-R5-010-T03
+  last_completed_task_id: V03-R5-005-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 014fbba
+  git_commit: 5c1e580
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,15 +18,15 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: ae452936059c6c24c4870f14f9a9bab98bb1747cbc2b2297d7646906ce2b09d7
-    run2: 99ad5e28eabfa942b813e5f7dd12f3c4437626e07949c200373823c05bb0faef
+    run1: 5042bef755b30808e78669edda4b5f0e14fe5a2e32d0a5f9cdc1e8bd78647260
+    run2: 7ce448122dd0ccecd6e788a7d6a35478bcd7d0b62bce792b196e52cfa7ddd1a5
 notes: >-
-  Accepted the tooling-owned preset UAT closure checklist onto the v0.3.5
-  control-plane line as `V03-R5-009-T05`. The accepted bundle makes the preset
-  pack the operator-facing closeout checklist, teaches `uatScenarioGate` to
-  emit canonical `closure_checklist[]` rows plus preset-filtered artifacts, and
-  refreshes the playtest docs around preset-first provenance review. Merged
-  focused script validation passed, `npm run preflight` still shows the
+  Accepted the tooling-owned outbound marriage fixture and preset coverage rail
+  onto the v0.3.5 control-plane line as `V03-R5-005-T06`. The accepted bundle
+  adds deterministic outbound marriage fixture cases, replay guards, and a
+  preset-backed review artifact, then extends the locked preset manifest to use
+  those marriage cues alongside the already-accepted closure rails. Merged
+  focused validation passed (`12/12`), `npm run preflight` still shows the
   standing `test3_mismatches=16` blocker, and both replay batches passed. The
   fresh full `qa` runner was attempted but hung in this environment and was
   terminated without a fresh merge-side result. Their raw summary hashes
