@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-009-T04
-  last_completed_task_id: V03-R5-009-T03
+  current_task_id: V03-R5-009-T05
+  last_completed_task_id: V03-R5-009-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 16e6c80
+  git_commit: 5a257ed
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,17 +18,18 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: e3f852e8e6083c328d585815516e50ba671c94d8f628308d666679f28f3d8eb0
-    run2: 49a8b9a46da835de95dc0d78c9e94f35927fb6cbe5bb9cb5883869aeb70f6132
+    run1: 982b7787fbe8eea5e4bc3a1cfeeaadcc7d2371a34d27b85cba4ec00b743222ec
+    run2: a49e8c31fef7b0888001c1d5e3a836ddcfe29546f34f939c54c0e92a97b9fd72
 notes: >-
-  Accepted the tooling-owned locked preset scenario manifest onto the v0.3.5
-  control-plane line as `V03-R5-009-T03`. The accepted bundle keeps one
-  deterministic row per preset, derives live court-provisioning and outbound
-  marriage review cues from canonical run init, and anchors packet, fixture,
-  UAT, and maintenance expectations to already-accepted artifacts. Merged
-  focused acceptance coverage passed (`16/16`), `npm run preflight` still shows
-  the standing `test3_mismatches=16` blocker, and both replay batches passed.
-  Their raw summary hashes differed because of path-shaped metadata, but the
-  normalized summaries matched exactly with hash
+  Accepted the UI-owned preset selection and provenance shell onto the v0.3.5
+  control-plane line as `V03-R5-009-T04`. The accepted bundle keeps preset
+  selection on the canonical new-run init path, surfaces preset and seed
+  provenance in the new-run shell, play shell, and run log, and avoids a second
+  initialization seam. Merged focused acceptance coverage passed (`12/12`),
+  `npm run preflight` still shows the standing `test3_mismatches=16` blocker,
+  and both replay batches passed. The fresh full `qa` runner was attempted but
+  hung in this environment and was terminated without new artifacts. Their raw
+  summary hashes differed because of path-shaped metadata, but the normalized
+  summaries matched exactly with hash
   `e519f5ce476960d955e228662db3b9d8e9f20594d60b7c217e72524b20bfb568`.
 active_claims: {}

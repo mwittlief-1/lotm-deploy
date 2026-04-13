@@ -10606,7 +10606,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add preset selection and provenance to the new-run shell
-  status: ready
+  status: done
   priority: 62
   tranche: 6
   change_type: behavior_change
@@ -10649,7 +10649,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Refresh UAT gate and operator docs around the preset pack
-  status: todo
+  status: ready
   priority: 61
   tranche: 6
   change_type: behavior_change
