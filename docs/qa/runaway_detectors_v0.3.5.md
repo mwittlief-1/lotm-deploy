@@ -8,6 +8,11 @@
 - artifact: `qa_artifacts/economy_balance/v0.3.5/runaway_detectors.json`
 - guard test: `tests/sim/runaway_detectors.test.ts`
 
+The canonical balance closeout now consumes this packet through:
+
+- `qa_artifacts/economy_balance/v0.3.5/balance_review_closeout.json`
+- `docs/qa/balance_review_closeout_v0.3.5.md`
+
 ## Detector set
 
 The detector packet keeps one row per failure mode:
@@ -31,14 +36,15 @@ This stays on the existing balance-review path instead of opening a new control 
 
 - the preset pack still owns scenario-to-acceptance mapping
 - the KPI bands still own target versus comparison-rail framing
-- the runaway detector packet only translates those accepted rails into named failure-mode checks
+- the runaway detector packet only translates those accepted rails into named failure-mode checks after the KPI baseline comparisons are reviewed first
 
 The only direct regression-only checks added here are the short-run arrears hardness guard and the long-run dispossession timing anchor, because those are not fully expressible in the existing KPI packet alone.
 
 ## Verification
 
 1. `npx tsx scripts/runawayDetectors.ts`
-2. `npx vitest run tests/sim/runaway_detectors.test.ts tests/sim/kpi_acceptance_bands.test.ts`
-3. `npm run qa`
-4. `npm run preflight`
-5. `npm run seed:replay:batch` twice and compare the `summary_hash`
+2. `node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts`
+3. `npx vitest run tests/sim/runaway_detectors.test.ts tests/sim/kpi_acceptance_bands.test.ts`
+4. `npm run qa`
+5. `npm run preflight`
+6. `npm run seed:replay:batch` twice and compare the `summary_hash`

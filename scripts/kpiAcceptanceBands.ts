@@ -456,10 +456,11 @@ export function buildKpiAcceptanceBandsArtifact(): KpiAcceptanceBandsArtifact {
         "npm run preflight",
         "npm run seed:replay:batch",
         "node node_modules/tsx/dist/cli.mjs scripts/playabilityPresetPack.ts",
-        "node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts"
+        "node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts",
+        "node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts"
       ],
       note:
-        "Refresh the accepted regression and preset artifacts first, then rebuild this band file so targets and comparison rails never drift onto a second scenario catalog."
+        "Refresh the accepted regression and preset artifacts first, then rebuild this band file and the balance-review closeout packet so deterministic baseline comparisons remain the canonical review path."
     }
   };
 }

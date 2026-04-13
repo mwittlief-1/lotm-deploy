@@ -11,6 +11,11 @@ It does not create a new preset list or a new init path. It reuses:
 - `qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json`
 - the accepted 15-turn and 30-turn DOE summaries
 
+The canonical balance closeout now starts from these metric rows through:
+
+- `qa_artifacts/economy_balance/v0.3.5/balance_review_closeout.json`
+- `docs/qa/balance_review_closeout_v0.3.5.md`
+
 ## Metrics covered
 
 The manifest records explicit bands for:
@@ -30,6 +35,8 @@ Every metric band splits the evidence into two buckets:
 - `comparison_rails`
   - accepted comparison points that should remain available for review, but are not the primary pass/fail number
 
+For `v0.3.5` closeout, this packet is the first review stop. Runaway detectors are a downstream triage layer, not a replacement for the metric comparisons here.
+
 Examples:
 
 - `net_coin` uses the calm prudent packet as the target and the stable-clear prudent scenario as the comparison rail.
@@ -40,6 +47,7 @@ Examples:
 
 ```
 node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts
+node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts
 ```
 
 Run this only after the preset pack and upstream deterministic regression artifacts are refreshed, so the band file never drifts onto a second scenario catalog.
@@ -47,6 +55,7 @@ Run this only after the preset pack and upstream deterministic regression artifa
 ## Verification
 
 1. `npx vitest run tests/sim/kpi_acceptance_bands.test.ts tests/ui/playabilityPresetPack.test.ts`
-2. `npm run qa`
-3. `npm run preflight`
-4. `npm run seed:replay:batch` twice and compare the `summary_hash`
+2. `node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts`
+3. `npm run qa`
+4. `npm run preflight`
+5. `npm run seed:replay:batch` twice and compare the `summary_hash`

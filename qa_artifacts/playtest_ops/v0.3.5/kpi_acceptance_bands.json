@@ -1,5 +1,5 @@
 {
-  "hash": "aa95bb30f339b9696a2476346d64da1603bb8174d5c3d707a2027f49b1da44cf",
+  "hash": "681047e198b46df2fbb482af7699cc081e4aceb4c586cb15128bb0ee23e36098",
   "kind": "kpi_acceptance_bands_v1",
   "metric_bands": [
     {
@@ -281,9 +281,10 @@
       "npm run preflight",
       "npm run seed:replay:batch",
       "node node_modules/tsx/dist/cli.mjs scripts/playabilityPresetPack.ts",
-      "node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts"
+      "node node_modules/tsx/dist/cli.mjs scripts/kpiAcceptanceBands.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts"
     ],
-    "note": "Refresh the accepted regression and preset artifacts first, then rebuild this band file so targets and comparison rails never drift onto a second scenario catalog."
+    "note": "Refresh the accepted regression and preset artifacts first, then rebuild this band file and the balance-review closeout packet so deterministic baseline comparisons remain the canonical review path."
   },
   "release": "v0.3.5",
   "source_artifacts": [

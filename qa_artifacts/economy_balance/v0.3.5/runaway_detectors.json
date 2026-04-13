@@ -312,14 +312,15 @@
       "summary": "Keep the current one-manor baseline explicit across both prudent regression anchors and both accepted builder DOE rails."
     }
   ],
-  "hash": "80978d90140a69cc5e137f4c34308af2bdf3ce715bbe8ccc5931e603408478ee",
+  "hash": "d050c77aa0c3f9af698d8128bd5a4f18dd36ad48c18441a648ad383b4d8a6479",
   "kind": "runaway_detectors_v1",
   "qa_flow": {
     "commands": [
       "npx tsx scripts/runawayDetectors.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts",
       "npx vitest run tests/sim/runaway_detectors.test.ts tests/sim/kpi_acceptance_bands.test.ts"
     ],
-    "note": "Detectors stay anchored to the preset pack, KPI bands, and locked regression or DOE artifacts so balance review does not fork into a second acceptance path."
+    "note": "Detectors stay anchored to the preset pack, KPI bands, and locked regression or DOE artifacts so balance review can stay baseline-first and avoid forking into a second acceptance path."
   },
   "release": "v0.3.5",
   "source_artifacts": [
@@ -331,7 +332,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/kpi_acceptance_bands.json",
-      "hash": "aa95bb30f339b9696a2476346d64da1603bb8174d5c3d707a2027f49b1da44cf",
+      "hash": "681047e198b46df2fbb482af7699cc081e4aceb4c586cb15128bb0ee23e36098",
       "kind": "kpi_acceptance_bands_v1",
       "label": "kpi acceptance bands"
     },

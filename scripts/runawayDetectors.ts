@@ -478,10 +478,11 @@ export function buildRunawayDetectorsArtifact(): RunawayDetectorsArtifact {
     qa_flow: {
       commands: [
         "npx tsx scripts/runawayDetectors.ts",
+        "node node_modules/tsx/dist/cli.mjs scripts/balanceReviewCloseout.ts",
         "npx vitest run tests/sim/runaway_detectors.test.ts tests/sim/kpi_acceptance_bands.test.ts"
       ],
       note:
-        "Detectors stay anchored to the preset pack, KPI bands, and locked regression or DOE artifacts so balance review does not fork into a second acceptance path."
+        "Detectors stay anchored to the preset pack, KPI bands, and locked regression or DOE artifacts so balance review can stay baseline-first and avoid forking into a second acceptance path."
     }
   };
 }
