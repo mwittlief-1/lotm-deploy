@@ -87,3 +87,12 @@ This task is meant to unblock the rest of the tooling/UI preset chain without ch
 - UI preset-selection shells can consume the stable preset ids and titles directly.
 - Later tooling tasks can hang fixtures, replay guards, KPI bands, and runaway detectors off `acceptance_ids[]`.
 - Final preset freeze and UAT lockability work can extend the same checked-in manifest instead of creating another preset list.
+
+## Closure Checklist
+
+For `v0.3.5` closeout, the preset pack is now the operator-facing checklist root rather than just a source-mapping helper.
+
+- UAT operators should select and report the three short-run closure cases by preset id: `uat_arrears_enforcement`, `uat_grant_visibility`, and `uat_hunting_proxy`.
+- `qa_artifacts/playtest_ops/uat_scenario_gate.json` now records those cases in `closure_checklist[]`, so the gate output can be read as a preset checklist instead of a raw scenario dump.
+- Targeted `--preset` reruns write release-scoped filtered gate artifacts under `qa_artifacts/playtest_ops/v0.3.5/` and preserve the canonical checklist file that downstream manifests read.
+- `docs/qa/preset_operator_checklist_v0.3.5.md` and `docs/qa/uat_scenario_pack_v0.3.md` should be treated as preset-driven review docs; the raw UAT scenario ids remain execution details for the deterministic pack.

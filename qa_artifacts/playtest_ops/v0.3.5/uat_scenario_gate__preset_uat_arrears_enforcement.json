@@ -1,0 +1,160 @@
+{
+  "closure_checklist": [
+    {
+      "acceptance_ids": [
+        "obligations_visibility"
+      ],
+      "gate_findings": {
+        "arrears_turn": 3,
+        "failures": [],
+        "grant_turn": null,
+        "hunting_yield_max": 3
+      },
+      "manual_review": {
+        "cue_samples": [
+          {
+            "cue_id": "required_turn",
+            "label": "Required arrears turn",
+            "value": "3"
+          },
+          {
+            "cue_id": "observed_turn",
+            "label": "Observed arrears turn",
+            "value": "3"
+          },
+          {
+            "cue_id": "failures",
+            "label": "Failures",
+            "value": "none"
+          }
+        ],
+        "expectation_summary": "The obligations closure scenario still surfaces arrears enforcement on schedule in the accepted short run.",
+        "live_seed_surfaces": [
+          {
+            "cue_samples": [
+              {
+                "cue_id": "court_members",
+                "label": "Court members",
+                "value": "7 court members"
+              },
+              {
+                "cue_id": "ration_demand",
+                "label": "Ration demand",
+                "value": "14 food / 2 meat"
+              },
+              {
+                "cue_id": "allocation_result",
+                "label": "Allocation result",
+                "value": "14 food / 0 meat"
+              }
+            ],
+            "summary": "Court provisioning stays directly reviewable from the live seed preview, without relying on fixture-only state or a separate init path.",
+            "surface_id": "court_provisioning_sheet"
+          },
+          {
+            "cue_samples": [
+              {
+                "cue_id": "subject_person",
+                "label": "Subject person",
+                "value": "Edmund"
+              },
+              {
+                "cue_id": "shown_count",
+                "label": "Shown candidates",
+                "value": "12"
+              },
+              {
+                "cue_id": "held_out_count",
+                "label": "Held-out candidates",
+                "value": "12"
+              }
+            ],
+            "summary": "Outbound marriage stays preview-only on a cloned snapshot, with deterministic registry ordering and stable accept/reject copy from the live seed.",
+            "surface_id": "outbound_marriage_sheet"
+          }
+        ],
+        "provenance_expectation": "Launch preset uat_arrears_enforcement from New Run and verify run provenance shows preset uat_arrears_enforcement, seed lotm_v026_seed_003_market_tight, and policy builder-forward.",
+        "surface_ids": [
+          "obligations_modal"
+        ]
+      },
+      "policy_id": "builder-forward",
+      "preset_id": "uat_arrears_enforcement",
+      "scenario_id": "uat_arrears_enforcement",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "status": "pass",
+      "title": "UAT arrears enforcement",
+      "turns": 3
+    }
+  ],
+  "completed_at": "2026-04-13T14:32:48.465Z",
+  "failed": 0,
+  "failures": [],
+  "gate": "uat_scenario_gate_v1",
+  "hash": "fac215382b3a9c530d2c700a47995c59a4adce91b642bc15ec0aa88b336e0d01",
+  "notes": [],
+  "operator_flow": {
+    "commands": [
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts",
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts --preset=uat_arrears_enforcement",
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts --preset=uat_grant_visibility",
+      "node node_modules/tsx/dist/cli.mjs scripts/uatScenarioGate.ts --preset=uat_hunting_proxy"
+    ],
+    "note": "Use preset ids as the operator-facing checklist handle. Raw scenario ids remain execution details for the deterministic UAT pack and should not replace the locked preset names in review notes."
+  },
+  "operator_notes": [
+    "Select the locked preset in the New Run UI first, then confirm the provenance banner shows the matching preset id and seed before reviewing gameplay surfaces.",
+    "Treat qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json as the canonical preset list and qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json as the visible-cue checklist.",
+    "Use --preset=<preset_id> for targeted reruns when a single closure lane needs confirmation; scenario ids remain source-pack detail rather than operator-facing checklist names.",
+    "Filtered reruns write a release-scoped gate artifact and preserve qa_artifacts/playtest_ops/uat_scenario_gate.json as the full closure checklist for downstream preset manifests."
+  ],
+  "passed": 1,
+  "release": "v0.3.5",
+  "report_scope": {
+    "canonical_artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+    "mode": "filtered",
+    "preset_filter": [
+      "uat_arrears_enforcement"
+    ],
+    "report_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/uat_scenario_gate__preset_uat_arrears_enforcement.json",
+    "scenario_filter": []
+  },
+  "scenarios": [
+    {
+      "acceptance_ids": [
+        "obligations_visibility"
+      ],
+      "arrears_turn": 3,
+      "failures": [],
+      "grant_turn": null,
+      "hunting_yield_max": 3,
+      "policy_id": "builder-forward",
+      "preset_id": "uat_arrears_enforcement",
+      "preset_title": "UAT arrears enforcement",
+      "scenario_id": "uat_arrears_enforcement",
+      "seed": "lotm_v026_seed_003_market_tight",
+      "turns": 3
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
+      "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+      "kind": "playability_preset_pack_v1",
+      "label": "playability preset pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json",
+      "hash": "c6a48249121e3f56f33c87499dad04ae1d19855bc8501cf7c4de32b29e86c7b8",
+      "kind": "locked_preset_scenarios_v1",
+      "label": "locked preset manifest"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
+      "hash": "aec150374b1c1278cc7e709bbb7752e9705b4bb1685d750b5f3fbd9ed8e6d9f6",
+      "kind": "uat_scenario_pack_v0.3",
+      "label": "uat scenario pack"
+    }
+  ],
+  "started_at": "2026-04-13T14:32:47.651Z"
+}
