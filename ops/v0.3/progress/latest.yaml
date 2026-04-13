@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R5-010-T03
-  last_completed_task_id: V03-R5-005-T06
+  current_task_id: ''
+  last_completed_task_id: V03-R5-010-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 5c1e580
+  git_commit: 36ed252
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,18 +18,19 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 5042bef755b30808e78669edda4b5f0e14fe5a2e32d0a5f9cdc1e8bd78647260
-    run2: 7ce448122dd0ccecd6e788a7d6a35478bcd7d0b62bce792b196e52cfa7ddd1a5
+    run1: cea36e04dbe47ee84c0592a5f10dd5961c4060e5cb76b7a9e7aba4bfa801b335
+    run2: 5e7b871552c10d1e9060c4f2f90337a3255af7a661fd4012ee2385ad7104fc15
 notes: >-
-  Accepted the tooling-owned outbound marriage fixture and preset coverage rail
-  onto the v0.3.5 control-plane line as `V03-R5-005-T06`. The accepted bundle
-  adds deterministic outbound marriage fixture cases, replay guards, and a
-  preset-backed review artifact, then extends the locked preset manifest to use
-  those marriage cues alongside the already-accepted closure rails. Merged
-  focused validation passed (`12/12`), `npm run preflight` still shows the
-  standing `test3_mismatches=16` blocker, and both replay batches passed. The
-  fresh full `qa` runner was attempted but hung in this environment and was
-  terminated without a fresh merge-side result. Their raw summary hashes
-  differed because of path-shaped metadata, but the normalized summaries matched exactly with hash
+  Accepted the tooling-owned balance review closeout packet onto the v0.3.5
+  control-plane line as `V03-R5-010-T03`, closing the last remaining task in
+  the release. The accepted bundle makes `balance_review_closeout.json` the
+  canonical baseline-first signoff surface, keeps KPI bands as the primary
+  comparison rail, keeps runaway detectors as the downstream triage layer, and
+  ties both back to the accepted baseline artifacts. Merged focused validation
+  passed (`9/9`), `npm run preflight` still shows the standing
+  `test3_mismatches=16` blocker, and both replay batches passed. The fresh full
+  `qa` runner was attempted but hung in this environment and was terminated
+  without a fresh merge-side result. Their raw summary hashes differed because
+  of path-shaped metadata, but the normalized summaries matched exactly with hash
   `e519f5ce476960d955e228662db3b9d8e9f20594d60b7c217e72524b20bfb568`.
 active_claims: {}
