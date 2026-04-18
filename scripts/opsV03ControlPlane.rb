@@ -140,6 +140,10 @@ module OpsV03ControlPlane
     index
   end
 
+  def find_task(data, task_id)
+    Array(data["tasks"]).find { |task| task["id"] == task_id }
+  end
+
   def done?(index, item_id)
     index.fetch(item_id, {})["status"] == "done"
   end

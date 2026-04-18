@@ -84,6 +84,39 @@ control_plane_rules:
     - prior_claimed_by
     - prior_claim_expires_at
     - reclaiming_run_id
+  lane_acceptance:
+    intake_audit_required: true
+    require_completed_for_acceptance: true
+    task_packet_fields:
+      - exact_deliverables
+      - definition_of_done
+      - required_test_updates
+      - stop_rules
+      - handoff_requirements
+    allowed_delivery_states:
+      - completed
+      - blocked
+      - advanced_not_claimable
+    required_report_metadata:
+      - Task ID
+      - Branch
+      - Commit
+    required_report_sections:
+      - Delivery state
+      - Task evidence
+      - Handoff
+    required_report_fields:
+      Delivery state:
+        - state
+        - summary
+      Task evidence:
+        - changed_files
+        - contracts_or_surfaces
+        - tests_run
+      Handoff:
+        - next_task_hint
+        - do_not_advance
+        - blockers
 run_logging_required:
   - node_version
   - npm_version

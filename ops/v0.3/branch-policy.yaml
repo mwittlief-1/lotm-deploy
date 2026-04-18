@@ -18,9 +18,20 @@ rules:
     push_required: true
     pr_target: "codex/v0.3-refactor-kickoff"
     pr_action: "open_or_update_after_passing_gates"
+    report_required: true
+    report_template: "ops/v0.3/templates/run-log.md"
+    intake_audit_command: "npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed"
+    required_packet_fields:
+      - branch
+      - commit
+      - report_path
+      - delivery_state
+      - changed_files
+      - tests_run
   integrator_handoff:
     merge_target: "codex/v0.3-refactor-kickoff"
     merge_policy: "integrator_only"
+    acceptance_checklist: "ops/v0.3/templates/intake-review.md"
   integrator_only_paths:
     - "src/sim/turn.ts"
     - "src/sim/phases/**"

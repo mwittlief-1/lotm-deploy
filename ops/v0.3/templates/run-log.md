@@ -24,6 +24,21 @@
 - run1:
 - run2:
 
+## Delivery state
+- state: completed | blocked | advanced_not_claimable
+- summary:
+
+## Task evidence
+- changed_files:
+- contracts_or_surfaces:
+- tests_run:
+- golden_or_replay_notes:
+
+## Handoff
+- next_task_hint:
+- do_not_advance:
+- blockers:
+
 ## Notes
 - 
 - reclaim_event: prior_claimed_by= ; prior_claim_expires_at= ; reclaiming_run_id=

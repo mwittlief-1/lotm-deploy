@@ -1,6 +1,6 @@
 # ops/v0.3 — Automation Execution Contract (Canonical)
 
-**Last Updated:** 2026-03-31
+**Last Updated:** 2026-04-18
 **Scope:** v0.3 unattended execution and backlog rebaseline.
 **Source of Truth:** This folder is canonical for automation state and rules.
 
@@ -18,12 +18,23 @@
 11. Claim the task before editing, set `claim_expires_at` to 4 hours ahead by default, and refresh the claim while the run remains active.
 12. Reclaim only expired claims, and record the reclaim event in the run log.
 13. Run `npm run ops:v0.3:validate`, `npm run ops:v0.3:scheduler-dry-run`, and `npm run ops:v0.3:rebase-dry-run` before accepting control-plane edits.
-14. Run the task's `required_gates` from `gates.yaml`.
-15. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
-16. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
-17. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
-18. For longer same-lane runs, integrator may pre-promote the immediate successor task to `ready` when its only unmet dependency is the currently active same-lane predecessor and no cross-lane blocker applies; the lane may self-claim that successor after locally closing the predecessor without waiting for another scheduler promotion pass.
-19. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+14. Before integrator acceptance of a lane handoff, run `npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed` and treat any failure as a hard stop.
+15. Run the task's `required_gates` from `gates.yaml`.
+16. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
+17. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
+18. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
+19. For longer same-lane runs, integrator may pre-promote the immediate successor task to `ready` when its only unmet dependency is the currently active same-lane predecessor and no cross-lane blocker applies; the lane may self-claim that successor after locally closing the predecessor without waiting for another scheduler promotion pass.
+20. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+
+## Task packet requirements
+- For new or revised executable tasks, `goal` and `done_conditions` are necessary but not sufficient. Prefer adding explicit `exact_deliverables`, `definition_of_done`, `required_test_updates`, `stop_rules`, and `handoff_requirements` fields directly on the task.
+- `definition_of_done` should name the exact contract version, exact player surfaces, and exact deterministic tests or fixtures that must exist before integrator acceptance.
+- `stop_rules` must say when the lane must stop, escalate, or avoid continuing into the next decomposed task even if adjacent work could also be attempted.
+- `handoff_requirements` should require one task-owned run report that names changed files, tests run, delivery state, and whether the result is actually claimable.
+- Delivery state should be reported as one of `completed`, `blocked`, or `advanced_not_claimable`. A task is not complete merely because nearby downstream work also progressed.
+- Release closeout or evidence-only tasks must depend on the substantive implementation tasks they summarize. They should not stay `ready` just because an earlier docs or fixture step landed.
+- When a task says `do_not_advance`, treat that as a hard stop for unattended continuation until integrator acceptance clears the listed boundary.
+- Integrator acceptance now requires a passing intake audit against the task packet and task-owned report. If the audit says the packet is structurally valid but `delivery_state` is not `completed`, the task may be reviewed but not accepted.
 
 ## Backlog model
 - `releases[]` define the roadmap containers.
@@ -53,6 +64,8 @@
 - Rebase imported paths to current repo truth before treating them as scheduler-eligible.
 - Reject any task that touches `src/sim/turn.ts` or `src/sim/phases/**` unless it is explicitly integrator work on `codex/v0.3-refactor-kickoff`.
 - Reject any world or topology task that does not use `codex/v0.3-lane-world-topology`, does not depend on `V03-XMAP-001`, or marks itself ready before that checkpoint is done.
+- Run the lane handoff through `npm run ops:v0.3:intake-audit -- --task <TASK_ID>` before reviewing code. Missing packet fields, missing report sections, missing changed-files or test evidence, or mismatched `Task ID` metadata are hard failures.
+- Use `ops/v0.3/templates/intake-review.md` for the acceptance pass so structural audit, diff review, focused test rerun, and downstream freeze checks happen in the same order every time.
 
 ## Lane Coordination
 - Canonical lanes are `codex/v0.3-refactor-kickoff`, `codex/v0.3-lane-tooling-qa`, `codex/v0.3-lane-social-mechanics`, `codex/v0.3-lane-engine-core`, `codex/v0.3-lane-ui-experience`, `codex/v0.3-lane-economy-fiscal`, and `codex/v0.3-lane-world-topology`.
@@ -61,22 +74,23 @@
 - Same-lane task chains should continue without an extra operator pause once the integrator accepts the prior task and no explicit checkpoint rule applies.
 - Same-lane chains should also avoid scheduler-promotion stalls: when the only remaining unmet dependency is the current same-lane task, pre-promote the successor to `ready` so the lane can continue after local closeout.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
-- For `v0.3.5` closure work, prefer reusing the canonical lanes above instead of inventing new lane branches unless the control plane is explicitly revised first.
-- For `v0.3.5` closure work, lane ownership defaults are:
+- Lane claims do not imply acceptance readiness. Only a passing intake audit plus the task packet's required evidence can move a lane result into integrator review.
+- For `v0.3.6` trust-and-legibility work, prefer reusing the canonical lanes above instead of inventing new lane branches unless the control plane is explicitly revised first.
+- For `v0.3.6` trust-and-legibility work, lane ownership defaults are:
   - `codex/v0.3-refactor-kickoff`: carry-over gate reconciliation, backlog decomposition, integrator-only orchestration seams, control-plane updates, and final acceptance merges
-  - `codex/v0.3-lane-world-topology`: map snapshots, manor detail projections, topology-backed selectors, and action-scope resolution
-  - `codex/v0.3-lane-economy-fiscal`: receipt-grade settlement paths, maintenance registry, stipend and provisioning fiscal writes, and obligations payload expansion
-  - `codex/v0.3-lane-social-mechanics`: dossier and person-card semantics, outbound marriage scouting and offer pipeline, and person-anchored court surfaces
-  - `codex/v0.3-lane-ui-experience`: map, manor, dossier, person-card, provisioning, obligations, and preset-selection presentation surfaces
-  - `codex/v0.3-lane-engine-core`: narrow runtime seams that must touch phase-adjacent allocation logic, especially auditable maintenance labor drag
-  - `codex/v0.3-lane-tooling-qa`: fixtures, preset packs, UAT packs, DOE acceptance bands, and runaway detectors
+  - `codex/v0.3-lane-world-topology`: deferred map and anchor-footprint work that is explicitly pulled into later dossier/manor clarity tasks
+  - `codex/v0.3-lane-economy-fiscal`: receipt-grade settlement paths, obligations payload expansion, upkeep visibility, and ledger walkdown truth
+  - `codex/v0.3-lane-social-mechanics`: relationship delta attribution, marriage flow legibility, household presence truth, and succession readability
+  - `codex/v0.3-lane-ui-experience`: player-facing explanation path, summary/drilldown separation, dossier/person-card readability, and copy cleanup
+  - `codex/v0.3-lane-engine-core`: narrow runtime seams that must touch phase-adjacent allocation or deterministic mechanic correctness
+  - `codex/v0.3-lane-tooling-qa`: fixtures, provenance rails, UAT packs, contract snapshots, and story-based checklist coverage
 - Integrator owns proactive orchestration: after any accepted lane task, reconcile backlog truth, pre-promote same-lane successors when safe, and dispatch the next unblocked lane work without waiting for an operator nudge.
-- Cross-lane checkpoints for `v0.3.5` should stay rare and explicit. Default checkpoint list:
+- Cross-lane checkpoints for `v0.3.6` should stay rare and explicit. Default checkpoint list:
   - carry-over gate closeout for `V03-R4-004-T01`, `V03-R4-005-T01`, and `V03-R4-006-T01`
-  - map renderer attachment before topology and UI map work fan out
-  - maintenance registry availability before engine-core labor-drag and downstream UI explain surfaces
-  - preset-pack freeze before final UAT lockability pass
-  - final balance and stability closure before release lock
+  - explanation spine and headline-cause contract before downstream UI/player-copy passes fan out
+  - obligations view v2 before counterparty-specific UI and consequence copy fan out
+  - provenance helper parity before UAT evidence and export workflows are treated as trustworthy
+  - any intentional simulation-outcome changes before golden review and release lock
 - Minimize operator touchpoints by decomposing work into lane-local chains, not isolated singletons, whenever the write scope and dependency graph allow safe self-chaining.
 
 ## Claim Policy
@@ -112,3 +126,4 @@ Each unattended run records:
 - `scripts/opsV03Validate.rb`
 - `scripts/opsV03SchedulerDryRun.rb`
 - `scripts/opsV03RebaseDryRun.rb`
+- `scripts/opsV03IntakeAudit.rb`

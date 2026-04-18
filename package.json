@@ -12,6 +12,7 @@
     "ops:v0.3:validate": "ruby scripts/opsV03Validate.rb",
     "ops:v0.3:scheduler-dry-run": "ruby scripts/opsV03SchedulerDryRun.rb",
     "ops:v0.3:rebase-dry-run": "ruby scripts/opsV03RebaseDryRun.rb",
+    "ops:v0.3:intake-audit": "ruby scripts/opsV03IntakeAudit.rb",
     "qa": "node scripts/qaGate.js",
     "uat:gate": "tsx scripts/uatGate.ts",
     "sim:batch": "tsx scripts/simBatch.ts",

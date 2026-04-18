@@ -46,6 +46,9 @@ releases:
   status: planned
 - id: v0.3.5
   title: Playability closure
+  status: planned
+- id: v0.3.6
+  title: UAT trust and legibility
   status: active
 epics:
 - id: V03-K0-001
@@ -1736,6 +1739,277 @@ epics:
   - balance review flow compares against deterministic baseline artifacts instead of ad hoc judgement
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R5-010.md
+- id: V03-R6-001
+  title: Explanation spine and surface roles
+  release: v0.3.6
+  status: ready
+  priority: 35
+  tranche: 7
+  change_type: refactor
+  category: SimCore
+  phase: none
+  lane_branch: codex/v0.3-refactor-kickoff
+  deps:
+  - V03-R4-006
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/experience/**
+  - src/sim/turn.ts
+  - src/ui/**
+  - tests/**
+  - docs/**
+  - ops/v0.3/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - TurnReport exposes turn_explanation_v1 and stable headline_causes
+  - Turn Report, Diff Ledger, Manor State, and Explain Changes have distinct roles
+  - player-facing wording becomes primary while debug detail stays secondary
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001.md
+- id: V03-R6-002
+  title: Obligations, arrears, and counterparty truth
+  release: v0.3.6
+  status: ready
+  priority: 34
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  deps:
+  - V03-R4-005
+  - V03-R4-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - obligations surfaces separate current dues from arrears by counterparty
+  - payment results and consequences are explicit
+  - deceased or vacant collectors no longer remain active obligation targets
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002.md
+- id: V03-R6-003
+  title: Manor economy auditability
+  release: v0.3.6
+  status: ready
+  priority: 33
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  deps:
+  - V03-R5-006
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - food and coin walkdowns reconcile without raw receipt spelunking
+  - maintenance and project completion effects show on headline and drilldown surfaces
+  - placeholder economy messaging no longer looks actionable when it is not
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003.md
+- id: V03-R6-004
+  title: Relationship state and change tracking
+  release: v0.3.6
+  status: ready
+  priority: 32
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R4-004
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - relationship changes come from canonical write paths rather than UI diffs
+  - current standing and per-turn movement are separated
+  - relationship posture labels are defined consistently
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-004.md
+- id: V03-R6-005
+  title: Marriage workflow and family routing
+  release: v0.3.6
+  status: todo
+  priority: 31
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R6-004
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/economy/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - inbound and outbound marriage paths share one coherent workflow
+  - family links and outcomes are explicit
+  - married-in and married-out household status is consistent
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-005.md
+- id: V03-R6-006
+  title: Household, court, succession, and demography readability
+  release: v0.3.6
+  status: todo
+  priority: 30
+  tranche: 7
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R5-007
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/court/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - agenda, household, provisioning, and succession surfaces agree on role truth
+  - court turnover and local succession events are explicit
+  - demography transitions are legible and birth spacing remains deterministic
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006.md
+- id: V03-R6-007
+  title: Dossier, person card, intel, and identity clarity
+  release: v0.3.6
+  status: todo
+  priority: 29
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  deps:
+  - V03-R6-004
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - dossier and person-card surfaces distinguish known, unknown, and absent data
+  - anchor manor, holdings scope, posture labels, and intel purpose are legible
+  - nearby identity ambiguity is reduced
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-007.md
+- id: V03-R6-008
+  title: Provenance, fixtures, and UAT closure
+  release: v0.3.6
+  status: ready
+  priority: 28
+  tranche: 7
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  deps:
+  - V03-R4-006
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - ops/v0.3/**
+  - docs/**
+  - qa_artifacts/**
+  - scripts/**
+  - src/sim/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  executable: false
+  done_conditions:
+  - one run provenance helper feeds UI, exports, packet metadata, and replay evidence
+  - v0.3.6 UAT fixtures and story-based checks exist
+  - release closeout uses the existing gates plus the new UAT checklist
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008.md
 tasks:
 - id: V03-R0-001-T01
   title: Audit economy mutation paths against ledger receipt ownership
@@ -8960,7 +9234,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Attach approved external map renderer seam and route entry point
-  status: done
+  status: todo
   priority: 99
   tranche: 6
   change_type: refactor
@@ -8973,7 +9247,7 @@ tasks:
   - V03-R4-005-T01
   - V03-R4-006-T01
   requires_integrator: true
-  blocked_reason: ''
+  blocked_reason: Superseded by the v0.3.6 trust-and-legibility reset unless explicitly reopened.
   allowed_paths:
   - src/App.tsx
   - src/ui/**
@@ -9006,7 +9280,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Expose map selectors from frozen topology and economic profile data
-  status: done
+  status: todo
   priority: 98
   tranche: 6
   change_type: behavior_change
@@ -9051,7 +9325,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Expose map_view_snapshot_v1 through bounded snapshots
-  status: done
+  status: todo
   priority: 97
   tranche: 6
   change_type: behavior_change
@@ -9095,7 +9369,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Render kingdom map with holdings, liege seat, and manor routing
-  status: done
+  status: todo
   priority: 96
   tranche: 6
   change_type: behavior_change
@@ -9138,7 +9412,7 @@ tasks:
   parent_epic: V03-R5-001
   release: v0.3.5
   title: Add deterministic map fixtures, route tests, and replay guards
-  status: done
+  status: todo
   priority: 95
   tranche: 6
   change_type: behavior_change
@@ -9181,7 +9455,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Expose manor_detail_view_v1 from world topology data
-  status: done
+  status: todo
   priority: 94
   tranche: 6
   change_type: behavior_change
@@ -9225,7 +9499,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Project manor maintenance, buildings, and rights summary
-  status: done
+  status: todo
   priority: 93
   tranche: 6
   change_type: behavior_change
@@ -9268,7 +9542,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Render Manor View player and debug tabs
-  status: done
+  status: todo
   priority: 92
   tranche: 6
   change_type: behavior_change
@@ -9311,7 +9585,7 @@ tasks:
   parent_epic: V03-R5-002
   release: v0.3.5
   title: Add manor view snapshot and component coverage
-  status: done
+  status: todo
   priority: 91
   tranche: 6
   change_type: behavior_change
@@ -9353,7 +9627,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Extend known-house surfaces to house_dossier_v2
-  status: done
+  status: todo
   priority: 90
   tranche: 6
   change_type: behavior_change
@@ -9366,7 +9640,7 @@ tasks:
   - V03-R4-005-T01
   - V03-R4-006-T01
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Superseded by the v0.3.6 trust-and-legibility reset unless explicitly reopened.
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/experience/**
@@ -9398,7 +9672,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Replace summary drilldown with dossier modal and debug tab
-  status: done
+  status: todo
   priority: 89
   tranche: 6
   change_type: behavior_change
@@ -9440,7 +9714,7 @@ tasks:
   parent_epic: V03-R5-003
   release: v0.3.5
   title: Add dossier fixtures and prospect completeness tests
-  status: done
+  status: todo
   priority: 88
   tranche: 6
   change_type: behavior_change
@@ -9482,7 +9756,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Define person_card_view_v1 from registries and summaries
-  status: done
+  status: todo
   priority: 87
   tranche: 6
   change_type: behavior_change
@@ -9525,7 +9799,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Add stable family, succession, lands, and service projections
-  status: done
+  status: todo
   priority: 86
   tranche: 6
   change_type: behavior_change
@@ -9568,7 +9842,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Wire tap-any-name person-card modal across live surfaces
-  status: done
+  status: todo
   priority: 85
   tranche: 6
   change_type: behavior_change
@@ -9610,7 +9884,7 @@ tasks:
   parent_epic: V03-R5-004
   release: v0.3.5
   title: Add person-card fixtures and routing tests
-  status: done
+  status: todo
   priority: 84
   tranche: 6
   change_type: behavior_change
@@ -9652,7 +9926,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Expose resolveActionScope(manor_id, action_type) from topology
-  status: done
+  status: todo
   priority: 83
   tranche: 6
   change_type: behavior_change
@@ -9696,7 +9970,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Build outbound scouting registry and candidate ranking
-  status: done
+  status: todo
   priority: 82
   tranche: 6
   change_type: behavior_change
@@ -9741,7 +10015,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add canonical dowry and dower receipt placeholders
-  status: done
+  status: todo
   priority: 81
   tranche: 6
   change_type: behavior_change
@@ -9783,7 +10057,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Implement outbound offer accept and reject pipeline
-  status: done
+  status: todo
   priority: 80
   tranche: 6
   change_type: behavior_change
@@ -9827,7 +10101,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Render outbound scout table and offer composer
-  status: done
+  status: todo
   priority: 79
   tranche: 6
   change_type: behavior_change
@@ -9869,7 +10143,7 @@ tasks:
   parent_epic: V03-R5-005
   release: v0.3.5
   title: Add outbound marriage fixtures, replay guards, and preset coverage
-  status: done
+  status: todo
   priority: 78
   tranche: 6
   change_type: behavior_change
@@ -9912,7 +10186,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Audit live maintenance-bearing surfaces and define maintenance_registry_v1
-  status: done
+  status: todo
   priority: 77
   tranche: 6
   change_type: behavior_change
@@ -9925,7 +10199,7 @@ tasks:
   - V03-R4-005-T01
   - V03-R4-006-T01
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Superseded by the v0.3.6 trust-and-legibility reset unless explicitly reopened.
   allowed_paths:
   - src/sim/domains/economy/**
   - src/sim/domains/court/**
@@ -9958,7 +10232,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Implement recurring maintenance coin and labor requirements
-  status: done
+  status: todo
   priority: 76
   tranche: 6
   change_type: behavior_change
@@ -10001,7 +10275,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Implement auditable maintenance labor-pressure helper seam
-  status: done
+  status: todo
   priority: 75
   tranche: 6
   change_type: behavior_change
@@ -10044,7 +10318,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Wire maintenance labor drag into allocatable labor ordering
-  status: done
+  status: todo
   priority: 74
   tranche: 6
   change_type: behavior_change
@@ -10085,7 +10359,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Surface maintenance rows in manor, portfolio, receipts, and explain views
-  status: done
+  status: todo
   priority: 74
   tranche: 6
   change_type: behavior_change
@@ -10128,7 +10402,7 @@ tasks:
   parent_epic: V03-R5-006
   release: v0.3.5
   title: Add maintenance-pressure DOE scenarios and invariants
-  status: done
+  status: todo
   priority: 73
   tranche: 6
   change_type: behavior_change
@@ -10171,7 +10445,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Define court provisioning view and stipend registry
-  status: done
+  status: todo
   priority: 72
   tranche: 6
   change_type: behavior_change
@@ -10214,7 +10488,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Implement ration and stipend effects through canonical fiscal paths
-  status: done
+  status: todo
   priority: 71
   tranche: 6
   change_type: behavior_change
@@ -10258,7 +10532,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Render court provisioning modal with overrides and debug table
-  status: done
+  status: todo
   priority: 70
   tranche: 6
   change_type: behavior_change
@@ -10300,7 +10574,7 @@ tasks:
   parent_epic: V03-R5-007
   release: v0.3.5
   title: Add provisioning fixtures and UAT coverage
-  status: done
+  status: todo
   priority: 69
   tranche: 6
   change_type: behavior_change
@@ -10342,7 +10616,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Extend economy_obligations_view with payment modes and terminal-risk fields
-  status: done
+  status: todo
   priority: 68
   tranche: 6
   change_type: behavior_change
@@ -10387,7 +10661,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Deepen obligations modal into full ladder and tangible-bite preview
-  status: done
+  status: todo
   priority: 67
   tranche: 6
   change_type: behavior_change
@@ -10431,7 +10705,7 @@ tasks:
   parent_epic: V03-R5-008
   release: v0.3.5
   title: Add obligations fixtures and UAT scripts for enforcement transparency
-  status: done
+  status: todo
   priority: 66
   tranche: 6
   change_type: behavior_change
@@ -10473,7 +10747,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Define playability_preset_pack_v1 and stable scenario mapping
-  status: done
+  status: todo
   priority: 65
   tranche: 6
   change_type: behavior_change
@@ -10486,7 +10760,7 @@ tasks:
   - V03-R4-005-T01
   - V03-R4-006-T01
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: Superseded by the v0.3.6 trust-and-legibility reset unless explicitly reopened.
   allowed_paths:
   - scripts/**
   - tests/**
@@ -10518,7 +10792,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add one deterministic preset-application seam for new runs
-  status: done
+  status: todo
   priority: 64
   tranche: 6
   change_type: behavior_change
@@ -10559,7 +10833,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Author locked preset scenarios and expected visible outcomes
-  status: done
+  status: todo
   priority: 63
   tranche: 6
   change_type: behavior_change
@@ -10606,7 +10880,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Add preset selection and provenance to the new-run shell
-  status: done
+  status: todo
   priority: 62
   tranche: 6
   change_type: behavior_change
@@ -10649,7 +10923,7 @@ tasks:
   parent_epic: V03-R5-009
   release: v0.3.5
   title: Refresh UAT gate and operator docs around the preset pack
-  status: done
+  status: todo
   priority: 61
   tranche: 6
   change_type: behavior_change
@@ -10691,7 +10965,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Define KPI acceptance bands from the locked DOE baseline
-  status: done
+  status: todo
   priority: 60
   tranche: 6
   change_type: behavior_change
@@ -10735,7 +11009,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Add runaway detectors for fiscal and starvation failure modes
-  status: done
+  status: todo
   priority: 59
   tranche: 6
   change_type: behavior_change
@@ -10779,7 +11053,7 @@ tasks:
   parent_epic: V03-R5-010
   release: v0.3.5
   title: Close balance review flow against baseline artifacts
-  status: done
+  status: todo
   priority: 58
   tranche: 6
   change_type: refactor
@@ -10818,3 +11092,1000 @@ tasks:
   - replay_mismatch
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R5-010-T03.md
+- id: V03-R6-001-T01
+  parent_epic: V03-R6-001
+  release: v0.3.6
+  title: Add turn explanation contracts and headline causes
+  status: done
+  priority: 80
+  tranche: 7
+  change_type: refactor
+  category: SimCore
+  phase: none
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Add turn_explanation_v1, headline_causes, and relationship_change_log_v1 so the report becomes the canonical explanation source.
+  deps: []
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/experience/**
+  - src/sim/domains/people/**
+  - src/sim/turn.ts
+  - src/ui/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - report exposes walkdowns for food, coin, and unrest
+  - headline causes and relationship change log are stable and deterministic
+  - UI can consume the new contracts without recomputing explanations
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001-T01.md
+- id: V03-R6-001-T02
+  parent_epic: V03-R6-001
+  release: v0.3.6
+  title: Rewire summary and drilldown surfaces around explanation roles
+  status: done
+  priority: 80
+  tranche: 7
+  change_type: refactor
+  category: SimCore
+  phase: none
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Make Turn Report summary-only, Diff Ledger top-deltas-only, Manor State current-state-plus-causes, and Explain Changes the drilldown home.
+  deps:
+  - V03-R6-001-T01
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/experience/**
+  - src/sim/turn.ts
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - Turn Report keeps only headline summary content
+  - Diff Ledger keeps top deltas and points into the cause chain
+  - Manor State and Explain Changes no longer duplicate the same headline facts
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001-T02.md
+- id: V03-R6-001-T03
+  parent_epic: V03-R6-001
+  release: v0.3.6
+  title: Demote debug-shaped wording behind secondary contexts
+  status: done
+  priority: 79
+  tranche: 7
+  change_type: refactor
+  category: SimCore
+  phase: none
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Keep player-facing wording primary on live surfaces while leaving deterministic/debug detail available behind clearly secondary contexts.
+  deps:
+  - V03-R6-001-T02
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - docs/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - debug-first labels are no longer the default language on live panels
+  - debug/deterministic detail remains intentionally available
+  - summary and debug paths no longer compete for attention on the same screen
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001-T03.md
+- id: V03-R6-002-T01
+  parent_epic: V03-R6-002
+  release: v0.3.6
+  title: Upgrade obligations view to counterparty-timed v2
+  status: done
+  priority: 79
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Add per-counterparty current due, arrears carried in, paid this turn, unpaid after response, and collector-state fields to economy_obligations_view_v2.
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - obligations projection is v2 and deterministic
+  - UI shows current vs arrears vs paid results by counterparty
+  - vacancy/succession state no longer leaves dead collectors active
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002-T01.md
+- id: V03-R6-002-T02
+  parent_epic: V03-R6-002
+  release: v0.3.6
+  title: Make obligation payment results explicit across player surfaces
+  status: done
+  priority: 79
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Show exact paid-versus-unpaid results by counterparty in Obligations, Coin & Dues, Turn Report, and Explain Changes.
+  deps:
+  - V03-R6-002-T01
+  - V03-R6-001-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - each counterparty shows paid this turn versus still unpaid after response
+  - current dues and carried arrears stay visibly distinct on the main read path
+  - Turn Report and Explain Changes repeat the same payment-result story
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002-T02.md
+- id: V03-R6-002-T03
+  parent_epic: V03-R6-002
+  release: v0.3.6
+  title: Rebase obligation collectors after death and succession
+  status: ready
+  priority: 78
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Transfer active liege and church collectors cleanly to successors or visibly vacant seats so deceased actors stop collecting dues.
+  exact_deliverables:
+  - obligations collector truth must come from a real successor-or-vacancy path rather than only flipping dead collectors to vacant in the read model
+  - economy_obligations_view_v2 must expose collector_state and collector_successor_label that truthfully match successor, institution, or vacancy outcomes
+  - player-facing obligations surfaces must render the rebased counterparty label consistently without leaving a dead collector active anywhere on the main read path
+  deps:
+  - V03-R6-002-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: true
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - src/sim/domains/experience/obligationsView.ts reports an active successor label when one exists and an explicit vacancy state when none exists
+  - enforcement and arrears summaries follow the rebased counterparty rather than the deceased actor
+  - Obligations and Coin & Dues surfaces tell the same successor-or-vacancy story without debug lookup
+  done_conditions:
+  - deceased lieges or clergy no longer remain active collectors
+  - successor labels or vacancy copy appear consistently across obligations surfaces
+  - enforcement and arrears state follow the rebased collector rather than the dead actor
+  required_test_updates:
+  - extend tests/sim/obligations_view.test.ts with at least one liege death to successor case and one clergy death to successor-or-vacancy case
+  - extend any supporting succession or institution fixture tests needed to keep the rebasing path deterministic
+  - focused command: npm exec vitest run tests/sim/obligations_view.test.ts
+  stop_rules:
+  - do not begin V03-R6-003-T01 until integrator accepts this task
+  - stop and escalate if truthful rebasing would require src/sim/turn.ts or phase-order edits
+  - stop and record golden-review notes if replay hashes or golden outputs move for reasons other than the intended collector identity change
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002-T03.md
+  handoff_requirements:
+  - include delivery_state completed, blocked, or advanced_not_claimable
+  - list the exact successor and vacancy fixtures exercised in the handoff
+  - name the changed files and focused test output used for acceptance
+- id: V03-R6-002-T04
+  parent_epic: V03-R6-002
+  release: v0.3.6
+  title: Add deterministic arrears carry and rebasing fixtures
+  status: todo
+  priority: 77
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Lock split-payment, arrears carry, collector rebasing, and consequence visibility into deterministic fixtures and UAT-ready scenarios.
+  exact_deliverables:
+  - deterministic fixtures for split-payment, current-vs-arrears carry, successor rebasing, and vacancy handling
+  - scenario-gate or evidence-pack coverage that names arrears consequences on the player path
+  - operator-facing notes that point reviewers to the obligation evidence bundle
+  deps:
+  - V03-R6-002-T03
+  - V03-R6-008-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - tests/**
+  - docs/**
+  - qa_artifacts/**
+  - scripts/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - tests and fixtures cover both payment timing truth and collector rebasing truth in deterministic runs
+  - the v0.3.6 scenario gate names obligation consequence visibility explicitly
+  - operator docs point to one canonical obligation evidence path instead of scattered fixture references
+  done_conditions:
+  - deterministic fixtures cover split dues, arrears carry, and rebased collectors
+  - scenario gate includes arrears consequence visibility checks
+  - operator docs point to the new obligation-focused evidence pack
+  required_test_updates:
+  - extend tests/sim/obligations_view.test.ts or adjacent obligation fixture tests with deterministic carry and rebasing cases
+  - update scripts/uatScenarioGate.ts or its fixture sources if new checks are added
+  - focused command: node --import tsx ./scripts/uatScenarioGate.ts
+  stop_rules:
+  - do not start V03-R6-008-T03 from the tooling lane as a substitute for this evidence task
+  - stop and escalate if the scenario gate cannot express the obligation evidence without broader release-pack replanning
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002-T04.md
+  handoff_requirements:
+  - include the deterministic fixture ids or seed names touched
+  - cite the updated scenario-gate path and any docs entry point added for reviewers
+- id: V03-R6-003-T01
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Backfill canonical food and coin walkdown rows
+  status: todo
+  priority: 78
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Synthesize ordered food and coin walkdowns from canonical state and receipt data even when fiscal receipts are sparse.
+  exact_deliverables:
+  - turn_explanation_v1 food and coin walkdowns reconcile from starting values to ending values using canonical ordered rows
+  - walkdown rows include explicit maintenance or dues outflows when those causes are known on the current turn
+  - Explain Changes and related player surfaces can render the ordered walkdown without raw JSON spelunking
+  deps:
+  - V03-R6-002-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - tests prove food and coin walkdowns reconcile numerically from start to end
+  - sparse receipt cases still render ordered rows instead of collapsing the cause chain
+  - the task does not rely on later maintenance/project polish to count as complete
+  done_conditions:
+  - food and coin walkdowns reconcile from start to ending values
+  - maintenance and dues appear as explicit outflow lines when known
+  - walkdowns stay available without raw receipt spelunking
+  required_test_updates:
+  - extend tests/sim/turn_explanation_contract.test.ts for ordered food and coin reconciliation
+  - extend tests/ui/receiptsViewerPanel.test.tsx or tests/ui/turnReportPanel.test.tsx to prove the ordered rows remain visible on the player path
+  - focused command: npm exec vitest run tests/sim/turn_explanation_contract.test.ts tests/ui/receiptsViewerPanel.test.tsx tests/ui/turnReportPanel.test.tsx
+  stop_rules:
+  - do not count maintenance/project headline work from V03-R6-003-T02 as completion for this task
+  - stop and escalate if the walkdown requires integrator-only orchestration edits in src/sim/turn.ts
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T01.md
+  handoff_requirements:
+  - include one reconciled food example and one reconciled coin example from the focused test evidence
+- id: V03-R6-003-T02
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Surface maintenance and project completion effects in headline and drilldown views
+  status: todo
+  priority: 77
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Carry maintenance, upkeep, and completed-project effects into headline causes and detailed walkdowns without relying on raw receipt spelunking.
+  exact_deliverables:
+  - recurring maintenance must appear on the main ledger path and in headline_causes when material
+  - completed-project costs and effects must appear in both headline and drilldown explanation surfaces
+  - player-facing evidence must show before-and-after project effects without exported JSON
+  deps:
+  - V03-R6-003-T01
+  - V03-R6-001-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: true
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - a completed improvement creates visible cause text in both headline and drilldown surfaces
+  - recurring upkeep is legible on the same main ledger path players already use for coin review
+  - the surface tells the same story in Turn Report, Diff Ledger, and Explain Changes
+  done_conditions:
+  - recurring maintenance shows on the main ledger path
+  - project completion costs and effects appear in both headline and drilldown surfaces
+  - project outcomes are auditable without exported JSON
+  required_test_updates:
+  - extend tests/sim/turn_explanation_contract.test.ts and any project or maintenance fixture tests that feed headline causes
+  - extend tests/ui/turnReportPanel.test.tsx, tests/ui/diffLedgerPanel.test.tsx, or tests/ui/manorStatePanel.test.tsx for headline/drilldown visibility
+  - focused command: npm exec vitest run tests/sim/turn_explanation_contract.test.ts tests/ui/turnReportPanel.test.tsx tests/ui/diffLedgerPanel.test.tsx tests/ui/manorStatePanel.test.tsx
+  stop_rules:
+  - stop and record golden-review notes if project accounting changes simulation outcomes
+  - do not continue into V03-R6-003-T03 on the assumption that placeholder messaging fixes this task's missing headline evidence
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T02.md
+  handoff_requirements:
+  - include one completed-project example and one recurring-maintenance example from the player surfaces
+- id: V03-R6-003-T03
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Clarify upkeep labor and placeholder-versus-live economy messaging
+  status: todo
+  priority: 76
+  tranche: 7
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Explain upkeep labor against farmers/builders and stop placeholder market or meat values from reading like live actionable systems.
+  exact_deliverables:
+  - Manor State must explain how upkeep labor is taken relative to builder and farmer labor
+  - placeholder economy references must be visibly labeled or removed from live-action language
+  - meat must either present live stock and acquisition paths or stop reading like a controllable live input
+  deps:
+  - V03-R6-003-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: true
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - Manor State gives a player-readable explanation for why productive labor changed after upkeep
+  - placeholder market lines do not imply live actions the player cannot actually take
+  - meat-language no longer penalizes or misleads the player when the resource is not truly actionable
+  done_conditions:
+  - Manor State explains upkeep labor against productive labor counts
+  - placeholder economy values are labeled or hidden rather than implying live actions
+  - meat is either surfaced as live stock with paths or removed from live decision language
+  required_test_updates:
+  - extend tests/ui/manorStatePanel.test.tsx and tests/ui/playScreenPortfolio.test.ts for upkeep labor and placeholder copy
+  - extend tests/sim/pricing_contract.test.ts or adjacent economy reference tests if lifecycle labeling changes
+  - focused command: npm exec vitest run tests/ui/manorStatePanel.test.tsx tests/ui/playScreenPortfolio.test.ts tests/sim/pricing_contract.test.ts
+  stop_rules:
+  - stop and record golden-review notes if resolving placeholder-versus-live messaging changes simulation outcomes
+  - do not treat generic copy cleanup as completion unless the labor and resource-truth surfaces are actually distinguishable in tests
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T03.md
+  handoff_requirements:
+  - include the exact live-versus-placeholder copy path and one labor-pressure example used for acceptance
+- id: V03-R6-004-T01
+  parent_epic: V03-R6-004
+  release: v0.3.6
+  title: Source relationship deltas from canonical write paths
+  status: done
+  priority: 77
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Emit relationship_change_log_v1 from relationship-engine writes and use it in explanation and ledger surfaces.
+  deps: []
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - relationship changes no longer rely on UI-only before/after diffing
+  - cause labels are human-readable
+  - dossier/person/diff surfaces can distinguish state from turn movement
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-004-T01.md
+- id: V03-R6-004-T02
+  parent_epic: V03-R6-004
+  release: v0.3.6
+  title: Name relationship delta causes and scope on explanation surfaces
+  status: done
+  priority: 77
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Make Diff Ledger and Explain Changes show relationship movement with explicit human-readable causes and house/person/institution scope.
+  deps:
+  - V03-R6-004-T01
+  - V03-R6-001-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - relationship entries name their cause instead of reading like unlabeled totals
+  - house-level versus person-level movement is visible on the explanation path
+  - relationship delta ordering stays deterministic
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-004-T02.md
+- id: V03-R6-004-T03
+  parent_epic: V03-R6-004
+  release: v0.3.6
+  title: Separate standing from turn movement on dossier and person surfaces
+  status: ready
+  priority: 76
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Keep current relationship posture separate from turn delta and define posture labels consistently across dossier and person-facing summaries.
+  exact_deliverables:
+  - house_dossier_summary_v2 must separate current relationship standing from this-turn movement in the bounded contract
+  - current dossier or known-house surfaces must render standing and delta distinctly without waiting for the later person-card task
+  - posture or favor labels must be derived from the same current-standing contract used on the player path
+  deps:
+  - V03-R6-004-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - src/sim/domains/people/knownHouseSummaries.ts exports house_dossier_summary_v2 instead of v1
+  - the bounded snapshot contract test asserts the new v2 relationship standing-versus-delta shape
+  - a player can read current posture without mistaking it for turn movement on the dossier-facing path
+  done_conditions:
+  - current standing and per-turn movement are visually distinct
+  - posture and favor labels use one consistent definition
+  - dossier/person surfaces no longer imply a delta is the standing itself
+  required_test_updates:
+  - extend tests/sim/bounded_snapshot_contract.test.ts to assert house_dossier_summary_v2
+  - extend tests/sim/known_house_snapshot_fields.test.ts and any dossier-facing UI tests needed for standing-versus-delta visibility
+  - focused command: npm exec vitest run tests/sim/bounded_snapshot_contract.test.ts tests/sim/known_house_snapshot_fields.test.ts
+  stop_rules:
+  - do not begin V03-R6-007-T01 until integrator accepts this task
+  - stop and escalate if the task grows into full person_card_view_v1 implementation, which belongs to V03-R6-007-T01
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-004-T03.md
+  handoff_requirements:
+  - include the exact v2 contract fields added and the dossier surface that now renders them separately
+- id: V03-R6-005-T01
+  parent_epic: V03-R6-005
+  release: v0.3.6
+  title: Define unified marriage workflow view contract
+  status: todo
+  priority: 76
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Add a bounded marriage workflow surface that groups inbound proposals and outbound offer/scouting state.
+  exact_deliverables:
+  - marriage_workflow_view_v1 must become the bounded contract for unified inbound and outbound marriage state
+  - prospects or outbound marriage surfaces must render one workflow entry point with one-hop links to candidate, parents, and house
+  - workflow copy must name expected effects and send or reject outcomes in player-facing language
+  deps:
+  - V03-R6-007-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - a player can move between inbound and outbound marriage paths without losing context
+  - proposal cards expose direct family and house links without intermediate hunting
+  - send, queue, and reject outcomes are explicit on the workflow path
+  done_conditions:
+  - one workflow view covers inbound and outbound marriage paths
+  - links to candidate, parents, and house are one hop away
+  - workflow copy is player-facing rather than debug-shaped
+  required_test_updates:
+  - add or extend tests/sim for marriage_workflow_view_v1 contract coverage
+  - extend tests/ui/prospectsPanel.test.tsx with unified workflow assertions
+  - focused command: npm exec vitest run tests/ui/prospectsPanel.test.tsx tests/sim/marriage_decision_budget.test.ts
+  stop_rules:
+  - stop and escalate if this task requires full household-presence or succession-surface work, which belongs to V03-R6-006-T01
+  - do not start V03-R6-006-T01 until integrator accepts this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-005-T01.md
+  handoff_requirements:
+  - include the workflow contract path, the primary entry surface, and the send-or-reject outcome evidence
+- id: V03-R6-006-T01
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Add household presence view contract
+  status: todo
+  priority: 75
+  tranche: 7
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Add one canonical read model for household membership, provisioning class, residence, and service context.
+  exact_deliverables:
+  - household_presence_view_v1 must become the canonical bounded read model for roster, provisioning, residence, and service context
+  - household or court surfaces must explain why each resident, guest, retainer, or outsider is present
+  - turnover and succession changes must be visible on the player path without opening raw debug views
+  deps:
+  - V03-R6-005-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/court/**
+  - src/ui/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - household and provisioning surfaces read from one consistent source of truth
+  - roster entries explain presence and role in player-facing terms
+  - officer turnover or succession changes become legible in the same resolved turn
+  done_conditions:
+  - household and provisioning surfaces share one source of truth
+  - roster entries explain why each person is present
+  - turnover and succession changes become visible without debug spelunking
+  required_test_updates:
+  - add or extend tests/sim for household_presence_view_v1 contract coverage
+  - extend play-screen household or agenda UI tests that prove classification alignment
+  - focused command: npm exec vitest run tests/ui/playScreenAgenda.test.ts tests/sim/agenda_registry.test.ts
+  stop_rules:
+  - stop and escalate if this task requires integrator-only phase or turn orchestration edits
+  - do not fold person-card dossier scope from V03-R6-007-T01 into this task unless the existing dependency chain is intentionally revised
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T01.md
+  handoff_requirements:
+  - include one aligned household-versus-provisioning example and one turnover-or-succession example
+- id: V03-R6-007-T01
+  parent_epic: V03-R6-007
+  release: v0.3.6
+  title: Upgrade dossier and person-card bounded summaries
+  status: todo
+  priority: 74
+  tranche: 7
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Extend the dossier path around house_dossier_summary_v2 and add person_card_view_v1 with anchor footprint, holding scope, and player-facing context.
+  exact_deliverables:
+  - use the accepted house_dossier_summary_v2 as the dossier base contract instead of reintroducing v1 assumptions
+  - add person_card_view_v1 with personal-versus-house holdings, residence, and service context
+  - dossier or intel surfaces must distinguish unknown from absent data and explain why the learned information matters
+  deps:
+  - V03-R6-004-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - dossier surfaces no longer collapse anchor footprint, holdings scope, and unknown-state meaning into one ambiguous label
+  - person_card_view_v1 exists and exposes player-facing residence and service context
+  - intel entries say what was learned, from where, and why it matters
+  done_conditions:
+  - dossier and person summaries distinguish unknown, absent, and known data
+  - house footprint and personal holdings do not collapse into one ambiguous label
+  - intel entries explain what changed, where it came from, and why it matters
+  required_test_updates:
+  - extend tests/sim/known_house_snapshot_fields.test.ts and bounded snapshot contract coverage for the dossier shape
+  - add or extend person-card or intel UI tests once person_card_view_v1 lands
+  - focused command: npm exec vitest run tests/sim/known_house_snapshot_fields.test.ts tests/ui/prospectsPanel.test.tsx
+  stop_rules:
+  - do not redefine relationship standing-versus-delta semantics here; consume the accepted V03-R6-004-T03 contract instead
+  - stop and escalate if anchor-footprint work requires deferred world-topology imports rather than existing bounded world surfaces
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-007-T01.md
+  handoff_requirements:
+  - include one dossier example, one person-card example, and one intel example from the shipped surfaces
+- id: V03-R6-008-T01
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Add shared run provenance helper and wire it into exports
+  status: done
+  priority: 73
+  tranche: 7
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Add run_provenance_v1 and use it in UI, run summary export, playtest packet metadata, and replay evidence.
+  deps: []
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/**
+  - src/ui/**
+  - docs/**
+  - qa_artifacts/**
+  - tests/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - UI, exported run summary, and packet metadata agree on version provenance
+  - mismatches are visible instead of silent
+  - deterministic tests lock the provenance schema
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T01.md
+- id: V03-R6-008-T02
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Refresh v0.3.6 UAT fixtures and scenario gate pack
+  status: done
+  priority: 73
+  tranche: 7
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Update deterministic v0.3.6 fixtures, scenario gate content, and playtest packet references so the new explanation surfaces are testable end to end.
+  deps:
+  - V03-R6-008-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - docs/**
+  - qa_artifacts/**
+  - scripts/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  done_conditions:
+  - scenario gate covers provenance parity and explanation-surface checks
+  - v0.3.6 packet references and UAT docs agree on the active release
+  - deterministic fixtures exist for the new ledger and obligation narratives
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T02.md
+- id: V03-R6-008-T03
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Publish story-based release closeout and gate evidence
+  status: blocked
+  priority: 72
+  tranche: 7
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Close v0.3.6 with the existing merge gates plus a story-shaped UAT checklist and evidence bundle.
+  exact_deliverables:
+  - one release closeout packet that ties accepted story coverage to the final gate evidence
+  - release docs that point to the accepted v0.3.6 UAT pack and exact evidence bundle paths
+  - a merge-ready tooling handoff that names the final unresolved blockers or confirms release-close status
+  deps:
+  - V03-R6-008-T02
+  - V03-R6-002-T04
+  - V03-R6-003-T03
+  - V03-R6-007-T01
+  - V03-R6-005-T01
+  - V03-R6-006-T01
+  requires_integrator: true
+  blocked_reason: release closeout must wait for the remaining v0.3.6 economy and social implementation chain to be accepted
+  allowed_paths:
+  - ops/v0.3/**
+  - docs/**
+  - qa_artifacts/**
+  - scripts/**
+  - tests/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - every referenced story checklist item points to accepted implementation evidence instead of planned work
+  - the closeout packet includes clean gate evidence or a truthful release blocker record for qa, preflight, and seed replay
+  - the tooling handoff is a true final-acceptance bundle, not a placeholder reminder doc
+  done_conditions:
+  - closeout report references the story checklist and gate evidence together
+  - release docs point to the accepted v0.3.6 UAT pack
+  - tooling lane leaves a merge-ready evidence trail for final release acceptance
+  required_test_updates:
+  - rerun the full required gates and record the exact evidence paths in the handoff
+  - extend any story-checklist or closeout validation tests needed to keep the release packet deterministic
+  - focused commands: npm run qa; npm run preflight; npm run seed:replay:batch twice with hash comparison
+  stop_rules:
+  - do not claim this task complete while any dependency remains unaccepted
+  - stop and escalate if the release packet would need to paper over missing economy or social evidence
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T03.md
+  handoff_requirements:
+  - include the story checklist path, gate evidence paths, and explicit final blocker summary if merge-ready status is not reached

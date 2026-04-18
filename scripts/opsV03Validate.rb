@@ -22,6 +22,26 @@ unless runtime_contract.dig("control_plane_rules", "scheduler_mode") == "lane_pa
   errors << "runtime-contract.yaml must declare scheduler_mode=lane_parallel"
 end
 
+lane_acceptance = runtime_contract.dig("control_plane_rules", "lane_acceptance") || {}
+errors << "runtime-contract.yaml must declare lane_acceptance.intake_audit_required=true" unless lane_acceptance["intake_audit_required"] == true
+errors << "runtime-contract.yaml must declare lane_acceptance.require_completed_for_acceptance=true" unless lane_acceptance["require_completed_for_acceptance"] == true
+%w[task_packet_fields allowed_delivery_states required_report_metadata required_report_sections required_report_fields].each do |field|
+  value = lane_acceptance[field]
+  missing =
+    if value.is_a?(Array) || value.is_a?(Hash)
+      value.empty?
+    else
+      OpsV03ControlPlane.blank?(value)
+    end
+  errors << "runtime-contract.yaml must declare lane_acceptance.#{field}" if missing
+end
+
+lane_handoff = branch_policy.dig("rules", "lane_handoff") || {}
+errors << "branch-policy.yaml must declare lane_handoff.report_required=true" unless lane_handoff["report_required"] == true
+errors << "branch-policy.yaml must declare lane_handoff.intake_audit_command" if OpsV03ControlPlane.blank?(lane_handoff["intake_audit_command"])
+errors << "branch-policy.yaml must declare lane_handoff.required_packet_fields" if Array(lane_handoff["required_packet_fields"]).empty?
+errors << "branch-policy.yaml must declare lane_handoff.report_template" if OpsV03ControlPlane.blank?(lane_handoff["report_template"])
+
 releases = Array(backlog["releases"])
 epics = Array(backlog["epics"])
 tasks = Array(backlog["tasks"])
