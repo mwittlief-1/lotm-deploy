@@ -63,8 +63,8 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
             </div>
 
             <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
-              <div style={PLAY_SCREEN_EYEBROW_STYLE}>Relationship</div>
-              <div style={{ marginTop: 8, fontSize: 21, fontWeight: 700 }}>{surface.relationshipBandLabel}</div>
+              <div style={PLAY_SCREEN_EYEBROW_STYLE}>Standing posture</div>
+              <div style={{ marginTop: 8, fontSize: 21, fontWeight: 700 }}>{surface.relationshipPostureLabel}</div>
               <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
                 {surface.relationshipSummary ? (
                   <>
@@ -75,6 +75,14 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
                 ) : (
                   "No relationship vector is available in this dossier."
                 )}
+              </div>
+            </div>
+
+            <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+              <div style={PLAY_SCREEN_EYEBROW_STYLE}>Turn movement</div>
+              <div style={{ marginTop: 8, fontSize: 21, fontWeight: 700 }}>{surface.relationshipMovementCount} changes</div>
+              <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
+                {surface.relationshipMovementHelperText}
               </div>
             </div>
 
@@ -152,6 +160,36 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
                   ? surface.holdingsKnownManorIds.join(", ")
                   : "This dossier does not expose known manor ids beyond the coarse holdings footprint."}
               </div>
+            </div>
+
+            <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+              <div style={PLAY_SCREEN_EYEBROW_STYLE}>Relationship movement</div>
+              {surface.relationshipMovementRows.length > 0 ? (
+                <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+                  {surface.relationshipMovementRows.map((row) => (
+                    <div key={row.id} style={{ display: "grid", gap: 4 }}>
+                      {row.personId && onOpenPersonCard ? (
+                        <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={row.personId}>
+                          {row.title}
+                        </PersonCardTrigger>
+                      ) : (
+                        <div style={{ fontWeight: 700 }}>{row.title}</div>
+                      )}
+                      <div style={{ fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
+                        {row.directionLabel}
+                        <br />
+                        {row.detail}
+                        <br />
+                        {row.causeLabel} ({row.postureShiftLabel})
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ marginTop: 10, fontSize: 13, color: PLAY_SCREEN_THEME.inkMuted }}>
+                  No turn-movement rows are recorded on this bounded dossier.
+                </div>
+              )}
             </div>
           </div>
         </div>

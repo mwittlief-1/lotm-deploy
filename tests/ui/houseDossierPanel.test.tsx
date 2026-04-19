@@ -20,6 +20,8 @@ describe("HouseDossierPanel", () => {
 
     expect(html).toContain("House dossier");
     expect(html).toContain("Player tab");
+    expect(html).toContain("Standing posture");
+    expect(html).toContain("Turn movement");
     expect(html).toContain("Ledger Posture");
     expect(html).toContain("Known Manor Footprint");
     expect(html).toContain(surface.houseName);

@@ -9,10 +9,10 @@ import type {
   HouseDossierKnownnessSource,
   HouseDossierLedgerBand,
   HouseDossierLedgerTrend,
-  HouseDossierRelationshipBand,
   HouseDossierRelationshipSummary,
   HouseDossierSummary,
   KnownHouseSummary,
+  RelationshipTurnMovementRowV1,
   RunState,
 } from "../../types";
 import { buildBoundedWorldTopologyView } from "../world";
@@ -88,8 +88,9 @@ function readRelationshipToPlayer(state: RunState, houseId: string): KnownHouseS
   return readRelationshipVector(state, headId, playerHeadId);
 }
 
-function classifyRelationshipBand(relationship: KnownHouseSummary["relationship"]): HouseDossierRelationshipBand {
-  if (!relationship) return "unknown";
+function classifyRelationshipBand(
+  relationship: NonNullable<KnownHouseSummary["relationship"]>
+): HouseDossierRelationshipSummary["standing_band"] {
   return classifyRelationshipStanding(relationship);
 }
 
@@ -239,6 +240,13 @@ function relationshipSummaryForHouse(
   };
 }
 
+function relationshipTurnMovementForHouse(
+  _state: RunState,
+  _houseId: string
+): { count: number; rows: RelationshipTurnMovementRowV1[] } {
+  return { count: 0, rows: [] };
+}
+
 function collectProspectHouseSources(state: RunState): Map<string, Set<HouseDossierKnownnessSource>> {
   const sourcesByHouseId = new Map<string, Set<HouseDossierKnownnessSource>>();
   const playerHouseId = playerHouseIdOf(state);
@@ -297,8 +305,9 @@ function compactHouseDossierForBoundedSnapshot(dossier: HouseDossierSummary): Bo
     knownness: dossier.knownness,
     kinship_summary: dossier.kinship_summary,
     kinship_tags: [...dossier.kinship_tags],
-    relationship_band: dossier.relationship_band,
     relationship_summary: dossier.relationship_summary ? { ...dossier.relationship_summary } : null,
+    relationship_turn_movement_count: dossier.relationship_turn_movement_count,
+    relationship_turn_movement_rows: dossier.relationship_turn_movement_rows.map((row) => ({ ...row })),
     holdings_footprint: compactHoldingsFootprintForBoundedSnapshot(dossier.holdings_footprint),
     ledger_band: dossier.ledger_band,
     ledger_trend: dossier.ledger_trend,
@@ -360,6 +369,7 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
     const headId = resolveCurrentHouseHeadId(state, houseId);
     const head = registryPersonFor(state, headId);
     const { relationship, summary: relationshipSummary } = relationshipSummaryForHouse(state, houseId);
+    const relationshipTurnMovement = relationshipTurnMovementForHouse(state, houseId);
     const heirSignals = heirSignalsForHouse(state, house);
     const memberIds = allHouseMemberIds(state, houseId);
     const householdMemberCount = memberIds.length;
@@ -401,8 +411,9 @@ export function buildKnownHouseExperienceSurfaces(state: RunState): KnownHouseEx
       knownness_sources: [...knownness.knownness_sources],
       kinship_summary: kinshipSummaryForReasons(reasons),
       kinship_tags: [...reasons],
-      relationship_band: classifyRelationshipBand(relationship),
       relationship_summary: relationshipSummary,
+      relationship_turn_movement_count: relationshipTurnMovement.count,
+      relationship_turn_movement_rows: relationshipTurnMovement.rows,
       household_scope: householdScopeForHouse(house, householdMemberCount, childCount),
       household_member_count: householdMemberCount,
       living_member_count: livingMemberCount,

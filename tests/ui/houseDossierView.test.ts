@@ -28,8 +28,9 @@ describe("houseDossierView", () => {
       "knownness_sources",
       "kinship_summary",
       "kinship_tags",
-      "relationship_band",
       "relationship_summary",
+      "relationship_turn_movement_count",
+      "relationship_turn_movement_rows",
       "household_scope",
       "household_member_count",
       "living_member_count",
@@ -44,5 +45,6 @@ describe("houseDossierView", () => {
       "ledger_band",
       "ledger_trend"
     ]);
+    expect(surface?.relationshipPostureLabel).toBe(surface?.relationshipSummary?.standingBandLabel ?? "Unknown");
   });
 });

@@ -56,10 +56,11 @@ describe("bounded snapshot contract", () => {
         expect.objectContaining({
           schema_version: "house_dossier_summary_v2",
           house_id: expect.any(String),
-          relationship_band: expect.any(String),
           kinship_summary: expect.any(String),
           knownness: expect.any(String),
           relationship_summary: expect.any(Object),
+          relationship_turn_movement_count: expect.any(Number),
+          relationship_turn_movement_rows: expect.any(Array),
           holdings_footprint: expect.any(Object),
           ledger_band: expect.any(String),
           ledger_trend: expect.any(String)
@@ -74,8 +75,10 @@ describe("bounded snapshot contract", () => {
       favor_score: expect.any(Number),
       allegiance: expect.any(Number),
       respect: expect.any(Number),
-      threat: expect.any(Number)
+      threat: expect.any(Number),
+      standing_band: expect.any(String)
     });
+    expect(dossierWithRelationship?.relationship_band).toBeUndefined();
     expect(dossierWithHoldings?.holdings_footprint?.known_manor_ids).toBeUndefined();
     expect(dossierWithHoldings?.kinship_tags).toEqual(expect.any(Array));
     expect((snapshot as any).succession_line_summary).toMatchObject({

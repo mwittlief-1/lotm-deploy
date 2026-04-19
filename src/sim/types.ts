@@ -204,6 +204,42 @@ export type KnownHouseRelevanceTier = "tier0" | "tier1";
 export type HouseDossierKinshipSummary = "none" | "blood_tie" | "marriage_tie" | "blood_and_marriage_tie";
 export type HouseDossierRelationshipBand = "unknown" | "favorable" | "steady" | "wary" | "hostile";
 export type HouseDossierHouseholdScope = "head_only" | "household_seeded";
+export type HouseDossierKnownness = "known_house" | "prospect_house" | "known_house_and_prospect";
+export type HouseDossierKnownnessSource = "relevance" | "marriage_offer" | "prospect";
+export type HouseDossierLedgerBand = "distressed" | "tight" | "stable" | "flush" | "unknown";
+export type HouseDossierLedgerTrend = "declining" | "flat" | "rising" | "unknown";
+export type HouseDossierHoldingsBand = "single_holding" | "minor_cluster" | "broad_domain";
+
+export interface HouseDossierRelationshipSummary {
+  allegiance: number;
+  respect: number;
+  threat: number;
+  favor_score: number;
+  standing_band: HouseDossierRelationshipBand;
+}
+
+export interface RelationshipTurnMovementRowV1 {
+  row_id: string;
+  counterparty_actor_id: string;
+  counterparty_label: string;
+  counterparty_person_id: string | null;
+  direction_label: string;
+  cause_summary: string;
+  allegiance_delta: number;
+  respect_delta: number;
+  threat_delta: number;
+  magnitude: number;
+  before_standing_band: HouseDossierRelationshipBand;
+  after_standing_band: HouseDossierRelationshipBand;
+}
+
+export interface HouseDossierHoldingsFootprint {
+  holdings_count: number;
+  holdings_band: HouseDossierHoldingsBand;
+  anchor_manor_id: string | null;
+  known_manor_ids?: string[];
+  source_kind: "player_portfolio" | "house_seed";
+}
 
 export interface KnownHouseSummary {
   house_id: string;
@@ -223,20 +259,151 @@ export interface KnownHouseSummary {
 }
 
 export interface HouseDossierSummary {
-  schema_version: "house_dossier_summary_v1";
+  schema_version: "house_dossier_summary_v2";
   house_id: string;
   house_name: string;
   tier: string;
   relevance_tier: KnownHouseRelevanceTier;
   relevance_reasons: KnownHouseRelevanceReason[];
   kinship_summary: HouseDossierKinshipSummary;
-  relationship_band: HouseDossierRelationshipBand;
+  kinship_tags: KnownHouseRelevanceReason[];
+  relationship_summary: HouseDossierRelationshipSummary | null;
+  relationship_turn_movement_count: number;
+  relationship_turn_movement_rows: RelationshipTurnMovementRowV1[];
   household_scope: HouseDossierHouseholdScope;
   household_member_count: number;
   living_member_count: number;
   child_count: number;
   has_male_heir: boolean;
   heiress_possible: boolean;
+  holdings_footprint: HouseDossierHoldingsFootprint;
+  ledger_band: HouseDossierLedgerBand;
+  ledger_trend: HouseDossierLedgerTrend;
+}
+
+export interface BoundedHouseDossierSummary {
+  schema_version: "house_dossier_summary_v2";
+  house_id: string;
+  knownness: HouseDossierKnownness;
+  kinship_summary: HouseDossierKinshipSummary;
+  kinship_tags: KnownHouseRelevanceReason[];
+  relationship_summary: HouseDossierRelationshipSummary | null;
+  relationship_turn_movement_count: number;
+  relationship_turn_movement_rows: RelationshipTurnMovementRowV1[];
+  holdings_footprint: HouseDossierHoldingsFootprint;
+  ledger_band: HouseDossierLedgerBand;
+  ledger_trend: HouseDossierLedgerTrend;
+}
+
+export interface PersonCardRelativeRef {
+  person_id: string;
+  person_name: string;
+  house_id: string | null;
+  house_name: string | null;
+  age: number | null;
+  sex: Sex | null;
+  alive: boolean;
+  married_out: boolean;
+}
+
+export interface PersonCardResidenceBinding {
+  residence_manor_id: string | null;
+  selector_contexts: string[];
+  source_kind: string | null;
+  source_ref_id: string | null;
+  travel_cost_distance: number | null;
+  route_hop_distance: number | null;
+  distance_band: "near" | "far" | null;
+}
+
+export interface PersonCardFamilyProjection {
+  family_person_ids: string[];
+  parents: PersonCardRelativeRef[];
+  spouse: PersonCardRelativeRef | null;
+  siblings: PersonCardRelativeRef[];
+  children: PersonCardRelativeRef[];
+  kinship_tags: string[];
+  married_out: boolean;
+}
+
+export interface PersonCardSuccessionProjection {
+  line_position: number | null;
+  adult_line_position: number | null;
+  claimant_position: number | null;
+  claimant_adult_position: number | null;
+  current_heir_id: string | null;
+  adult_successor_id: string | null;
+  claim_window_open: boolean;
+  blocked_by_current_heir: boolean | null;
+  current_heir: boolean;
+  adult_eligible: boolean;
+  player_house_relevance_reasons: string[];
+}
+
+export interface PersonCardOfficeAssignment {
+  seat_id: string | null;
+  title: string;
+  scope: string | null;
+  owner_actor_id: string | null;
+  holder_kind: string | null;
+  payment_basis: string | null;
+  active_service_record_id: string | null;
+}
+
+export interface PersonCardServiceTimelineEntry {
+  record_id: string;
+  title: string;
+  role_key: string;
+  source_kind: "court_service_record" | "service_record";
+  serve_at_actor_id: string | null;
+  institution_assignment_id: string | null;
+  payment_basis: string | null;
+  start_turn_index: number | null;
+  end_turn_index: number | null;
+  active: boolean;
+}
+
+export interface PersonCardLandsHeldProjection {
+  house_id: string | null;
+  house_name: string | null;
+  holdings_count: number;
+  holdings_band: HouseDossierHoldingsBand;
+  anchor_manor_id: string | null;
+  known_manor_ids: string[];
+}
+
+export interface PersonCardView {
+  schema_version: "person_card_view_v1";
+  person_id: string;
+  person_name: string;
+  short_id: string | null;
+  sex: Sex | null;
+  age: number | null;
+  alive: boolean;
+  current_house_id: string | null;
+  current_house_name: string | null;
+  birth_house_id: string | null;
+  birth_house_name: string | null;
+  court_member: boolean;
+  court_role_labels: string[];
+  known_house_relevance_tier: KnownHouseRelevanceTier | null;
+  known_house_relevance_reasons: KnownHouseRelevanceReason[];
+  married_out: boolean;
+  residence_binding: PersonCardResidenceBinding;
+  family_projection: PersonCardFamilyProjection;
+  succession_projection: PersonCardSuccessionProjection;
+  office_assignments: PersonCardOfficeAssignment[];
+  service_timeline: {
+    active_record_ids: string[];
+    entries: PersonCardServiceTimelineEntry[];
+  };
+  lands_held_projection: PersonCardLandsHeldProjection;
+}
+
+export interface PersonCardRegistry {
+  schema_version: "person_card_registry_v1";
+  person_ids: string[];
+  entries_by_person_id: Record<string, PersonCardView>;
 }
 
 export interface RunState {

@@ -1,12 +1,12 @@
 version: 2
 cursor:
   current_task_id: V03-R6-002-T03
-  last_completed_task_id: V03-R6-008-T02
+  last_completed_task_id: V03-R6-004-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 301ad11
+  git_commit: working tree
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,16 +21,16 @@ last_run:
     run1: ''
     run2: ''
 notes: >-
-  Re-reviewed lane progress on 2026-04-19. The live queue is still economy
-  V03-R6-002-T03 and social V03-R6-004-T03, and neither task has a handoff
-  report on kickoff. The new intake audit still fails both tasks immediately.
-  Remote lane history shows an additional blocker: the canonical economy branch
-  still carries a V03-R4 queue in its own progress/latest state, and the social
-  branch still carries a V03-R1 queue, proving both branches are stale relative
-  to the current v0.3.6 kickoff line. Future handoffs must include a kickoff
-  base commit and lanes must rebootstrap from current kickoff before retrying.
-  Shared repo-wide merge debt remains open: preflight reports
-  test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
-  for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
-  produced a clean branch-wide exit in this workspace.
+  Integrator recovery is active on 2026-04-19. Kickoff now carries the accepted
+  R6-001 explanation spine at e442c0f, and V03-R6-004-T03 has been recovered on
+  kickoff with bounded dossier standing-versus-delta separation plus the hidden
+  snapshot registries required by the existing player-card, provisioning, and
+  outbound-marriage contracts. The live global queue remains economy
+  V03-R6-002-T03, while social may rebootstrap from current kickoff head and
+  take V03-R6-007-T01 next. Economy still requires a fresh current-task packet:
+  no valid V03-R6-002-T03 handoff report exists on kickoff yet. Shared
+  repo-wide merge debt remains open: preflight reports test3_mismatches=16,
+  seed:replay:batch still fails on the snapshot-cap breach for
+  lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet produced
+  a clean branch-wide exit in this workspace.
 active_claims: {}

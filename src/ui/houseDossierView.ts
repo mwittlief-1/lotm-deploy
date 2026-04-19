@@ -14,6 +14,17 @@ export type HouseDossierRelatedPersonSurface = {
   title: string;
 };
 
+export type HouseDossierRelationshipMovementSurface = {
+  causeLabel: string;
+  detail: string;
+  directionLabel: string;
+  id: string;
+  personId: string | null;
+  postureShiftLabel: string;
+  title: string;
+  totalChange: number;
+};
+
 export type HouseDossierSurface = {
   debugRows: HouseDossierDebugRowSurface[];
   dossier: HouseDossierRecord;
@@ -38,7 +49,10 @@ export type HouseDossierSurface = {
   relevanceReasons: string[];
   relevanceTierLabel: string;
   relatedPeople: HouseDossierRelatedPersonSurface[];
-  relationshipBandLabel: string;
+  relationshipMovementCount: number;
+  relationshipMovementHelperText: string;
+  relationshipMovementRows: HouseDossierRelationshipMovementSurface[];
+  relationshipPostureLabel: string;
   relationshipSummary:
     | {
         allegiance: number;
@@ -80,6 +94,18 @@ function formatBoolean(value: boolean): string {
 
 function formatTextList(values: string[]): string {
   return values.length > 0 ? values.join(", ") : "None";
+}
+
+function formatSigned(value: number): string {
+  return value > 0 ? `+${value}` : `${value}`;
+}
+
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function readNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
 }
 
 function readStringArray(value: unknown): string[] {
@@ -129,6 +155,42 @@ function readRelationshipSummary(dossier: HouseDossierRecord): HouseDossierSurfa
   };
 }
 
+function relationshipMovementRows(dossier: HouseDossierRecord): { count: number; rows: HouseDossierRelationshipMovementSurface[] } {
+  const rows = Array.isArray((dossier as any).relationship_turn_movement_rows)
+    ? ((dossier as any).relationship_turn_movement_rows as Array<Record<string, unknown>>)
+        .map((row) => {
+          const id = readString(row.row_id);
+          const title = readString(row.counterparty_label);
+          if (!id || !title) return null;
+
+          const personId = readString(row.counterparty_person_id);
+          const allegianceDelta = readNumber(row.allegiance_delta) ?? 0;
+          const respectDelta = readNumber(row.respect_delta) ?? 0;
+          const threatDelta = readNumber(row.threat_delta) ?? 0;
+
+          return {
+            causeLabel: readString(row.cause_summary) ?? "Relationship change",
+            detail: `A ${formatSigned(allegianceDelta)} · R ${formatSigned(respectDelta)} · T ${formatSigned(threatDelta)}`,
+            directionLabel: readString(row.direction_label) ?? "Toward this house",
+            id,
+            personId,
+            postureShiftLabel: `${formatToken(readString(row.before_standing_band))} -> ${formatToken(readString(row.after_standing_band))}`,
+            title,
+            totalChange: readNumber(row.magnitude) ?? (Math.abs(allegianceDelta) + Math.abs(respectDelta) + Math.abs(threatDelta)),
+          } satisfies HouseDossierRelationshipMovementSurface;
+        })
+        .filter((row): row is HouseDossierRelationshipMovementSurface => row !== null)
+    : [];
+
+  return {
+    count:
+      typeof (dossier as any).relationship_turn_movement_count === "number"
+        ? Math.max(0, Math.trunc((dossier as any).relationship_turn_movement_count))
+        : rows.length,
+    rows,
+  };
+}
+
 function readKnownHouse(previewState: RunState | null | undefined, houseId: string): Record<string, unknown> | null {
   const knownHouses = Array.isArray((previewState as any)?.known_houses) ? ((previewState as any).known_houses as unknown[]) : [];
   return (
@@ -170,8 +232,9 @@ export function buildHouseDossierSurface(
   const knownnessSources = readStringArray((dossier as any).knownness_sources);
   const kinshipSummaryLabel = formatToken((dossier as any).kinship_summary);
   const kinshipTags = readStringArray((dossier as any).kinship_tags);
-  const relationshipBandLabel = formatToken((dossier as any).relationship_band);
   const relationshipSummary = readRelationshipSummary(dossier);
+  const relationshipPostureLabel = relationshipSummary?.standingBandLabel ?? "Unknown";
+  const { count: relationshipMovementCount, rows: relationshipMovementRowsVisible } = relationshipMovementRows(dossier);
   const householdScopeLabel = formatToken((dossier as any).household_scope);
   const householdMemberCount =
     typeof (dossier as any).household_member_count === "number"
@@ -236,13 +299,21 @@ export function buildHouseDossierSurface(
     { key: "knownness_sources", label: "knownness_sources", value: formatTextList(knownnessSources) },
     { key: "kinship_summary", label: "kinship_summary", value: kinshipSummaryLabel },
     { key: "kinship_tags", label: "kinship_tags", value: formatTextList(kinshipTags) },
-    { key: "relationship_band", label: "relationship_band", value: relationshipBandLabel },
     {
       key: "relationship_summary",
       label: "relationship_summary",
       value: relationshipSummary
         ? `A ${relationshipSummary.allegiance} / R ${relationshipSummary.respect} / T ${relationshipSummary.threat} / Favor ${relationshipSummary.favorScore} / ${relationshipSummary.standingBandLabel}`
         : "Unavailable"
+    },
+    { key: "relationship_turn_movement_count", label: "relationship_turn_movement_count", value: String(relationshipMovementCount) },
+    {
+      key: "relationship_turn_movement_rows",
+      label: "relationship_turn_movement_rows",
+      value:
+        relationshipMovementRowsVisible.length > 0
+          ? relationshipMovementRowsVisible.map((row) => row.title).join(", ")
+          : "None"
     },
     { key: "household_scope", label: "household_scope", value: householdScopeLabel },
     { key: "household_member_count", label: "household_member_count", value: String(householdMemberCount) },
@@ -284,7 +355,13 @@ export function buildHouseDossierSurface(
     relevanceReasons,
     relevanceTierLabel,
     relatedPeople,
-    relationshipBandLabel,
+    relationshipMovementCount,
+    relationshipMovementHelperText:
+      relationshipMovementCount > relationshipMovementRowsVisible.length
+        ? `Showing ${relationshipMovementRowsVisible.length} of ${relationshipMovementCount} recorded relationship movements for this house.`
+        : "Standing posture is read from the current relationship summary. Turn movement, when recorded, stays separate below.",
+    relationshipMovementRows: relationshipMovementRowsVisible,
+    relationshipPostureLabel,
     relationshipSummary,
     schemaVersion: dossier.schema_version,
     subtitle: `${knownnessLabel} · ${relevanceTierLabel} · ${dossier.house_id}`,

@@ -11703,7 +11703,7 @@ tasks:
   parent_epic: V03-R6-004
   release: v0.3.6
   title: Separate standing from turn movement on dossier and person surfaces
-  status: ready
+  status: done
   priority: 76
   tranche: 7
   change_type: behavior_change
@@ -11882,7 +11882,7 @@ tasks:
   parent_epic: V03-R6-007
   release: v0.3.6
   title: Upgrade dossier and person-card bounded summaries
-  status: todo
+  status: ready
   priority: 74
   tranche: 7
   change_type: behavior_change

@@ -15,10 +15,18 @@ import type {
 import { deepCopy } from "../../util";
 import { buildAiRailDebugPacket } from "../ai/debug";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
+import { buildEconomyMaintenanceView } from "../economy/maintenance";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
-import { buildKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import {
+  attachCourtProvisioningSurfaces,
+  buildCourtProvisioningView,
+  buildCourtStipendRegistry
+} from "../people/courtProvisioningRegistry";
+import { buildBoundedKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
+import { attachOutboundMarriageScoutingRegistry, buildOutboundMarriageScoutingRegistry } from "../people/marriage";
+import { attachPersonCardRegistry, buildPersonCardRegistry } from "../people/personCardRegistry";
 import {
   readRuntimeRelationshipChangeLog,
   type RuntimeRelationshipChangeRecordV1
@@ -28,10 +36,14 @@ import { buildSuccessionExperienceSurfaces } from "../people/successionSummaries
 import { buildBoundedMapViewSnapshot, buildBoundedWorldTopologyView, buildManorDetailView } from "../world";
 
 export function boundedSnapshot(state: RunState): RunSnapshot {
-  const experienceSurfaces = buildKnownHouseExperienceSurfaces(state);
+  const experienceSurfaces = buildBoundedKnownHouseExperienceSurfaces(state);
   const successionSurfaces = buildSuccessionExperienceSurfaces(state);
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   const residenceSurfaces = ensureResidenceManorBindings(state);
+  const personCardRegistry = buildPersonCardRegistry(state);
+  const outboundMarriageScoutingRegistry = buildOutboundMarriageScoutingRegistry(state);
+  const courtProvisioningView = buildCourtProvisioningView(state, personCardRegistry);
+  const courtStipendRegistry = buildCourtStipendRegistry(state, courtProvisioningView);
   const delegationView = buildCourtDelegationView(state);
   const worldTopologyView = buildBoundedWorldTopologyView();
   const mapViewSnapshot = buildBoundedMapViewSnapshot();
@@ -48,6 +60,7 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     player_house_id: (state as any).player_house_id,
     kinship_edges: (state as any).kinship_edges ?? (state as any).kinship,
     economy: (state as any).economy,
+    economy_maintenance_view: buildEconomyMaintenanceView(state),
     economy_obligations_view: buildEconomyObligationsView(state),
     economy_pricing_view: buildEconomyPricingView(state),
     court_delegation_view: delegationView,
@@ -147,6 +160,13 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     writable: true,
     configurable: true
   });
+  attachPersonCardRegistry(snapshot as RunState, deepCopy(personCardRegistry));
+  attachOutboundMarriageScoutingRegistry(snapshot as RunState, deepCopy(outboundMarriageScoutingRegistry));
+  attachCourtProvisioningSurfaces(
+    snapshot as RunState,
+    deepCopy(courtProvisioningView),
+    deepCopy(courtStipendRegistry)
+  );
   Object.defineProperty(snapshot, "residence_selector_summary", {
     value: deepCopy(residenceSurfaces.selector_summary),
     enumerable: false,

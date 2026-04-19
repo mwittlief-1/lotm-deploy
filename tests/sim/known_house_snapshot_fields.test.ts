@@ -10,7 +10,7 @@ import { buildMarriageWindow } from "../../src/sim/domains/people/marriage";
 import { getKnownHouses } from "../../src/ui/playViewModel";
 
 describe("known-house snapshot fields", () => {
-  it("builds deterministic known-house summaries and coarse dossiers from the people registries", () => {
+  it("builds deterministic known-house summaries and standing-vs-delta dossier contracts from the people registries", () => {
     const state = createNewRun("known_house_snapshot_fields_v031");
 
     const one = buildKnownHouseExperienceSurfaces(state);
@@ -29,13 +29,15 @@ describe("known-house snapshot fields", () => {
       schema_version: HOUSE_DOSSIER_SUMMARY_SCHEMA_VERSION,
       knownness: expect.any(String),
       knownness_sources: expect.any(Array),
-      relationship_band: expect.any(String),
       relationship_summary: expect.objectContaining({
         favor_score: expect.any(Number),
         allegiance: expect.any(Number),
         respect: expect.any(Number),
         threat: expect.any(Number),
+        standing_band: expect.any(String),
       }),
+      relationship_turn_movement_count: expect.any(Number),
+      relationship_turn_movement_rows: expect.any(Array),
       kinship_summary: expect.any(String),
       holdings_footprint: expect.objectContaining({
         holdings_count: expect.any(Number),
@@ -44,6 +46,7 @@ describe("known-house snapshot fields", () => {
       ledger_band: expect.any(String),
       ledger_trend: expect.any(String),
     });
+    expect((one.house_dossiers[0] as any).relationship_band).toBeUndefined();
   });
 
   it("keeps active prospect houses backed by matching dossier rows", () => {
