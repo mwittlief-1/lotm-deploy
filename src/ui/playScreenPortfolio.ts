@@ -1,6 +1,4 @@
 import type { TopologyDebugSurface } from "./playScreenTopology";
-import { getMapViewSelectorRow } from "../sim/domains/world";
-import type { RunState } from "../sim/types";
 
 type PortfolioValueKind = "coin" | "food" | "meat" | "count";
 type PortfolioCardTone = "neutral" | "caution" | "danger";
@@ -726,13 +724,13 @@ export function buildPortfolioEvidenceScope(args: {
   if (!contract || scopeMode === "portfolio") {
     return {
       chipHelperText:
-        "Portfolio summary is active above, but headline chips still open the current manor chronicle so the resolved ledger stays grounded in one bounded holding.",
+        "Holdings summary is active above, but headline chips still open the current manor ledger so the resolved turn stays anchored to one live holding.",
       diffLedgerHelper:
-        "Portfolio summary is active above. This resolved ledger still follows the current manor chronicle until you switch into selected-manor detail.",
-      diffLedgerScopeLabel: "Current manor chronicle",
-      receiptScopeLabel: "Current manor chronicle",
+        "Holdings summary is active above. This ledger still follows the current manor until you switch into selected-manor detail.",
+      diffLedgerScopeLabel: "Current manor ledger",
+      receiptScopeLabel: "Current manor ledger",
       receiptScopeSummary:
-        "Explain Changes is still showing the current manor receipt trail. Portfolio totals remain summary context only.",
+        "Explain Changes is still following the current manor ledger. Holdings totals above remain summary context only.",
       state: "current_manor"
     };
   }
@@ -747,17 +745,17 @@ export function buildPortfolioEvidenceScope(args: {
       diffLedgerScopeLabel: `${selectedManor.title} detail`,
       receiptScopeLabel: `${selectedManor.title} detail`,
       receiptScopeSummary:
-        "Explain Changes is following the same selected manor detail that is active in Holdings because the selected manor still matches the current chronicle.",
+        "Explain Changes is following the same selected manor detail that is active in Holdings because the selected manor still matches the current manor.",
       state: "selected_manor_live"
     };
   }
 
   return {
-    chipHelperText: `${selectedManor.title} detail is selected above, but the headline chips still track the current manor chronicle because only that holding exposes resolved receipts in this snapshot.`,
-    diffLedgerHelper: `${selectedManor.title} detail is selected above, but this resolved ledger remains pinned to the current manor chronicle because non-anchor holdings do not expose a separate ledger trail yet.`,
-    diffLedgerScopeLabel: `Current manor chronicle · ${selectedManor.title} selected`,
+    chipHelperText: `${selectedManor.title} detail is selected above, but the headline chips still follow the current manor ledger because only the home manor has a resolved turn ledger right now.`,
+    diffLedgerHelper: `${selectedManor.title} detail is selected above, but this ledger still follows the current manor because non-anchor holdings do not yet expose their own resolved turn ledger.`,
+    diffLedgerScopeLabel: `Current manor ledger · ${selectedManor.title} selected`,
     receiptScopeLabel: `${selectedManor.title} selected`,
-    receiptScopeSummary: `${selectedManor.title} detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.`,
+    receiptScopeSummary: `${selectedManor.title} detail is selected in Holdings, but Explain Changes still follows the current manor ledger. Use the selector for holdings comparison without assuming a second resolved ledger.`,
     state: "selected_manor_holdings_only"
   };
 }
@@ -765,38 +763,23 @@ export function buildPortfolioEvidenceScope(args: {
 export function buildPortfolioMapCheckpoint(args: {
   contract: PortfolioScopeContract | null;
   mapCheckpointAvailable: boolean;
-  previewState?: RunState | null;
   scopeMode: PortfolioScopeMode;
   selectedManorId: string | null | undefined;
   topologySurface: TopologyDebugSurface | null;
 }): PortfolioMapCheckpoint | null {
-  const { contract, mapCheckpointAvailable, previewState, scopeMode, selectedManorId, topologySurface } = args;
+  const { contract, mapCheckpointAvailable, scopeMode, selectedManorId, topologySurface } = args;
 
   if (!contract || scopeMode !== "selected_manor" || !topologySurface) {
     return null;
   }
 
   const selectedManor = selectPortfolioManor(contract, selectedManorId);
-  let target: PortfolioMapTarget = {
+  const target: PortfolioMapTarget = {
     countyId: selectedManor.isAnchorManor ? topologySurface.anchorCountyId : null,
     holdingId: selectedManor.isAnchorManor ? topologySurface.anchorHoldingId : null,
     manorId: selectedManor.manorId,
     manorLabel: selectedManor.title
   };
-
-  if (previewState) {
-    try {
-      const selectorRow = getMapViewSelectorRow(selectedManor.manorId);
-      target = {
-        countyId: selectorRow.map_checkpoint_target.county_id,
-        holdingId: selectorRow.map_checkpoint_target.holding_id,
-        manorId: selectorRow.map_checkpoint_target.manor_id,
-        manorLabel: selectorRow.map_checkpoint_target.manor_label
-      };
-    } catch {
-      // Leave the deterministic topology-only fallback in place for synthetic fixtures.
-    }
-  }
 
   if (!mapCheckpointAvailable) {
     return {
@@ -811,8 +794,8 @@ export function buildPortfolioMapCheckpoint(args: {
 
   if (target.holdingId) {
     return {
-      buttonLabel: "Open kingdom map",
-      helper: "Open the kingdom map and Manor View for the selected holding without changing the holdings selector or evidence scope.",
+      buttonLabel: "Center on selected holding",
+      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
       state: "ready",
       statusLabel: "Ready",
       target

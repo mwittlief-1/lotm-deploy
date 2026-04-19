@@ -204,27 +204,6 @@ export type KnownHouseRelevanceTier = "tier0" | "tier1";
 export type HouseDossierKinshipSummary = "none" | "blood_tie" | "marriage_tie" | "blood_and_marriage_tie";
 export type HouseDossierRelationshipBand = "unknown" | "favorable" | "steady" | "wary" | "hostile";
 export type HouseDossierHouseholdScope = "head_only" | "household_seeded";
-export type HouseDossierKnownness = "known_house" | "prospect_house" | "known_house_and_prospect";
-export type HouseDossierKnownnessSource = "relevance" | "marriage_offer" | "prospect";
-export type HouseDossierLedgerBand = "distressed" | "tight" | "stable" | "flush" | "unknown";
-export type HouseDossierLedgerTrend = "declining" | "flat" | "rising" | "unknown";
-export type HouseDossierHoldingsBand = "single_holding" | "minor_cluster" | "broad_domain";
-
-export interface HouseDossierRelationshipSummary {
-  allegiance: number;
-  respect: number;
-  threat: number;
-  favor_score: number;
-  standing_band: HouseDossierRelationshipBand;
-}
-
-export interface HouseDossierHoldingsFootprint {
-  holdings_count: number;
-  holdings_band: HouseDossierHoldingsBand;
-  anchor_manor_id: string | null;
-  known_manor_ids?: string[];
-  source_kind: "player_portfolio" | "house_seed";
-}
 
 export interface KnownHouseSummary {
   house_id: string;
@@ -244,158 +223,26 @@ export interface KnownHouseSummary {
 }
 
 export interface HouseDossierSummary {
-  schema_version: "house_dossier_summary_v2";
+  schema_version: "house_dossier_summary_v1";
   house_id: string;
   house_name: string;
   tier: string;
   relevance_tier: KnownHouseRelevanceTier;
   relevance_reasons: KnownHouseRelevanceReason[];
-  knownness: HouseDossierKnownness;
-  knownness_sources?: HouseDossierKnownnessSource[];
   kinship_summary: HouseDossierKinshipSummary;
-  kinship_tags: KnownHouseRelevanceReason[];
   relationship_band: HouseDossierRelationshipBand;
-  relationship_summary: HouseDossierRelationshipSummary | null;
   household_scope: HouseDossierHouseholdScope;
   household_member_count: number;
   living_member_count: number;
   child_count: number;
   has_male_heir: boolean;
   heiress_possible: boolean;
-  holdings_footprint: HouseDossierHoldingsFootprint;
-  ledger_band: HouseDossierLedgerBand;
-  ledger_trend: HouseDossierLedgerTrend;
-}
-
-export interface BoundedHouseDossierSummary {
-  schema_version: "house_dossier_summary_v2";
-  house_id: string;
-  knownness: HouseDossierKnownness;
-  kinship_summary: HouseDossierKinshipSummary;
-  kinship_tags: KnownHouseRelevanceReason[];
-  relationship_band: HouseDossierRelationshipBand;
-  relationship_summary: HouseDossierRelationshipSummary | null;
-  holdings_footprint: HouseDossierHoldingsFootprint;
-  ledger_band: HouseDossierLedgerBand;
-  ledger_trend: HouseDossierLedgerTrend;
-}
-
-export interface PersonCardRelativeRef {
-  person_id: string;
-  person_name: string;
-  house_id: string | null;
-  house_name: string | null;
-  age: number | null;
-  sex: Sex | null;
-  alive: boolean;
-  married_out: boolean;
-}
-
-export interface PersonCardResidenceBinding {
-  residence_manor_id: string | null;
-  selector_contexts: string[];
-  source_kind: string | null;
-  source_ref_id: string | null;
-  travel_cost_distance: number | null;
-  route_hop_distance: number | null;
-  distance_band: "near" | "far" | null;
-}
-
-export interface PersonCardFamilyProjection {
-  family_person_ids: string[];
-  parents: PersonCardRelativeRef[];
-  spouse: PersonCardRelativeRef | null;
-  siblings: PersonCardRelativeRef[];
-  children: PersonCardRelativeRef[];
-  kinship_tags: string[];
-  married_out: boolean;
-}
-
-export interface PersonCardSuccessionProjection {
-  line_position: number | null;
-  adult_line_position: number | null;
-  claimant_position: number | null;
-  claimant_adult_position: number | null;
-  current_heir_id: string | null;
-  adult_successor_id: string | null;
-  claim_window_open: boolean;
-  blocked_by_current_heir: boolean | null;
-  current_heir: boolean;
-  adult_eligible: boolean;
-  player_house_relevance_reasons: string[];
-}
-
-export interface PersonCardOfficeAssignment {
-  seat_id: string | null;
-  title: string;
-  scope: string | null;
-  owner_actor_id: string | null;
-  holder_kind: string | null;
-  payment_basis: string | null;
-  active_service_record_id: string | null;
-}
-
-export interface PersonCardServiceTimelineEntry {
-  record_id: string;
-  title: string;
-  role_key: string;
-  source_kind: "court_service_record" | "service_record";
-  serve_at_actor_id: string | null;
-  institution_assignment_id: string | null;
-  payment_basis: string | null;
-  start_turn_index: number | null;
-  end_turn_index: number | null;
-  active: boolean;
-}
-
-export interface PersonCardLandsHeldProjection {
-  house_id: string | null;
-  house_name: string | null;
-  holdings_count: number;
-  holdings_band: HouseDossierHoldingsBand;
-  anchor_manor_id: string | null;
-  known_manor_ids: string[];
-}
-
-export interface PersonCardView {
-  schema_version: "person_card_view_v1";
-  person_id: string;
-  person_name: string;
-  short_id: string | null;
-  sex: Sex | null;
-  age: number | null;
-  alive: boolean;
-  current_house_id: string | null;
-  current_house_name: string | null;
-  birth_house_id: string | null;
-  birth_house_name: string | null;
-  court_member: boolean;
-  court_role_labels: string[];
-  known_house_relevance_tier: KnownHouseRelevanceTier | null;
-  known_house_relevance_reasons: KnownHouseRelevanceReason[];
-  married_out: boolean;
-  residence_binding: PersonCardResidenceBinding;
-  family_projection: PersonCardFamilyProjection;
-  succession_projection: PersonCardSuccessionProjection;
-  office_assignments: PersonCardOfficeAssignment[];
-  service_timeline: {
-    active_record_ids: string[];
-    entries: PersonCardServiceTimelineEntry[];
-  };
-  lands_held_projection: PersonCardLandsHeldProjection;
-}
-
-export interface PersonCardRegistry {
-  schema_version: "person_card_registry_v1";
-  person_ids: string[];
-  entries_by_person_id: Record<string, PersonCardView>;
 }
 
 export interface RunState {
   version: SimVersion;
   app_version: string;
   run_seed: string;
-  run_preset_id?: string | null;
   state_schema_version?: RunStateSchemaVersion;
   bounded_registry_manifest?: BoundedRegistryManifest;
   turn_index: number;
@@ -417,8 +264,7 @@ export interface RunState {
   economy_fiscal_receipts?: FiscalReceiptSnapshotV1[];
   portfolio?: PortfolioRegistryPlaceholderV1;
   known_houses?: KnownHouseSummary[];
-  house_dossiers?: BoundedHouseDossierSummary[];
-  person_card_registry?: PersonCardRegistry;
+  house_dossiers?: HouseDossierSummary[];
 
   flags: Record<string, unknown>;
   log: TurnLogEntry[];
@@ -450,15 +296,13 @@ export interface RunSnapshot {
   service_records?: ServiceRecord[];
   beliefs?: BeliefRegistryV0;
   economy?: EconomyRegistryPlaceholderV1;
-  economy_maintenance_view?: { schema_version: string; [key: string]: unknown };
-  economy_obligations_view?: { schema_version: string; [key: string]: unknown };
+  economy_obligations_view?: { schema_version: string } | null;
   portfolio?: PortfolioRegistryPlaceholderV1;
   world_topology_view?: WorldTopologySnapshotV1;
   map_view_snapshot?: MapViewSnapshotV1;
   manor_detail_view?: ManorDetailViewV1;
   known_houses?: KnownHouseSummary[];
   house_dossiers?: HouseDossierSummary[];
-  person_card_registry?: PersonCardRegistry;
   flags: Record<string, unknown>;
   game_over?: GameOverState | null;
 }
@@ -503,6 +347,120 @@ export interface EventResult {
   why: EventWhy;
   effects: string[]; // plain-language
   deltas: EventDelta[];
+}
+
+export interface MaintenanceLaborPressureEntryV1 {
+  maintenance_key: string;
+  label: string;
+  source_kind: string;
+  labor_required: number;
+}
+
+export interface MaintenanceLaborPressureV1 {
+  schema_version: "maintenance_labor_pressure_v1";
+  ordering_rule: "builders_first";
+  delegated: boolean;
+  delegated_multiplier_pct: number;
+  source_keys: string[];
+  total_sources: number;
+  planned_population: number;
+  planned_farmers: number;
+  planned_builders: number;
+  allocatable_before: number;
+  required_labor_before_delegation: number;
+  required_labor_after_delegation: number;
+  applied_drag: number;
+  unmet_labor: number;
+  allocatable_after: number;
+  effective_farmers: number;
+  effective_builders: number;
+  entries: MaintenanceLaborPressureEntryV1[];
+}
+
+export type HeadlineCauseMetricV1 = "food" | "coin" | "unrest" | "relationships" | "household" | "project";
+export type HeadlineCauseSourceV1 = "decision" | "event" | "system_pressure" | "prospect";
+export type TurnExplanationWalkdownMetricV1 = "food" | "coin" | "unrest";
+export type TurnExplanationWalkdownDirectionV1 = "start" | "inflow" | "outflow" | "net" | "ending";
+export type TurnExplanationSurfaceIdV1 = "turn_report" | "diff_ledger" | "manor_state" | "explain_changes";
+export type RelationshipChangeScopeV1 = "person" | "house" | "institution" | "unknown";
+
+export interface HeadlineCauseV1 {
+  id: string;
+  metric: HeadlineCauseMetricV1;
+  source: HeadlineCauseSourceV1;
+  magnitude: number;
+  summary: string;
+  detail: string;
+}
+
+export interface TurnExplanationWalkdownRowV1 {
+  id: string;
+  label: string;
+  direction: TurnExplanationWalkdownDirectionV1;
+  amount: number;
+  running_total?: number;
+  summary: string;
+}
+
+export interface TurnExplanationWalkdownV1 {
+  schema_version: "turn_explanation_walkdown_v1";
+  metric: TurnExplanationWalkdownMetricV1;
+  unit_label: string;
+  start_amount: number;
+  end_amount: number;
+  reconciles: boolean;
+  rows: TurnExplanationWalkdownRowV1[];
+}
+
+export interface TurnExplanationSurfaceRoleV1 {
+  surface: TurnExplanationSurfaceIdV1;
+  role_label: string;
+  helper: string;
+}
+
+export interface TurnExplanationV1 {
+  schema_version: "turn_explanation_v1";
+  food_walkdown: TurnExplanationWalkdownV1;
+  coin_walkdown: TurnExplanationWalkdownV1;
+  unrest_walkdown: TurnExplanationWalkdownV1;
+  headline_causes: HeadlineCauseV1[];
+  surface_roles: TurnExplanationSurfaceRoleV1[];
+}
+
+export interface RelationshipChangeLogEntryV1 {
+  id: string;
+  turn_index: number;
+  scope: RelationshipChangeScopeV1;
+  from_id: string;
+  to_id: string;
+  from_label: string;
+  to_label: string;
+  cause_key: string;
+  cause_summary: string;
+  delta: {
+    allegiance: number;
+    respect: number;
+    threat: number;
+  };
+}
+
+export interface RelationshipChangeLogV1 {
+  schema_version: "relationship_change_log_v1";
+  turn_index: number;
+  entries: RelationshipChangeLogEntryV1[];
+}
+
+export interface RunProvenanceV1 {
+  schema_version: "run_provenance_v1";
+  ui_app_version: string;
+  run_app_version: string;
+  build_info_app_version: string | null;
+  sim_version: SimVersion;
+  code_fingerprint: string | null;
+  build_time_utc: string | null;
+  created_at_utc: string | null;
+  version_match: boolean;
+  notes: string | null;
 }
 
 export interface TurnReport {
@@ -552,6 +510,9 @@ export interface TurnReport {
   };
   house_log: HouseLogEvent[];
   events: EventResult[];
+  headline_causes?: HeadlineCauseV1[];
+  turn_explanation_v1?: TurnExplanationV1;
+  relationship_change_log_v1?: RelationshipChangeLogV1;
   top_drivers: string[]; // top 3 explanation strings
   notes: string[]; // additional log notes
   // v0.2.3.2+: structured deltas for UI clarity (no mechanics).
@@ -575,6 +536,7 @@ export interface TurnReport {
     was_oversubscribed: boolean;
     auto_clamped: boolean;
   };
+  maintenance_labor_pressure?: MaintenanceLaborPressureV1;
   // v0.2.3.4+: roster snapshot embedded for history-safe rendering (dedupe + death/heir badges).
   household_roster?: HouseholdRoster;
   // v0.2.8: derived household roles (rebased on succession; view-only; does not change household_roster schema).
@@ -876,11 +838,11 @@ export interface TurnLogEntry {
 
 export interface RunSummaryExport {
   seed: string;
-  preset_id: string | null;
   app_version: string;
   sim_version: SimVersion;
   state_schema_version: RunStateSchemaVersion;
   bounded_registry_manifest: BoundedRegistryManifest;
+  run_provenance_v1: RunProvenanceV1;
   turns_played: number;
   game_over_reason: string | null;
   ending_resources: { bushels: number; coin: number; unrest: number; arrears_coin: number; arrears_bushels: number };

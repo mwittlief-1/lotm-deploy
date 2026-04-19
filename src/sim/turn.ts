@@ -18,7 +18,7 @@ import {
   maxLaborDeltaPerTurn,
 } from "./constants";
 import { refreshEnergy } from "./domains/court/energy";
-import { buildMaintenanceLaborPressure, maintenanceLaborPressureSummaryLines } from "./domains/court/maintenance";
+import { maintenanceLaborPressureSummaryLines } from "./domains/court/maintenance";
 import { LEGACY_APPLY_INPUT_STATE_MIGRATION_PLAN, PREVIEW_LOAD_STATE_MIGRATION_PLAN, runStateMigrationPlan } from "./migrations";
 import { normalizeState } from "./normalize";
 import { IMPROVEMENTS, hasImprovement } from "../content/improvements";
@@ -38,7 +38,11 @@ import {
 } from "./domains/ai/evidence";
 import { recordBeliefEvidence } from "./domains/ai/beliefs";
 import { buildHouseholdRoster } from "./domains/people/playerHousehold";
-import { boundedSnapshot, computeTopDrivers } from "./domains/experience/reporting";
+import {
+  attachExperienceContractsToReport,
+  buildRelationshipChangeLogV1,
+  boundedSnapshot
+} from "./domains/experience/reporting";
 import { getChildren as kinChildren } from "./kinship";
 import { gcExpiredReservations } from "./marriageMarket";
 import { playerHouseIdOf, registryPersonFor, syncHouseRegistryCurrentHeads } from "./actors";
@@ -121,12 +125,6 @@ function noteReceipts(lines: string[]): PhaseReceiptV0[] {
 
 function evidenceReceipts(events: EvidenceEventV0[]): PhaseReceiptV0[] {
   return events.map((event) => makePhaseReceipt(event.detail, "note"));
-}
-
-function previewMods(state: RunState): Record<string, number> {
-  const anyFlags: any = state.flags;
-  if (!anyFlags._mods || typeof anyFlags._mods !== "object") anyFlags._mods = {};
-  return anyFlags._mods as Record<string, number>;
 }
 
 const LEGACY_IMPROVEMENT_ALIASES: Record<string, string> = {
@@ -233,16 +231,6 @@ export function proposeTurn(state: RunState): TurnContext {
   const spoil = applySpoilagePhase(working);
   const macro = computeWeatherMarketPhase(working);
 
-  const maintenanceLaborPressure = buildMaintenanceLaborPressure(working);
-  const maintenanceLaborNotes = maintenanceLaborPressure ? maintenanceLaborPressureSummaryLines(maintenanceLaborPressure) : [];
-  if (maintenanceLaborPressure) {
-    const mods = previewMods(working);
-    mods.farmer_penalty =
-      asNonNegInt(mods.farmer_penalty ?? 0) + Math.max(0, working.manor.farmers - maintenanceLaborPressure.effective_farmers);
-    mods.builder_penalty =
-      asNonNegInt(mods.builder_penalty ?? 0) + Math.max(0, working.manor.builders - maintenanceLaborPressure.effective_builders);
-  }
-
   // 3) production (+ construction progress)
   const prod = applyProductionAndConstructionPhase(working, macro.weather_multiplier);
 
@@ -345,6 +333,9 @@ export function proposeTurn(state: RunState): TurnContext {
 
   // 8) consumption (peasants + court)
   const cons = applyConsumptionAndShortagePhase(working, court.court_consumption_bushels);
+  const maintenanceLaborPressureReceipts = prod.maintenance_labor_pressure
+    ? maintenanceLaborPressureSummaryLines(prod.maintenance_labor_pressure).map((line) => makePhaseReceipt(line, "note"))
+    : [];
   const consumptionEvidence = [
     ...(prod.completed_improvement_id
       ? [makeEvidenceEvent({
@@ -366,7 +357,7 @@ export function proposeTurn(state: RunState): TurnContext {
     receipts: [
       makePhaseReceipt(`Weather ${macro.weather_multiplier.toFixed(2)}; market ${macro.market.price_per_bushel.toFixed(2)} coin/bushel; sell cap ${macro.market.sell_cap_bushels}.`),
       makePhaseReceipt(`Spoilage -${spoil.loss_bushels}; production +${prod.production_bushels}; consumption -${cons.total_consumption_bushels}.`),
-      ...maintenanceLaborNotes.map((line) => makePhaseReceipt(line, "note")),
+      ...maintenanceLaborPressureReceipts,
       ...(prod.completed_improvement_id ? [makePhaseReceipt(`Construction completed: ${prod.completed_improvement_id}.`, "note")] : []),
       ...(cons.shortage_bushels > 0 ? [makePhaseReceipt(`Shortage ${cons.shortage_bushels} bushels; population ${cons.population_delta}.`, "note")] : [])
     ],
@@ -466,10 +457,8 @@ export function proposeTurn(state: RunState): TurnContext {
     house_log: houseLog,
     events,
     top_drivers: [],
-    notes: [...maintenanceLaborNotes]
+    notes: []
   };
-
-  report.top_drivers = computeTopDrivers(report, state, working);
 
   // v0.2.3.2: labor oversubscription auto-clamp signal (UI).
   if (laborSignalBefore && laborSignalAfter) {
@@ -489,6 +478,9 @@ export function proposeTurn(state: RunState): TurnContext {
       auto_clamped:
         laborSignalBefore.farmers !== laborSignalAfter.farmers || laborSignalBefore.builders !== laborSignalAfter.builders
     };
+  }
+  if (prod.maintenance_labor_pressure) {
+    report.maintenance_labor_pressure = prod.maintenance_labor_pressure;
   }
 
   // v0.2.3.2: unrest delta breakdown (contributors up/down).
@@ -608,6 +600,7 @@ export function proposeTurn(state: RunState): TurnContext {
   report.court_roster = court.court_roster;
   report.court_headcount = court.court_headcount;
   report.phase_results_v0 = previewPhaseResults;
+  attachExperienceContractsToReport(report, state, working, previewPhaseResults);
 
   return {
     preview_state: working,
@@ -823,17 +816,36 @@ export function applyDecisions(state: RunState, decisions: TurnDecisions): RunSt
     return a.i - b.i;
   }).map((x) => x.e);
 
-  working.log = [...cleanedPriorLog, {
-    processed_turn_index: ctx.report.turn_index,
-    summary,
-    // Order rule: if succession + heir_selected occur same turn, show Succession first.
-    report: {
+  const previewRelationshipChanges = ctx.report.relationship_change_log_v1?.entries ?? [];
+  const resolutionRelationshipChanges = buildRelationshipChangeLogV1(working).entries;
+  const mergedRelationshipChangeLog = {
+    schema_version: "relationship_change_log_v1" as const,
+    turn_index: ctx.report.turn_index,
+    entries: [...previewRelationshipChanges, ...resolutionRelationshipChanges].map((entry, index) => ({
+      ...entry,
+      id: `relationship_change_${String(index).padStart(2, "0")}`
+    }))
+  };
+
+  const finalReport = attachExperienceContractsToReport(
+    {
       ...ctx.report,
       house_log: orderedHouseLog,
       notes: [...ctx.report.notes, ...notes],
       prospects_log: prospectsLog.length ? prospectsLog : undefined,
       resolution_phase_results_v0: resolutionPhaseResults
     },
+    base,
+    working,
+    [...(ctx.phase_results_v0 ?? []), ...resolutionPhaseResults],
+    mergedRelationshipChangeLog
+  );
+
+  working.log = [...cleanedPriorLog, {
+    processed_turn_index: ctx.report.turn_index,
+    summary,
+    // Order rule: if succession + heir_selected occur same turn, show Succession first.
+    report: finalReport,
     decisions,
     snapshot_before: snapshotBefore,
     snapshot_after: snapshotAfter,

@@ -122,53 +122,6 @@ const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
   } as any
 });
 
-const MAINTENANCE_PREVIEW_STATE = {
-  world_topology_view: {
-    anchor_manor_id: "manor_hx_26597"
-  },
-  economy_maintenance_view: {
-    schema_version: "economy_maintenance_view_v1",
-    manor_keys: ["portfolio:player_portfolio:manor:manor_hx_26597"],
-    manor_summaries_by_key: {
-      "portfolio:player_portfolio:manor:manor_hx_26597": {
-        manor_id: "manor_hx_26597",
-        manor_key: "portfolio:player_portfolio:manor:manor_hx_26597",
-        totals: {
-          building_count: 0,
-          coin_cost: 4,
-          entry_count: 2,
-          labor_required: 7,
-          right_count: 2
-        },
-        active_project: null,
-        building_entries: [],
-        right_entries: [
-          {
-            entry_id: "right_bridge",
-            entry_kind: "right",
-            source_id: "bridge_crossing",
-            source_kind: "right",
-            source_label: "Bridge & crossing revenue",
-            source_state: "active",
-            coin_cost: 1,
-            labor_required: 3
-          },
-          {
-            entry_id: "right_market",
-            entry_kind: "right",
-            source_id: "market_right",
-            source_kind: "right",
-            source_label: "Market right",
-            source_state: "active",
-            coin_cost: 3,
-            labor_required: 4
-          }
-        ]
-      }
-    }
-  }
-} as const;
-
 describe("ReceiptsViewerPanel", () => {
   it("renders counterparty-first relationship lever cards in grouped mode", () => {
     const data = buildReceiptViewerData({
@@ -184,13 +137,14 @@ describe("ReceiptsViewerPanel", () => {
         mode="grouped"
         onModeChange={() => undefined}
         rawPhases={data.rawPhases}
-        scopeLabel="Current manor chronicle"
-        scopeSummary="Explain Changes is still showing the current manor receipt trail."
+        scopeLabel="Current manor ledger"
+        scopeSummary="Explain Changes is still following the current manor ledger. Holdings totals above remain summary context only."
       />
     );
 
-    expect(markup).toContain("Current manor chronicle");
-    expect(markup).toContain("Explain Changes is still showing the current manor receipt trail.");
+    expect(markup).toContain("Current manor ledger");
+    expect(markup).toContain("Explain Changes is still following the current manor ledger.");
+    expect(markup).toContain("Drilldown is the main player-facing explanation path");
     expect(markup).toContain("Counterparty paths");
     expect(markup).toContain("Relationship lever");
     expect(markup).toContain("Gift to liege");
@@ -216,6 +170,7 @@ describe("ReceiptsViewerPanel", () => {
       />
     );
 
+    expect(markup).toContain("Phase record is secondary evidence.");
     expect(markup).toContain("Receipt ID");
     expect(markup).toContain("ledger:t7:obligations:p5:coin:0001");
     expect(markup).toContain("Category");
@@ -252,42 +207,5 @@ describe("ReceiptsViewerPanel", () => {
     expect(markup).toContain("summary");
     expect(markup).toContain("Tax due 2 coin; tithe due 60 bushels.");
     expect(markup).not.toContain("Receipt ID");
-  });
-
-  it("renders maintenance grouped receipts when the upkeep view resolves", () => {
-    const data = buildReceiptViewerData({
-      diffLedgerItems: [
-        ...DIFF_LEDGER_ITEMS,
-        {
-          id: "maintenance",
-          sort_mag: 11,
-          tie_key: "04_maintenance",
-          primary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
-          why: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
-          source: "system_pressure"
-        }
-      ],
-      obligationsContract: OBLIGATIONS_CONTRACT,
-      phaseResults: PHASE_RESULTS,
-      previewState: MAINTENANCE_PREVIEW_STATE,
-      report: {
-        notes: ["Maintenance reserved 7 labor before output was applied."]
-      }
-    });
-
-    const markup = renderToStaticMarkup(
-      <ReceiptsViewerPanel
-        counterpartySections={data.counterpartySections}
-        groupedSections={data.groupedSections.filter((section) => section.id === "maintenance")}
-        mode="grouped"
-        onModeChange={() => undefined}
-        rawPhases={data.rawPhases}
-      />
-    );
-
-    expect(markup).toContain("Maintenance pressure");
-    expect(markup).toContain("Maintenance reserved 7 labor before output was applied.");
-    expect(markup).toContain("Bridge &amp; crossing revenue");
-    expect(markup).toContain("Market right");
   });
 });

@@ -1,0 +1,570 @@
+export const PLAY_SCREEN_PORTFOLIO_CONTRACT_SCHEMA_VERSION = "play_screen_portfolio_contract_v1";
+export const PLAY_SCREEN_PORTFOLIO_SCOPE_ORDER = ["portfolio", "selected_manor"];
+export const PLAY_SCREEN_PORTFOLIO_SURFACE_ORDER = [
+    "portfolio_summary",
+    "portfolio_outliers",
+    "diff_ledger",
+    "receipts"
+];
+const TOTAL_CARD_CONFIG = [
+    {
+        id: "coin_total",
+        label: "Portfolio coin",
+        key: "coin",
+        source: "asset",
+        helper: "Total held coin across every tracked manor in the bounded portfolio.",
+        tone: "neutral",
+        valueKind: "coin"
+    },
+    {
+        id: "food_total",
+        label: "Food stores",
+        key: "food_stores",
+        source: "asset",
+        helper: "Total grain stores across the tracked manors.",
+        tone: "neutral",
+        valueKind: "food"
+    },
+    {
+        id: "meat_total",
+        label: "Meat stores",
+        key: "meat_stores",
+        source: "asset",
+        helper: "Total preserved meat carried by the tracked manors.",
+        tone: "neutral",
+        valueKind: "meat"
+    },
+    {
+        id: "coin_due",
+        label: "Coin due",
+        key: "obligations.current_due.coin",
+        source: "category",
+        helper: "Current liege dues still sitting in the portfolio rollup.",
+        tone: "caution",
+        valueKind: "coin"
+    },
+    {
+        id: "food_due",
+        label: "Food due",
+        key: "obligations.current_due.food_stores",
+        source: "category",
+        helper: "Current church dues still sitting in the portfolio rollup.",
+        tone: "caution",
+        valueKind: "food"
+    },
+    {
+        id: "coin_arrears",
+        label: "Coin arrears",
+        key: "obligations.arrears.coin",
+        source: "category",
+        helper: "Open coin arrears across the tracked manors.",
+        tone: "danger",
+        valueKind: "coin"
+    },
+    {
+        id: "food_arrears",
+        label: "Food arrears",
+        key: "obligations.arrears.food_stores",
+        source: "category",
+        helper: "Open bushel arrears across the tracked manors.",
+        tone: "danger",
+        valueKind: "food"
+    }
+];
+const SELECTED_MANOR_CARD_CONFIG = [
+    {
+        id: "coin_total",
+        label: "Coin on hand",
+        key: "coin",
+        source: "asset",
+        helper: "Coin currently held at the selected manor.",
+        tone: "neutral",
+        valueKind: "coin"
+    },
+    {
+        id: "food_total",
+        label: "Food stores",
+        key: "food_stores",
+        source: "asset",
+        helper: "Stored grain currently held at the selected manor.",
+        tone: "neutral",
+        valueKind: "food"
+    },
+    {
+        id: "meat_total",
+        label: "Meat stores",
+        key: "meat_stores",
+        source: "asset",
+        helper: "Preserved meat currently held at the selected manor.",
+        tone: "neutral",
+        valueKind: "meat"
+    },
+    {
+        id: "coin_due",
+        label: "Coin due",
+        key: "obligations.current_due.coin",
+        source: "category",
+        helper: "Current liege dues still open at the selected manor.",
+        tone: "caution",
+        valueKind: "coin"
+    },
+    {
+        id: "food_due",
+        label: "Food due",
+        key: "obligations.current_due.food_stores",
+        source: "category",
+        helper: "Current church dues still open at the selected manor.",
+        tone: "caution",
+        valueKind: "food"
+    },
+    {
+        id: "coin_arrears",
+        label: "Coin arrears",
+        key: "obligations.arrears.coin",
+        source: "category",
+        helper: "Coin arrears currently carried by the selected manor.",
+        tone: "danger",
+        valueKind: "coin"
+    },
+    {
+        id: "food_arrears",
+        label: "Food arrears",
+        key: "obligations.arrears.food_stores",
+        source: "category",
+        helper: "Food arrears currently carried by the selected manor.",
+        tone: "danger",
+        valueKind: "food"
+    }
+];
+const OUTLIER_METRIC_CONFIG = [
+    {
+        id: "lowest_net_coin",
+        label: "Lowest net coin",
+        metricKey: "outlier.lowest.net.coin",
+        tone: "danger",
+        valueKind: "coin"
+    },
+    {
+        id: "lowest_net_food",
+        label: "Lowest net food",
+        metricKey: "outlier.lowest.net.food_stores",
+        tone: "danger",
+        valueKind: "food"
+    },
+    {
+        id: "highest_arrears_coin",
+        label: "Most coin arrears",
+        metricKey: "outlier.highest.arrears_coin",
+        tone: "danger",
+        valueKind: "coin"
+    },
+    {
+        id: "highest_arrears_food",
+        label: "Most food arrears",
+        metricKey: "outlier.highest.arrears_bushels",
+        tone: "danger",
+        valueKind: "food"
+    },
+    {
+        id: "highest_coin",
+        label: "Most coin",
+        metricKey: "outlier.highest.coin",
+        tone: "neutral",
+        valueKind: "coin"
+    },
+    {
+        id: "highest_food",
+        label: "Most food stores",
+        metricKey: "outlier.highest.food_stores",
+        tone: "neutral",
+        valueKind: "food"
+    }
+];
+function asRecord(value) {
+    return value && typeof value === "object" ? value : null;
+}
+function readString(value) {
+    return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+function readWholeNumber(value) {
+    return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
+}
+function formatValue(value, kind) {
+    if (kind === "coin")
+        return `${value} coin`;
+    if (kind === "food")
+        return `${value} ${value === 1 ? "bushel" : "bushels"}`;
+    if (kind === "meat")
+        return `${value} stores`;
+    return String(value);
+}
+function formatManorLabel(manorId, anchorManorId) {
+    if (anchorManorId && manorId === anchorManorId)
+        return "Current manor";
+    const cleaned = manorId.replace(/^manor_/, "").replace(/_/g, " ");
+    return cleaned.length > 0 ? cleaned.charAt(0).toUpperCase() + cleaned.slice(1) : manorId;
+}
+function sortText(left, right) {
+    if (left < right)
+        return -1;
+    if (left > right)
+        return 1;
+    return 0;
+}
+function readPortfolioTotal(portfolio, config) {
+    const totalsRecord = asRecord(config.source === "asset" ? portfolio.totals_by_asset : portfolio.totals_by_category);
+    return readWholeNumber(totalsRecord?.[config.key]) ?? 0;
+}
+function buildSummaryCards(portfolio) {
+    return TOTAL_CARD_CONFIG.map((config) => ({
+        helper: config.helper,
+        id: config.id,
+        label: config.label,
+        tone: config.tone,
+        value: formatValue(readPortfolioTotal(portfolio, config), config.valueKind)
+    }));
+}
+function readPortfolioContext(previewState) {
+    const previewStateRecord = asRecord(previewState);
+    const portfolio = asRecord(previewStateRecord?.portfolio);
+    if (!portfolio)
+        return null;
+    const manorKeys = Array.isArray(portfolio.manor_keys)
+        ? portfolio.manor_keys.map(readString).filter((value) => value !== null)
+        : [];
+    const manorCount = manorKeys.length;
+    if (manorCount === 0)
+        return null;
+    const worldTopologyView = asRecord(previewStateRecord?.world_topology_view);
+    const anchorManorId = readString(worldTopologyView?.anchor_manor_id);
+    return {
+        anchorManorId,
+        manorCount,
+        manorCountLabel: manorCount === 1 ? "1 tracked manor" : `${manorCount} tracked manors`,
+        manorKeys,
+        portfolio
+    };
+}
+function readManorMetric(row, config) {
+    if (config.source === "net") {
+        return readWholeNumber(asRecord(row.net_values)?.[config.key]) ?? 0;
+    }
+    const totalsRecord = asRecord(config.source === "asset" ? row.asset_totals : row.category_totals);
+    return readWholeNumber(totalsRecord?.[config.key]) ?? 0;
+}
+function buildSelectedManorCards(row) {
+    return SELECTED_MANOR_CARD_CONFIG.map((config) => ({
+        helper: config.helper,
+        id: config.id,
+        label: config.label,
+        tone: config.tone,
+        value: formatValue(readManorMetric(row, config), config.valueKind)
+    }));
+}
+function inferManorIdFromKey(manorKey) {
+    const match = manorKey.match(/:manor:([^:]+)$/);
+    return match?.[1] ?? manorKey;
+}
+function buildOutlierGroups(portfolio, anchorManorId) {
+    const outliersByMetric = asRecord(portfolio.outliers_by_metric);
+    if (!outliersByMetric)
+        return [];
+    const grouped = new Map();
+    for (const [priority, config] of OUTLIER_METRIC_CONFIG.entries()) {
+        const rawEntries = Array.isArray(outliersByMetric[config.metricKey]) ? outliersByMetric[config.metricKey] : [];
+        const entry = asRecord(rawEntries[0]);
+        if (!entry)
+            continue;
+        const manorId = readString(entry.manor_id);
+        const manorKey = readString(entry.manor_key);
+        const value = readWholeNumber(entry.value);
+        if (!manorId || value === null)
+            continue;
+        const current = grouped.get(manorId) ??
+            {
+                manorId,
+                manorKey,
+                manorLabel: formatManorLabel(manorId, anchorManorId),
+                flags: []
+            };
+        current.flags.push({
+            id: config.id,
+            label: config.label,
+            tone: config.tone,
+            value: formatValue(value, config.valueKind),
+            priority
+        });
+        grouped.set(manorId, current);
+    }
+    return [...grouped.values()]
+        .map((group) => ({
+        ...group,
+        flags: [...group.flags].sort((left, right) => left.priority - right.priority || sortText(left.label, right.label))
+    }))
+        .sort((left, right) => {
+        if (left.flags.length !== right.flags.length)
+            return right.flags.length - left.flags.length;
+        const leftPriority = Math.min(...left.flags.map((flag) => flag.priority));
+        const rightPriority = Math.min(...right.flags.map((flag) => flag.priority));
+        if (leftPriority !== rightPriority)
+            return leftPriority - rightPriority;
+        return sortText(left.manorLabel, right.manorLabel);
+    });
+}
+function buildVisibleOutlierManors(groups, manorCount) {
+    return groups
+        .slice(0, Math.max(1, Math.min(3, manorCount)))
+        .map((group) => ({
+        manorId: group.manorId,
+        manorLabel: group.manorLabel,
+        summary: group.flags.length === 1
+            ? "Flagged by 1 tracked extreme."
+            : `Flagged by ${group.flags.length} tracked extremes.`,
+        flags: group.flags.map(({ priority: _priority, ...flag }) => flag)
+    }));
+}
+function buildPortfolioOverviewSurfaceFromContext(context) {
+    const { anchorManorId, manorCount, manorCountLabel, portfolio } = context;
+    return {
+        emptyOutliersLabel: "No portfolio outlier rows are exposed in this bounded snapshot yet.",
+        helper: manorCount === 1
+            ? "Read-only multi-manor stub. The current bounded snapshot only exposes one tracked manor so far, but the portfolio totals and outlier contract are already locked."
+            : "Read-only multi-manor stub. Totals stay additive across the tracked manors, and the outlier list stays bounded to the strongest current extremes.",
+        manorCount,
+        manorCountLabel,
+        outlierManors: buildVisibleOutlierManors(buildOutlierGroups(portfolio, anchorManorId), manorCount),
+        summaryCards: buildSummaryCards(portfolio)
+    };
+}
+function readPortfolioRowsInOrder(portfolio, manorKeys, anchorManorId) {
+    const manorRowsByKey = asRecord(portfolio.manor_rows_by_key);
+    if (!manorRowsByKey)
+        return [];
+    return manorKeys.flatMap((manorKey) => {
+        const row = asRecord(manorRowsByKey[manorKey]);
+        if (!row)
+            return [];
+        const manorId = readString(row.manor_id) ?? inferManorIdFromKey(manorKey);
+        return [
+            {
+                isAnchorManor: anchorManorId !== null && manorId === anchorManorId,
+                manorId,
+                manorKey,
+                manorLabel: formatManorLabel(manorId, anchorManorId),
+                row
+            }
+        ];
+    });
+}
+function selectedManorModeLabel(selectedRow) {
+    return selectedRow.isAnchorManor ? "Current manor detail" : `${selectedRow.manorLabel} detail`;
+}
+function buildSelectorSummary(row, outlierCount) {
+    const fragments = [];
+    if (row.isAnchorManor)
+        fragments.push("Current manor");
+    if (outlierCount > 0) {
+        fragments.push(outlierCount === 1 ? "1 outlier flag" : `${outlierCount} outlier flags`);
+    }
+    return fragments.length > 0 ? fragments.join(" · ") : "Tracked manor";
+}
+function buildSelectedManorSummary(row, outlierCount) {
+    const title = row.isAnchorManor ? "Current manor" : row.manorLabel;
+    if (outlierCount === 0) {
+        return `${title} is the default manor-scoped follow-up beneath the portfolio summary even when no outlier is active.`;
+    }
+    return outlierCount === 1
+        ? `${title} is currently flagged by 1 tracked extreme.`
+        : `${title} is currently flagged by ${outlierCount} tracked extremes.`;
+}
+function buildSurfaceScopeRules(selectedRow) {
+    const selectedDetailLabel = selectedRow.isAnchorManor ? "Current manor detail" : `${selectedRow.manorLabel} detail`;
+    const byId = {
+        portfolio_summary: {
+            id: "portfolio_summary",
+            label: "Portfolio summary",
+            mode: "portfolio",
+            helper: "Additive holdings totals stay portfolio-scoped context rather than collapsing into one manor."
+        },
+        portfolio_outliers: {
+            id: "portfolio_outliers",
+            label: "Portfolio outliers",
+            mode: "portfolio",
+            helper: "Exception rows stay portfolio-scoped so they can promote one manor into detail without becoming a ledger."
+        },
+        diff_ledger: {
+            id: "diff_ledger",
+            label: "Diff ledger",
+            mode: "selected_manor",
+            helper: `${selectedDetailLabel} should own the resolved ledger trail instead of widening it to the whole portfolio.`
+        },
+        receipts: {
+            id: "receipts",
+            label: "Receipts explainer",
+            mode: "selected_manor",
+            helper: `${selectedDetailLabel} should own receipt detail once the explain surface inherits selector state.`
+        }
+    };
+    return PLAY_SCREEN_PORTFOLIO_SURFACE_ORDER.map((surfaceId) => byId[surfaceId]);
+}
+function buildSelectedManorSurface(row, outlierFlags) {
+    return {
+        helper: row.isAnchorManor
+            ? "Current manor detail stays ready for manor-scoped ledger and receipt follow-up."
+            : `${row.manorLabel} is the deterministic manor detail selection exposed by this contract.`,
+        isAnchorManor: row.isAnchorManor,
+        manorId: row.manorId,
+        manorKey: row.manorKey,
+        modeLabel: selectedManorModeLabel(row),
+        outlierFlags,
+        summary: buildSelectedManorSummary(row, outlierFlags.length),
+        summaryCards: buildSelectedManorCards(row.row),
+        title: row.manorLabel
+    };
+}
+export function buildPortfolioScopeContract(previewState) {
+    const context = readPortfolioContext(previewState);
+    if (!context)
+        return null;
+    const { anchorManorId, manorCount, manorKeys, portfolio } = context;
+    const portfolioSummary = buildPortfolioOverviewSurfaceFromContext(context);
+    const outlierGroups = buildOutlierGroups(portfolio, anchorManorId);
+    const outlierGroupsByManorId = new Map(outlierGroups.map((group) => [group.manorId, group]));
+    const rows = readPortfolioRowsInOrder(portfolio, manorKeys, anchorManorId);
+    if (rows.length === 0)
+        return null;
+    const manorDetailsById = Object.fromEntries(rows.map((row) => {
+        const outlierFlags = (outlierGroupsByManorId.get(row.manorId)?.flags ?? []).map(({ priority: _priority, ...flag }) => flag);
+        return [row.manorId, buildSelectedManorSurface(row, outlierFlags)];
+    }));
+    const selectedRow = rows.find((row) => row.isAnchorManor) ?? rows[0];
+    const scopeOptions = [
+        {
+            id: "portfolio",
+            label: "Portfolio summary",
+            helper: "Holdings totals and portfolio exceptions stay grouped here as the top-level shell context."
+        },
+        {
+            id: "selected_manor",
+            label: selectedManorModeLabel(selectedRow),
+            helper: selectedRow.isAnchorManor
+                ? "The selector starts on the current manor so manor-scoped follow-up stays anchored without inventing a second default."
+                : "The selector can move detail focus to a tracked manor without changing the portfolio totals above it."
+        }
+    ];
+    return {
+        anchorManorId,
+        defaultMode: "portfolio",
+        manorCount,
+        manorDetailsById,
+        portfolioSummary,
+        schemaVersion: PLAY_SCREEN_PORTFOLIO_CONTRACT_SCHEMA_VERSION,
+        scopeOptions,
+        selectedManor: {
+            ...manorDetailsById[selectedRow.manorId],
+            modeLabel: scopeOptions[1].label
+        },
+        selectedManorId: selectedRow.manorId,
+        selectorHelper: "Tracked manor selection stays deterministic, UI-owned, and ready for receipts or ledger surfaces to inherit later.",
+        selectorLabel: "Tracked manor detail",
+        selectorOptions: rows.map((row) => {
+            const outlierCount = outlierGroupsByManorId.get(row.manorId)?.flags.length ?? 0;
+            return {
+                helper: "Use this manor as the focused detail scope beneath the portfolio summary.",
+                id: row.manorId,
+                isAnchorManor: row.isAnchorManor,
+                isOutlier: outlierCount > 0,
+                manorId: row.manorId,
+                manorKey: row.manorKey,
+                outlierCount,
+                summary: buildSelectorSummary(row, outlierCount),
+                title: row.manorLabel
+            };
+        }),
+        surfaceScopeRules: buildSurfaceScopeRules(selectedRow)
+    };
+}
+export function buildPortfolioOverviewSurface(previewState) {
+    const contract = buildPortfolioScopeContract(previewState);
+    if (contract)
+        return contract.portfolioSummary;
+    const context = readPortfolioContext(previewState);
+    if (!context)
+        return null;
+    return buildPortfolioOverviewSurfaceFromContext(context);
+}
+export function selectPortfolioManor(contract, manorId) {
+    if (manorId && contract.manorDetailsById[manorId])
+        return contract.manorDetailsById[manorId];
+    return contract.selectedManor;
+}
+export function buildPortfolioEvidenceScope(args) {
+    const { contract, scopeMode, selectedManorId } = args;
+    if (!contract || scopeMode === "portfolio") {
+        return {
+            chipHelperText: "Holdings summary is active above, but headline chips still open the current manor ledger so the resolved turn stays anchored to one live holding.",
+            diffLedgerHelper: "Holdings summary is active above. This ledger still follows the current manor until you switch into selected-manor detail.",
+            diffLedgerScopeLabel: "Current manor ledger",
+            receiptScopeLabel: "Current manor ledger",
+            receiptScopeSummary: "Explain Changes is still following the current manor ledger. Holdings totals above remain summary context only.",
+            state: "current_manor"
+        };
+    }
+    const selectedManor = selectPortfolioManor(contract, selectedManorId);
+    if (selectedManor.isAnchorManor) {
+        return {
+            chipHelperText: "Selected manor detail is active and it currently matches the current manor, so chips, ledger, and receipts all stay live on the same resolved holding.",
+            diffLedgerHelper: "Selected manor detail is active and it currently matches the current manor, so this resolved ledger is the live follow-up for the same holding.",
+            diffLedgerScopeLabel: `${selectedManor.title} detail`,
+            receiptScopeLabel: `${selectedManor.title} detail`,
+            receiptScopeSummary: "Explain Changes is following the same selected manor detail that is active in Holdings because the selected manor still matches the current manor.",
+            state: "selected_manor_live"
+        };
+    }
+    return {
+        chipHelperText: `${selectedManor.title} detail is selected above, but the headline chips still follow the current manor ledger because only the home manor has a resolved turn ledger right now.`,
+        diffLedgerHelper: `${selectedManor.title} detail is selected above, but this ledger still follows the current manor because non-anchor holdings do not yet expose their own resolved turn ledger.`,
+        diffLedgerScopeLabel: `Current manor ledger · ${selectedManor.title} selected`,
+        receiptScopeLabel: `${selectedManor.title} selected`,
+        receiptScopeSummary: `${selectedManor.title} detail is selected in Holdings, but Explain Changes still follows the current manor ledger. Use the selector for holdings comparison without assuming a second resolved ledger.`,
+        state: "selected_manor_holdings_only"
+    };
+}
+export function buildPortfolioMapCheckpoint(args) {
+    const { contract, mapCheckpointAvailable, scopeMode, selectedManorId, topologySurface } = args;
+    if (!contract || scopeMode !== "selected_manor" || !topologySurface) {
+        return null;
+    }
+    const selectedManor = selectPortfolioManor(contract, selectedManorId);
+    const target = {
+        countyId: selectedManor.isAnchorManor ? topologySurface.anchorCountyId : null,
+        holdingId: selectedManor.isAnchorManor ? topologySurface.anchorHoldingId : null,
+        manorId: selectedManor.manorId,
+        manorLabel: selectedManor.title
+    };
+    if (!mapCheckpointAvailable) {
+        return {
+            buttonLabel: "Center on selected holding",
+            helper: "Holdings already owns the target selection, but this gameplay shell does not yet expose a live map checkpoint. The control stays dormant until a world map surface is attached.",
+            state: "dormant",
+            statusLabel: "Dormant",
+            target
+        };
+    }
+    if (target.holdingId) {
+        return {
+            buttonLabel: "Center on selected holding",
+            helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
+            state: "ready",
+            statusLabel: "Ready",
+            target
+        };
+    }
+    return {
+        buttonLabel: "Center on selected holding",
+        helper: `${selectedManor.title} is selected in Holdings, but this bounded snapshot still only exposes a concrete holding target for the current manor. The control stays dormant until selected-holding targets widen beyond the anchor manor.`,
+        state: "dormant",
+        statusLabel: "Dormant",
+        target
+    };
+}

@@ -102,11 +102,28 @@ export function ReceiptsViewerPanel({
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <button aria-pressed={mode === "grouped"} onClick={() => onModeChange("grouped")} style={modeButtonStyle(mode === "grouped")} type="button">
-          Grouped
+          Drilldown
         </button>
         <button aria-pressed={mode === "raw"} onClick={() => onModeChange("raw")} style={modeButtonStyle(mode === "raw")} type="button">
-          Raw receipts
+          Phase record
         </button>
+      </div>
+
+      <div
+        style={{
+          padding: 12,
+          borderRadius: 12,
+          border: "1px solid rgba(172, 143, 100, 0.24)",
+          background: "#fcfaf5",
+          color: PLAY_SCREEN_THEME.ink,
+          fontSize: 12,
+          lineHeight: 1.45,
+          opacity: 0.86
+        }}
+      >
+        {mode === "grouped"
+          ? "Drilldown is the main player-facing explanation path here: ordered walkdowns, counterparty timing, and matched receipts stay grouped together."
+          : "Phase record is secondary evidence. Use it when the drilldown still leaves questions about the exact per-phase receipt trail."}
       </div>
 
       {mode === "grouped" ? (
@@ -221,6 +238,29 @@ export function ReceiptsViewerPanel({
               <div style={{ fontWeight: 700 }}>{section.title}</div>
               <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{section.helper}</div>
 
+              {section.walkdownRows.length ? (
+                <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Walkdown</div>
+                  {section.walkdownRows.map((row) => (
+                    <div
+                      key={row.id}
+                      style={{
+                        padding: 10,
+                        borderRadius: 12,
+                        background: "#fcfaf5",
+                        border: "1px solid rgba(172, 143, 100, 0.24)"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+                        <div style={{ fontWeight: 700 }}>{row.label}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700 }}>{row.amountLabel}</div>
+                      </div>
+                      <div style={{ fontSize: 12, opacity: 0.82, marginTop: 6 }}>{row.summary}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
               {section.highlights.length ? (
                 <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
                   {section.highlights.map((highlight) => (
@@ -278,7 +318,7 @@ export function ReceiptsViewerPanel({
                 </div>
               ) : (
                 <div style={{ marginTop: 12, fontSize: 12, opacity: 0.72 }}>
-                  No extra receipt lines matched this focus. The headline summary above is still the primary explanation.
+                  No extra receipt lines matched this focus. The grouped drilldown above is still the primary explanation.
                 </div>
               )}
             </section>
@@ -361,7 +401,7 @@ export function ReceiptsViewerPanel({
         </div>
       ) : (
         <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
-          No raw receipt lines matched this focus yet.
+          No phase record lines matched this focus yet.
         </div>
       )}
     </div>

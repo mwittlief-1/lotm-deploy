@@ -183,56 +183,47 @@ const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
   }
 ];
 
-const MAINTENANCE_PREVIEW_STATE = {
-  world_topology_view: {
-    anchor_manor_id: "manor_hx_26597"
-  },
-  economy_maintenance_view: {
-    schema_version: "economy_maintenance_view_v1",
-    manor_keys: ["portfolio:player_portfolio:manor:manor_hx_26597"],
-    manor_summaries_by_key: {
-      "portfolio:player_portfolio:manor:manor_hx_26597": {
-        manor_id: "manor_hx_26597",
-        manor_key: "portfolio:player_portfolio:manor:manor_hx_26597",
-        totals: {
-          building_count: 0,
-          coin_cost: 4,
-          entry_count: 2,
-          labor_required: 7,
-          right_count: 2
-        },
-        active_project: null,
-        building_entries: [],
-        right_entries: [
-          {
-            entry_id: "right_bridge",
-            entry_kind: "right",
-            source_id: "bridge_crossing",
-            source_kind: "right",
-            source_label: "Bridge & crossing revenue",
-            source_state: "active",
-            coin_cost: 1,
-            labor_required: 3
-          },
-          {
-            entry_id: "right_market",
-            entry_kind: "right",
-            source_id: "market_right",
-            source_kind: "right",
-            source_label: "Market right",
-            source_state: "active",
-            coin_cost: 3,
-            labor_required: 4
-          }
-        ]
+const MAINTENANCE_TURN_EXPLANATION = {
+  food_walkdown: {
+    rows: [
+      {
+        id: "food_start",
+        label: "Starting stores",
+        direction: "start",
+        amount: 905,
+        summary: "Stores entering the turn."
+      },
+      {
+        id: "food_maintenance",
+        label: "Maintenance labor drag",
+        direction: "outflow",
+        amount: 7,
+        summary: "Maintenance reserved 7 labor before harvest and build output were applied."
       }
-    }
+    ]
+  },
+  coin_walkdown: {
+    rows: [
+      {
+        id: "coin_start",
+        label: "Starting coin",
+        direction: "start",
+        amount: 9,
+        summary: "Coin entering the turn."
+      },
+      {
+        id: "coin_maintenance",
+        label: "Recurring upkeep",
+        direction: "outflow",
+        amount: 4,
+        summary: "Bridge & crossing revenue and Market right required 4 coin of upkeep this turn."
+      }
+    ]
+  },
+  unrest_walkdown: {
+    rows: []
   }
-} as const;
-
-const MAINTENANCE_REPORT = {
-  notes: ["Maintenance reserved 7 labor before output was applied."]
-} as const;
+} as any;
 
 describe("playScreenReceipts", () => {
   it("creates deterministic routes for explain-changes and resource chips", () => {
@@ -412,7 +403,7 @@ describe("playScreenReceipts", () => {
     ]);
   });
 
-  it("adds a maintenance grouped section when the upkeep read model resolves", () => {
+  it("shows maintenance pressure through the core walkdowns instead of a dedicated grouped section", () => {
     const data = buildReceiptViewerData({
       diffLedgerItems: [
         ...DIFF_LEDGER_ITEMS,
@@ -427,52 +418,44 @@ describe("playScreenReceipts", () => {
       ],
       obligationsContract: OBLIGATIONS_CONTRACT,
       phaseResults: PHASE_RESULTS,
-      previewState: MAINTENANCE_PREVIEW_STATE,
-      report: MAINTENANCE_REPORT
+      turnExplanation: MAINTENANCE_TURN_EXPLANATION
     });
 
-    expect(data.groupedSections.map((section) => section.id)).toEqual(["overview", "food", "coin", "maintenance", "unrest"]);
-    expect(data.groupedSections.find((section) => section.id === "maintenance")).toEqual({
-      id: "maintenance",
-      title: "Maintenance pressure",
-      helper: "Upkeep rows stay visible here so maintenance labor and coin pressure do not disappear into lower output.",
-      highlights: [
-        {
-          id: "maintenance",
-          primary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
-          why: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
-          source: "system_pressure"
-        }
-      ],
-      receipts: [
-        {
-          counterpartyTags: [],
-          id: "maintenance_note_00",
-          kind: "summary",
-          line: "Maintenance reserved 7 labor before output was applied.",
-          phase: "consumption",
-          phaseLabel: "Consumption",
-          tags: ["maintenance"]
-        },
-        {
-          counterpartyTags: [],
-          id: "maintenance_row_00",
-          kind: "summary",
-          line: "Bridge & crossing revenue — Right; 1 coin; 3 labor; Active.",
-          phase: "events",
-          phaseLabel: "Maintenance view",
-          tags: ["coin", "maintenance"]
-        },
-        {
-          counterpartyTags: [],
-          id: "maintenance_row_01",
-          kind: "summary",
-          line: "Market right — Right; 3 coin; 4 labor; Active.",
-          phase: "events",
-          phaseLabel: "Maintenance view",
-          tags: ["coin", "maintenance"]
-        }
-      ]
-    });
+    expect(data.groupedSections.map((section) => section.id)).toEqual(["overview", "food", "coin", "unrest"]);
+    expect(data.groupedSections.find((section) => section.id === "maintenance")).toBeUndefined();
+    expect(data.groupedSections[0]?.highlights.map((highlight) => highlight.id)).toEqual([
+      "food",
+      "coin",
+      "unrest",
+      "maintenance"
+    ]);
+    expect(data.groupedSections.find((section) => section.id === "food")?.walkdownRows).toEqual([
+      {
+        id: "food_start",
+        label: "Starting stores",
+        amountLabel: "905 bushels",
+        summary: "Stores entering the turn."
+      },
+      {
+        id: "food_maintenance",
+        label: "Maintenance labor drag",
+        amountLabel: "-7 bushels",
+        summary: "Maintenance reserved 7 labor before harvest and build output were applied."
+      }
+    ]);
+    expect(data.groupedSections.find((section) => section.id === "coin")?.walkdownRows).toEqual([
+      {
+        id: "coin_start",
+        label: "Starting coin",
+        amountLabel: "9 coin",
+        summary: "Coin entering the turn."
+      },
+      {
+        id: "coin_maintenance",
+        label: "Recurring upkeep",
+        amountLabel: "-4 coin",
+        summary: "Bridge & crossing revenue and Market right required 4 coin of upkeep this turn."
+      }
+    ]);
   });
 });

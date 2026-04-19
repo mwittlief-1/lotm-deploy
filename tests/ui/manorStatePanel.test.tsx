@@ -2,48 +2,10 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { createNewRun } from "../../src/sim/state";
+import { proposeTurn } from "../../src/sim/turn";
 import { ManorStatePanel } from "../../src/ui/panels/ManorStatePanel";
-
-const MAINTENANCE_PRESSURE = {
-  currentManorId: "manor_hx_26597",
-  currentManorRow: {
-    buildingCount: 0,
-    coinCost: 4,
-    entryCount: 2,
-    laborRequired: 7,
-    manorId: "manor_hx_26597",
-    manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
-    manorLabel: "Current manor",
-    rightCount: 2,
-    rows: [
-      {
-        coinCost: 1,
-        entryId: "right_bridge",
-        kindLabel: "Right",
-        laborRequired: 3,
-        label: "Bridge & crossing revenue",
-        manorId: "manor_hx_26597",
-        manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
-        stateLabel: "Active"
-      },
-      {
-        coinCost: 3,
-        entryId: "right_market",
-        kindLabel: "Right",
-        laborRequired: 4,
-        label: "Market right",
-        manorId: "manor_hx_26597",
-        manorKey: "portfolio:player_portfolio:manor:manor_hx_26597",
-        stateLabel: "Active"
-      }
-    ]
-  },
-  explainPrimary: "Maintenance: 7 labor, 4 coin across 2 upkeep rows.",
-  explainWhy: "Rights upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
-  helperText: "Maintenance rows come from the accepted upkeep read model.",
-  manorRows: [],
-  noteLines: ["Maintenance reserved 7 labor before output was applied."]
-} as const;
+import { buildEconomyPricingSurface } from "../../src/ui/playViewModel";
 
 describe("ManorStatePanel", () => {
   it("renders the unrest-tip text from the shared dispossession content slot", () => {
@@ -90,7 +52,9 @@ describe("ManorStatePanel", () => {
     expect(html).toContain("If Unrest is ≥ 100 at end of a turn, you are Dispossessed (game over).");
   });
 
-  it("renders current-manor maintenance rows from the accepted upkeep surface", () => {
+  it("shows current-state direct causes from the explanation contract", () => {
+    const state = createNewRun("lotm_v026_seed_001_baseline");
+    const ctx = proposeTurn(state);
     const html = renderToStaticMarkup(
       <ManorStatePanel
         anchorUnrest="unrest"
@@ -106,36 +70,30 @@ describe("ManorStatePanel", () => {
           unrestBreakdownNone: "No unrest movement.",
           unrestBreakdownTitle: "Unrest breakdown"
         }}
-        deltaBushels={0}
-        deltaCoin={0}
-        deltaPop={0}
-        deltaUnrest={0}
+        deltaBushels={ctx.preview_state.manor.bushels_stored - state.manor.bushels_stored}
+        deltaCoin={ctx.preview_state.manor.coin - state.manor.coin}
+        deltaPop={ctx.preview_state.manor.population - state.manor.population}
+        deltaUnrest={ctx.preview_state.manor.unrest - state.manor.unrest}
         desiredBuilders={0}
         fmtSigned={(value: number) => (value > 0 ? `+${value}` : `${value}`)}
         improvements={{}}
-        maintenancePressure={MAINTENANCE_PRESSURE}
-        manor={{
-          builders: 1,
-          bushels_stored: 12,
-          coin: 5,
-          construction: null,
-          farmers: 3,
-          population: 4,
-          unrest: 12
-        }}
+        manor={ctx.preview_state.manor}
         onAbandonProject={() => undefined}
         popChangeSummary={null}
-        report={{ construction: {} }}
+        pricingSurface={buildEconomyPricingSurface(ctx.preview_state)}
+        report={ctx.report}
         showUnrestBreakdown={false}
+        turnExplanation={ctx.report.turn_explanation_v1 ?? null}
         turnYears={3}
         unrestBreakdown={null}
       />
     );
 
-    expect(html).toContain("Maintenance pressure");
-    expect(html).toContain("Maintenance rows come from the accepted upkeep read model.");
-    expect(html).toContain("Maintenance reserved 7 labor before output was applied.");
-    expect(html).toContain("Bridge &amp; crossing revenue");
-    expect(html).toContain("Market right");
+    expect(html).toContain("Food stores now");
+    expect(html).toContain("Coin on hand");
+    expect(html).toContain("Unrest pressure now");
+    expect(html).toContain("Labor &amp; upkeep");
+    expect(html).toContain("current manor condition and the strongest direct pressure");
+    expect(html).toContain("Market reference:");
   });
 });

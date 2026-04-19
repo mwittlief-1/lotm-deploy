@@ -35,18 +35,6 @@ import {
   summarizePopulationChange,
   uncertaintyLabel as labelUncertainty
 } from "../playViewModel";
-import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
-import { buildCourtProvisioningSurface } from "../courtProvisioningView";
-import { buildMaintenancePressureSurface } from "../maintenancePressureView";
-import { buildOutboundMarriageSurface } from "../outboundMarriageView";
-import { buildRunProvenanceSurface } from "../runProvenanceView";
-import {
-  buildPersonCardSurface,
-  createPersonCardRoute,
-  listPersonCardIds,
-  type PersonCardRoute,
-  type PersonCardRouteOrigin
-} from "../personCardView";
 import {
   PLAY_ANCHORS,
   buildCouncilAgendaItems,
@@ -106,24 +94,19 @@ import {
 } from "../playScreenTheme";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
-import { CourtProvisioningPanel } from "./CourtProvisioningPanel";
 import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
 import { EventsPanel } from "./EventsPanel";
-import { HouseDossierPanel } from "./HouseDossierPanel";
 import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
 import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
-import { OutboundMarriagePanel } from "./OutboundMarriagePanel";
-import { PersonCardPanel } from "./PersonCardPanel";
 import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
 import { RelationshipDrawerPanel } from "./RelationshipDrawerPanel";
-import { RunProvenanceBanner } from "./RunProvenanceBanner";
 import { StickyResourceChips } from "./StickyResourceChips";
 import { TopologyDebugPanel } from "./TopologyDebugPanel";
 import { TurnReportPanel } from "./TurnReportPanel";
@@ -183,11 +166,7 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
-  const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
-  const [showOutboundMarriage, setShowOutboundMarriage] = useState(false);
-  const [personCardRoute, setPersonCardRoute] = useState<PersonCardRoute | null>(null);
-  const [showCourtProvisioning, setShowCourtProvisioning] = useState(false);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
@@ -244,22 +223,9 @@ export function PlayScreen({
   const knownHouses: any[] = getKnownHouses(ctx.preview_state, knownHousesRaw);
   const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
   const hasMoreKnownHouses = knownHouses.length > 5;
-  const knownHouseDossierIds = useMemo(() => new Set(listHouseDossierIds(ctx.preview_state)), [ctx.preview_state]);
-  const personCardIds = useMemo(() => new Set(listPersonCardIds(ctx.preview_state)), [ctx.preview_state]);
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
-  const activeHouseDossierSurface = useMemo(
-    () => (activeHouseDossierId ? buildHouseDossierSurface(ctx.preview_state, activeHouseDossierId) : null),
-    [activeHouseDossierId, ctx.preview_state]
-  );
-  const activePersonCardSurface = useMemo(
-    () => (personCardRoute ? buildPersonCardSurface(ctx.preview_state, personCardRoute.personId) : null),
-    [ctx.preview_state, personCardRoute]
-  );
-  const courtProvisioningSurface = useMemo(() => buildCourtProvisioningSurface(ctx.preview_state), [ctx.preview_state]);
-  const outboundMarriageSurface = useMemo(() => buildOutboundMarriageSurface(ctx.preview_state, mw), [ctx.preview_state, mw]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
-  const provenanceSurface = useMemo(() => buildRunProvenanceSurface(state), [state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
   const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
   const portfolioEvidenceScope = buildPortfolioEvidenceScope({
@@ -557,7 +523,6 @@ export function PlayScreen({
       buildPortfolioMapCheckpoint({
         contract: portfolioContract,
         mapCheckpointAvailable: typeof onCenterSelectedHolding === "function",
-        previewState: ctx.preview_state,
         scopeMode: portfolioScopeMode,
         selectedManorId: selectedPortfolioManorId,
         topologySurface: topologyDebugSurface
@@ -636,14 +601,6 @@ export function PlayScreen({
     previewState: ctx.preview_state,
     report: ctx.report,
   });
-  const maintenancePressureSurface = useMemo(
-    () =>
-      buildMaintenancePressureSurface({
-        previewState: ctx.preview_state,
-        report: ctx.report
-      }),
-    [ctx.preview_state, ctx.report]
-  );
 
   const resourceChips = buildStickyResourceChips({
     manor: m,
@@ -658,10 +615,9 @@ export function PlayScreen({
         diffLedgerItems,
         obligationsContract,
         phaseResults: ctx.phase_results_v0,
-        previewState: ctx.preview_state,
-        report: ctx.report
+        turnExplanation: ctx.report.turn_explanation_v1 ?? null
       }),
-    [ctx.phase_results_v0, ctx.preview_state, ctx.report, diffLedgerItems, obligationsContract]
+    [ctx.phase_results_v0, ctx.report.turn_explanation_v1, diffLedgerItems, obligationsContract]
   );
   const activeReceiptViewerFocus = receiptViewerRoute?.focus ?? "overview";
   const receiptsViewerMode: ReceiptViewerMode = receiptViewerRoute?.mode ?? "grouped";
@@ -692,38 +648,6 @@ export function PlayScreen({
   function handlePortfolioManorSelect(manorId: string) {
     setPortfolioScopeMode("selected_manor");
     setSelectedPortfolioManorId(manorId);
-  }
-
-  function openHouseDossier(houseId: string) {
-    setActiveHouseDossierId(houseId);
-  }
-
-  function closeHouseDossier() {
-    setActiveHouseDossierId(null);
-  }
-
-  function openPersonCard(personId: string, origin: PersonCardRouteOrigin) {
-    setPersonCardRoute(createPersonCardRoute(personId, origin));
-  }
-
-  function closePersonCard() {
-    setPersonCardRoute(null);
-  }
-
-  function openCourtProvisioning() {
-    setShowCourtProvisioning(true);
-  }
-
-  function closeCourtProvisioning() {
-    setShowCourtProvisioning(false);
-  }
-
-  function openOutboundMarriage() {
-    setShowOutboundMarriage(true);
-  }
-
-  function closeOutboundMarriage() {
-    setShowOutboundMarriage(false);
   }
 
   function closeReceiptViewer() {
@@ -778,12 +702,13 @@ export function PlayScreen({
         desiredBuilders={decisions.labor.desired_builders}
         fmtSigned={fmtSigned}
         improvements={IMPROVEMENTS}
-        maintenancePressure={maintenancePressureSurface}
         manor={m}
         onAbandonProject={() => setDecisions((current: any) => ({ ...current, construction: { kind: "construction", action: "abandon", confirm: true } }))}
         popChangeSummary={popChangeSummary}
+        pricingSurface={pricingSurface}
         report={ctx.report}
         showUnrestBreakdown={showUnrestBreakdown}
+        turnExplanation={ctx.report.turn_explanation_v1 ?? null}
         turnYears={TURN_YEARS}
         unrestBreakdown={unrestBreakdown}
       />
@@ -811,10 +736,7 @@ export function PlayScreen({
         manor={m}
         obligationsSections={allObligationsSections}
         onOpenObligationsDetails={(focus) => openObligationsDetails("turn_report", focus)}
-        onOpenHouseholdPersonCard={(personId) => openPersonCard(personId, "household")}
-        onOpenRosterPersonCard={(personId) => openPersonCard(personId, "roster")}
         peasantConsumptionBushels={peasantConsumptionBushels}
-        personCardIds={personCardIds}
         pricingSurface={pricingSurface}
         previewState={ctx.preview_state}
         report={ctx.report}
@@ -831,7 +753,6 @@ export function PlayScreen({
         anchorId={PLAY_ANCHORS.portfolio}
         contract={portfolioContract}
         mapCheckpoint={portfolioMapCheckpoint}
-        maintenancePressure={maintenancePressureSurface}
         onCenterSelectedHolding={
           portfolioMapCheckpoint?.state === "ready" && onCenterSelectedHolding
             ? () => onCenterSelectedHolding(portfolioMapCheckpoint.target)
@@ -857,9 +778,7 @@ export function PlayScreen({
         hiddenCount={prospectsHiddenCount}
         hiddenIds={prospectsHiddenIds}
         houseLabel={houseLabel}
-        onOpenPersonCard={(personId) => openPersonCard(personId, "prospects")}
         personNameFromRegistry={personNameFromRegistry}
-        personCardIds={personCardIds}
         pfHouseLabelById={pfHouseIx.houseLabelById}
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}
@@ -879,14 +798,10 @@ export function PlayScreen({
     known_houses: (
       <KnownHousesPanel
         copy={copy}
-        dossierHouseIds={knownHouseDossierIds}
         hasMoreKnownHouses={hasMoreKnownHouses}
         knownHouses={knownHouses}
         knownHousesMain={knownHousesMain}
-        onOpenHouseDossier={openHouseDossier}
-        onOpenPersonCard={(personId) => openPersonCard(personId, "known_houses")}
         onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
-        personCardIds={personCardIds}
         showAllKnownHouses={showAllKnownHouses}
       />
     ),
@@ -914,15 +829,11 @@ export function PlayScreen({
         laborRequested={laborRequested}
         manor={m}
         courtDecisionBudget={courtDecisionBudget}
-        courtProvisioningSurface={courtProvisioningSurface}
         marriageWindow={mw}
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
         obligationsSections={allObligationsSections}
-        outboundMarriageSurface={outboundMarriageSurface}
         onExportFullRunJson={onExportFullRunJson}
-        onOpenCourtProvisioning={openCourtProvisioning}
-        onOpenOutboundMarriage={openOutboundMarriage}
         onExportRunSummary={onExportRunSummary}
         onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
@@ -998,7 +909,6 @@ export function PlayScreen({
         <div style={PLAY_SCREEN_HEADER_HELPER_STYLE}>
           {copy.gameplayOverviewHelper ?? "Resolved above: the last 3 years. Choose below: the next turn's response."}
         </div>
-        <RunProvenanceBanner surface={provenanceSurface} />
       </div>
 
       {state.game_over ? (
@@ -1040,31 +950,6 @@ export function PlayScreen({
       </div>
 
       <ModalSheet
-        onClose={closeHouseDossier}
-        open={activeHouseDossierSurface !== null}
-        subtitle={activeHouseDossierSurface?.subtitle}
-        title={activeHouseDossierSurface ? `House ${activeHouseDossierSurface.houseName}` : "House dossier"}
-      >
-        {activeHouseDossierSurface ? (
-          <HouseDossierPanel onOpenPersonCard={(personId) => openPersonCard(personId, "house_dossier")} surface={activeHouseDossierSurface} />
-        ) : null}
-      </ModalSheet>
-
-      <ModalSheet
-        onClose={closePersonCard}
-        open={activePersonCardSurface !== null}
-        subtitle={activePersonCardSurface?.subtitle}
-        title={activePersonCardSurface ? activePersonCardSurface.personName : "Person card"}
-      >
-        {activePersonCardSurface ? (
-          <PersonCardPanel
-            onOpenPersonCard={(personId) => openPersonCard(personId, "person_card")}
-            surface={activePersonCardSurface}
-          />
-        ) : null}
-      </ModalSheet>
-
-      <ModalSheet
         onClose={closeObligationsDetails}
         open={obligationsModalRoute !== null}
         subtitle={obligationsModalSubtitleText}
@@ -1077,31 +962,6 @@ export function PlayScreen({
           onJumpToDecisions={jumpToObligationsDecisions}
           sections={visibleObligationsSections}
         />
-      </ModalSheet>
-
-      <ModalSheet
-        onClose={closeCourtProvisioning}
-        open={showCourtProvisioning && courtProvisioningSurface !== null}
-        subtitle={courtProvisioningSurface?.subtitle}
-        title="Court provisioning"
-      >
-        {courtProvisioningSurface ? <CourtProvisioningPanel surface={courtProvisioningSurface} /> : null}
-      </ModalSheet>
-
-      <ModalSheet
-        onClose={closeOutboundMarriage}
-        open={showOutboundMarriage && outboundMarriageSurface !== null}
-        subtitle={outboundMarriageSurface?.subtitle}
-        title="Outbound marriage"
-      >
-        {outboundMarriageSurface ? (
-          <OutboundMarriagePanel
-            onClearScout={() => setDecisions((current: any) => ({ ...current, marriage: { kind: "marriage", action: "none" } }))}
-            onQueueScout={() => setDecisions((current: any) => ({ ...current, marriage: { kind: "marriage", action: "scout" } }))}
-            scoutQueued={decisions.marriage.action === "scout"}
-            surface={outboundMarriageSurface}
-          />
-        ) : null}
       </ModalSheet>
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>

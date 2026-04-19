@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { buildBoundedWorldTopologyView } from "../../src/sim/domains/world";
 import {
   buildPortfolioEvidenceScope,
   buildPortfolioMapCheckpoint,
@@ -8,7 +7,6 @@ import {
   buildPortfolioScopeContract,
   selectPortfolioManor
 } from "../../src/ui/playScreenPortfolio";
-import { buildTopologyDebugSurface } from "../../src/ui/playScreenTopology";
 
 const PREVIEW_STATE = {
   world_topology_view: {
@@ -331,13 +329,13 @@ describe("playScreenPortfolio", () => {
       })
     ).toEqual({
       chipHelperText:
-        "Portfolio summary is active above, but headline chips still open the current manor chronicle so the resolved ledger stays grounded in one bounded holding.",
+        "Holdings summary is active above, but headline chips still open the current manor ledger so the resolved turn stays anchored to one live holding.",
       diffLedgerHelper:
-        "Portfolio summary is active above. This resolved ledger still follows the current manor chronicle until you switch into selected-manor detail.",
-      diffLedgerScopeLabel: "Current manor chronicle",
-      receiptScopeLabel: "Current manor chronicle",
+        "Holdings summary is active above. This ledger still follows the current manor until you switch into selected-manor detail.",
+      diffLedgerScopeLabel: "Current manor ledger",
+      receiptScopeLabel: "Current manor ledger",
       receiptScopeSummary:
-        "Explain Changes is still showing the current manor receipt trail. Portfolio totals remain summary context only.",
+        "Explain Changes is still following the current manor ledger. Holdings totals above remain summary context only.",
       state: "current_manor"
     });
 
@@ -349,13 +347,13 @@ describe("playScreenPortfolio", () => {
       })
     ).toEqual({
       chipHelperText:
-        "Hx 30001 detail is selected above, but the headline chips still track the current manor chronicle because only that holding exposes resolved receipts in this snapshot.",
+        "Hx 30001 detail is selected above, but the headline chips still follow the current manor ledger because only the home manor has a resolved turn ledger right now.",
       diffLedgerHelper:
-        "Hx 30001 detail is selected above, but this resolved ledger remains pinned to the current manor chronicle because non-anchor holdings do not expose a separate ledger trail yet.",
-      diffLedgerScopeLabel: "Current manor chronicle · Hx 30001 selected",
+        "Hx 30001 detail is selected above, but this ledger still follows the current manor because non-anchor holdings do not yet expose their own resolved turn ledger.",
+      diffLedgerScopeLabel: "Current manor ledger · Hx 30001 selected",
       receiptScopeLabel: "Hx 30001 selected",
       receiptScopeSummary:
-        "Hx 30001 detail is selected in Holdings, but this bounded snapshot only exposes the current manor receipt trail. Use the selector for holdings comparison without assuming a second ledger exists.",
+        "Hx 30001 detail is selected in Holdings, but Explain Changes still follows the current manor ledger. Use the selector for holdings comparison without assuming a second resolved ledger.",
       state: "selected_manor_holdings_only"
     });
   });
@@ -457,8 +455,8 @@ describe("playScreenPortfolio", () => {
         }
       })
     ).toEqual({
-      buttonLabel: "Open kingdom map",
-      helper: "Open the kingdom map and Manor View for the selected holding without changing the holdings selector or evidence scope.",
+      buttonLabel: "Center on selected holding",
+      helper: "Center the live world map on the selected holding without changing the holdings selector or evidence scope.",
       state: "ready",
       statusLabel: "Ready",
       target: {
@@ -468,106 +466,6 @@ describe("playScreenPortfolio", () => {
         manorLabel: "Current manor"
       }
     });
-  });
-
-  it("upgrades selected-manor targets through the accepted world selector seam when live preview data is available", () => {
-    const livePreviewState = {
-      player_house_id: "h_player",
-      houses: {
-        h_player: {
-          tier: "Knight"
-        }
-      },
-      world_topology_view: buildBoundedWorldTopologyView(),
-      portfolio: {
-        schema_version: "economy_portfolio_analysis_v1",
-        manor_keys: [
-          "portfolio:player_portfolio:manor:manor_hx_26597",
-          "portfolio:player_portfolio:manor:manor_hx_28840"
-        ],
-        totals_by_asset: {
-          coin: 18,
-          food_stores: 112,
-          meat_stores: 7
-        },
-        totals_by_category: {
-          "obligations.current_due.coin": 2,
-          "obligations.current_due.food_stores": 4,
-          "obligations.arrears.coin": 1,
-          "obligations.arrears.food_stores": 0
-        },
-        manor_rows_by_key: {
-          "portfolio:player_portfolio:manor:manor_hx_26597": {
-            manor_id: "manor_hx_26597",
-            manor_key: "portfolio:player_portfolio:manor:manor_hx_26597",
-            asset_totals: {
-              coin: 14,
-              food_stores: 90,
-              meat_stores: 4
-            },
-            category_totals: {
-              "obligations.current_due.coin": 2,
-              "obligations.current_due.food_stores": 4,
-              "obligations.arrears.coin": 1,
-              "obligations.arrears.food_stores": 0
-            },
-            net_values: {
-              "net.coin": 11,
-              "net.food_stores": 86,
-              "net.meat_stores": 4
-            }
-          },
-          "portfolio:player_portfolio:manor:manor_hx_28840": {
-            manor_id: "manor_hx_28840",
-            manor_key: "portfolio:player_portfolio:manor:manor_hx_28840",
-            asset_totals: {
-              coin: 4,
-              food_stores: 22,
-              meat_stores: 3
-            },
-            category_totals: {
-              "obligations.current_due.coin": 0,
-              "obligations.current_due.food_stores": 0,
-              "obligations.arrears.coin": 0,
-              "obligations.arrears.food_stores": 0
-            },
-            net_values: {
-              "net.coin": 4,
-              "net.food_stores": 22,
-              "net.meat_stores": 3
-            }
-          }
-        },
-        outliers_by_metric: {}
-      }
-    } as const;
-    const contract = buildPortfolioScopeContract(livePreviewState);
-    const topologySurface = buildTopologyDebugSurface(livePreviewState);
-
-    if (!contract || !topologySurface) {
-      throw new Error("Expected live holdings and topology surfaces.");
-    }
-
-    const checkpoint = buildPortfolioMapCheckpoint({
-      contract,
-      mapCheckpointAvailable: true,
-      previewState: livePreviewState as any,
-      scopeMode: "selected_manor",
-      selectedManorId: "manor_hx_28840",
-      topologySurface
-    });
-
-    expect(checkpoint).toMatchObject({
-      buttonLabel: "Open kingdom map",
-      state: "ready",
-      statusLabel: "Ready",
-      target: {
-        manorId: "manor_hx_28840",
-        manorLabel: "Hx 28840"
-      }
-    });
-    expect(checkpoint?.target.holdingId).toBeTruthy();
-    expect(checkpoint?.target.countyId).toBeTruthy();
   });
 
   it("keeps the overview surface projection stable while the scope contract grows", () => {

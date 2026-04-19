@@ -1,8 +1,9 @@
 import React from "react";
-import type { RunState } from "../../sim/types";
+import type { RunState, TurnExplanationV1, TurnExplanationWalkdownV1 } from "../../sim/types";
 import { PLAY_SCREEN_MODAL_TITLES } from "../playScreenChrome";
-import { PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
-import { Tip } from "../viewHelpers";
+import type { ObligationsCounterpartyContractSection, ObligationsModalFocus } from "../playScreenObligations";
+import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS, PLAY_SCREEN_SUBCARD_STYLE } from "../playScreenTheme";
+import type { EconomyPricingSurface } from "../playViewModel";
 import { HouseholdDetailsPanel } from "./HouseholdDetailsPanel";
 import { HouseholdPanel } from "./HouseholdPanel";
 import { ModalSheet } from "./ModalSheet";
@@ -28,10 +29,10 @@ type TurnReportPanelProps = {
   hasConsumptionSplit: boolean;
   idle: number;
   manor: any;
-  onOpenHouseholdPersonCard?: (personId: string) => void;
-  onOpenRosterPersonCard?: (personId: string) => void;
+  obligationsSections: ObligationsCounterpartyContractSection[];
+  onOpenObligationsDetails?: (focus: ObligationsModalFocus) => void;
   peasantConsumptionBushels: number | null;
-  personCardIds?: Set<string>;
+  pricingSurface: EconomyPricingSurface | null;
   previewState: RunState;
   report: any;
   showHouseholdDetails: boolean;
@@ -42,30 +43,81 @@ type TurnReportPanelProps = {
   turnYears: number;
 };
 
+function readTurnExplanation(report: any): TurnExplanationV1 | null {
+  return report?.turn_explanation_v1 && typeof report.turn_explanation_v1 === "object"
+    ? (report.turn_explanation_v1 as TurnExplanationV1)
+    : null;
+}
+
+function walkdownForMetric(explanation: TurnExplanationV1 | null, metric: "food" | "coin" | "unrest"): TurnExplanationWalkdownV1 | null {
+  if (!explanation) return null;
+  if (metric === "food") return explanation.food_walkdown;
+  if (metric === "coin") return explanation.coin_walkdown;
+  return explanation.unrest_walkdown;
+}
+
+function formatWalkdownAmount(amount: number, unitLabel: string): string {
+  return `${amount} ${unitLabel}`;
+}
+
+function summarizeWalkdown(walkdown: TurnExplanationWalkdownV1 | null): {
+  directSummary: string;
+  endLabel: string;
+  startLabel: string;
+} | null {
+  if (!walkdown) return null;
+  const biggestRow =
+    [...walkdown.rows]
+    .filter((row) => !["start", "net", "ending"].includes(row.direction) && row.amount !== 0)
+    .sort((left, right) => Math.abs(right.amount) - Math.abs(left.amount) || left.label.localeCompare(right.label))
+    [0] ?? null;
+
+  return {
+    directSummary: biggestRow?.summary ?? `Explain Changes keeps the full ${walkdown.metric} walkdown for this turn.`,
+    endLabel: formatWalkdownAmount(walkdown.end_amount, walkdown.unit_label),
+    startLabel: formatWalkdownAmount(walkdown.start_amount, walkdown.unit_label)
+  };
+}
+
+function headlineCauseDetail(headlineCauses: any[], metric: "food" | "coin" | "unrest"): string | null {
+  const match =
+    headlineCauses.find((cause) => cause && typeof cause === "object" && cause.metric === metric) ?? null;
+  if (!match) return null;
+  return typeof match.detail === "string" && match.detail.length > 0 ? match.detail : null;
+}
+
+function summarizeObligations(sections: ObligationsCounterpartyContractSection[]): string {
+  if (!sections.length) return "Open the obligation detail sheet for current versus arrears timing by counterparty.";
+
+  return sections
+    .slice(0, 2)
+    .map((section) => {
+      const dueLabel = section.dueGroup.amountLabel;
+      const arrearsLabel = section.penaltyGroup.amountLabel;
+      const stageLabel = section.penaltyGroup.stageLabel;
+      if (section.penaltyGroup.amount > 0) {
+        return `${section.shortTitle}: ${dueLabel} due, ${arrearsLabel} arrears, ${stageLabel}.`;
+      }
+      return `${section.shortTitle}: ${dueLabel} due, ${stageLabel}.`;
+    })
+    .join(" ");
+}
+
 export function TurnReportPanel({
   accruedThisTurn,
   anchorFood,
   anchorHousehold,
   arrearsCarried,
-  baselineConsPerTurn,
-  builderExtraPerTurn,
-  consBuilders,
-  consFarmers,
-  consIdle,
   copy,
-  courtConsumptionBushels,
   courtRosterEntries,
   courtSize,
   currentHouseLog,
   dueEntering,
   fmtObAmount,
-  hasConsumptionSplit,
-  idle,
-  manor,
-  onOpenHouseholdPersonCard,
-  onOpenRosterPersonCard,
+  obligationsSections,
+  onOpenObligationsDetails,
+  pricingSurface,
   peasantConsumptionBushels,
-  personCardIds,
   previewState,
   report,
   showHouseholdDetails,
@@ -75,6 +127,24 @@ export function TurnReportPanel({
   totalObligations,
   turnYears
 }: TurnReportPanelProps) {
+  const turnExplanation = readTurnExplanation(report);
+  const headlineCauses = Array.isArray(turnExplanation?.headline_causes) && turnExplanation.headline_causes.length > 0
+    ? turnExplanation.headline_causes
+    : Array.isArray(report?.headline_causes)
+      ? report.headline_causes
+      : [];
+  const summaryRole =
+    Array.isArray(turnExplanation?.surface_roles)
+      ? turnExplanation.surface_roles.find((role) => role.surface === "turn_report") ?? null
+      : null;
+  const foodWalkdown = summarizeWalkdown(walkdownForMetric(turnExplanation, "food"));
+  const coinWalkdown = summarizeWalkdown(walkdownForMetric(turnExplanation, "coin"));
+  const unrestWalkdown = summarizeWalkdown(walkdownForMetric(turnExplanation, "unrest"));
+  const foodHeadlineDetail = headlineCauseDetail(headlineCauses, "food");
+  const coinHeadlineDetail = headlineCauseDetail(headlineCauses, "coin");
+  const unrestHeadlineDetail = headlineCauseDetail(headlineCauses, "unrest");
+  const obligationsSummary = summarizeObligations(obligationsSections);
+
   return (
     <div style={PLAY_SCREEN_PANEL_STYLE}>
       <SectionHeading
@@ -88,114 +158,97 @@ export function TurnReportPanel({
         anchorId={anchorHousehold}
         copy={copy}
         courtSize={courtSize}
-        onOpenPersonCard={onOpenHouseholdPersonCard}
-        personCardIds={personCardIds}
         previewState={previewState}
         state={state}
         showDetails={showHouseholdDetails}
         onToggleDetails={toggleHouseholdDetails}
       />
 
-      <h4>Top drivers (3)</h4>
-      {report.top_drivers.length ? (
-        <ol>
-          {report.top_drivers.slice(0, 3).map((d: string, i: number) => (
-            <li key={i}>{d}</li>
-          ))}
-        </ol>
-      ) : (
-        <div style={{ opacity: 0.7 }}>None</div>
-      )}
+      {summaryRole ? (
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12, marginTop: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Role</div>
+          <div style={{ marginTop: 4, fontWeight: 700 }}>{summaryRole.role_label} only</div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>{summaryRole.helper}</div>
+        </div>
+      ) : null}
 
-      <h4 id={anchorFood}>Food & stores</h4>
-      <ul>
-        <li>Weather multiplier: {report.weather_multiplier.toFixed(2)}</li>
-        <li>Production: +{report.production_bushels} bushels</li>
-        <li>
-          Consumption: -{totalConsumptionBushels !== null ? totalConsumptionBushels : report.consumption_bushels} bushels
-          <Tip
-            text={`Baseline consumption: ${baselineConsPerTurn} bushels this turn (${turnYears}y) per person. Builders cost +${builderExtraPerTurn} extra bushels this turn (${turnYears}y) each.`}
-          />
-          {hasConsumptionSplit ? (
-            <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
-              <div>
-                <b>{copy.peasantConsumptionLabel}:</b> -{peasantConsumptionBushels} bushels <Tip text={copy.peasantConsumptionHelper} />
-              </div>
-              <div>
-                <b>{copy.courtConsumptionLabel}:</b> -{courtConsumptionBushels} bushels <Tip text={copy.courtConsumptionHelper} />
-              </div>
-              <div style={{ marginTop: 4 }}>{copy.courtEatsSameStores}</div>
-              <div>{copy.consumptionReconcileNote}</div>
-            </div>
-          ) : null}
-        </li>
-        <li>
-          Spoilage: -{report.spoilage.loss_bushels} bushels ({(report.spoilage.rate * 100).toFixed(1)}%)
-        </li>
-      </ul>
-
-      <details style={{ marginTop: 6 }}>
-        <summary>Consumption breakdown</summary>
-        <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
-          <div style={{ marginBottom: 6, opacity: 0.85 }}>All values are for this turn ({turnYears}y).</div>
-          <ul>
-            <li>
-              Farmers: {manor.farmers} × {baselineConsPerTurn} = {consFarmers} bushels
-            </li>
-            <li>
-              Builders: {manor.builders} × {baselineConsPerTurn + builderExtraPerTurn} = {consBuilders} bushels
-            </li>
-            <li>
-              Idle: {idle} × {baselineConsPerTurn} = {consIdle} bushels
-            </li>
-            {hasConsumptionSplit ? (
-              <li>
-                {copy.courtConsumptionLabel}: {courtConsumptionBushels} bushels
+      <div style={{ marginTop: 14 }}>
+        <h4 style={{ marginBottom: 8 }}>Headline causes</h4>
+        {headlineCauses.length ? (
+          <ol style={{ margin: 0, paddingLeft: 18 }}>
+            {headlineCauses.slice(0, 4).map((cause: any) => (
+              <li key={cause.id} style={{ marginTop: 6 }}>
+                <b>{cause.summary}</b>. {cause.detail}
               </li>
-            ) : null}
-            <li>
-              Total:{" "}
-              {hasConsumptionSplit && courtConsumptionBushels !== null
-                ? consFarmers + consBuilders + consIdle + courtConsumptionBushels
-                : consFarmers + consBuilders + consIdle}{" "}
-              bushels
-            </li>
-          </ul>
-          <div style={{ fontSize: 12, opacity: 0.85 }}>
-            Builder premium: +{builderExtraPerTurn} bushels this turn ({turnYears}y) <b>per builder</b>.
+            ))}
+          </ol>
+        ) : report.top_drivers.length ? (
+          <ol style={{ margin: 0, paddingLeft: 18 }}>
+            {report.top_drivers.slice(0, 4).map((driver: string, index: number) => (
+              <li key={index} style={{ marginTop: 6 }}>{driver}</li>
+            ))}
+          </ol>
+        ) : (
+          <div style={{ opacity: 0.7 }}>No headline causes recorded for this turn.</div>
+        )}
+      </div>
+
+      <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", marginTop: 14 }}>
+        <div id={anchorFood} style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Food & stores</div>
+          <div style={{ marginTop: 4, fontSize: 22, fontWeight: 700 }}>
+            {foodWalkdown ? foodWalkdown.endLabel : `${report.production_bushels} bushels produced`}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {foodHeadlineDetail ?? foodWalkdown?.directSummary ?? "Explain Changes keeps the ordered food walkdown when you need the full accounting path."}
+          </div>
+          {foodWalkdown ? <div style={{ marginTop: 8, fontSize: 12, opacity: 0.76 }}>Started at {foodWalkdown.startLabel}.</div> : null}
+        </div>
+
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Coin & dues</div>
+          <div style={{ marginTop: 4, fontSize: 22, fontWeight: 700 }}>
+            {coinWalkdown ? coinWalkdown.endLabel : `${manor.coin} coin`}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {coinHeadlineDetail ?? coinWalkdown?.directSummary ?? "Explain Changes keeps the ordered coin walkdown when offsets need a fuller reading."}
+          </div>
+          <div style={{ marginTop: 8, fontSize: 12, opacity: 0.76 }}>
+            Due entering {fmtObAmount(dueEntering)}. Arrears carried {fmtObAmount(arrearsCarried)}.
+            {accruedThisTurn ? ` New obligations ${fmtObAmount(accruedThisTurn)}.` : ""}
           </div>
         </div>
-      </details>
 
-      <h4 style={{ marginTop: 12 }}>Market</h4>
-      <ul>
-        <li>
-          Price: {report.market.price_per_bushel.toFixed(2)} coin/bushel
-        </li>
-        <li>
-          Sell cap: {report.market.sell_cap_bushels} bushels
-          <Tip text="Selling consumes 1 energy. Amount is trimmed to the market cap." />
-        </li>
-      </ul>
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Unrest & stability</div>
+          <div style={{ marginTop: 4, fontSize: 22, fontWeight: 700 }}>
+            {unrestWalkdown ? unrestWalkdown.endLabel : `${manor.unrest} unrest`}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {unrestHeadlineDetail ?? unrestWalkdown?.directSummary ?? "Manor State keeps the live pressure while Explain Changes keeps the full unrest cause chain."}
+          </div>
+          {unrestWalkdown ? <div style={{ marginTop: 8, fontSize: 12, opacity: 0.76 }}>Started at {unrestWalkdown.startLabel}.</div> : null}
+        </div>
 
-      <h4 style={{ marginTop: 12 }}>Obligations</h4>
-      <ul>
-        <li>
-          <b>{copy.obligationsTotal}</b>: {fmtObAmount(totalObligations)}
-        </li>
-        <li>
-          {copy.obligationsDueEntering}: {fmtObAmount(dueEntering)}
-        </li>
-        {accruedThisTurn ? (
-          <li>
-            {copy.obligationsAccrued}: {fmtObAmount(accruedThisTurn)}
-          </li>
-        ) : null}
-        <li>
-          {copy.obligationsArrears}: {fmtObAmount(arrearsCarried)}
-        </li>
-      </ul>
-      <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.obligationsHelper}</div>
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Obligations</div>
+              <div style={{ marginTop: 4, fontSize: 22, fontWeight: 700 }}>{fmtObAmount(totalObligations)}</div>
+            </div>
+            {onOpenObligationsDetails ? (
+              <button onClick={() => onOpenObligationsDetails("overview")} style={PLAY_SCREEN_ACTION_BUTTON_STYLE} type="button">
+                Open detail sheet
+              </button>
+            ) : null}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>{obligationsSummary}</div>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 12, opacity: 0.78, marginTop: 12 }}>
+        Diff Ledger keeps only the biggest resolved moves, Manor State keeps live conditions, and Explain Changes is the drilldown home for ordered walkdowns and matched receipts.
+      </div>
 
       <ModalSheet
         onClose={toggleHouseholdDetails}
@@ -208,8 +261,6 @@ export function TurnReportPanel({
           currentHouseLog={currentHouseLog}
           courtRosterEntries={courtRosterEntries}
           courtSize={courtSize}
-          onOpenPersonCard={onOpenRosterPersonCard}
-          personCardIds={personCardIds}
           previewState={previewState}
           state={state}
         />

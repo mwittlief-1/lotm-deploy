@@ -1,15 +1,14 @@
 import type { StickyResourceChip } from "./playScreenLayout";
 import type { LedgerItem, SourceTag } from "./playScreenModel";
-import type { PhaseNameV0, PhaseReceiptKindV0, PhaseResultV0 } from "../sim/types";
+import type { PhaseNameV0, PhaseReceiptKindV0, PhaseResultV0, TurnExplanationV1 } from "../sim/types";
 import {
   classifyReceiptCounterpartyTags,
   type ObligationsCounterpartyContract,
   type ObligationsCounterpartyId
 } from "./playScreenObligations";
-import { buildMaintenancePressureSurface } from "./maintenancePressureView";
 
 export type ReceiptViewerMode = "grouped" | "raw";
-export type ReceiptViewerFocus = "overview" | StickyResourceChip["id"] | "maintenance";
+export type ReceiptViewerFocus = "overview" | StickyResourceChip["id"];
 type ReceiptFocusTag = Exclude<ReceiptViewerFocus, "overview">;
 export type ReceiptCounterpartyTag = ObligationsCounterpartyId;
 
@@ -31,6 +30,7 @@ export type GroupedReceiptSection = {
   title: string;
   helper: string;
   highlights: ReceiptHighlight[];
+  walkdownRows: Array<{ amountLabel: string; id: string; label: string; summary: string }>;
   receipts: ReceiptLine[];
 };
 
@@ -109,10 +109,6 @@ const GROUPED_SECTION_META: Record<ReceiptViewerFocus, { title: string; helper: 
     title: "Coin & dues",
     helper: "Coin movement, market context, and obligation pressure stay grouped together here."
   },
-  maintenance: {
-    title: "Maintenance pressure",
-    helper: "Upkeep rows stay visible here so maintenance labor and coin pressure do not disappear into lower output."
-  },
   unrest: {
     title: "Unrest & stability",
     helper: "Stability pressure stays grouped here so rising risk has one obvious explanation surface."
@@ -120,17 +116,15 @@ const GROUPED_SECTION_META: Record<ReceiptViewerFocus, { title: string; helper: 
 };
 
 const FOCUS_SUBTITLES: Record<ReceiptViewerFocus, string> = {
-  overview: "Grouped mode keeps counterparties and relationship levers first, then the resource story beneath them. Raw mode preserves the exact phase receipt trail underneath it.",
+  overview: "Drilldown keeps counterparties and relationship levers first, then the resource story beneath them. Phase record keeps the exact per-phase receipt trail underneath it.",
   food: "Food details keep the resource chip aligned with the receipt trail behind harvest, stores, and dues.",
   coin: "Coin details keep the resource chip aligned with the receipt trail behind market context and obligations.",
-  maintenance: "Maintenance details keep upkeep rows and any live labor-drag notes visible without hiding them inside lower harvest or build output.",
   unrest: "Unrest details keep stability pressure and its supporting receipt trail in one focused surface."
 };
 
 const RECEIPT_KEYWORDS: Record<ReceiptFocusTag, string[]> = {
   food: ["bushel", "bushels", "tithe", "spoilage", "production", "consumption", "weather", "harvest", "stores"],
   coin: ["coin", "coins", "tax", "market", "price", "sell cap", "dowry", "grant"],
-  maintenance: ["maintenance", "upkeep", "effective builders", "effective farmers", "reserved"],
   unrest: ["unrest", "arrears", "festival", "stability", "riot", "rebellion", "pressure"]
 };
 const STRUCTURED_RECEIPT_ASSET_TAGS: Partial<Record<string, ReceiptFocusTag[]>> = {
@@ -248,41 +242,41 @@ function highlightForMetric(diffLedgerItems: LedgerItem[], metric: ReceiptFocusT
   return [{ id: item.id, primary: item.primary, source: item.source, why: item.why }];
 }
 
-function buildMaintenanceGroupedReceipts(previewState: unknown, report: unknown): ReceiptLine[] {
-  const surface = buildMaintenancePressureSurface({ previewState, report });
-  if (!surface || !surface.currentManorRow) return [];
+function formatWalkdownAmount(metric: ReceiptFocusTag, direction: string, amount: number): string {
+  if (direction === "start" || direction === "ending" || direction === "net") {
+    if (metric === "unrest") return `${amount}`;
+    return metric === "coin" ? `${amount} coin` : `${amount} bushels`;
+  }
+  const signed = direction === "outflow" ? `-${amount}` : `+${amount}`;
+  if (metric === "unrest") return signed;
+  return metric === "coin" ? `${signed} coin` : `${signed} bushels`;
+}
 
-  const noteLines = surface.noteLines.map((line, index) => ({
-    counterpartyTags: [],
-    id: `maintenance_note_${String(index).padStart(2, "0")}`,
-    kind: "summary" as const,
-    line,
-    phase: "consumption" as const,
-    phaseLabel: "Consumption",
-    tags: ["maintenance"] as ReceiptFocusTag[]
+function walkdownRowsForMetric(turnExplanation: TurnExplanationV1 | null | undefined, metric: ReceiptFocusTag) {
+  const walkdown =
+    metric === "food"
+      ? turnExplanation?.food_walkdown
+      : metric === "coin"
+        ? turnExplanation?.coin_walkdown
+        : metric === "unrest"
+          ? turnExplanation?.unrest_walkdown
+          : null;
+  if (!walkdown || !Array.isArray(walkdown.rows)) return [];
+  return walkdown.rows.map((row) => ({
+    id: row.id,
+    label: row.label,
+    amountLabel: formatWalkdownAmount(metric, row.direction, row.amount),
+    summary: row.summary
   }));
-
-  const rowLines = surface.currentManorRow.rows.map((row, index) => ({
-    counterpartyTags: [],
-    id: `maintenance_row_${String(index).padStart(2, "0")}`,
-    kind: "summary" as const,
-    line: `${row.label} — ${row.kindLabel}; ${row.coinCost} coin; ${row.laborRequired} labor; ${row.stateLabel}.`,
-    phase: "events" as const,
-    phaseLabel: "Maintenance view",
-    tags: (row.coinCost > 0 ? ["coin", "maintenance"] : ["maintenance"]) as ReceiptFocusTag[]
-  }));
-
-  return [...noteLines, ...rowLines];
 }
 
 export function buildReceiptViewerData(args: {
   diffLedgerItems: LedgerItem[];
   obligationsContract?: ObligationsCounterpartyContract | null;
   phaseResults: PhaseResultV0[] | null | undefined;
-  previewState?: unknown;
-  report?: unknown;
+  turnExplanation?: TurnExplanationV1 | null;
 }): ReceiptViewerData {
-  const { diffLedgerItems, obligationsContract = null, phaseResults, previewState, report } = args;
+  const { diffLedgerItems, obligationsContract = null, phaseResults, turnExplanation = null } = args;
   const rawPhases: RawReceiptPhase[] = [];
 
   for (const phaseResult of Array.isArray(phaseResults) ? phaseResults : []) {
@@ -305,9 +299,6 @@ export function buildReceiptViewerData(args: {
     });
   }
 
-  const maintenanceHighlights = highlightForMetric(diffLedgerItems, "maintenance");
-  const maintenanceReceipts = buildMaintenanceGroupedReceipts(previewState, report);
-
   const groupedSections: GroupedReceiptSection[] = [
     {
       id: "overview",
@@ -318,36 +309,31 @@ export function buildReceiptViewerData(args: {
         source: item.source,
         why: item.why
       })),
+      walkdownRows: [],
       receipts: []
     },
     {
       id: "food",
       ...GROUPED_SECTION_META.food,
       highlights: highlightForMetric(diffLedgerItems, "food"),
+      walkdownRows: walkdownRowsForMetric(turnExplanation, "food"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("food")))
     },
     {
       id: "coin",
       ...GROUPED_SECTION_META.coin,
       highlights: highlightForMetric(diffLedgerItems, "coin"),
+      walkdownRows: walkdownRowsForMetric(turnExplanation, "coin"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("coin")))
     },
     {
       id: "unrest",
       ...GROUPED_SECTION_META.unrest,
       highlights: highlightForMetric(diffLedgerItems, "unrest"),
+      walkdownRows: walkdownRowsForMetric(turnExplanation, "unrest"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("unrest")))
     }
   ];
-
-  if (maintenanceHighlights.length > 0 || maintenanceReceipts.length > 0) {
-    groupedSections.splice(3, 0, {
-      id: "maintenance",
-      ...GROUPED_SECTION_META.maintenance,
-      highlights: maintenanceHighlights,
-      receipts: maintenanceReceipts
-    });
-  }
 
   const counterpartySections: CounterpartyReceiptSection[] = obligationsContract
     ? obligationsContract.counterpartySections.map((section) => ({

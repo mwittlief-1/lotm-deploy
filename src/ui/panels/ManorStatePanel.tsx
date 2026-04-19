@@ -1,7 +1,8 @@
 import React from "react";
 import { renderDispossessionThresholdTip } from "../../content/experienceContent";
-import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS } from "../playScreenTheme";
-import type { MaintenancePressureSurface } from "../maintenancePressureView";
+import type { TurnExplanationV1, TurnExplanationWalkdownV1 } from "../../sim/types";
+import { PLAY_SCREEN_ACTION_BUTTON_STYLE, PLAY_SCREEN_PANEL_STYLE, PLAY_SCREEN_SECTION_SIGILS, PLAY_SCREEN_SUBCARD_STYLE } from "../playScreenTheme";
+import type { EconomyPricingSurface } from "../playViewModel";
 import { Tip } from "../viewHelpers";
 import { SectionHeading } from "./SectionHeading";
 
@@ -21,14 +22,31 @@ type ManorStatePanelProps = {
   fmtSigned: (value: number) => string;
   improvements: Record<string, { name: string }>;
   manor: any;
-  maintenancePressure?: MaintenancePressureSurface | null;
   onAbandonProject: () => void;
   popChangeSummary: string | null;
+  pricingSurface?: EconomyPricingSurface | null;
   report: any;
   showUnrestBreakdown: boolean;
+  turnExplanation?: TurnExplanationV1 | null;
   turnYears: number;
   unrestBreakdown: { increased: Array<{ label: string; amount: number }>; decreased: Array<{ label: string; amount: number }> } | null;
 };
+
+function walkdownForMetric(explanation: TurnExplanationV1 | null | undefined, metric: "food" | "coin" | "unrest"): TurnExplanationWalkdownV1 | null {
+  if (!explanation) return null;
+  if (metric === "food") return explanation.food_walkdown;
+  if (metric === "coin") return explanation.coin_walkdown;
+  return explanation.unrest_walkdown;
+}
+
+function biggestWalkdownRow(walkdown: TurnExplanationWalkdownV1 | null): TurnExplanationWalkdownV1["rows"][number] | null {
+  if (!walkdown) return null;
+  return (
+    [...walkdown.rows]
+      .filter((row) => !["start", "net", "ending"].includes(row.direction) && row.amount !== 0)
+      .sort((left, right) => Math.abs(right.amount) - Math.abs(left.amount) || left.label.localeCompare(right.label))[0] ?? null
+  );
+}
 
 export function ManorStatePanel({
   anchorUnrest,
@@ -46,15 +64,24 @@ export function ManorStatePanel({
   fmtSigned,
   improvements,
   manor,
-  maintenancePressure = null,
   onAbandonProject,
   popChangeSummary,
+  pricingSurface = null,
   report,
   showUnrestBreakdown,
+  turnExplanation = null,
   turnYears,
   unrestBreakdown
 }: ManorStatePanelProps) {
-  const currentMaintenance = maintenancePressure?.currentManorRow ?? null;
+  const foodWalkdown = walkdownForMetric(turnExplanation, "food");
+  const coinWalkdown = walkdownForMetric(turnExplanation, "coin");
+  const unrestWalkdown = walkdownForMetric(turnExplanation, "unrest");
+  const biggestFoodRow = biggestWalkdownRow(foodWalkdown);
+  const biggestCoinRow = biggestWalkdownRow(coinWalkdown);
+  const biggestUnrestRow = biggestWalkdownRow(unrestWalkdown);
+  const maintenanceLaborDrag = Number(report?.maintenance_labor_pressure?.applied_drag ?? 0);
+  const maintenanceLaborApplied = Number(report?.maintenance_labor_pressure?.applied ?? 0);
+  const placeholderCatalogCount = pricingSurface?.catalogLines.filter((line) => line.includes("(placeholder)")).length ?? 0;
 
   return (
     <div style={PLAY_SCREEN_PANEL_STYLE}>
@@ -128,62 +155,59 @@ export function ManorStatePanel({
         </details>
       ) : null}
 
-      {currentMaintenance ? (
-        <>
-          <h4 style={{ marginTop: 12 }}>Maintenance pressure</h4>
-          <div style={{ fontSize: 12, opacity: 0.85 }}>{maintenancePressure?.helperText}</div>
-          <ul style={{ marginTop: 8 }}>
-            <li>
-              Current manor upkeep: {currentMaintenance.coinCost} coin and {currentMaintenance.laborRequired} labor across{" "}
-              {currentMaintenance.entryCount} rows.
-            </li>
-            <li>
-              Buildings: {currentMaintenance.buildingCount}; rights: {currentMaintenance.rightCount}.
-            </li>
-          </ul>
-          {maintenancePressure?.noteLines.length ? (
-            <ul style={{ marginTop: 6 }}>
-              {maintenancePressure.noteLines.map((line, index) => (
-                <li key={`maintenance_note_${index}`}>{line}</li>
-              ))}
-            </ul>
-          ) : null}
-          <div style={{ overflowX: "auto", marginTop: 8 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-              <thead>
-                <tr>
-                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
-                    Row
-                  </th>
-                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
-                    Kind
-                  </th>
-                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
-                    State
-                  </th>
-                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
-                    Coin
-                  </th>
-                  <th align="left" style={{ borderBottom: "1px solid #ddd7cb", paddingBottom: 6 }}>
-                    Labor
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentMaintenance.rows.map((row) => (
-                  <tr key={row.entryId}>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.label}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.kindLabel}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.stateLabel}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.coinCost}</td>
-                    <td style={{ borderBottom: "1px solid #eee", padding: "8px 0" }}>{row.laborRequired}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", marginTop: 12 }}>
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Food stores now</div>
+          <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>
+            {manor.bushels_stored} bushels stored
           </div>
-        </>
-      ) : null}
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {biggestFoodRow ? biggestFoodRow.summary : "No direct food walkdown line was recorded this turn."}
+          </div>
+        </div>
+
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Coin on hand</div>
+          <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>
+            {manor.coin} coin
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {biggestCoinRow ? biggestCoinRow.summary : "No direct coin walkdown line was recorded this turn."}
+          </div>
+        </div>
+
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Unrest pressure now</div>
+          <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>
+            {manor.unrest} unrest
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {biggestUnrestRow ? biggestUnrestRow.summary : "No explicit unrest contributor lines were recorded this turn."}
+          </div>
+        </div>
+
+        <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Labor & upkeep</div>
+          <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>
+            {maintenanceLaborDrag > 0 ? `${maintenanceLaborDrag} labor absorbed` : "No upkeep drag"}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
+            {maintenanceLaborDrag > 0
+              ? `${maintenanceLaborApplied} upkeep labor came off the top before the remaining labor pool could be assigned to farming or building.`
+              : "No maintenance labor drag was recorded in the resolved turn."}
+          </div>
+          {pricingSurface ? (
+            <div style={{ marginTop: 8, fontSize: 12, opacity: 0.78 }}>
+              Market reference: {pricingSurface.ratioLabel}.
+              {placeholderCatalogCount > 0 ? ` ${placeholderCatalogCount} catalog line${placeholderCatalogCount === 1 ? "" : "s"} still read as placeholder.` : " All shown catalog lines are active references."}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div style={{ fontSize: 12, opacity: 0.78, marginTop: 12 }}>
+        Manor State stays on the current manor condition and the strongest direct pressure behind it. Explain Changes keeps the full ordered walkdowns.
+      </div>
 
       <h4>Construction</h4>
       {report.construction.completed_improvement_id ? (

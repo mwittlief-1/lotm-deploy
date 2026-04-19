@@ -64,6 +64,15 @@ export type RelationshipSeedProfile = {
   target: RelationshipScoreVector;
 };
 
+export interface RuntimeRelationshipChangeRecordV1 {
+  sequence: number;
+  turn_index: number;
+  from_id: string;
+  to_id: string;
+  reason: string;
+  delta: RelationshipScoreVector;
+}
+
 type RelationshipSeedProfileSpec = {
   family: RelationshipSeedFamily;
   direction: RelationshipSeedDirection;
@@ -140,12 +149,29 @@ const RELATIONSHIP_SEED_PROFILE_SPECS: Record<RelationshipSeedProfileKey, Relati
   },
 };
 
+const runtimeRelationshipChangeLogByState = new WeakMap<RunState, RuntimeRelationshipChangeRecordV1[]>();
+
 function cloneRelationshipVector(vector: RelationshipScoreVector): RelationshipScoreVector {
   return {
     allegiance: Math.trunc(vector.allegiance),
     respect: Math.trunc(vector.respect),
     threat: Math.trunc(vector.threat),
   };
+}
+
+function runtimeRelationshipChangeLog(state: RunState): RuntimeRelationshipChangeRecordV1[] {
+  const existing = runtimeRelationshipChangeLogByState.get(state);
+  if (existing) return existing;
+  const created: RuntimeRelationshipChangeRecordV1[] = [];
+  runtimeRelationshipChangeLogByState.set(state, created);
+  return created;
+}
+
+export function readRuntimeRelationshipChangeLog(state: RunState): RuntimeRelationshipChangeRecordV1[] {
+  return runtimeRelationshipChangeLog(state).map((entry) => ({
+    ...entry,
+    delta: cloneRelationshipVector(entry.delta)
+  }));
 }
 
 export function readRelationshipVector(
@@ -385,12 +411,32 @@ export function applyRelationshipDelta(
   fromId: string,
   toId: string,
   delta: RelationshipDelta,
-  _reason?: string
+  reason?: string
 ): RelationshipEdge {
   const edge = ensureRelationshipEdge(state, fromId, toId);
+  const before = cloneRelationshipVector(edge);
   if (delta.allegiance !== undefined) edge.allegiance = clampInt(edge.allegiance + delta.allegiance, 0, 100);
   if (delta.respect !== undefined) edge.respect = clampInt(edge.respect + delta.respect, 0, 100);
   if (delta.threat !== undefined) edge.threat = clampInt(edge.threat + delta.threat, 0, 100);
+
+  const appliedDelta = {
+    allegiance: edge.allegiance - before.allegiance,
+    respect: edge.respect - before.respect,
+    threat: edge.threat - before.threat
+  };
+
+  if (appliedDelta.allegiance !== 0 || appliedDelta.respect !== 0 || appliedDelta.threat !== 0) {
+    const log = runtimeRelationshipChangeLog(state);
+    log.push({
+      sequence: log.length,
+      turn_index: Math.trunc(state.turn_index),
+      from_id: fromId,
+      to_id: toId,
+      reason: typeof reason === "string" && reason.trim().length > 0 ? reason.trim() : "relationship_delta",
+      delta: appliedDelta
+    });
+  }
+
   return edge;
 }
 

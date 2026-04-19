@@ -6,7 +6,6 @@ import {
 } from "../sim/domains/court/agendaRegistry";
 import { buildEconomyPortfolioAnalysisFromState } from "../sim/domains/economy/portfolioAnalysis";
 import { buildEconomyObligationsView } from "../sim/domains/experience/obligationsView";
-import { buildMaintenancePressureSurface } from "./maintenancePressureView";
 import { formatPersonName } from "./viewHelpers";
 
 export const PLAY_ANCHORS = {
@@ -73,6 +72,16 @@ function pickTopDriver(report: any, prefix: string): string | null {
   return null;
 }
 
+function pickHeadlineCause(report: any, metric: "food" | "coin" | "unrest") {
+  const causes: any[] =
+    Array.isArray(report?.turn_explanation_v1?.headline_causes)
+      ? report.turn_explanation_v1.headline_causes
+      : Array.isArray(report?.headline_causes)
+        ? report.headline_causes
+        : [];
+  return causes.find((cause) => cause && typeof cause === "object" && cause.metric === metric) ?? null;
+}
+
 function whyForMetric(args: {
   copy: any;
   metric: "food" | "coin" | "population" | "unrest";
@@ -84,6 +93,10 @@ function whyForMetric(args: {
   const { copy, metric, popChangeSummary, report, shouldSurfaceWeatherOnFood, weatherHarmedHarvestWhy } = args;
 
   if (metric === "food") {
+    const headlineCause = pickHeadlineCause(report, "food");
+    if (headlineCause && typeof headlineCause.detail === "string" && headlineCause.detail.length > 0) {
+      return { why: headlineCause.detail, source: headlineCause.source === "event" ? "event" : "system_pressure" };
+    }
     const base =
       pickEventWhyForDeltaKey(report, "bushels") ??
       (pickTopDriver(report, "Food:") ? { why: pickTopDriver(report, "Food:") as string, source: "system_pressure" as const } : null) ??
@@ -99,6 +112,10 @@ function whyForMetric(args: {
   }
 
   if (metric === "coin") {
+    const headlineCause = pickHeadlineCause(report, "coin");
+    if (headlineCause && typeof headlineCause.detail === "string" && headlineCause.detail.length > 0) {
+      return { why: headlineCause.detail, source: headlineCause.source === "event" ? "event" : "system_pressure" };
+    }
     return (
       pickEventWhyForDeltaKey(report, "coin") ??
       (pickTopDriver(report, "Coin:") ? { why: pickTopDriver(report, "Coin:") as string, source: "system_pressure" as const } : null) ??
@@ -107,6 +124,10 @@ function whyForMetric(args: {
   }
 
   if (metric === "unrest") {
+    const headlineCause = pickHeadlineCause(report, "unrest");
+    if (headlineCause && typeof headlineCause.detail === "string" && headlineCause.detail.length > 0) {
+      return { why: headlineCause.detail, source: headlineCause.source === "event" ? "event" : "system_pressure" };
+    }
     return (
       pickEventWhyForDeltaKey(report, "unrest") ??
       (pickTopDriver(report, "Unrest:") ? { why: pickTopDriver(report, "Unrest:") as string, source: "system_pressure" as const } : null) ??
@@ -123,43 +144,6 @@ function whyForMetric(args: {
   }
 
   return { why: copy.diffLedgerMultipleCauses, source: "system_pressure" };
-}
-
-function appendMaintenanceLedgerItem(
-  items: LedgerItem[],
-  args: {
-    copy: any;
-    previewState: RunState;
-    report: any;
-  }
-): LedgerItem[] {
-  if (items.some((item) => item.id === "maintenance")) return items;
-
-  const maintenanceSurface = buildMaintenancePressureSurface({
-    previewState: args.previewState,
-    report: args.report
-  });
-  const currentManorRow = maintenanceSurface?.currentManorRow ?? null;
-  if (!maintenanceSurface || !currentManorRow || currentManorRow.entryCount <= 0) return items;
-
-  return [
-    ...items,
-    {
-      id: "maintenance",
-      sort_mag: currentManorRow.laborRequired + currentManorRow.coinCost,
-      tie_key: "04_maintenance",
-      primary:
-        maintenanceSurface.explainPrimary ??
-        (typeof args.copy?.diffLedgerLine_maintenance === "function"
-          ? args.copy.diffLedgerLine_maintenance(currentManorRow.laborRequired, currentManorRow.coinCost, currentManorRow.entryCount)
-          : `Maintenance: ${currentManorRow.laborRequired} labor, ${currentManorRow.coinCost} coin across ${currentManorRow.entryCount} upkeep rows.`),
-      why:
-        maintenanceSurface.explainWhy ??
-        args.copy?.diffLedgerWhy_maintenance ??
-        "Maintenance pressure stays visible here so output loss never feels like hidden magic.",
-      source: "system_pressure"
-    }
-  ];
 }
 
 export function buildDiffLedgerItems(args: {
@@ -240,11 +224,7 @@ export function buildDiffLedgerItems(args: {
         source: normalizeSource(item.source ?? item.source_tag ?? item.sourceTag ?? item.kind)
       });
     }
-    if (parsed.length) {
-      const withMaintenance = appendMaintenanceLedgerItem(parsed, { copy, previewState, report });
-      withMaintenance.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
-      return withMaintenance;
-    }
+    if (parsed.length) return parsed;
   }
 
   const items: LedgerItem[] = [];
@@ -312,6 +292,49 @@ export function buildDiffLedgerItems(args: {
   const playerHeadId: string | null =
     typeof previewState?.house?.head?.id === "string" ? previewState.house.head.id : typeof state.house?.head?.id === "string" ? state.house.head.id : null;
   const playerHouseId: string | null = typeof (previewState as any)?.player_house_id === "string" ? String((previewState as any).player_house_id) : null;
+  const relationshipChangeEntries: any[] = Array.isArray(report?.relationship_change_log_v1?.entries)
+    ? report.relationship_change_log_v1.entries
+    : [];
+
+  if (relationshipChangeEntries.length > 0) {
+    const sortedRelationshipEntries = [...relationshipChangeEntries]
+      .map((entry, index) => ({
+        id: typeof entry?.id === "string" ? entry.id : `relationship_change_${index}`,
+        fromLabel: typeof entry?.from_label === "string" ? entry.from_label : typeof entry?.from_id === "string" ? entry.from_id : "Unknown",
+        delta: {
+          allegiance: typeof entry?.delta?.allegiance === "number" ? Math.trunc(entry.delta.allegiance) : 0,
+          respect: typeof entry?.delta?.respect === "number" ? Math.trunc(entry.delta.respect) : 0,
+          threat: typeof entry?.delta?.threat === "number" ? Math.trunc(entry.delta.threat) : 0
+        },
+        why: typeof entry?.cause_summary === "string" && entry.cause_summary.length > 0 ? entry.cause_summary : copy.diffLedgerWhy_relations_drift
+      }))
+      .filter((entry) => Math.abs(entry.delta.allegiance) + Math.abs(entry.delta.respect) + Math.abs(entry.delta.threat) > 0)
+      .sort((a, b) =>
+        Math.abs(b.delta.allegiance) + Math.abs(b.delta.respect) + Math.abs(b.delta.threat) -
+          (Math.abs(a.delta.allegiance) + Math.abs(a.delta.respect) + Math.abs(a.delta.threat)) ||
+        a.id.localeCompare(b.id)
+      );
+
+    for (const entry of sortedRelationshipEntries.slice(0, 3)) {
+      const score = Math.abs(entry.delta.allegiance) + Math.abs(entry.delta.respect) + Math.abs(entry.delta.threat);
+      items.push({
+        id: entry.id,
+        sort_mag: score,
+        tie_key: `10_rel:${entry.id}`,
+        primary: copy.diffLedgerLine_relations(
+          entry.fromLabel,
+          fmtSigned(entry.delta.allegiance),
+          fmtSigned(entry.delta.respect),
+          fmtSigned(entry.delta.threat)
+        ),
+        why: entry.why,
+        source: "system_pressure"
+      });
+    }
+
+    items.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+    return items;
+  }
 
   const beforeArr: any[] = Array.isArray((state as any).relationships) ? (state as any).relationships : [];
   const afterArr: any[] = Array.isArray((previewState as any).relationships) ? (previewState as any).relationships : [];
@@ -427,9 +450,8 @@ export function buildDiffLedgerItems(args: {
     });
   }
 
-  const withMaintenance = appendMaintenanceLedgerItem(items, { copy, previewState, report });
-  withMaintenance.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
-  return withMaintenance;
+  items.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+  return items;
 }
 
 function noteTagValue(item: CourtAgendaItemV0, prefix: string): string | null {
