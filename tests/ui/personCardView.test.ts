@@ -43,6 +43,11 @@ describe("personCardView", () => {
     expect(surface?.relationshipRows).toHaveLength(12);
     expect(surface?.relationshipCount ?? 0).toBeGreaterThan(surface?.relationshipRows.length ?? 0);
     expect(surface?.relationshipRows[0]?.totalScore ?? 0).toBeGreaterThanOrEqual(surface?.relationshipRows[1]?.totalScore ?? 0);
+    expect(surface?.helperText).toContain("what the player actually knows");
+    expect(surface?.overviewCards.find((card) => card.id === "lands")).toMatchObject({
+      value: "Known footprint",
+    });
+    expect(surface?.overviewCards.find((card) => card.id === "lands")?.detail).toContain("Personal holdings not exposed");
   });
 
   it("creates stable origin routes for the shared tap-any-name modal flow", () => {

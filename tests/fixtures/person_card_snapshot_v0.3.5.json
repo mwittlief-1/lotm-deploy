@@ -20,7 +20,7 @@
         "id": "residence",
         "label": "Residence",
         "value": "Hx 26597",
-        "detail": "Contexts household · Source Player Anchor Manor · Travel 0 · Hops 0"
+        "detail": "Contexts household · Source Player Anchor Manor · Travel 0 · Hops 0 · Residence routing keeps travel and court reach tied to one bounded seam."
       },
       {
         "id": "roles",
@@ -37,8 +37,8 @@
       {
         "id": "lands",
         "label": "Lands held",
-        "value": "1 holding",
-        "detail": "Single Holding · Anchor Hx 26597 · Known Hx 26597"
+        "value": "Known footprint",
+        "detail": "1 house holding · Single Holding · Player anchor footprint · Personal holdings not exposed · Anchor Hx 26597 · Known Hx 26597"
       }
     ]
   },

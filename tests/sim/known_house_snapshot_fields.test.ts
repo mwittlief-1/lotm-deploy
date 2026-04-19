@@ -47,6 +47,12 @@ describe("known-house snapshot fields", () => {
       ledger_trend: expect.any(String),
     });
     expect((one.house_dossiers[0] as any).relationship_band).toBeUndefined();
+
+    const externalDossier = one.house_dossiers.find((dossier) => dossier.holdings_footprint.source_kind === "house_seed");
+
+    expect(one.house_dossiers.every((dossier) => Array.isArray(dossier.holdings_footprint.known_manor_ids))).toBe(true);
+    expect(externalDossier?.holdings_footprint.known_manor_ids).toEqual([]);
+    expect(externalDossier?.holdings_footprint.source_kind).toBe("house_seed");
   });
 
   it("keeps active prospect houses backed by matching dossier rows", () => {

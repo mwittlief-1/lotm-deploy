@@ -5,6 +5,8 @@ export type IntelEntry = {
   subject_id: string;
   subject_label: string;
   detail: string;
+  source_label: string;
+  why_it_matters: string;
   confidence: EvidenceConfidenceV0;
   category: string;
   phase: string;
@@ -42,6 +44,70 @@ function personLabel(state: RunState, subjectId: string): string {
   return name || subjectId;
 }
 
+function formatToken(value: string | null | undefined): string {
+  const token = typeof value === "string" ? value.trim() : "";
+  if (!token) return "Unknown";
+  return token
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatManorLabel(manorId: string | null): string {
+  if (!manorId) return "Unmapped";
+  const match = manorId.match(/hx_(\d+)/);
+  return match ? `Hx ${match[1]}` : manorId;
+}
+
+function readPersonCardContext(state: RunState, subjectId: string): { currentHouseLabel: string | null; residenceLabel: string | null } {
+  const registry: any = (state as any)?.person_card_registry;
+  const entry = registry?.entries_by_person_id?.[subjectId];
+  if (!entry || typeof entry !== "object") return { currentHouseLabel: null, residenceLabel: null };
+
+  const currentHouseName =
+    typeof entry.current_house_name === "string" && entry.current_house_name.trim().length > 0
+      ? entry.current_house_name.trim()
+      : typeof entry.current_house_id === "string" && entry.current_house_id.trim().length > 0
+        ? entry.current_house_id.trim()
+        : null;
+  const currentHouseLabel = currentHouseName
+    ? entry.current_house_id === (state as any)?.player_house_id
+      ? "Player house"
+      : `House ${currentHouseName}`
+    : null;
+  const residenceLabel =
+    typeof entry?.residence_binding?.residence_manor_id === "string"
+      ? formatManorLabel(entry.residence_binding.residence_manor_id)
+      : null;
+
+  return { currentHouseLabel, residenceLabel };
+}
+
+function sourceLabelForIntel(entry: Pick<IntelEntry, "source" | "phase" | "turn_index">): string {
+  if (entry.source === "current") return `${formatToken(entry.phase)} phase · current turn`;
+  return `${formatToken(entry.phase)} memory · turn ${entry.turn_index}`;
+}
+
+function whyItMatters(state: RunState, subjectId: string, category: string, source: IntelEntry["source"]): string {
+  const context = readPersonCardContext(state, subjectId);
+  const contextParts = [
+    context.currentHouseLabel ? context.currentHouseLabel : null,
+    context.residenceLabel ? `Residence ${context.residenceLabel}` : null,
+  ].filter((value): value is string => typeof value === "string" && value.length > 0);
+
+  const base =
+    category === "marriage"
+      ? "Marriage intel matters because it can change alliance reach, court membership, and who becomes a live tie between houses."
+      : category === "prospects"
+        ? "Prospect intel matters because it explains why this subject is surfacing in the current decision window."
+        : source === "current"
+          ? "Current-turn intel matters because it records what just entered the bounded sim surface."
+          : "Stored intel matters because it keeps earlier evidence available for later comparison.";
+
+  return contextParts.length > 0 ? `${base} Context: ${contextParts.join(" · ")}.` : base;
+}
+
 function sortIntelEntries(a: IntelEntry, b: IntelEntry): number {
   if (a.turn_index !== b.turn_index) return b.turn_index - a.turn_index;
   const conf = confidenceRank(a.confidence) - confidenceRank(b.confidence);
@@ -68,6 +134,12 @@ function currentTurnIntelEntries(state: RunState, ctx: TurnContext): IntelEntry[
           subject_id: subjectId,
           subject_label: personLabel(ctx.preview_state, subjectId),
           detail: event.detail,
+          source_label: sourceLabelForIntel({
+            source: "current",
+            phase: phaseResult.phase,
+            turn_index: ctx.report.turn_index,
+          }),
+          why_it_matters: whyItMatters(ctx.preview_state, subjectId, event.category, "current"),
           confidence: event.confidence,
           category: event.category,
           phase: phaseResult.phase,
@@ -97,6 +169,12 @@ function memoryIntelEntries(state: RunState): IntelEntry[] {
         subject_id: subjectId,
         subject_label: personLabel(state, subjectId),
         detail: observation.detail,
+        source_label: sourceLabelForIntel({
+          source: "memory",
+          phase: observation.phase,
+          turn_index: observation.turn_index,
+        }),
+        why_it_matters: whyItMatters(state, subjectId, observation.category, "memory"),
         confidence: observation.confidence,
         category: observation.category,
         phase: observation.phase,

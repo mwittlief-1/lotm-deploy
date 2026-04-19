@@ -4,6 +4,8 @@ type IntelEntry = {
   id: string;
   subject_label: string;
   detail: string;
+  source_label: string;
+  why_it_matters: string;
   confidence: "known" | "likely" | "possible";
   category: string;
   phase: string;
@@ -28,11 +30,12 @@ function renderEntries(copy: any, entries: IntelEntry[]) {
     <div key={entry.id} style={{ padding: 8, border: "1px solid #eee", background: "#fff", marginBottom: 6 }}>
       <div style={{ fontWeight: 700 }}>{entry.subject_label}</div>
       <div style={{ marginTop: 4 }}>{entry.detail}</div>
+      <div style={{ fontSize: 12, opacity: 0.8, marginTop: 4 }}>{entry.why_it_matters}</div>
       <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>
         <b>{copy.prospectConfidenceLabel}</b> {confidenceLabel(copy, entry.confidence)} · <b>{copy.intelCategoryLabel}</b> {entry.category} · <b>{copy.intelTurnLabel}</b> {entry.turn_index}
       </div>
       <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
-        <b>{copy.intelPhaseLabel}</b> {entry.phase}
+        <b>{copy.intelPhaseLabel}</b> {entry.phase} · {entry.source_label}
       </div>
     </div>
   ));

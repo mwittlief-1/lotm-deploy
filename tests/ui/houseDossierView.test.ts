@@ -46,5 +46,8 @@ describe("houseDossierView", () => {
       "ledger_trend"
     ]);
     expect(surface?.relationshipPostureLabel).toBe(surface?.relationshipSummary?.standingBandLabel ?? "Unknown");
+    expect(surface?.helperText).toContain("Standing posture comes from the current relationship summary");
+    expect(surface?.knownnessHelperText.length ?? 0).toBeGreaterThan(0);
+    expect(surface?.holdingsFootprintHelperText.length ?? 0).toBeGreaterThan(0);
   });
 });

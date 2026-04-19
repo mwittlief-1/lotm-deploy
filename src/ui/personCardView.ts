@@ -116,6 +116,17 @@ function formatManorLabel(manorId: string | null): string {
   return match ? `Hx ${match[1]}` : manorId;
 }
 
+function houseHoldingsStatusLabel(status: PersonCardViewRecord["lands_held_projection"]["house_holdings_status"]): string {
+  if (status === "player_anchor_known") return "Player anchor footprint";
+  if (status === "coarse_house_only") return "Coarse house footprint";
+  return "No house footprint";
+}
+
+function personalHoldingsStatusLabel(status: PersonCardViewRecord["lands_held_projection"]["personal_holdings_status"]): string {
+  if (status === "not_exposed_on_this_seam") return "Personal holdings not exposed";
+  return "No personal holdings context";
+}
+
 function houseDisplayName(previewState: RunState | null | undefined, houseId: string | null, fallbackName?: string | null): string {
   if (!houseId) return "No house recorded";
   const previewRecord = asRecord(previewState);
@@ -372,6 +383,8 @@ function debugRows(
       value: [
         `count ${record.lands_held_projection.holdings_count}`,
         formatToken(record.lands_held_projection.holdings_band),
+        houseHoldingsStatusLabel(record.lands_held_projection.house_holdings_status),
+        personalHoldingsStatusLabel(record.lands_held_projection.personal_holdings_status),
         `anchor ${record.lands_held_projection.anchor_manor_id ?? "None"}`,
         `known ${formatList(record.lands_held_projection.known_manor_ids)}`
       ].join(" · ")
@@ -419,7 +432,8 @@ export function buildPersonCardSurface(
     residence.selector_contexts.length > 0 ? `Contexts ${residence.selector_contexts.join(", ")}` : null,
     residence.source_kind ? `Source ${formatToken(residence.source_kind)}` : null,
     residence.travel_cost_distance !== null ? `Travel ${residence.travel_cost_distance}` : null,
-    residence.route_hop_distance !== null ? `Hops ${residence.route_hop_distance}` : null
+    residence.route_hop_distance !== null ? `Hops ${residence.route_hop_distance}` : null,
+    "Residence routing keeps travel and court reach tied to one bounded seam."
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
 
   const roleValue = record.court_member ? "Court-linked" : "Outside court";
@@ -447,15 +461,29 @@ export function buildPersonCardSurface(
     record.succession_projection.blocked_by_current_heir ? "Blocked by current heir" : null
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
 
-  const landsValue = `${record.lands_held_projection.holdings_count} holding${record.lands_held_projection.holdings_count === 1 ? "" : "s"}`;
+  const landsValue =
+    record.lands_held_projection.house_holdings_status === "player_anchor_known"
+      ? "Known footprint"
+      : record.lands_held_projection.house_holdings_status === "coarse_house_only"
+        ? "House-level footprint"
+        : "No house recorded";
   const landsDetail = [
+    record.lands_held_projection.holdings_count > 0
+      ? `${record.lands_held_projection.holdings_count} house holding${record.lands_held_projection.holdings_count === 1 ? "" : "s"}`
+      : null,
     formatToken(record.lands_held_projection.holdings_band),
+    houseHoldingsStatusLabel(record.lands_held_projection.house_holdings_status),
+    personalHoldingsStatusLabel(record.lands_held_projection.personal_holdings_status),
     record.lands_held_projection.anchor_manor_id
       ? `Anchor ${formatManorLabel(record.lands_held_projection.anchor_manor_id)}`
-      : "No anchor manor",
+      : record.lands_held_projection.house_holdings_status === "coarse_house_only"
+        ? "Anchor manor absent by contract"
+        : "No anchor manor",
     record.lands_held_projection.known_manor_ids.length > 0
       ? `Known ${record.lands_held_projection.known_manor_ids.map((manorId) => formatManorLabel(manorId)).join(", ")}`
-      : null
+      : record.lands_held_projection.house_holdings_status === "coarse_house_only"
+        ? "Known manor ids stay absent on external house cards"
+        : null
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
 
   const { count: relationshipCount, rows: relationshipRowsVisible } = relationshipRows(previewState, targetPersonId);
@@ -475,7 +503,7 @@ export function buildPersonCardSurface(
       familySection(previewState, "children", "Children", record.family_projection.children, "No children recorded.")
     ],
     helperText:
-      "This modal stays on the accepted person-card seam. The family, service, and relationship tabs keep one deterministic read path instead of duplicating people logic across the shell.",
+      "This modal stays on the accepted person-card seam. Residence and holding context show what the player actually knows about this person without implying personal control that the sim does not model yet.",
     officeAssignments: officeAssignments(record),
     overviewCards: [
       {

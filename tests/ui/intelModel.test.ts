@@ -200,6 +200,9 @@ describe("intel model", () => {
         subject_id: "p_candidate",
         subject_label: "Candidate",
         detail: "House River (p_candidate)",
+        source_label: "Marriage phase · current turn",
+        why_it_matters:
+          "Marriage intel matters because it can change alliance reach, court membership, and who becomes a live tie between houses.",
         confidence: "known",
         category: "marriage",
         phase: "marriage",
@@ -211,6 +214,9 @@ describe("intel model", () => {
         subject_id: "p_candidate",
         subject_label: "Candidate",
         detail: "Prospect generated: marriage (pr_2).",
+        source_label: "Prospects phase · current turn",
+        why_it_matters:
+          "Prospect intel matters because it explains why this subject is surfacing in the current decision window.",
         confidence: "likely",
         category: "prospects",
         phase: "prospects",
@@ -222,6 +228,9 @@ describe("intel model", () => {
         subject_id: "p_child",
         subject_label: "Child",
         detail: "Prospect generated: marriage (pr_2).",
+        source_label: "Prospects phase · current turn",
+        why_it_matters:
+          "Prospect intel matters because it explains why this subject is surfacing in the current decision window.",
         confidence: "likely",
         category: "prospects",
         phase: "prospects",
@@ -236,6 +245,9 @@ describe("intel model", () => {
         subject_id: "p_candidate",
         subject_label: "Candidate",
         detail: "House Vale (p_candidate)",
+        source_label: "Marriage memory · turn 1",
+        why_it_matters:
+          "Marriage intel matters because it can change alliance reach, court membership, and who becomes a live tie between houses.",
         confidence: "known",
         category: "marriage",
         phase: "marriage",
@@ -247,6 +259,9 @@ describe("intel model", () => {
         subject_id: "p_child",
         subject_label: "Child",
         detail: "Prospect generated: marriage (pr_1).",
+        source_label: "Prospects memory · turn 1",
+        why_it_matters:
+          "Prospect intel matters because it explains why this subject is surfacing in the current decision window.",
         confidence: "likely",
         category: "prospects",
         phase: "prospects",

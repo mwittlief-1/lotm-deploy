@@ -79,7 +79,14 @@ describe("bounded snapshot contract", () => {
       standing_band: expect.any(String)
     });
     expect(dossierWithRelationship?.relationship_band).toBeUndefined();
+    expect(dossierWithRelationship?.relationship_turn_movement_count).toEqual(expect.any(Number));
+    expect(dossierWithRelationship?.relationship_turn_movement_rows).toEqual(expect.any(Array));
     expect(dossierWithHoldings?.holdings_footprint?.known_manor_ids).toBeUndefined();
+    expect(dossierWithHoldings?.holdings_footprint).toMatchObject({
+      holdings_count: expect.any(Number),
+      holdings_band: expect.any(String),
+      source_kind: expect.any(String),
+    });
     expect(dossierWithHoldings?.kinship_tags).toEqual(expect.any(Array));
     expect((snapshot as any).succession_line_summary).toMatchObject({
       schema_version: "succession_line_summary_v0",

@@ -349,20 +349,31 @@ function landsHeldProjectionForPerson(state: RunState, personId: string): Person
   }
 
   const manorIds = sortStrings(knownManorIds);
+  const houseHoldingsStatus =
+    !currentHouseId
+      ? "absent_no_house"
+      : currentHouseId === playerHouseId
+        ? "player_anchor_known"
+        : "coarse_house_only";
+  const personalHoldingsStatus = currentHouseId ? "not_exposed_on_this_seam" : "absent_no_house";
   const holdingsCount =
-    currentHouseId === playerHouseId
-      ? Math.max(1, manorIds.length || 1)
-      : typeof currentHouse?.holdings_count === "number" && Number.isFinite(currentHouse.holdings_count)
-        ? Math.max(1, Math.trunc(currentHouse.holdings_count))
-        : 1;
+    !currentHouseId
+      ? 0
+      : currentHouseId === playerHouseId
+        ? Math.max(1, manorIds.length || 1)
+        : typeof currentHouse?.holdings_count === "number" && Number.isFinite(currentHouse.holdings_count)
+          ? Math.max(1, Math.trunc(currentHouse.holdings_count))
+          : 1;
 
   return {
     house_id: currentHouseId,
     house_name: readHouseNameForId(state, currentHouseId),
     holdings_count: holdingsCount,
-    holdings_band: holdingsBandForCount(holdingsCount),
+    holdings_band: holdingsBandForCount(Math.max(1, holdingsCount)),
     anchor_manor_id: manorIds[0] ?? null,
     known_manor_ids: manorIds,
+    house_holdings_status: houseHoldingsStatus,
+    personal_holdings_status: personalHoldingsStatus,
   };
 }
 

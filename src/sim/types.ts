@@ -265,6 +265,8 @@ export interface HouseDossierSummary {
   tier: string;
   relevance_tier: KnownHouseRelevanceTier;
   relevance_reasons: KnownHouseRelevanceReason[];
+  knownness: HouseDossierKnownness;
+  knownness_sources: HouseDossierKnownnessSource[];
   kinship_summary: HouseDossierKinshipSummary;
   kinship_tags: KnownHouseRelevanceReason[];
   relationship_summary: HouseDossierRelationshipSummary | null;
@@ -363,6 +365,9 @@ export interface PersonCardServiceTimelineEntry {
   active: boolean;
 }
 
+export type PersonCardHouseHoldingsStatus = "player_anchor_known" | "coarse_house_only" | "absent_no_house";
+export type PersonCardPersonalHoldingsStatus = "not_exposed_on_this_seam" | "absent_no_house";
+
 export interface PersonCardLandsHeldProjection {
   house_id: string | null;
   house_name: string | null;
@@ -370,6 +375,8 @@ export interface PersonCardLandsHeldProjection {
   holdings_band: HouseDossierHoldingsBand;
   anchor_manor_id: string | null;
   known_manor_ids: string[];
+  house_holdings_status: PersonCardHouseHoldingsStatus;
+  personal_holdings_status: PersonCardPersonalHoldingsStatus;
 }
 
 export interface PersonCardView {

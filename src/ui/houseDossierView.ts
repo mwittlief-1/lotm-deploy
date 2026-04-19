@@ -32,6 +32,7 @@ export type HouseDossierSurface = {
   holdingsAnchorManorId: string | null;
   holdingsBandLabel: string;
   holdingsCount: number;
+  holdingsFootprintHelperText: string;
   holdingsKnownManorIds: string[];
   holdingsSourceLabel: string;
   houseId: string;
@@ -43,6 +44,7 @@ export type HouseDossierSurface = {
   kinshipSummaryLabel: string;
   kinshipTags: string[];
   knownnessLabel: string;
+  knownnessHelperText: string;
   knownnessSources: string[];
   ledgerBandLabel: string;
   ledgerTrendLabel: string;
@@ -201,6 +203,27 @@ function readKnownHouse(previewState: RunState | null | undefined, houseId: stri
   ) ?? null;
 }
 
+function holdingsFootprintHelperText(
+  holdingsSourceLabel: string,
+  holdingsKnownManorIds: string[],
+  holdingsAnchorManorId: string | null
+): string {
+  if (holdingsKnownManorIds.length > 0) {
+    return `Known manor ids come from the ${holdingsSourceLabel.toLowerCase()} path. Use them as player-facing anchor context, not as a full map of every title this house controls.`;
+  }
+  if (holdingsAnchorManorId) {
+    return `Only the anchor manor is currently exposed on this dossier. Additional manor ids are absent here, not unknown in-world rumor.`;
+  }
+  return `This dossier only exposes a coarse house footprint. Missing manor ids are absent by contract on this path, not an unresolved mystery row.`;
+}
+
+function knownnessHelperText(knownnessLabel: string, knownnessSources: string[]): string {
+  if (knownnessSources.length === 0) {
+    return `${knownnessLabel} is present without an attached source tag.`;
+  }
+  return `${knownnessLabel} matters because ${knownnessSources.join(", ")} is why this house is surfacing on the player's board right now.`;
+}
+
 function hasPersonCard(previewState: RunState | null | undefined, personId: string | null): boolean {
   if (!personId) return false;
   const registry = (previewState as any)?.person_card_registry;
@@ -258,6 +281,11 @@ export function buildHouseDossierSurface(
       : null;
   const holdingsKnownManorIds = readStringArray(holdings.known_manor_ids);
   const holdingsSourceLabel = formatToken(holdings.source_kind);
+  const holdingsFootprintNote = holdingsFootprintHelperText(
+    holdingsSourceLabel,
+    holdingsKnownManorIds,
+    holdingsAnchorManorId
+  );
   const ledgerBandLabel = formatToken((dossier as any).ledger_band);
   const ledgerTrendLabel = formatToken((dossier as any).ledger_trend);
   const successionLabel = hasMaleHeir
@@ -334,10 +362,11 @@ export function buildHouseDossierSurface(
     debugRows,
     dossier,
     helperText:
-      "This modal stays on the accepted house dossier seam only. The player tab keeps the coarse narrative view, and the debug tab mirrors the deterministic dossier fields in a fixed order.",
+      "This modal stays on the accepted house dossier seam only. Standing posture comes from the current relationship summary, turn movement stays separate below, and missing manor detail is called out when it is absent by contract rather than merely unknown.",
     holdingsAnchorManorId,
     holdingsBandLabel,
     holdingsCount,
+    holdingsFootprintHelperText: holdingsFootprintNote,
     holdingsKnownManorIds,
     holdingsSourceLabel,
     houseId: dossier.house_id,
@@ -349,6 +378,7 @@ export function buildHouseDossierSurface(
     kinshipSummaryLabel,
     kinshipTags,
     knownnessLabel,
+    knownnessHelperText: knownnessHelperText(knownnessLabel, knownnessSources),
     knownnessSources,
     ledgerBandLabel,
     ledgerTrendLabel,

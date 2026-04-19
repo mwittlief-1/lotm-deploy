@@ -59,6 +59,8 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
                 Knownness: {surface.knownnessLabel}
                 <br />
                 Relevance: {surface.relevanceTierLabel}
+                <br />
+                {surface.knownnessHelperText}
               </div>
             </div>
 
@@ -158,7 +160,9 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
               <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
                 {surface.holdingsKnownManorIds.length > 0
                   ? surface.holdingsKnownManorIds.join(", ")
-                  : "This dossier does not expose known manor ids beyond the coarse holdings footprint."}
+                  : "No known manor ids are exposed on this dossier."}
+                <br />
+                {surface.holdingsFootprintHelperText}
               </div>
             </div>
 

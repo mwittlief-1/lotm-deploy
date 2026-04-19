@@ -26,6 +26,8 @@ describe("person card registry", () => {
       lands_held_projection: expect.objectContaining({
         house_id: "h_player",
         holdings_count: expect.any(Number),
+        house_holdings_status: "player_anchor_known",
+        personal_holdings_status: "not_exposed_on_this_seam",
       }),
     });
     expect(one.entries_by_person_id.p_court_steward).toMatchObject({
