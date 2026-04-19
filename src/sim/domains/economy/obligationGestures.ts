@@ -1,6 +1,7 @@
 import type { PhaseNameV0, RunState } from "../../types";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
 import { ensureCourtDecisionBudgetRegistry } from "../court/decisionBudget";
+import { resolveEconomyObligationCollector } from "../people/obligationCollectorResolution";
 import { applyRelationshipDelta, readRelationshipVector, type RelationshipDelta } from "../people/relationshipEngine";
 import { readLedgerReceiptSnapshots, type TrackedStoreAsset } from "./ledger";
 import type { FiscalReceiptSnapshotV1 } from "./receipts";
@@ -82,20 +83,14 @@ const GESTURE_SPECS: Record<EconomyObligationGestureActionV1, EconomyObligationG
   gift_liege: {
     contract_id: "liege_gift",
     counterparty_kind: "liege",
-    counterparty_ref: (state) => ({
-      counterparty_id: state.locals.liege.id,
-      counterparty_label: state.locals.liege.name
-    }),
+    counterparty_ref: (state) => resolveEconomyObligationCollector(state, "liege"),
     relationship_delta: { respect: 1, threat: -1 },
     rule_id: "obligations.gesture.liege_gift"
   },
   offering_church: {
     contract_id: "church_offering",
     counterparty_kind: "church",
-    counterparty_ref: (state) => ({
-      counterparty_id: state.locals.clergy.id,
-      counterparty_label: state.locals.clergy.name
-    }),
+    counterparty_ref: (state) => resolveEconomyObligationCollector(state, "church"),
     relationship_delta: { respect: 1, threat: -1 },
     rule_id: "obligations.gesture.church_offering"
   }

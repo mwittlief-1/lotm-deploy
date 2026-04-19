@@ -141,6 +141,9 @@ type ParsedObligationsViewSummary = {
   acceptedPaymentModes: string[];
   arrearsAmount: number;
   carriedThisTurn: boolean;
+  collectorState: "active" | "successor" | "vacant";
+  collectorSuccessorLabel: string | null;
+  collectorSummary: string | null;
   counterpartyKind: ObligationsCounterpartyId;
   counterpartyLabel: string;
   dueAmount: number;
@@ -459,6 +462,12 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
       acceptedPaymentModes: readStringArray(summary.accepted_payment_modes),
       arrearsAmount: readNumber(summary.arrears_amount) ?? 0,
       carriedThisTurn: readBoolean(summary.carried_this_turn),
+      collectorState:
+        summary.collector_state === "successor" || summary.collector_state === "vacant"
+          ? summary.collector_state
+          : "active",
+      collectorSuccessorLabel: readString(summary.collector_successor_label),
+      collectorSummary: readString(summary.collector_summary),
       counterpartyKind,
       counterpartyLabel,
       dueAmount: readNumber(summary.due_amount) ?? 0,
@@ -512,7 +521,7 @@ export function buildObligationsCounterpartyContract(args: {
       id: counterpartyId,
       title: summary.counterpartyLabel,
       shortTitle: meta.shortTitle,
-      helper: meta.helper,
+      helper: summary.collectorState === "active" ? meta.helper : summary.collectorSummary ?? meta.helper,
       paymentModes: paymentModes(summary),
       settlementStatus: summary.settlementStatus,
       stageRows: stageRows(summary),

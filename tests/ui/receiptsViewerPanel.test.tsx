@@ -88,7 +88,7 @@ const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
   } as any,
   previewState: {
     economy_obligations_view: {
-      schema_version: "economy_obligations_view_v1",
+      schema_version: "economy_obligations_view_v2",
       counterparty_order: ["liege", "church"],
       counterparty_summaries: [
         {

@@ -22,7 +22,7 @@ describe("bounded snapshot contract", () => {
       manor_keys: ["portfolio:player_portfolio:manor:manor_hx_26597"]
     });
     expect(serialized.economy_obligations_view).toMatchObject({
-      schema_version: "economy_obligations_view_v1",
+      schema_version: "economy_obligations_view_v2",
       counterparty_order: ["liege", "church"],
       receipt_group_order: ["payment", "penalty", "seizure"]
     });

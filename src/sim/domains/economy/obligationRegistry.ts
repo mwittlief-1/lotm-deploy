@@ -1,6 +1,11 @@
-import type { Person, PhaseNameV0, RunState } from "../../types";
+import type { PhaseNameV0, RunState } from "../../types";
 import { asNonNegInt } from "../../util";
 import { makeEvidenceEvent, recordRuntimeDomainEvidence } from "../ai/evidence";
+import {
+  resolveEconomyObligationCollector,
+  type EconomyObligationCollectorActorKindV1,
+  type EconomyObligationCollectorStateV1
+} from "../people/obligationCollectorResolution";
 import {
   arrearsBushels,
   arrearsCoin,
@@ -39,6 +44,10 @@ export interface EconomyObligationCounterpartyEntryV1 {
   counterparty_kind: EconomyObligationCounterpartyKindV1;
   counterparty_id: string;
   counterparty_label: string;
+  counterparty_actor_kind: EconomyObligationCollectorActorKindV1;
+  collector_state: EconomyObligationCollectorStateV1;
+  collector_successor_label: string | null;
+  collector_summary: string;
   contract_id: FiscalPaymentContractIdV1;
   due_asset: EconomyObligationDueAssetV1;
   arrears_asset: EconomyObligationArrearsAssetV1;
@@ -117,6 +126,10 @@ interface EconomyObligationRuntimeRegistryV1 {
 interface EconomyObligationCounterpartyRefV1 {
   counterparty_id: string;
   counterparty_label: string;
+  counterparty_actor_kind: EconomyObligationCollectorActorKindV1;
+  collector_state: EconomyObligationCollectorStateV1;
+  collector_successor_label: string | null;
+  collector_summary: string;
 }
 
 interface EconomyObligationCounterpartySpecV1 {
@@ -155,18 +168,6 @@ function normalizeOptionalTurnIndex(value: unknown): number | null {
 
 function canonicalRelatedActorIds(ids: readonly string[]): string[] {
   return [...ids].sort(compareText);
-}
-
-function personRef(person: Person | undefined, fallbackLabel: string): EconomyObligationCounterpartyRefV1 {
-  return {
-    counterparty_id: typeof person?.id === "string" && person.id.length > 0 ? person.id : fallbackLabel.toLowerCase(),
-    counterparty_label:
-      typeof person?.name === "string" && person.name.length > 0
-        ? person.name
-        : typeof person?.id === "string" && person.id.length > 0
-          ? person.id
-          : fallbackLabel
-  };
 }
 
 function recordObligationFlowEvidence(
@@ -232,21 +233,22 @@ const COUNTERPARTY_SPECS: Record<EconomyObligationCounterpartyKindV1, EconomyObl
     due_asset: "tithe_due_bushels",
     arrears_asset: "arrears_bushels",
     supported_payment_modes: ["food_stores"],
-    counterparty_ref: (state) => personRef(state.locals?.clergy, "Church"),
+    counterparty_ref: (state) => resolveEconomyObligationCollector(state, "church"),
     due_amount: (state) => titheDueBushels(state),
     arrears_amount: (state) => arrearsBushels(state),
     spend_due: (state, amount, receiptContext) => spendTitheDueBushels(state, amount, receiptContext),
     spend_arrears: (state, amount, receiptContext) => spendArrearsBushels(state, amount, receiptContext),
-    carry_due_into_arrears: (state, input) =>
-      rollTitheDueBushelsIntoArrears(state, {
+    carry_due_into_arrears: (state, input) => {
+      const collector = resolveEconomyObligationCollector(state, "church");
+      return rollTitheDueBushelsIntoArrears(state, {
         debit: {
           phase: input.phase,
           phase_sequence: normalizeInteger(input.phase_sequence),
           category: "obligation.arrears_carry",
           counterparty_kind: "church",
-          counterparty_id: personRef(state.locals?.clergy, "Church").counterparty_id,
-          counterparty_label: personRef(state.locals?.clergy, "Church").counterparty_label,
-          summary: `Moved unpaid current tithe due out of the active ledger slot for ${personRef(state.locals?.clergy, "Church").counterparty_label}.`,
+          counterparty_id: collector.counterparty_id,
+          counterparty_label: collector.counterparty_label,
+          summary: `Moved unpaid current tithe due out of the active ledger slot for ${collector.counterparty_label}.`,
           rule_id: `${input.rule_id}.debit`,
           related_actor_ids: [...(input.related_actor_ids ?? [])]
         },
@@ -255,34 +257,36 @@ const COUNTERPARTY_SPECS: Record<EconomyObligationCounterpartyKindV1, EconomyObl
           phase_sequence: normalizeInteger(input.phase_sequence),
           category: "obligation.arrears_carry",
           counterparty_kind: "church",
-          counterparty_id: personRef(state.locals?.clergy, "Church").counterparty_id,
-          counterparty_label: personRef(state.locals?.clergy, "Church").counterparty_label,
-          summary: `Moved unpaid tithe due into arrears for ${personRef(state.locals?.clergy, "Church").counterparty_label}.`,
+          counterparty_id: collector.counterparty_id,
+          counterparty_label: collector.counterparty_label,
+          summary: `Moved unpaid tithe due into arrears for ${collector.counterparty_label}.`,
           rule_id: `${input.rule_id}.credit`,
           related_actor_ids: [...(input.related_actor_ids ?? [])]
         }
-      })
+      });
+    }
   },
   liege: {
     contract_id: "liege_due",
     due_asset: "tax_due_coin",
     arrears_asset: "arrears_coin",
     supported_payment_modes: ["coin"],
-    counterparty_ref: (state) => personRef(state.locals?.liege, "Liege"),
+    counterparty_ref: (state) => resolveEconomyObligationCollector(state, "liege"),
     due_amount: (state) => taxDueCoin(state),
     arrears_amount: (state) => arrearsCoin(state),
     spend_due: (state, amount, receiptContext) => spendTaxDueCoin(state, amount, receiptContext),
     spend_arrears: (state, amount, receiptContext) => spendArrearsCoin(state, amount, receiptContext),
-    carry_due_into_arrears: (state, input) =>
-      rollTaxDueCoinIntoArrears(state, {
+    carry_due_into_arrears: (state, input) => {
+      const collector = resolveEconomyObligationCollector(state, "liege");
+      return rollTaxDueCoinIntoArrears(state, {
         debit: {
           phase: input.phase,
           phase_sequence: normalizeInteger(input.phase_sequence),
           category: "obligation.arrears_carry",
           counterparty_kind: "liege",
-          counterparty_id: personRef(state.locals?.liege, "Liege").counterparty_id,
-          counterparty_label: personRef(state.locals?.liege, "Liege").counterparty_label,
-          summary: `Moved unpaid current tax due out of the active ledger slot for ${personRef(state.locals?.liege, "Liege").counterparty_label}.`,
+          counterparty_id: collector.counterparty_id,
+          counterparty_label: collector.counterparty_label,
+          summary: `Moved unpaid current tax due out of the active ledger slot for ${collector.counterparty_label}.`,
           rule_id: `${input.rule_id}.debit`,
           related_actor_ids: [...(input.related_actor_ids ?? [])]
         },
@@ -291,13 +295,14 @@ const COUNTERPARTY_SPECS: Record<EconomyObligationCounterpartyKindV1, EconomyObl
           phase_sequence: normalizeInteger(input.phase_sequence),
           category: "obligation.arrears_carry",
           counterparty_kind: "liege",
-          counterparty_id: personRef(state.locals?.liege, "Liege").counterparty_id,
-          counterparty_label: personRef(state.locals?.liege, "Liege").counterparty_label,
-          summary: `Moved unpaid tax due into arrears for ${personRef(state.locals?.liege, "Liege").counterparty_label}.`,
+          counterparty_id: collector.counterparty_id,
+          counterparty_label: collector.counterparty_label,
+          summary: `Moved unpaid tax due into arrears for ${collector.counterparty_label}.`,
           rule_id: `${input.rule_id}.credit`,
           related_actor_ids: [...(input.related_actor_ids ?? [])]
         }
-      })
+      });
+    }
   }
 };
 
@@ -359,6 +364,10 @@ function buildCounterpartyEntry(
     counterparty_kind: counterpartyKind,
     counterparty_id: ref.counterparty_id,
     counterparty_label: ref.counterparty_label,
+    counterparty_actor_kind: ref.counterparty_actor_kind,
+    collector_state: ref.collector_state,
+    collector_successor_label: ref.collector_successor_label,
+    collector_summary: ref.collector_summary,
     contract_id: spec.contract_id,
     due_asset: spec.due_asset,
     arrears_asset: spec.arrears_asset,

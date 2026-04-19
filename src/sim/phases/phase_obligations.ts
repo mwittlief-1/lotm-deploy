@@ -10,6 +10,7 @@ import { applyEconomyObligationCloseTurnStage } from "../domains/economy/obligat
 import { settleEconomyObligationCounterparty } from "../domains/economy/obligationRegistry";
 import { recordEconomyPortfolioPhaseHints, refreshEconomyPortfolioState } from "../domains/economy/portfolioAnalysis";
 import type { FiscalPaymentModeV1 } from "../domains/economy/schema";
+import { resolveEconomyObligationCollector } from "../domains/people/obligationCollectorResolution";
 import { applyRelationshipDelta } from "../domains/people/relationshipEngine";
 import type { RunState, TurnDecisions } from "../types";
 import { clampInt } from "../util";
@@ -22,10 +23,17 @@ function modsObj(state: RunState): Record<string, number> {
 
 export function applyPreviewObligationsPhase(state: RunState, productionBushels: number): void {
   const ob = state.manor.obligations;
+  const liegeCollector = resolveEconomyObligationCollector(state, "liege");
 
   if (ob.arrears.coin > 0 || ob.arrears.bushels > 0) {
     state.manor.unrest = clampInt(state.manor.unrest + UNREST_ARREARS_PENALTY, 0, 100);
-    applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -2, threat: +2 }, "obligations_arrears_preview");
+    applyRelationshipDelta(
+      state,
+      liegeCollector.counterparty_id,
+      state.house.head.id,
+      { respect: -2, threat: +2 },
+      "obligations_arrears_preview"
+    );
   }
 
   setTaxDueCoin(state, Math.max(1, Math.floor(state.manor.population / 25)));
@@ -36,7 +44,13 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
     state.manor.bushels_stored < ob.tithe_due_bushels;
   if (currentDueUnpayable) {
     state.manor.unrest = clampInt(state.manor.unrest + UNREST_ARREARS_PENALTY, 0, 100);
-    applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -1, threat: +1 }, "obligations_current_due_pressure");
+    applyRelationshipDelta(
+      state,
+      liegeCollector.counterparty_id,
+      state.house.head.id,
+      { respect: -1, threat: +1 },
+      "obligations_current_due_pressure"
+    );
   }
 
   recordEconomyPortfolioPhaseHints(state, {
@@ -48,6 +62,8 @@ export function applyPreviewObligationsPhase(state: RunState, productionBushels:
 export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDecisions, reportNotes: string[]): void {
   const ob = state.manor.obligations;
   const gestureDecisions = resolveObligationGestureDecisions(decisions);
+  const liegeCollector = resolveEconomyObligationCollector(state, "liege");
+  const churchCollector = resolveEconomyObligationCollector(state, "church");
 
   const arrearsCoinBefore = ob.arrears.coin;
   const arrearsBushelsBefore = ob.arrears.bushels;
@@ -58,7 +74,7 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
     requested_amount: decisions.obligations.pay_coin,
     payment_mode: "coin",
     rule_id: "obligations.liege_due_settlement",
-    related_actor_ids: [state.house.head.id, state.locals.liege.id]
+    related_actor_ids: [state.house.head.id, liegeCollector.counterparty_id]
   });
   const churchSettlement = settleEconomyObligationCounterparty(state, {
     phase: "obligations",
@@ -67,7 +83,7 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
     requested_amount: decisions.obligations.pay_bushels,
     payment_mode: "food_stores",
     rule_id: "obligations.church_due_settlement",
-    related_actor_ids: [state.house.head.id, state.locals.clergy.id]
+    related_actor_ids: [state.house.head.id, churchCollector.counterparty_id]
   });
   const toArrearsCoin = liegeSettlement.paid_to_arrears;
   const toArrearsBushels = churchSettlement.paid_to_arrears;
@@ -86,14 +102,14 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
     phase_sequence: 3,
     gesture_action: "gift_liege",
     decision: gestureDecisions.gift_liege,
-    related_actor_ids: [state.locals.liege.id]
+    related_actor_ids: [liegeCollector.counterparty_id]
   });
   const churchGesture = resolveEconomyObligationGesture(state, {
     phase: "obligations",
     phase_sequence: 4,
     gesture_action: "offering_church",
     decision: gestureDecisions.offering_church,
-    related_actor_ids: [state.locals.clergy.id]
+    related_actor_ids: [churchCollector.counterparty_id]
   });
 
   for (const gesture of [liegeGesture, churchGesture]) {
@@ -121,14 +137,14 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
       const mods = modsObj(state);
       mods["farmer_penalty"] = (mods["farmer_penalty"] ?? 0) + levy.men;
       clearWarLevyDue(state);
-      applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: +2, threat: -2 }, "war_levy_men");
+      applyRelationshipDelta(state, liegeCollector.counterparty_id, state.house.head.id, { respect: +2, threat: -2 }, "war_levy_men");
       reportNotes.push(`War levy answered with men: -${levy.men} effective farmers next turn.`);
     } else if (choice === "coin") {
       const paid = spendCoin(state, levy.coin);
       const remaining = levy.coin - paid;
       if (remaining <= 0) {
         clearWarLevyDue(state);
-        applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: +2, threat: -2 }, "war_levy_coin");
+        applyRelationshipDelta(state, liegeCollector.counterparty_id, state.house.head.id, { respect: +2, threat: -2 }, "war_levy_coin");
         reportNotes.push(`War levy paid in coin: -${levy.coin} coin.`);
       } else {
         const menNeeded = Math.ceil(levy.men * (remaining / levy.coin));
@@ -137,15 +153,21 @@ export function applyDecisionObligationsPhase(state: RunState, decisions: TurnDe
           const mods = modsObj(state);
           mods["farmer_penalty"] = (mods["farmer_penalty"] ?? 0) + menNeeded;
           clearWarLevyDue(state);
-          applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: +1, threat: -1 }, "war_levy_partial_coin_then_men");
+          applyRelationshipDelta(
+            state,
+            liegeCollector.counterparty_id,
+            state.house.head.id,
+            { respect: +1, threat: -1 },
+            "war_levy_partial_coin_then_men"
+          );
           reportNotes.push(`War levy coin shortfall: paid ${paid}/${levy.coin} coin; covered remainder with men (-${menNeeded} effective farmers next turn).`);
         } else {
-          applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -4, threat: +6 }, "war_levy_failed");
+          applyRelationshipDelta(state, liegeCollector.counterparty_id, state.house.head.id, { respect: -4, threat: +6 }, "war_levy_failed");
           reportNotes.push(`War levy NOT met: paid ${paid}/${levy.coin} coin; insufficient men. Liege anger rises.`);
         }
       }
     } else {
-      applyRelationshipDelta(state, state.locals.liege.id, state.house.head.id, { respect: -3, threat: +5 }, "war_levy_ignored");
+      applyRelationshipDelta(state, liegeCollector.counterparty_id, state.house.head.id, { respect: -3, threat: +5 }, "war_levy_ignored");
       reportNotes.push("War levy ignored; liege displeased.");
     }
   }
@@ -200,11 +222,13 @@ function resolveObligationGestureDecisions(decisions: TurnDecisions): Record<Eco
 }
 
 export function applyCloseTurnObligationsPhase(state: RunState, reportNotes: string[]): void {
+  const liegeCollector = resolveEconomyObligationCollector(state, "liege");
+  const churchCollector = resolveEconomyObligationCollector(state, "church");
   const result = applyEconomyObligationCloseTurnStage(state, {
     phase: "succession",
     phase_sequence: 1,
     rule_prefix: "obligations.close_turn",
-    related_actor_ids: [state.house.head.id, state.locals.clergy.id, state.locals.liege.id],
+    related_actor_ids: [state.house.head.id, churchCollector.counterparty_id, liegeCollector.counterparty_id],
     shortage: Boolean((state.flags as Record<string, unknown>).Shortage)
   });
   const churchCarry = result.carry_results_by_counterparty.church.carried_amount;

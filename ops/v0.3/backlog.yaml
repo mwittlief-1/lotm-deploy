@@ -11308,7 +11308,7 @@ tasks:
   parent_epic: V03-R6-002
   release: v0.3.6
   title: Rebase obligation collectors after death and succession
-  status: ready
+  status: done
   priority: 78
   tranche: 7
   change_type: behavior_change
@@ -11372,7 +11372,7 @@ tasks:
   parent_epic: V03-R6-002
   release: v0.3.6
   title: Add deterministic arrears carry and rebasing fixtures
-  status: todo
+  status: ready
   priority: 77
   tranche: 7
   change_type: behavior_change
@@ -11434,7 +11434,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Backfill canonical food and coin walkdown rows
-  status: todo
+  status: ready
   priority: 78
   tranche: 7
   change_type: behavior_change

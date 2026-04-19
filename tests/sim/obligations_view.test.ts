@@ -107,6 +107,8 @@ describe("economy obligations view", () => {
     expect(viewA.counterparty_summaries[0]).toMatchObject({
       counterparty_kind: "liege",
       counterparty_label: "House Liege",
+      collector_state: "active",
+      collector_successor_label: null,
       due_amount: 3,
       arrears_amount: 0,
       total_outstanding: 3,
@@ -129,6 +131,8 @@ describe("economy obligations view", () => {
     expect(viewA.counterparty_summaries[1]).toMatchObject({
       counterparty_kind: "church",
       counterparty_label: "Parish Church",
+      collector_state: "active",
+      collector_successor_label: null,
       due_amount: 3,
       arrears_amount: 0,
       total_outstanding: 3,
@@ -161,7 +165,7 @@ describe("economy obligations view", () => {
     const churchSummary = snapshot.economy_obligations_view.counterparty_summaries[1];
 
     expect(snapshot.economy_obligations_view).toMatchObject({
-      schema_version: "economy_obligations_view_v1",
+      schema_version: "economy_obligations_view_v2",
       turn: 1,
       shortage_active: false,
       stable_unrest_delta: 0,
@@ -173,10 +177,12 @@ describe("economy obligations view", () => {
       receipt_group_order: ["payment", "penalty", "seizure"],
       counterparty_summaries: [
         {
-          schema_version: "economy_obligations_view_v1",
+          schema_version: "economy_obligations_view_v2",
           counterparty_kind: "liege",
           counterparty_id: "p_liege",
           counterparty_label: "House Liege",
+          collector_state: "active",
+          collector_successor_label: null,
           contract_id: "liege_due",
           due_asset: "tax_due_coin",
           due_amount: 0,
@@ -197,10 +203,12 @@ describe("economy obligations view", () => {
           relationship_delta: { respect: -1, threat: 1 }
         },
         {
-          schema_version: "economy_obligations_view_v1",
+          schema_version: "economy_obligations_view_v2",
           counterparty_kind: "church",
           counterparty_id: "p_clergy",
           counterparty_label: "Parish Church",
+          collector_state: "active",
+          collector_successor_label: null,
           contract_id: "church_due",
           due_asset: "tithe_due_bushels",
           due_amount: 0,
@@ -315,5 +323,80 @@ describe("economy obligations view", () => {
     );
     expect(seizureGroup?.receipt_count).toBeGreaterThan(0);
     expect(seizureGroup?.receipts.every((receipt) => receipt.category === "enforcement.seizure")).toBe(true);
+  });
+
+  it("rebases a dead liege collector to the current living house successor", () => {
+    const state = mkState();
+    const liegeSuccessor = mkPerson("p_liege_successor", "Lady Westmarch", "F", 28);
+    state.manor.obligations.tax_due_coin = 4;
+    state.manor.obligations.arrears.coin = 2;
+    state.locals.liege.alive = false;
+
+    (state as any).people = {
+      [state.locals.liege.id]: { ...state.locals.liege },
+      [liegeSuccessor.id]: liegeSuccessor
+    };
+    (state as any).houses = {
+      h_liege: {
+        house_name: "House Westmarch",
+        head_id: state.locals.liege.id,
+        spouse_id: null,
+        child_ids: [liegeSuccessor.id],
+        member_person_ids: [state.locals.liege.id, liegeSuccessor.id]
+      }
+    };
+    liegeSuccessor.house_id = "h_liege";
+    liegeSuccessor.residence_house_id = "h_liege";
+
+    const liegeSummary = buildEconomyObligationsView(state).counterparty_summaries[0]!;
+
+    expect(liegeSummary).toMatchObject({
+      counterparty_kind: "liege",
+      counterparty_id: "p_liege_successor",
+      counterparty_label: "Lady Westmarch (current liege)",
+      counterparty_actor_kind: "person",
+      collector_state: "successor",
+      collector_successor_label: "Lady Westmarch",
+      collector_summary: "Lady Westmarch now collects liege dues after House Liege died.",
+      due_amount: 4,
+      arrears_amount: 2,
+      settlement_summary: "Lady Westmarch (current liege): 2 coin in arrears, 4 coin due."
+    });
+  });
+
+  it("rebases a dead clergy collector to the parish institution when no living priest is available", () => {
+    const state = mkState();
+    state.manor.obligations.tithe_due_bushels = 5;
+    state.manor.obligations.arrears.bushels = 3;
+    state.locals.clergy.alive = false;
+
+    (state as any).people = {
+      [state.locals.clergy.id]: { ...state.locals.clergy }
+    };
+    (state as any).institutions = {
+      parish_st_cuthbert: {
+        id: "parish_st_cuthbert",
+        type: "parish",
+        name: "St. Cuthbert Parish",
+        patron_actor_id: { kind: "house", id: "h_player" },
+        priest_person_id: state.locals.clergy.id
+      }
+    };
+    (state as any).locals.parish_institution_id = "parish_st_cuthbert";
+
+    const churchSummary = buildEconomyObligationsView(state).counterparty_summaries[1]!;
+
+    expect(churchSummary).toMatchObject({
+      counterparty_kind: "church",
+      counterparty_id: "parish_st_cuthbert",
+      counterparty_label: "St. Cuthbert Parish (Vacant)",
+      counterparty_actor_kind: "institution",
+      collector_state: "vacant",
+      collector_successor_label: "St. Cuthbert Parish",
+      collector_summary: "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed.",
+      due_amount: 5,
+      arrears_amount: 3,
+      settlement_summary: "St. Cuthbert Parish (Vacant): 3 bushels in arrears, 5 bushels due."
+    });
   });
 });

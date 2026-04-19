@@ -17,7 +17,7 @@ import {
 
 const PREVIEW_STATE = {
   economy_obligations_view: {
-    schema_version: "economy_obligations_view_v1",
+    schema_version: "economy_obligations_view_v2",
     counterparty_order: ["liege", "church"],
     counterparty_summaries: [
       {
@@ -570,7 +570,7 @@ describe("playScreenObligations", () => {
       courtDecisionBudget: COURT_BUDGET,
       previewState: {
         economy_obligations_view: {
-          schema_version: "economy_obligations_view_v1",
+          schema_version: "economy_obligations_view_v2",
           counterparty_order: ["liege", "church"],
           counterparty_summaries: [
             {
@@ -595,5 +595,60 @@ describe("playScreenObligations", () => {
     expect(stageThreeContract?.counterpartySections[0]?.penaltyGroup.responseSummary).toBe(
       "Next turn: dispossession danger is active. Clear liege arrears immediately or you can lose the seat."
     );
+  });
+
+  it("surfaces successor and vacancy collector copy on the main obligations path", () => {
+    const rebasedContract = buildObligationsCounterpartyContract({
+      courtDecisionBudget: COURT_BUDGET,
+      previewState: {
+        economy_obligations_view: {
+          schema_version: "economy_obligations_view_v2",
+          counterparty_order: ["liege", "church"],
+          counterparty_summaries: [
+            {
+              counterparty_kind: "liege",
+              counterparty_label: "Lady Westmarch (current liege)",
+              collector_state: "successor",
+              collector_successor_label: "Lady Westmarch",
+              collector_summary: "Lady Westmarch now collects liege dues after House Liege died.",
+              due_amount: 2,
+              arrears_amount: 1,
+              enforcement_stage: 1,
+              settlement_status: "due_and_arrears",
+              settlement_summary: "Lady Westmarch (current liege): 1 coin in arrears, 2 coin due.",
+              enforcement_state: "arrears",
+              enforcement_summary: "Stage-one enforcement pressure rose for Lady Westmarch (current liege) because arrears remain open after carry.",
+              settled_this_turn: false,
+              carried_this_turn: true
+            },
+            {
+              counterparty_kind: "church",
+              counterparty_label: "St. Cuthbert Parish (Vacant)",
+              collector_state: "vacant",
+              collector_successor_label: "St. Cuthbert Parish",
+              collector_summary: "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed.",
+              due_amount: 4,
+              arrears_amount: 3,
+              enforcement_stage: 1,
+              settlement_status: "due_and_arrears",
+              settlement_summary: "St. Cuthbert Parish (Vacant): 3 bushels in arrears, 4 bushels due.",
+              enforcement_state: "arrears",
+              enforcement_summary: "Stage-one enforcement pressure rose for St. Cuthbert Parish (Vacant) because arrears remain open after carry.",
+              settled_this_turn: false,
+              carried_this_turn: true
+            }
+          ]
+        }
+      } as any
+    });
+
+    expect(rebasedContract?.counterpartySections[0]).toMatchObject({
+      title: "Lady Westmarch (current liege)",
+      helper: "Lady Westmarch now collects liege dues after House Liege died."
+    });
+    expect(rebasedContract?.counterpartySections[1]).toMatchObject({
+      title: "St. Cuthbert Parish (Vacant)",
+      helper: "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed."
+    });
   });
 });

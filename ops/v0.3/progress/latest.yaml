@@ -1,7 +1,7 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-002-T03
-  last_completed_task_id: V03-R6-004-T03
+  current_task_id: V03-R6-002-T04
+  last_completed_task_id: V03-R6-002-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
@@ -22,15 +22,15 @@ last_run:
     run2: ''
 notes: >-
   Integrator recovery is active on 2026-04-19. Kickoff now carries the accepted
-  R6-001 explanation spine at e442c0f, and V03-R6-004-T03 has been recovered on
-  kickoff with bounded dossier standing-versus-delta separation plus the hidden
-  snapshot registries required by the existing player-card, provisioning, and
-  outbound-marriage contracts. The live global queue remains economy
-  V03-R6-002-T03, while social may rebootstrap from current kickoff head and
-  take V03-R6-007-T01 next. Economy still requires a fresh current-task packet:
-  no valid V03-R6-002-T03 handoff report exists on kickoff yet. Shared
-  repo-wide merge debt remains open: preflight reports test3_mismatches=16,
-  seed:replay:batch still fails on the snapshot-cap breach for
+  R6-001 explanation spine at e442c0f, the recovered R6-004-T03 dossier trust
+  contract, and the accepted R6-002-T03 obligation collector rebasing pass.
+  Economy obligations now resolve collectors from living liege-house successor
+  truth or parish institution holder/vacancy truth instead of leaving deceased
+  lieges or clergy active on the player path. The same acceptance promotes
+  economy V03-R6-002-T04 and V03-R6-003-T01 as the next same-lane sequence,
+  while social remains ready on V03-R6-007-T01. Shared repo-wide merge debt
+  remains open: preflight reports test3_mismatches=16, seed:replay:batch still
+  fails on the snapshot-cap breach for
   lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet produced
   a clean branch-wide exit in this workspace.
 active_claims: {}

@@ -6,6 +6,10 @@ import type {
   EconomyObligationRegistryV1
 } from "../economy/obligationRegistry";
 import { buildEconomyObligationRegistryFromState } from "../economy/obligationRegistry";
+import type {
+  EconomyObligationCollectorActorKindV1,
+  EconomyObligationCollectorStateV1
+} from "../people/obligationCollectorResolution";
 import {
   type EconomyObligationPenaltyStageEntryV1,
   buildEconomyObligationPenaltyStageFromState
@@ -19,7 +23,7 @@ import type { FiscalReceiptSnapshotV1 } from "../economy/receipts";
 import type { FiscalPaymentModeV1 } from "../economy/schema";
 import type { GameOverState, RunState } from "../../types";
 
-export const ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION = "economy_obligations_view_v1" as const;
+export const ECONOMY_OBLIGATIONS_VIEW_SCHEMA_VERSION = "economy_obligations_view_v2" as const;
 export const ECONOMY_OBLIGATIONS_VIEW_COUNTERPARTY_ORDER = ["liege", "church"] as const;
 export const ECONOMY_OBLIGATIONS_VIEW_RECEIPT_ROW_SCHEMA_VERSION = "economy_obligations_view_receipt_row_v1" as const;
 export const ECONOMY_OBLIGATIONS_VIEW_RECEIPT_GROUP_SCHEMA_VERSION = "economy_obligations_view_receipt_group_v1" as const;
@@ -87,6 +91,10 @@ export interface EconomyObligationsViewCounterpartySummaryV1 {
   counterparty_kind: EconomyObligationCounterpartyKindV1;
   counterparty_id: string;
   counterparty_label: string;
+  counterparty_actor_kind: EconomyObligationCollectorActorKindV1;
+  collector_state: EconomyObligationCollectorStateV1;
+  collector_successor_label: string | null;
+  collector_summary: string;
   contract_id: EconomyObligationCounterpartyEntryV1["contract_id"];
   due_asset: EconomyObligationDueAssetV1;
   due_amount: number;
@@ -399,6 +407,10 @@ function buildCounterpartySummary(
     counterparty_kind: counterpartyKind,
     counterparty_id: entry.counterparty_id,
     counterparty_label: entry.counterparty_label,
+    counterparty_actor_kind: entry.counterparty_actor_kind,
+    collector_state: entry.collector_state,
+    collector_successor_label: entry.collector_successor_label,
+    collector_summary: entry.collector_summary,
     contract_id: entry.contract_id,
     due_asset: entry.due_asset,
     due_amount: entry.due_amount,
