@@ -4,6 +4,7 @@
 **Task ID:** {{TASK_ID}}
 **Date:** {{DATE}}
 **Branch:** {{BRANCH}}
+**Kickoff Base Commit:** {{KICKOFF_BASE_COMMIT}}
 **Commit:** {{COMMIT}}
 **PR URL:** {{PR_URL}}
 **PR Status:** {{PR_STATUS}}

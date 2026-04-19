@@ -41,6 +41,12 @@ errors << "branch-policy.yaml must declare lane_handoff.report_required=true" un
 errors << "branch-policy.yaml must declare lane_handoff.intake_audit_command" if OpsV03ControlPlane.blank?(lane_handoff["intake_audit_command"])
 errors << "branch-policy.yaml must declare lane_handoff.required_packet_fields" if Array(lane_handoff["required_packet_fields"]).empty?
 errors << "branch-policy.yaml must declare lane_handoff.report_template" if OpsV03ControlPlane.blank?(lane_handoff["report_template"])
+errors << "branch-policy.yaml must declare lane_handoff.kickoff_base_commit_required=true" unless lane_handoff["kickoff_base_commit_required"] == true
+
+lane_rebootstrap = branch_policy.dig("rules", "lane_rebootstrap") || {}
+errors << "branch-policy.yaml must declare lane_rebootstrap.stale_branch_rejection=true" unless lane_rebootstrap["stale_branch_rejection"] == true
+errors << "branch-policy.yaml must declare lane_rebootstrap.required_after" if Array(lane_rebootstrap["required_after"]).empty?
+errors << "branch-policy.yaml must declare lane_rebootstrap.required_action" if OpsV03ControlPlane.blank?(lane_rebootstrap["required_action"])
 
 releases = Array(backlog["releases"])
 epics = Array(backlog["epics"])

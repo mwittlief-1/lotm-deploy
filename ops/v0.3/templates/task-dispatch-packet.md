@@ -27,5 +27,6 @@ Use this template when creating or tightening executable `backlog.yaml` tasks.
 
 ## Handoff requirements
 - One task-owned run report at the task `handoff.report_path`.
+- The report should name the kickoff base commit or sync point the lane actually built from.
 - Include `delivery_state`, changed files, tests run, and whether the task is truly claimable.
 - If the lane made progress but missed the finish line, report `advanced_not_claimable` instead of “done”.

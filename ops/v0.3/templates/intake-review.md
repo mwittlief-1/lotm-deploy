@@ -8,6 +8,7 @@ Use this checklist before integrator acceptance of any lane-owned task.
    - Confirm the submitted work still matches `exact_deliverables`, `definition_of_done`, `required_test_updates`, `stop_rules`, and `handoff_requirements`.
 3. Open the task-owned run report.
    - Confirm `delivery_state` is `completed`.
+   - Confirm `Kickoff Base Commit` is present and matches the current kickoff line or an explicitly accepted sync point.
    - Confirm `changed_files`, `contracts_or_surfaces`, and `tests_run` are concrete rather than placeholder text.
 4. Review the actual diff against the task boundaries.
    - Confirm the changed files stay inside `allowed_paths`.

@@ -21,14 +21,16 @@ last_run:
     run1: ''
     run2: ''
 notes: >-
-  Intake reset landed on 2026-04-18. Lane acceptance now requires
-  `npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed`,
-  which checks the tightened task packet fields plus a task-owned run report
-  before code review. The live queue is still economy V03-R6-002-T03 and social
-  V03-R6-004-T03. Both currently fail the new intake audit because their
-  required handoff reports do not exist yet, which is now treated as a hard
-  stop instead of a soft review note. Shared repo-wide merge debt remains open:
-  preflight reports test3_mismatches=16, seed:replay:batch still fails on the
-  snapshot-cap breach for lotm_v022_seed_001_baseline_extworld at turn 10, and
-  qa has not yet produced a clean branch-wide exit in this workspace.
+  Re-reviewed lane progress on 2026-04-19. The live queue is still economy
+  V03-R6-002-T03 and social V03-R6-004-T03, and neither task has a handoff
+  report on kickoff. The new intake audit still fails both tasks immediately.
+  Remote lane history shows an additional blocker: the canonical economy branch
+  still carries a V03-R4 queue in its own progress/latest state, and the social
+  branch still carries a V03-R1 queue, proving both branches are stale relative
+  to the current v0.3.6 kickoff line. Future handoffs must include a kickoff
+  base commit and lanes must rebootstrap from current kickoff before retrying.
+  Shared repo-wide merge debt remains open: preflight reports
+  test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
+  for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
+  produced a clean branch-wide exit in this workspace.
 active_claims: {}

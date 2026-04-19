@@ -20,7 +20,7 @@ function writeFixtureFiles(dir, { backlogTaskBody, reportBody }) {
   const reportPath = path.join(dir, "ops", "v0.3", "progress", "runs", "V03-R6-999-T01.md");
 
   writeFileSync(backlogPath, `version: 2\ntasks:\n  - id: V03-R6-999-T01\n${backlogTaskBody}`);
-  writeFileSync(runtimeContractPath, `version: 1\ncontrol_plane_rules:\n  lane_acceptance:\n    intake_audit_required: true\n    require_completed_for_acceptance: true\n    task_packet_fields:\n      - exact_deliverables\n      - definition_of_done\n      - required_test_updates\n      - stop_rules\n      - handoff_requirements\n    allowed_delivery_states:\n      - completed\n      - blocked\n      - advanced_not_claimable\n    required_report_metadata:\n      - Task ID\n      - Branch\n      - Commit\n    required_report_sections:\n      - Delivery state\n      - Task evidence\n      - Handoff\n    required_report_fields:\n      Delivery state:\n        - state\n        - summary\n      Task evidence:\n        - changed_files\n        - contracts_or_surfaces\n        - tests_run\n      Handoff:\n        - next_task_hint\n        - do_not_advance\n        - blockers\n`);
+  writeFileSync(runtimeContractPath, `version: 1\ncontrol_plane_rules:\n  lane_acceptance:\n    intake_audit_required: true\n    require_completed_for_acceptance: true\n    task_packet_fields:\n      - exact_deliverables\n      - definition_of_done\n      - required_test_updates\n      - stop_rules\n      - handoff_requirements\n    allowed_delivery_states:\n      - completed\n      - blocked\n      - advanced_not_claimable\n    required_report_metadata:\n      - Task ID\n      - Branch\n      - Kickoff Base Commit\n      - Commit\n    required_report_sections:\n      - Delivery state\n      - Task evidence\n      - Handoff\n    required_report_fields:\n      Delivery state:\n        - state\n        - summary\n      Task evidence:\n        - changed_files\n        - contracts_or_surfaces\n        - tests_run\n      Handoff:\n        - next_task_hint\n        - do_not_advance\n        - blockers\n`);
   writeFileSync(reportPath, reportBody);
 
   return { backlogPath, runtimeContractPath };
@@ -48,6 +48,7 @@ describe("ops v0.3 intake audit", () => {
 **Task ID:** V03-R6-999-T01
 **Date:** 2026-04-18
 **Branch:** codex/v0.3-lane-social-mechanics
+**Kickoff Base Commit:** 32110af
 **Commit:** abc123
 **PR URL:**
 **PR Status:**
@@ -101,6 +102,7 @@ describe("ops v0.3 intake audit", () => {
 **Task ID:** V03-R6-999-T01
 **Date:** 2026-04-18
 **Branch:** codex/v0.3-lane-economy-fiscal
+**Kickoff Base Commit:** 32110af
 **Commit:** def456
 **PR URL:**
 **PR Status:**
@@ -153,6 +155,7 @@ describe("ops v0.3 intake audit", () => {
 **Task ID:** V03-R6-999-T01
 **Date:** 2026-04-18
 **Branch:** codex/v0.3-lane-social-mechanics
+**Kickoff Base Commit:** 32110af
 **Commit:** ghi789
 **PR URL:**
 **PR Status:**

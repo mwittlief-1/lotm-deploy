@@ -100,6 +100,7 @@ control_plane_rules:
     required_report_metadata:
       - Task ID
       - Branch
+      - Kickoff Base Commit
       - Commit
     required_report_sections:
       - Delivery state

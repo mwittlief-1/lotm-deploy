@@ -19,15 +19,23 @@ rules:
     pr_target: "codex/v0.3-refactor-kickoff"
     pr_action: "open_or_update_after_passing_gates"
     report_required: true
+    kickoff_base_commit_required: true
     report_template: "ops/v0.3/templates/run-log.md"
     intake_audit_command: "npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed"
     required_packet_fields:
       - branch
+      - kickoff_base_commit
       - commit
       - report_path
       - delivery_state
       - changed_files
       - tests_run
+  lane_rebootstrap:
+    stale_branch_rejection: true
+    required_after:
+      - "release reset or intake reset lands on kickoff"
+      - "lane progress/latest.yaml still points at a prior release chain"
+    required_action: "rebase or recreate the lane branch from the current kickoff head before continuing task work"
   integrator_handoff:
     merge_target: "codex/v0.3-refactor-kickoff"
     merge_policy: "integrator_only"

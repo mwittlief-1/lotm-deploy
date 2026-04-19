@@ -1,6 +1,6 @@
 # ops/v0.3 — Automation Execution Contract (Canonical)
 
-**Last Updated:** 2026-04-18
+**Last Updated:** 2026-04-19
 **Scope:** v0.3 unattended execution and backlog rebaseline.
 **Source of Truth:** This folder is canonical for automation state and rules.
 
@@ -8,29 +8,31 @@
 1. Ensure the kickoff baseline is split into a reviewable commit stack on `codex/v0.3-refactor-kickoff`.
 2. Read `backlog.yaml`, `ownership-map.yaml`, `branch-policy.yaml`, `runtime-contract.yaml`, and `progress/latest.yaml`.
 3. Treat imported `backlog.yaml` ids, statuses, deps, lane assignment, and `epics[].executable=false` as authoritative.
-4. Normalize imported task paths to repo truth before claims: `src/sim/relationshipEngine.ts` -> `src/sim/domains/people/relationshipEngine.ts`, `src/components/**` -> `src/App.tsx` + `src/ui/**`, and `docs/ui/**` -> `docs/ux/**`.
-5. Select from `tasks[]` only; `epics[]` are planning containers and never drive execution.
-6. Schedule lane-parallel: at most one active claimed task per lane, with `cursor.current_task_id` tracking the first globally claimable ready task and `active_claims` tracking live lane work.
-7. A task is claimable only when `status: ready`, deps are done, `claim.status: unclaimed`, the lane has no active claim, and the task is not blocked by topology policy.
-8. Skip any task in `codex/v0.3-lane-world-topology` until `V03-XMAP-001` is `done`.
-9. Treat the imported `xmap_alpha_v1` bundle already landed in `lotm-deploy` as the frozen world import surface while `V03-XMAP-001` remains blocked; do not run another import pass on kickoff.
-10. After `V03-XMAP-001` clears, rebase `V03-R1-001-T01` and `V03-R1-001-T02` against the frozen import surface and start fresh topology coding at `V03-R1-001-T03`.
-11. Claim the task before editing, set `claim_expires_at` to 4 hours ahead by default, and refresh the claim while the run remains active.
-12. Reclaim only expired claims, and record the reclaim event in the run log.
-13. Run `npm run ops:v0.3:validate`, `npm run ops:v0.3:scheduler-dry-run`, and `npm run ops:v0.3:rebase-dry-run` before accepting control-plane edits.
-14. Before integrator acceptance of a lane handoff, run `npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed` and treat any failure as a hard stop.
-15. Run the task's `required_gates` from `gates.yaml`.
-16. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
-17. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
-18. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
-19. For longer same-lane runs, integrator may pre-promote the immediate successor task to `ready` when its only unmet dependency is the currently active same-lane predecessor and no cross-lane blocker applies; the lane may self-claim that successor after locally closing the predecessor without waiting for another scheduler promotion pass.
-20. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
+4. After any release reset or intake reset lands on kickoff, rebootstrap lane work from the current kickoff head before continuing; stale lane branch control-plane state is not a valid handoff surface.
+5. Normalize imported task paths to repo truth before claims: `src/sim/relationshipEngine.ts` -> `src/sim/domains/people/relationshipEngine.ts`, `src/components/**` -> `src/App.tsx` + `src/ui/**`, and `docs/ui/**` -> `docs/ux/**`.
+6. Select from `tasks[]` only; `epics[]` are planning containers and never drive execution.
+7. Schedule lane-parallel: at most one active claimed task per lane, with `cursor.current_task_id` tracking the first globally claimable ready task and `active_claims` tracking live lane work.
+8. A task is claimable only when `status: ready`, deps are done, `claim.status: unclaimed`, the lane has no active claim, and the task is not blocked by topology policy.
+9. Skip any task in `codex/v0.3-lane-world-topology` until `V03-XMAP-001` is `done`.
+10. Treat the imported `xmap_alpha_v1` bundle already landed in `lotm-deploy` as the frozen world import surface while `V03-XMAP-001` remains blocked; do not run another import pass on kickoff.
+11. After `V03-XMAP-001` clears, rebase `V03-R1-001-T01` and `V03-R1-001-T02` against the frozen import surface and start fresh topology coding at `V03-R1-001-T03`.
+12. Claim the task before editing, set `claim_expires_at` to 4 hours ahead by default, and refresh the claim while the run remains active.
+13. Reclaim only expired claims, and record the reclaim event in the run log.
+14. Run `npm run ops:v0.3:validate`, `npm run ops:v0.3:scheduler-dry-run`, and `npm run ops:v0.3:rebase-dry-run` before accepting control-plane edits.
+15. Before integrator acceptance of a lane handoff, run `npm run ops:v0.3:intake-audit -- --task <TASK_ID> --require-completed` and treat any failure as a hard stop.
+16. Run the task's `required_gates` from `gates.yaml`.
+17. If gates pass, commit + push and open or update the PR to `codex/v0.3-refactor-kickoff` when lane work is involved.
+18. Update `progress/latest.yaml` and append a run log under `progress/runs/`.
+19. When a lane-owned task is accepted and the next decomposed task in that same lane is newly unblocked with no cross-lane dependency, integrator-only boundary, or escalation checkpoint, promote and dispatch it in the same reconciliation pass instead of leaving the lane idle.
+20. For longer same-lane runs, integrator may pre-promote the immediate successor task to `ready` when its only unmet dependency is the currently active same-lane predecessor and no cross-lane blocker applies; the lane may self-claim that successor after locally closing the predecessor without waiting for another scheduler promotion pass.
+21. Stop immediately on any E1 or E2 escalation from `escalation-policy.yaml`.
 
 ## Task packet requirements
 - For new or revised executable tasks, `goal` and `done_conditions` are necessary but not sufficient. Prefer adding explicit `exact_deliverables`, `definition_of_done`, `required_test_updates`, `stop_rules`, and `handoff_requirements` fields directly on the task.
 - `definition_of_done` should name the exact contract version, exact player surfaces, and exact deterministic tests or fixtures that must exist before integrator acceptance.
 - `stop_rules` must say when the lane must stop, escalate, or avoid continuing into the next decomposed task even if adjacent work could also be attempted.
 - `handoff_requirements` should require one task-owned run report that names changed files, tests run, delivery state, and whether the result is actually claimable.
+- Task-owned run reports should also record the kickoff base commit or accepted sync point the lane built from, so stale branch work is detectable before deep review.
 - Delivery state should be reported as one of `completed`, `blocked`, or `advanced_not_claimable`. A task is not complete merely because nearby downstream work also progressed.
 - Release closeout or evidence-only tasks must depend on the substantive implementation tasks they summarize. They should not stay `ready` just because an earlier docs or fixture step landed.
 - When a task says `do_not_advance`, treat that as a hard stop for unattended continuation until integrator acceptance clears the listed boundary.
@@ -65,6 +67,7 @@
 - Reject any task that touches `src/sim/turn.ts` or `src/sim/phases/**` unless it is explicitly integrator work on `codex/v0.3-refactor-kickoff`.
 - Reject any world or topology task that does not use `codex/v0.3-lane-world-topology`, does not depend on `V03-XMAP-001`, or marks itself ready before that checkpoint is done.
 - Run the lane handoff through `npm run ops:v0.3:intake-audit -- --task <TASK_ID>` before reviewing code. Missing packet fields, missing report sections, missing changed-files or test evidence, or mismatched `Task ID` metadata are hard failures.
+- Reject any lane handoff whose report omits the kickoff base commit or points at a stale pre-reset kickoff line unless the integrator explicitly approved that sync point in advance.
 - Use `ops/v0.3/templates/intake-review.md` for the acceptance pass so structural audit, diff review, focused test rerun, and downstream freeze checks happen in the same order every time.
 
 ## Lane Coordination
@@ -75,6 +78,7 @@
 - Same-lane chains should also avoid scheduler-promotion stalls: when the only remaining unmet dependency is the current same-lane task, pre-promote the successor to `ready` so the lane can continue after local closeout.
 - Record any claim reclaim, status rebase, or cross-lane override in a run log before mutating backlog or progress state.
 - Lane claims do not imply acceptance readiness. Only a passing intake audit plus the task packet's required evidence can move a lane result into integrator review.
+- If a lane branch still carries an older `progress/latest.yaml` release line or predates the latest kickoff reset, require a branch rebootstrap before any further task review.
 - For `v0.3.6` trust-and-legibility work, prefer reusing the canonical lanes above instead of inventing new lane branches unless the control plane is explicitly revised first.
 - For `v0.3.6` trust-and-legibility work, lane ownership defaults are:
   - `codex/v0.3-refactor-kickoff`: carry-over gate reconciliation, backlog decomposition, integrator-only orchestration seams, control-plane updates, and final acceptance merges
