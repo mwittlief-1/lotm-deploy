@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-002-T04
-  last_completed_task_id: V03-R6-002-T03
+  current_task_id: V03-R6-003-T02
+  last_completed_task_id: V03-R6-003-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 98f416d
+  git_commit: 2d9c910
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,16 +21,16 @@ last_run:
     run1: ''
     run2: ''
 notes: >-
-  Integrator recovery is active on 2026-04-19. Kickoff now carries the accepted
-  R6-001 explanation spine at e442c0f, the recovered R6-004-T03 dossier trust
-  contract, and the accepted R6-002-T03 obligation collector rebasing pass.
-  Economy obligations now resolve collectors from living liege-house successor
-  truth or parish institution holder/vacancy truth instead of leaving deceased
-  lieges or clergy active on the player path. The same acceptance promotes
-  economy V03-R6-002-T04 and V03-R6-003-T01 as the next same-lane sequence,
-  while social remains ready on V03-R6-007-T01. Shared repo-wide merge debt
-  remains open: preflight reports test3_mismatches=16, seed:replay:batch still
-  fails on the snapshot-cap breach for
-  lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet produced
-  a clean branch-wide exit in this workspace.
+  Integrator recovery remains active on 2026-04-19. Kickoff now carries the
+  accepted R6-001 explanation spine, the recovered R6-004-T03 dossier trust
+  contract, the accepted R6-002-T03 collector rebasing seam, and the newly
+  accepted V03-R6-002-T04, V03-R6-003-T01, and V03-R6-007-T01 lane wave.
+  Economy now has deterministic obligation visibility evidence plus reconciled
+  food and coin walkdown rows, and social now has the upgraded dossier and
+  person-card context layer with player-facing holdings and intel framing.
+  The next same-lane sequence is economy V03-R6-003-T02 followed by social
+  V03-R6-005-T01. Shared repo-wide merge debt remains open: preflight reports
+  test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
+  for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
+  produced a clean branch-wide exit in this workspace.
 active_claims: {}

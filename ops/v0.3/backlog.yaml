@@ -11372,7 +11372,7 @@ tasks:
   parent_epic: V03-R6-002
   release: v0.3.6
   title: Add deterministic arrears carry and rebasing fixtures
-  status: ready
+  status: done
   priority: 77
   tranche: 7
   change_type: behavior_change
@@ -11434,7 +11434,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Backfill canonical food and coin walkdown rows
-  status: ready
+  status: done
   priority: 78
   tranche: 7
   change_type: behavior_change
@@ -11494,7 +11494,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Surface maintenance and project completion effects in headline and drilldown views
-  status: todo
+  status: ready
   priority: 77
   tranche: 7
   change_type: behavior_change
@@ -11763,7 +11763,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Define unified marriage workflow view contract
-  status: todo
+  status: ready
   priority: 76
   tranche: 7
   change_type: behavior_change
@@ -11882,7 +11882,7 @@ tasks:
   parent_epic: V03-R6-007
   release: v0.3.6
   title: Upgrade dossier and person-card bounded summaries
-  status: ready
+  status: done
   priority: 74
   tranche: 7
   change_type: behavior_change
