@@ -399,4 +399,190 @@ describe("economy obligations view", () => {
       settlement_summary: "St. Cuthbert Parish (Vacant): 3 bushels in arrears, 5 bushels due."
     });
   });
+
+  it("keeps split payments and close-turn carry attached to rebased successor collectors", () => {
+    const state = mkState();
+    const liegeSuccessor = {
+      ...mkPerson("p_liege_successor", "Lady Regent", "F", 36),
+      house_id: "h_liege",
+      residence_house_id: "h_liege"
+    } as any;
+    const churchSuccessor = mkPerson("p_clergy_successor", "Father Aldwyn", "M", 37);
+
+    state.locals.liege.alive = false;
+    state.locals.clergy.alive = false;
+    state.manor.obligations.tax_due_coin = 6;
+    state.manor.obligations.arrears.coin = 2;
+    state.manor.obligations.tithe_due_bushels = 5;
+    state.manor.obligations.arrears.bushels = 1;
+
+    (state as any).player_house_id = "h_player";
+    (state as any).people = {
+      [state.house.head.id]: state.house.head,
+      [state.house.spouse!.id]: state.house.spouse,
+      [state.locals.liege.id]: state.locals.liege,
+      [state.locals.clergy.id]: state.locals.clergy,
+      [liegeSuccessor.id]: liegeSuccessor,
+      [churchSuccessor.id]: churchSuccessor
+    };
+    (state as any).houses = {
+      h_player: {
+        id: "h_player",
+        head_id: state.house.head.id,
+        spouse_id: state.house.spouse!.id,
+        child_ids: [],
+        member_person_ids: [state.house.head.id, state.house.spouse!.id]
+      },
+      h_liege: {
+        id: "h_liege",
+        house_name: "House Westmarch",
+        head_id: state.locals.liege.id,
+        spouse_id: null,
+        child_ids: [liegeSuccessor.id],
+        member_person_ids: [state.locals.liege.id, liegeSuccessor.id]
+      }
+    };
+    (state as any).institutions = {
+      parish_st_cuthbert: {
+        id: "parish_st_cuthbert",
+        type: "parish",
+        name: "St. Cuthbert Parish",
+        patron_actor_id: { kind: "house", id: "h_player" },
+        priest_person_id: churchSuccessor.id
+      }
+    };
+    (state.locals as any).parish_institution_id = "parish_st_cuthbert";
+
+    settleEconomyObligationCounterparty(state, {
+      phase: "obligations",
+      phase_sequence: 4,
+      counterparty_kind: "liege",
+      requested_amount: 5,
+      rule_id: "obligations.visibility_fixture.liege",
+      related_actor_ids: [state.house.head.id, liegeSuccessor.id]
+    });
+    settleEconomyObligationCounterparty(state, {
+      phase: "obligations",
+      phase_sequence: 5,
+      counterparty_kind: "church",
+      requested_amount: 2,
+      rule_id: "obligations.visibility_fixture.church",
+      related_actor_ids: [state.house.head.id, churchSuccessor.id]
+    });
+    applyEconomyObligationCloseTurnStage(state, {
+      phase: "succession",
+      phase_sequence: 9,
+      rule_prefix: "obligations.visibility_fixture",
+      related_actor_ids: [state.house.head.id, liegeSuccessor.id, churchSuccessor.id]
+    });
+
+    const view = buildEconomyObligationsView(state);
+    const liegeSummary = view.counterparty_summaries[0]!;
+    const churchSummary = view.counterparty_summaries[1]!;
+
+    expect(liegeSummary).toMatchObject({
+      counterparty_kind: "liege",
+      counterparty_id: "p_liege_successor",
+      counterparty_label: "Lady Regent (current liege)",
+      collector_state: "successor",
+      collector_successor_label: "Lady Regent",
+      due_amount: 0,
+      arrears_amount: 3,
+      total_outstanding: 3,
+      settled_this_turn: true,
+      carried_this_turn: true,
+      settlement_status: "arrears_only",
+      settlement_summary: "Lady Regent (current liege): 3 coin in arrears."
+    });
+    expect(liegeSummary.receipt_groups.find((group) => group.group_kind === "payment")?.receipts.map((receipt) => receipt.category)).toEqual(
+      expect.arrayContaining(["obligation.liege_settlement"])
+    );
+    expect(liegeSummary.receipt_groups.find((group) => group.group_kind === "penalty")?.receipts.map((receipt) => receipt.category)).toEqual(
+      expect.arrayContaining(["obligation.arrears_carry"])
+    );
+
+    expect(churchSummary).toMatchObject({
+      counterparty_kind: "church",
+      counterparty_id: "p_clergy_successor",
+      counterparty_label: "Father Aldwyn (St. Cuthbert Parish)",
+      collector_state: "successor",
+      collector_successor_label: "Father Aldwyn",
+      due_amount: 0,
+      arrears_amount: 4,
+      total_outstanding: 4,
+      settled_this_turn: true,
+      carried_this_turn: true,
+      settlement_status: "arrears_only",
+      settlement_summary: "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears."
+    });
+    expect(churchSummary.receipt_groups.find((group) => group.group_kind === "payment")?.receipts.map((receipt) => receipt.category)).toEqual(
+      expect.arrayContaining(["obligation.church_settlement"])
+    );
+    expect(churchSummary.receipt_groups.find((group) => group.group_kind === "penalty")?.receipts.map((receipt) => receipt.category)).toEqual(
+      expect.arrayContaining(["obligation.arrears_carry"])
+    );
+  });
+
+  it("keeps vacancy carry and penalty receipts attached to the parish institution when clergy stay dead", () => {
+    const state = mkState();
+    state.locals.clergy.alive = false;
+    state.manor.obligations.tithe_due_bushels = 5;
+    state.manor.obligations.arrears.bushels = 3;
+
+    (state as any).player_house_id = "h_player";
+    (state as any).people = {
+      [state.house.head.id]: state.house.head,
+      [state.house.spouse!.id]: state.house.spouse,
+      [state.locals.liege.id]: state.locals.liege,
+      [state.locals.clergy.id]: state.locals.clergy
+    };
+    (state as any).houses = {
+      h_player: {
+        id: "h_player",
+        head_id: state.house.head.id,
+        spouse_id: state.house.spouse!.id,
+        child_ids: [],
+        member_person_ids: [state.house.head.id, state.house.spouse!.id]
+      }
+    };
+    (state as any).institutions = {
+      parish_st_cuthbert: {
+        id: "parish_st_cuthbert",
+        type: "parish",
+        name: "St. Cuthbert Parish",
+        patron_actor_id: { kind: "house", id: "h_player" },
+        priest_person_id: state.locals.clergy.id
+      }
+    };
+    (state.locals as any).parish_institution_id = "parish_st_cuthbert";
+
+    applyEconomyObligationCloseTurnStage(state, {
+      phase: "succession",
+      phase_sequence: 9,
+      rule_prefix: "obligations.visibility_fixture",
+      related_actor_ids: [state.house.head.id]
+    });
+
+    const churchSummary = buildEconomyObligationsView(state).counterparty_summaries[1]!;
+
+    expect(churchSummary).toMatchObject({
+      counterparty_kind: "church",
+      counterparty_id: "parish_st_cuthbert",
+      counterparty_label: "St. Cuthbert Parish (Vacant)",
+      collector_state: "vacant",
+      collector_successor_label: "St. Cuthbert Parish",
+      due_amount: 0,
+      arrears_amount: 8,
+      total_outstanding: 8,
+      carried_this_turn: true,
+      settlement_status: "arrears_only",
+      settlement_summary: "St. Cuthbert Parish (Vacant): 8 bushels in arrears."
+    });
+    expect(churchSummary.receipt_groups.find((group) => group.group_kind === "penalty")?.receipts.map((receipt) => receipt.summary)).toEqual(
+      expect.arrayContaining([
+        "Moved unpaid tithe due into arrears for St. Cuthbert Parish (Vacant).",
+        "Moved unpaid current tithe due out of the active ledger slot for St. Cuthbert Parish (Vacant)."
+      ])
+    );
+  });
 });

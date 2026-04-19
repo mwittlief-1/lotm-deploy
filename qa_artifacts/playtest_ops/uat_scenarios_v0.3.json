@@ -31,7 +31,8 @@
       "policy_id": "builder-forward",
       "turns": 3,
       "expectations": {
-        "arrears_enforcement_by_turn": 3
+        "arrears_enforcement_by_turn": 3,
+        "obligation_consequence_visible_by_turn": 3
       }
     },
     {

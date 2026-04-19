@@ -1,6 +1,83 @@
 import { describe, expect, it } from "vitest";
 
+import { buildTurnExplanationV1 } from "../../src/sim/domains/experience/reporting";
 import { createNewRun, proposeTurn } from "../../src/sim";
+import type { PhaseResultV0, RunState, TurnReport } from "../../src/sim/types";
+import { SIM_VERSION } from "../../src/sim/version";
+
+function makeState(): RunState {
+  return {
+    version: SIM_VERSION,
+    app_version: "test",
+    run_seed: "turn_explanation_sparse_structured",
+    turn_index: 3,
+    manor: {
+      population: 20,
+      farmers: 10,
+      builders: 2,
+      bushels_stored: 40,
+      meat_stores: 4,
+      coin: 12,
+      unrest: 18,
+      improvements: [],
+      construction: null,
+      obligations: {
+        tax_due_coin: 0,
+        tithe_due_bushels: 0,
+        arrears: { coin: 0, bushels: 0 },
+        war_levy_due: null
+      }
+    } as any,
+    house: {
+      head: {
+        id: "p_head",
+        name: "Lord Rowan",
+        sex: "M",
+        age: 40,
+        alive: true,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+        married: true
+      },
+      spouse: {
+        id: "p_spouse",
+        name: "Lady Rowan",
+        sex: "F",
+        age: 38,
+        alive: true,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+        married: true
+      },
+      spouse_status: "spouse",
+      children: [],
+      energy: { max: 3, available: 3 },
+      heir_id: null
+    },
+    locals: {
+      liege: {
+        id: "p_liege",
+        name: "House Liege",
+        sex: "M",
+        age: 51,
+        alive: true,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+        married: true
+      },
+      clergy: {
+        id: "p_clergy",
+        name: "Parish Church",
+        sex: "M",
+        age: 45,
+        alive: true,
+        traits: { stewardship: 3, martial: 3, diplomacy: 3, discipline: 3, fertility: 3 },
+        married: false
+      },
+      nobles: []
+    },
+    relationships: [],
+    flags: {},
+    log: []
+  };
+}
 
 describe("turn explanation contract", () => {
   it("builds ordered walkdowns and surface roles on the preview report", () => {
@@ -47,5 +124,146 @@ describe("turn explanation contract", () => {
     });
     expect(ctx.report.headline_causes?.length ?? 0).toBeGreaterThan(0);
     expect(ctx.report.top_drivers.length).toBeGreaterThan(0);
+  });
+
+  it("reconciles food and coin walkdowns from structured obligation receipts when note lines are sparse", () => {
+    const before = makeState();
+    const after = makeState();
+    after.manor.bushels_stored = 25;
+    after.manor.coin = 6;
+
+    const report: TurnReport = {
+      turn_index: 3,
+      weather_multiplier: 0.9,
+      market: { price_per_bushel: 0.1, sell_cap_bushels: 40 },
+      spoilage: { rate: 0.05, loss_bushels: 1 },
+      production_bushels: 10,
+      consumption_bushels: 18,
+      peasant_consumption_bushels: 15,
+      court_consumption_bushels: 3,
+      total_consumption_bushels: 18,
+      shortage_bushels: 0,
+      construction: { progress_added: 0, completed_improvement_id: null },
+      obligations: {
+        tax_due_coin: 0,
+        tithe_due_bushels: 0,
+        arrears_coin: 0,
+        arrears_bushels: 0,
+        war_levy_due: null
+      },
+      household: {
+        births: [],
+        deaths: [],
+        population_delta: 0
+      },
+      house_log: [],
+      events: [],
+      top_drivers: [],
+      notes: [],
+      unrest_breakdown: {
+        schema_version: "unrest_breakdown_v1",
+        before: 18,
+        after: 18,
+        delta: 0,
+        increased_by: [],
+        decreased_by: []
+      }
+    };
+    const phaseResults: PhaseResultV0[] = [
+      {
+        phase: "obligations",
+        receipts: [],
+        fiscal_receipts_v1: [
+          {
+            schema_version: "fiscal_receipt_v1",
+            receipt_id: "maintenance_01",
+            turn: 3,
+            phase: "obligations",
+            phase_sequence: 1,
+            category: "expense.maintenance",
+            counterparty_kind: "self",
+            counterparty_id: "manor:maintenance",
+            counterparty_label: "Manor upkeep",
+            asset: "coin",
+            delta: -2,
+            balance_after: 10,
+            summary: "Manor upkeep paid 2 coin for recurring maintenance.",
+            rule_id: "maintenance.upkeep",
+            related_actor_ids: ["p_head"]
+          },
+          {
+            schema_version: "fiscal_receipt_v1",
+            receipt_id: "liege_due_01",
+            turn: 3,
+            phase: "obligations",
+            phase_sequence: 2,
+            category: "obligation.liege_settlement",
+            counterparty_kind: "liege",
+            counterparty_id: "p_liege",
+            counterparty_label: "House Liege",
+            asset: "coin",
+            delta: -4,
+            balance_after: 6,
+            summary: "Settlement paid in coin to House Liege.",
+            rule_id: "obligations.liege_due",
+            related_actor_ids: ["p_head", "p_liege"]
+          },
+          {
+            schema_version: "fiscal_receipt_v1",
+            receipt_id: "church_due_01",
+            turn: 3,
+            phase: "obligations",
+            phase_sequence: 3,
+            category: "obligation.church_settlement",
+            counterparty_kind: "church",
+            counterparty_id: "p_clergy",
+            counterparty_label: "Parish Church",
+            asset: "food_stores",
+            delta: -6,
+            balance_after: 25,
+            summary: "Settlement drew down food stores for Parish Church.",
+            rule_id: "obligations.church_due",
+            related_actor_ids: ["p_head", "p_clergy"]
+          }
+        ],
+        log_events: [],
+        evidence_events_v0: [],
+        rng_keys_used: []
+      }
+    ];
+
+    const turnExplanation = buildTurnExplanationV1(report, before, after, phaseResults);
+
+    expect(turnExplanation.food_walkdown.reconciles).toBe(true);
+    expect(turnExplanation.coin_walkdown.reconciles).toBe(true);
+    expect(turnExplanation.food_walkdown.rows.map((row) => row.id)).toEqual([
+      "food_starting_stores",
+      "food_production",
+      "food_total_before_deductions",
+      "food_consumption",
+      "food_spoilage",
+      "food_dues",
+      "food_ending_stores"
+    ]);
+    expect(turnExplanation.coin_walkdown.rows.map((row) => row.id)).toEqual([
+      "coin_starting_coin",
+      "coin_market_trade",
+      "coin_marriage_project_other_inflows",
+      "coin_maintenance",
+      "coin_dues_paid",
+      "coin_ending_coin"
+    ]);
+    expect(turnExplanation.food_walkdown.rows.find((row) => row.id === "food_dues")).toMatchObject({
+      amount: 6,
+      summary: "6 bushels left stores to cover dues or arrears."
+    });
+    expect(turnExplanation.coin_walkdown.rows.find((row) => row.id === "coin_maintenance")).toMatchObject({
+      amount: 2,
+      summary: "2 coin went to upkeep and recurring maintenance."
+    });
+    expect(turnExplanation.coin_walkdown.rows.find((row) => row.id === "coin_dues_paid")).toMatchObject({
+      amount: 4,
+      summary: "4 coin went to dues or arrears payments."
+    });
   });
 });

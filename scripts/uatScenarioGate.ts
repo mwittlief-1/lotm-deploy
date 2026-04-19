@@ -34,6 +34,7 @@ type DecisionOverride = {
 type ScenarioExpectations = {
   hunting_yield_min?: number;
   arrears_enforcement_by_turn?: number;
+  obligation_consequence_visible_by_turn?: number;
   grant_window_by_turn?: number;
 };
 
@@ -115,6 +116,12 @@ type ScenarioFinding = {
   hunting_yield_max: number;
   grant_turn?: number | null;
   arrears_turn?: number | null;
+  obligation_visibility?: {
+    collector_labels: string[];
+    collector_states: string[];
+    consequence_summaries: string[];
+    turn: number | null;
+  } | null;
   failures: string[];
 };
 
@@ -125,6 +132,12 @@ type PresetChecklistEntry = {
     failures: string[];
     grant_turn: number | null;
     hunting_yield_max: number;
+    obligation_visibility: {
+      collector_labels: string[];
+      collector_states: string[];
+      consequence_summaries: string[];
+      turn: number | null;
+    } | null;
   };
   manual_review: {
     cue_samples: SurfaceCue[];
@@ -184,6 +197,14 @@ function deriveArtifactHash(payload: Record<string, unknown>): string {
 
 function nowIso(): string {
   return new Date().toISOString();
+}
+
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function readNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : null;
 }
 
 function cloneCueRows(rows: readonly SurfaceCue[]): SurfaceCue[] {
@@ -261,6 +282,44 @@ function findArrearsEnforcementTurn(state: RunState): number | null {
   return Number.isFinite(turn) ? turn : null;
 }
 
+function findObligationConsequenceVisibility(state: RunState): {
+  collector_labels: string[];
+  collector_states: string[];
+  consequence_summaries: string[];
+  turn: number | null;
+} | null {
+  const lastLog = state.log?.[state.log.length - 1];
+  const snapshot: any = lastLog?.snapshot_after ?? null;
+  const view = snapshot?.economy_obligations_view ?? null;
+  const summaries = Array.isArray(view?.counterparty_summaries) ? view.counterparty_summaries : [];
+  const visibleRows = summaries
+    .map((entry: any) => ({
+      arrears_amount: readNumber(entry?.arrears_amount) ?? 0,
+      collector_label: readString(entry?.counterparty_label),
+      collector_state: readString(entry?.collector_state),
+      enforcement_state: readString(entry?.enforcement_state),
+      enforcement_summary: readString(entry?.enforcement_summary)
+    }))
+    .filter((entry) => {
+      return (
+        entry.arrears_amount > 0 &&
+        entry.enforcement_state === "arrears" &&
+        entry.collector_label !== null &&
+        entry.enforcement_summary !== null
+      );
+    });
+
+  if (visibleRows.length === 0) return null;
+
+  const turn = readNumber(view?.turn ?? snapshot?.turn_index ?? state.turn_index);
+  return {
+    collector_labels: visibleRows.map((entry) => entry.collector_label ?? "Unknown"),
+    collector_states: visibleRows.map((entry) => entry.collector_state ?? "unknown"),
+    consequence_summaries: visibleRows.map((entry) => entry.enforcement_summary ?? "Unavailable"),
+    turn
+  };
+}
+
 function listUatPresetMappings(presetPack: PlayabilityPresetPackV1): UatPresetMapping[] {
   return presetPack.presets
     .flatMap((preset) =>
@@ -322,6 +381,12 @@ function runScenario(scenario: ScenarioDefinition, mapping: UatPresetMapping): S
   let state = createNewRun(scenario.seed);
   let grantTurn: number | null = null;
   let arrearsTurn: number | null = null;
+  let obligationVisibility: {
+    collector_labels: string[];
+    collector_states: string[];
+    consequence_summaries: string[];
+    turn: number | null;
+  } | null = null;
   let huntingYieldMax = 0;
 
   for (let i = 0; i < scenario.turns; i++) {
@@ -346,6 +411,10 @@ function runScenario(scenario: ScenarioDefinition, mapping: UatPresetMapping): S
       const hit = findArrearsEnforcementTurn(state);
       if (hit !== null) arrearsTurn = hit;
     }
+    if (obligationVisibility === null) {
+      const hit = findObligationConsequenceVisibility(state);
+      if (hit !== null) obligationVisibility = hit;
+    }
   }
 
   const failures: string[] = [];
@@ -368,6 +437,18 @@ function runScenario(scenario: ScenarioDefinition, mapping: UatPresetMapping): S
       failures.push(`expected arrears enforcement by turn ${expectations.arrears_enforcement_by_turn}, saw turn ${arrearsTurn}`);
     }
   }
+  if (expectations.obligation_consequence_visible_by_turn !== undefined) {
+    const visibleTurn = obligationVisibility?.turn ?? null;
+    if (visibleTurn === null) {
+      failures.push(
+        `expected obligation consequence visibility by turn ${expectations.obligation_consequence_visible_by_turn}, saw none`
+      );
+    } else if (visibleTurn > expectations.obligation_consequence_visible_by_turn) {
+      failures.push(
+        `expected obligation consequence visibility by turn ${expectations.obligation_consequence_visible_by_turn}, saw turn ${visibleTurn}`
+      );
+    }
+  }
 
   return {
     acceptance_ids: [...mapping.acceptance_ids],
@@ -380,6 +461,7 @@ function runScenario(scenario: ScenarioDefinition, mapping: UatPresetMapping): S
     hunting_yield_max: huntingYieldMax,
     grant_turn: grantTurn,
     arrears_turn: arrearsTurn,
+    obligation_visibility: obligationVisibility,
     failures
   };
 }
@@ -399,6 +481,31 @@ function buildChecklistEntry(
         entry.source_artifact_relpath === UAT_SCENARIO_GATE_RELPATH &&
         entry.source_ref === mapping.scenario_id
     ) ?? null;
+  const obligationCueSamples =
+    finding.obligation_visibility === null
+      ? []
+      : [
+          {
+            cue_id: "consequence_turn",
+            label: "Consequence turn",
+            value: String(finding.obligation_visibility.turn ?? "none")
+          },
+          {
+            cue_id: "visible_collectors",
+            label: "Visible collectors",
+            value: finding.obligation_visibility.collector_labels.join(" | ")
+          },
+          {
+            cue_id: "collector_states",
+            label: "Collector states",
+            value: finding.obligation_visibility.collector_states.join(" | ")
+          },
+          {
+            cue_id: "sample_consequence",
+            label: "Sample consequence",
+            value: finding.obligation_visibility.consequence_summaries[0] ?? "Unavailable"
+          }
+        ];
 
   return {
     acceptance_ids: [...mapping.acceptance_ids],
@@ -406,10 +513,11 @@ function buildChecklistEntry(
       arrears_turn: finding.arrears_turn ?? null,
       failures: [...finding.failures],
       grant_turn: finding.grant_turn ?? null,
-      hunting_yield_max: finding.hunting_yield_max
+      hunting_yield_max: finding.hunting_yield_max,
+      obligation_visibility: finding.obligation_visibility
     },
     manual_review: {
-      cue_samples: cloneCueRows(gateExpectation?.cues ?? []),
+      cue_samples: [...cloneCueRows(gateExpectation?.cues ?? []), ...cloneCueRows(obligationCueSamples)],
       expectation_summary:
         gateExpectation?.summary ??
         "Use the locked preset manifest to review the expected visible surface for this preset-driven UAT case.",
@@ -436,6 +544,9 @@ function main(): void {
   const pack = readJson<ScenarioPack>(path.relative(process.cwd(), packPath));
   const presetPack = readJson<PlayabilityPresetPackV1>(PLAYABILITY_PRESET_PACK_RELPATH);
   const lockedPresetManifest = readJson<LockedPresetScenarioManifest>(LOCKED_PRESET_SCENARIOS_RELPATH);
+  const obligationsEvidencePack = readJson<Record<string, unknown>>(
+    "qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json"
+  );
   const reportArtifactRelpath = buildFilteredArtifactRelpath(presetFilter, scenarioFilter);
   const presetMappings = listUatPresetMappings(presetPack);
   const mappingByScenarioId = new Map(presetMappings.map((mapping) => [mapping.scenario_id, mapping]));
@@ -459,6 +570,12 @@ function main(): void {
       hash: deriveArtifactHash(pack as Record<string, unknown>),
       kind: pack.schema_version,
       label: "uat scenario pack"
+    },
+    {
+      artifact_relpath: "qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json",
+      hash: deriveArtifactHash(obligationsEvidencePack),
+      kind: String(obligationsEvidencePack.kind ?? "obligations_visibility_evidence_pack_v1"),
+      label: "obligations visibility evidence pack"
     }
   ];
 
@@ -493,6 +610,7 @@ function main(): void {
     operator_notes: [
       "Select the locked preset in the New Run UI first, then confirm the provenance banner shows the matching preset id and seed before reviewing gameplay surfaces.",
       "Treat qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json as the canonical preset list and qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json as the visible-cue checklist.",
+      "Use docs/qa/obligations_visibility_evidence_pack_v0.3.6.md plus qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json as the canonical obligation evidence bundle for successor, vacancy, and carry review.",
       "Use --preset=<preset_id> for targeted reruns when a single closure lane needs confirmation; scenario ids remain source-pack detail rather than operator-facing checklist names.",
       "Filtered reruns write a release-scoped gate artifact and preserve qa_artifacts/playtest_ops/uat_scenario_gate.json as the full closure checklist for downstream preset manifests."
     ]

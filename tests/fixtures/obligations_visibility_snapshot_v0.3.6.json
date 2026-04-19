@@ -1,0 +1,593 @@
+{
+  "split_payment_successor_rebase": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "Lady Regent (current liege)",
+        "short_title": "Liege",
+        "helper": "Lady Regent now collects liege dues after House Liege died.",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "Lady Regent (current liege): 3 coin in arrears.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 3,
+          "amountLabel": "3 coin",
+          "summary": "Lady Regent (current liege): 3 coin in arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for Lady Regent (current liege) because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay coin to cut carried arrears, then add a gift if you need more liege cover.",
+          "resolvedSummary": "This turn: arrears carried, so stage 1 active now applies.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": true,
+          "settledThisTurn": true
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Lady Regent (current liege): 3 coin in arrears.",
+            "detail": "Stage-one enforcement pressure rose for Lady Regent (current liege) because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 3/1 on manor.obligations.arrears.coin",
+            "detail": "Stage-two preview: enterprise seizure can force coin out of the manor for Lady Regent (current liege); the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Seizure",
+          "paymentModeLabel": "Coin",
+          "previewAmountLabel": "3",
+          "summary": "Stage-two preview: enterprise seizure can force coin out of the manor for Lady Regent (current liege); the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 3,
+            "rows": [
+              {
+                "assetLabel": "Arrears Coin",
+                "balanceAfterLabel": "0",
+                "category": "obligation.liege_settlement",
+                "deltaLabel": "-2",
+                "id": "ledger:t7:obligations:p4:arrears_coin:0002",
+                "ruleLabel": "obligations.visibility_fixture.liege",
+                "summary": "Settlement cleared arrears owed to Lady Regent (current liege)."
+              },
+              {
+                "assetLabel": "Coin",
+                "balanceAfterLabel": "7",
+                "category": "obligation.liege_settlement",
+                "deltaLabel": "-5",
+                "id": "ledger:t7:obligations:p4:coin:0001",
+                "ruleLabel": "obligations.visibility_fixture.liege",
+                "summary": "Settlement paid in coin to Lady Regent (current liege)."
+              },
+              {
+                "assetLabel": "Tax Due Coin",
+                "balanceAfterLabel": "3",
+                "category": "obligation.liege_settlement",
+                "deltaLabel": "-3",
+                "id": "ledger:t7:obligations:p4:tax_due_coin:0003",
+                "ruleLabel": "obligations.visibility_fixture.liege",
+                "summary": "Settlement cleared current due owed to Lady Regent (current liege)."
+              }
+            ]
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Coin",
+                "balanceAfterLabel": "3",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "+3",
+                "id": "ledger:t7:succession:p9:arrears_coin:0009",
+                "ruleLabel": "obligations.visibility_fixture.liege_arrears_carry.credit",
+                "summary": "Moved unpaid tax due into arrears for Lady Regent (current liege)."
+              },
+              {
+                "assetLabel": "Tax Due Coin",
+                "balanceAfterLabel": "0",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "-3",
+                "id": "ledger:t7:succession:p9:tax_due_coin:0010",
+                "ruleLabel": "obligations.visibility_fixture.liege_arrears_carry.debit",
+                "summary": "Moved unpaid current tax due out of the active ledger slot for Lady Regent (current liege)."
+              }
+            ]
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "Father Aldwyn (St. Cuthbert Parish)",
+        "short_title": "Church",
+        "helper": "Father Aldwyn now collects church dues for St. Cuthbert Parish after Parish Church died.",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 4,
+          "amountLabel": "4 bushels",
+          "summary": "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for Father Aldwyn (St. Cuthbert Parish) because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.",
+          "resolvedSummary": "This turn: arrears carried, so stage 1 active now applies.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": true,
+          "settledThisTurn": true
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears.",
+            "detail": "Stage-one enforcement pressure rose for Father Aldwyn (St. Cuthbert Parish) because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 4/1 on manor.obligations.arrears.bushels",
+            "detail": "Stage-two preview: forced food-store payment can clear dues for Father Aldwyn (St. Cuthbert Parish); the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Forced Payment Stores",
+          "paymentModeLabel": "Food stores",
+          "previewAmountLabel": "4",
+          "summary": "Stage-two preview: forced food-store payment can clear dues for Father Aldwyn (St. Cuthbert Parish); the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 3,
+            "rows": [
+              {
+                "assetLabel": "Arrears Bushels",
+                "balanceAfterLabel": "0",
+                "category": "obligation.church_settlement",
+                "deltaLabel": "-1",
+                "id": "ledger:t7:obligations:p5:arrears_bushels:0005",
+                "ruleLabel": "obligations.visibility_fixture.church",
+                "summary": "Settlement cleared arrears owed to Father Aldwyn (St. Cuthbert Parish)."
+              },
+              {
+                "assetLabel": "Food Stores",
+                "balanceAfterLabel": "14",
+                "category": "obligation.church_settlement",
+                "deltaLabel": "-2",
+                "id": "ledger:t7:obligations:p5:food_stores:0004",
+                "ruleLabel": "obligations.visibility_fixture.church",
+                "summary": "Settlement drew down food stores for Father Aldwyn (St. Cuthbert Parish)."
+              },
+              {
+                "assetLabel": "Tithe Due Bushels",
+                "balanceAfterLabel": "4",
+                "category": "obligation.church_settlement",
+                "deltaLabel": "-1",
+                "id": "ledger:t7:obligations:p5:tithe_due_bushels:0006",
+                "ruleLabel": "obligations.visibility_fixture.church",
+                "summary": "Settlement cleared current due owed to Father Aldwyn (St. Cuthbert Parish)."
+              }
+            ]
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Bushels",
+                "balanceAfterLabel": "4",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "+4",
+                "id": "ledger:t7:succession:p9:arrears_bushels:0007",
+                "ruleLabel": "obligations.visibility_fixture.church_arrears_carry.credit",
+                "summary": "Moved unpaid tithe due into arrears for Father Aldwyn (St. Cuthbert Parish)."
+              },
+              {
+                "assetLabel": "Tithe Due Bushels",
+                "balanceAfterLabel": "0",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "-4",
+                "id": "ledger:t7:succession:p9:tithe_due_bushels:0008",
+                "ruleLabel": "obligations.visibility_fixture.church_arrears_carry.debit",
+                "summary": "Moved unpaid current tithe due out of the active ledger slot for Father Aldwyn (St. Cuthbert Parish)."
+              }
+            ]
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      }
+    ]
+  },
+  "church_vacancy_carry": {
+    "counterparty_order": [
+      "liege",
+      "church"
+    ],
+    "receipt_category_order": [
+      "coin",
+      "food",
+      "unrest"
+    ],
+    "sections": [
+      {
+        "id": "liege",
+        "title": "House Liege",
+        "short_title": "Liege",
+        "helper": "Keeps liege dues, arrears pressure, and gift language aligned with coin-first receipts.",
+        "settlement_status": "clear",
+        "due_group": {
+          "title": "Tax due",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: clear.",
+          "receiptCategories": [
+            "coin"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores",
+            "Meat stores"
+          ],
+          "preferredLabel": "Coin",
+          "supportedLabels": [
+            "Coin"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & liege pressure",
+          "amount": 0,
+          "amountLabel": "0 coin",
+          "summary": "House Liege: no carried arrears.",
+          "receiptCategories": [
+            "coin",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "clear",
+          "enforcementSummary": "Stage-one enforcement stayed favorable for House Liege because arrears are clear after carry.",
+          "responseSummary": "Next turn: no liege arrears are carried right now, but coin payments and gifts remain your levers if pressure returns.",
+          "resolvedSummary": "This turn: pressure ended clear with no carried arrears.",
+          "stageLabel": "Pressure clear",
+          "carriedThisTurn": false,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "House Liege: clear.",
+            "detail": "Stage-one enforcement stayed favorable for House Liege because arrears are clear after carry.",
+            "id": "stage_1",
+            "statusLabel": "Clear",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "No next-stage boundary recorded.",
+            "detail": "No stage-two trigger recorded.",
+            "id": "stage_2",
+            "statusLabel": "Dormant",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Dormant",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": null,
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Dormant",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      },
+      {
+        "id": "church",
+        "title": "St. Cuthbert Parish (Vacant)",
+        "short_title": "Church",
+        "helper": "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed.",
+        "settlement_status": "arrears_only",
+        "due_group": {
+          "title": "Tithe due",
+          "amount": 0,
+          "amountLabel": "0 bushels",
+          "summary": "St. Cuthbert Parish (Vacant): 8 bushels in arrears.",
+          "receiptCategories": [
+            "food"
+          ]
+        },
+        "payment_modes": {
+          "acceptedLabels": [
+            "Coin",
+            "Food stores"
+          ],
+          "preferredLabel": "Food stores",
+          "supportedLabels": [
+            "Food stores"
+          ]
+        },
+        "penalty_group": {
+          "title": "Arrears & church pressure",
+          "amount": 8,
+          "amountLabel": "8 bushels",
+          "summary": "St. Cuthbert Parish (Vacant): 8 bushels in arrears.",
+          "receiptCategories": [
+            "food",
+            "unrest"
+          ],
+          "enforcementStage": 1,
+          "enforcementState": "arrears",
+          "enforcementSummary": "Stage-one enforcement pressure rose for St. Cuthbert Parish (Vacant) because arrears remain open after carry.",
+          "responseSummary": "Next turn: pay bushels to cut carried arrears, then add an offering if you need more church cover.",
+          "resolvedSummary": "This turn: arrears carried, so stage 1 active now applies.",
+          "stageLabel": "Stage 1 active",
+          "carriedThisTurn": true,
+          "settledThisTurn": false
+        },
+        "stage_rows": [
+          {
+            "boundaryLabel": "St. Cuthbert Parish (Vacant): 8 bushels in arrears.",
+            "detail": "Stage-one enforcement pressure rose for St. Cuthbert Parish (Vacant) because arrears remain open after carry.",
+            "id": "stage_1",
+            "statusLabel": "Current",
+            "title": "Stage 1 · Arrears carry"
+          },
+          {
+            "boundaryLabel": "Tangible Bite boundary: 8/1 on manor.obligations.arrears.bushels",
+            "detail": "Stage-two preview: forced food-store payment can clear dues for St. Cuthbert Parish (Vacant); the per-turn cap is still unset in tuning.",
+            "id": "stage_2",
+            "statusLabel": "Armed",
+            "title": "Stage 2 · Tangible bite"
+          },
+          {
+            "boundaryLabel": "Unrest 12/100; remaining 88.",
+            "detail": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12.",
+            "id": "stage_3",
+            "statusLabel": "Armed",
+            "title": "Stage 3 · Dispossession danger"
+          }
+        ],
+        "tangible_bite_preview": {
+          "categoryLabel": "Enforcement Forced Payment Stores",
+          "paymentModeLabel": "Food stores",
+          "previewAmountLabel": "8",
+          "summary": "Stage-two preview: forced food-store payment can clear dues for St. Cuthbert Parish (Vacant); the per-turn cap is still unset in tuning.",
+          "turnCapLabel": "No per-turn cap"
+        },
+        "terminal_risk": {
+          "boundaryLabel": "Boundary 12/100 on manor.unrest",
+          "statusLabel": "Armed",
+          "summary": "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 12."
+        },
+        "receipt_groups": [
+          {
+            "id": "payment",
+            "label": "Payments",
+            "category_order": [
+              "obligation.liege_settlement",
+              "obligation.church_settlement",
+              "obligation.extraordinary_levy",
+              "gift.liege",
+              "offering.church"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          },
+          {
+            "id": "penalty",
+            "label": "Penalty trail",
+            "category_order": [
+              "obligation.arrears_carry",
+              "enforcement.penalty"
+            ],
+            "receipt_count": 2,
+            "rows": [
+              {
+                "assetLabel": "Arrears Bushels",
+                "balanceAfterLabel": "8",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "+5",
+                "id": "ledger:t7:succession:p9:arrears_bushels:0001",
+                "ruleLabel": "obligations.visibility_fixture.church_arrears_carry.credit",
+                "summary": "Moved unpaid tithe due into arrears for St. Cuthbert Parish (Vacant)."
+              },
+              {
+                "assetLabel": "Tithe Due Bushels",
+                "balanceAfterLabel": "0",
+                "category": "obligation.arrears_carry",
+                "deltaLabel": "-5",
+                "id": "ledger:t7:succession:p9:tithe_due_bushels:0002",
+                "ruleLabel": "obligations.visibility_fixture.church_arrears_carry.debit",
+                "summary": "Moved unpaid current tithe due out of the active ledger slot for St. Cuthbert Parish (Vacant)."
+              }
+            ]
+          },
+          {
+            "id": "seizure",
+            "label": "Seizures & forced payment",
+            "category_order": [
+              "enforcement.seizure",
+              "enforcement.forced_payment_stores"
+            ],
+            "receipt_count": 0,
+            "rows": []
+          }
+        ]
+      }
+    ]
+  }
+}

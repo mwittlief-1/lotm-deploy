@@ -8,7 +8,19 @@
         "arrears_turn": 3,
         "failures": [],
         "grant_turn": null,
-        "hunting_yield_max": 3
+        "hunting_yield_max": 3,
+        "obligation_visibility": {
+          "collector_labels": [
+            "Local Parish (Vacant)"
+          ],
+          "collector_states": [
+            "vacant"
+          ],
+          "consequence_summaries": [
+            "Stage-one enforcement pressure rose for Local Parish (Vacant) because arrears remain open after carry."
+          ],
+          "turn": 3
+        }
       },
       "manual_review": {
         "cue_samples": [
@@ -26,6 +38,26 @@
             "cue_id": "failures",
             "label": "Failures",
             "value": "none"
+          },
+          {
+            "cue_id": "consequence_turn",
+            "label": "Consequence turn",
+            "value": "3"
+          },
+          {
+            "cue_id": "visible_collectors",
+            "label": "Visible collectors",
+            "value": "Local Parish (Vacant)"
+          },
+          {
+            "cue_id": "collector_states",
+            "label": "Collector states",
+            "value": "vacant"
+          },
+          {
+            "cue_id": "sample_consequence",
+            "label": "Sample consequence",
+            "value": "Stage-one enforcement pressure rose for Local Parish (Vacant) because arrears remain open after carry."
           }
         ],
         "expectation_summary": "The obligations closure scenario still surfaces arrears enforcement on schedule in the accepted short run.",
@@ -94,7 +126,19 @@
         "arrears_turn": 3,
         "failures": [],
         "grant_turn": 4,
-        "hunting_yield_max": 3
+        "hunting_yield_max": 3,
+        "obligation_visibility": {
+          "collector_labels": [
+            "Local Parish (Vacant)"
+          ],
+          "collector_states": [
+            "vacant"
+          ],
+          "consequence_summaries": [
+            "Stage-one enforcement pressure rose for Local Parish (Vacant) because arrears remain open after carry."
+          ],
+          "turn": 3
+        }
       },
       "manual_review": {
         "cue_samples": [
@@ -112,6 +156,26 @@
             "cue_id": "failures",
             "label": "Failures",
             "value": "none"
+          },
+          {
+            "cue_id": "consequence_turn",
+            "label": "Consequence turn",
+            "value": "3"
+          },
+          {
+            "cue_id": "visible_collectors",
+            "label": "Visible collectors",
+            "value": "Local Parish (Vacant)"
+          },
+          {
+            "cue_id": "collector_states",
+            "label": "Collector states",
+            "value": "vacant"
+          },
+          {
+            "cue_id": "sample_consequence",
+            "label": "Sample consequence",
+            "value": "Stage-one enforcement pressure rose for Local Parish (Vacant) because arrears remain open after carry."
           }
         ],
         "expectation_summary": "Grant prospects remain visible within the locked short-run window, so reviewers do not have to seed-hunt.",
@@ -180,7 +244,8 @@
         "arrears_turn": null,
         "failures": [],
         "grant_turn": null,
-        "hunting_yield_max": 7
+        "hunting_yield_max": 7,
+        "obligation_visibility": null
       },
       "manual_review": {
         "cue_samples": [
@@ -269,11 +334,11 @@
       "turns": 2
     }
   ],
-  "completed_at": "2026-04-13T14:35:21.919Z",
+  "completed_at": "2026-04-19T22:11:54.336Z",
   "failed": 0,
   "failures": [],
   "gate": "uat_scenario_gate_v1",
-  "hash": "576637284df54d97cae41a897e7ab9b28f4be9871aace6ff90bfe92abc659b45",
+  "hash": "e60037253e7c4c931e5c1260196c2f7aa91d8e631261300968033289cad1b8a6",
   "notes": [
     "scenario uat_meat_hunting_proxy uses fallback visibility: Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead."
   ],
@@ -289,6 +354,7 @@
   "operator_notes": [
     "Select the locked preset in the New Run UI first, then confirm the provenance banner shows the matching preset id and seed before reviewing gameplay surfaces.",
     "Treat qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json as the canonical preset list and qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json as the visible-cue checklist.",
+    "Use docs/qa/obligations_visibility_evidence_pack_v0.3.6.md plus qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json as the canonical obligation evidence bundle for successor, vacancy, and carry review.",
     "Use --preset=<preset_id> for targeted reruns when a single closure lane needs confirmation; scenario ids remain source-pack detail rather than operator-facing checklist names.",
     "Filtered reruns write a release-scoped gate artifact and preserve qa_artifacts/playtest_ops/uat_scenario_gate.json as the full closure checklist for downstream preset manifests."
   ],
@@ -310,6 +376,7 @@
       "failures": [],
       "grant_turn": null,
       "hunting_yield_max": 7,
+      "obligation_visibility": null,
       "policy_id": "prudent-builder",
       "preset_id": "uat_hunting_proxy",
       "preset_title": "UAT hunting proxy",
@@ -325,6 +392,7 @@
       "failures": [],
       "grant_turn": null,
       "hunting_yield_max": 3,
+      "obligation_visibility": "[Circular]",
       "policy_id": "builder-forward",
       "preset_id": "uat_arrears_enforcement",
       "preset_title": "UAT arrears enforcement",
@@ -340,6 +408,7 @@
       "failures": [],
       "grant_turn": 4,
       "hunting_yield_max": 3,
+      "obligation_visibility": "[Circular]",
       "policy_id": "builder-forward",
       "preset_id": "uat_grant_visibility",
       "preset_title": "UAT grant visibility",
@@ -357,16 +426,22 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json",
-      "hash": "b72fb1f7f1d0416a7c283904b64bfb5ef6ae15261cd2f2c880a1d772fd7b6c2c",
+      "hash": "e62dba53e1ed016be2ff2ae37b2483e5b3c5a6befb7aa09fb3c9197622264603",
       "kind": "locked_preset_scenarios_v1",
       "label": "locked preset manifest"
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
-      "hash": "aec150374b1c1278cc7e709bbb7752e9705b4bb1685d750b5f3fbd9ed8e6d9f6",
+      "hash": "f55863a3429a440027664cfedd10eb279cf45d753a9934fbe2729b7aa9dd7cd0",
       "kind": "uat_scenario_pack_v0.3",
       "label": "uat scenario pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json",
+      "hash": "476330ff50c2bb523df0a339695c54335a1241029e5b441c7c9baf2f1c8453c0",
+      "kind": "obligations_visibility_evidence_pack_v1",
+      "label": "obligations visibility evidence pack"
     }
   ],
-  "started_at": "2026-04-13T14:35:19.623Z"
+  "started_at": "2026-04-19T22:11:52.133Z"
 }

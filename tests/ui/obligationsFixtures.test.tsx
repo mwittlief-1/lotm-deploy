@@ -9,6 +9,12 @@ import {
   buildObligationsFixtureCases,
   OBLIGATIONS_FIXTURE_SCENARIO_ORDER
 } from "../support/obligationsFixtures";
+import {
+  buildObligationsVisibilityEvidencePack,
+  buildObligationsVisibilityFixture,
+  buildObligationsVisibilityFixtureCases,
+  OBLIGATIONS_VISIBILITY_FIXTURE_SCENARIO_ORDER
+} from "../support/obligationsVisibilityFixtures";
 
 function fixturePath(name: string): string {
   return path.resolve("tests/fixtures", name);
@@ -91,5 +97,73 @@ describe("obligations fixtures", () => {
       "tests/fixtures/obligations_detail_snapshot_v0.3.5.json",
       "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json"
     ]);
+  });
+
+  it("matches the deterministic v0.3.6 obligations visibility fixture", () => {
+    const expected = readFixture("obligations_visibility_snapshot_v0.3.6.json");
+
+    expect(buildObligationsVisibilityFixture()).toBe(expected);
+    expect(buildObligationsVisibilityFixture()).toBe(buildObligationsVisibilityFixture());
+  });
+
+  it("locks split-payment successor rebasing and church vacancy carry into deterministic v0.3.6 cases", () => {
+    const cases = buildObligationsVisibilityFixtureCases();
+
+    expect(Object.keys(cases)).toEqual([...OBLIGATIONS_VISIBILITY_FIXTURE_SCENARIO_ORDER]);
+
+    expect(cases.split_payment_successor_rebase.counterpartySections[0]).toMatchObject({
+      title: "Lady Regent (current liege)",
+      helper: "Lady Regent now collects liege dues after House Liege died.",
+      settlementStatus: "arrears_only",
+      dueGroup: {
+        summary: "Lady Regent (current liege): 3 coin in arrears."
+      },
+      penaltyGroup: {
+        amount: 3,
+        summary: "Lady Regent (current liege): 3 coin in arrears.",
+        carriedThisTurn: true,
+        settledThisTurn: true
+      }
+    });
+    expect(cases.split_payment_successor_rebase.counterpartySections[1]).toMatchObject({
+      title: "Father Aldwyn (St. Cuthbert Parish)",
+      helper: "Father Aldwyn now collects church dues for St. Cuthbert Parish after Parish Church died.",
+      settlementStatus: "arrears_only",
+      dueGroup: {
+        summary: "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears."
+      },
+      penaltyGroup: {
+        amount: 4,
+        summary: "Father Aldwyn (St. Cuthbert Parish): 4 bushels in arrears.",
+        carriedThisTurn: true,
+        settledThisTurn: true
+      }
+    });
+
+    expect(cases.church_vacancy_carry.counterpartySections[1]).toMatchObject({
+      title: "St. Cuthbert Parish (Vacant)",
+      helper: "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed.",
+      settlementStatus: "arrears_only",
+      dueGroup: {
+        summary: "St. Cuthbert Parish (Vacant): 8 bushels in arrears."
+      },
+      penaltyGroup: {
+        amount: 8,
+        summary: "St. Cuthbert Parish (Vacant): 8 bushels in arrears.",
+        carriedThisTurn: true
+      }
+    });
+  });
+
+  it("keeps the v0.3.6 obligations visibility evidence pack aligned to fixture ids and gate entry points", () => {
+    const expected = buildObligationsVisibilityEvidencePack();
+    const pack = JSON.parse(
+      fs.readFileSync(path.resolve("qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json"), "utf8")
+    ) as ReturnType<typeof buildObligationsVisibilityEvidencePack>;
+
+    expect(pack).toEqual(expected);
+    expect(pack.cases.map((entry) => entry.fixture_case_id)).toEqual([...OBLIGATIONS_VISIBILITY_FIXTURE_SCENARIO_ORDER]);
+    expect(pack.docs_entry_path).toBe("docs/qa/obligations_visibility_evidence_pack_v0.3.6.md");
+    expect(pack.scenario_gate_artifact_path).toBe("qa_artifacts/playtest_ops/uat_scenario_gate.json");
   });
 });

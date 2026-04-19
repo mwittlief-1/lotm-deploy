@@ -122,6 +122,58 @@ const OBLIGATIONS_CONTRACT = buildObligationsCounterpartyContract({
   } as any
 });
 
+const TURN_EXPLANATION = {
+  schema_version: "turn_explanation_v1",
+  food_walkdown: {
+    schema_version: "turn_explanation_walkdown_v1",
+    metric: "food",
+    unit_label: "bushels",
+    start_amount: 40,
+    end_amount: 25,
+    reconciles: true,
+    rows: [
+      { id: "food_starting_stores", label: "Starting stores", direction: "start", amount: 40, summary: "40 bushels on hand at the start of the turn." },
+      { id: "food_production", label: "Production", direction: "inflow", amount: 10, summary: "10 bushels came in from production." },
+      { id: "food_total_before_deductions", label: "Total before deductions", direction: "net", amount: 50, summary: "50 bushels were available before consumption, spoilage, and dues." },
+      { id: "food_consumption", label: "Consumption", direction: "outflow", amount: 18, summary: "18 bushels were consumed by peasants and court." },
+      { id: "food_spoilage", label: "Spoilage", direction: "outflow", amount: 1, summary: "1 bushel was lost to spoilage." },
+      { id: "food_dues", label: "Dues and tithe", direction: "outflow", amount: 6, summary: "6 bushels left stores to cover dues or arrears." },
+      { id: "food_ending_stores", label: "Ending stores", direction: "ending", amount: 25, summary: "25 bushels remain at turn end." }
+    ]
+  },
+  coin_walkdown: {
+    schema_version: "turn_explanation_walkdown_v1",
+    metric: "coin",
+    unit_label: "coin",
+    start_amount: 12,
+    end_amount: 6,
+    reconciles: true,
+    rows: [
+      { id: "coin_starting_coin", label: "Starting coin", direction: "start", amount: 12, summary: "12 coin on hand at the start of the turn." },
+      { id: "coin_market_trade", label: "Market and trade", direction: "inflow", amount: 0, summary: "No market or trade coin movement was recorded." },
+      { id: "coin_marriage_project_other_inflows", label: "Marriage, project, and other inflows", direction: "inflow", amount: 0, summary: "No marriage, project, or event coin inflows were recorded." },
+      { id: "coin_maintenance", label: "Maintenance and upkeep", direction: "outflow", amount: 2, summary: "2 coin went to upkeep and recurring maintenance." },
+      { id: "coin_dues_paid", label: "Dues paid", direction: "outflow", amount: 4, summary: "4 coin went to dues or arrears payments." },
+      { id: "coin_ending_coin", label: "Ending coin", direction: "ending", amount: 6, summary: "6 coin remain at turn end." }
+    ]
+  },
+  unrest_walkdown: {
+    schema_version: "turn_explanation_walkdown_v1",
+    metric: "unrest",
+    unit_label: "unrest",
+    start_amount: 12,
+    end_amount: 12,
+    reconciles: true,
+    rows: [
+      { id: "unrest_start", label: "Starting unrest", direction: "start", amount: 12, summary: "12 unrest at the start of the turn." },
+      { id: "unrest_net", label: "Net unrest change", direction: "net", amount: 0, summary: "Net unrest change 0." },
+      { id: "unrest_end", label: "Ending unrest", direction: "ending", amount: 12, summary: "12 unrest at the end of the turn." }
+    ]
+  },
+  headline_causes: [],
+  surface_roles: []
+} as const;
+
 describe("ReceiptsViewerPanel", () => {
   it("renders counterparty-first relationship lever cards in grouped mode", () => {
     const data = buildReceiptViewerData({
@@ -207,5 +259,33 @@ describe("ReceiptsViewerPanel", () => {
     expect(markup).toContain("summary");
     expect(markup).toContain("Tax due 2 coin; tithe due 60 bushels.");
     expect(markup).not.toContain("Receipt ID");
+  });
+
+  it("renders ordered coin and food walkdown rows on the grouped player-facing drilldown path", () => {
+    const data = buildReceiptViewerData({
+      diffLedgerItems: DIFF_LEDGER_ITEMS,
+      obligationsContract: OBLIGATIONS_CONTRACT,
+      phaseResults: STRUCTURED_PHASE_RESULTS,
+      turnExplanation: TURN_EXPLANATION as any
+    });
+
+    const markup = renderToStaticMarkup(
+      <ReceiptsViewerPanel
+        counterpartySections={data.counterpartySections}
+        groupedSections={data.groupedSections}
+        mode="grouped"
+        onModeChange={() => undefined}
+        rawPhases={data.rawPhases}
+      />
+    );
+
+    expect(markup).toContain("Walkdown");
+    expect(markup).toContain("Dues and tithe");
+    expect(markup).toContain("-6 bushels");
+    expect(markup).toContain("6 bushels left stores to cover dues or arrears.");
+    expect(markup).toContain("Maintenance and upkeep");
+    expect(markup).toContain("-2 coin");
+    expect(markup).toContain("Dues paid");
+    expect(markup).toContain("-4 coin");
   });
 });

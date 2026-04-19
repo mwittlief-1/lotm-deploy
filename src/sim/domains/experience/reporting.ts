@@ -421,31 +421,50 @@ function sumFiscalDelta(
 }
 
 function extractPaidAmounts(phaseResults?: PhaseResultV0[] | null): {
-  paidCurrentCoin: number;
-  paidCurrentBushels: number;
-  paidArrearsCoin: number;
-  paidArrearsBushels: number;
+  paidCoin: number;
+  paidBushels: number;
 } {
   const lines = phaseNoteLines(phaseResults);
-  let paidCurrentCoin = 0;
-  let paidCurrentBushels = 0;
-  let paidArrearsCoin = 0;
-  let paidArrearsBushels = 0;
+  let paidCoinFromNotes = 0;
+  let paidBushelsFromNotes = 0;
 
   for (const line of lines) {
     const currentMatch = line.match(/Paid current dues: tax -(\d+) coin, tithe -(\d+) bushels\./i);
     if (currentMatch) {
-      paidCurrentCoin += normalizeInteger(Number(currentMatch[1]));
-      paidCurrentBushels += normalizeInteger(Number(currentMatch[2]));
+      paidCoinFromNotes += normalizeInteger(Number(currentMatch[1]));
+      paidBushelsFromNotes += normalizeInteger(Number(currentMatch[2]));
     }
     const arrearsMatch = line.match(/Paid arrears: coin -(\d+), bushels -(\d+)\./i);
     if (arrearsMatch) {
-      paidArrearsCoin += normalizeInteger(Number(arrearsMatch[1]));
-      paidArrearsBushels += normalizeInteger(Number(arrearsMatch[2]));
+      paidCoinFromNotes += normalizeInteger(Number(arrearsMatch[1]));
+      paidBushelsFromNotes += normalizeInteger(Number(arrearsMatch[2]));
     }
   }
 
-  return { paidCurrentCoin, paidCurrentBushels, paidArrearsCoin, paidArrearsBushels };
+  let paidCoinFromStructured = 0;
+  let paidBushelsFromStructured = 0;
+  let sawStructuredCoin = false;
+  let sawStructuredBushels = false;
+
+  for (const phaseResult of allPhaseReceipts(phaseResults)) {
+    for (const receipt of phaseResult.fiscal_receipts_v1 ?? []) {
+      if (!receipt.category.startsWith("obligation.") || receipt.delta >= 0) continue;
+
+      if (receipt.asset === "coin") {
+        paidCoinFromStructured += Math.abs(normalizeInteger(receipt.delta));
+        sawStructuredCoin = true;
+      }
+      if (receipt.asset === "food_stores") {
+        paidBushelsFromStructured += Math.abs(normalizeInteger(receipt.delta));
+        sawStructuredBushels = true;
+      }
+    }
+  }
+
+  return {
+    paidCoin: sawStructuredCoin ? paidCoinFromStructured : paidCoinFromNotes,
+    paidBushels: sawStructuredBushels ? paidBushelsFromStructured : paidBushelsFromNotes
+  };
 }
 
 function buildFoodWalkdown(
@@ -460,7 +479,7 @@ function buildFoodWalkdown(
   const consumption = normalizeInteger(report.total_consumption_bushels || report.consumption_bushels);
   const spoilage = normalizeInteger(report.spoilage.loss_bushels);
   const paidAmounts = extractPaidAmounts(phaseResults);
-  const duesAndTithe = paidAmounts.paidCurrentBushels + paidAmounts.paidArrearsBushels;
+  const duesAndTithe = paidAmounts.paidBushels;
   const endAmount = normalizeInteger(after.manor.bushels_stored);
   const otherEffects = totalBeforeDeductions - consumption - spoilage - duesAndTithe - endAmount;
   const rows: TurnExplanationWalkdownV1["rows"] = [
@@ -510,7 +529,7 @@ function buildFoodWalkdown(
       direction: "outflow",
       amount: duesAndTithe,
       running_total: totalBeforeDeductions - consumption - spoilage - duesAndTithe,
-      summary: duesAndTithe > 0 ? `${duesAndTithe} bushels left stores to cover church dues or arrears.` : "No bushels left stores for tithe settlement this turn."
+      summary: duesAndTithe > 0 ? `${duesAndTithe} bushels left stores to cover dues or arrears.` : "No bushels left stores for dues settlement this turn."
     }
   ];
 
@@ -573,7 +592,7 @@ function buildCoinWalkdown(
         (receipt.category.includes("maintenance") || receipt.summary.toLowerCase().includes("upkeep"))
     )
   );
-  const duesPaid = paidAmounts.paidCurrentCoin + paidAmounts.paidArrearsCoin;
+  const duesPaid = paidAmounts.paidCoin;
   const endAmount = normalizeInteger(after.manor.coin);
   const otherEffects = endAmount - startAmount - marketTradeCoin - marriageProjectOtherInflows + maintenanceUpkeep + duesPaid;
   const rows: TurnExplanationWalkdownV1["rows"] = [

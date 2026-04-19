@@ -1,0 +1,60 @@
+{
+  "kind": "obligations_visibility_evidence_pack_v1",
+  "release": "v0.3.6",
+  "acceptance_id": "obligations_visibility",
+  "docs_entry_path": "docs/qa/obligations_visibility_evidence_pack_v0.3.6.md",
+  "fixture_snapshot_path": "tests/fixtures/obligations_visibility_snapshot_v0.3.6.json",
+  "scenario_gate_artifact_path": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+  "cases": [
+    {
+      "fixture_case_id": "split_payment_successor_rebase",
+      "deterministic_seed_name": "obligations_visibility_successor_seed",
+      "expected_focus": "overview",
+      "live_gate_preset_ids": [
+        "uat_arrears_enforcement"
+      ],
+      "live_gate_scenario_id": "uat_arrears_enforcement",
+      "steps": [
+        "Open the obligations detail sheet and keep the overview focus active.",
+        "Confirm liege and church sections both show successor collectors instead of the deceased office holders.",
+        "Verify partial settlement cleared carried arrears first, then current dues rolled forward into arrears with penalty-trail receipts."
+      ],
+      "expected_cues": [
+        "Lady Regent now collects liege dues after House Liege died.",
+        "Father Aldwyn now collects church dues for St. Cuthbert Parish after Parish Church died.",
+        "Stage-one enforcement pressure rose"
+      ]
+    },
+    {
+      "fixture_case_id": "church_vacancy_carry",
+      "deterministic_seed_name": "obligations_visibility_vacancy_seed",
+      "expected_focus": "church",
+      "live_gate_preset_ids": [],
+      "live_gate_scenario_id": null,
+      "steps": [
+        "Open the obligations detail sheet and focus Church.",
+        "Confirm the dead clergy collector rebases to the parish institution vacancy instead of staying on the deceased actor.",
+        "Verify carry receipts and stage-one consequence copy still reference the vacant parish seat."
+      ],
+      "expected_cues": [
+        "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed.",
+        "St. Cuthbert Parish (Vacant): 8 bushels in arrears.",
+        "Penalty trail"
+      ]
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact_relpath": "tests/fixtures/obligations_visibility_snapshot_v0.3.6.json",
+      "label": "obligations visibility fixture snapshot"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
+      "label": "uat scenario pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+      "label": "uat scenario gate"
+    }
+  ]
+}
