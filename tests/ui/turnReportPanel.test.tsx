@@ -77,4 +77,59 @@ describe("TurnReportPanel", () => {
     expect(html).toContain("Open detail sheet");
     expect(html).not.toContain("food_starting_stores");
   });
+
+  it("keeps the unrest summary card aligned with the shared headline cause wording", () => {
+    const state = createNewRun("lotm_v026_seed_001_baseline");
+    const ctx = proposeTurn(state);
+    const obligationsContract = buildObligationsCounterpartyContract({
+      courtDecisionBudget: null,
+      previewState: ctx.preview_state
+    });
+    ctx.report.turn_explanation_v1.headline_causes = ctx.report.turn_explanation_v1.headline_causes.map((cause) =>
+      cause.metric === "unrest"
+        ? {
+            ...cause,
+            detail: "Arrears pressure (+4) pushed unrest up while Relief: Harvest Festival (-1) eased it."
+          }
+        : cause
+    );
+
+    const html = renderToStaticMarkup(
+      <TurnReportPanel
+        accruedThisTurn={{ coin: 1, bushels: 0 }}
+        anchorFood="food"
+        anchorHousehold="household"
+        arrearsCarried={{ coin: 0, bushels: 0 }}
+        baselineConsPerTurn={3}
+        builderExtraPerTurn={1}
+        consBuilders={0}
+        consFarmers={0}
+        consIdle={0}
+        copy={COPY}
+        courtConsumptionBushels={0}
+        courtRosterEntries={[]}
+        courtSize={0}
+        currentHouseLog={[]}
+        dueEntering={{ coin: 1, bushels: 1 }}
+        fmtObAmount={(value: { bushels?: number; coin?: number }) => `${value.coin ?? 0} coin / ${value.bushels ?? 0} bushels`}
+        hasConsumptionSplit={false}
+        idle={0}
+        manor={ctx.preview_state.manor}
+        obligationsSections={obligationsContract?.counterpartySections ?? []}
+        onOpenObligationsDetails={() => undefined}
+        peasantConsumptionBushels={0}
+        pricingSurface={buildEconomyPricingSurface(ctx.preview_state)}
+        previewState={ctx.preview_state}
+        report={ctx.report}
+        showHouseholdDetails={false}
+        state={state}
+        toggleHouseholdDetails={() => undefined}
+        totalConsumptionBushels={ctx.report.total_consumption_bushels}
+        totalObligations={{ coin: 1, bushels: 1 }}
+        turnYears={3}
+      />
+    );
+
+    expect(html).toContain("Arrears pressure (+4) pushed unrest up while Relief: Harvest Festival (-1) eased it.");
+  });
 });

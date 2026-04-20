@@ -684,6 +684,125 @@ function buildCoinWalkdown(
   };
 }
 
+function humanizeImprovementId(improvementId: string | null | undefined): string | null {
+  const raw = typeof improvementId === "string" ? improvementId.trim() : "";
+  if (!raw) return null;
+  return raw
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function normalizeUnrestLabel(label: string): string {
+  return label.trim().toLowerCase();
+}
+
+function isReliefUnrestLabel(label: string): boolean {
+  const normalized = normalizeUnrestLabel(label);
+  return ["festival", "relief", "aid", "alms", "charity", "feast", "harvest", "mercy"].some((token) =>
+    normalized.includes(token)
+  );
+}
+
+function isProjectUnrestLabel(label: string, report: TurnReport): boolean {
+  const normalized = normalizeUnrestLabel(label);
+  const projectTokens = [
+    "project",
+    "construction",
+    "repair",
+    "repairs",
+    "works",
+    "rebuild",
+    "bridge",
+    "granary",
+    "mill",
+    "chapel",
+    "wall",
+    "walls",
+    "improvement",
+  ];
+  if (projectTokens.some((token) => normalized.includes(token))) return true;
+
+  const completedImprovementLabel = humanizeImprovementId(report.construction.completed_improvement_id);
+  return completedImprovementLabel ? normalized.includes(normalizeUnrestLabel(completedImprovementLabel)) : false;
+}
+
+function canonicalizeUnrestRow(args: {
+  amount: number;
+  direction: "inflow" | "outflow";
+  label: string;
+  report: TurnReport;
+}): { canonicalLabel: string; priority: number; summary: string } {
+  const { amount, direction, label, report } = args;
+  const normalized = normalizeUnrestLabel(label);
+  const isOutflow = direction === "outflow";
+
+  if (normalized === "arrears" || normalized.includes("arrears")) {
+    return {
+      canonicalLabel: isOutflow ? "Arrears relief" : "Arrears pressure",
+      priority: 10,
+      summary: `${amount} unrest ${isOutflow ? "eased as arrears pressure lifted" : "came from arrears pressure"}.`
+    };
+  }
+
+  if (normalized.includes("shortage") || normalized.includes("hunger") || normalized.includes("famine")) {
+    return {
+      canonicalLabel: isOutflow ? "Shortage relief" : "Food shortage",
+      priority: 20,
+      summary: `${amount} unrest ${isOutflow ? "eased as shortage pressure lifted" : "came from food shortage pressure"}.`
+    };
+  }
+
+  if (normalized === "adjustment") {
+    return {
+      canonicalLabel: isOutflow ? "Balancing relief" : "Balancing adjustment",
+      priority: 90,
+      summary: `${amount} unrest ${isOutflow ? "eased through a balancing adjustment" : "came from a balancing adjustment"} recorded on the bounded breakdown.`
+    };
+  }
+
+  if (isProjectUnrestLabel(label, report)) {
+    return {
+      canonicalLabel: isOutflow ? `Project relief: ${label}` : `Project pressure: ${label}`,
+      priority: isOutflow ? 25 : 30,
+      summary: `${amount} unrest ${isOutflow ? `eased because of project relief tied to ${label}` : `came from project pressure tied to ${label}`}.`
+    };
+  }
+
+  if (isOutflow && isReliefUnrestLabel(label)) {
+    return {
+      canonicalLabel: `Relief: ${label}`,
+      priority: 15,
+      summary: `${amount} unrest eased through relief tied to ${label}.`
+    };
+  }
+
+  return {
+    canonicalLabel: isOutflow ? `Event relief: ${label}` : `Event pressure: ${label}`,
+    priority: isOutflow ? 35 : 40,
+    summary: `${amount} unrest ${isOutflow ? `eased because of ${label}` : `came from ${label}`}.`
+  };
+}
+
+function buildUnrestHeadlineDetail(unrestWalkdown: TurnExplanationWalkdownV1): string {
+  const inflows = unrestWalkdown.rows.filter((row) => row.direction === "inflow" && row.amount > 0);
+  const outflows = unrestWalkdown.rows.filter((row) => row.direction === "outflow" && row.amount > 0);
+  const biggestInflow = inflows[0] ?? null;
+  const biggestOutflow = outflows[0] ?? null;
+
+  if (biggestInflow && biggestOutflow) {
+    return `${biggestInflow.label} (${signedAmount(biggestInflow.amount)}) pushed unrest up while ${biggestOutflow.label} (-${biggestOutflow.amount}) eased it.`;
+  }
+  if (biggestInflow) {
+    return `${biggestInflow.label} (${signedAmount(biggestInflow.amount)}) was the clearest visible unrest driver.`;
+  }
+  if (biggestOutflow) {
+    return `${biggestOutflow.label} (-${biggestOutflow.amount}) provided the clearest visible unrest relief.`;
+  }
+  return "Unrest did not meaningfully move.";
+}
+
 function buildUnrestWalkdown(report: TurnReport, before: RunState, after: RunState): TurnExplanationWalkdownV1 {
   const startAmount = normalizeInteger(before.manor.unrest);
   const endAmount = normalizeInteger(after.manor.unrest);
@@ -698,24 +817,67 @@ function buildUnrestWalkdown(report: TurnReport, before: RunState, after: RunSta
       summary: `${startAmount} unrest at the start of the turn.`
     }
   ];
+  let runningTotal = startAmount;
 
-  for (const row of breakdown?.increased_by ?? []) {
+  const increasedRows = [...(breakdown?.increased_by ?? [])]
+    .map((row) => {
+      const amount = normalizeInteger(row.amount);
+      const normalized = canonicalizeUnrestRow({
+        amount,
+        direction: "inflow",
+        label: row.label,
+        report
+      });
+      return {
+        amount,
+        canonicalLabel: normalized.canonicalLabel,
+        priority: normalized.priority,
+        summary: normalized.summary
+      };
+    })
+    .filter((row) => row.amount > 0)
+    .sort((left, right) => left.priority - right.priority || right.amount - left.amount || compareText(left.canonicalLabel, right.canonicalLabel));
+
+  for (const row of increasedRows) {
+    runningTotal += row.amount;
     rows.push({
-      id: `unrest_increase_${row.label.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
-      label: row.label,
+      id: `unrest_increase_${row.canonicalLabel.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+      label: row.canonicalLabel,
       direction: "inflow",
-      amount: normalizeInteger(row.amount),
-      summary: `${normalizeInteger(row.amount)} unrest came from ${row.label.toLowerCase()}.`
+      amount: row.amount,
+      running_total: runningTotal,
+      summary: row.summary
     });
   }
 
-  for (const row of breakdown?.decreased_by ?? []) {
+  const decreasedRows = [...(breakdown?.decreased_by ?? [])]
+    .map((row) => {
+      const amount = normalizeInteger(row.amount);
+      const normalized = canonicalizeUnrestRow({
+        amount,
+        direction: "outflow",
+        label: row.label,
+        report
+      });
+      return {
+        amount,
+        canonicalLabel: normalized.canonicalLabel,
+        priority: normalized.priority,
+        summary: normalized.summary
+      };
+    })
+    .filter((row) => row.amount > 0)
+    .sort((left, right) => left.priority - right.priority || right.amount - left.amount || compareText(left.canonicalLabel, right.canonicalLabel));
+
+  for (const row of decreasedRows) {
+    runningTotal -= row.amount;
     rows.push({
-      id: `unrest_decrease_${row.label.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
-      label: row.label,
+      id: `unrest_decrease_${row.canonicalLabel.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+      label: row.canonicalLabel,
       direction: "outflow",
-      amount: normalizeInteger(row.amount),
-      summary: `${normalizeInteger(row.amount)} unrest eased because of ${row.label.toLowerCase()}.`
+      amount: row.amount,
+      running_total: runningTotal,
+      summary: row.summary
     });
   }
 
@@ -742,7 +904,7 @@ function buildUnrestWalkdown(report: TurnReport, before: RunState, after: RunSta
     unit_label: "unrest",
     start_amount: startAmount,
     end_amount: endAmount,
-    reconciles: true,
+    reconciles: runningTotal === endAmount,
     rows
   };
 }
@@ -792,7 +954,7 @@ function buildHeadlineCauses(
     source: "system_pressure",
     magnitude: Math.abs(unrestDelta),
     summary: `Unrest ${signedAmount(unrestDelta)}`,
-    detail: biggestUnrest ? `${biggestUnrest.label} was the clearest visible unrest driver (${signedAmount(biggestUnrest.amount)}).` : "Unrest did not meaningfully move."
+    detail: biggestUnrest ? buildUnrestHeadlineDetail(unrestWalkdown) : "Unrest did not meaningfully move."
   });
 
   if (report.construction.completed_improvement_id) {
