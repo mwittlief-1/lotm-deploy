@@ -1,4 +1,5 @@
 import React from "react";
+import { buildRunProvenanceV1 } from "../../sim/provenance";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
 import type {
   ObligationsCounterpartyContractSection,
@@ -297,7 +298,7 @@ export function DecisionsPanel({
   turnYears,
   arrearsCarried
 }: DecisionsPanelProps) {
-  const exportCopy = buildPlaytestOpsExportCopy(runSeed);
+  const exportCopy = buildPlaytestOpsExportCopy(runSeed, buildRunProvenanceV1(previewState));
   const payCoin = Math.max(0, Math.min(Math.max(0, manor.coin), Math.trunc(Number.isFinite(decisions.obligations.pay_coin) ? decisions.obligations.pay_coin : 0)));
   const payBushels = Math.max(
     0,

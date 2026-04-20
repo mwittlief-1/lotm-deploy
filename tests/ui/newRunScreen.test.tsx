@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { APP_VERSION } from "../../src/version";
 import { buildNewRunPresetSurface } from "../../src/ui/newRunPresetView";
 import { NewRunScreen } from "../../src/ui/panels/NewRunScreen";
 
@@ -29,6 +30,7 @@ describe("NewRunScreen", () => {
     expect(html).toContain("Arrears-pressure builder");
     expect(html).toContain("builder-forward");
     expect(html).toContain("lotm_v022_seed_001_baseline_extworld");
+    expect(html).toContain(`Provenance: UI ${APP_VERSION}, build ${APP_VERSION}, status aligned.`);
     expect(html).toContain("qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json -&gt; arrears_pressure_builder");
   });
 
@@ -48,6 +50,7 @@ describe("NewRunScreen", () => {
     );
 
     expect(html).toContain("Custom seed");
+    expect(html).toContain(`Provenance: UI ${APP_VERSION}, build ${APP_VERSION}, status aligned.`);
     expect(html).toContain("Generate");
     expect(html).not.toContain("Preset provenance");
   });

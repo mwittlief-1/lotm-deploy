@@ -1,0 +1,28 @@
+{
+  "gate": "preflight",
+  "app_version": "v0.3.6",
+  "sim_version": "v0.2.8.2",
+  "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
+  "baseline_contract": {
+    "app_version": "v0.3.6",
+    "baseline_exists": true,
+    "baseline_relpath": "docs/qa/v0.3.6_non_perturbation_baseline_v0.3.6.json",
+    "contract_relpath": "docs/qa/v0.3.6_preflight_baseline_contract.json",
+    "contract_source": "explicit_contract",
+    "legacy_fallback_relpath": "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json",
+    "policy_mode": "baseline_file",
+    "selection_reason": "explicit_contract_baseline",
+    "baseline_source_app_version": "v0.3.6",
+    "baseline_source_code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634"
+  },
+  "started_at": "2026-04-20T21:58:45.801Z",
+  "tests_run": 3,
+  "passed": 3,
+  "failed": 0,
+  "failures": [],
+  "notes": [
+    "determinism seed: lotm_v022_seed_001_baseline_extworld (turns scanned=12, windows seen=12)"
+  ],
+  "finished_at": "2026-04-20T22:14:59.219Z",
+  "ok": true
+}

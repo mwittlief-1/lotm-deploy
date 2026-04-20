@@ -1,5 +1,5 @@
 {
-  "hash": "e62dba53e1ed016be2ff2ae37b2483e5b3c5a6befb7aa09fb3c9197622264603",
+  "hash": "05492fbcb6a289ea6436aa0734123dbb5192547a40ffc174f84c8f5dec478eb8",
   "kind": "locked_preset_scenarios_v1",
   "qa_flow": {
     "commands": [
@@ -110,17 +110,17 @@
             {
               "cue_id": "ending_bushels_stored",
               "label": "Ending bushels stored",
-              "value": "1192"
+              "value": "1194"
             },
             {
               "cue_id": "ending_coin",
               "label": "Ending coin",
-              "value": "118"
+              "value": "71"
             },
             {
               "cue_id": "ending_unrest",
               "label": "Ending unrest",
-              "value": "3"
+              "value": "16"
             },
             {
               "cue_id": "ending_arrears_bushels",
@@ -134,7 +134,7 @@
             }
           ],
           "expectation_id": "packet_review:baseline_low_pressure_prudent",
-          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
           "source_ref": "baseline_low_pressure_prudent",
           "summary": "Use this as the least noisy reference packet when checking whether the playtest bundle is easy to read and name correctly.",
           "surface_ids": [
@@ -621,7 +621,7 @@
             {
               "cue_id": "ending_bushels_stored",
               "label": "Ending bushels stored",
-              "value": "402"
+              "value": "160"
             },
             {
               "cue_id": "ending_coin",
@@ -636,7 +636,7 @@
             {
               "cue_id": "ending_arrears_bushels",
               "label": "Ending arrears bushels",
-              "value": "444"
+              "value": "499"
             },
             {
               "cue_id": "ending_arrears_coin",
@@ -645,7 +645,7 @@
             }
           ],
           "expectation_id": "packet_review:arrears_pressure_builder",
-          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
           "source_ref": "arrears_pressure_builder",
           "summary": "Use this packet when the review needs visible arrears and enough pressure to compare summary, receipts, and raw exports side by side.",
           "surface_ids": [
@@ -1080,7 +1080,7 @@
             {
               "cue_id": "ending_bushels_stored",
               "label": "Ending bushels stored",
-              "value": "477"
+              "value": "471"
             },
             {
               "cue_id": "ending_coin",
@@ -1090,7 +1090,7 @@
             {
               "cue_id": "ending_unrest",
               "label": "Ending unrest",
-              "value": "45"
+              "value": "47"
             },
             {
               "cue_id": "ending_arrears_bushels",
@@ -1100,11 +1100,11 @@
             {
               "cue_id": "ending_arrears_coin",
               "label": "Ending arrears coin",
-              "value": "4"
+              "value": "7"
             }
           ],
           "expectation_id": "packet_review:relationship_edges_builder",
-          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
           "source_ref": "relationship_edges_builder",
           "summary": "Use this packet when grouped receipts and counterparty follow-up need to stay legible for liege and church review.",
           "surface_ids": [
@@ -1279,21 +1279,21 @@
             {
               "cue_id": "ending_unrest",
               "label": "Ending unrest",
-              "value": "65"
+              "value": "85"
             },
             {
               "cue_id": "ending_arrears_bushels",
               "label": "Ending arrears bushels",
-              "value": "334"
+              "value": "550"
             },
             {
               "cue_id": "ending_arrears_coin",
               "label": "Ending arrears coin",
-              "value": "8"
+              "value": "7"
             }
           ],
           "expectation_id": "packet_review:weather_shortage_builder",
-          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+          "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
           "source_ref": "weather_shortage_builder",
           "summary": "Use this packet when grouped evidence becomes noisy enough that the raw receipt notes and run log should both be inspected.",
           "surface_ids": [
@@ -2297,8 +2297,8 @@
       "label": "playability preset pack"
     },
     {
-      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
-      "hash": "2ef80e7c39bae835befdc9adc5b18549774d9822a664e9c498985298e145d5af",
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
+      "hash": "271e0351a395a7cb328d21860aec0494fe5fa5405632892d36836d73a3ddfe22",
       "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
       "label": "receipt-bundle seed pack"
     },
@@ -2334,7 +2334,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
-      "hash": "576637284df54d97cae41a897e7ab9b28f4be9871aace6ff90bfe92abc659b45",
+      "hash": "4c118f02cdefefd9820ab6732fdcb20650b80b32da6f941c4c6d9cdaf55b1fd2",
       "kind": "uat_scenario_gate_v1",
       "label": "UAT scenario gate"
     },

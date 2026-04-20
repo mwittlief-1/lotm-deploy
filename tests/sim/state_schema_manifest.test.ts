@@ -45,6 +45,11 @@ describe("state schema scaffold", () => {
     expect(summary.preset_id).toBeNull();
     expect(summary.state_schema_version).toBe(RUN_STATE_SCHEMA_VERSION);
     expect(summary.bounded_registry_manifest).toEqual(state.bounded_registry_manifest);
+    expect(summary.run_provenance_v1).toMatchObject({
+      schema_version: "run_provenance_v1",
+      run_app_version: state.app_version,
+      sim_version: state.version
+    });
   });
 
   it("adds the canonical scaffold to legacy preview states deterministically", () => {

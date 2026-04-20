@@ -22,8 +22,8 @@ export function RunLogScreen({
   onFilterChange,
   state
 }: RunLogScreenProps) {
-  const exportCopy = buildPlaytestOpsExportCopy(state.run_seed);
   const provenanceSurface = buildRunProvenanceSurface(state);
+  const exportCopy = buildPlaytestOpsExportCopy(state.run_seed, provenanceSurface.runProvenance);
 
   return (
     <div style={{ padding: 16, fontFamily: "sans-serif", maxWidth: 1100 }}>

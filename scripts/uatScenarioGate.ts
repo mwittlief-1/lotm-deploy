@@ -8,6 +8,7 @@ import { proposeTurn, applyDecisions } from "../src/sim/turn";
 import { decide, canonicalizePolicyId } from "../src/sim/policies";
 import { deterministicHuntingYieldForState } from "../src/sim/domains/economy/productionRegistry";
 import type { RunState, TurnDecisions } from "../src/sim/types";
+import { APP_VERSION } from "../src/version";
 import {
   PLAYABILITY_PRESET_PACK_RELEASE,
   PLAYABILITY_PRESET_PACK_RELPATH,
@@ -16,6 +17,7 @@ import {
 import { LOCKED_PRESET_SCENARIOS_RELPATH } from "./lockedPresetScenarios";
 import { writeStableArtifact } from "./seed_replay/artifactWriter";
 import { sha256, stableStringify } from "./seed_replay/hash";
+import { STORY_UAT_FIXTURE_PACK_RELPATH, type StoryUatFixturePackArtifact } from "./storyUatFixtures";
 
 const DEFAULT_PACK_RELPATH = "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json" as const;
 const UAT_SCENARIO_GATE_RELPATH = "qa_artifacts/playtest_ops/uat_scenario_gate.json" as const;
@@ -167,6 +169,7 @@ type GateReport = {
   failed: number;
   passed: number;
   failures: Array<{ scenario_id: string; detail: string }>;
+  provenance_expectation: string;
   operator_flow: {
     commands: string[];
     note: string;
@@ -179,11 +182,109 @@ type GateReport = {
     report_artifact_relpath: string;
     scenario_filter: string[];
   };
+  story_checklist: StoryChecklistEntry[];
   release: string;
   scenarios: ScenarioFinding[];
   source_artifacts: SourceArtifact[];
   notes: string[];
 };
+
+type StoryChecklistStatus = "automated_fail" | "automated_pass" | "manual_review";
+
+type StoryChecklistEntry = {
+  fixture_case_ids: string[];
+  id: string;
+  scenario_ids: string[];
+  source_artifact_relpath: string | null;
+  status: StoryChecklistStatus;
+  surfaces: string[];
+  summary: string;
+  title: string;
+  verification: "automated" | "manual_review";
+};
+
+const STORY_CHECKLIST_DEFS = [
+  {
+    fixture_case_ids: ["ledger_explain_changes_story"],
+    id: "food_reconciliation",
+    scenario_ids: [],
+    source_artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+    surfaces: ["Turn Report", "Explain Changes", "Food & Stores"],
+    summary: "Verify the food summary and drilldown tell one ordered story from starting stores through ending stores.",
+    title: "US-01 Food ledger walkdown",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: ["ledger_explain_changes_story"],
+    id: "coin_reconciliation",
+    scenario_ids: [],
+    source_artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+    surfaces: ["Turn Report", "Explain Changes", "Coin & Dues"],
+    summary: "Verify coin shows a readable start-to-end walkdown, including upkeep, dues, and any offsetting inflows.",
+    title: "US-02 Coin ledger walkdown",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: ["ledger_explain_changes_story"],
+    id: "unrest_causal_walkdown",
+    scenario_ids: [],
+    source_artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+    surfaces: ["Manor State", "Explain Changes", "Unrest & Stability"],
+    summary: "Verify unrest shows explicit positive and negative contributors and that the net change matches the headline surface.",
+    title: "US-03 Unrest causal walkdown",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: ["obligations_split_payment_story"],
+    id: "obligations_split_payment",
+    scenario_ids: [],
+    source_artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+    surfaces: ["Obligations", "Turn Report", "Coin & Dues", "Council Agenda"],
+    summary: "Verify current dues, arrears carried in, paid this turn, and unpaid carry all remain distinct by counterparty.",
+    title: "US-06 to US-08 Obligations and arrears truth",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: ["obligations_split_payment_story"],
+    id: "arrears_consequences",
+    scenario_ids: ["uat_arrears_enforcement"],
+    source_artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+    surfaces: ["Council Agenda", "Obligations", "Turn Report", "Unrest & Stability"],
+    summary: "Arrears enforcement must become visible within the short deterministic run and remain legible on the player-facing surfaces.",
+    title: "US-09 Arrears consequences",
+    verification: "automated"
+  },
+  {
+    fixture_case_ids: [],
+    id: "project_completion_effects",
+    scenario_ids: [],
+    source_artifact_relpath: null,
+    surfaces: ["Manor State", "Explain Changes", "Construction"],
+    summary: "Verify completed projects leave a visible cost and effect trail in both headline and drilldown surfaces.",
+    title: "US-35 Project completion effects",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: [],
+    id: "relationship_delta_attribution",
+    scenario_ids: [],
+    source_artifact_relpath: null,
+    surfaces: ["Diff Ledger", "Explain Changes", "House Dossier", "Person Card"],
+    summary: "Verify relationship movement is presented as a turn delta with a named cause, not as a repeated total value.",
+    title: "US-38 to US-40 Relationship delta trust",
+    verification: "manual_review"
+  },
+  {
+    fixture_case_ids: [],
+    id: "provenance_parity",
+    scenario_ids: [],
+    source_artifact_relpath: null,
+    surfaces: ["New Run", "Run Log", "Run export", "Run summary", "docs/BUILD_INFO.json"],
+    summary: "Verify the UI version, run export, packet metadata, and build info agree on the same release provenance.",
+    title: "US-45 Provenance parity",
+    verification: "manual_review"
+  }
+] as const;
 
 function readJson<T>(artifactRelpath: string): T {
   return JSON.parse(fs.readFileSync(path.resolve(artifactRelpath), "utf8")) as T;
@@ -539,6 +640,32 @@ function buildChecklistEntry(
   };
 }
 
+function buildStoryChecklist(results: readonly ScenarioFinding[]): StoryChecklistEntry[] {
+  return STORY_CHECKLIST_DEFS.map((entry) => {
+    if (entry.verification === "manual_review") {
+      return {
+        ...entry,
+        fixture_case_ids: [...entry.fixture_case_ids],
+        scenario_ids: [...entry.scenario_ids],
+        status: "manual_review"
+      };
+    }
+
+    const matchedResults = results.filter((result) => entry.scenario_ids.includes(result.scenario_id));
+    const status: StoryChecklistStatus =
+      matchedResults.length > 0 && matchedResults.every((result) => result.failures.length === 0)
+        ? "automated_pass"
+        : "automated_fail";
+
+    return {
+      ...entry,
+      fixture_case_ids: [...entry.fixture_case_ids],
+      scenario_ids: [...entry.scenario_ids],
+      status
+    };
+  });
+}
+
 function main(): void {
   const { packPath, presetFilter, scenarioFilter } = parseArgs(process.argv.slice(2));
   const pack = readJson<ScenarioPack>(path.relative(process.cwd(), packPath));
@@ -547,6 +674,7 @@ function main(): void {
   const obligationsEvidencePack = readJson<Record<string, unknown>>(
     "qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json"
   );
+  const storyFixturePack = readJson<StoryUatFixturePackArtifact>(STORY_UAT_FIXTURE_PACK_RELPATH);
   const reportArtifactRelpath = buildFilteredArtifactRelpath(presetFilter, scenarioFilter);
   const presetMappings = listUatPresetMappings(presetPack);
   const mappingByScenarioId = new Map(presetMappings.map((mapping) => [mapping.scenario_id, mapping]));
@@ -576,12 +704,21 @@ function main(): void {
       hash: deriveArtifactHash(obligationsEvidencePack),
       kind: String(obligationsEvidencePack.kind ?? "obligations_visibility_evidence_pack_v1"),
       label: "obligations visibility evidence pack"
+    },
+    {
+      artifact_relpath: STORY_UAT_FIXTURE_PACK_RELPATH,
+      hash: deriveArtifactHash(storyFixturePack as Record<string, unknown>),
+      kind: storyFixturePack.kind,
+      label: "story fixture pack"
     }
   ];
 
   const report: GateReport = {
     gate: "uat_scenario_gate_v1",
-    release: presetPack.release,
+    release: APP_VERSION,
+    provenance_expectation:
+      `Review against release ${APP_VERSION}. Manual provenance checks should confirm that New Run, Run Log, ` +
+      "run summary export, packet metadata, and BUILD_INFO all agree on the same app version.",
     source_artifacts,
     closure_checklist: [],
     started_at: nowIso(),
@@ -611,9 +748,11 @@ function main(): void {
       "Select the locked preset in the New Run UI first, then confirm the provenance banner shows the matching preset id and seed before reviewing gameplay surfaces.",
       "Treat qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json as the canonical preset list and qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json as the visible-cue checklist.",
       "Use docs/qa/obligations_visibility_evidence_pack_v0.3.6.md plus qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json as the canonical obligation evidence bundle for successor, vacancy, and carry review.",
+      `Use ${STORY_UAT_FIXTURE_PACK_RELPATH} when the v0.3.6 story checklist needs deterministic cue text for Explain Changes or Obligations review.`,
       "Use --preset=<preset_id> for targeted reruns when a single closure lane needs confirmation; scenario ids remain source-pack detail rather than operator-facing checklist names.",
       "Filtered reruns write a release-scoped gate artifact and preserve qa_artifacts/playtest_ops/uat_scenario_gate.json as the full closure checklist for downstream preset manifests."
-    ]
+    ],
+    story_checklist: []
   };
 
   if (scenarios.length === 0) {
@@ -653,6 +792,7 @@ function main(): void {
       }
       return buildChecklistEntry(mapping, finding, lockedPresetManifest);
     });
+  report.story_checklist = buildStoryChecklist(report.scenarios);
 
   report.completed_at = nowIso();
 

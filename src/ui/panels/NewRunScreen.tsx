@@ -1,5 +1,6 @@
 import React from "react";
 
+import { buildRunProvenanceV1 } from "../../sim/provenance";
 import type { PlayabilityPresetId } from "../playabilityPresetPack";
 import type { NewRunPresetSurface } from "../newRunPresetView";
 
@@ -27,6 +28,7 @@ export function NewRunScreen({
   turnYears
 }: NewRunScreenProps) {
   const selectedPreset = presetSurface.selectedPreset;
+  const provenance = buildRunProvenanceV1();
 
   return (
     <div
@@ -49,6 +51,10 @@ export function NewRunScreen({
             Deterministic, seeded prototype. Turn = {turnYears} years. Locked presets stay on the same canonical init path as custom runs.
           </div>
           <div style={{ marginTop: 6, fontSize: 12, opacity: 0.68 }}>App {appVersion}</div>
+          <div style={{ marginTop: 4, fontSize: 12, opacity: 0.68 }}>
+            Provenance: UI {provenance.ui_app_version}, build {provenance.build_info_app_version ?? "unknown"}, status{" "}
+            {provenance.version_match ? "aligned" : "mismatch"}.
+          </div>
         </div>
 
         <div
