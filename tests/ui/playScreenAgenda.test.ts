@@ -162,4 +162,36 @@ describe("play screen court agenda", () => {
     expect(items.map((item) => item.id)).not.toContain("agenda_food_shortage");
     expect(items.map((item) => item.id)).not.toContain("agenda_labor_oversubscribed");
   });
+
+  it("keeps office vacancy and transition prompts anchored to the household surface", () => {
+    const previewState = buildAgendaPreviewState();
+
+    const items = buildCouncilAgendaItems({
+      anchors: PLAY_ANCHORS,
+      copy: {
+        agenda_obligations_title: "Obligations are pressing",
+        agenda_prospect_title: "Opportunity expires soon",
+        agenda_prospect_context: (turnIndex: number) => `A prospect expires end of Turn ${turnIndex}.`,
+        cta_reviewObligations: "Review obligations",
+        cta_viewProspects: "View prospects",
+        cta_viewHousehold: "View household",
+        cta_viewPortfolio: "View portfolio",
+        cta_openDetails: "Open details"
+      },
+      previewState,
+      report: {
+        turn_index: previewState.turn_index,
+        shortage_bushels: 0,
+        prospects_window: null
+      }
+    });
+
+    const householdItems = items.filter((item) => item.anchor === PLAY_ANCHORS.household);
+
+    expect(householdItems.map((item) => item.id)).toEqual([
+      "agenda_offices_required_vacancy_house:house:h_player:steward",
+      "agenda_offices_realm_transition_realm:actor:earl:chancellor"
+    ]);
+    expect(householdItems.every((item) => item.cta_label === "View household")).toBe(true);
+  });
 });

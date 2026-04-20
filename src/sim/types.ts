@@ -413,6 +413,107 @@ export interface PersonCardRegistry {
   entries_by_person_id: Record<string, PersonCardView>;
 }
 
+export interface MarriageWorkflowRelativeRefV1 {
+  person_id: string;
+  person_name: string;
+  house_id: string | null;
+  house_name: string | null;
+}
+
+export interface MarriageWorkflowPersonRefV1 {
+  person_id: string;
+  person_name: string;
+  house_id: string | null;
+  house_name: string | null;
+  parent_refs: MarriageWorkflowRelativeRefV1[];
+}
+
+export interface MarriageWorkflowEffectSummaryV1 {
+  coin_delta: number;
+  relationship_delta: {
+    allegiance: number;
+    respect: number;
+    threat: number;
+  };
+  liege_delta: {
+    respect: number;
+    threat: number;
+  } | null;
+  risk_tags: string[];
+}
+
+export interface MarriageWorkflowInboundOfferV1 {
+  schema_version: "marriage_workflow_inbound_offer_v1";
+  entry_id: string;
+  offer_index: number;
+  offer_key: string | null;
+  state: "received";
+  candidate: MarriageWorkflowPersonRefV1;
+  expected_effects: MarriageWorkflowEffectSummaryV1;
+}
+
+export interface MarriageWorkflowOutboundScoutingV1 {
+  schema_version: "marriage_workflow_outbound_scouting_v1";
+  scouting_status: "available" | "empty";
+  shown_candidate_count: number;
+  held_out_candidate_count: number;
+  total_candidates_considered: number;
+  featured_candidate: MarriageWorkflowPersonRefV1 | null;
+}
+
+export interface MarriageWorkflowLatestOfferV1 {
+  schema_version: "marriage_workflow_latest_offer_v1";
+  offer_key: string;
+  state: "generated" | "pending" | "accepted" | "rejected" | "expired" | "withdrawn";
+  candidate: MarriageWorkflowPersonRefV1;
+  expected_effects: MarriageWorkflowEffectSummaryV1;
+}
+
+export interface MarriageWorkflowSubjectViewV1 {
+  schema_version: "marriage_workflow_subject_v1";
+  subject: MarriageWorkflowPersonRefV1;
+  inbound_offer_count: number;
+  inbound_offers: MarriageWorkflowInboundOfferV1[];
+  outbound_scouting: MarriageWorkflowOutboundScoutingV1 | null;
+  latest_outbound_offer: MarriageWorkflowLatestOfferV1 | null;
+}
+
+export interface MarriageWorkflowViewV1 {
+  schema_version: "marriage_workflow_view_v1";
+  turn_index: number;
+  subject_person_ids: string[];
+  subjects_by_person_id: Record<string, MarriageWorkflowSubjectViewV1>;
+}
+
+export type HouseholdPresenceKindV1 = "resident" | "guest" | "retainer" | "outsider";
+
+export interface HouseholdPresenceEntryV1 {
+  schema_version: "household_presence_entry_v1";
+  person_id: string;
+  person_name: string;
+  presence_kind: HouseholdPresenceKindV1;
+  roster_role: CourtRosterRole | "local_power";
+  local_role: "liege" | "clergy" | "noble" | null;
+  provisioning_class: string | null;
+  lodging_level: string | null;
+  stipend_basis: string | null;
+  residence_manor_id: string | null;
+  court_role_labels: string[];
+  active_seat_ids: string[];
+  active_service_record_ids: string[];
+  presence_summary: string;
+  turnover_note: string | null;
+  succession_note: string | null;
+}
+
+export interface HouseholdPresenceViewV1 {
+  schema_version: "household_presence_view_v1";
+  generated_at_turn_index: number;
+  entry_order: string[];
+  entries_by_person_id: Record<string, HouseholdPresenceEntryV1>;
+  recent_succession: { turn_index: number; new_ruler_name: string } | null;
+}
+
 export interface RunState {
   version: SimVersion;
   app_version: string;

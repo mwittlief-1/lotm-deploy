@@ -1,10 +1,9 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import { buildHouseholdPresenceSurface } from "../householdPresenceView";
 import { findLastSuccession, getPlayerHousehold } from "../stateSelectors";
 import { formatPersonName, Tip } from "../viewHelpers";
 import { PersonCardTrigger } from "./PersonCardTrigger";
-
-type LocalStatus = { key: string; personId: string | null; role: string; name: string; status: "alive" | "deceased" | "vacant" };
 
 type HouseholdPanelProps = {
   anchorId: string;
@@ -31,35 +30,7 @@ export function HouseholdPanel({
 }: HouseholdPanelProps) {
   const household = getPlayerHousehold(previewState);
   const lastSuccession = findLastSuccession(state);
-
-  const localStatusRows: LocalStatus[] = (() => {
-    const sAny: any = previewState as any;
-    const people: any = sAny?.people && typeof sAny.people === "object" ? sAny.people : {};
-    const rows: LocalStatus[] = [];
-
-    const pushLocal = (role: string, key: string, p: any) => {
-      const id = typeof p?.id === "string" ? p.id : null;
-      const reg = id ? people?.[id] : null;
-      const nameRaw =
-        typeof reg?.name === "string"
-          ? reg.name
-          : typeof p?.name === "string"
-            ? p.name
-            : `${role} (Vacant)`;
-      const name = String(nameRaw).trim().length > 0 ? String(nameRaw).trim() : `${role} (Vacant)`;
-      const alive = typeof reg?.alive === "boolean" ? reg.alive : typeof p?.alive === "boolean" ? p.alive : false;
-      const status: LocalStatus["status"] = !id || /\(Vacant\)/i.test(name) ? "vacant" : alive ? "alive" : "deceased";
-      rows.push({ key, personId: id, role, name, status });
-    };
-
-    pushLocal("Liege", "liege", sAny?.locals?.liege);
-    pushLocal("Clergy", "clergy", sAny?.locals?.clergy);
-
-    const nobles: any[] = Array.isArray(sAny?.locals?.nobles) ? sAny.locals.nobles : [];
-    nobles.forEach((n, i) => pushLocal(`Local ${i + 1}`, `noble:${i}`, n));
-
-    return rows.sort((a, b) => a.key.localeCompare(b.key));
-  })();
+  const householdPresenceSurface = buildHouseholdPresenceSurface(previewState);
 
   return (
     <>
@@ -128,26 +99,44 @@ export function HouseholdPanel({
           </div>
         </div>
 
-        <div style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>Locals</div>
-          <ul style={{ margin: "0 0 0 18px" }}>
-            {localStatusRows.map((r) => (
-              <li key={r.key} style={{ marginBottom: 4 }}>
-                <span style={{ fontWeight: 600 }}>{r.role}:</span>{" "}
-                {r.personId && personCardIds?.has(r.personId) && onOpenPersonCard ? (
-                  <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={r.personId}>
-                    {r.name}
-                  </PersonCardTrigger>
-                ) : (
-                  r.name
-                )}
-                <span style={{ marginLeft: 6, fontSize: 12, opacity: 0.8 }}>
-                  ({r.status === "alive" ? "Alive" : r.status === "deceased" ? "Deceased" : "Vacant"})
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {householdPresenceSurface ? (
+          <div
+            data-household-presence={householdPresenceSurface.schemaVersion}
+            style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>Presence at court</div>
+            <div style={{ fontSize: 12, opacity: 0.82, marginBottom: 8 }}>{householdPresenceSurface.helperText}</div>
+            {householdPresenceSurface.recentSuccessionSummary ? (
+              <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 8 }}>
+                {householdPresenceSurface.recentSuccessionSummary}
+              </div>
+            ) : null}
+            <ul style={{ margin: "0 0 0 18px" }}>
+              {householdPresenceSurface.entries.map((entry) => (
+                <li key={entry.personId} style={{ marginBottom: 6 }}>
+                  <div>
+                    {personCardIds?.has(entry.personId) && onOpenPersonCard ? (
+                      <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={entry.personId}>
+                        {entry.personName}
+                      </PersonCardTrigger>
+                    ) : (
+                      entry.personName
+                    )}{" "}
+                    <span style={{ fontSize: 12, opacity: 0.8 }}>({entry.presenceLabel})</span>
+                  </div>
+                  <div style={{ fontSize: 12, opacity: 0.85, marginTop: 2 }}>{entry.reason}</div>
+                  <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{entry.detail}</div>
+                  {entry.turnoverNote ? (
+                    <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{entry.turnoverNote}</div>
+                  ) : null}
+                  {entry.successionNote ? (
+                    <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{entry.successionNote}</div>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
     </>
   );

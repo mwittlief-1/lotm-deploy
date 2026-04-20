@@ -24,8 +24,10 @@ import {
   buildCourtProvisioningView,
   buildCourtStipendRegistry
 } from "../people/courtProvisioningRegistry";
+import { attachHouseholdPresenceView, buildHouseholdPresenceView } from "../people/householdPresenceView";
 import { buildBoundedKnownHouseExperienceSurfaces } from "../people/knownHouseSummaries";
-import { attachOutboundMarriageScoutingRegistry, buildOutboundMarriageScoutingRegistry } from "../people/marriage";
+import { attachOutboundMarriageScoutingRegistry, buildMarriageWindow, buildOutboundMarriageScoutingRegistry } from "../people/marriage";
+import { attachMarriageWorkflowView, buildMarriageWorkflowView } from "../people/marriageWorkflowView";
 import { attachPersonCardRegistry, buildPersonCardRegistry } from "../people/personCardRegistry";
 import {
   readRuntimeRelationshipChangeLog,
@@ -41,9 +43,15 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   const residenceSurfaces = ensureResidenceManorBindings(state);
   const personCardRegistry = buildPersonCardRegistry(state);
+  const marriageWindow = buildMarriageWindow(state);
   const outboundMarriageScoutingRegistry = buildOutboundMarriageScoutingRegistry(state);
+  const marriageWorkflowView = buildMarriageWorkflowView(state, {
+    marriage_window: marriageWindow,
+    outbound_marriage_scouting_registry: outboundMarriageScoutingRegistry
+  });
   const courtProvisioningView = buildCourtProvisioningView(state, personCardRegistry);
   const courtStipendRegistry = buildCourtStipendRegistry(state, courtProvisioningView);
+  const householdPresenceView = buildHouseholdPresenceView(state, personCardRegistry, courtProvisioningView);
   const delegationView = buildCourtDelegationView(state);
   const worldTopologyView = buildBoundedWorldTopologyView();
   const mapViewSnapshot = buildBoundedMapViewSnapshot();
@@ -162,6 +170,8 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
   });
   attachPersonCardRegistry(snapshot as RunState, deepCopy(personCardRegistry));
   attachOutboundMarriageScoutingRegistry(snapshot as RunState, deepCopy(outboundMarriageScoutingRegistry));
+  attachMarriageWorkflowView(snapshot as RunState, deepCopy(marriageWorkflowView));
+  attachHouseholdPresenceView(snapshot as RunState, deepCopy(householdPresenceView));
   attachCourtProvisioningSurfaces(
     snapshot as RunState,
     deepCopy(courtProvisioningView),

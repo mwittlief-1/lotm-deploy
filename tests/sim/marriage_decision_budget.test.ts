@@ -6,6 +6,8 @@ import {
   ensureCourtDecisionBudgetRegistry
 } from "../../src/sim/domains/court/decisionBudget";
 import { applyMarriageDecision } from "../../src/sim/domains/people/marriage";
+import { buildMarriageWorkflowView } from "../../src/sim/domains/people/marriageWorkflowView";
+import { recordPersistedOutboundMarriageOfferEntry } from "../../src/sim/domains/people/marriageOfferRegistry";
 import type { MarriageWindow, Person, RunState } from "../../src/sim/types";
 import { SIM_VERSION } from "../../src/sim/version";
 
@@ -323,5 +325,81 @@ describe("marriage decision budget costs", () => {
         marriage_scout: 1,
       },
     });
+  });
+
+  it("builds marriage_workflow_view_v1 with grouped inbound and outbound state", () => {
+    const state = mkState();
+    const marriageWindow = mkMarriageWindow();
+    const notes: string[] = [];
+
+    applyMarriageDecision(
+      state,
+      { marriage_window: marriageWindow } as any,
+      { marriage: { kind: "marriage", action: "scout" } } as any,
+      notes
+    );
+
+    recordPersistedOutboundMarriageOfferEntry(state, {
+      candidate_house_id: "h_ext_01",
+      candidate_house_label: "House Ashford",
+      candidate_person_id: "p_cand_a",
+      created_turn: state.turn_index,
+      direction: "outbound",
+      dowry_coin_net: 0,
+      relationship_delta: { respect: 0, allegiance: 0, threat: 0 },
+      risk_tags: [],
+      state: "pending",
+      subject_person_id: "p_child_1"
+    });
+
+    const workflowView = buildMarriageWorkflowView(state, {
+      marriage_window: marriageWindow,
+      outbound_marriage_scouting_registry: (state as any).outbound_marriage_scouting_registry
+    });
+
+    expect(workflowView).toMatchObject({
+      schema_version: "marriage_workflow_view_v1",
+      subject_person_ids: ["p_child_1"],
+      subjects_by_person_id: {
+        p_child_1: {
+          schema_version: "marriage_workflow_subject_v1",
+          inbound_offer_count: 1,
+          subject: {
+            person_id: "p_child_1",
+            parent_refs: expect.any(Array)
+          },
+          inbound_offers: [
+            expect.objectContaining({
+              schema_version: "marriage_workflow_inbound_offer_v1",
+              state: "received",
+              candidate: expect.objectContaining({
+                person_id: "p_cand_a",
+                house_id: "h_ext_01"
+              }),
+              expected_effects: expect.objectContaining({
+                coin_delta: 3
+              })
+            })
+          ],
+          outbound_scouting: expect.objectContaining({
+            schema_version: "marriage_workflow_outbound_scouting_v1",
+            scouting_status: "available",
+            shown_candidate_count: 1,
+            featured_candidate: expect.objectContaining({
+              person_id: "p_cand_a"
+            })
+          }),
+          latest_outbound_offer: expect.objectContaining({
+            schema_version: "marriage_workflow_latest_offer_v1",
+            offer_key: "marriage_offer:outbound:subject:p_child_1:candidate:p_cand_a",
+            state: "pending",
+            candidate: expect.objectContaining({
+              person_id: "p_cand_a"
+            })
+          })
+        }
+      }
+    });
+    expect(notes).toEqual(["Scouted prospects; next marriage window slightly improved."]);
   });
 });

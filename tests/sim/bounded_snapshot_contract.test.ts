@@ -120,6 +120,14 @@ describe("bounded snapshot contract", () => {
         candidate_ids: expect.any(Array),
       });
     }
+    expect((snapshot as any).marriage_workflow_view).toMatchObject({
+      schema_version: "marriage_workflow_view_v1",
+      subject_person_ids: expect.any(Array),
+    });
+    expect((snapshot as any).household_presence_view).toMatchObject({
+      schema_version: "household_presence_view_v1",
+      entry_order: expect.any(Array),
+    });
     expect((snapshot as any).court_provisioning_view).toMatchObject({
       schema_version: "court_provisioning_view_v1",
       person_ids: expect.any(Array),
@@ -147,6 +155,8 @@ describe("bounded snapshot contract", () => {
     expect(serialized.claimant_summary).toBeUndefined();
     expect(serialized.person_card_registry).toBeUndefined();
     expect(serialized.outbound_marriage_scouting_registry).toBeUndefined();
+    expect(serialized.marriage_workflow_view).toBeUndefined();
+    expect(serialized.household_presence_view).toBeUndefined();
     expect(serialized.court_provisioning_view).toBeUndefined();
     expect(serialized.court_stipend_registry).toBeUndefined();
     expect(serialized.world_topology_view).toMatchObject({
@@ -200,6 +210,8 @@ describe("bounded snapshot contract", () => {
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "person_card_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "outbound_marriage_scouting_registry")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "marriage_workflow_view")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "household_presence_view")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "court_provisioning_view")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "court_stipend_registry")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "grant_eligibility")).toBe(false);

@@ -7,6 +7,9 @@ import {
   TURN_YEARS
 } from "../../sim/constants";
 import type { RunState, TurnContext, TurnDecisions } from "../../sim/types";
+import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
+import { buildMarriageWorkflowSurface } from "../marriageWorkflowView";
+import { buildPersonCardSurface } from "../personCardView";
 import {
   buildHouseIndexes,
   buildParentsIndex,
@@ -98,11 +101,13 @@ import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
 import { EventsPanel } from "./EventsPanel";
+import { HouseDossierPanel } from "./HouseDossierPanel";
 import { IntelPanel } from "./IntelPanel";
 import { KnownHousesPanel } from "./KnownHousesPanel";
 import { ManorStatePanel } from "./ManorStatePanel";
 import { ModalSheet } from "./ModalSheet";
 import { ObligationsDetailPanel } from "./ObligationsDetailPanel";
+import { PersonCardPanel } from "./PersonCardPanel";
 import { PortfolioOverviewPanel } from "./PortfolioOverviewPanel";
 import { ProspectsPanel } from "./ProspectsPanel";
 import { ReceiptsViewerPanel } from "./ReceiptsViewerPanel";
@@ -166,7 +171,9 @@ export function PlayScreen({
   state,
   toast
 }: PlayScreenProps) {
+  const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
+  const [activePersonCardId, setActivePersonCardId] = useState<string | null>(null);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
@@ -518,6 +525,22 @@ export function PlayScreen({
     [courtDecisionBudget, ctx.preview_state]
   );
   const topologyDebugSurface = useMemo(() => buildTopologyDebugSurface(ctx.preview_state), [ctx.preview_state]);
+  const personCardIds = useMemo(() => {
+    const ids = Array.isArray((ctx.preview_state as any)?.person_card_registry?.person_ids)
+      ? ((ctx.preview_state as any).person_card_registry.person_ids as string[])
+      : [];
+    return new Set(ids);
+  }, [ctx.preview_state]);
+  const dossierHouseIds = useMemo(() => new Set(listHouseDossierIds(ctx.preview_state)), [ctx.preview_state]);
+  const marriageWorkflowSurface = useMemo(() => buildMarriageWorkflowSurface(ctx.preview_state), [ctx.preview_state]);
+  const activePersonCardSurface = useMemo(
+    () => (activePersonCardId ? buildPersonCardSurface(ctx.preview_state, activePersonCardId) : null),
+    [activePersonCardId, ctx.preview_state]
+  );
+  const activeHouseDossierSurface = useMemo(
+    () => (activeHouseDossierId ? buildHouseDossierSurface(ctx.preview_state, activeHouseDossierId) : null),
+    [activeHouseDossierId, ctx.preview_state]
+  );
   const portfolioMapCheckpoint = useMemo(
     () =>
       buildPortfolioMapCheckpoint({
@@ -654,6 +677,24 @@ export function PlayScreen({
     setReceiptViewerRoute(null);
   }
 
+  function openPersonCard(personId: string) {
+    setActiveHouseDossierId(null);
+    setActivePersonCardId(personId);
+  }
+
+  function closePersonCard() {
+    setActivePersonCardId(null);
+  }
+
+  function openHouseDossier(houseId: string) {
+    setActivePersonCardId(null);
+    setActiveHouseDossierId(houseId);
+  }
+
+  function closeHouseDossier() {
+    setActiveHouseDossierId(null);
+  }
+
   function openObligationsDetails(origin: "turn_report" | "decisions", focus: ObligationsModalFocus = "overview") {
     setObligationsModalRoute(createObligationsModalRoute(origin, focus));
   }
@@ -770,6 +811,7 @@ export function PlayScreen({
         anchorId={PLAY_ANCHORS.prospects}
         copy={copy}
         costsForProspect={costsForProspect}
+        dossierHouseIds={dossierHouseIds}
         effectsSummary={effectsSummary}
         fmtSigned={fmtSigned}
         getProspectDecision={getProspectDecision}
@@ -778,7 +820,11 @@ export function PlayScreen({
         hiddenCount={prospectsHiddenCount}
         hiddenIds={prospectsHiddenIds}
         houseLabel={houseLabel}
+        marriageWorkflowSurface={marriageWorkflowSurface}
+        onOpenHouseDossier={openHouseDossier}
+        onOpenPersonCard={openPersonCard}
         personNameFromRegistry={personNameFromRegistry}
+        personCardIds={personCardIds}
         pfHouseLabelById={pfHouseIx.houseLabelById}
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}
@@ -974,6 +1020,28 @@ export function PlayScreen({
           scopeLabel={portfolioEvidenceScope.receiptScopeLabel}
           scopeSummary={portfolioEvidenceScope.receiptScopeSummary}
         />
+      </ModalSheet>
+
+      <ModalSheet
+        onClose={closePersonCard}
+        open={activePersonCardSurface !== null}
+        subtitle={activePersonCardSurface?.subtitle}
+        title={activePersonCardSurface?.personName ?? "Person card"}
+      >
+        {activePersonCardSurface ? (
+          <PersonCardPanel initialTab="overview" onOpenPersonCard={openPersonCard} surface={activePersonCardSurface} />
+        ) : null}
+      </ModalSheet>
+
+      <ModalSheet
+        onClose={closeHouseDossier}
+        open={activeHouseDossierSurface !== null}
+        subtitle={activeHouseDossierSurface?.subtitle}
+        title={activeHouseDossierSurface?.houseName ?? "House dossier"}
+      >
+        {activeHouseDossierSurface ? (
+          <HouseDossierPanel initialTab="player" onOpenPersonCard={openPersonCard} surface={activeHouseDossierSurface} />
+        ) : null}
       </ModalSheet>
     </div>
   );

@@ -8,7 +8,9 @@ import {
   buildCourtProvisioningView,
   buildCourtStipendRegistry,
 } from "./courtProvisioningRegistry";
-import { attachOutboundMarriageScoutingRegistry, buildOutboundMarriageScoutingRegistry } from "./marriage";
+import { attachHouseholdPresenceView, buildHouseholdPresenceView } from "./householdPresenceView";
+import { attachOutboundMarriageScoutingRegistry, buildMarriageWindow, buildOutboundMarriageScoutingRegistry } from "./marriage";
+import { attachMarriageWorkflowView, buildMarriageWorkflowView } from "./marriageWorkflowView";
 import { attachPersonCardRegistry, buildPersonCardRegistry } from "./personCardRegistry";
 import { ensureResidenceManorBindings } from "./residenceManorRegistry";
 import { buildSuccessionExperienceSurfaces } from "./successionSummaries";
@@ -28,9 +30,15 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   const grantAcquisitionSurfaces = buildGrantAcquisitionExperienceSurfaces(state);
   ensureResidenceManorBindings(state);
   const personCardRegistry = buildPersonCardRegistry(state);
+  const marriageWindow = buildMarriageWindow(state);
   const outboundMarriageScoutingRegistry = buildOutboundMarriageScoutingRegistry(state);
+  const marriageWorkflowView = buildMarriageWorkflowView(state, {
+    marriage_window: marriageWindow,
+    outbound_marriage_scouting_registry: outboundMarriageScoutingRegistry
+  });
   const courtProvisioningView = buildCourtProvisioningView(state, personCardRegistry);
   const courtStipendRegistry = buildCourtStipendRegistry(state, courtProvisioningView);
+  const householdPresenceView = buildHouseholdPresenceView(state, personCardRegistry, courtProvisioningView);
   (state as any).known_houses = experienceSurfaces.known_houses;
   (state as any).house_dossiers = experienceSurfaces.house_dossiers;
   (state as any).succession_line_summary = successionSurfaces.succession_line_summary;
@@ -49,6 +57,8 @@ export function buildHouseholdRoster(state: RunState): HouseholdRoster {
   attachHiddenSurface(state.house as object, "acquisition_prospects_window", grantAcquisitionSurfaces.acquisition_prospects_window);
   attachPersonCardRegistry(state, personCardRegistry);
   attachOutboundMarriageScoutingRegistry(state, outboundMarriageScoutingRegistry);
+  attachMarriageWorkflowView(state, marriageWorkflowView);
+  attachHouseholdPresenceView(state, householdPresenceView);
   attachCourtProvisioningSurfaces(state, courtProvisioningView, courtStipendRegistry);
 
   const heirId = state.house.heir_id ?? null;

@@ -61,5 +61,9 @@ describe("HouseholdPanel", () => {
     if (localLiegeId) {
       expect(html).toContain(`data-person-card-open="${localLiegeId}"`);
     }
+
+    expect(html).toContain('data-household-presence="household_presence_view_v1"');
+    expect(html).toContain("Rules the household and anchors the court this turn.");
+    expect(html).toContain("Lives outside your household but still matters as part of the nearby noble web.");
   });
 });

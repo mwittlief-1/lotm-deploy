@@ -1,7 +1,9 @@
 import React from "react";
 import { getGrantProspectTemplate } from "../../content/experienceContent";
 import type { RunState } from "../../sim/types";
+import type { MarriageWorkflowSurface } from "../marriageWorkflowView";
 import { Tip, formatParentsLine } from "../viewHelpers";
+import { HouseDossierTrigger } from "./HouseDossierTrigger";
 import { PersonCardTrigger } from "./PersonCardTrigger";
 
 type ProspectDecision = "accept" | "reject" | null;
@@ -11,6 +13,7 @@ type ProspectsPanelProps = {
   anchorId: string;
   copy: any;
   costsForProspect: (prospect: any) => { coin: number; energy: number; bushels: number };
+  dossierHouseIds?: Set<string>;
   effectsSummary: (prospect: any) => { coin?: number; rel?: string | null; flags?: string | null };
   fmtSigned: (value: number) => string;
   getProspectDecision: (id: string) => ProspectDecision;
@@ -19,6 +22,8 @@ type ProspectsPanelProps = {
   hiddenIds: string[];
   hiddenCount: number;
   houseLabel: (houseId: string | null | undefined) => string;
+  marriageWorkflowSurface?: MarriageWorkflowSurface | null;
+  onOpenHouseDossier?: (houseId: string) => void;
   onOpenPersonCard?: (personId: string) => void;
   personNameFromRegistry: (personId: string | null | undefined) => string | null;
   personCardIds?: Set<string>;
@@ -42,6 +47,7 @@ export function ProspectsPanel({
   anchorId,
   copy,
   costsForProspect,
+  dossierHouseIds,
   effectsSummary,
   fmtSigned,
   getProspectDecision,
@@ -50,6 +56,8 @@ export function ProspectsPanel({
   hiddenIds,
   hiddenCount,
   houseLabel,
+  marriageWorkflowSurface,
+  onOpenHouseDossier,
   onOpenPersonCard,
   personNameFromRegistry,
   personCardIds,
@@ -70,11 +78,149 @@ export function ProspectsPanel({
 }: ProspectsPanelProps) {
   const people: any = (previewState as any).people;
   const grantTemplate = getGrantProspectTemplate();
+  const canOpenHouseDossier = (houseId: string | null | undefined): houseId is string =>
+    Boolean(houseId && dossierHouseIds?.has(houseId) && onOpenHouseDossier);
 
   return (
     <>
       <h4 id={anchorId} style={{ marginTop: 12 }}>{copy.prospects}</h4>
       <div style={{ fontSize: 12, opacity: 0.85 }}>{copy.prospectsHelper}</div>
+
+      {marriageWorkflowSurface && marriageWorkflowSurface.subjects.length > 0 ? (
+        <div
+          data-marriage-workflow={marriageWorkflowSurface.schemaVersion}
+          style={{ marginTop: 10, display: "grid", gap: 10 }}
+        >
+          <div style={{ padding: 10, border: "1px solid #eee", background: "#fffdf8" }}>
+            <div style={{ fontWeight: 700 }}>Marriage workflow</div>
+            <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{marriageWorkflowSurface.helperText}</div>
+          </div>
+
+          {marriageWorkflowSurface.subjects.map((workflow) => (
+            <div key={workflow.workflowId} style={{ padding: 10, border: "1px solid #eee", background: "#fff" }}>
+              <div style={{ fontWeight: 700 }}>
+                {personCardIds?.has(workflow.subject.personId) && onOpenPersonCard ? (
+                  <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={workflow.subject.personId}>
+                    {workflow.subject.title}
+                  </PersonCardTrigger>
+                ) : (
+                  workflow.subject.title
+                )}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{workflow.subject.detail}</div>
+
+              {workflow.subjectParents.length > 0 ? (
+                <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>
+                  Parents:{" "}
+                  {workflow.subjectParents.map((parent, index) => (
+                    <React.Fragment key={parent.personId}>
+                      {index > 0 ? ", " : null}
+                      {personCardIds?.has(parent.personId) && onOpenPersonCard ? (
+                        <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={parent.personId}>
+                          {parent.title}
+                        </PersonCardTrigger>
+                      ) : (
+                        parent.title
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              ) : null}
+
+              <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
+                <div style={{ padding: 10, border: "1px solid #f0ede4", background: "#fffcf5" }}>
+                  <div style={{ fontWeight: 700 }}>Inbound proposals</div>
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{workflow.inboundSummary}</div>
+
+                  {workflow.inboundOffers.length > 0 ? (
+                    <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
+                      {workflow.inboundOffers.map((offer) => (
+                        <div key={offer.entryId} style={{ paddingTop: 8, borderTop: "1px solid #f0ede4" }}>
+                          <div style={{ fontSize: 12, opacity: 0.85 }}>{offer.offerSummary}</div>
+                          <div style={{ marginTop: 4 }}>
+                            Candidate:{" "}
+                            {personCardIds?.has(offer.candidate.personId) && onOpenPersonCard ? (
+                              <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={offer.candidate.personId}>
+                                {offer.candidate.title}
+                              </PersonCardTrigger>
+                            ) : (
+                              offer.candidate.title
+                            )}
+                          </div>
+                          {offer.houseLabel ? (
+                            <div style={{ marginTop: 2, fontSize: 12, opacity: 0.85 }}>
+                              House:{" "}
+                              {canOpenHouseDossier(offer.houseId) ? (
+                                <HouseDossierTrigger houseId={offer.houseId} onOpenHouseDossier={onOpenHouseDossier!}>
+                                  {offer.houseLabel}
+                                </HouseDossierTrigger>
+                              ) : (
+                                offer.houseLabel
+                              )}
+                            </div>
+                          ) : null}
+                          <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                            Expected effects: {offer.effectSummary}
+                          </div>
+                          <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                            Reject outcome: {offer.rejectOutcomeSummary}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div style={{ padding: 10, border: "1px solid #f0ede4", background: "#fffcf5" }}>
+                  <div style={{ fontWeight: 700 }}>Outbound scouting & offer</div>
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{workflow.outboundSummary}</div>
+                  {workflow.outboundFeaturedCandidate ? (
+                    <div style={{ marginTop: 6, fontSize: 12, opacity: 0.9 }}>
+                      Featured candidate:{" "}
+                      {personCardIds?.has(workflow.outboundFeaturedCandidate.personId) && onOpenPersonCard ? (
+                        <PersonCardTrigger
+                          onOpenPersonCard={onOpenPersonCard}
+                          personId={workflow.outboundFeaturedCandidate.personId}
+                        >
+                          {workflow.outboundFeaturedCandidate.title}
+                        </PersonCardTrigger>
+                      ) : (
+                        workflow.outboundFeaturedCandidate.title
+                      )}
+                      {workflow.outboundFeaturedCandidate.houseLabel ? (
+                        <>
+                          {" "}from{" "}
+                          {canOpenHouseDossier(workflow.outboundFeaturedCandidate.houseId) ? (
+                            <HouseDossierTrigger
+                              houseId={workflow.outboundFeaturedCandidate.houseId}
+                              onOpenHouseDossier={onOpenHouseDossier!}
+                            >
+                              {workflow.outboundFeaturedCandidate.houseLabel}
+                            </HouseDossierTrigger>
+                          ) : (
+                            workflow.outboundFeaturedCandidate.houseLabel
+                          )}
+                        </>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {workflow.outboundSendOutcomeSummary ? (
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                      Send outcome: {workflow.outboundSendOutcomeSummary}
+                    </div>
+                  ) : null}
+                  {workflow.latestOfferSummary ? (
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                      {workflow.latestOfferSummary}
+                    </div>
+                  ) : null}
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.8 }}>{workflow.helperText}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {(() => {
         const anyVisibleExpired = prospectsShown.some(
