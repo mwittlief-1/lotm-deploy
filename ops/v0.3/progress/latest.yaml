@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-003-T02
-  last_completed_task_id: V03-R6-003-T01
+  current_task_id: ''
+  last_completed_task_id: V03-R6-006-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 2d9c910
+  git_commit: 00e5f6e
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,15 +21,15 @@ last_run:
     run1: ''
     run2: ''
 notes: >-
-  Integrator recovery remains active on 2026-04-19. Kickoff now carries the
-  accepted R6-001 explanation spine, the recovered R6-004-T03 dossier trust
-  contract, the accepted R6-002-T03 collector rebasing seam, and the newly
-  accepted V03-R6-002-T04, V03-R6-003-T01, and V03-R6-007-T01 lane wave.
-  Economy now has deterministic obligation visibility evidence plus reconciled
-  food and coin walkdown rows, and social now has the upgraded dossier and
-  person-card context layer with player-facing holdings and intel framing.
-  The next same-lane sequence is economy V03-R6-003-T02 followed by social
-  V03-R6-005-T01. Shared repo-wide merge debt remains open: preflight reports
+  Integrator acceptance advanced again on 2026-04-20. Kickoff now carries the
+  accepted economy verification closeout for V03-R6-003-T02 and V03-R6-003-T03
+  plus the accepted social chain for V03-R6-005-T01 and V03-R6-006-T01. There
+  are no remaining ready lane tasks in the v0.3.6 implementation queue. The
+  only remaining R6 task is V03-R6-008-T03, which stays blocked behind shared
+  release-close conditions and final evidence work. A story-to-task
+  reconciliation note and story-coverage matrix have been added so the 45-story
+  UAT pack can be tracked separately from the compressed 19-task engineering
+  backlog. Shared repo-wide merge debt remains open: preflight reports
   test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
   for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
   produced a clean branch-wide exit in this workspace.

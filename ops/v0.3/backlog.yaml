@@ -11494,7 +11494,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Surface maintenance and project completion effects in headline and drilldown views
-  status: ready
+  status: done
   priority: 77
   tranche: 7
   change_type: behavior_change
@@ -11555,7 +11555,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Clarify upkeep labor and placeholder-versus-live economy messaging
-  status: todo
+  status: done
   priority: 76
   tranche: 7
   change_type: behavior_change
@@ -11763,7 +11763,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Define unified marriage workflow view contract
-  status: ready
+  status: done
   priority: 76
   tranche: 7
   change_type: behavior_change
@@ -11822,7 +11822,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Add household presence view contract
-  status: todo
+  status: done
   priority: 75
   tranche: 7
   change_type: behavior_change
