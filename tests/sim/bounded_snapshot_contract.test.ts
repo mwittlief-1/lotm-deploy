@@ -177,12 +177,19 @@ describe("bounded snapshot contract", () => {
       seat_r: 94,
       owner_actor_id: "actor_abbey_hx_28841"
     });
+    expect((snapshot as any).manor_detail_view).toMatchObject({
+      schema_version: "manor_detail_view_v1",
+      manor_id: "manor_hx_26597",
+      seat_q: 183,
+      seat_r: 94
+    });
     expect(serialized.portfolio).toEqual(state.portfolio);
     expect(serialized.log).toBeUndefined();
     expect(serialized.institutions).toBeUndefined();
     expect(serialized.service_records).toBeUndefined();
     expect(serialized.beliefs).toBeUndefined();
     expect(serialized.ai_rail_debug_packet).toBeUndefined();
+    expect(serialized.manor_detail_view).toBeUndefined();
     expect(serialized.grant_eligibility).toBeUndefined();
     expect(serialized.grant_source_registry).toBeUndefined();
     expect(serialized.grant_dossier_summaries).toBeUndefined();
@@ -206,6 +213,7 @@ describe("bounded snapshot contract", () => {
     });
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "beliefs")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "ai_rail_debug_packet")).toBe(false);
+    expect(Object.prototype.propertyIsEnumerable.call(snapshot, "manor_detail_view")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "succession_line_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "claimant_summary")).toBe(false);
     expect(Object.prototype.propertyIsEnumerable.call(snapshot, "person_card_registry")).toBe(false);

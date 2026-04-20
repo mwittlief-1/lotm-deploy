@@ -82,6 +82,7 @@ export type ManorViewSurface = {
 type EnrichedMapRow = {
   countyLabel: string;
   holdingLabel: string;
+  manorLabel: string;
   mapTarget: PortfolioMapTarget;
   ownerLabel: string;
   riverExposureLabel: string;
@@ -131,12 +132,18 @@ function targetFromSelectorRow(selectorRow: MapViewRowV1): PortfolioMapTarget {
   };
 }
 
+function fallbackManorLabel(row: MapSnapshotRow): string {
+  if (row.is_anchor_manor) return "Current manor";
+  const match = /^hx_(\d+)$/.exec(row.seat_hex_id);
+  return match ? `Hx ${match[1]}` : row.manor_id;
+}
+
 function targetFromSnapshotRow(row: MapSnapshotRow): PortfolioMapTarget {
   return {
     countyId: row.county_id,
     holdingId: row.holding_id,
     manorId: row.manor_id,
-    manorLabel: row.manor_label
+    manorLabel: fallbackManorLabel(row)
   };
 }
 
@@ -161,6 +168,7 @@ function buildEnrichedRows(snapshot: MapViewSnapshotV1): EnrichedMapRow[] {
     return {
       countyLabel: selectorRow?.county_label ?? row.county_id,
       holdingLabel: selectorRow?.holding_label ?? row.holding_id,
+      manorLabel: selectorRow?.manor_label ?? fallbackManorLabel(row),
       mapTarget: selectorRow ? targetFromSelectorRow(selectorRow) : targetFromSnapshotRow(row),
       ownerLabel: selectorRow?.owner_label ?? row.owner_actor_id,
       riverExposureLabel: riverExposureLabel(selectorRow, row),
@@ -234,7 +242,7 @@ export function buildWorldMapScreenSurface(
       isSelected,
       leftPct: normalizePercent(pixel.x, minX, maxX),
       manorId: entry.row.manor_id,
-      manorLabel: entry.row.manor_label,
+      manorLabel: entry.manorLabel,
       ownerLabel: entry.ownerLabel,
       riverExposureLabel: entry.riverExposureLabel,
       roadExposureLabel: entry.roadExposureLabel,
@@ -258,7 +266,7 @@ export function buildWorldMapScreenSurface(
         flags,
         holdingLabel: entry.holdingLabel,
         manorId: entry.row.manor_id,
-        manorLabel: entry.row.manor_label,
+        manorLabel: entry.manorLabel,
         ownerLabel: entry.ownerLabel,
         riverExposure: entry.riverExposureLabel,
         roadExposure: entry.roadExposureLabel,
@@ -268,8 +276,8 @@ export function buildWorldMapScreenSurface(
       };
     });
 
-  const selectedTargetLabel = routeSurface.target.manor_label ?? selectedRow.row.manor_label;
-  const liegeSeatLabel = liegeSeatRow ? `${liegeSeatRow.row.manor_label} (${liegeSeatRow.ownerLabel})` : null;
+  const selectedTargetLabel = routeSurface.target.manor_label ?? selectedRow.manorLabel;
+  const liegeSeatLabel = liegeSeatRow ? `${liegeSeatRow.manorLabel} (${liegeSeatRow.ownerLabel})` : null;
 
   return {
     anchorManorId: snapshot.anchor_manor_id,

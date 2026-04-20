@@ -7,7 +7,6 @@
   "rows": [
     {
       "manor_id": "manor_hx_26597",
-      "manor_label": "Hx 26597",
       "is_anchor_manor": true,
       "seat_hex_id": "hx_26597",
       "seat_q": 183,
@@ -18,7 +17,6 @@
     },
     {
       "manor_id": "manor_hx_27972",
-      "manor_label": "Hx 27972",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_27972",
       "seat_q": 153,
@@ -29,7 +27,6 @@
     },
     {
       "manor_id": "manor_hx_27973",
-      "manor_label": "Hx 27973",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_27973",
       "seat_q": 154,
@@ -40,7 +37,6 @@
     },
     {
       "manor_id": "manor_hx_28538",
-      "manor_label": "Hx 28538",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_28538",
       "seat_q": 157,
@@ -51,7 +47,6 @@
     },
     {
       "manor_id": "manor_hx_28811",
-      "manor_label": "Hx 28811",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_28811",
       "seat_q": 149,
@@ -62,7 +57,6 @@
     },
     {
       "manor_id": "manor_hx_28840",
-      "manor_label": "Hx 28840",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_28840",
       "seat_q": 178,
@@ -73,7 +67,6 @@
     },
     {
       "manor_id": "manor_hx_28841",
-      "manor_label": "Hx 28841",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_28841",
       "seat_q": 179,
@@ -84,7 +77,6 @@
     },
     {
       "manor_id": "manor_hx_29096",
-      "manor_label": "Hx 29096",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29096",
       "seat_q": 153,
@@ -95,7 +87,6 @@
     },
     {
       "manor_id": "manor_hx_29126",
-      "manor_label": "Hx 29126",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29126",
       "seat_q": 183,
@@ -106,7 +97,6 @@
     },
     {
       "manor_id": "manor_hx_29369",
-      "manor_label": "Hx 29369",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29369",
       "seat_q": 145,
@@ -117,7 +107,6 @@
     },
     {
       "manor_id": "manor_hx_29371",
-      "manor_label": "Hx 29371",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29371",
       "seat_q": 147,
@@ -128,7 +117,6 @@
     },
     {
       "manor_id": "manor_hx_29372",
-      "manor_label": "Hx 29372",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29372",
       "seat_q": 148,
@@ -139,7 +127,6 @@
     },
     {
       "manor_id": "manor_hx_29412",
-      "manor_label": "Hx 29412",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29412",
       "seat_q": 188,
@@ -150,7 +137,6 @@
     },
     {
       "manor_id": "manor_hx_29660",
-      "manor_label": "Hx 29660",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29660",
       "seat_q": 155,
@@ -161,7 +147,6 @@
     },
     {
       "manor_id": "manor_hx_29691",
-      "manor_label": "Hx 29691",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29691",
       "seat_q": 186,
@@ -172,7 +157,6 @@
     },
     {
       "manor_id": "manor_hx_29933",
-      "manor_label": "Hx 29933",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_29933",
       "seat_q": 147,
@@ -183,7 +167,6 @@
     },
     {
       "manor_id": "manor_hx_30217",
-      "manor_label": "Hx 30217",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30217",
       "seat_q": 150,
@@ -194,7 +177,6 @@
     },
     {
       "manor_id": "manor_hx_30260",
-      "manor_label": "Hx 30260",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30260",
       "seat_q": 193,
@@ -205,7 +187,6 @@
     },
     {
       "manor_id": "manor_hx_30262",
-      "manor_label": "Hx 30262",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30262",
       "seat_q": 195,
@@ -216,7 +197,6 @@
     },
     {
       "manor_id": "manor_hx_30491",
-      "manor_label": "Hx 30491",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30491",
       "seat_q": 143,
@@ -227,7 +207,6 @@
     },
     {
       "manor_id": "manor_hx_30535",
-      "manor_label": "Hx 30535",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30535",
       "seat_q": 187,
@@ -238,7 +217,6 @@
     },
     {
       "manor_id": "manor_hx_30811",
-      "manor_label": "Hx 30811",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_30811",
       "seat_q": 182,
@@ -249,7 +227,6 @@
     },
     {
       "manor_id": "manor_hx_31061",
-      "manor_label": "Hx 31061",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31061",
       "seat_q": 151,
@@ -260,7 +237,6 @@
     },
     {
       "manor_id": "manor_hx_31093",
-      "manor_label": "Hx 31093",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31093",
       "seat_q": 183,
@@ -271,7 +247,6 @@
     },
     {
       "manor_id": "manor_hx_31094",
-      "manor_label": "Hx 31094",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31094",
       "seat_q": 184,
@@ -282,7 +257,6 @@
     },
     {
       "manor_id": "manor_hx_31099",
-      "manor_label": "Hx 31099",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31099",
       "seat_q": 189,
@@ -293,7 +267,6 @@
     },
     {
       "manor_id": "manor_hx_31338",
-      "manor_label": "Hx 31338",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31338",
       "seat_q": 147,
@@ -304,7 +277,6 @@
     },
     {
       "manor_id": "manor_hx_31643",
-      "manor_label": "Hx 31643",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31643",
       "seat_q": 171,
@@ -315,7 +287,6 @@
     },
     {
       "manor_id": "manor_hx_31655",
-      "manor_label": "Hx 31655",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31655",
       "seat_q": 183,
@@ -326,7 +297,6 @@
     },
     {
       "manor_id": "manor_hx_31932",
-      "manor_label": "Hx 31932",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_31932",
       "seat_q": 179,
@@ -337,7 +307,6 @@
     },
     {
       "manor_id": "manor_hx_32204",
-      "manor_label": "Hx 32204",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32204",
       "seat_q": 170,
@@ -348,7 +317,6 @@
     },
     {
       "manor_id": "manor_hx_32209",
-      "manor_label": "Hx 32209",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32209",
       "seat_q": 175,
@@ -359,7 +327,6 @@
     },
     {
       "manor_id": "manor_hx_32219",
-      "manor_label": "Hx 32219",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32219",
       "seat_q": 185,
@@ -370,7 +337,6 @@
     },
     {
       "manor_id": "manor_hx_32221",
-      "manor_label": "Hx 32221",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32221",
       "seat_q": 187,
@@ -381,7 +347,6 @@
     },
     {
       "manor_id": "manor_hx_32475",
-      "manor_label": "Hx 32475",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32475",
       "seat_q": 160,
@@ -392,7 +357,6 @@
     },
     {
       "manor_id": "manor_hx_32485",
-      "manor_label": "Hx 32485",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32485",
       "seat_q": 170,
@@ -403,7 +367,6 @@
     },
     {
       "manor_id": "manor_hx_32760",
-      "manor_label": "Hx 32760",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32760",
       "seat_q": 164,
@@ -414,7 +377,6 @@
     },
     {
       "manor_id": "manor_hx_32768",
-      "manor_label": "Hx 32768",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32768",
       "seat_q": 172,
@@ -425,7 +387,6 @@
     },
     {
       "manor_id": "manor_hx_32770",
-      "manor_label": "Hx 32770",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32770",
       "seat_q": 174,
@@ -436,7 +397,6 @@
     },
     {
       "manor_id": "manor_hx_32802",
-      "manor_label": "Hx 32802",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_32802",
       "seat_q": 206,
@@ -447,7 +407,6 @@
     },
     {
       "manor_id": "manor_hx_33050",
-      "manor_label": "Hx 33050",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33050",
       "seat_q": 173,
@@ -458,7 +417,6 @@
     },
     {
       "manor_id": "manor_hx_33053",
-      "manor_label": "Hx 33053",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33053",
       "seat_q": 176,
@@ -469,7 +427,6 @@
     },
     {
       "manor_id": "manor_hx_33083",
-      "manor_label": "Hx 33083",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33083",
       "seat_q": 206,
@@ -480,7 +437,6 @@
     },
     {
       "manor_id": "manor_hx_33325",
-      "manor_label": "Hx 33325",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33325",
       "seat_q": 167,
@@ -491,7 +447,6 @@
     },
     {
       "manor_id": "manor_hx_33329",
-      "manor_label": "Hx 33329",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33329",
       "seat_q": 171,
@@ -502,7 +457,6 @@
     },
     {
       "manor_id": "manor_hx_33338",
-      "manor_label": "Hx 33338",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33338",
       "seat_q": 180,
@@ -513,7 +467,6 @@
     },
     {
       "manor_id": "manor_hx_33344",
-      "manor_label": "Hx 33344",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33344",
       "seat_q": 186,
@@ -524,7 +477,6 @@
     },
     {
       "manor_id": "manor_hx_33645",
-      "manor_label": "Hx 33645",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33645",
       "seat_q": 206,
@@ -535,7 +487,6 @@
     },
     {
       "manor_id": "manor_hx_33878",
-      "manor_label": "Hx 33878",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33878",
       "seat_q": 158,
@@ -546,7 +497,6 @@
     },
     {
       "manor_id": "manor_hx_33886",
-      "manor_label": "Hx 33886",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33886",
       "seat_q": 166,
@@ -557,7 +507,6 @@
     },
     {
       "manor_id": "manor_hx_33900",
-      "manor_label": "Hx 33900",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33900",
       "seat_q": 180,
@@ -568,7 +517,6 @@
     },
     {
       "manor_id": "manor_hx_33915",
-      "manor_label": "Hx 33915",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_33915",
       "seat_q": 195,
@@ -579,7 +527,6 @@
     },
     {
       "manor_id": "manor_hx_34157",
-      "manor_label": "Hx 34157",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34157",
       "seat_q": 156,
@@ -590,7 +537,6 @@
     },
     {
       "manor_id": "manor_hx_34162",
-      "manor_label": "Hx 34162",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34162",
       "seat_q": 161,
@@ -601,7 +547,6 @@
     },
     {
       "manor_id": "manor_hx_34181",
-      "manor_label": "Hx 34181",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34181",
       "seat_q": 180,
@@ -612,7 +557,6 @@
     },
     {
       "manor_id": "manor_hx_34183",
-      "manor_label": "Hx 34183",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34183",
       "seat_q": 182,
@@ -623,7 +567,6 @@
     },
     {
       "manor_id": "manor_hx_34196",
-      "manor_label": "Hx 34196",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34196",
       "seat_q": 195,
@@ -634,7 +577,6 @@
     },
     {
       "manor_id": "manor_hx_34201",
-      "manor_label": "Hx 34201",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34201",
       "seat_q": 200,
@@ -645,7 +587,6 @@
     },
     {
       "manor_id": "manor_hx_34209",
-      "manor_label": "Hx 34209",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34209",
       "seat_q": 208,
@@ -656,7 +597,6 @@
     },
     {
       "manor_id": "manor_hx_34402",
-      "manor_label": "Hx 34402",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34402",
       "seat_q": 120,
@@ -667,7 +607,6 @@
     },
     {
       "manor_id": "manor_hx_34404",
-      "manor_label": "Hx 34404",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34404",
       "seat_q": 122,
@@ -678,7 +617,6 @@
     },
     {
       "manor_id": "manor_hx_34437",
-      "manor_label": "Hx 34437",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34437",
       "seat_q": 155,
@@ -689,7 +627,6 @@
     },
     {
       "manor_id": "manor_hx_34446",
-      "manor_label": "Hx 34446",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34446",
       "seat_q": 164,
@@ -700,7 +637,6 @@
     },
     {
       "manor_id": "manor_hx_34460",
-      "manor_label": "Hx 34460",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34460",
       "seat_q": 178,
@@ -711,7 +647,6 @@
     },
     {
       "manor_id": "manor_hx_34476",
-      "manor_label": "Hx 34476",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34476",
       "seat_q": 194,
@@ -722,7 +657,6 @@
     },
     {
       "manor_id": "manor_hx_34483",
-      "manor_label": "Hx 34483",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34483",
       "seat_q": 201,
@@ -733,7 +667,6 @@
     },
     {
       "manor_id": "manor_hx_34487",
-      "manor_label": "Hx 34487",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34487",
       "seat_q": 205,
@@ -744,7 +677,6 @@
     },
     {
       "manor_id": "manor_hx_34488",
-      "manor_label": "Hx 34488",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34488",
       "seat_q": 206,
@@ -755,7 +687,6 @@
     },
     {
       "manor_id": "manor_hx_34491",
-      "manor_label": "Hx 34491",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34491",
       "seat_q": 209,
@@ -766,7 +697,6 @@
     },
     {
       "manor_id": "manor_hx_34686",
-      "manor_label": "Hx 34686",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34686",
       "seat_q": 123,
@@ -777,7 +707,6 @@
     },
     {
       "manor_id": "manor_hx_34737",
-      "manor_label": "Hx 34737",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34737",
       "seat_q": 174,
@@ -788,7 +717,6 @@
     },
     {
       "manor_id": "manor_hx_34760",
-      "manor_label": "Hx 34760",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34760",
       "seat_q": 197,
@@ -799,7 +727,6 @@
     },
     {
       "manor_id": "manor_hx_34770",
-      "manor_label": "Hx 34770",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_34770",
       "seat_q": 207,
@@ -810,7 +737,6 @@
     },
     {
       "manor_id": "manor_hx_35003",
-      "manor_label": "Hx 35003",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35003",
       "seat_q": 159,
@@ -821,7 +747,6 @@
     },
     {
       "manor_id": "manor_hx_35280",
-      "manor_label": "Hx 35280",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35280",
       "seat_q": 155,
@@ -832,7 +757,6 @@
     },
     {
       "manor_id": "manor_hx_35283",
-      "manor_label": "Hx 35283",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35283",
       "seat_q": 158,
@@ -843,7 +767,6 @@
     },
     {
       "manor_id": "manor_hx_35304",
-      "manor_label": "Hx 35304",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35304",
       "seat_q": 179,
@@ -854,7 +777,6 @@
     },
     {
       "manor_id": "manor_hx_35327",
-      "manor_label": "Hx 35327",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35327",
       "seat_q": 202,
@@ -865,7 +787,6 @@
     },
     {
       "manor_id": "manor_hx_35525",
-      "manor_label": "Hx 35525",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35525",
       "seat_q": 119,
@@ -876,7 +797,6 @@
     },
     {
       "manor_id": "manor_hx_35581",
-      "manor_label": "Hx 35581",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35581",
       "seat_q": 175,
@@ -887,7 +807,6 @@
     },
     {
       "manor_id": "manor_hx_35599",
-      "manor_label": "Hx 35599",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35599",
       "seat_q": 193,
@@ -898,7 +817,6 @@
     },
     {
       "manor_id": "manor_hx_35602",
-      "manor_label": "Hx 35602",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35602",
       "seat_q": 196,
@@ -909,7 +827,6 @@
     },
     {
       "manor_id": "manor_hx_35604",
-      "manor_label": "Hx 35604",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35604",
       "seat_q": 198,
@@ -920,7 +837,6 @@
     },
     {
       "manor_id": "manor_hx_35611",
-      "manor_label": "Hx 35611",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35611",
       "seat_q": 205,
@@ -931,7 +847,6 @@
     },
     {
       "manor_id": "manor_hx_35807",
-      "manor_label": "Hx 35807",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35807",
       "seat_q": 120,
@@ -942,7 +857,6 @@
     },
     {
       "manor_id": "manor_hx_35821",
-      "manor_label": "Hx 35821",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35821",
       "seat_q": 134,
@@ -953,7 +867,6 @@
     },
     {
       "manor_id": "manor_hx_35844",
-      "manor_label": "Hx 35844",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35844",
       "seat_q": 157,
@@ -964,7 +877,6 @@
     },
     {
       "manor_id": "manor_hx_35858",
-      "manor_label": "Hx 35858",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35858",
       "seat_q": 171,
@@ -975,7 +887,6 @@
     },
     {
       "manor_id": "manor_hx_35882",
-      "manor_label": "Hx 35882",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35882",
       "seat_q": 195,
@@ -986,7 +897,6 @@
     },
     {
       "manor_id": "manor_hx_35883",
-      "manor_label": "Hx 35883",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_35883",
       "seat_q": 196,
@@ -997,7 +907,6 @@
     },
     {
       "manor_id": "manor_hx_36087",
-      "manor_label": "Hx 36087",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36087",
       "seat_q": 119,
@@ -1008,7 +917,6 @@
     },
     {
       "manor_id": "manor_hx_36149",
-      "manor_label": "Hx 36149",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36149",
       "seat_q": 181,
@@ -1019,7 +927,6 @@
     },
     {
       "manor_id": "manor_hx_36156",
-      "manor_label": "Hx 36156",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36156",
       "seat_q": 188,
@@ -1030,7 +937,6 @@
     },
     {
       "manor_id": "manor_hx_36371",
-      "manor_label": "Hx 36371",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36371",
       "seat_q": 122,
@@ -1041,7 +947,6 @@
     },
     {
       "manor_id": "manor_hx_36396",
-      "manor_label": "Hx 36396",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36396",
       "seat_q": 147,
@@ -1052,7 +957,6 @@
     },
     {
       "manor_id": "manor_hx_36402",
-      "manor_label": "Hx 36402",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36402",
       "seat_q": 153,
@@ -1063,7 +967,6 @@
     },
     {
       "manor_id": "manor_hx_36426",
-      "manor_label": "Hx 36426",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36426",
       "seat_q": 177,
@@ -1074,7 +977,6 @@
     },
     {
       "manor_id": "manor_hx_36433",
-      "manor_label": "Hx 36433",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36433",
       "seat_q": 184,
@@ -1085,7 +987,6 @@
     },
     {
       "manor_id": "manor_hx_36448",
-      "manor_label": "Hx 36448",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36448",
       "seat_q": 199,
@@ -1096,7 +997,6 @@
     },
     {
       "manor_id": "manor_hx_36648",
-      "manor_label": "Hx 36648",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36648",
       "seat_q": 118,
@@ -1107,7 +1007,6 @@
     },
     {
       "manor_id": "manor_hx_36703",
-      "manor_label": "Hx 36703",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36703",
       "seat_q": 173,
@@ -1118,7 +1017,6 @@
     },
     {
       "manor_id": "manor_hx_36709",
-      "manor_label": "Hx 36709",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36709",
       "seat_q": 179,
@@ -1129,7 +1027,6 @@
     },
     {
       "manor_id": "manor_hx_36718",
-      "manor_label": "Hx 36718",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36718",
       "seat_q": 188,
@@ -1140,7 +1037,6 @@
     },
     {
       "manor_id": "manor_hx_36720",
-      "manor_label": "Hx 36720",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36720",
       "seat_q": 190,
@@ -1151,7 +1047,6 @@
     },
     {
       "manor_id": "manor_hx_36724",
-      "manor_label": "Hx 36724",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36724",
       "seat_q": 194,
@@ -1162,7 +1057,6 @@
     },
     {
       "manor_id": "manor_hx_36734",
-      "manor_label": "Hx 36734",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36734",
       "seat_q": 204,
@@ -1173,7 +1067,6 @@
     },
     {
       "manor_id": "manor_hx_36745",
-      "manor_label": "Hx 36745",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36745",
       "seat_q": 215,
@@ -1184,7 +1077,6 @@
     },
     {
       "manor_id": "manor_hx_36951",
-      "manor_label": "Hx 36951",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36951",
       "seat_q": 140,
@@ -1195,7 +1087,6 @@
     },
     {
       "manor_id": "manor_hx_36989",
-      "manor_label": "Hx 36989",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36989",
       "seat_q": 178,
@@ -1206,7 +1097,6 @@
     },
     {
       "manor_id": "manor_hx_36998",
-      "manor_label": "Hx 36998",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_36998",
       "seat_q": 187,
@@ -1217,7 +1107,6 @@
     },
     {
       "manor_id": "manor_hx_37233",
-      "manor_label": "Hx 37233",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37233",
       "seat_q": 141,
@@ -1228,7 +1117,6 @@
     },
     {
       "manor_id": "manor_hx_37235",
-      "manor_label": "Hx 37235",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37235",
       "seat_q": 143,
@@ -1239,7 +1127,6 @@
     },
     {
       "manor_id": "manor_hx_37239",
-      "manor_label": "Hx 37239",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37239",
       "seat_q": 147,
@@ -1250,7 +1137,6 @@
     },
     {
       "manor_id": "manor_hx_37270",
-      "manor_label": "Hx 37270",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37270",
       "seat_q": 178,
@@ -1261,7 +1147,6 @@
     },
     {
       "manor_id": "manor_hx_37278",
-      "manor_label": "Hx 37278",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37278",
       "seat_q": 186,
@@ -1272,7 +1157,6 @@
     },
     {
       "manor_id": "manor_hx_37487",
-      "manor_label": "Hx 37487",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37487",
       "seat_q": 114,
@@ -1283,7 +1167,6 @@
     },
     {
       "manor_id": "manor_hx_37492",
-      "manor_label": "Hx 37492",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37492",
       "seat_q": 119,
@@ -1294,7 +1177,6 @@
     },
     {
       "manor_id": "manor_hx_37526",
-      "manor_label": "Hx 37526",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37526",
       "seat_q": 153,
@@ -1305,7 +1187,6 @@
     },
     {
       "manor_id": "manor_hx_37547",
-      "manor_label": "Hx 37547",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37547",
       "seat_q": 174,
@@ -1316,7 +1197,6 @@
     },
     {
       "manor_id": "manor_hx_37554",
-      "manor_label": "Hx 37554",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37554",
       "seat_q": 181,
@@ -1327,7 +1207,6 @@
     },
     {
       "manor_id": "manor_hx_37568",
-      "manor_label": "Hx 37568",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37568",
       "seat_q": 195,
@@ -1338,7 +1217,6 @@
     },
     {
       "manor_id": "manor_hx_37573",
-      "manor_label": "Hx 37573",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37573",
       "seat_q": 200,
@@ -1349,7 +1227,6 @@
     },
     {
       "manor_id": "manor_hx_37578",
-      "manor_label": "Hx 37578",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37578",
       "seat_q": 205,
@@ -1360,7 +1237,6 @@
     },
     {
       "manor_id": "manor_hx_37580",
-      "manor_label": "Hx 37580",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37580",
       "seat_q": 207,
@@ -1371,7 +1247,6 @@
     },
     {
       "manor_id": "manor_hx_37779",
-      "manor_label": "Hx 37779",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37779",
       "seat_q": 125,
@@ -1382,7 +1257,6 @@
     },
     {
       "manor_id": "manor_hx_37798",
-      "manor_label": "Hx 37798",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37798",
       "seat_q": 144,
@@ -1393,7 +1267,6 @@
     },
     {
       "manor_id": "manor_hx_37800",
-      "manor_label": "Hx 37800",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37800",
       "seat_q": 146,
@@ -1404,7 +1277,6 @@
     },
     {
       "manor_id": "manor_hx_37803",
-      "manor_label": "Hx 37803",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37803",
       "seat_q": 149,
@@ -1415,7 +1287,6 @@
     },
     {
       "manor_id": "manor_hx_37816",
-      "manor_label": "Hx 37816",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37816",
       "seat_q": 162,
@@ -1426,7 +1297,6 @@
     },
     {
       "manor_id": "manor_hx_37819",
-      "manor_label": "Hx 37819",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37819",
       "seat_q": 165,
@@ -1437,7 +1307,6 @@
     },
     {
       "manor_id": "manor_hx_37842",
-      "manor_label": "Hx 37842",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37842",
       "seat_q": 188,
@@ -1448,7 +1317,6 @@
     },
     {
       "manor_id": "manor_hx_37858",
-      "manor_label": "Hx 37858",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_37858",
       "seat_q": 204,
@@ -1459,7 +1327,6 @@
     },
     {
       "manor_id": "manor_hx_38056",
-      "manor_label": "Hx 38056",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38056",
       "seat_q": 121,
@@ -1470,7 +1337,6 @@
     },
     {
       "manor_id": "manor_hx_38085",
-      "manor_label": "Hx 38085",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38085",
       "seat_q": 150,
@@ -1481,7 +1347,6 @@
     },
     {
       "manor_id": "manor_hx_38126",
-      "manor_label": "Hx 38126",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38126",
       "seat_q": 191,
@@ -1492,7 +1357,6 @@
     },
     {
       "manor_id": "manor_hx_38340",
-      "manor_label": "Hx 38340",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38340",
       "seat_q": 124,
@@ -1503,7 +1367,6 @@
     },
     {
       "manor_id": "manor_hx_38348",
-      "manor_label": "Hx 38348",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38348",
       "seat_q": 132,
@@ -1514,7 +1377,6 @@
     },
     {
       "manor_id": "manor_hx_38353",
-      "manor_label": "Hx 38353",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38353",
       "seat_q": 137,
@@ -1525,7 +1387,6 @@
     },
     {
       "manor_id": "manor_hx_38360",
-      "manor_label": "Hx 38360",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38360",
       "seat_q": 144,
@@ -1536,7 +1397,6 @@
     },
     {
       "manor_id": "manor_hx_38366",
-      "manor_label": "Hx 38366",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38366",
       "seat_q": 150,
@@ -1547,7 +1407,6 @@
     },
     {
       "manor_id": "manor_hx_38384",
-      "manor_label": "Hx 38384",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38384",
       "seat_q": 168,
@@ -1558,7 +1417,6 @@
     },
     {
       "manor_id": "manor_hx_38391",
-      "manor_label": "Hx 38391",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38391",
       "seat_q": 175,
@@ -1569,7 +1427,6 @@
     },
     {
       "manor_id": "manor_hx_38398",
-      "manor_label": "Hx 38398",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38398",
       "seat_q": 182,
@@ -1580,7 +1437,6 @@
     },
     {
       "manor_id": "manor_hx_38412",
-      "manor_label": "Hx 38412",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38412",
       "seat_q": 196,
@@ -1591,7 +1447,6 @@
     },
     {
       "manor_id": "manor_hx_38417",
-      "manor_label": "Hx 38417",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38417",
       "seat_q": 201,
@@ -1602,7 +1457,6 @@
     },
     {
       "manor_id": "manor_hx_38424",
-      "manor_label": "Hx 38424",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38424",
       "seat_q": 208,
@@ -1613,7 +1467,6 @@
     },
     {
       "manor_id": "manor_hx_38620",
-      "manor_label": "Hx 38620",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38620",
       "seat_q": 123,
@@ -1624,7 +1477,6 @@
     },
     {
       "manor_id": "manor_hx_38637",
-      "manor_label": "Hx 38637",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38637",
       "seat_q": 140,
@@ -1635,7 +1487,6 @@
     },
     {
       "manor_id": "manor_hx_38658",
-      "manor_label": "Hx 38658",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38658",
       "seat_q": 161,
@@ -1646,7 +1497,6 @@
     },
     {
       "manor_id": "manor_hx_38701",
-      "manor_label": "Hx 38701",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38701",
       "seat_q": 204,
@@ -1657,7 +1507,6 @@
     },
     {
       "manor_id": "manor_hx_38904",
-      "manor_label": "Hx 38904",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38904",
       "seat_q": 126,
@@ -1668,7 +1517,6 @@
     },
     {
       "manor_id": "manor_hx_38910",
-      "manor_label": "Hx 38910",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38910",
       "seat_q": 132,
@@ -1679,7 +1527,6 @@
     },
     {
       "manor_id": "manor_hx_38917",
-      "manor_label": "Hx 38917",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38917",
       "seat_q": 139,
@@ -1690,7 +1537,6 @@
     },
     {
       "manor_id": "manor_hx_38918",
-      "manor_label": "Hx 38918",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38918",
       "seat_q": 140,
@@ -1701,7 +1547,6 @@
     },
     {
       "manor_id": "manor_hx_38925",
-      "manor_label": "Hx 38925",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38925",
       "seat_q": 147,
@@ -1712,7 +1557,6 @@
     },
     {
       "manor_id": "manor_hx_38942",
-      "manor_label": "Hx 38942",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38942",
       "seat_q": 164,
@@ -1723,7 +1567,6 @@
     },
     {
       "manor_id": "manor_hx_38948",
-      "manor_label": "Hx 38948",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38948",
       "seat_q": 170,
@@ -1734,7 +1577,6 @@
     },
     {
       "manor_id": "manor_hx_38970",
-      "manor_label": "Hx 38970",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_38970",
       "seat_q": 192,
@@ -1745,7 +1587,6 @@
     },
     {
       "manor_id": "manor_hx_39188",
-      "manor_label": "Hx 39188",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39188",
       "seat_q": 129,
@@ -1756,7 +1597,6 @@
     },
     {
       "manor_id": "manor_hx_39221",
-      "manor_label": "Hx 39221",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39221",
       "seat_q": 162,
@@ -1767,7 +1607,6 @@
     },
     {
       "manor_id": "manor_hx_39260",
-      "manor_label": "Hx 39260",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39260",
       "seat_q": 201,
@@ -1778,7 +1617,6 @@
     },
     {
       "manor_id": "manor_hx_39261",
-      "manor_label": "Hx 39261",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39261",
       "seat_q": 202,
@@ -1789,7 +1627,6 @@
     },
     {
       "manor_id": "manor_hx_39442",
-      "manor_label": "Hx 39442",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39442",
       "seat_q": 102,
@@ -1800,7 +1637,6 @@
     },
     {
       "manor_id": "manor_hx_39462",
-      "manor_label": "Hx 39462",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39462",
       "seat_q": 122,
@@ -1811,7 +1647,6 @@
     },
     {
       "manor_id": "manor_hx_39463",
-      "manor_label": "Hx 39463",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39463",
       "seat_q": 123,
@@ -1822,7 +1657,6 @@
     },
     {
       "manor_id": "manor_hx_39475",
-      "manor_label": "Hx 39475",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39475",
       "seat_q": 135,
@@ -1833,7 +1667,6 @@
     },
     {
       "manor_id": "manor_hx_39502",
-      "manor_label": "Hx 39502",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39502",
       "seat_q": 162,
@@ -1844,7 +1677,6 @@
     },
     {
       "manor_id": "manor_hx_39506",
-      "manor_label": "Hx 39506",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39506",
       "seat_q": 166,
@@ -1855,7 +1687,6 @@
     },
     {
       "manor_id": "manor_hx_39538",
-      "manor_label": "Hx 39538",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39538",
       "seat_q": 198,
@@ -1866,7 +1697,6 @@
     },
     {
       "manor_id": "manor_hx_39744",
-      "manor_label": "Hx 39744",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39744",
       "seat_q": 123,
@@ -1877,7 +1707,6 @@
     },
     {
       "manor_id": "manor_hx_39752",
-      "manor_label": "Hx 39752",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39752",
       "seat_q": 131,
@@ -1888,7 +1717,6 @@
     },
     {
       "manor_id": "manor_hx_39755",
-      "manor_label": "Hx 39755",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39755",
       "seat_q": 134,
@@ -1899,7 +1727,6 @@
     },
     {
       "manor_id": "manor_hx_39760",
-      "manor_label": "Hx 39760",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39760",
       "seat_q": 139,
@@ -1910,7 +1737,6 @@
     },
     {
       "manor_id": "manor_hx_39764",
-      "manor_label": "Hx 39764",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39764",
       "seat_q": 143,
@@ -1921,7 +1747,6 @@
     },
     {
       "manor_id": "manor_hx_39781",
-      "manor_label": "Hx 39781",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39781",
       "seat_q": 160,
@@ -1932,7 +1757,6 @@
     },
     {
       "manor_id": "manor_hx_39815",
-      "manor_label": "Hx 39815",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39815",
       "seat_q": 194,
@@ -1943,7 +1767,6 @@
     },
     {
       "manor_id": "manor_hx_39822",
-      "manor_label": "Hx 39822",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39822",
       "seat_q": 201,
@@ -1954,7 +1777,6 @@
     },
     {
       "manor_id": "manor_hx_39823",
-      "manor_label": "Hx 39823",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_39823",
       "seat_q": 202,
@@ -1965,7 +1787,6 @@
     },
     {
       "manor_id": "manor_hx_40014",
-      "manor_label": "Hx 40014",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40014",
       "seat_q": 112,
@@ -1976,7 +1797,6 @@
     },
     {
       "manor_id": "manor_hx_40026",
-      "manor_label": "Hx 40026",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40026",
       "seat_q": 124,
@@ -1987,7 +1807,6 @@
     },
     {
       "manor_id": "manor_hx_40036",
-      "manor_label": "Hx 40036",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40036",
       "seat_q": 134,
@@ -1998,7 +1817,6 @@
     },
     {
       "manor_id": "manor_hx_40058",
-      "manor_label": "Hx 40058",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40058",
       "seat_q": 156,
@@ -2009,7 +1827,6 @@
     },
     {
       "manor_id": "manor_hx_40070",
-      "manor_label": "Hx 40070",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40070",
       "seat_q": 168,
@@ -2020,7 +1837,6 @@
     },
     {
       "manor_id": "manor_hx_40104",
-      "manor_label": "Hx 40104",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40104",
       "seat_q": 202,
@@ -2031,7 +1847,6 @@
     },
     {
       "manor_id": "manor_hx_40310",
-      "manor_label": "Hx 40310",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40310",
       "seat_q": 127,
@@ -2042,7 +1857,6 @@
     },
     {
       "manor_id": "manor_hx_40312",
-      "manor_label": "Hx 40312",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40312",
       "seat_q": 129,
@@ -2053,7 +1867,6 @@
     },
     {
       "manor_id": "manor_hx_40328",
-      "manor_label": "Hx 40328",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40328",
       "seat_q": 145,
@@ -2064,7 +1877,6 @@
     },
     {
       "manor_id": "manor_hx_40345",
-      "manor_label": "Hx 40345",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40345",
       "seat_q": 162,
@@ -2075,7 +1887,6 @@
     },
     {
       "manor_id": "manor_hx_40373",
-      "manor_label": "Hx 40373",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40373",
       "seat_q": 190,
@@ -2086,7 +1897,6 @@
     },
     {
       "manor_id": "manor_hx_40584",
-      "manor_label": "Hx 40584",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40584",
       "seat_q": 120,
@@ -2097,7 +1907,6 @@
     },
     {
       "manor_id": "manor_hx_40592",
-      "manor_label": "Hx 40592",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40592",
       "seat_q": 128,
@@ -2108,7 +1917,6 @@
     },
     {
       "manor_id": "manor_hx_40599",
-      "manor_label": "Hx 40599",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40599",
       "seat_q": 135,
@@ -2119,7 +1927,6 @@
     },
     {
       "manor_id": "manor_hx_40658",
-      "manor_label": "Hx 40658",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40658",
       "seat_q": 194,
@@ -2130,7 +1937,6 @@
     },
     {
       "manor_id": "manor_hx_40660",
-      "manor_label": "Hx 40660",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40660",
       "seat_q": 196,
@@ -2141,7 +1947,6 @@
     },
     {
       "manor_id": "manor_hx_40661",
-      "manor_label": "Hx 40661",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40661",
       "seat_q": 197,
@@ -2152,7 +1957,6 @@
     },
     {
       "manor_id": "manor_hx_40876",
-      "manor_label": "Hx 40876",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40876",
       "seat_q": 131,
@@ -2163,7 +1967,6 @@
     },
     {
       "manor_id": "manor_hx_40885",
-      "manor_label": "Hx 40885",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40885",
       "seat_q": 140,
@@ -2174,7 +1977,6 @@
     },
     {
       "manor_id": "manor_hx_40892",
-      "manor_label": "Hx 40892",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40892",
       "seat_q": 147,
@@ -2185,7 +1987,6 @@
     },
     {
       "manor_id": "manor_hx_40902",
-      "manor_label": "Hx 40902",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40902",
       "seat_q": 157,
@@ -2196,7 +1997,6 @@
     },
     {
       "manor_id": "manor_hx_40909",
-      "manor_label": "Hx 40909",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40909",
       "seat_q": 164,
@@ -2207,7 +2007,6 @@
     },
     {
       "manor_id": "manor_hx_40916",
-      "manor_label": "Hx 40916",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40916",
       "seat_q": 171,
@@ -2218,7 +2017,6 @@
     },
     {
       "manor_id": "manor_hx_40938",
-      "manor_label": "Hx 40938",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_40938",
       "seat_q": 193,
@@ -2229,7 +2027,6 @@
     },
     {
       "manor_id": "manor_hx_41149",
-      "manor_label": "Hx 41149",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41149",
       "seat_q": 123,
@@ -2240,7 +2037,6 @@
     },
     {
       "manor_id": "manor_hx_41179",
-      "manor_label": "Hx 41179",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41179",
       "seat_q": 153,
@@ -2251,7 +2047,6 @@
     },
     {
       "manor_id": "manor_hx_41193",
-      "manor_label": "Hx 41193",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41193",
       "seat_q": 167,
@@ -2262,7 +2057,6 @@
     },
     {
       "manor_id": "manor_hx_41223",
-      "manor_label": "Hx 41223",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41223",
       "seat_q": 197,
@@ -2273,7 +2067,6 @@
     },
     {
       "manor_id": "manor_hx_41414",
-      "manor_label": "Hx 41414",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41414",
       "seat_q": 107,
@@ -2284,7 +2077,6 @@
     },
     {
       "manor_id": "manor_hx_41434",
-      "manor_label": "Hx 41434",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41434",
       "seat_q": 127,
@@ -2295,7 +2087,6 @@
     },
     {
       "manor_id": "manor_hx_41443",
-      "manor_label": "Hx 41443",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41443",
       "seat_q": 136,
@@ -2306,7 +2097,6 @@
     },
     {
       "manor_id": "manor_hx_41449",
-      "manor_label": "Hx 41449",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41449",
       "seat_q": 142,
@@ -2317,7 +2107,6 @@
     },
     {
       "manor_id": "manor_hx_41466",
-      "manor_label": "Hx 41466",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41466",
       "seat_q": 159,
@@ -2328,7 +2117,6 @@
     },
     {
       "manor_id": "manor_hx_41495",
-      "manor_label": "Hx 41495",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41495",
       "seat_q": 188,
@@ -2339,7 +2127,6 @@
     },
     {
       "manor_id": "manor_hx_41720",
-      "manor_label": "Hx 41720",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41720",
       "seat_q": 132,
@@ -2350,7 +2137,6 @@
     },
     {
       "manor_id": "manor_hx_41782",
-      "manor_label": "Hx 41782",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41782",
       "seat_q": 194,
@@ -2361,7 +2147,6 @@
     },
     {
       "manor_id": "manor_hx_41986",
-      "manor_label": "Hx 41986",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_41986",
       "seat_q": 117,
@@ -2372,7 +2157,6 @@
     },
     {
       "manor_id": "manor_hx_42007",
-      "manor_label": "Hx 42007",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42007",
       "seat_q": 138,
@@ -2383,7 +2167,6 @@
     },
     {
       "manor_id": "manor_hx_42013",
-      "manor_label": "Hx 42013",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42013",
       "seat_q": 144,
@@ -2394,7 +2177,6 @@
     },
     {
       "manor_id": "manor_hx_42024",
-      "manor_label": "Hx 42024",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42024",
       "seat_q": 155,
@@ -2405,7 +2187,6 @@
     },
     {
       "manor_id": "manor_hx_42031",
-      "manor_label": "Hx 42031",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42031",
       "seat_q": 162,
@@ -2416,7 +2197,6 @@
     },
     {
       "manor_id": "manor_hx_42053",
-      "manor_label": "Hx 42053",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42053",
       "seat_q": 184,
@@ -2427,7 +2207,6 @@
     },
     {
       "manor_id": "manor_hx_42059",
-      "manor_label": "Hx 42059",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42059",
       "seat_q": 190,
@@ -2438,7 +2217,6 @@
     },
     {
       "manor_id": "manor_hx_42272",
-      "manor_label": "Hx 42272",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42272",
       "seat_q": 122,
@@ -2449,7 +2227,6 @@
     },
     {
       "manor_id": "manor_hx_42278",
-      "manor_label": "Hx 42278",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42278",
       "seat_q": 128,
@@ -2460,7 +2237,6 @@
     },
     {
       "manor_id": "manor_hx_42315",
-      "manor_label": "Hx 42315",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42315",
       "seat_q": 165,
@@ -2471,7 +2247,6 @@
     },
     {
       "manor_id": "manor_hx_42548",
-      "manor_label": "Hx 42548",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42548",
       "seat_q": 117,
@@ -2482,7 +2257,6 @@
     },
     {
       "manor_id": "manor_hx_42565",
-      "manor_label": "Hx 42565",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42565",
       "seat_q": 134,
@@ -2493,7 +2267,6 @@
     },
     {
       "manor_id": "manor_hx_42571",
-      "manor_label": "Hx 42571",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42571",
       "seat_q": 140,
@@ -2504,7 +2277,6 @@
     },
     {
       "manor_id": "manor_hx_42588",
-      "manor_label": "Hx 42588",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42588",
       "seat_q": 157,
@@ -2515,7 +2287,6 @@
     },
     {
       "manor_id": "manor_hx_42617",
-      "manor_label": "Hx 42617",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42617",
       "seat_q": 186,
@@ -2526,7 +2297,6 @@
     },
     {
       "manor_id": "manor_hx_42619",
-      "manor_label": "Hx 42619",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42619",
       "seat_q": 188,
@@ -2537,7 +2307,6 @@
     },
     {
       "manor_id": "manor_hx_42836",
-      "manor_label": "Hx 42836",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42836",
       "seat_q": 124,
@@ -2548,7 +2317,6 @@
     },
     {
       "manor_id": "manor_hx_42842",
-      "manor_label": "Hx 42842",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42842",
       "seat_q": 130,
@@ -2559,7 +2327,6 @@
     },
     {
       "manor_id": "manor_hx_42890",
-      "manor_label": "Hx 42890",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42890",
       "seat_q": 178,
@@ -2570,7 +2337,6 @@
     },
     {
       "manor_id": "manor_hx_42899",
-      "manor_label": "Hx 42899",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42899",
       "seat_q": 187,
@@ -2581,7 +2347,6 @@
     },
     {
       "manor_id": "manor_hx_42904",
-      "manor_label": "Hx 42904",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_42904",
       "seat_q": 192,
@@ -2592,7 +2357,6 @@
     },
     {
       "manor_id": "manor_hx_43129",
-      "manor_label": "Hx 43129",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43129",
       "seat_q": 136,
@@ -2603,7 +2367,6 @@
     },
     {
       "manor_id": "manor_hx_43135",
-      "manor_label": "Hx 43135",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43135",
       "seat_q": 142,
@@ -2614,7 +2377,6 @@
     },
     {
       "manor_id": "manor_hx_43146",
-      "manor_label": "Hx 43146",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43146",
       "seat_q": 153,
@@ -2625,7 +2387,6 @@
     },
     {
       "manor_id": "manor_hx_43152",
-      "manor_label": "Hx 43152",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43152",
       "seat_q": 159,
@@ -2636,7 +2397,6 @@
     },
     {
       "manor_id": "manor_hx_43168",
-      "manor_label": "Hx 43168",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43168",
       "seat_q": 175,
@@ -2647,7 +2407,6 @@
     },
     {
       "manor_id": "manor_hx_43180",
-      "manor_label": "Hx 43180",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43180",
       "seat_q": 187,
@@ -2658,7 +2417,6 @@
     },
     {
       "manor_id": "manor_hx_43400",
-      "manor_label": "Hx 43400",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43400",
       "seat_q": 126,
@@ -2669,7 +2427,6 @@
     },
     {
       "manor_id": "manor_hx_43421",
-      "manor_label": "Hx 43421",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43421",
       "seat_q": 147,
@@ -2680,7 +2437,6 @@
     },
     {
       "manor_id": "manor_hx_43448",
-      "manor_label": "Hx 43448",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43448",
       "seat_q": 174,
@@ -2691,7 +2447,6 @@
     },
     {
       "manor_id": "manor_hx_43686",
-      "manor_label": "Hx 43686",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43686",
       "seat_q": 131,
@@ -2702,7 +2457,6 @@
     },
     {
       "manor_id": "manor_hx_43693",
-      "manor_label": "Hx 43693",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43693",
       "seat_q": 138,
@@ -2713,7 +2467,6 @@
     },
     {
       "manor_id": "manor_hx_43710",
-      "manor_label": "Hx 43710",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43710",
       "seat_q": 155,
@@ -2724,7 +2477,6 @@
     },
     {
       "manor_id": "manor_hx_43734",
-      "manor_label": "Hx 43734",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43734",
       "seat_q": 179,
@@ -2735,7 +2487,6 @@
     },
     {
       "manor_id": "manor_hx_43741",
-      "manor_label": "Hx 43741",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_43741",
       "seat_q": 186,
@@ -2746,7 +2497,6 @@
     },
     {
       "manor_id": "manor_hx_44018",
-      "manor_label": "Hx 44018",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44018",
       "seat_q": 182,
@@ -2757,7 +2507,6 @@
     },
     {
       "manor_id": "manor_hx_44023",
-      "manor_label": "Hx 44023",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44023",
       "seat_q": 187,
@@ -2768,7 +2517,6 @@
     },
     {
       "manor_id": "manor_hx_44250",
-      "manor_label": "Hx 44250",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44250",
       "seat_q": 133,
@@ -2779,7 +2527,6 @@
     },
     {
       "manor_id": "manor_hx_44263",
-      "manor_label": "Hx 44263",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44263",
       "seat_q": 146,
@@ -2790,7 +2537,6 @@
     },
     {
       "manor_id": "manor_hx_44265",
-      "manor_label": "Hx 44265",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44265",
       "seat_q": 148,
@@ -2801,7 +2547,6 @@
     },
     {
       "manor_id": "manor_hx_44292",
-      "manor_label": "Hx 44292",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44292",
       "seat_q": 175,
@@ -2812,7 +2557,6 @@
     },
     {
       "manor_id": "manor_hx_44294",
-      "manor_label": "Hx 44294",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44294",
       "seat_q": 177,
@@ -2823,7 +2567,6 @@
     },
     {
       "manor_id": "manor_hx_44542",
-      "manor_label": "Hx 44542",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44542",
       "seat_q": 144,
@@ -2834,7 +2577,6 @@
     },
     {
       "manor_id": "manor_hx_44544",
-      "manor_label": "Hx 44544",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44544",
       "seat_q": 146,
@@ -2845,7 +2587,6 @@
     },
     {
       "manor_id": "manor_hx_44549",
-      "manor_label": "Hx 44549",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44549",
       "seat_q": 151,
@@ -2856,7 +2597,6 @@
     },
     {
       "manor_id": "manor_hx_44573",
-      "manor_label": "Hx 44573",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44573",
       "seat_q": 175,
@@ -2867,7 +2607,6 @@
     },
     {
       "manor_id": "manor_hx_44833",
-      "manor_label": "Hx 44833",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44833",
       "seat_q": 154,
@@ -2878,7 +2617,6 @@
     },
     {
       "manor_id": "manor_hx_44850",
-      "manor_label": "Hx 44850",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44850",
       "seat_q": 171,
@@ -2889,7 +2627,6 @@
     },
     {
       "manor_id": "manor_hx_44857",
-      "manor_label": "Hx 44857",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44857",
       "seat_q": 178,
@@ -2900,7 +2637,6 @@
     },
     {
       "manor_id": "manor_hx_44862",
-      "manor_label": "Hx 44862",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_44862",
       "seat_q": 183,
@@ -2911,7 +2647,6 @@
     },
     {
       "manor_id": "manor_hx_45388",
-      "manor_label": "Hx 45388",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45388",
       "seat_q": 147,
@@ -2922,7 +2657,6 @@
     },
     {
       "manor_id": "manor_hx_45415",
-      "manor_label": "Hx 45415",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45415",
       "seat_q": 174,
@@ -2933,7 +2667,6 @@
     },
     {
       "manor_id": "manor_hx_45423",
-      "manor_label": "Hx 45423",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45423",
       "seat_q": 182,
@@ -2944,7 +2677,6 @@
     },
     {
       "manor_id": "manor_hx_45621",
-      "manor_label": "Hx 45621",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45621",
       "seat_q": 99,
@@ -2955,7 +2687,6 @@
     },
     {
       "manor_id": "manor_hx_45661",
-      "manor_label": "Hx 45661",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45661",
       "seat_q": 139,
@@ -2966,7 +2697,6 @@
     },
     {
       "manor_id": "manor_hx_45665",
-      "manor_label": "Hx 45665",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45665",
       "seat_q": 143,
@@ -2977,7 +2707,6 @@
     },
     {
       "manor_id": "manor_hx_45672",
-      "manor_label": "Hx 45672",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45672",
       "seat_q": 150,
@@ -2988,7 +2717,6 @@
     },
     {
       "manor_id": "manor_hx_45689",
-      "manor_label": "Hx 45689",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45689",
       "seat_q": 167,
@@ -2999,7 +2727,6 @@
     },
     {
       "manor_id": "manor_hx_45701",
-      "manor_label": "Hx 45701",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45701",
       "seat_q": 179,
@@ -3010,7 +2737,6 @@
     },
     {
       "manor_id": "manor_hx_45956",
-      "manor_label": "Hx 45956",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45956",
       "seat_q": 153,
@@ -3021,7 +2747,6 @@
     },
     {
       "manor_id": "manor_hx_45973",
-      "manor_label": "Hx 45973",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45973",
       "seat_q": 170,
@@ -3032,7 +2757,6 @@
     },
     {
       "manor_id": "manor_hx_45974",
-      "manor_label": "Hx 45974",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45974",
       "seat_q": 171,
@@ -3043,7 +2767,6 @@
     },
     {
       "manor_id": "manor_hx_45975",
-      "manor_label": "Hx 45975",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_45975",
       "seat_q": 172,
@@ -3054,7 +2777,6 @@
     },
     {
       "manor_id": "manor_hx_46259",
-      "manor_label": "Hx 46259",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46259",
       "seat_q": 175,
@@ -3065,7 +2787,6 @@
     },
     {
       "manor_id": "manor_hx_46509",
-      "manor_label": "Hx 46509",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46509",
       "seat_q": 144,
@@ -3076,7 +2797,6 @@
     },
     {
       "manor_id": "manor_hx_46528",
-      "manor_label": "Hx 46528",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46528",
       "seat_q": 163,
@@ -3087,7 +2807,6 @@
     },
     {
       "manor_id": "manor_hx_46535",
-      "manor_label": "Hx 46535",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46535",
       "seat_q": 170,
@@ -3098,7 +2817,6 @@
     },
     {
       "manor_id": "manor_hx_46786",
-      "manor_label": "Hx 46786",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46786",
       "seat_q": 140,
@@ -3109,7 +2827,6 @@
     },
     {
       "manor_id": "manor_hx_46793",
-      "manor_label": "Hx 46793",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_46793",
       "seat_q": 147,
@@ -3120,7 +2837,6 @@
     },
     {
       "manor_id": "manor_hx_47077",
-      "manor_label": "Hx 47077",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47077",
       "seat_q": 150,
@@ -3131,7 +2847,6 @@
     },
     {
       "manor_id": "manor_hx_47098",
-      "manor_label": "Hx 47098",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47098",
       "seat_q": 171,
@@ -3142,7 +2857,6 @@
     },
     {
       "manor_id": "manor_hx_47103",
-      "manor_label": "Hx 47103",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47103",
       "seat_q": 176,
@@ -3153,7 +2867,6 @@
     },
     {
       "manor_id": "manor_hx_47375",
-      "manor_label": "Hx 47375",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47375",
       "seat_q": 167,
@@ -3164,7 +2877,6 @@
     },
     {
       "manor_id": "manor_hx_47630",
-      "manor_label": "Hx 47630",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47630",
       "seat_q": 141,
@@ -3175,7 +2887,6 @@
     },
     {
       "manor_id": "manor_hx_47651",
-      "manor_label": "Hx 47651",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47651",
       "seat_q": 162,
@@ -3186,7 +2897,6 @@
     },
     {
       "manor_id": "manor_hx_47652",
-      "manor_label": "Hx 47652",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47652",
       "seat_q": 163,
@@ -3197,7 +2907,6 @@
     },
     {
       "manor_id": "manor_hx_47653",
-      "manor_label": "Hx 47653",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47653",
       "seat_q": 164,
@@ -3208,7 +2917,6 @@
     },
     {
       "manor_id": "manor_hx_47661",
-      "manor_label": "Hx 47661",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47661",
       "seat_q": 172,
@@ -3219,7 +2927,6 @@
     },
     {
       "manor_id": "manor_hx_47662",
-      "manor_label": "Hx 47662",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47662",
       "seat_q": 173,
@@ -3230,7 +2937,6 @@
     },
     {
       "manor_id": "manor_hx_47663",
-      "manor_label": "Hx 47663",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47663",
       "seat_q": 174,
@@ -3241,7 +2947,6 @@
     },
     {
       "manor_id": "manor_hx_47666",
-      "manor_label": "Hx 47666",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47666",
       "seat_q": 177,
@@ -3252,7 +2957,6 @@
     },
     {
       "manor_id": "manor_hx_47879",
-      "manor_label": "Hx 47879",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47879",
       "seat_q": 109,
@@ -3263,7 +2967,6 @@
     },
     {
       "manor_id": "manor_hx_47880",
-      "manor_label": "Hx 47880",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47880",
       "seat_q": 110,
@@ -3274,7 +2977,6 @@
     },
     {
       "manor_id": "manor_hx_47907",
-      "manor_label": "Hx 47907",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47907",
       "seat_q": 137,
@@ -3285,7 +2987,6 @@
     },
     {
       "manor_id": "manor_hx_47914",
-      "manor_label": "Hx 47914",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47914",
       "seat_q": 144,
@@ -3296,7 +2997,6 @@
     },
     {
       "manor_id": "manor_hx_47942",
-      "manor_label": "Hx 47942",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_47942",
       "seat_q": 172,
@@ -3307,7 +3007,6 @@
     },
     {
       "manor_id": "manor_hx_48176",
-      "manor_label": "Hx 48176",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48176",
       "seat_q": 125,
@@ -3318,7 +3017,6 @@
     },
     {
       "manor_id": "manor_hx_48208",
-      "manor_label": "Hx 48208",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48208",
       "seat_q": 157,
@@ -3329,7 +3027,6 @@
     },
     {
       "manor_id": "manor_hx_48450",
-      "manor_label": "Hx 48450",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48450",
       "seat_q": 118,
@@ -3340,7 +3037,6 @@
     },
     {
       "manor_id": "manor_hx_48465",
-      "manor_label": "Hx 48465",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48465",
       "seat_q": 133,
@@ -3351,7 +3047,6 @@
     },
     {
       "manor_id": "manor_hx_48498",
-      "manor_label": "Hx 48498",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48498",
       "seat_q": 166,
@@ -3362,7 +3057,6 @@
     },
     {
       "manor_id": "manor_hx_48725",
-      "manor_label": "Hx 48725",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48725",
       "seat_q": 112,
@@ -3373,7 +3067,6 @@
     },
     {
       "manor_id": "manor_hx_48731",
-      "manor_label": "Hx 48731",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48731",
       "seat_q": 118,
@@ -3384,7 +3077,6 @@
     },
     {
       "manor_id": "manor_hx_48742",
-      "manor_label": "Hx 48742",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48742",
       "seat_q": 129,
@@ -3395,7 +3087,6 @@
     },
     {
       "manor_id": "manor_hx_48775",
-      "manor_label": "Hx 48775",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_48775",
       "seat_q": 162,
@@ -3406,7 +3097,6 @@
     },
     {
       "manor_id": "manor_hx_49019",
-      "manor_label": "Hx 49019",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49019",
       "seat_q": 125,
@@ -3417,7 +3107,6 @@
     },
     {
       "manor_id": "manor_hx_49029",
-      "manor_label": "Hx 49029",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49029",
       "seat_q": 135,
@@ -3428,7 +3117,6 @@
     },
     {
       "manor_id": "manor_hx_49062",
-      "manor_label": "Hx 49062",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49062",
       "seat_q": 168,
@@ -3439,7 +3127,6 @@
     },
     {
       "manor_id": "manor_hx_49063",
-      "manor_label": "Hx 49063",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49063",
       "seat_q": 169,
@@ -3450,7 +3137,6 @@
     },
     {
       "manor_id": "manor_hx_49066",
-      "manor_label": "Hx 49066",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49066",
       "seat_q": 172,
@@ -3461,7 +3147,6 @@
     },
     {
       "manor_id": "manor_hx_49296",
-      "manor_label": "Hx 49296",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49296",
       "seat_q": 121,
@@ -3472,7 +3157,6 @@
     },
     {
       "manor_id": "manor_hx_49332",
-      "manor_label": "Hx 49332",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49332",
       "seat_q": 157,
@@ -3483,7 +3167,6 @@
     },
     {
       "manor_id": "manor_hx_49345",
-      "manor_label": "Hx 49345",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49345",
       "seat_q": 170,
@@ -3494,7 +3177,6 @@
     },
     {
       "manor_id": "manor_hx_49581",
-      "manor_label": "Hx 49581",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49581",
       "seat_q": 125,
@@ -3505,7 +3187,6 @@
     },
     {
       "manor_id": "manor_hx_49587",
-      "manor_label": "Hx 49587",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49587",
       "seat_q": 131,
@@ -3516,7 +3197,6 @@
     },
     {
       "manor_id": "manor_hx_49608",
-      "manor_label": "Hx 49608",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49608",
       "seat_q": 152,
@@ -3527,7 +3207,6 @@
     },
     {
       "manor_id": "manor_hx_49619",
-      "manor_label": "Hx 49619",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49619",
       "seat_q": 163,
@@ -3538,7 +3217,6 @@
     },
     {
       "manor_id": "manor_hx_49862",
-      "manor_label": "Hx 49862",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49862",
       "seat_q": 125,
@@ -3549,7 +3227,6 @@
     },
     {
       "manor_id": "manor_hx_49864",
-      "manor_label": "Hx 49864",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_49864",
       "seat_q": 127,
@@ -3560,7 +3237,6 @@
     },
     {
       "manor_id": "manor_hx_50141",
-      "manor_label": "Hx 50141",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50141",
       "seat_q": 123,
@@ -3571,7 +3247,6 @@
     },
     {
       "manor_id": "manor_hx_50176",
-      "manor_label": "Hx 50176",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50176",
       "seat_q": 158,
@@ -3582,7 +3257,6 @@
     },
     {
       "manor_id": "manor_hx_50182",
-      "manor_label": "Hx 50182",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50182",
       "seat_q": 164,
@@ -3593,7 +3267,6 @@
     },
     {
       "manor_id": "manor_hx_50418",
-      "manor_label": "Hx 50418",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50418",
       "seat_q": 119,
@@ -3604,7 +3277,6 @@
     },
     {
       "manor_id": "manor_hx_50431",
-      "manor_label": "Hx 50431",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50431",
       "seat_q": 132,
@@ -3615,7 +3287,6 @@
     },
     {
       "manor_id": "manor_hx_50452",
-      "manor_label": "Hx 50452",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50452",
       "seat_q": 153,
@@ -3626,7 +3297,6 @@
     },
     {
       "manor_id": "manor_hx_50460",
-      "manor_label": "Hx 50460",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50460",
       "seat_q": 161,
@@ -3637,7 +3307,6 @@
     },
     {
       "manor_id": "manor_hx_50467",
-      "manor_label": "Hx 50467",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50467",
       "seat_q": 168,
@@ -3648,7 +3317,6 @@
     },
     {
       "manor_id": "manor_hx_50728",
-      "manor_label": "Hx 50728",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50728",
       "seat_q": 148,
@@ -3659,7 +3327,6 @@
     },
     {
       "manor_id": "manor_hx_50742",
-      "manor_label": "Hx 50742",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50742",
       "seat_q": 162,
@@ -3670,7 +3337,6 @@
     },
     {
       "manor_id": "manor_hx_50985",
-      "manor_label": "Hx 50985",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_50985",
       "seat_q": 124,
@@ -3681,7 +3347,6 @@
     },
     {
       "manor_id": "manor_hx_51023",
-      "manor_label": "Hx 51023",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51023",
       "seat_q": 162,
@@ -3692,7 +3357,6 @@
     },
     {
       "manor_id": "manor_hx_51262",
-      "manor_label": "Hx 51262",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51262",
       "seat_q": 120,
@@ -3703,7 +3367,6 @@
     },
     {
       "manor_id": "manor_hx_51273",
-      "manor_label": "Hx 51273",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51273",
       "seat_q": 131,
@@ -3714,7 +3377,6 @@
     },
     {
       "manor_id": "manor_hx_51274",
-      "manor_label": "Hx 51274",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51274",
       "seat_q": 132,
@@ -3725,7 +3387,6 @@
     },
     {
       "manor_id": "manor_hx_51275",
-      "manor_label": "Hx 51275",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51275",
       "seat_q": 133,
@@ -3736,7 +3397,6 @@
     },
     {
       "manor_id": "manor_hx_51296",
-      "manor_label": "Hx 51296",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51296",
       "seat_q": 154,
@@ -3747,7 +3407,6 @@
     },
     {
       "manor_id": "manor_hx_51305",
-      "manor_label": "Hx 51305",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51305",
       "seat_q": 163,
@@ -3758,7 +3417,6 @@
     },
     {
       "manor_id": "manor_hx_51539",
-      "manor_label": "Hx 51539",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51539",
       "seat_q": 116,
@@ -3769,7 +3427,6 @@
     },
     {
       "manor_id": "manor_hx_51552",
-      "manor_label": "Hx 51552",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51552",
       "seat_q": 129,
@@ -3780,7 +3437,6 @@
     },
     {
       "manor_id": "manor_hx_51572",
-      "manor_label": "Hx 51572",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51572",
       "seat_q": 149,
@@ -3791,7 +3447,6 @@
     },
     {
       "manor_id": "manor_hx_51580",
-      "manor_label": "Hx 51580",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51580",
       "seat_q": 157,
@@ -3802,7 +3457,6 @@
     },
     {
       "manor_id": "manor_hx_51829",
-      "manor_label": "Hx 51829",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51829",
       "seat_q": 125,
@@ -3813,7 +3467,6 @@
     },
     {
       "manor_id": "manor_hx_51861",
-      "manor_label": "Hx 51861",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_51861",
       "seat_q": 157,
@@ -3824,7 +3477,6 @@
     },
     {
       "manor_id": "manor_hx_52106",
-      "manor_label": "Hx 52106",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52106",
       "seat_q": 121,
@@ -3835,7 +3487,6 @@
     },
     {
       "manor_id": "manor_hx_52142",
-      "manor_label": "Hx 52142",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52142",
       "seat_q": 157,
@@ -3846,7 +3497,6 @@
     },
     {
       "manor_id": "manor_hx_52143",
-      "manor_label": "Hx 52143",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52143",
       "seat_q": 158,
@@ -3857,7 +3507,6 @@
     },
     {
       "manor_id": "manor_hx_52383",
-      "manor_label": "Hx 52383",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52383",
       "seat_q": 117,
@@ -3868,7 +3517,6 @@
     },
     {
       "manor_id": "manor_hx_52396",
-      "manor_label": "Hx 52396",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52396",
       "seat_q": 130,
@@ -3879,7 +3527,6 @@
     },
     {
       "manor_id": "manor_hx_52408",
-      "manor_label": "Hx 52408",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52408",
       "seat_q": 142,
@@ -3890,7 +3537,6 @@
     },
     {
       "manor_id": "manor_hx_52416",
-      "manor_label": "Hx 52416",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52416",
       "seat_q": 150,
@@ -3901,7 +3547,6 @@
     },
     {
       "manor_id": "manor_hx_52418",
-      "manor_label": "Hx 52418",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52418",
       "seat_q": 152,
@@ -3912,7 +3557,6 @@
     },
     {
       "manor_id": "manor_hx_52420",
-      "manor_label": "Hx 52420",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52420",
       "seat_q": 154,
@@ -3923,7 +3567,6 @@
     },
     {
       "manor_id": "manor_hx_52673",
-      "manor_label": "Hx 52673",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52673",
       "seat_q": 126,
@@ -3934,7 +3577,6 @@
     },
     {
       "manor_id": "manor_hx_52689",
-      "manor_label": "Hx 52689",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52689",
       "seat_q": 142,
@@ -3945,7 +3587,6 @@
     },
     {
       "manor_id": "manor_hx_52693",
-      "manor_label": "Hx 52693",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52693",
       "seat_q": 146,
@@ -3956,7 +3597,6 @@
     },
     {
       "manor_id": "manor_hx_52950",
-      "manor_label": "Hx 52950",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_52950",
       "seat_q": 122,
@@ -3967,7 +3607,6 @@
     },
     {
       "manor_id": "manor_hx_53227",
-      "manor_label": "Hx 53227",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_53227",
       "seat_q": 118,
@@ -3978,7 +3617,6 @@
     },
     {
       "manor_id": "manor_hx_53261",
-      "manor_label": "Hx 53261",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_53261",
       "seat_q": 152,
@@ -3989,7 +3627,6 @@
     },
     {
       "manor_id": "manor_hx_53517",
-      "manor_label": "Hx 53517",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_53517",
       "seat_q": 127,
@@ -4000,7 +3637,6 @@
     },
     {
       "manor_id": "manor_hx_53813",
-      "manor_label": "Hx 53813",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_53813",
       "seat_q": 142,
@@ -4011,7 +3647,6 @@
     },
     {
       "manor_id": "manor_hx_53817",
-      "manor_label": "Hx 53817",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_53817",
       "seat_q": 146,
@@ -4022,7 +3657,6 @@
     },
     {
       "manor_id": "manor_hx_54090",
-      "manor_label": "Hx 54090",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54090",
       "seat_q": 138,
@@ -4033,7 +3667,6 @@
     },
     {
       "manor_id": "manor_hx_54094",
-      "manor_label": "Hx 54094",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54094",
       "seat_q": 142,
@@ -4044,7 +3677,6 @@
     },
     {
       "manor_id": "manor_hx_54101",
-      "manor_label": "Hx 54101",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54101",
       "seat_q": 149,
@@ -4055,7 +3687,6 @@
     },
     {
       "manor_id": "manor_hx_54379",
-      "manor_label": "Hx 54379",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54379",
       "seat_q": 146,
@@ -4066,7 +3697,6 @@
     },
     {
       "manor_id": "manor_hx_54659",
-      "manor_label": "Hx 54659",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54659",
       "seat_q": 145,
@@ -4077,7 +3707,6 @@
     },
     {
       "manor_id": "manor_hx_54660",
-      "manor_label": "Hx 54660",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54660",
       "seat_q": 146,
@@ -4088,7 +3717,6 @@
     },
     {
       "manor_id": "manor_hx_54663",
-      "manor_label": "Hx 54663",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54663",
       "seat_q": 149,
@@ -4099,7 +3727,6 @@
     },
     {
       "manor_id": "manor_hx_54937",
-      "manor_label": "Hx 54937",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_54937",
       "seat_q": 142,
@@ -4110,7 +3737,6 @@
     },
     {
       "manor_id": "manor_hx_55208",
-      "manor_label": "Hx 55208",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55208",
       "seat_q": 132,
@@ -4121,7 +3747,6 @@
     },
     {
       "manor_id": "manor_hx_55214",
-      "manor_label": "Hx 55214",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55214",
       "seat_q": 138,
@@ -4132,7 +3757,6 @@
     },
     {
       "manor_id": "manor_hx_55221",
-      "manor_label": "Hx 55221",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55221",
       "seat_q": 145,
@@ -4143,7 +3767,6 @@
     },
     {
       "manor_id": "manor_hx_55495",
-      "manor_label": "Hx 55495",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55495",
       "seat_q": 138,
@@ -4154,7 +3777,6 @@
     },
     {
       "manor_id": "manor_hx_55772",
-      "manor_label": "Hx 55772",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55772",
       "seat_q": 134,
@@ -4165,7 +3787,6 @@
     },
     {
       "manor_id": "manor_hx_55776",
-      "manor_label": "Hx 55776",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_55776",
       "seat_q": 138,
@@ -4176,7 +3797,6 @@
     },
     {
       "manor_id": "manor_hx_56058",
-      "manor_label": "Hx 56058",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56058",
       "seat_q": 139,
@@ -4187,7 +3807,6 @@
     },
     {
       "manor_id": "manor_hx_56332",
-      "manor_label": "Hx 56332",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56332",
       "seat_q": 132,
@@ -4198,7 +3817,6 @@
     },
     {
       "manor_id": "manor_hx_56338",
-      "manor_label": "Hx 56338",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56338",
       "seat_q": 138,
@@ -4209,7 +3827,6 @@
     },
     {
       "manor_id": "manor_hx_56611",
-      "manor_label": "Hx 56611",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56611",
       "seat_q": 130,
@@ -4220,7 +3837,6 @@
     },
     {
       "manor_id": "manor_hx_56612",
-      "manor_label": "Hx 56612",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56612",
       "seat_q": 131,
@@ -4231,7 +3847,6 @@
     },
     {
       "manor_id": "manor_hx_56613",
-      "manor_label": "Hx 56613",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_56613",
       "seat_q": 132,
@@ -4242,7 +3857,6 @@
     },
     {
       "manor_id": "manor_hx_57175",
-      "manor_label": "Hx 57175",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_57175",
       "seat_q": 132,
@@ -4253,7 +3867,6 @@
     },
     {
       "manor_id": "manor_hx_57734",
-      "manor_label": "Hx 57734",
       "is_anchor_manor": false,
       "seat_hex_id": "hx_57734",
       "seat_q": 129,
