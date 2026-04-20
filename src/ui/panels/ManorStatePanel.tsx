@@ -39,6 +39,12 @@ function walkdownForMetric(explanation: TurnExplanationV1 | null | undefined, me
   return explanation.unrest_walkdown;
 }
 
+function headlineCauseDetail(explanation: TurnExplanationV1 | null | undefined, metric: "food" | "coin" | "unrest"): string | null {
+  const causes = Array.isArray(explanation?.headline_causes) ? explanation.headline_causes : [];
+  const match = causes.find((cause) => cause && typeof cause === "object" && cause.metric === metric) ?? null;
+  return match && typeof match.detail === "string" && match.detail.length > 0 ? match.detail : null;
+}
+
 function biggestWalkdownRow(walkdown: TurnExplanationWalkdownV1 | null): TurnExplanationWalkdownV1["rows"][number] | null {
   if (!walkdown) return null;
   return (
@@ -46,6 +52,22 @@ function biggestWalkdownRow(walkdown: TurnExplanationWalkdownV1 | null): TurnExp
       .filter((row) => !["start", "net", "ending"].includes(row.direction) && row.amount !== 0)
       .sort((left, right) => Math.abs(right.amount) - Math.abs(left.amount) || left.label.localeCompare(right.label))[0] ?? null
   );
+}
+
+function unrestCauseLists(
+  walkdown: TurnExplanationWalkdownV1 | null,
+  fallback: { increased: Array<{ label: string; amount: number }>; decreased: Array<{ label: string; amount: number }> } | null
+): { increased: Array<{ label: string; amount: number }>; decreased: Array<{ label: string; amount: number }> } | null {
+  if (walkdown) {
+    const increased = walkdown.rows
+      .filter((row) => row.direction === "inflow" && row.amount > 0)
+      .map((row) => ({ label: row.label, amount: row.amount }));
+    const decreased = walkdown.rows
+      .filter((row) => row.direction === "outflow" && row.amount > 0)
+      .map((row) => ({ label: row.label, amount: row.amount }));
+    if (increased.length > 0 || decreased.length > 0) return { increased, decreased };
+  }
+  return fallback;
 }
 
 export function ManorStatePanel({
@@ -76,6 +98,8 @@ export function ManorStatePanel({
   const foodWalkdown = walkdownForMetric(turnExplanation, "food");
   const coinWalkdown = walkdownForMetric(turnExplanation, "coin");
   const unrestWalkdown = walkdownForMetric(turnExplanation, "unrest");
+  const unrestHeadlineDetail = headlineCauseDetail(turnExplanation, "unrest");
+  const unrestCauseBreakdown = unrestCauseLists(unrestWalkdown, unrestBreakdown);
   const biggestFoodRow = biggestWalkdownRow(foodWalkdown);
   const biggestCoinRow = biggestWalkdownRow(coinWalkdown);
   const biggestUnrestRow = biggestWalkdownRow(unrestWalkdown);
@@ -124,26 +148,32 @@ export function ManorStatePanel({
         <details style={{ marginTop: 6 }}>
           <summary>{copy.unrestBreakdownTitle}</summary>
           <div style={{ fontSize: 12, marginTop: 6 }}>
-            {!unrestBreakdown ? (
+            {!unrestCauseBreakdown ? (
               <div style={{ opacity: 0.85 }}>{copy.unrestBreakdownNone}</div>
             ) : (
               <div style={{ display: "grid", gap: 10 }}>
-                {unrestBreakdown.increased.length ? (
+                {unrestWalkdown ? (
+                  <div style={{ opacity: 0.78 }}>
+                    Started at {unrestWalkdown.start_amount} unrest, ended at {unrestWalkdown.end_amount} (net {fmtSigned(unrestWalkdown.end_amount - unrestWalkdown.start_amount)}).
+                  </div>
+                ) : null}
+
+                {unrestCauseBreakdown.increased.length ? (
                   <div>
                     <div style={{ fontWeight: 700 }}>{copy.unrestBreakdownIncreasedBy}</div>
                     <ul style={{ margin: "6px 0 0 18px" }}>
-                      {unrestBreakdown.increased.map((l) => (
+                      {unrestCauseBreakdown.increased.map((l) => (
                         <li key={`up:${l.label}`}>{l.label}: {l.amount}</li>
                       ))}
                     </ul>
                   </div>
                 ) : null}
 
-                {unrestBreakdown.decreased.length ? (
+                {unrestCauseBreakdown.decreased.length ? (
                   <div>
                     <div style={{ fontWeight: 700 }}>{copy.unrestBreakdownDecreasedBy}</div>
                     <ul style={{ margin: "6px 0 0 18px" }}>
-                      {unrestBreakdown.decreased.map((l) => (
+                      {unrestCauseBreakdown.decreased.map((l) => (
                         <li key={`down:${l.label}`}>{l.label}: {l.amount}</li>
                       ))}
                     </ul>
@@ -182,7 +212,7 @@ export function ManorStatePanel({
             {manor.unrest} unrest
           </div>
           <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>
-            {biggestUnrestRow ? biggestUnrestRow.summary : "No explicit unrest contributor lines were recorded this turn."}
+            {unrestHeadlineDetail ?? biggestUnrestRow?.summary ?? "No explicit unrest contributor lines were recorded this turn."}
           </div>
         </div>
 
