@@ -124,6 +124,21 @@ export function OutboundMarriagePanel({
           <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
               <div>
+                <div style={PLAY_SCREEN_EYEBROW_STYLE}>Offer submission</div>
+                <div style={{ marginTop: 6, fontWeight: 700 }}>{surface.submissionStatus.label}</div>
+                <div style={{ marginTop: 4, fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted, lineHeight: 1.55 }}>
+                  {surface.submissionStatus.summary}
+                </div>
+              </div>
+              <div style={{ fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted }}>
+                Normal player flow previews send-state here before any canonical offer record changes.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+              <div>
                 <div style={PLAY_SCREEN_EYEBROW_STYLE}>Candidate table</div>
                 <div style={{ marginTop: 6, fontWeight: 700 }}>Deterministic shown candidates from the accepted scouting registry</div>
               </div>
@@ -203,6 +218,44 @@ export function OutboundMarriagePanel({
                 Counterparty {selectedRow.candidateHouseLabel}. Player tab keeps liege deltas and risk tags neutral by default while still previewing the accepted resolver on a cloned snapshot.
               </div>
             ) : null}
+
+            <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12, marginTop: 12 }}>
+              <div style={PLAY_SCREEN_EYEBROW_STYLE}>Player term access</div>
+              <div style={{ marginTop: 8, fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted, lineHeight: 1.55 }}>
+                Editable terms stay on this player tab. Fields that are not truly player-directed on this seam remain locked to the advanced contract preview below.
+              </div>
+              <div style={{ overflowX: "auto", marginTop: 10 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Term</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Player access</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Draft field</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Resolver field</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {surface.playerTermRows.map((row) => (
+                      <tr key={row.draftFieldPath}>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                          <div style={{ fontWeight: 700 }}>{row.label}</div>
+                          <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.helperText}</div>
+                        </td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                          {row.playerAccessLabel}
+                        </td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0", color: PLAY_SCREEN_THEME.inkMuted }}>
+                          {row.draftFieldPath}
+                        </td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0", color: PLAY_SCREEN_THEME.inkMuted }}>
+                          {row.resolverFieldPath}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", marginTop: 12 }}>
               <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12 }}>

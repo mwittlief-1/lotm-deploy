@@ -108,16 +108,16 @@ function attachHiddenSurface(target: object | null | undefined, key: string, val
   });
 }
 
+function hasAnyCourtRole(card: PersonCardView, labels: readonly string[]): boolean {
+  return labels.some((label) => card.court_role_labels.includes(label));
+}
+
 function paymentBasisForCard(card: PersonCardView): CourtProvisioningStipendBasis {
   const officeBasis = card.office_assignments.map((assignment) => assignment.payment_basis).find((basis) => typeof basis === "string");
   if (officeBasis === "family_service" || officeBasis === "retainer_upkeep" || officeBasis === "realm_stipend" || officeBasis === "benefice") {
     return officeBasis;
   }
-  if (
-    card.court_role_labels.includes("Head of House") ||
-    card.court_role_labels.includes("Spouse") ||
-    card.court_role_labels.includes("Household Child")
-  ) {
+  if (hasAnyCourtRole(card, ["Head of House", "Spouse", "Married-in Spouse", "Household Child"])) {
     return "family_service";
   }
   if (card.service_timeline.active_record_ids.length > 0) return "unknown";
@@ -126,7 +126,7 @@ function paymentBasisForCard(card: PersonCardView): CourtProvisioningStipendBasi
 
 function provisioningClassForCard(card: PersonCardView, stipendBasis: CourtProvisioningStipendBasis): CourtProvisioningClass {
   if (card.court_role_labels.includes("Head of House")) return "head_of_house";
-  if (card.court_role_labels.includes("Spouse")) return "household_family";
+  if (hasAnyCourtRole(card, ["Spouse", "Married-in Spouse"])) return "household_family";
   if (card.court_role_labels.includes("Household Child")) return "household_child";
   if (stipendBasis === "realm_stipend") return "realm_holder";
   if (stipendBasis === "benefice") return "institutional_service";
