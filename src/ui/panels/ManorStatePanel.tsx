@@ -229,7 +229,9 @@ export function ManorStatePanel({
           {pricingSurface ? (
             <div style={{ marginTop: 8, fontSize: 12, opacity: 0.78 }}>
               Market reference: {pricingSurface.ratioLabel}.
-              {placeholderCatalogCount > 0 ? ` ${placeholderCatalogCount} catalog line${placeholderCatalogCount === 1 ? "" : "s"} still read as placeholder.` : " All shown catalog lines are active references."}
+              {placeholderCatalogCount > 0
+                ? ` ${placeholderCatalogCount} catalog line${placeholderCatalogCount === 1 ? "" : "s"} still read as placeholder references, not live actions from this screen.`
+                : " All shown catalog lines are active references."}
             </div>
           ) : null}
         </div>

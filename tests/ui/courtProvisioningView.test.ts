@@ -50,5 +50,8 @@ describe("courtProvisioningView", () => {
       label: "Rationing is read-only in v0.3.6"
     });
     expect(surface?.subtitle).toContain("court members");
+    expect(surface?.helperText).toContain("Meat here is passive ration stock already on hand, not a separate market control.");
+    expect(surface?.summaryCards.find((card) => card.id === "ration_demand")?.detail).toContain("not a separate live market action");
+    expect(surface?.summaryCards.find((card) => card.id === "allocation_result")?.detail).toContain("food or meat stock fell short");
   });
 });

@@ -95,6 +95,7 @@ describe("ManorStatePanel", () => {
     expect(html).toContain("Labor &amp; upkeep");
     expect(html).toContain("current manor condition and the strongest direct pressure");
     expect(html).toContain("Market reference:");
+    expect(html).toContain("placeholder references, not live actions from this screen");
   });
 
   it("renders reconciled unrest pressure and relief rows from the explanation walkdown", () => {

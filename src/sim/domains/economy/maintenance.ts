@@ -15,6 +15,7 @@ export const ECONOMY_MAINTENANCE_REGISTRY_SCHEMA_VERSION = "economy_maintenance_
 export const ECONOMY_MAINTENANCE_MANOR_ROW_SCHEMA_VERSION = "economy_maintenance_manor_row_v1" as const;
 export const ECONOMY_MAINTENANCE_ENTRY_SCHEMA_VERSION = "economy_maintenance_entry_v1" as const;
 export const ECONOMY_MAINTENANCE_PROJECT_SCHEMA_VERSION = "economy_maintenance_project_v1" as const;
+export const ECONOMY_IMPROVEMENT_PREVIEW_SCHEMA_VERSION = "economy_improvement_preview_v1" as const;
 export const ECONOMY_MAINTENANCE_VIEW_SCHEMA_VERSION = "economy_maintenance_view_v1" as const;
 export const ECONOMY_MAINTENANCE_MANOR_SUMMARY_SCHEMA_VERSION = "economy_maintenance_manor_summary_v1" as const;
 export const ECONOMY_MAINTENANCE_SUMMARY_ENTRY_SCHEMA_VERSION = "economy_maintenance_summary_entry_v1" as const;
@@ -107,6 +108,20 @@ export interface EconomyMaintenanceProjectV1 {
   progress: number;
   required: number;
   remaining: number;
+}
+
+export interface EconomyImprovementPreviewV1 {
+  schema_version: typeof ECONOMY_IMPROVEMENT_PREVIEW_SCHEMA_VERSION;
+  improvement_id: string;
+  improvement_label: string;
+  upfront_coin_cost: number;
+  upfront_energy_cost: number;
+  required_builder_progress: number;
+  expected_benefit_summary: string;
+  recurring_maintenance_coin_cost: number;
+  recurring_maintenance_labor_required: number;
+  upfront_summary: string;
+  recurring_maintenance_summary: string;
 }
 
 export interface EconomyMaintenanceManorRowV1 {
@@ -332,6 +347,41 @@ function buildingEntry(manorId: string, manorKey: string, improvementId: string)
         ]
       : ["manor.improvements", "maintenance_profile.fallback_building"]
   };
+}
+
+export function buildEconomyImprovementPreview(
+  improvementId: string
+): EconomyImprovementPreviewV1 | null {
+  const definition = IMPROVEMENTS[improvementId];
+  if (!definition) return null;
+
+  const recurringCoinCost = ceilDiv(definition.coin_cost, MAINTENANCE_PROFILE.building_coin_divisor);
+  const recurringLaborRequired = ceilDiv(definition.required, MAINTENANCE_PROFILE.building_labor_divisor);
+  const benefitSummary = definition.description.trim().length > 0
+    ? definition.description.trim()
+    : `${definition.name} changes manor conditions when completed.`;
+
+  return {
+    schema_version: ECONOMY_IMPROVEMENT_PREVIEW_SCHEMA_VERSION,
+    improvement_id: definition.id,
+    improvement_label: definition.name,
+    upfront_coin_cost: normalizeInteger(definition.coin_cost),
+    upfront_energy_cost: normalizeInteger(definition.energy_cost),
+    required_builder_progress: Math.max(1, normalizeInteger(definition.required)),
+    expected_benefit_summary: benefitSummary,
+    recurring_maintenance_coin_cost: recurringCoinCost,
+    recurring_maintenance_labor_required: recurringLaborRequired,
+    upfront_summary: `Upfront cost ${normalizeInteger(definition.coin_cost)} coin and ${normalizeInteger(definition.energy_cost)} energy. Build effort ${Math.max(1, normalizeInteger(definition.required))} progress.`,
+    recurring_maintenance_summary: `Recurring upkeep after completion: ${recurringCoinCost} coin and ${recurringLaborRequired} labor.`
+  };
+}
+
+export function buildEconomyImprovementPreviewCatalog(
+  improvementIds: readonly string[]
+): EconomyImprovementPreviewV1[] {
+  return improvementIds
+    .map((improvementId) => buildEconomyImprovementPreview(improvementId))
+    .filter((preview): preview is EconomyImprovementPreviewV1 => preview !== null);
 }
 
 function franchiseRightEntry(

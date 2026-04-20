@@ -272,7 +272,7 @@ describe("playScreenPortfolio", () => {
           label: "Meat stores",
           tone: "neutral",
           value: "4 stores",
-          helper: "Preserved meat currently held at the selected manor."
+          helper: "Passive preserved meat stock currently held at the selected manor. This view does not expose a separate meat market or spend control."
         },
         {
           id: "coin_due",

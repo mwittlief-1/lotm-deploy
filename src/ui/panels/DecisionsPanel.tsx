@@ -1,4 +1,5 @@
 import React from "react";
+import { buildEconomyImprovementPreviewCatalog } from "../../sim/domains/economy/maintenance";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
 import type {
   ObligationsCounterpartyContractSection,
@@ -300,6 +301,17 @@ export function DecisionsPanel({
   arrearsCarried
 }: DecisionsPanelProps) {
   const exportCopy = buildPlaytestOpsExportCopy(runSeed);
+  const builtImprovementIds = new Set(
+    Array.isArray(manor.improvements)
+      ? manor.improvements.filter((value: unknown): value is string => typeof value === "string" && value.length > 0)
+      : []
+  );
+  const projectPreviews = buildEconomyImprovementPreviewCatalog(improvementIds)
+    .filter((preview) => !builtImprovementIds.has(preview.improvement_id));
+  const queuedProjectId =
+    decisions.construction.action === "start" && typeof decisions.construction.improvement_id === "string"
+      ? decisions.construction.improvement_id
+      : null;
   const payCoin = Math.max(0, Math.min(Math.max(0, manor.coin), Math.trunc(Number.isFinite(decisions.obligations.pay_coin) ? decisions.obligations.pay_coin : 0)));
   const payBushels = Math.max(
     0,
@@ -773,6 +785,37 @@ export function DecisionsPanel({
         <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
           Construction is <b>not instant</b>. Progress each turn = builders × {buildRatePerBuilderPerTurn}. Builders also consume +{builderExtraPerTurn} extra bushels this turn ({turnYears}y) each.
         </div>
+        {projectPreviews.length ? (
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", marginTop: 10 }}>
+            {projectPreviews.map((preview) => {
+              const queued = queuedProjectId === preview.improvement_id;
+              return (
+                <div
+                  key={preview.improvement_id}
+                  style={{
+                    padding: "10px 12px",
+                    border: queued ? "1px solid rgba(146, 100, 45, 0.45)" : "1px solid rgba(172, 143, 100, 0.28)",
+                    borderRadius: 12,
+                    background: queued ? "rgba(244, 233, 210, 0.78)" : "rgba(255, 250, 241, 0.78)"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline", flexWrap: "wrap" }}>
+                    <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.72, textTransform: "uppercase" }}>Project preview</div>
+                    <div style={{ fontSize: 12, opacity: 0.76 }}>{queued ? "Queued to start" : "Available to compare"}</div>
+                  </div>
+                  <div style={{ marginTop: 4, fontWeight: 700 }}>{preview.improvement_label}</div>
+                  <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>{preview.upfront_summary}</div>
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>
+                    Expected benefit: {preview.expected_benefit_summary}
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>
+                    {preview.recurring_maintenance_summary}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {marriageWindow && prospectsTotalCount === 0 && !marriageWorkflowActive ? (
