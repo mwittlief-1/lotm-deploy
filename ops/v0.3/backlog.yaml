@@ -12721,7 +12721,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Bring succession-pressure replay snapshots back under cap
-  status: ready
+  status: done
   priority: 82
   tranche: 8
   change_type: refactor
