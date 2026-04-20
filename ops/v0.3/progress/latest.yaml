@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
+  current_task_id: V03-R6-001-T04
   last_completed_task_id: V03-R6-006-T01
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 00e5f6e
+  git_commit: 921a9dc
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,16 +21,17 @@ last_run:
     run1: ''
     run2: ''
 notes: >-
-  Integrator acceptance advanced again on 2026-04-20. Kickoff now carries the
-  accepted economy verification closeout for V03-R6-003-T02 and V03-R6-003-T03
-  plus the accepted social chain for V03-R6-005-T01 and V03-R6-006-T01. There
-  are no remaining ready lane tasks in the v0.3.6 implementation queue. The
-  only remaining R6 task is V03-R6-008-T03, which stays blocked behind shared
-  release-close conditions and final evidence work. A story-to-task
-  reconciliation note and story-coverage matrix have been added so the 45-story
-  UAT pack can be tracked separately from the compressed 19-task engineering
-  backlog. Shared repo-wide merge debt remains open: preflight reports
-  test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
-  for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
-  produced a clean branch-wide exit in this workspace.
+  Integrator reopened the v0.3.6 queue on 2026-04-20 because the accepted
+  19-task engineering backlog left 17 user stories either partially covered or
+  unstarted. The control plane now includes explicit follow-on tasks for unrest
+  causality, pre-commit project previews, meat/resource truth, outbound offer
+  semantics, family-status consistency, agenda and provisioning alignment,
+  turnover and succession readability, demographic realism, nearby-name
+  disambiguation, and the decomposed release blockers. The known blocker
+  signatures remain concrete: preflight still fails with test3_mismatches=16
+  against the stale v0.2.2 fallback baseline path, seed replay batch fails on
+  lotm_v022_seed_003_succession_pressure / builder-forward / turn 13 at 528401
+  bytes against a 524288 cap, and qa still lacks a clean branch-wide exit on
+  the kickoff line. The next integrator-owned task is V03-R6-008-T05 while dev
+  lanes can now resume on the new follow-on packets.
 active_claims: {}

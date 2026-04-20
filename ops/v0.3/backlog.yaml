@@ -11218,6 +11218,68 @@ tasks:
   - replay_mismatch
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R6-001-T03.md
+- id: V03-R6-001-T04
+  parent_epic: V03-R6-001
+  release: v0.3.6
+  title: Add explicit unrest causal walkdown and summary alignment
+  status: ready
+  priority: 80
+  tranche: 8
+  change_type: behavior_change
+  category: Experience
+  phase: none
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Make unrest detail show reconciled positive and negative contributors while keeping headline and drilldown surfaces on one causal story.
+  exact_deliverables:
+  - turn_explanation_v1 must expose ordered unrest cause rows or equivalent bounded cause groups that reconcile to the displayed unrest delta
+  - the player-facing unrest detail surface must name arrears, events, projects, and relief contributors separately when present
+  - summary surfaces must point at the same unrest causes instead of drifting into unrelated or duplicate wording
+  deps:
+  - V03-R6-001-T02
+  - V03-R6-002-T04
+  - V03-R6-003-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - unrest detail shows readable positive and negative contributors that net to the same unrest delta shown elsewhere
+  - headline and drilldown surfaces no longer tell conflicting unrest stories
+  - the player path can explain unrest movement without opening raw receipts or debug-only tabs
+  done_conditions:
+  - unrest cause rows or grouped causes reconcile to the displayed unrest delta
+  - arrears pressure appears as a named unrest driver when it actually contributed
+  - Turn Report, Diff Ledger, Manor State, and Explain Changes stay aligned on unrest wording
+  required_test_updates:
+  - extend turn explanation contract tests for unrest cause rows or cause groups
+  - extend UI tests around unrest detail or summary surfaces that consume the explanation contract
+  - focused command: npm exec vitest run tests/sim/turn_explanation_contract.test.ts tests/ui/turnReportPanel.test.tsx tests/ui/diffLedgerPanel.test.tsx tests/ui/manorStatePanel.test.tsx
+  stop_rules:
+  - stop and escalate if closing unrest walkdown requires new simulation writes rather than reporting-layer alignment
+  - do not fold unrelated relationship or economy headline work into this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001-T04.md
+  handoff_requirements:
+  - include one reconciled unrest example and the exact surface path used to verify it
 - id: V03-R6-002-T01
   parent_epic: V03-R6-002
   release: v0.3.6
@@ -11613,6 +11675,130 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-003-T03.md
   handoff_requirements:
   - include the exact live-versus-placeholder copy path and one labor-pressure example used for acceptance
+- id: V03-R6-003-T04
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Show project benefits before commitment on player surfaces
+  status: ready
+  priority: 79
+  tranche: 8
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Make improvement choices show upfront benefit, maintenance impact, and strategic tradeoffs before the player commits.
+  exact_deliverables:
+  - construction or improvement surfaces must show upfront cost, expected primary benefit, and ongoing maintenance impact before selection
+  - the project selector path must stop reading like a blind pick list
+  - before-commit surfaces must reuse canonical improvement or economy contracts instead of ad hoc prose
+  deps:
+  - V03-R6-003-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - the player can compare project choices without guessing what they do
+  - ongoing maintenance impact is visible before the decision is committed
+  - project preview language stays consistent with the accepted headline and drilldown explanation spine
+  done_conditions:
+  - project options show upfront cost, expected benefit, and maintenance implications
+  - the construction path no longer feels like a blind dropdown or hidden contract
+  - preview and post-completion language do not contradict each other
+  required_test_updates:
+  - extend construction or manor-state UI tests for pre-commit preview evidence
+  - add or extend any economy or reporting tests needed to keep preview values deterministic
+  - focused command: npm exec vitest run tests/ui/manorStatePanel.test.tsx tests/ui/playScreenPortfolio.test.ts tests/sim/turn_explanation_contract.test.ts
+  stop_rules:
+  - stop and escalate if the requested preview requires inventing simulation outputs that do not exist in canonical economy state
+  - do not count post-completion evidence as completion for this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T04.md
+  handoff_requirements:
+  - include one project-choice example showing upfront cost, benefit, and maintenance impact before commitment
+- id: V03-R6-003-T05
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Finish meat and live-resource truth on player surfaces
+  status: todo
+  priority: 77
+  tranche: 8
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Resolve the remaining meat-system ambiguity so the player either sees a true live resource path or a clearly passive non-actionable inventory concept.
+  exact_deliverables:
+  - meat-related player surfaces must no longer imply a controllable live decision if no such path exists
+  - if any live acquisition or spend path exists, the same surfaces must show where it comes from and how it is used
+  - economy copy for meat must stay aligned across provisioning, manor, and portfolio paths
+  deps:
+  - V03-R6-003-T04
+  - V03-R6-003-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - meat is either presented as a real actionable resource with player-visible source paths or clearly demoted to passive stock language
+  - no live-decision surface implies the player is being judged on a resource they cannot actually influence
+  - provisioning and manor surfaces tell the same truth about meat
+  done_conditions:
+  - meat-language is consistently truthful across player surfaces
+  - passive inventory versus live resource state is unmistakable in tests
+  - placeholder-safe copy does not create a fake management layer
+  required_test_updates:
+  - extend portfolio, manor, or provisioning UI tests around meat or resource truth
+  - extend economy contract tests if any live or pseudo-live marker fields change
+  - focused command: npm exec vitest run tests/ui/playScreenPortfolio.test.ts tests/ui/manorStatePanel.test.tsx tests/sim/pricing_contract.test.ts
+  stop_rules:
+  - stop and escalate if closing this task requires inventing a new simulation economy loop rather than clarifying the current one
+  - do not hide a punitive mechanic behind softer copy; either make it real or make it explicitly passive
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T05.md
+  handoff_requirements:
+  - include the exact surfaces audited and the final player-facing truth statement for meat
 - id: V03-R6-004-T01
   parent_epic: V03-R6-004
   release: v0.3.6
@@ -11818,6 +12004,127 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-005-T01.md
   handoff_requirements:
   - include the workflow contract path, the primary entry surface, and the send-or-reject outcome evidence
+- id: V03-R6-005-T02
+  parent_epic: V03-R6-005
+  release: v0.3.6
+  title: Clarify outbound offer terms and explicit submission state
+  status: ready
+  priority: 78
+  tranche: 8
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Make outbound marriage offer terms understandable, constrain or explain editable relationship fields, and leave no ambiguity about when an offer has actually been sent.
+  exact_deliverables:
+  - outbound offer surfaces must explain editable relationship terms or lock them if they are not truly player-directed
+  - the send or queue action and immediate post-submit state must be unmistakable on the player path
+  - the accepted marriage workflow must continue to present outcome language in player-facing terms rather than raw A/R/T shorthand alone
+  deps:
+  - V03-R6-005-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - a player can tell what any editable outbound offer term means or sees that the field is intentionally non-editable
+  - send and queue state are explicit before and after action
+  - outbound workflow language remains consistent with the accepted marriage workflow view
+  done_conditions:
+  - editable marriage terms are explained, constrained, or removed
+  - the submit path has one clear action and one clear immediate result
+  - the player does not have to infer whether an offer was really sent
+  required_test_updates:
+  - extend outbound marriage or prospects UI tests for offer-term explanation and submit-state copy
+  - add or extend any bounded marriage workflow tests if helper fields change
+  - focused command: npm exec vitest run tests/ui/prospectsPanel.test.tsx tests/sim/marriage_decision_budget.test.ts
+  stop_rules:
+  - stop and escalate if term semantics require new simulation bargaining systems rather than UI-visible explanation or locking
+  - do not roll family-status classification work into this task; that belongs to V03-R6-005-T03
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-005-T02.md
+  handoff_requirements:
+  - include the exact outbound term field path and one explicit post-submit state example
+- id: V03-R6-005-T03
+  parent_epic: V03-R6-005
+  release: v0.3.6
+  title: Label married-out and married-in family status consistently
+  status: todo
+  priority: 76
+  tranche: 8
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Make married-out children and married-in spouses render with consistent family and household status across person, household, and dossier surfaces.
+  exact_deliverables:
+  - married-out children must be visibly labeled as kin who left the birth house through marriage
+  - married-in spouses must be classified consistently across household, provisioning, and person-card surfaces
+  - family-role copy must remain legible after the accepted household presence work
+  deps:
+  - V03-R6-005-T02
+  - V03-R6-006-T01
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - family views, household views, and person cards no longer disagree about married-in or married-out status
+  - kinship remains understandable after marriage outcomes
+  - the player can distinguish household membership from blood relation on the player path
+  done_conditions:
+  - married-out children are visibly labeled and still legible as kin
+  - married-in spouses are not treated as external on one surface and household on another without explanation
+  - person, household, and dossier copy stays aligned
+  required_test_updates:
+  - extend person-card, household, or dossier UI tests with married-in and married-out examples
+  - add or extend any family-status fixture coverage needed for deterministic review
+  - focused command: npm exec vitest run tests/ui/personCardView.test.ts tests/ui/householdPanel.test.tsx tests/ui/houseDossierView.test.ts
+  stop_rules:
+  - stop and escalate if closing this task requires new kinship simulation semantics instead of classification truth on existing surfaces
+  - do not roll agenda or court-office truth into this task; that belongs to V03-R6-006-T02
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-005-T03.md
+  handoff_requirements:
+  - include one married-out example and one married-in example from the accepted player surfaces
 - id: V03-R6-006-T01
   parent_epic: V03-R6-006
   release: v0.3.6
@@ -11878,6 +12185,193 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-006-T01.md
   handoff_requirements:
   - include one aligned household-versus-provisioning example and one turnover-or-succession example
+- id: V03-R6-006-T02
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Align agenda, household, and provisioning truth
+  status: todo
+  priority: 75
+  tranche: 8
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Make council agenda, household roster, and provisioning treatment agree about who holds office, who belongs locally, and who is being provisioned.
+  exact_deliverables:
+  - agenda warnings must match actual current office state
+  - household membership and provisioning status must agree unless a visible explanation says otherwise
+  - the player path must stop presenting contradictory classification for the same person
+  deps:
+  - V03-R6-006-T01
+  - V03-R6-005-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/court/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - agenda, roster, and provisioning no longer contradict one another for the same character
+  - office-state warnings track the same truth used elsewhere on the player path
+  - classification exceptions are explicit rather than implied
+  done_conditions:
+  - a filled seat is not shown as vacant on the agenda
+  - household and provisioning classifications agree or explain why they differ
+  - player-facing tests prove cross-surface alignment
+  required_test_updates:
+  - extend agenda and household/provisioning UI tests for shared truth cases
+  - extend any registry or presence tests needed to lock office truth
+  - focused command: npm exec vitest run tests/ui/playScreenAgenda.test.ts tests/ui/householdPanel.test.tsx tests/sim/agenda_registry.test.ts
+  stop_rules:
+  - stop and escalate if this task would require turn-phase orchestration changes rather than read-model alignment
+  - do not fold demography or marriage-term semantics into this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T02.md
+  handoff_requirements:
+  - include one office-truth example and one household-versus-provisioning alignment example
+- id: V03-R6-006-T03
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Surface court turnover and local succession clearly
+  status: todo
+  priority: 74
+  tranche: 8
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Make officer loss, liege or clergy succession, and succession widgets legible on the normal player path.
+  exact_deliverables:
+  - resolved-turn surfaces must say when an officer, liege, or clergy figure dies, departs, or is replaced
+  - local and household context must reflect succession state in player-facing terms
+  - succession widgets must explain heir or claimant logic without schema-shaped copy
+  deps:
+  - V03-R6-006-T02
+  - V03-R6-002-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - court turnover and local succession changes are visible in the same turn they matter
+  - succession widgets read as player-facing inheritance guidance rather than debug state
+  - local political continuity remains legible when a seat changes hands or goes vacant
+  done_conditions:
+  - officer turnover is clearly explained on the player path
+  - liege and clergy succession is surfaced or explicitly shown as unresolved
+  - succession widgets are human-readable in tests or fixtures
+  required_test_updates:
+  - extend household, locals, turn-report, or succession UI tests for turnover and succession examples
+  - add or extend any deterministic fixtures for liege or clergy replacement
+  - focused command: npm exec vitest run tests/ui/playScreenAgenda.test.ts tests/ui/householdPanel.test.tsx tests/ui/personCardView.test.ts tests/sim/agenda_registry.test.ts
+  stop_rules:
+  - stop and escalate if this task requires new simulation-order semantics rather than better use of accepted succession and presence data
+  - do not fold birth-spacing tuning into this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T03.md
+  handoff_requirements:
+  - include one officer-turnover example and one liege-or-clergy succession example from the accepted surfaces
+- id: V03-R6-006-T04
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Tune birth spacing and dynastic transition summaries
+  status: todo
+  priority: 73
+  tranche: 8
+  change_type: behavior_change
+  category: Court
+  phase: none
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Improve noble household birth-spacing realism and make births, deaths, and household growth legible on the resolved-turn path.
+  exact_deliverables:
+  - normal noble household runs must avoid obviously implausible birth-spacing patterns at a glance
+  - resolved-turn summaries must name important births, deaths, marriages, and household size changes
+  - dynastic transition summaries must remain deterministic and reviewable in fixtures
+  deps:
+  - V03-R6-006-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: true
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - family growth looks broadly believable in routine household views
+  - the player can tell why household size changed on the resolved-turn path
+  - any intentional simulation outcome drift is explicitly reviewed and justified
+  done_conditions:
+  - birth-spacing realism improves in deterministic fixtures or seed review
+  - births, deaths, and marriages are summarized clearly for the player
+  - golden-review notes exist for any intended sim-output drift
+  required_test_updates:
+  - add deterministic demographic fixtures or seed reviews for spacing changes
+  - extend turn-report or household UI tests for dynastic transition summaries
+  - focused command: npm exec vitest run tests/ui/householdPanel.test.tsx tests/ui/turnReportPanel.test.tsx tests/sim/*demograph*.test.ts
+  stop_rules:
+  - stop and escalate if this work expands into a broad fertility or aging refactor rather than bounded realism tuning
+  - do not claim completion without explicit golden-review notes if simulation outcomes change
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T04.md
+  handoff_requirements:
+  - include one believable-spacing example and one dynastic transition summary example
 - id: V03-R6-007-T01
   parent_epic: V03-R6-007
   release: v0.3.6
@@ -11938,6 +12432,67 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-007-T01.md
   handoff_requirements:
   - include one dossier example, one person-card example, and one intel example from the shipped surfaces
+- id: V03-R6-007-T02
+  parent_epic: V03-R6-007
+  release: v0.3.6
+  title: Add secondary identifiers for nearby-house disambiguation
+  status: todo
+  priority: 72
+  tranche: 8
+  change_type: behavior_change
+  category: People
+  phase: none
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Reduce nearby name ambiguity with consistent secondary identifiers across known-house, dossier, and marriage-adjacent surfaces.
+  exact_deliverables:
+  - visible nearby houses and people must expose enough secondary identifiers to be distinguishable at a glance
+  - dossier and proposal browsing must stop feeling repetitive when names repeat
+  - the disambiguation path must reuse accepted dossier and person-card bounded data instead of inventing parallel labels
+  deps:
+  - V03-R6-007-T01
+  - V03-R6-001-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - repeated nearby names are manageable without repeated confusion
+  - secondary identifiers stay consistent across dossier, known-house, and marriage-adjacent views
+  - disambiguation remains player-facing rather than debug-shaped
+  done_conditions:
+  - name ambiguity is reduced on the accepted player path
+  - secondary identifiers are consistent across related views
+  - tests or fixtures prove the repeated-name case
+  required_test_updates:
+  - extend dossier, person-card, or prospects UI tests with repeated-name fixtures
+  - add or extend any bounded identifier fixture coverage needed for determinism
+  - focused command: npm exec vitest run tests/ui/houseDossierView.test.ts tests/ui/prospectsPanel.test.tsx tests/ui/personCardView.test.ts
+  stop_rules:
+  - stop and escalate if solving ambiguity would require a broad procedural naming rewrite instead of better bounded identifiers on the player path
+  - do not fold new marriage workflow semantics into this task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-007-T02.md
+  handoff_requirements:
+  - include one repeated-name example and the exact secondary identifiers used to disambiguate it
 - id: V03-R6-008-T01
   parent_epic: V03-R6-008
   release: v0.3.6
@@ -12041,13 +12596,25 @@ tasks:
   - a merge-ready tooling handoff that names the final unresolved blockers or confirms release-close status
   deps:
   - V03-R6-008-T02
+  - V03-R6-008-T04
+  - V03-R6-008-T05
+  - V03-R6-008-T06
+  - V03-R6-001-T04
   - V03-R6-002-T04
   - V03-R6-003-T03
+  - V03-R6-003-T04
+  - V03-R6-003-T05
   - V03-R6-007-T01
   - V03-R6-005-T01
   - V03-R6-006-T01
+  - V03-R6-005-T02
+  - V03-R6-005-T03
+  - V03-R6-006-T02
+  - V03-R6-006-T03
+  - V03-R6-006-T04
+  - V03-R6-007-T02
   requires_integrator: true
-  blocked_reason: release closeout must wait for the remaining v0.3.6 economy and social implementation chain to be accepted
+  blocked_reason: release closeout must wait for the decomposed partially-covered story tasks and the explicit gate-remediation tasks to be accepted
   allowed_paths:
   - ops/v0.3/**
   - docs/**
@@ -12089,3 +12656,186 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-008-T03.md
   handoff_requirements:
   - include the story checklist path, gate evidence paths, and explicit final blocker summary if merge-ready status is not reached
+- id: V03-R6-008-T04
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Normalize preflight baseline contract for v0.3.x
+  status: ready
+  priority: 81
+  tranche: 8
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Make preflight compare the current v0.3.x line against an explicit, truthful baseline contract instead of falling back silently to the old v0.2.2 bundle.
+  exact_deliverables:
+  - preflight must name an intentional v0.3.x baseline source or an explicit no-baseline policy instead of falling back to v0.2.2
+  - release docs must explain the baseline contract used for v0.3.6
+  - the gate output must make stale-baseline failure versus real regression visibly distinguishable
+  deps:
+  - V03-R6-008-T02
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - docs/**
+  - qa_artifacts/**
+  - tests/**
+  - ops/v0.3/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - the preflight gate no longer implicitly compares v0.3.x work against the old v0.2.2 fallback baseline
+  - reviewers can tell whether a failure is a stale-baseline contract issue or a real non-perturbation regression
+  - the baseline policy is documented alongside the release-close evidence path
+  done_conditions:
+  - preflight baseline source is explicit and truthful for the v0.3.x line
+  - gate output names the baseline contract used
+  - docs and acceptance notes point to the same policy
+  required_test_updates:
+  - add or extend tests around the preflight baseline selection path if needed
+  - rerun preflight and record the exact baseline source path used in the handoff
+  - focused command: npm run preflight
+  stop_rules:
+  - stop and escalate if normalizing the baseline would silently bless unreviewed simulation drift
+  - do not treat documentation-only notes as completion unless the gate behavior itself is truthful
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T04.md
+  handoff_requirements:
+  - include the exact baseline source or explicit no-baseline policy path and one before-versus-after gate signature
+- id: V03-R6-008-T05
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Bring succession-pressure replay snapshots back under cap
+  status: ready
+  priority: 82
+  tranche: 8
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Reduce bounded snapshot size for the failing succession-pressure replay path without backing out accepted player-facing read models.
+  exact_deliverables:
+  - npm run seed:replay:batch must no longer exceed the per-turn snapshot cap on lotm_v022_seed_003_succession_pressure
+  - any snapshot compaction must preserve accepted player surfaces and deterministic replay semantics
+  - the handoff must name the exact seed, policy, turn, and byte delta used to prove the fix
+  deps:
+  - V03-R6-006-T01
+  requires_integrator: true
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/**
+  - src/ui/**
+  - scripts/**
+  - tests/**
+  - docs/**
+  - ops/v0.3/**
+  forbidden_paths: []
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - the known replay-cap offender is fixed without losing accepted player-facing functionality
+  - replay output remains deterministic and the cap breach is replaced with explicit passing evidence
+  - the compaction strategy is documented so future follow-ons know what must remain bounded
+  done_conditions:
+  - the failing succession-pressure replay path falls below the configured byte cap
+  - seed replay batch passes twice with hash comparison
+  - accepted player-facing contracts remain available after compaction
+  required_test_updates:
+  - rerun seed replay batch twice and record the exact summary hashes
+  - extend any bounded snapshot contract tests needed to lock the compacted shape
+  - focused command: npm run seed:replay:batch
+  stop_rules:
+  - stop and escalate if replay-cap repair would require removing already accepted player-facing information instead of compacting or bounding it
+  - do not treat a single-seed pass as completion; the batch gate must be the acceptance source
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T05.md
+  handoff_requirements:
+  - include the exact failing seed, policy, turn, before-bytes, after-bytes, and replay hashes
+- id: V03-R6-008-T06
+  parent_epic: V03-R6-008
+  release: v0.3.6
+  title: Achieve clean branch-wide qa gate exit
+  status: todo
+  priority: 71
+  tranche: 8
+  change_type: refactor
+  category: Tooling
+  phase: playtest_ops
+  lane_branch: codex/v0.3-lane-tooling-qa
+  goal: Get npm run qa to a clean, truthful exit on the v0.3.6 kickoff line and record the exact evidence path used by release closeout.
+  exact_deliverables:
+  - branch-wide qa must finish with a clean exit and fresh artifact evidence on the kickoff line
+  - stale or stray artifact paths must stop being confused with current gate truth
+  - release-close documentation must point at the fresh qa evidence path rather than stale leftovers
+  deps:
+  - V03-R6-008-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - scripts/**
+  - qa_artifacts/**
+  - tests/**
+  - docs/**
+  - ops/v0.3/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - npm run qa exits cleanly on the current kickoff line
+  - the accepted evidence path for qa is fresh and unambiguous
+  - release-close tooling can point at one deterministic qa artifact path
+  done_conditions:
+  - qa gate exits zero on kickoff
+  - stale artifact confusion is removed from the release-close path
+  - the handoff records the fresh evidence path and any quarantined stale path
+  required_test_updates:
+  - rerun npm run qa and record the exact artifact path produced
+  - add or extend tooling tests if the qa gate path selection changes
+  - focused command: npm run qa
+  stop_rules:
+  - stop and escalate if the clean exit would require silently excluding accepted test suites without an explicit control-plane decision
+  - do not count stale qa_artifacts or vitest leftovers as fresh evidence
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-008-T06.md
+  handoff_requirements:
+  - include the exact qa artifact path, final exit status, and any stale-path cleanup performed
