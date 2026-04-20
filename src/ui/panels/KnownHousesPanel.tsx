@@ -1,4 +1,6 @@
 import React from "react";
+import type { RunState } from "../../sim/types";
+import { buildHouseSecondaryIdentifier } from "../identityLabels";
 import { Tip, formatNameParts } from "../viewHelpers";
 import { PersonCardTrigger } from "./PersonCardTrigger";
 
@@ -12,6 +14,7 @@ type KnownHousesPanelProps = {
   onOpenPersonCard?: (personId: string) => void;
   onToggleShowAll: () => void;
   personCardIds?: Set<string>;
+  previewState?: RunState | null;
   showAllKnownHouses: boolean;
 };
 
@@ -25,6 +28,7 @@ export function KnownHousesPanel({
   onOpenPersonCard,
   onToggleShowAll,
   personCardIds,
+  previewState,
   showAllKnownHouses
 }: KnownHousesPanelProps) {
   return (
@@ -39,6 +43,10 @@ export function KnownHousesPanel({
             const houseName = String(h?.house_name ?? h?.houseName ?? h?.name ?? "").trim();
             const tier = String(h?.tier ?? "").trim();
             const canOpenDossier = Boolean(houseId && dossierHouseIds?.has(houseId) && onOpenHouseDossier);
+            const secondaryIdentifier = buildHouseSecondaryIdentifier(previewState, houseId, {
+              houseName,
+              knownHouse: h
+            });
 
             const headNameRaw = h?.head_name ?? h?.head?.head_name ?? h?.head?.name ?? "";
             const headAgeRaw = h?.head_age ?? h?.head?.head_age ?? h?.head?.age;
@@ -86,6 +94,10 @@ export function KnownHousesPanel({
                     </button>
                   ) : null}
                 </div>
+
+                {secondaryIdentifier ? (
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{secondaryIdentifier}</div>
+                ) : null}
 
                 {tier ? (
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.95 }}>

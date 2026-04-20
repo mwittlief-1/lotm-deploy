@@ -25,6 +25,7 @@ describe("HouseDossierPanel", () => {
     expect(html).toContain("Ledger Posture");
     expect(html).toContain("Known Manor Footprint");
     expect(html).toContain(surface.houseName);
+    expect(html).toContain(surface.subtitle);
   });
 
   it("renders the debug tab table in deterministic field order", () => {

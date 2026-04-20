@@ -35,6 +35,7 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
         <div>
           <div style={PLAY_SCREEN_EYEBROW_STYLE}>House dossier</div>
           <h3 style={{ margin: "6px 0 0", fontSize: 28 }}>{surface.houseName}</h3>
+          <div style={{ marginTop: 8, fontSize: 13, color: PLAY_SCREEN_THEME.inkMuted }}>{surface.subtitle}</div>
           <p style={{ margin: "10px 0 0", maxWidth: 760, color: PLAY_SCREEN_THEME.inkMuted, lineHeight: 1.55 }}>
             {surface.helperText}
           </p>

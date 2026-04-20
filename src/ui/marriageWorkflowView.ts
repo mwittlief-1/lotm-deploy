@@ -7,6 +7,7 @@ import type {
   MarriageWorkflowViewV1,
   RunState,
 } from "../sim/types";
+import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from "./identityLabels";
 import {
   buildOutboundMarriageOfferPreview,
   buildOutboundMarriageSurface,
@@ -15,6 +16,7 @@ import {
 
 export type MarriageWorkflowLinkSurface = {
   detail: string;
+  houseDetail: string | null;
   houseId: string | null;
   houseLabel: string | null;
   personId: string;
@@ -85,14 +87,20 @@ function houseLabel(houseName: string | null | undefined, houseId: string | null
   return null;
 }
 
-function personDetail(ref: MarriageWorkflowPersonRefV1): string {
-  const houseText = houseLabel(ref.house_name, ref.house_id);
-  return houseText ? houseText : "House not recorded on this workflow seam.";
+function personDetail(previewState: RunState, ref: MarriageWorkflowPersonRefV1): string {
+  return (
+    buildPersonSecondaryIdentifier(previewState, ref.person_id, {
+      defaultLabel: "House not recorded on this workflow seam.",
+      houseId: ref.house_id,
+      houseName: ref.house_name
+    }) ?? "House not recorded on this workflow seam."
+  );
 }
 
-function personLink(ref: MarriageWorkflowPersonRefV1): MarriageWorkflowLinkSurface {
+function personLink(previewState: RunState, ref: MarriageWorkflowPersonRefV1): MarriageWorkflowLinkSurface {
   return {
-    detail: personDetail(ref),
+    detail: personDetail(previewState, ref),
+    houseDetail: buildHouseSecondaryIdentifier(previewState, ref.house_id, { houseName: ref.house_name }),
     houseId: ref.house_id,
     houseLabel: houseLabel(ref.house_name, ref.house_id),
     personId: ref.person_id,
@@ -166,7 +174,7 @@ function outboundSendOutcomeSummary(previewState: RunState, subjectView: Marriag
 
 function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
   const inboundOffers = subjectView.inbound_offers.map((offer) => ({
-    candidate: personLink(offer.candidate),
+    candidate: personLink(previewState, offer.candidate),
     effectSummary: effectSummary(offer.expected_effects),
     entryId: offer.entry_id,
     houseId: offer.candidate.house_id,
@@ -179,7 +187,7 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
   }));
 
   const outboundFeaturedCandidate = subjectView.outbound_scouting?.featured_candidate
-    ? personLink(subjectView.outbound_scouting.featured_candidate)
+    ? personLink(previewState, subjectView.outbound_scouting.featured_candidate)
     : null;
 
   return {
@@ -194,11 +202,17 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
     outboundFeaturedCandidate,
     outboundSendOutcomeSummary: outboundSendOutcomeSummary(previewState, subjectView),
     outboundSummary: outboundSummary(subjectView),
-    subject: personLink(subjectView.subject),
+    subject: personLink(previewState, subjectView.subject),
     subjectParents: [...subjectView.subject.parent_refs]
       .sort((left, right) => compareText(left.person_id, right.person_id))
       .map((parent) => ({
-        detail: parent.house_name ? `House ${parent.house_name}` : "House not recorded on this workflow seam.",
+        detail:
+          buildPersonSecondaryIdentifier(previewState, parent.person_id, {
+            defaultLabel: "House not recorded on this workflow seam.",
+            houseId: parent.house_id,
+            houseName: parent.house_name
+          }) ?? "House not recorded on this workflow seam.",
+        houseDetail: buildHouseSecondaryIdentifier(previewState, parent.house_id, { houseName: parent.house_name }),
         houseId: parent.house_id,
         houseLabel: houseLabel(parent.house_name, parent.house_id),
         personId: parent.person_id,

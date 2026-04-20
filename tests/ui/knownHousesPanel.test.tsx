@@ -39,6 +39,40 @@ describe("KnownHousesPanel", () => {
         onOpenPersonCard={() => undefined}
         onToggleShowAll={() => undefined}
         personCardIds={new Set(["p_ext_01_head"])}
+        previewState={{
+          house_dossiers: [
+            {
+              child_count: 0,
+              has_male_heir: true,
+              heiress_possible: false,
+              holdings_footprint: {
+                anchor_manor_id: "hx_18",
+                holdings_band: "single_holding",
+                holdings_count: 1,
+                known_manor_ids: ["hx_18"],
+                source_kind: "house_seed"
+              },
+              household_member_count: 1,
+              household_scope: "head_only",
+              house_id: "h_ext_01",
+              house_name: "Falkmere",
+              kinship_summary: "none",
+              kinship_tags: [],
+              knownness: "known_house",
+              knownness_sources: ["nearby_house"],
+              ledger_band: "stable",
+              ledger_trend: "flat",
+              living_member_count: 1,
+              relevance_reasons: ["nearby_house"],
+              relevance_tier: "tier1",
+              relationship_summary: null,
+              relationship_turn_movement_count: 0,
+              relationship_turn_movement_rows: [],
+              schema_version: "house_dossier_summary_v2",
+              tier: "Count"
+            }
+          ]
+        } as any}
         showAllKnownHouses={false}
       />
     );
@@ -46,6 +80,7 @@ describe("KnownHousesPanel", () => {
     expect(html).toContain("Open dossier");
     expect(html).toContain('data-person-card-open="p_ext_01_head"');
     expect(html).not.toContain('data-person-card-open="p_ext_02_head"');
+    expect(html).toContain("Count · Head Aveline · Anchor Hx 18");
     expect(html.indexOf("Open dossier")).toBeLessThan(html.indexOf("House Ashford"));
   });
 });

@@ -1,6 +1,7 @@
 import React from "react";
 import { getGrantProspectTemplate } from "../../content/experienceContent";
 import type { RunState } from "../../sim/types";
+import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from "../identityLabels";
 import type { MarriageWorkflowSurface } from "../marriageWorkflowView";
 import { Tip, formatParentsLine } from "../viewHelpers";
 import { HouseDossierTrigger } from "./HouseDossierTrigger";
@@ -108,6 +109,9 @@ export function ProspectsPanel({
                 )}
               </div>
               <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{workflow.subject.detail}</div>
+              {workflow.subject.houseDetail ? (
+                <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>{workflow.subject.houseDetail}</div>
+              ) : null}
 
               {workflow.subjectParents.length > 0 ? (
                 <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>
@@ -147,6 +151,7 @@ export function ProspectsPanel({
                               offer.candidate.title
                             )}
                           </div>
+                          <div style={{ marginTop: 2, fontSize: 12, opacity: 0.85 }}>{offer.candidate.detail}</div>
                           {offer.houseLabel ? (
                             <div style={{ marginTop: 2, fontSize: 12, opacity: 0.85 }}>
                               House:{" "}
@@ -158,6 +163,9 @@ export function ProspectsPanel({
                                 offer.houseLabel
                               )}
                             </div>
+                          ) : null}
+                          {offer.candidate.houseDetail ? (
+                            <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>{offer.candidate.houseDetail}</div>
                           ) : null}
                           <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
                             Expected effects: {offer.effectSummary}
@@ -202,6 +210,16 @@ export function ProspectsPanel({
                           )}
                         </>
                       ) : null}
+                    </div>
+                  ) : null}
+                  {workflow.outboundFeaturedCandidate?.detail ? (
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                      {workflow.outboundFeaturedCandidate.detail}
+                    </div>
+                  ) : null}
+                  {workflow.outboundFeaturedCandidate?.houseDetail ? (
+                    <div style={{ marginTop: 2, fontSize: 12, opacity: 0.8 }}>
+                      {workflow.outboundFeaturedCandidate.houseDetail}
                     </div>
                   ) : null}
                   {workflow.outboundSendOutcomeSummary ? (
@@ -277,6 +295,12 @@ export function ProspectsPanel({
                   personNameFromRegistry(subjectId) ??
                   (typeof p?.subject_person_name === "string" ? p.subject_person_name : null) ??
                   null;
+                const subjectSecondary = subjectId ? buildPersonSecondaryIdentifier(previewState, subjectId) : null;
+                const fromHouseSecondary = fromHouseId
+                  ? buildHouseSecondaryIdentifier(previewState, fromHouseId, {
+                      houseName: fromHouse
+                    })
+                  : null;
 
                 const summary = typeof p?.summary === "string" ? p.summary : "";
                 const reqs: any[] = Array.isArray(p?.requirements) ? p.requirements : [];
@@ -322,6 +346,9 @@ export function ProspectsPanel({
                         )}
                       </div>
                     ) : null}
+                    {subjectSecondary ? (
+                      <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{subjectSecondary}</div>
+                    ) : null}
 
                     {t === "marriage" && subjectParentsLine ? (
                       <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Parents: {subjectParentsLine}</div>
@@ -366,6 +393,13 @@ export function ProspectsPanel({
                         const spouseParentsLine: string | null = spouseId
                           ? formatParentsLine(spouseId, pfParentsByChild, pfPeopleRec, pfHouseLabelById, pfPersonHouseById)
                           : null;
+                        const spouseSecondary = spouseId
+                          ? buildPersonSecondaryIdentifier(previewState, spouseId, {
+                              age: spouseAge,
+                              houseId: fromHouseId,
+                              houseName: fromHouse
+                            })
+                          : null;
 
                         return spouseText ? (
                           <>
@@ -380,6 +414,12 @@ export function ProspectsPanel({
                               )}
                               {fromHouse ? ` — House ${fromHouse}` : ""}
                             </div>
+                            {spouseSecondary ? (
+                              <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>{spouseSecondary}</div>
+                            ) : null}
+                            {fromHouseSecondary ? (
+                              <div style={{ fontSize: 12, opacity: 0.78, marginTop: 2 }}>{fromHouseSecondary}</div>
+                            ) : null}
                             {spouseParentsLine ? (
                               <div style={{ fontSize: 12, opacity: 0.8, marginTop: 2 }}>Parents: {spouseParentsLine}</div>
                             ) : null}
