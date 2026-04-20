@@ -330,4 +330,56 @@ describe("turn explanation contract", () => {
       detail: "Arrears pressure (+4) pushed unrest up while Relief: Harvest Festival (-1) eased it."
     });
   });
+
+  it("uses canonical improvement benefit and upkeep language for completed-project headline causes", () => {
+    const before = makeState();
+    const after = makeState();
+    after.manor.improvements = ["granary_upgrade"];
+
+    const report: TurnReport = {
+      turn_index: 3,
+      weather_multiplier: 1,
+      market: { price_per_bushel: 0.1, sell_cap_bushels: 40 },
+      spoilage: { rate: 0.05, loss_bushels: 0 },
+      production_bushels: 0,
+      consumption_bushels: 0,
+      peasant_consumption_bushels: 0,
+      court_consumption_bushels: 0,
+      total_consumption_bushels: 0,
+      shortage_bushels: 0,
+      construction: { progress_added: 0, completed_improvement_id: "granary_upgrade" },
+      obligations: {
+        tax_due_coin: 0,
+        tithe_due_bushels: 0,
+        arrears_coin: 0,
+        arrears_bushels: 0,
+        war_levy_due: null
+      },
+      household: {
+        births: [],
+        deaths: [],
+        population_delta: 0
+      },
+      house_log: [],
+      events: [],
+      top_drivers: [],
+      notes: [],
+      unrest_breakdown: {
+        schema_version: "unrest_breakdown_v1",
+        before: 18,
+        after: 18,
+        delta: 0,
+        increased_by: [],
+        decreased_by: []
+      }
+    };
+
+    const turnExplanation = buildTurnExplanationV1(report, before, after, []);
+    const projectCause = turnExplanation.headline_causes.find((cause) => cause.id === "headline_project_completion");
+
+    expect(projectCause).toMatchObject({
+      summary: "Project completed: granary_upgrade",
+      detail: "Reduces spoilage meaningfully. Ongoing upkeep: 2 coin and 1 labor once built."
+    });
+  });
 });

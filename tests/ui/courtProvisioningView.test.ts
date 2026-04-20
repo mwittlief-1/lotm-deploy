@@ -40,5 +40,8 @@ describe("courtProvisioningView", () => {
       [...(surface?.stipendRows.map((row) => row.stipendKey) ?? [])].sort()
     );
     expect(surface?.subtitle).toContain("court members");
+    expect(surface?.helperText).toContain("Meat here is passive ration stock already on hand, not a separate market control.");
+    expect(surface?.summaryCards.find((card) => card.id === "ration_demand")?.detail).toContain("not a separate live market action");
+    expect(surface?.summaryCards.find((card) => card.id === "allocation_result")?.detail).toContain("food or meat stock fell short");
   });
 });

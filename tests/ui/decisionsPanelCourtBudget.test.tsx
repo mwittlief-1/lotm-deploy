@@ -8,6 +8,7 @@ import { buildOutboundMarriageSurface } from "../../src/ui/outboundMarriageView"
 import { DecisionsPanel } from "../../src/ui/panels/DecisionsPanel";
 import type { CourtDecisionBudgetSurface } from "../../src/ui/playScreenCourtBudget";
 import type { ObligationsCounterpartyContractSection } from "../../src/ui/playScreenObligations";
+import { IMPROVEMENTS } from "../../src/content/improvements";
 
 function createCourtDecisionBudget(): CourtDecisionBudgetSurface {
   return {
@@ -354,5 +355,26 @@ describe("DecisionsPanel court budget", () => {
     expect(html).toContain("Queue offering");
     expect(html).toContain("Amount 0. Payment mode None.");
     expect(html).toContain("Court budget available now.");
+  });
+
+  it("shows project preview evidence before the player commits to construction", () => {
+    const props = createProps();
+    props.improvementIds = ["granary_upgrade", "field_rotation"];
+    props.improvements = IMPROVEMENTS;
+    props.decisions = {
+      ...props.decisions,
+      construction: { kind: "construction", action: "start", improvement_id: "granary_upgrade" }
+    };
+
+    const html = renderToStaticMarkup(<DecisionsPanel {...props} />);
+
+    expect(html).toContain("Project preview");
+    expect(html).toContain("Granary Upgrade");
+    expect(html).toContain("Queued to start");
+    expect(html).toContain("Upfront cost 6 coin and 2 energy. Build effort 40 progress.");
+    expect(html).toContain("Expected benefit: Reduces spoilage meaningfully.");
+    expect(html).toContain("Recurring upkeep after completion: 2 coin and 1 labor.");
+    expect(html).toContain("Field Rotation");
+    expect(html).toContain("Upfront cost 5 coin and 2 energy. Build effort 45 progress.");
   });
 });

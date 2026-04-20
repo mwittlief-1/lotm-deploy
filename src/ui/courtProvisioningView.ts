@@ -242,13 +242,15 @@ export function buildCourtProvisioningSurface(
       value: `${view.person_ids.length} court members`
     },
     {
-      detail: `${policy.allocation_order.length} entries in deterministic allocation order.`,
+      detail: `${policy.allocation_order.length} entries in deterministic allocation order. Meat here is ration stock already on hand, not a separate live market action.`,
       id: "ration_demand",
       label: "Ration demand",
       value: formatRationPair(policy.total_requested_food_units, policy.total_requested_meat_units)
     },
     {
-      detail: atRiskNames.length > 0 ? `${atRiskNames.length} people are currently flagged at risk.` : "Every current ration row is covered or external.",
+      detail: atRiskNames.length > 0
+        ? `${atRiskNames.length} people are currently flagged at risk because current food or meat stock fell short.`
+        : "Every current ration row is covered or external from current food and meat stores.",
       id: "allocation_result",
       label: "Allocation result",
       value: formatRationPair(policy.total_allocated_food_units, policy.total_allocated_meat_units)
@@ -328,7 +330,7 @@ export function buildCourtProvisioningSurface(
     debugRows,
     debugStipendRows,
     helperText:
-      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Meat here is passive ration stock already on hand, not a separate market control.",
     overrideRows,
     schemaVersion: view.schema_version,
     stipendRows,
