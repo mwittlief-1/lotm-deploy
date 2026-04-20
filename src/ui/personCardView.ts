@@ -1,4 +1,5 @@
 import type { PersonCardRegistry, PersonCardView as PersonCardViewRecord, RunState } from "../sim/types";
+import { buildPersonSecondaryIdentifier } from "./identityLabels";
 
 export type PersonCardRouteOrigin = "household" | "roster" | "prospects" | "known_houses" | "house_dossier" | "person_card";
 
@@ -555,10 +556,14 @@ export function buildPersonCardSurface(
     relationshipRows: relationshipRowsVisible,
     schemaVersion: record.schema_version,
     serviceEntries: serviceEntries(record),
-    subtitle: [
-      record.short_id ?? null,
-      currentHouseLabel,
-      record.known_house_relevance_tier ? formatToken(record.known_house_relevance_tier) : null
-    ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ")
+    subtitle:
+      buildPersonSecondaryIdentifier(previewState, targetPersonId) ??
+      [
+        record.short_id ?? null,
+        currentHouseLabel,
+        record.known_house_relevance_tier ? formatToken(record.known_house_relevance_tier) : null
+      ]
+        .filter((value): value is string => typeof value === "string" && value.length > 0)
+        .join(" · ")
   };
 }

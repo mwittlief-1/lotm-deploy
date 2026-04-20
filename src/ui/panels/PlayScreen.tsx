@@ -847,10 +847,15 @@ export function PlayScreen({
     known_houses: (
       <KnownHousesPanel
         copy={copy}
+        dossierHouseIds={dossierHouseIds}
         hasMoreKnownHouses={hasMoreKnownHouses}
         knownHouses={knownHouses}
         knownHousesMain={knownHousesMain}
+        onOpenHouseDossier={openHouseDossier}
+        onOpenPersonCard={openPersonCard}
         onToggleShowAll={() => setShowAllKnownHouses((value) => !value)}
+        personCardIds={personCardIds}
+        previewState={ctx.preview_state}
         showAllKnownHouses={showAllKnownHouses}
       />
     ),
