@@ -25,6 +25,16 @@ describe("outboundMarriageView", () => {
     expect(
       resolveOutboundMarriageSelectedCandidateId(surface, surface.scoutingRegistry.held_out_candidate_ids[0] ?? null)
     ).toBe(surface.scoutingRegistry.held_out_candidate_ids[0] ?? null);
+    expect(surface.playerTermRows.find((row) => row.draftFieldPath === "draft.relationshipRespect")).toMatchObject({
+      label: "Respect delta",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "offer.relationship_delta.respect",
+    });
+    expect(surface.playerTermRows.find((row) => row.draftFieldPath === "draft.riskTagsText")).toMatchObject({
+      playerAccessLabel: "Locked to advanced contract",
+      resolverFieldPath: "offer.risk_tags[]",
+    });
+    expect(surface.submissionStatus.label.length).toBeGreaterThan(0);
   });
 
   it("previews outbound offer outcomes against a cloned snapshot without mutating live preview state", () => {

@@ -55,5 +55,42 @@ describe("household_presence_view_v1", () => {
       local_role: "noble",
       presence_summary: "Lives outside your household but still matters as part of the nearby noble web."
     });
+    expect(householdPresenceView.entries_by_person_id[state.locals.liege.id]).toMatchObject({
+      presence_kind: "outsider",
+      roster_role: "local_power",
+      local_role: "liege",
+      presence_summary: "Lives outside your household but still drives local obligation and liege continuity."
+    });
+  });
+
+  it("surfaces local clergy succession and vacancy continuity on the household path", () => {
+    const state = createNewRun("household_presence_local_continuity_v1") as any;
+    state.turn_index = 7;
+    state.locals.clergy.alive = false;
+    state.manor.obligations.tithe_due_bushels = 5;
+    state.manor.obligations.arrears.bushels = 3;
+    state.player_house_id = state.player_house_id ?? "h_player";
+    state.institutions = {
+      ...(state.institutions ?? {}),
+      parish_st_cuthbert: {
+        id: "parish_st_cuthbert",
+        type: "parish",
+        name: "St. Cuthbert Parish",
+        patron_actor_id: { kind: "house", id: state.player_house_id },
+        priest_person_id: state.locals.clergy.id
+      }
+    };
+    state.locals.parish_institution_id = "parish_st_cuthbert";
+
+    const personCards = buildPersonCardRegistry(state);
+    const provisioningView = buildCourtProvisioningView(state, personCards);
+    const householdPresenceView = buildHouseholdPresenceView(state, personCards, provisioningView);
+
+    expect(householdPresenceView.entries_by_person_id[state.locals.clergy.id]).toMatchObject({
+      presence_kind: "outsider",
+      roster_role: "local_power",
+      local_role: "clergy",
+      succession_note: "St. Cuthbert Parish has no living priest; dues remain with the institution until a successor is placed."
+    });
   });
 });

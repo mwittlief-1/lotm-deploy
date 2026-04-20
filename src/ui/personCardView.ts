@@ -144,6 +144,11 @@ function houseDisplayName(previewState: RunState | null | undefined, houseId: st
   return houseId;
 }
 
+function personDisplayName(previewState: RunState | null | undefined, personId: string | null): string | null {
+  if (!personId) return null;
+  return actorDisplayLabel(previewState, personId).title;
+}
+
 function readPersonCardRegistry(previewState: RunState | null | undefined): PersonCardRegistry | null {
   const registry = (previewState as any)?.person_card_registry;
   const record = asRecord(registry);
@@ -166,12 +171,16 @@ function relativeDetail(
   previewState: RunState | null | undefined,
   relative: PersonCardViewRecord["family_projection"]["parents"][number]
 ): string {
+  const houseLabel = relative.house_id ? houseDisplayName(previewState, relative.house_id, relative.house_name) : null;
   const detailParts = [
     relative.sex ? formatToken(relative.sex) : null,
     relative.age !== null ? `Age ${relative.age}` : null,
-    relative.house_id ? houseDisplayName(previewState, relative.house_id, relative.house_name) : null,
+    relative.married_out
+      ? houseLabel
+        ? `Birth-house kin now in ${houseLabel} through marriage`
+        : "Birth-house kin who left through marriage"
+      : houseLabel,
     relative.alive ? "Alive" : "Deceased",
-    relative.married_out ? "Married out" : null
   ].filter((value): value is string => typeof value === "string" && value.length > 0);
   return detailParts.join(" · ");
 }
@@ -311,6 +320,36 @@ function relationshipRows(
   };
 }
 
+function marriedOutRoleDetail(currentHouseLabel: string, birthHouseLabel: string): string {
+  if (currentHouseLabel !== birthHouseLabel) {
+    return `Birth-house kin now living with ${currentHouseLabel} through marriage.`;
+  }
+  return "Birth-house kin who left the birth house through marriage.";
+}
+
+function formatSuccessionDetail(
+  previewState: RunState | null | undefined,
+  record: PersonCardViewRecord
+): string {
+  const currentHeirName = personDisplayName(previewState, record.succession_projection.current_heir_id);
+  const adultSuccessorName = personDisplayName(previewState, record.succession_projection.adult_successor_id);
+
+  return [
+    record.succession_projection.line_position !== null
+      ? `Current line position: ${record.succession_projection.line_position}.`
+      : null,
+    record.succession_projection.adult_line_position !== null
+      ? `Adult line position: ${record.succession_projection.adult_line_position}.`
+      : null,
+    currentHeirName ? `Current heir: ${currentHeirName}.` : null,
+    adultSuccessorName && record.succession_projection.adult_successor_id !== record.succession_projection.current_heir_id
+      ? `Adult fallback: ${adultSuccessorName}.`
+      : null,
+    record.succession_projection.blocked_by_current_heir ? "A living current heir still blocks immediate succession movement." : null,
+    record.succession_projection.claim_window_open ? "Claim window is open if the current line fails." : null
+  ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" ");
+}
+
 function debugRows(
   previewState: RunState | null | undefined,
   record: PersonCardViewRecord,
@@ -434,32 +473,31 @@ export function buildPersonCardSurface(
     residence.travel_cost_distance !== null ? `Travel ${residence.travel_cost_distance}` : null,
     residence.route_hop_distance !== null ? `Hops ${residence.route_hop_distance}` : null,
     "Residence routing keeps travel and court reach tied to one bounded seam."
-  ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
+      ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
 
-  const roleValue = record.court_member ? "Court-linked" : "Outside court";
+  const hasMarriedInRole = record.court_role_labels.includes("Married-in Spouse");
+  const roleValue = hasMarriedInRole
+    ? "Household by marriage"
+    : record.married_out
+      ? "Birth-house kin abroad"
+      : record.court_member
+        ? "Court-linked"
+        : "Outside court";
   const roleDetail = [
     record.court_role_labels.length > 0 ? record.court_role_labels.join(", ") : "No active court roles",
-    record.married_out ? "Married out" : null
+    hasMarriedInRole ? `Married into ${currentHouseLabel} and treated as household family on the player path.` : null,
+    record.married_out ? marriedOutRoleDetail(currentHouseLabel, birthHouseLabel) : null
   ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
 
   const successionValue =
     record.succession_projection.current_heir
       ? "Current heir"
+      : record.succession_projection.line_position !== null
+        ? `Line ${record.succession_projection.line_position}`
       : record.succession_projection.claim_window_open
         ? "Claim window open"
         : "No active claim";
-  const successionDetail = [
-    record.succession_projection.line_position !== null
-      ? `Line ${record.succession_projection.line_position}`
-      : null,
-    record.succession_projection.adult_line_position !== null
-      ? `Adult line ${record.succession_projection.adult_line_position}`
-      : null,
-    record.succession_projection.current_heir_id
-      ? `Current heir ${record.succession_projection.current_heir_id}`
-      : null,
-    record.succession_projection.blocked_by_current_heir ? "Blocked by current heir" : null
-  ].filter((value): value is string => typeof value === "string" && value.length > 0).join(" · ");
+  const successionDetail = formatSuccessionDetail(previewState, record);
 
   const landsValue =
     record.lands_held_projection.house_holdings_status === "player_anchor_known"

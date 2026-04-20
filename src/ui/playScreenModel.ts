@@ -6,6 +6,8 @@ import {
 } from "../sim/domains/court/agendaRegistry";
 import { buildEconomyPortfolioAnalysisFromState } from "../sim/domains/economy/portfolioAnalysis";
 import { buildEconomyObligationsView } from "../sim/domains/experience/obligationsView";
+import { buildCourtProvisioningView } from "../sim/domains/people/courtProvisioningRegistry";
+import { buildHouseholdPresenceView } from "../sim/domains/people/householdPresenceView";
 import { formatPersonName } from "./viewHelpers";
 
 export const PLAY_ANCHORS = {
@@ -508,6 +510,36 @@ function personNameFromState(state: RunState, personId: string | null): string {
   return formatPersonName(person ?? { id: personId });
 }
 
+function formatAgendaToken(value: string | null | undefined): string {
+  const normalized = typeof value === "string" ? value.trim() : "";
+  if (!normalized) return "Unknown";
+  return normalized
+    .split(/[._]/u)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function officeTruthNotes(previewState: RunState, personId: string | null): string[] {
+  if (!personId) return [];
+
+  const provisioningEntry = buildCourtProvisioningView(previewState).entries_by_person_id[personId] ?? null;
+  const householdEntry = buildHouseholdPresenceView(previewState).entries_by_person_id[personId] ?? null;
+  const notes: string[] = [];
+
+  if (householdEntry) {
+    notes.push(`Household path: ${formatAgendaToken(householdEntry.presence_kind)} — ${householdEntry.presence_summary}`);
+  }
+
+  if (provisioningEntry) {
+    notes.push(
+      `Provisioning: ${formatAgendaToken(provisioningEntry.provisioning_class)} / ${formatAgendaToken(provisioningEntry.lodging_level)}.`
+    );
+  }
+
+  return notes.slice(0, 2);
+}
+
 function agendaItemFromRegistry(args: {
   anchors: typeof PLAY_ANCHORS;
   copy: any;
@@ -633,13 +665,17 @@ function agendaItemFromRegistry(args: {
 
     if (item.source_key === "offices.realm_holder_transition") {
       const seat = officeRegistry.seats_by_id?.[item.subject_ref_id ?? ""];
+      const truthNotes = officeTruthNotes(previewState, seat?.holder_person_id ?? null);
       return {
         id: item.agenda_item_id,
         score: item.priority,
         tie_key: item.tie_key,
         title: "A realm office just changed hands",
         context: `${seat?.title ?? "Realm office"} last shifted on Turn ${seat?.last_transition_turn_index ?? previewState.turn_index}.`,
-        notes: seat?.holder_person_id ? [`Current holder: ${personNameFromState(previewState, seat.holder_person_id)}.`] : [],
+        notes:
+          seat?.holder_person_id
+            ? [`Current holder: ${personNameFromState(previewState, seat.holder_person_id)}.`, ...truthNotes]
+            : truthNotes,
         cta_label: copy.cta_viewHousehold,
         anchor: anchors.household
       };
@@ -664,13 +700,17 @@ function agendaItemFromRegistry(args: {
     if (item.source_key === "offices.active_service_record") {
       const record = serviceRegistry.records_by_id?.[item.subject_ref_id ?? ""];
       const seat = officeRegistry.seats_by_id?.[record?.seat_id ?? ""];
+      const truthNotes = officeTruthNotes(previewState, record?.holder_person_id ?? null);
+      const placementNote = record
+        ? `Placement mode: ${String(noteTagValue(item, "placement:") ?? "serving_actor").replaceAll("_", " ")}.`
+        : null;
       return {
         id: item.agenda_item_id,
         score: item.priority,
         tie_key: item.tie_key,
         title: "A court placement deserves review",
         context: `${personNameFromState(previewState, record?.holder_person_id ?? null)} serves as ${seat?.title ?? "office holder"}.`,
-        notes: record ? [`Placement mode: ${String(noteTagValue(item, "placement:") ?? "serving_actor").replaceAll("_", " ")}.`] : [],
+        notes: [...truthNotes, ...(placementNote ? [placementNote] : [])],
         cta_label: copy.cta_viewHousehold,
         anchor: anchors.household
       };

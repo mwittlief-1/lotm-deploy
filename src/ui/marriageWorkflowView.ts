@@ -38,6 +38,7 @@ export type MarriageWorkflowSubjectSurface = {
   latestOfferSummary: string | null;
   outboundFeaturedCandidate: MarriageWorkflowLinkSurface | null;
   outboundSendOutcomeSummary: string | null;
+  outboundTermSummary: string;
   outboundSummary: string;
   subject: MarriageWorkflowLinkSurface;
   subjectParents: MarriageWorkflowLinkSurface[];
@@ -136,7 +137,22 @@ function latestOfferSummary(subjectView: MarriageWorkflowSubjectViewV1): string 
   if (!latestOffer) return null;
   const candidateHouse = houseLabel(latestOffer.candidate.house_name, latestOffer.candidate.house_id);
   const candidateLabel = candidateHouse ? `${latestOffer.candidate.person_name} of ${candidateHouse}` : latestOffer.candidate.person_name;
-  return `Last outbound offer: ${formatToken(latestOffer.state)} with ${candidateLabel}.`;
+  if (latestOffer.state === "pending") {
+    return `Post-submit state: awaiting reply from ${candidateLabel}.`;
+  }
+  if (latestOffer.state === "accepted") {
+    return `Post-submit state: accepted by ${candidateLabel}.`;
+  }
+  if (latestOffer.state === "rejected") {
+    return `Post-submit state: rejected by ${candidateLabel}.`;
+  }
+  if (latestOffer.state === "expired") {
+    return `Post-submit state: the offer to ${candidateLabel} expired before a match closed.`;
+  }
+  if (latestOffer.state === "withdrawn") {
+    return `Post-submit state: the latest offer to ${candidateLabel} was withdrawn.`;
+  }
+  return `Post-submit state: ${formatToken(latestOffer.state)} with ${candidateLabel}.`;
 }
 
 function outboundSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
@@ -162,6 +178,24 @@ function outboundSendOutcomeSummary(previewState: RunState, subjectView: Marriag
   if (!preview) return null;
 
   return `If you send now: ${preview.outcomeLabel}. ${preview.summary}`;
+}
+
+function outboundTermSummary(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): string {
+  const marriageWindow = buildMarriageWindow(previewState);
+  const surface = buildOutboundMarriageSurface(previewState, marriageWindow);
+  if (!surface || surface.subjectPersonId !== subjectView.subject.person_id) {
+    return "Player-term access is unavailable until the bounded outbound offer sheet loads for this subject.";
+  }
+
+  const editableLabels = surface.playerTermRows
+    .filter((row) => row.playerAccessLabel === "Editable on player tab")
+    .slice(0, 4)
+    .map((row) => row.label.toLowerCase());
+  const lockedLabels = surface.playerTermRows
+    .filter((row) => row.playerAccessLabel === "Locked to advanced contract")
+    .map((row) => row.label.toLowerCase());
+
+  return `Editable on player tab: ${editableLabels.join(", ")}. Locked on the normal path: ${lockedLabels.join(", ")}.`;
 }
 
 function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
@@ -193,6 +227,7 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
     latestOfferSummary: latestOfferSummary(subjectView),
     outboundFeaturedCandidate,
     outboundSendOutcomeSummary: outboundSendOutcomeSummary(previewState, subjectView),
+    outboundTermSummary: outboundTermSummary(previewState, subjectView),
     outboundSummary: outboundSummary(subjectView),
     subject: personLink(subjectView.subject),
     subjectParents: [...subjectView.subject.parent_refs]

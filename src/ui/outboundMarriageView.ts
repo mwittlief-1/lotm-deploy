@@ -4,6 +4,7 @@ import type {
   OutboundMarriageScoutingCandidateEntry,
   OutboundMarriageScoutingRegistry
 } from "../sim/domains/people/marriage";
+import { readPersistedOutboundMarriageOfferEntries } from "../sim/domains/people/marriageOfferRegistry";
 import { resolveOutboundMarriageOffer } from "../sim/domains/people/marriage";
 import { deepCopy } from "../sim/util";
 
@@ -58,14 +59,30 @@ export type OutboundMarriageOfferPreview = {
   summary: string;
 };
 
+export type OutboundMarriageTermControlSurface = {
+  draftFieldPath: string;
+  helperText: string;
+  label: string;
+  playerAccessLabel: "Editable on player tab" | "Locked to advanced contract";
+  resolverFieldPath: string;
+};
+
+export type OutboundMarriageSubmissionStatusSurface = {
+  label: string;
+  state: "no_offer" | "generated" | "pending" | "accepted" | "rejected" | "expired" | "withdrawn";
+  summary: string;
+};
+
 export type OutboundMarriageSurface = {
   candidateRows: OutboundMarriageCandidateRow[];
   helperText: string;
   heldOutCount: number;
+  playerTermRows: OutboundMarriageTermControlSurface[];
   previewState: RunState;
   schemaVersion: typeof OUTBOUND_MARRIAGE_VIEW_SCHEMA_VERSION;
   scopeSummary: string;
   shownCount: number;
+  submissionStatus: OutboundMarriageSubmissionStatusSurface;
   subjectPersonId: string;
   subjectPersonName: string;
   subtitle: string;
@@ -140,6 +157,16 @@ function formatScopeLabel(entry: OutboundMarriageScoutingCandidateEntry): string
   return formatToken(entry.scope_status);
 }
 
+function compareOfferEntriesByRecency(left: any, right: any): number {
+  if ((right?.last_state_change_turn ?? -1) !== (left?.last_state_change_turn ?? -1)) {
+    return (right?.last_state_change_turn ?? -1) - (left?.last_state_change_turn ?? -1);
+  }
+  if ((right?.created_turn ?? -1) !== (left?.created_turn ?? -1)) {
+    return (right?.created_turn ?? -1) - (left?.created_turn ?? -1);
+  }
+  return compareText(String(left?.offer_key ?? ""), String(right?.offer_key ?? ""));
+}
+
 function candidateRows(registry: OutboundMarriageScoutingRegistry): OutboundMarriageCandidateRow[] {
   return registry.candidate_ids
     .map((candidateId, index) => {
@@ -166,6 +193,163 @@ function candidateRows(registry: OutboundMarriageScoutingRegistry): OutboundMarr
       };
     })
     .filter((row): row is OutboundMarriageCandidateRow => row !== null);
+}
+
+function playerTermRows(): OutboundMarriageTermControlSurface[] {
+  return [
+    {
+      draftFieldPath: "draft.dowryCoinDelta",
+      label: "Dowry coin",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "offer.dowry_coin_net",
+      helperText: "Player offer copy can tune the headline dowry coin value directly on the bounded player tab."
+    },
+    {
+      draftFieldPath: "draft.relationshipRespect",
+      label: "Respect delta",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "offer.relationship_delta.respect",
+      helperText: "Respect stays player-directed on the main offer sheet."
+    },
+    {
+      draftFieldPath: "draft.relationshipAllegiance",
+      label: "Allegiance delta",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "offer.relationship_delta.allegiance",
+      helperText: "Allegiance stays player-directed on the main offer sheet."
+    },
+    {
+      draftFieldPath: "draft.relationshipThreat",
+      label: "Threat delta",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "offer.relationship_delta.threat",
+      helperText: "Threat stays player-directed on the main offer sheet."
+    },
+    {
+      draftFieldPath: "draft.dowryFoodStores",
+      label: "Dowry food",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "dowry_requested_delta_by_asset.food_stores",
+      helperText: "Non-coin dowry requests stay exposed as bounded settlement rows."
+    },
+    {
+      draftFieldPath: "draft.dowryMeatStores",
+      label: "Dowry meat",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "dowry_requested_delta_by_asset.meat_stores",
+      helperText: "Non-coin dowry requests stay exposed as bounded settlement rows."
+    },
+    {
+      draftFieldPath: "draft.dowerCoinDelta",
+      label: "Dower coin",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "dower_requested_delta_by_asset.coin",
+      helperText: "Dower settlement rows remain player-directed on the main sheet."
+    },
+    {
+      draftFieldPath: "draft.dowerFoodStores",
+      label: "Dower food",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "dower_requested_delta_by_asset.food_stores",
+      helperText: "Dower settlement rows remain player-directed on the main sheet."
+    },
+    {
+      draftFieldPath: "draft.dowerMeatStores",
+      label: "Dower meat",
+      playerAccessLabel: "Editable on player tab",
+      resolverFieldPath: "dower_requested_delta_by_asset.meat_stores",
+      helperText: "Dower settlement rows remain player-directed on the main sheet."
+    },
+    {
+      draftFieldPath: "draft.includeLiegeDelta",
+      label: "Liege delta",
+      playerAccessLabel: "Locked to advanced contract",
+      resolverFieldPath: "offer.liege_delta",
+      helperText: "Liege-side nudges stay off the player tab until the sim exposes them as a direct player control."
+    },
+    {
+      draftFieldPath: "draft.riskTagsText",
+      label: "Risk tags",
+      playerAccessLabel: "Locked to advanced contract",
+      resolverFieldPath: "offer.risk_tags[]",
+      helperText: "Risk-tag tuning stays on the advanced contract path rather than the normal player offer flow."
+    }
+  ];
+}
+
+function submissionStatus(
+  previewState: RunState,
+  subjectPersonId: string,
+  subjectPersonName: string
+): OutboundMarriageSubmissionStatusSurface {
+  const latest = readPersistedOutboundMarriageOfferEntries(previewState)
+    .filter((entry) => entry.subject_person_id === subjectPersonId)
+    .sort(compareOfferEntriesByRecency)[0] ?? null;
+
+  if (!latest) {
+    return {
+      state: "no_offer",
+      label: "No outbound offer recorded",
+      summary:
+        `${subjectPersonName} has no recorded outbound offer yet. The player tab previews the canonical send result, ` +
+        `but live submission stays locked until an offer is written through the accepted resolver path.`
+    };
+  }
+
+  const candidateName =
+    typeof latest.candidate_person_id === "string" && latest.candidate_person_id.length > 0
+      ? asPersonName(previewState, latest.candidate_person_id)
+      : "Unknown candidate";
+  const candidateHouse =
+    typeof latest.candidate_house_label === "string" && latest.candidate_house_label.trim().length > 0
+      ? latest.candidate_house_label.trim()
+      : latest.candidate_house_id ?? "Unknown house";
+  const candidateLabel = `${candidateName} of ${candidateHouse}`;
+
+  switch (latest.state) {
+    case "generated":
+      return {
+        state: "generated",
+        label: "Offer generated",
+        summary: `Post-submit state: ${candidateLabel} is the latest recorded offer target, and the offer has been generated on the canonical registry.`
+      };
+    case "pending":
+      return {
+        state: "pending",
+        label: "Offer pending reply",
+        summary: `Post-submit state: awaiting reply from ${candidateLabel}.`
+      };
+    case "accepted":
+      return {
+        state: "accepted",
+        label: "Offer accepted",
+        summary: `Post-submit state: accepted by ${candidateLabel}.`
+      };
+    case "rejected":
+      return {
+        state: "rejected",
+        label: "Offer rejected",
+        summary: `Post-submit state: rejected by ${candidateLabel}.`
+      };
+    case "expired":
+      return {
+        state: "expired",
+        label: "Offer expired",
+        summary: `Post-submit state: ${candidateLabel} did not close before the offer expired.`
+      };
+    case "withdrawn":
+      return {
+        state: "withdrawn",
+        label: "Offer withdrawn",
+        summary: `Post-submit state: the latest recorded offer toward ${candidateLabel} was withdrawn.`
+      };
+    default:
+      return {
+        state: "no_offer",
+        label: "No outbound offer recorded",
+        summary: `${subjectPersonName} has no readable outbound offer state on this seam.`
+      };
+  }
 }
 
 export function resolveOutboundMarriageSelectedCandidateId(
@@ -363,10 +547,12 @@ export function buildOutboundMarriageSurface(
     helperText:
       "This sheet reads the accepted outbound scouting registry and previews the canonical offer resolver against a cloned snapshot. Live state stays unchanged until a turn decision resolves.",
     heldOutCount,
+    playerTermRows: playerTermRows(),
     previewState,
     schemaVersion: OUTBOUND_MARRIAGE_VIEW_SCHEMA_VERSION,
     scopeSummary,
     shownCount,
+    submissionStatus: submissionStatus(previewState, scoutingRegistry.subject_person_id, subjectPersonName),
     subjectPersonId: scoutingRegistry.subject_person_id,
     subjectPersonName,
     subtitle: `${subjectPersonName} · ${shownCount} shown · ${heldOutCount} held out`,
