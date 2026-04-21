@@ -212,9 +212,13 @@ describe("ProspectsPanel", () => {
         hiddenCount={0}
         hiddenIds={[]}
         houseLabel={(houseId: string | null | undefined) => (houseId === "h_ext_02" ? "House Ashford" : houseId ?? "House Unknown")}
+        marriageWorkflowActionStatus={{
+          "marriage_workflow:outbound_offer:workflow:p_child_1": "queued"
+        }}
         onMarriageWorkflowAcceptInbound={() => undefined}
         onMarriageWorkflowClearScout={() => undefined}
         onMarriageWorkflowConstructOffer={() => undefined}
+        onMarriageWorkflowQueueOffer={() => undefined}
         onMarriageWorkflowRejectInbound={() => undefined}
         onMarriageWorkflowScout={() => undefined}
         marriageWorkflowSurface={{
@@ -333,10 +337,15 @@ describe("ProspectsPanel", () => {
     expect(html).toContain("Scout/search candidates");
     expect(html).toContain("Outbound offer construction");
     expect(html).toContain("Construct outbound offer");
-    expect(html).toContain("Offer terms stay read-only until the Social lane publishes the canonical submission contract.");
+    expect(html).toContain("Queue outbound offer");
+    expect(html).toContain("Build the offer here, then queue it for the Social lane contract.");
+    expect(html).toContain("Dowry coin");
+    expect(html).toContain("Respect delta");
+    expect(html).toContain("Settlement asset terms remain locked until Social owns the canonical offer payload.");
     expect(html).toContain("Rejecting this proposal leaves the match unresolved");
     expect(html).toContain("Search status:");
     expect(html).toContain("Offer status:");
+    expect(html).toContain("Queued in this workflow UI; the final simulation send waits for the Social lane contract.");
     expect(html).toContain("If you send now: Accepted preview.");
     expect(html).toContain("Terms: Editable on player tab:");
     expect(html).toContain("Post-submit state: awaiting reply from Cedric of House Ashford.");

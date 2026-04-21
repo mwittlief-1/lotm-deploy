@@ -3,6 +3,7 @@ export const PLAY_SCREEN_CARD_ORDER = [
   "diff_ledger",
   "manor_state",
   "turn_report",
+  "portfolio_overview",
   "prospects",
   "known_houses",
   "intel",

@@ -41,6 +41,14 @@ export type MarriageWorkflowInboundOfferSurface = {
   candidate: MarriageWorkflowLinkSurface;
 };
 
+export type MarriageWorkflowOutboundOfferDraftSurface = {
+  candidatePersonId: string | null;
+  dowryCoinDelta: number;
+  relationshipAllegiance: number;
+  relationshipRespect: number;
+  relationshipThreat: number;
+};
+
 export type MarriageWorkflowSubjectSurface = {
   helperText: string;
   inboundOffers: MarriageWorkflowInboundOfferSurface[];
