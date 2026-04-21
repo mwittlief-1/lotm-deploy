@@ -12584,7 +12584,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Publish story-based release closeout and gate evidence
-  status: blocked
+  status: ready
   priority: 72
   tranche: 7
   change_type: refactor
@@ -12616,7 +12616,7 @@ tasks:
   - V03-R6-006-T04
   - V03-R6-007-T02
   requires_integrator: true
-  blocked_reason: release closeout must wait for the decomposed partially-covered story tasks and the explicit gate-remediation tasks to be accepted
+  blocked_reason: ''
   allowed_paths:
   - ops/v0.3/**
   - docs/**
@@ -12784,7 +12784,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Achieve clean branch-wide qa gate exit
-  status: ready
+  status: done
   priority: 71
   tranche: 8
   change_type: refactor

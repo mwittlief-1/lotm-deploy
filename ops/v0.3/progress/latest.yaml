@@ -1,19 +1,19 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-008-T06
-  last_completed_task_id: V03-R6-006-T04
+  current_task_id: V03-R6-008-T03
+  last_completed_task_id: V03-R6-008-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 6efcfce
+  git_commit: 8fefa45
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: blocked_clean_exit
+    qa: pass
     preflight: pass
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
@@ -21,13 +21,12 @@ last_run:
     run1: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
     run2: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
 notes: >-
-  Integrator accepted V03-R6-006-T04 on 2026-04-20 after centralizing noble
-  birth spacing on MIN_NOBLE_BIRTH_SPACING_YEARS and adding a Turn Report
-  Household changes summary for births, deaths, marriage notes, widowhood,
-  succession, and heir selection. Preflight stayed green with
-  test3_mismatches=0, and seed:replay:batch passed twice with matching summary
-  hash 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b. The
-  intentional golden-review note is that noble mothers with last_birth_year now
-  need at least 3 years before another eligible birth roll. V03-R6-008-T06 is
-  the current ready task for the remaining branch-wide qa clean-exit work.
+  Integrator accepted V03-R6-008-T06 on 2026-04-20 after branch-wide qa,
+  preflight, and seed:replay:batch twice passed on the kickoff line. Fresh gate
+  evidence is in qa_artifacts/vitest.json, qa_artifacts/uat_gate.json,
+  qa_artifacts/v0.3.6_preflight.json, and
+  qa_artifacts/seed_replay/v0.3.6/batch/turns_15/summary.json. Both replay runs
+  produced summary hash
+  490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b. V03-R6-008-T03
+  is now ready for the final story-based release closeout.
 active_claims: {}
