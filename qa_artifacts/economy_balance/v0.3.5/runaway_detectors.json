@@ -312,7 +312,7 @@
       "summary": "Keep the current one-manor baseline explicit across both prudent regression anchors and both accepted builder DOE rails."
     }
   ],
-  "hash": "d050c77aa0c3f9af698d8128bd5a4f18dd36ad48c18441a648ad383b4d8a6479",
+  "hash": "4154b30bdd94e2344d95763cec5dd50e619956ec8bc9bf3a44c350caec7d7a05",
   "kind": "runaway_detectors_v1",
   "qa_flow": {
     "commands": [
@@ -326,13 +326,13 @@
   "source_artifacts": [
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json",
-      "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+      "hash": "4aa5c5b4cc702e1382ccfee321d2a53517278f60605ff2f799cf532a2651d8d0",
       "kind": "playability_preset_pack_v1",
       "label": "playability preset pack"
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/kpi_acceptance_bands.json",
-      "hash": "681047e198b46df2fbb482af7699cc081e4aceb4c586cb15128bb0ee23e36098",
+      "hash": "d74fecb3128938fb54a928447a943161fa644ec2e92bbe85ead6924ea05ca06a",
       "kind": "kpi_acceptance_bands_v1",
       "label": "kpi acceptance bands"
     },

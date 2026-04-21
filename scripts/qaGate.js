@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 
 function ensureDir(p) { fs.mkdirSync(p, { recursive: true }); }
 
@@ -51,6 +51,14 @@ function copyIfPresent(from, to) {
   return true;
 }
 
+function unlinkIfPresent(p) {
+  try {
+    fs.unlinkSync(p);
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
+}
+
 function buildStartedReport(appVersion, paths) {
   return {
     gate: "qa_gate_v1",
@@ -89,6 +97,10 @@ function run(cmd, args) {
   return spawnSync(cmd, args, { stdio: "inherit" });
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function parseVitestResult(vitestPath) {
   const payload = readJsonIfPresent(vitestPath);
   const numTotalTests = Number(payload?.numTotalTests ?? 0);
@@ -106,6 +118,102 @@ function parseVitestResult(vitestPath) {
   };
 }
 
+function isSuccessfulVitestResult(vitest) {
+  return Boolean(
+    vitest &&
+      vitest.success &&
+      vitest.num_total_tests > 0 &&
+      vitest.num_failed_tests === 0 &&
+      vitest.num_failed_test_suites === 0
+  );
+}
+
+function positiveEnvInt(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : fallback;
+}
+
+function terminateChild(child) {
+  if (!child.pid) return;
+  try {
+    if (process.platform !== "win32") {
+      process.kill(-child.pid, "SIGTERM");
+      return;
+    }
+  } catch {
+    // Fall through to killing just the child process.
+  }
+  try {
+    child.kill("SIGTERM");
+  } catch {
+    // The process may already have exited.
+  }
+}
+
+async function runVitestWithJsonEscape(cmd, args, vitestPath) {
+  const maxMs = positiveEnvInt("QA_VITEST_MAX_MS", 60 * 60 * 1000);
+  const jsonGraceMs = positiveEnvInt("QA_VITEST_JSON_GRACE_MS", 5 * 1000);
+  const child = spawn(cmd, args, {
+    detached: process.platform !== "win32",
+    stdio: "inherit"
+  });
+
+  let exitStatus = null;
+  let exitSignal = null;
+  const exited = new Promise((resolve) => {
+    child.on("exit", (status, signal) => {
+      exitStatus = status;
+      exitSignal = signal;
+      resolve("exit");
+    });
+  });
+
+  const startedAt = Date.now();
+  let successSeenAt = null;
+
+  while (true) {
+    const marker = await Promise.race([exited, sleep(1000).then(() => "tick")]);
+    const vitest = fs.existsSync(vitestPath) ? parseVitestResult(vitestPath) : null;
+
+    if (marker === "exit") {
+      return {
+        status: exitStatus,
+        signal: exitSignal,
+        vitest,
+        escaped_after_success_json: false
+      };
+    }
+
+    if (isSuccessfulVitestResult(vitest)) {
+      if (successSeenAt === null) successSeenAt = Date.now();
+      if (Date.now() - successSeenAt >= jsonGraceMs) {
+        console.warn(
+          `QA WARN: Vitest wrote a successful JSON report but did not exit after ${jsonGraceMs}ms; continuing with versioned evidence.`
+        );
+        terminateChild(child);
+        await Promise.race([exited, sleep(5000)]);
+        return {
+          status: 0,
+          signal: "JSON_SUCCESS_ESCAPE",
+          vitest,
+          escaped_after_success_json: true
+        };
+      }
+    }
+
+    if (Date.now() - startedAt >= maxMs) {
+      terminateChild(child);
+      await Promise.race([exited, sleep(5000)]);
+      return {
+        status: 124,
+        signal: "QA_VITEST_MAX_MS",
+        vitest,
+        escaped_after_success_json: false
+      };
+    }
+  }
+}
+
 function parseUatResult(uatPath) {
   const payload = readJsonIfPresent(uatPath);
   return {
@@ -115,7 +223,7 @@ function parseUatResult(uatPath) {
   };
 }
 
-export function main() {
+export async function main() {
   const repoRoot = process.cwd();
   const appVersion = resolveQaGateVersion(repoRoot);
   const paths = qaEvidencePaths(appVersion, repoRoot);
@@ -128,6 +236,7 @@ export function main() {
   const tsxBin = path.resolve("node_modules/tsx/dist/cli.mjs");
 
   if (fs.existsSync(vitestBin)) {
+    unlinkIfPresent(paths.vitest);
     const vitestArgs = [
       "run",
       "--poolOptions.threads.minThreads=1",
@@ -136,8 +245,8 @@ export function main() {
       "--reporter=json",
       `--outputFile.json=${paths.vitest}`
     ];
-    const res = run(vitestBin, vitestArgs);
-    const vitest = fs.existsSync(paths.vitest) ? parseVitestResult(paths.vitest) : null;
+    const res = await runVitestWithJsonEscape(vitestBin, vitestArgs, paths.vitest);
+    const vitest = res.vitest ?? (fs.existsSync(paths.vitest) ? parseVitestResult(paths.vitest) : null);
 
     if ((res.status ?? 1) !== 0) {
       finalizeReport(report, paths, "vitest_failed", {
@@ -157,7 +266,15 @@ export function main() {
     }
 
     copyIfPresent(paths.vitest, paths.legacyVitest);
-    report = finalizeReport(report, paths, "uat_running", { vitest });
+    report = finalizeReport(report, paths, "uat_running", {
+      vitest,
+      vitest_exit: res.escaped_after_success_json
+        ? {
+            escaped_after_success_json: true,
+            signal: res.signal
+          }
+        : undefined
+    });
 
     const uatRes = run(process.execPath, [tsxBin, path.resolve("scripts/uatGate.ts")]);
     copyIfPresent(paths.legacyUat, paths.uat);
@@ -203,5 +320,8 @@ export function main() {
 
 const isEntrypoint = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isEntrypoint) {
-  main();
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 }

@@ -1,0 +1,171 @@
+{
+  "kind": "playtest_ops_receipt_bundle_seed_pack_v1",
+  "release": "v0.3.6",
+  "runtime_app_version": "v0.3.6",
+  "source_replay_summary_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/summary.json",
+  "source_replay_summary_hash": "2694b5972cba8adead449c6d9560c23eca92be644f58f29a86d7cb61a67bd14e",
+  "qa_flow": {
+    "commands": [
+      "npm run qa",
+      "npm run preflight",
+      "npm run seed:replay:batch"
+    ],
+    "note": "Refresh the deterministic replay batch before assembling or reviewing a receipt bundle so the packet can cite the accepted 15-turn replay hash for the active v0.3.6 release stamp."
+  },
+  "bundle_contract": {
+    "archive_name_template": "lotm_v0.3.6_playtest_receipt_bundle_<scenario_id>_<policy>_<seed>.zip",
+    "bundle_root_template": "qa_artifacts/playtest_ops/v0.3.6/receipt_bundles/<scenario_id>/<policy>/<seed>/",
+    "required_artifacts": [
+      {
+        "artifact_id": "run_summary_json",
+        "delivery": "ui_export",
+        "filename_template": "run_summary_<seed>.json",
+        "required": true,
+        "source_surface": "gameplay_decisions_exports"
+      },
+      {
+        "artifact_id": "full_run_json",
+        "delivery": "ui_export",
+        "filename_template": "run_export_<seed>.json",
+        "required": true,
+        "source_surface": "gameplay_decisions_exports"
+      },
+      {
+        "artifact_id": "turn_report_notes",
+        "delivery": "manual_capture",
+        "filename_template": "turn_report_notes.md",
+        "required": true,
+        "source_surface": "turn_report_summary"
+      },
+      {
+        "artifact_id": "receipts_grouped_notes",
+        "delivery": "manual_capture",
+        "filename_template": "receipts_grouped_notes.md",
+        "required": true,
+        "source_surface": "receipts_viewer_modal"
+      },
+      {
+        "artifact_id": "receipts_raw_notes",
+        "delivery": "manual_capture",
+        "filename_template": "receipts_raw_notes.md",
+        "required": false,
+        "source_surface": "receipts_viewer_modal"
+      },
+      {
+        "artifact_id": "seed_replay_batch_summary",
+        "delivery": "qa_reference",
+        "repo_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/summary.json",
+        "required": true,
+        "source_surface": null
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "baseline_low_pressure_prudent",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "policy": "prudent-builder",
+      "turns": 15,
+      "focus": [
+        "clean_turn_report_review",
+        "summary_export_reference",
+        "packet_naming_check"
+      ],
+      "required_surfaces": [
+        "gameplay_decisions_exports",
+        "turn_report_summary",
+        "run_log_screen"
+      ],
+      "expected_end_state": {
+        "arrears_bushels": 0,
+        "arrears_coin": 0,
+        "bushels_stored": 1194,
+        "coin": 71,
+        "unrest": 16
+      },
+      "source_artifact_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/runs/prudent-builder/lotm_v022_seed_001_baseline_extworld.json",
+      "source_hash": "d68283b0e6da1924a364e5b5a1fb9dcf8193b065665077920cb958a80a4a0a19",
+      "notes": "Use this as the least noisy reference packet when checking whether the playtest bundle is easy to read and name correctly."
+    },
+    {
+      "scenario_id": "arrears_pressure_builder",
+      "seed": "lotm_v022_seed_001_baseline_extworld",
+      "policy": "builder-forward",
+      "turns": 15,
+      "focus": [
+        "overdue_obligations_review",
+        "unrest_pressure_review",
+        "export_vs_report_alignment"
+      ],
+      "required_surfaces": [
+        "gameplay_decisions_exports",
+        "turn_report_summary",
+        "receipts_viewer_modal",
+        "diff_ledger_summary"
+      ],
+      "expected_end_state": {
+        "arrears_bushels": 499,
+        "arrears_coin": 6,
+        "bushels_stored": 160,
+        "coin": 0,
+        "unrest": 52
+      },
+      "source_artifact_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/runs/builder-forward/lotm_v022_seed_001_baseline_extworld.json",
+      "source_hash": "1cf729c12cee0cbc836878561630be9f5d88a9df855f20300f00eaaa3ceba7e1",
+      "notes": "Use this packet when the review needs visible arrears and enough pressure to compare summary, receipts, and raw exports side by side."
+    },
+    {
+      "scenario_id": "relationship_edges_builder",
+      "seed": "lotm_v022_seed_002_relationship_edges",
+      "policy": "builder-forward",
+      "turns": 15,
+      "focus": [
+        "counterparty_receipt_review",
+        "relationship_follow_up",
+        "manual_receipt_grouping"
+      ],
+      "required_surfaces": [
+        "debug_accordion_exports",
+        "receipts_viewer_modal",
+        "diff_ledger_summary"
+      ],
+      "expected_end_state": {
+        "arrears_bushels": 225,
+        "arrears_coin": 7,
+        "bushels_stored": 471,
+        "coin": 0,
+        "unrest": 47
+      },
+      "source_artifact_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/runs/builder-forward/lotm_v022_seed_002_relationship_edges.json",
+      "source_hash": "e8b7244c4aef11deb528937da59846358a865e158a943b991504a7cb18c28d49",
+      "notes": "Use this packet when grouped receipts and counterparty follow-up need to stay legible for liege and church review."
+    },
+    {
+      "scenario_id": "weather_shortage_builder",
+      "seed": "lotm_v022_seed_007_weather_volatility",
+      "policy": "builder-forward",
+      "turns": 15,
+      "focus": [
+        "shortage_pressure_review",
+        "raw_receipt_follow_up",
+        "high_noise_debug_packet"
+      ],
+      "required_surfaces": [
+        "run_log_screen",
+        "receipts_viewer_modal",
+        "diff_ledger_summary",
+        "turn_report_summary"
+      ],
+      "expected_end_state": {
+        "arrears_bushels": 550,
+        "arrears_coin": 7,
+        "bushels_stored": 0,
+        "coin": 0,
+        "unrest": 85
+      },
+      "source_artifact_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/runs/builder-forward/lotm_v022_seed_007_weather_volatility.json",
+      "source_hash": "6ff54b203cf0ad7dc508a955355955b93bc4d58bcbb108ee3d2039d3f770f218",
+      "notes": "Use this packet when grouped evidence becomes noisy enough that the raw receipt notes and run log should both be inspected."
+    }
+  ]
+}

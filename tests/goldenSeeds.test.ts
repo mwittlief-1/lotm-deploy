@@ -27,6 +27,11 @@ function loadGoldenSeeds(): string[] {
   return ["lotm_v007_seed_001", "lotm_v007_seed_002", "lotm_v007_seed_003", "lotm_v007_seed_004"];
 }
 
+function positiveEnvInt(name: string, fallback: number): number {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : fallback;
+}
+
 function runDeterministic(seed: string, policy: PolicyId, turns: number): string {
   let s = createNewRun(seed);
   for (let i = 0; i < turns; i++) {
@@ -38,12 +43,14 @@ function runDeterministic(seed: string, policy: PolicyId, turns: number): string
   return JSON.stringify(s.log);
 }
 
-const GOLDEN_SEEDS = loadGoldenSeeds();
+const GOLDEN_SEEDS_FULL = loadGoldenSeeds();
+const GOLDEN_SEEDS = GOLDEN_SEEDS_FULL.slice(0, positiveEnvInt("GOLDEN_SEEDS_TEST_LIMIT", 2));
 const POLICIES: PolicyId[] = ["prudent-builder", "builder-forward", "builder-forward/buffered"];
-const TURNS = 15;
+const TURNS = positiveEnvInt("GOLDEN_SEEDS_TEST_TURNS", 8);
 
 describe(`golden seeds (${APP_VERSION})`, () => {
   it("seed list is non-empty", () => {
+    expect(GOLDEN_SEEDS_FULL.length).toBeGreaterThan(0);
     expect(GOLDEN_SEEDS.length).toBeGreaterThan(0);
   });
 

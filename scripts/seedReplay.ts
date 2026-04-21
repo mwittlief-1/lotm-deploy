@@ -230,7 +230,7 @@ async function main() {
         policy,
         seed,
         turns: plan.turns,
-        artifact_relpath: path.relative(process.cwd(), artifactPath).split(path.sep).join("/"),
+        artifact_relpath: path.relative(outdir, artifactPath).split(path.sep).join("/"),
         hash: written.hash,
         final_signature: finalSignature,
         final_summary: payload.final_summary,

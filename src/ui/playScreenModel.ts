@@ -84,6 +84,56 @@ function pickHeadlineCause(report: any, metric: "food" | "coin" | "unrest") {
   return causes.find((cause) => cause && typeof cause === "object" && cause.metric === metric) ?? null;
 }
 
+function readRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+}
+
+function readWholeNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function buildMaintenanceLedgerItem(previewState: RunState): LedgerItem | null {
+  const stateRecord = readRecord(previewState);
+  const maintenanceView = readRecord(stateRecord?.economy_maintenance_view);
+  const summariesByKey = readRecord(maintenanceView?.manor_summaries_by_key);
+  if (!summariesByKey) return null;
+
+  const topology = readRecord(stateRecord?.world_topology_view);
+  const anchorManorId = readString(topology?.anchor_manor_id);
+  const summaries = Object.keys(summariesByKey)
+    .sort()
+    .map((key) => readRecord(summariesByKey[key]))
+    .filter((summary): summary is Record<string, unknown> => summary !== null);
+  const summary =
+    summaries.find((candidate) => anchorManorId && readString(candidate.manor_id) === anchorManorId) ?? summaries[0] ?? null;
+  if (!summary) return null;
+
+  const totals = readRecord(summary.totals);
+  if (!totals) return null;
+  const laborRequired = readWholeNumber(totals.labor_required);
+  const coinCost = readWholeNumber(totals.coin_cost);
+  const entryCount =
+    readWholeNumber(totals.entry_count) ||
+    readWholeNumber(totals.building_count) + readWholeNumber(totals.right_count);
+  if (laborRequired + coinCost <= 0 || entryCount <= 0) return null;
+
+  const rowLabel = entryCount === 1 ? "upkeep row" : "upkeep rows";
+  const rightCount = readWholeNumber(totals.right_count);
+  const pressureLabel = rightCount > 0 ? "Rights upkeep" : "Manor upkeep";
+  return {
+    id: "maintenance",
+    sort_mag: laborRequired + coinCost,
+    tie_key: "04_maintenance",
+    primary: `Maintenance: ${laborRequired} labor, ${coinCost} coin across ${entryCount} ${rowLabel}.`,
+    why: `${pressureLabel} remains visible here so labor and coin pressure does not disappear into lower output totals.`,
+    source: "system_pressure",
+  };
+}
+
 function whyForMetric(args: {
   copy: any;
   metric: "food" | "coin" | "population" | "unrest";
@@ -180,6 +230,7 @@ export function buildDiffLedgerItems(args: {
     state,
     weatherHarmedHarvestWhy
   } = args;
+  const maintenanceLedgerItem = buildMaintenanceLedgerItem(previewState);
 
   const reportLedgerRaw: any =
     report?.diff_ledger_items ??
@@ -226,10 +277,16 @@ export function buildDiffLedgerItems(args: {
         source: normalizeSource(item.source ?? item.source_tag ?? item.sourceTag ?? item.kind)
       });
     }
-    if (parsed.length) return parsed;
+    if (parsed.length) {
+      const merged = maintenanceLedgerItem ? [maintenanceLedgerItem, ...parsed.filter((item) => item.id !== "maintenance")] : parsed;
+      merged.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+      return merged;
+    }
   }
 
   const items: LedgerItem[] = [];
+
+  if (maintenanceLedgerItem) items.push(maintenanceLedgerItem);
 
   items.push({
     id: "food",

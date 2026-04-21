@@ -1,6 +1,10 @@
 import { IMPROVEMENTS, hasImprovement } from "../../content/improvements";
 import { canSpendEnergy, spendEnergy } from "../domains/court/energy";
 import {
+  buildMaintenanceLaborPressure,
+  type MaintenanceLaborPressureV1
+} from "../domains/court/maintenance";
+import {
   applyConstructionWork,
   clearConstructionProject,
   hasActiveConstruction,
@@ -107,9 +111,21 @@ export function computeWeatherMarketPhase(
 export function applyProductionAndConstructionPhase(
   state: RunState,
   weather_multiplier: number
-): { production_bushels: number; construction_progress_added: number; completed_improvement_id?: string } {
-  const farmerPenalty = Math.trunc(consumeMod(state, "farmer_penalty", 0));
-  const builderPenalty = Math.trunc(consumeMod(state, "builder_penalty", 0));
+): {
+  production_bushels: number;
+  construction_progress_added: number;
+  completed_improvement_id?: string;
+  maintenance_labor_pressure?: MaintenanceLaborPressureV1;
+} {
+  const maintenanceLaborPressure = buildMaintenanceLaborPressure(state) ?? undefined;
+  const maintenanceFarmerPenalty = maintenanceLaborPressure
+    ? Math.max(0, state.manor.farmers - maintenanceLaborPressure.effective_farmers)
+    : 0;
+  const maintenanceBuilderPenalty = maintenanceLaborPressure
+    ? Math.max(0, state.manor.builders - maintenanceLaborPressure.effective_builders)
+    : 0;
+  const farmerPenalty = Math.trunc(consumeMod(state, "farmer_penalty", 0)) + maintenanceFarmerPenalty;
+  const builderPenalty = Math.trunc(consumeMod(state, "builder_penalty", 0)) + maintenanceBuilderPenalty;
   const effectiveFarmers = Math.max(0, state.manor.farmers - farmerPenalty);
   const effectiveBuilders = Math.max(0, state.manor.builders - builderPenalty);
 
@@ -133,7 +149,12 @@ export function applyProductionAndConstructionPhase(
     }
   }
 
-  return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
+  return {
+    production_bushels: production,
+    construction_progress_added: progressAdded,
+    completed_improvement_id: completed,
+    maintenance_labor_pressure: maintenanceLaborPressure,
+  };
 }
 
 export function applyConsumptionAndShortagePhase(state: RunState, court_consumption_bushels: number): {

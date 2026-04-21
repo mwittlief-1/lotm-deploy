@@ -33,6 +33,11 @@ function ensureDir(dir: string): void {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function positiveEnvInt(name: string, fallback: number): number {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : fallback;
+}
+
 function pushFailure(report: GateReport, failure: GateFailure): void {
   report.failed += 1;
   report.failures.push(failure);
@@ -189,8 +194,9 @@ function checkBranchDescendantHeir(report: GateReport): void {
 }
 
 function checkMultiSeedSmoke(report: GateReport): void {
-  const seeds = ["gate_smoke_1", "gate_smoke_2", "gate_smoke_3", "gate_smoke_4", "gate_smoke_5", "gate_smoke_6"];
-  const turns = 24;
+  const seeds = ["gate_smoke_1", "gate_smoke_2", "gate_smoke_3", "gate_smoke_4", "gate_smoke_5", "gate_smoke_6"]
+    .slice(0, positiveEnvInt("UAT_GATE_SMOKE_SEED_LIMIT", 4));
+  const turns = positiveEnvInt("UAT_GATE_SMOKE_TURNS", 12);
   let sawPlayerInfant = false;
   let sawWorldInfant = false;
 

@@ -12791,7 +12791,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Achieve clean branch-wide qa gate exit
-  status: ready
+  status: done
   priority: 71
   tranche: 8
   change_type: refactor
@@ -12852,7 +12852,7 @@ tasks:
   parent_epic: V03-R6-001
   release: v0.3.6
   title: Route Decisions section actions to live decision paths
-  status: todo
+  status: ready
   priority: 78
   tranche: 8
   change_type: behavior_change
@@ -12912,7 +12912,7 @@ tasks:
   parent_epic: V03-R6-002
   release: v0.3.6
   title: Populate Obligations detail sheet from v2 counterparty truth
-  status: ready
+  status: done
   priority: 84
   tranche: 8
   change_type: behavior_change
@@ -12972,7 +12972,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Restore consumption and maintenance detail audit surfaces
-  status: ready
+  status: done
   priority: 83
   tranche: 8
   change_type: behavior_change
@@ -13034,7 +13034,7 @@ tasks:
   parent_epic: V03-R6-004
   release: v0.3.6
   title: Prevent relationship baselines from rendering as turn deltas
-  status: ready
+  status: done
   priority: 85
   tranche: 8
   change_type: behavior_change
@@ -13211,7 +13211,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Hydrate court office registry from living legacy officers
-  status: ready
+  status: done
   priority: 83
   tranche: 8
   change_type: behavior_change

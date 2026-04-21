@@ -1,6 +1,6 @@
 {
   "gate": "uat_gate_v1",
-  "started_at": "2026-04-21T16:46:46.301Z",
+  "started_at": "2026-04-21T19:01:59.513Z",
   "failed": 0,
   "passed": 12,
   "failures": [],
@@ -18,5 +18,5 @@
     "missing_heir_apparent",
     "inheritance_claim_repeat"
   ],
-  "completed_at": "2026-04-21T16:53:05.976Z"
+  "completed_at": "2026-04-21T19:03:16.714Z"
 }

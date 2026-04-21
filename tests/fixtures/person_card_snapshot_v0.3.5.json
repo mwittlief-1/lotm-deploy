@@ -2,7 +2,7 @@
   "overview": {
     "person_id": "p_head",
     "person_name": "Giles",
-    "subtitle": "Player house · Tier0",
+    "subtitle": "Age 37 · Player house · Resides Hx 26597",
     "overview_cards": [
       {
         "id": "status",
@@ -32,7 +32,7 @@
         "id": "succession",
         "label": "Succession",
         "value": "No active claim",
-        "detail": "Current heir p_child1"
+        "detail": "Current heir: Edith."
       },
       {
         "id": "lands",

@@ -726,7 +726,7 @@
           "value": "12 held out"
         },
         {
-          "detail": "Anchor manor_hx_26597 · 114 candidates considered.",
+          "detail": "Anchor manor_hx_26597 · 112 candidates considered.",
           "id": "scope",
           "label": "Scope",
           "value": "Topology Cap · 6 admitted · 0 rejected"
@@ -738,7 +738,7 @@
       "shown_count": 12,
       "held_out_count": 12,
       "total_candidates": 24,
-      "total_candidates_considered": 114,
+      "total_candidates_considered": 112,
       "shown_candidate_ids": [
         "p_ext_30_child1",
         "p_ext_20_child1",
@@ -951,7 +951,7 @@
           "value": "12 held out"
         },
         {
-          "detail": "Anchor manor_hx_26597 · 88 candidates considered.",
+          "detail": "Anchor manor_hx_26597 · 86 candidates considered.",
           "id": "scope",
           "label": "Scope",
           "value": "Topology Cap · 6 admitted · 0 rejected"
@@ -963,7 +963,7 @@
       "shown_count": 12,
       "held_out_count": 12,
       "total_candidates": 24,
-      "total_candidates_considered": 88,
+      "total_candidates_considered": 86,
       "shown_candidate_ids": [
         "p_ext_08_child1",
         "p_ext_54_child1",
@@ -1177,7 +1177,7 @@
           "value": "12 held out"
         },
         {
-          "detail": "Anchor manor_hx_26597 · 98 candidates considered.",
+          "detail": "Anchor manor_hx_26597 · 97 candidates considered.",
           "id": "scope",
           "label": "Scope",
           "value": "Topology Cap · 6 admitted · 0 rejected"
@@ -1189,7 +1189,7 @@
       "shown_count": 12,
       "held_out_count": 12,
       "total_candidates": 24,
-      "total_candidates_considered": 98,
+      "total_candidates_considered": 97,
       "shown_candidate_ids": [
         "p_ext_34_child1",
         "p_ext_30_child1",

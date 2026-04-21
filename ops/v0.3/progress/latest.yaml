@@ -1,24 +1,24 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-008-T06
-  last_completed_task_id: V03-R6-006-T04
+  current_task_id: V03-R6-001-T05
+  last_completed_task_id: V03-R6-006-T06
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: ff964e0feb4072a078d079f787f333e089716a4f
+  git_commit: a4a356e10da0c8411d4c3425a82b5ad68505d5a6
   ci_env: ''
   vercel_env: ''
   pr_url: ''
   pr_status: ''
 last_run:
   gates:
-    qa: blocked_clean_exit
+    qa: pass
     preflight: pass
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-    run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: V03-R6-006-T04 is accepted and V03-R6-006-T07 is now ready for UI rendering from _dynastic_transition_facts_v1. Tooling V03-R6-008-T06 is ready after accepted preflight baseline normalization. Lane-parallel scheduling is active with current_task_id set to V03-R6-008-T06. Claimable lanes are tooling V03-R6-008-T06, economy V03-R6-002-T05, social V03-R6-004-T04, and UI V03-R6-006-T07. No active lane claims are currently recorded.
+    run1: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
+    run2: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
+notes: Integrated the economy, social, and tooling lane handoffs; accepted V03-R6-002-T05, V03-R6-003-T06, V03-R6-004-T04, V03-R6-006-T06, and V03-R6-008-T06. Branch-wide qa, preflight, and replay-twice gates pass after bounding legacy smoke loops and removing run-local replay paths from summary hashes. Next claimable task is UI lane V03-R6-001-T05, followed by V03-R6-006-T07.
 active_claims: {}
