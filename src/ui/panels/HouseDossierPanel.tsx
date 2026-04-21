@@ -71,7 +71,7 @@ export function HouseDossierPanel({ initialTab = "player", onOpenPersonCard, sur
               <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
                 {surface.relationshipSummary ? (
                   <>
-                    A {surface.relationshipSummary.allegiance} / R {surface.relationshipSummary.respect} / T {surface.relationshipSummary.threat}
+                    {surface.relationshipSummary.standingVectorLabel}
                     <br />
                     Favor {surface.relationshipSummary.favorScore} ({surface.relationshipSummary.standingBandLabel})
                   </>

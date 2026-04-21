@@ -62,6 +62,7 @@ export type HouseDossierSurface = {
         favorScore: number;
         respect: number;
         standingBandLabel: string;
+        standingVectorLabel: string;
         threat: number;
       }
     | null;
@@ -154,6 +155,7 @@ function readRelationshipSummary(dossier: HouseDossierRecord): HouseDossierSurfa
     favorScore: summary.favor_score,
     respect: summary.respect,
     standingBandLabel: formatToken(summary.standing_band),
+    standingVectorLabel: `Standing A ${summary.allegiance} / R ${summary.respect} / T ${summary.threat}`,
     threat: summary.threat
   };
 }
@@ -173,7 +175,7 @@ function relationshipMovementRows(dossier: HouseDossierRecord): { count: number;
 
           return {
             causeLabel: readString(row.cause_summary) ?? "Relationship change",
-            detail: `A ${formatSigned(allegianceDelta)} · R ${formatSigned(respectDelta)} · T ${formatSigned(threatDelta)}`,
+            detail: `Turn delta A ${formatSigned(allegianceDelta)} · R ${formatSigned(respectDelta)} · T ${formatSigned(threatDelta)}`,
             directionLabel: readString(row.direction_label) ?? "Toward this house",
             id,
             personId,
@@ -336,7 +338,7 @@ export function buildHouseDossierSurface(
       key: "relationship_summary",
       label: "relationship_summary",
       value: relationshipSummary
-        ? `A ${relationshipSummary.allegiance} / R ${relationshipSummary.respect} / T ${relationshipSummary.threat} / Favor ${relationshipSummary.favorScore} / ${relationshipSummary.standingBandLabel}`
+        ? `${relationshipSummary.standingVectorLabel} / Favor ${relationshipSummary.favorScore} / ${relationshipSummary.standingBandLabel}`
         : "Unavailable"
     },
     { key: "relationship_turn_movement_count", label: "relationship_turn_movement_count", value: String(relationshipMovementCount) },
