@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-001-T04
-  last_completed_task_id: V03-R6-008-T05
+  current_task_id: V03-R6-006-T04
+  last_completed_task_id: V03-R6-008-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: eb8eaad
+  git_commit: 32a0c08
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -14,24 +14,21 @@ runtime:
 last_run:
   gates:
     qa: blocked_clean_exit
-    preflight: fail
+    preflight: pass
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-    run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
+    run1: 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59
+    run2: 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59
 notes: >-
-  Integrator accepted V03-R6-008-T05 on 2026-04-20 after compacting replay
-  snapshots without backing out the accepted world-map read models. The
-  bounded snapshot now keeps manor detail hidden and non-enumerable, and the
-  serialized map snapshot drops duplicated manor labels while the live UI
-  derives the same labels from selector rows or seat hex ids. The known
-  succession-pressure offender moved from 528401 bytes at turn 13 and 526672
-  bytes at turn 15 down to 495985 and 516997 respectively, and
-  seed:replay:batch passed twice with matching summary hash
-  4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c. Remaining
-  branch-wide blockers are unchanged: preflight still fails with
-  test3_mismatches=16 against the stale v0.2.2 fallback baseline path, and qa
-  still lacks a clean branch-wide exit on the kickoff line. Ready follow-on
-  lane work remains open for UI, economy, social, and tooling.
+  Integrator accepted the v0.3.6 UI/economy/social/tooling wave on 2026-04-20:
+  V03-R6-001-T04, V03-R6-003-T04, V03-R6-003-T05, V03-R6-005-T02,
+  V03-R6-005-T03, V03-R6-006-T02, V03-R6-006-T03, V03-R6-007-T02, and
+  V03-R6-008-T04. The branch is now stamped v0.3.6, preflight uses the explicit
+  docs/qa/v0.3.6_preflight_baseline_contract.json contract and passes with
+  test3_mismatches=0, and seed:replay:batch passed twice with matching summary
+  hash 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59.
+  V03-R6-006-T04 is reopened as an integrator-owned ready task with explicit
+  demography path allowance, and V03-R6-008-T06 is ready for the remaining
+  branch-wide qa clean-exit work.
 active_claims: {}

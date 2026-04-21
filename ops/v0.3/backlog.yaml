@@ -11222,7 +11222,7 @@ tasks:
   parent_epic: V03-R6-001
   release: v0.3.6
   title: Add explicit unrest causal walkdown and summary alignment
-  status: ready
+  status: done
   priority: 80
   tranche: 8
   change_type: behavior_change
@@ -11679,7 +11679,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Show project benefits before commitment on player surfaces
-  status: ready
+  status: done
   priority: 79
   tranche: 8
   change_type: behavior_change
@@ -11740,7 +11740,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Finish meat and live-resource truth on player surfaces
-  status: todo
+  status: done
   priority: 77
   tranche: 8
   change_type: behavior_change
@@ -12008,7 +12008,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Clarify outbound offer terms and explicit submission state
-  status: ready
+  status: done
   priority: 78
   tranche: 8
   change_type: behavior_change
@@ -12068,7 +12068,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Label married-out and married-in family status consistently
-  status: todo
+  status: done
   priority: 76
   tranche: 8
   change_type: behavior_change
@@ -12189,7 +12189,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Align agenda, household, and provisioning truth
-  status: todo
+  status: done
   priority: 75
   tranche: 8
   change_type: behavior_change
@@ -12251,7 +12251,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Surface court turnover and local succession clearly
-  status: todo
+  status: done
   priority: 74
   tranche: 8
   change_type: behavior_change
@@ -12314,13 +12314,13 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Tune birth spacing and dynastic transition summaries
-  status: todo
+  status: ready
   priority: 73
   tranche: 8
   change_type: behavior_change
   category: Court
   phase: none
-  lane_branch: codex/v0.3-lane-social-mechanics
+  lane_branch: codex/v0.3-refactor-kickoff
   goal: Improve noble household birth-spacing realism and make births, deaths, and household growth legible on the resolved-turn path.
   exact_deliverables:
   - normal noble household runs must avoid obviously implausible birth-spacing patterns at a glance
@@ -12328,12 +12328,14 @@ tasks:
   - dynastic transition summaries must remain deterministic and reviewable in fixtures
   deps:
   - V03-R6-006-T03
-  requires_integrator: false
+  requires_integrator: true
   blocked_reason: ''
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/court/**
   - src/sim/domains/experience/**
+  - src/sim/demography.ts
+  - src/sim/phases/phase_demography.ts
   - src/ui/**
   - tests/**
   - docs/**
@@ -12436,7 +12438,7 @@ tasks:
   parent_epic: V03-R6-007
   release: v0.3.6
   title: Add secondary identifiers for nearby-house disambiguation
-  status: todo
+  status: done
   priority: 72
   tranche: 8
   change_type: behavior_change
@@ -12660,7 +12662,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Normalize preflight baseline contract for v0.3.x
-  status: ready
+  status: done
   priority: 81
   tranche: 8
   change_type: refactor
@@ -12782,7 +12784,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Achieve clean branch-wide qa gate exit
-  status: todo
+  status: ready
   priority: 71
   tranche: 8
   change_type: refactor
