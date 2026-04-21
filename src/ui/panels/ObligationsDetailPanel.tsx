@@ -123,6 +123,16 @@ export function ObligationsDetailPanel({
           </div>
 
           <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))" }}>
+            {section.detailFacts.map((fact) => (
+              <div key={`${section.id}_detail_${fact.label}`} style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10, background: "#fdfbf7" }}>
+                <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>{fact.label}</div>
+                <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{fact.value}</div>
+                <div style={{ marginTop: 6, fontSize: 12, opacity: 0.8 }}>{fact.detail}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))" }}>
             <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10, background: "#fdfbf7" }}>
               <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>{section.dueGroup.title}</div>
               <div style={{ marginTop: 4, fontSize: 22, fontWeight: 700 }}>{section.dueGroup.amountLabel}</div>
@@ -162,6 +172,19 @@ export function ObligationsDetailPanel({
               {section.gestureGroup.spent !== null ? (
                 <div style={{ marginTop: 4, fontSize: 12, opacity: 0.8 }}>Used this turn: {section.gestureGroup.spent}</div>
               ) : null}
+            </div>
+          </div>
+
+          <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12, background: "#fcfaf5" }}>
+            <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>Consequences from v2 obligations</div>
+            <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", marginTop: 10 }}>
+              {section.consequenceFacts.map((fact) => (
+                <div key={`${section.id}_consequence_${fact.label}`} style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 10, background: "#fff" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 0.6, opacity: 0.66, textTransform: "uppercase" }}>{fact.label}</div>
+                  <div style={{ marginTop: 4, fontSize: 18, fontWeight: 700 }}>{fact.value}</div>
+                  <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45, opacity: 0.82 }}>{fact.detail}</div>
+                </div>
+              ))}
             </div>
           </div>
 

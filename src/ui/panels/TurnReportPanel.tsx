@@ -114,6 +114,7 @@ export function TurnReportPanel({
   currentHouseLog,
   dueEntering,
   fmtObAmount,
+  manor,
   obligationsSections,
   onOpenObligationsDetails,
   pricingSurface,
@@ -159,6 +160,7 @@ export function TurnReportPanel({
         copy={copy}
         courtSize={courtSize}
         previewState={previewState}
+        report={report}
         state={state}
         showDetails={showHouseholdDetails}
         onToggleDetails={toggleHouseholdDetails}

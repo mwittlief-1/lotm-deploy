@@ -8,6 +8,7 @@ import {
 } from "../../sim/constants";
 import type { RunState, TurnContext, TurnDecisions } from "../../sim/types";
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
+import { buildMaintenancePressureSurface } from "../maintenancePressureView";
 import {
   buildMarriageWorkflowSurface,
   marriageWorkflowInboundActionKey,
@@ -249,6 +250,10 @@ export function PlayScreen({
   const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
   const provenanceSurface = useMemo(() => buildRunProvenanceSurface(state), [state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
+  const maintenancePressureSurface = useMemo(
+    () => buildMaintenancePressureSurface({ previewState: ctx.preview_state, report: ctx.report }),
+    [ctx.preview_state, ctx.report]
+  );
   const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
   const portfolioEvidenceScope = buildPortfolioEvidenceScope({
     contract: portfolioContract,
@@ -924,6 +929,7 @@ export function PlayScreen({
       <PortfolioOverviewPanel
         anchorId={PLAY_ANCHORS.portfolio}
         contract={portfolioContract}
+        maintenancePressure={maintenancePressureSurface}
         mapCheckpoint={portfolioMapCheckpoint}
         onCenterSelectedHolding={
           portfolioMapCheckpoint?.state === "ready" && onCenterSelectedHolding

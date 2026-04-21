@@ -153,6 +153,9 @@ export interface EconomyMaintenanceSummaryEntryV1 {
   coin_cost: number;
   labor_required: number;
   category: "expense.maintenance";
+  counterparty_id: string;
+  counterparty_label: string;
+  rule_id: string;
 }
 
 export interface EconomyMaintenanceManorSummaryV1 {
@@ -293,7 +296,10 @@ function summarizeEntry(entry: EconomyMaintenanceEntryV1): EconomyMaintenanceSum
     source_state: entry.source_state,
     coin_cost: normalizeInteger(entry.coin_cost),
     labor_required: normalizeInteger(entry.labor_required),
-    category: entry.category
+    category: entry.category,
+    counterparty_id: entry.counterparty_id,
+    counterparty_label: entry.counterparty_label,
+    rule_id: entry.rule_id
   };
 }
 

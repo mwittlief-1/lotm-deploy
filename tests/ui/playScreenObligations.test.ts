@@ -25,11 +25,13 @@ const PREVIEW_STATE = {
         counterparty_label: "House Liege",
         due_amount: 3,
         arrears_amount: 4,
+        total_outstanding: 7,
         enforcement_stage: 1,
         settlement_status: "due_and_arrears",
         settlement_summary: "House Liege: 4 coin in arrears, 3 coin due.",
         enforcement_state: "arrears",
         enforcement_summary: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+        relationship_delta: { respect: -1, threat: 2 },
         accepted_payment_modes: ["coin", "food_stores", "service_placeholder"],
         supported_payment_modes: ["coin"],
         preferred_payment_mode: "coin",
@@ -120,11 +122,13 @@ const PREVIEW_STATE = {
         counterparty_label: "Parish Church",
         due_amount: 5,
         arrears_amount: 0,
+        total_outstanding: 5,
         enforcement_stage: 1,
         settlement_status: "due_only",
         settlement_summary: "Parish Church: 5 bushels due.",
         enforcement_state: "clear",
         enforcement_summary: "Parish Church: clear.",
+        relationship_delta: { respect: 0, threat: 0 },
         accepted_payment_modes: ["food_stores", "coin"],
         supported_payment_modes: ["food_stores"],
         preferred_payment_mode: "food_stores",
@@ -292,6 +296,50 @@ describe("playScreenObligations", () => {
         summary: "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 58."
       }
     });
+    expect(liegeSection?.detailFacts).toEqual([
+      {
+        detail: "This is the active collector used by the obligations contract.",
+        label: "Collector",
+        value: "Active: House Liege"
+      },
+      {
+        detail: "House Liege: 4 coin in arrears, 3 coin due.",
+        label: "Current due",
+        value: "3 coin"
+      },
+      {
+        detail: "Arrears carried in this resolved turn and are visible in the penalty trail.",
+        label: "Arrears carried in",
+        value: "4 coin"
+      },
+      {
+        detail: "Summed from this counterparty's v2 payment receipt group.",
+        label: "Paid this turn",
+        value: "2 coin"
+      },
+      {
+        detail: "Current due plus arrears still open in the v2 obligations snapshot.",
+        label: "Unpaid carried out",
+        value: "7 coin"
+      }
+    ]);
+    expect(liegeSection?.consequenceFacts).toEqual([
+      {
+        detail: "Stage-one enforcement pressure rose for House Liege because arrears remain open after carry.",
+        label: "Enforcement consequence",
+        value: "Stage 1 active"
+      },
+      {
+        detail: "Relationship deltas are sourced from the v2 obligation penalty summary.",
+        label: "Relationship pressure",
+        value: "Respect -1, threat +2"
+      },
+      {
+        detail: "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 58.",
+        label: "Terminal risk",
+        value: "Armed"
+      }
+    ]);
     expect(liegeSection?.stageRows).toEqual([
       {
         boundaryLabel: "House Liege: 4 coin in arrears, 3 coin due.",

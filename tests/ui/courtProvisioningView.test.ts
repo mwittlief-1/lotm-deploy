@@ -54,4 +54,20 @@ describe("courtProvisioningView", () => {
     expect(surface?.summaryCards.find((card) => card.id === "ration_demand")?.detail).toContain("not a separate live market action");
     expect(surface?.summaryCards.find((card) => card.id === "allocation_result")?.detail).toContain("food or meat stock fell short");
   });
+
+  it("builds a consumption audit that reconciles the report split to the food walkdown", () => {
+    const state = createNewRun("court_provisioning_consumption_audit");
+    const ctx = proposeTurn(state);
+    const surface = buildCourtProvisioningSurface(ctx.preview_state, { report: ctx.report });
+
+    expect(surface?.consumptionAudit).toMatchObject({
+      statusLabel: "Reconciled",
+      totalLedgerMeatLabel: "0 meat ledger-spent"
+    });
+    expect(surface?.consumptionAudit?.summary).toContain("food walkdown consumption row");
+    expect(surface?.consumptionAudit?.rows.map((row) => row.groupId)).toEqual(["peasant_household", "court_provisioning"]);
+    expect(surface?.consumptionAudit?.rows.find((row) => row.groupId === "court_provisioning")?.meatTruthLabel).toContain(
+      "passive meat allocated"
+    );
+  });
 });

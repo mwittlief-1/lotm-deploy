@@ -13,6 +13,25 @@ export type CourtProvisioningSummaryCard = {
   value: string;
 };
 
+export type CourtProvisioningConsumptionAuditRow = {
+  detail: string;
+  demandLabel: string;
+  groupId: "peasant_household" | "court_provisioning";
+  groupLabel: string;
+  ledgerLabel: string;
+  meatTruthLabel: string;
+};
+
+export type CourtProvisioningConsumptionAudit = {
+  reconciled: boolean;
+  rows: CourtProvisioningConsumptionAuditRow[];
+  statusLabel: string;
+  summary: string;
+  totalLedgerFoodLabel: string;
+  totalLedgerMeatLabel: string;
+  walkdownLabel: string;
+};
+
 export type CourtProvisioningAllocationRow = {
   allocationPriority: number;
   badgeLabels: string[];
@@ -111,6 +130,7 @@ export type CourtProvisioningDebugStipendRow = {
 
 export type CourtProvisioningSurface = {
   allocationRows: CourtProvisioningAllocationRow[];
+  consumptionAudit: CourtProvisioningConsumptionAudit | null;
   debugEntryRows: CourtProvisioningDebugEntryRow[];
   debugRows: CourtProvisioningDebugRow[];
   debugStipendRows: CourtProvisioningDebugStipendRow[];
@@ -142,6 +162,14 @@ function asStipendRegistry(previewState: RunState | null | undefined): CourtStip
   return value.schema_version === "court_stipend_registry_v1" ? (value as CourtStipendRegistry) : null;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function readWholeNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : null;
+}
+
 function formatToken(value: string | null | undefined): string {
   const token = typeof value === "string" ? value.trim() : "";
   if (!token) return "Unknown";
@@ -158,6 +186,18 @@ function formatInteger(value: number | null | undefined): string {
 
 function formatRationPair(food: number | null | undefined, meat: number | null | undefined): string {
   return `${formatInteger(food)} food / ${formatInteger(meat)} meat`;
+}
+
+function readFoodWalkdownConsumption(report: unknown): number | null {
+  const turnExplanation = asRecord(asRecord(report)?.turn_explanation_v1);
+  const foodWalkdown = asRecord(turnExplanation?.food_walkdown);
+  const rows = Array.isArray(foodWalkdown?.rows) ? foodWalkdown.rows : [];
+  for (const row of rows) {
+    const rowRecord = asRecord(row);
+    if (rowRecord?.id !== "food_consumption") continue;
+    return readWholeNumber(rowRecord.amount);
+  }
+  return null;
 }
 
 function formatStringList(values: readonly string[] | null | undefined, emptyLabel = "None"): string {
@@ -182,8 +222,61 @@ function personNameById(view: CourtProvisioningView): Map<string, string> {
   );
 }
 
+function buildConsumptionAudit(
+  view: CourtProvisioningView,
+  report: unknown
+): CourtProvisioningConsumptionAudit | null {
+  const reportRecord = asRecord(report);
+  if (!reportRecord) return null;
+
+  const peasantConsumption = readWholeNumber(reportRecord.peasant_consumption_bushels) ?? 0;
+  const courtConsumption = readWholeNumber(reportRecord.court_consumption_bushels) ?? 0;
+  const reportedTotal =
+    readWholeNumber(reportRecord.total_consumption_bushels)
+    ?? readWholeNumber(reportRecord.consumption_bushels)
+    ?? peasantConsumption + courtConsumption;
+  const ledgerFoodTotal = peasantConsumption + courtConsumption;
+  const ledgerMeatTotal = readWholeNumber(reportRecord.meat_consumption_units) ?? 0;
+  const foodWalkdownConsumption = readFoodWalkdownConsumption(reportRecord);
+  const reconciled = foodWalkdownConsumption === null
+    ? ledgerFoodTotal === reportedTotal
+    : ledgerFoodTotal === foodWalkdownConsumption && reportedTotal === foodWalkdownConsumption;
+  const policy = view.fiscal_policy;
+
+  return {
+    reconciled,
+    rows: [
+      {
+        detail: "Peasant demand comes from the resolved turn report and is part of the same bushel total used by the food walkdown.",
+        demandLabel: formatRationPair(peasantConsumption, 0),
+        groupId: "peasant_household",
+        groupLabel: "Peasant household",
+        ledgerLabel: formatRationPair(peasantConsumption, 0),
+        meatTruthLabel: "No peasant meat spend is tracked in the live turn ledger."
+      },
+      {
+        detail:
+          "Court food spend comes from the resolved turn report. Meat remains passive provisioning allocation in v0.3.6, not a separate live spend loop.",
+        demandLabel: `${courtConsumption} food / ${formatInteger(policy.total_requested_meat_units)} passive meat requested`,
+        groupId: "court_provisioning",
+        groupLabel: "Court provisioning",
+        ledgerLabel: formatRationPair(courtConsumption, ledgerMeatTotal),
+        meatTruthLabel: `${formatInteger(policy.total_allocated_meat_units)} passive meat allocated by the provisioning view.`
+      }
+    ],
+    statusLabel: reconciled ? "Reconciled" : "Needs reconciliation",
+    summary: foodWalkdownConsumption === null
+      ? `Consumption detail totals ${ledgerFoodTotal} bushels; no food walkdown row was available in this surface.`
+      : `Consumption detail totals ${ledgerFoodTotal} bushels against the food walkdown consumption row of ${foodWalkdownConsumption} bushels.`,
+    totalLedgerFoodLabel: `${ledgerFoodTotal} food`,
+    totalLedgerMeatLabel: `${ledgerMeatTotal} meat ledger-spent`,
+    walkdownLabel: foodWalkdownConsumption === null ? "No food walkdown row" : `${foodWalkdownConsumption} food walkdown`
+  };
+}
+
 export function buildCourtProvisioningSurface(
-  previewState: RunState | null | undefined
+  previewState: RunState | null | undefined,
+  options: { report?: unknown } = {}
 ): CourtProvisioningSurface | null {
   const view = asProvisioningView(previewState);
   const stipendRegistry = asStipendRegistry(previewState);
@@ -376,6 +469,7 @@ export function buildCourtProvisioningSurface(
 
   return {
     allocationRows,
+    consumptionAudit: buildConsumptionAudit(view, options.report),
     debugEntryRows,
     debugRows,
     debugStipendRows,

@@ -6,6 +6,50 @@ import type { ObligationsCounterpartyContractSection } from "../../src/ui/playSc
 import { ObligationsDetailPanel } from "../../src/ui/panels/ObligationsDetailPanel";
 
 const LIEGE_SECTION: ObligationsCounterpartyContractSection = {
+  consequenceFacts: [
+    {
+      detail: "Stage-two tangible bite is active for House Liege; forced collection receipts are already landing against open arrears.",
+      label: "Enforcement consequence",
+      value: "Stage 2 active"
+    },
+    {
+      detail: "Relationship deltas are sourced from the v2 obligation penalty summary.",
+      label: "Relationship pressure",
+      value: "Respect -1, threat +2"
+    },
+    {
+      detail: "Dispossession occurs if unrest reaches 100 at end of turn; current unrest is 88.",
+      label: "Terminal risk",
+      value: "Armed"
+    }
+  ],
+  detailFacts: [
+    {
+      detail: "This is the active collector used by the obligations contract.",
+      label: "Collector",
+      value: "Active: House Liege"
+    },
+    {
+      detail: "House Liege: 4 coin in arrears, 3 coin due.",
+      label: "Current due",
+      value: "3 coin"
+    },
+    {
+      detail: "Arrears carried in this resolved turn and are visible in the penalty trail.",
+      label: "Arrears carried in",
+      value: "4 coin"
+    },
+    {
+      detail: "Summed from this counterparty's v2 payment receipt group.",
+      label: "Paid this turn",
+      value: "2 coin"
+    },
+    {
+      detail: "Current due plus arrears still open in the v2 obligations snapshot.",
+      label: "Unpaid carried out",
+      value: "7 coin"
+    }
+  ],
   dueGroup: {
     amount: 3,
     amountLabel: "3 coin",
@@ -153,6 +197,13 @@ describe("ObligationsDetailPanel", () => {
     );
 
     expect(html).toContain("Payment modes");
+    expect(html).toContain("Current due");
+    expect(html).toContain("Arrears carried in");
+    expect(html).toContain("Paid this turn");
+    expect(html).toContain("Unpaid carried out");
+    expect(html).toContain("Active: House Liege");
+    expect(html).toContain("Consequences from v2 obligations");
+    expect(html).toContain("Respect -1, threat +2");
     expect(html).toContain("Terminal risk");
     expect(html).toContain("Tangible bite preview");
     expect(html).toContain("Enforcement ladder");

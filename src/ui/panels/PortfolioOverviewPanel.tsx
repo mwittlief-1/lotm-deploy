@@ -100,7 +100,11 @@ export function PortfolioOverviewPanel({
   scopeMode
 }: PortfolioOverviewPanelProps) {
   const surface = contract.portfolioSummary;
-  const activeScope = contract.scopeOptions.find((option) => option.id === scopeMode) ?? contract.scopeOptions[0];
+  const activeScope = contract.scopeOptions.find((option) => option.id === scopeMode) ?? contract.scopeOptions[0] ?? {
+    helper: contract.selectorHelper,
+    id: "portfolio" as const,
+    label: "Portfolio summary"
+  };
   const assetCards = selectedManor.summaryCards.slice(0, 3);
   const pressureCards = selectedManor.summaryCards.slice(3);
   const selectedMaintenanceRow = maintenancePressure?.manorRows.find((row) => row.manorId === selectedManorId) ?? null;
@@ -133,6 +137,9 @@ export function PortfolioOverviewPanel({
           <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
             {maintenancePressure.helperText}
           </div>
+          <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 6 }}>
+            {maintenancePressure.coinAudit?.summary ?? "No coin walkdown audit is available for these upkeep rows yet."}
+          </div>
 
           <div style={{ overflowX: "auto", marginTop: 10 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
@@ -142,7 +149,10 @@ export function PortfolioOverviewPanel({
                     Manor
                   </th>
                   <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
-                    Coin
+                    Modeled coin
+                  </th>
+                  <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
+                    Ledger-paid
                   </th>
                   <th align="left" style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.32)", paddingBottom: 6 }}>
                     Labor
@@ -157,6 +167,7 @@ export function PortfolioOverviewPanel({
                   <tr key={row.manorKey}>
                     <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.manorLabel}</td>
                     <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.coinCost}</td>
+                    <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.ledgerPaidCoinCost}</td>
                     <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>{row.laborRequired}</td>
                     <td style={{ borderBottom: "1px solid rgba(172, 143, 100, 0.18)", padding: "8px 0" }}>
                       {row.entryCount} ({row.buildingCount} buildings / {row.rightCount} rights)
@@ -184,7 +195,10 @@ export function PortfolioOverviewPanel({
                   >
                     <div style={{ fontWeight: 700 }}>{row.label}</div>
                     <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 4 }}>
-                      {row.kindLabel} · {row.stateLabel} · {row.coinCost} coin · {row.laborRequired} labor
+                      {row.kindLabel} · {row.stateLabel} · modeled {row.coinCost} coin · ledger-paid {row.ledgerPaidCoinCost} coin · {row.laborRequired} labor
+                    </div>
+                    <div style={{ fontSize: 12, lineHeight: 1.45, color: PLAY_SCREEN_THEME.inkMuted, marginTop: 3 }}>
+                      {row.ledgerStatusLabel}
                     </div>
                   </div>
                 ))}

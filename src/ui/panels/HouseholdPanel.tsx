@@ -13,6 +13,7 @@ type HouseholdPanelProps = {
   onOpenPersonCard?: (personId: string) => void;
   personCardIds?: Set<string>;
   previewState: RunState;
+  report?: unknown;
   state: RunState;
   showDetails: boolean;
   onToggleDetails: () => void;
@@ -25,6 +26,7 @@ export function HouseholdPanel({
   onOpenPersonCard,
   personCardIds,
   previewState,
+  report,
   state,
   showDetails,
   onToggleDetails
@@ -32,7 +34,7 @@ export function HouseholdPanel({
   const household = getPlayerHousehold(previewState);
   const lastSuccession = findLastSuccession(state);
   const householdPresenceSurface = buildHouseholdPresenceSurface(previewState);
-  const courtProvisioningSurface = buildCourtProvisioningSurface(previewState);
+  const courtProvisioningSurface = buildCourtProvisioningSurface(previewState, { report });
 
   return (
     <>
@@ -155,6 +157,14 @@ export function HouseholdPanel({
               <div style={{ fontSize: 12, opacity: 0.72 }}>{courtProvisioningSurface.householdRows.length} rows</div>
             </div>
             <div style={{ overflowX: "auto", marginTop: 10 }}>
+              {courtProvisioningSurface.consumptionAudit ? (
+                <div
+                  data-household-consumption-ledger-audit={courtProvisioningSurface.consumptionAudit.statusLabel}
+                  style={{ fontSize: 12, lineHeight: 1.45, opacity: 0.82, marginBottom: 10 }}
+                >
+                  {courtProvisioningSurface.consumptionAudit.summary} {courtProvisioningSurface.consumptionAudit.statusLabel}.
+                </div>
+              ) : null}
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                 <thead>
                   <tr>
