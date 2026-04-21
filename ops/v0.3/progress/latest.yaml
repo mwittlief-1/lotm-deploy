@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-006-T04
-  last_completed_task_id: V03-R6-008-T04
+  current_task_id: V03-R6-008-T06
+  last_completed_task_id: V03-R6-006-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 32a0c08
+  git_commit: 6efcfce
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -18,17 +18,16 @@ last_run:
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
-    run1: 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59
-    run2: 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59
+    run1: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
+    run2: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
 notes: >-
-  Integrator accepted the v0.3.6 UI/economy/social/tooling wave on 2026-04-20:
-  V03-R6-001-T04, V03-R6-003-T04, V03-R6-003-T05, V03-R6-005-T02,
-  V03-R6-005-T03, V03-R6-006-T02, V03-R6-006-T03, V03-R6-007-T02, and
-  V03-R6-008-T04. The branch is now stamped v0.3.6, preflight uses the explicit
-  docs/qa/v0.3.6_preflight_baseline_contract.json contract and passes with
+  Integrator accepted V03-R6-006-T04 on 2026-04-20 after centralizing noble
+  birth spacing on MIN_NOBLE_BIRTH_SPACING_YEARS and adding a Turn Report
+  Household changes summary for births, deaths, marriage notes, widowhood,
+  succession, and heir selection. Preflight stayed green with
   test3_mismatches=0, and seed:replay:batch passed twice with matching summary
-  hash 4085c2f5225a05f5546f1c872fc0fe8d74cb73fe044a242692f913686af12a59.
-  V03-R6-006-T04 is reopened as an integrator-owned ready task with explicit
-  demography path allowance, and V03-R6-008-T06 is ready for the remaining
-  branch-wide qa clean-exit work.
+  hash 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b. The
+  intentional golden-review note is that noble mothers with last_birth_year now
+  need at least 3 years before another eligible birth roll. V03-R6-008-T06 is
+  the current ready task for the remaining branch-wide qa clean-exit work.
 active_claims: {}

@@ -12314,7 +12314,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Tune birth spacing and dynastic transition summaries
-  status: ready
+  status: done
   priority: 73
   tranche: 8
   change_type: behavior_change
