@@ -1,0 +1,364 @@
+{
+  "kind": "v0.3.6_release_story_closeout_v1",
+  "release": "v0.3.6",
+  "date": "2026-04-20",
+  "branch": "codex/v0.3-refactor-kickoff",
+  "evidence_base_commit": "8db7706",
+  "status": "release_close_ready",
+  "story_totals": {
+    "total": 45,
+    "covered": 45,
+    "partially_covered": 0,
+    "unstarted": 0
+  },
+  "gate_evidence": {
+    "qa": {
+      "status": "pass",
+      "artifact_relpath": "qa_artifacts/vitest.json",
+      "uat_gate_relpath": "qa_artifacts/uat_gate.json",
+      "vitest_suites": 353,
+      "vitest_tests": 540,
+      "uat_gate_passed": 12,
+      "uat_gate_failed": 0
+    },
+    "preflight": {
+      "status": "pass",
+      "artifact_relpath": "qa_artifacts/v0.3.6_preflight.json",
+      "baseline_contract_relpath": "docs/qa/v0.3.6_preflight_baseline_contract.json",
+      "baseline_relpath": "docs/qa/v0.3.6_non_perturbation_baseline_v0.3.6.json",
+      "test3_mismatches": 0
+    },
+    "seed_replay_batch_twice": {
+      "status": "pass",
+      "run1_hash": "490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b",
+      "run2_hash": "490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b",
+      "generated_summary_relpath": "qa_artifacts/seed_replay/v0.3.6/batch/turns_15/summary.json",
+      "hashes_match": true
+    }
+  },
+  "checklist_sources": {
+    "story_matrix_relpath": "ops/v0.3/progress/runs/2026-04-20_v0.3.6_story_coverage_matrix.md",
+    "uat_pack_doc_relpath": "docs/qa/uat_scenario_pack_v0.3.md",
+    "uat_gate_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
+    "obligations_evidence_doc_relpath": "docs/qa/obligations_visibility_evidence_pack_v0.3.6.md",
+    "obligations_evidence_relpath": "qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json"
+  },
+  "final_blockers": [],
+  "story_coverage": [
+    {
+      "story_id": "US-01",
+      "title": "Food ledger walkdown",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T01", "V03-R6-001-T02", "V03-R6-003-T01"],
+      "summary": "Ordered food walkdown is accepted on player drilldown and explanation surfaces."
+    },
+    {
+      "story_id": "US-02",
+      "title": "Coin ledger walkdown",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T01", "V03-R6-001-T02", "V03-R6-003-T01", "V03-R6-003-T02"],
+      "summary": "Coin walkdown, dues, maintenance, and project cost visibility are accepted."
+    },
+    {
+      "story_id": "US-03",
+      "title": "Unrest causal walkdown",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T01", "V03-R6-001-T02", "V03-R6-001-T04"],
+      "summary": "Unrest pressure and relief rows reconcile through the shared explanation spine."
+    },
+    {
+      "story_id": "US-04",
+      "title": "Clarify roles of summary and detail screens",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T02"],
+      "summary": "Turn Report, Diff Ledger, Manor State, and Explain Changes have distinct player roles."
+    },
+    {
+      "story_id": "US-05",
+      "title": "Promote real causes into headline summaries",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T01", "V03-R6-003-T02", "V03-R6-001-T04"],
+      "summary": "Headline causes now align with the same ledger and walkdown causes used by drilldowns."
+    },
+    {
+      "story_id": "US-06",
+      "title": "Break out obligations by counterparty",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T01"],
+      "summary": "Obligations v2 separates liege, church, and other counterparties."
+    },
+    {
+      "story_id": "US-07",
+      "title": "Separate current dues from arrears",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T01", "V03-R6-002-T04"],
+      "summary": "Current dues, carried arrears, paid amounts, and carry-out are distinct."
+    },
+    {
+      "story_id": "US-08",
+      "title": "Show obligation payment results explicitly",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T02"],
+      "summary": "Resolved turns surface exact paid and unpaid obligation results."
+    },
+    {
+      "story_id": "US-09",
+      "title": "Surface arrears consequences clearly",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T02", "V03-R6-002-T04"],
+      "summary": "Arrears consequence visibility is locked in the accepted obligation evidence pack."
+    },
+    {
+      "story_id": "US-10",
+      "title": "Rebase obligations after death and succession",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T03", "V03-R6-002-T04"],
+      "summary": "Dead collectors transfer to successors or institution/vacancy labels."
+    },
+    {
+      "story_id": "US-11",
+      "title": "Unify inbound and outbound marriage flow",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T01"],
+      "summary": "Marriage workflow groups inbound proposals and outbound offers in one contract."
+    },
+    {
+      "story_id": "US-12",
+      "title": "Add direct family links to marriage cards",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T01"],
+      "summary": "Candidate, parent, and house links are part of the accepted workflow surface."
+    },
+    {
+      "story_id": "US-13",
+      "title": "Distinguish personal holdings from house holdings",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T01"],
+      "summary": "Person-card and dossier summaries separate personal and house holdings."
+    },
+    {
+      "story_id": "US-14",
+      "title": "Explain marriage effects in player terms",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T01"],
+      "summary": "Marriage effects use player-facing coin, relationship, and household copy."
+    },
+    {
+      "story_id": "US-15",
+      "title": "Make outbound offer submission explicit",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T01", "V03-R6-005-T02"],
+      "summary": "Outbound offer submit and post-submit states are explicit on player surfaces."
+    },
+    {
+      "story_id": "US-16",
+      "title": "Explain editable marriage offer terms",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T02"],
+      "summary": "Editable and locked outbound terms now expose field meaning and resolver mapping."
+    },
+    {
+      "story_id": "US-17",
+      "title": "Show rejected marriage results clearly",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T01"],
+      "summary": "Rejected proposal outcomes are visible in the accepted marriage workflow."
+    },
+    {
+      "story_id": "US-18",
+      "title": "Mark married-out children clearly",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T03", "V03-R6-007-T01"],
+      "summary": "Married-out kin are labeled as birth-house family now living through marriage."
+    },
+    {
+      "story_id": "US-19",
+      "title": "Classify married-in spouses consistently",
+      "status": "covered",
+      "tasks": ["V03-R6-005-T03", "V03-R6-006-T02"],
+      "summary": "Married-in spouses resolve as household family across household and provisioning paths."
+    },
+    {
+      "story_id": "US-20",
+      "title": "Keep Council Agenda in sync with actual office state",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T02"],
+      "summary": "Agenda office notes reuse household presence and provisioning truth."
+    },
+    {
+      "story_id": "US-21",
+      "title": "Explain why each resident or guest is present",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T01", "V03-R6-006-T02"],
+      "summary": "Household presence entries carry player-facing role and residence reasons."
+    },
+    {
+      "story_id": "US-22",
+      "title": "Align household and provisioning classifications",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T01", "V03-R6-006-T02"],
+      "summary": "Provisioning classification now aligns with the household presence read model."
+    },
+    {
+      "story_id": "US-23",
+      "title": "Surface officer and court turnover events",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T03", "V03-R6-006-T04"],
+      "summary": "Office-holder turnover and household changes are visible on the normal player path."
+    },
+    {
+      "story_id": "US-24",
+      "title": "Surface liege and clergy succession",
+      "status": "covered",
+      "tasks": ["V03-R6-002-T03", "V03-R6-006-T03"],
+      "summary": "Liege and clergy succession or vacancy continuity is shown without dead collectors."
+    },
+    {
+      "story_id": "US-25",
+      "title": "Make person-card residence and service legible",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T01"],
+      "summary": "Person cards carry player-facing residence, service, and local-world context."
+    },
+    {
+      "story_id": "US-26",
+      "title": "Make succession widgets human-readable",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T03"],
+      "summary": "Person-card succession widgets name heirs and fallback context in human terms."
+    },
+    {
+      "story_id": "US-27",
+      "title": "Ground house footprints in known anchor manors",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T01"],
+      "summary": "Dossier summaries show known anchor manor context or explicit unknown states."
+    },
+    {
+      "story_id": "US-28",
+      "title": "Define favor and relationship posture labels",
+      "status": "covered",
+      "tasks": ["V03-R6-004-T03"],
+      "summary": "Relationship posture labels are defined from standing instead of turn movement."
+    },
+    {
+      "story_id": "US-29",
+      "title": "Distinguish unknown from absent data",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T01"],
+      "summary": "Person and dossier views distinguish unknown data from confirmed absence."
+    },
+    {
+      "story_id": "US-30",
+      "title": "Make Intel understandable and actionable",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T01"],
+      "summary": "Intel entries explain what was learned, source, and why it matters."
+    },
+    {
+      "story_id": "US-31",
+      "title": "Reduce nearby name ambiguity",
+      "status": "covered",
+      "tasks": ["V03-R6-007-T02"],
+      "summary": "Shared identity labels add secondary identifiers across nearby-house surfaces."
+    },
+    {
+      "story_id": "US-32",
+      "title": "Show maintenance costs in the main ledger",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T02", "V03-R6-008-T06"],
+      "summary": "Maintenance coin and labor pressure are visible in ledger and QA-verified paths."
+    },
+    {
+      "story_id": "US-33",
+      "title": "Explain labor allocation versus upkeep",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T03", "V03-R6-008-T06"],
+      "summary": "Upkeep labor pressure is explained and now affects effective production labor."
+    },
+    {
+      "story_id": "US-34",
+      "title": "Show project benefits before commitment",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T04"],
+      "summary": "Construction choices preview cost, benefit, and ongoing upkeep before commitment."
+    },
+    {
+      "story_id": "US-35",
+      "title": "Show project completion effects in receipts",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T02", "V03-R6-003-T04"],
+      "summary": "Completed project effects and upkeep are visible in headline and drilldown paths."
+    },
+    {
+      "story_id": "US-36",
+      "title": "Clarify active versus placeholder economy systems",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T03", "V03-R6-003-T05"],
+      "summary": "Market and placeholder economy copy now distinguishes reference values from live actions."
+    },
+    {
+      "story_id": "US-37",
+      "title": "Resolve meat as a live or placeholder resource",
+      "status": "covered",
+      "tasks": ["V03-R6-003-T05"],
+      "summary": "Meat is consistently framed as passive preserved stock, not a fake live market control."
+    },
+    {
+      "story_id": "US-38",
+      "title": "Show true relationship deltas",
+      "status": "covered",
+      "tasks": ["V03-R6-004-T01", "V03-R6-004-T02"],
+      "summary": "Relationship movement is sourced from canonical change logs, not absolute-value confusion."
+    },
+    {
+      "story_id": "US-39",
+      "title": "Attribute relationship changes to actual causes",
+      "status": "covered",
+      "tasks": ["V03-R6-004-T02"],
+      "summary": "Relationship deltas name causes and scope on explanation surfaces."
+    },
+    {
+      "story_id": "US-40",
+      "title": "Separate relationship state from relationship change",
+      "status": "covered",
+      "tasks": ["V03-R6-004-T03"],
+      "summary": "Current standing and turn movement are separate on dossier/person surfaces."
+    },
+    {
+      "story_id": "US-41",
+      "title": "Improve noble family birth-spacing realism",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T04"],
+      "summary": "Noble birth spacing now uses the accepted shared minimum-spacing guardrail."
+    },
+    {
+      "story_id": "US-42",
+      "title": "Surface births, deaths, and household changes clearly",
+      "status": "covered",
+      "tasks": ["V03-R6-006-T04"],
+      "summary": "Turn Report now surfaces household changes, succession, widowhood, and births/deaths."
+    },
+    {
+      "story_id": "US-43",
+      "title": "Replace debug-shaped labels with player-facing labels",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T03"],
+      "summary": "Player-facing wording is promoted while debug meaning remains secondary."
+    },
+    {
+      "story_id": "US-44",
+      "title": "Keep debug detail available but secondary",
+      "status": "covered",
+      "tasks": ["V03-R6-001-T02", "V03-R6-001-T03"],
+      "summary": "Primary player paths and secondary debug paths no longer compete."
+    },
+    {
+      "story_id": "US-45",
+      "title": "Surface trustworthy build/version provenance",
+      "status": "covered",
+      "tasks": ["V03-R6-008-T01", "V03-R6-008-T02"],
+      "summary": "Run provenance and export/UI version evidence agree on v0.3.6."
+    }
+  ]
+}
