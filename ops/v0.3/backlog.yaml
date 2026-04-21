@@ -12584,7 +12584,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Publish story-based release closeout and gate evidence
-  status: ready
+  status: done
   priority: 72
   tranche: 7
   change_type: refactor

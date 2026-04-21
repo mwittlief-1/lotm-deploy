@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-008-T03
-  last_completed_task_id: V03-R6-008-T06
+  current_task_id: ''
+  last_completed_task_id: V03-R6-008-T03
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 8fefa45
+  git_commit: 19eea4f
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -21,12 +21,13 @@ last_run:
     run1: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
     run2: 490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b
 notes: >-
-  Integrator accepted V03-R6-008-T06 on 2026-04-20 after branch-wide qa,
-  preflight, and seed:replay:batch twice passed on the kickoff line. Fresh gate
-  evidence is in qa_artifacts/vitest.json, qa_artifacts/uat_gate.json,
-  qa_artifacts/v0.3.6_preflight.json, and
-  qa_artifacts/seed_replay/v0.3.6/batch/turns_15/summary.json. Both replay runs
-  produced summary hash
-  490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b. V03-R6-008-T03
-  is now ready for the final story-based release closeout.
+  Integrator accepted V03-R6-008-T03 on 2026-04-20 as the final v0.3.6
+  story-based release closeout. The closeout packet at
+  qa_artifacts/playtest_ops/v0.3.6/release_closeout.json maps all 45 UAT stories
+  to accepted task evidence with 45 covered, 0 partially covered, and 0
+  unstarted. npm run qa passed with 353 Vitest suites, 540 Vitest tests, and
+  12/12 UAT checks passing; npm run preflight passed with test3_mismatches=0;
+  seed:replay:batch passed twice with matching summary hash
+  490f2fb2f7842cdf1eead8a6a9a1b8617871b0b550909d2e0c139a7dff2ecf5b. No
+  remaining v0.3.6 implementation task is ready in the control plane.
 active_claims: {}
