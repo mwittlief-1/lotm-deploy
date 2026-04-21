@@ -118,6 +118,34 @@ function buildOfficeOnlyAgendaPreviewState() {
   return state;
 }
 
+function buildLegacyStewardOfficeAgendaPreviewState() {
+  const state = createNewRun("play_screen_agenda_legacy_steward_truth_v036");
+  const playerHouseId = state.player_house_id ?? "h_player";
+  state.turn_index = 4;
+  state.people = {
+    ...(state.people ?? {}),
+    p_legacy_steward: {
+      ...state.house.head,
+      id: "p_legacy_steward",
+      name: "Sir Living Steward",
+      house_id: playerHouseId,
+      residence_house_id: playerHouseId,
+      married: false,
+      alive: true
+    }
+  };
+  state.houses = {
+    ...(state.houses ?? {}),
+    [playerHouseId]: {
+      ...((state.houses as any)?.[playerHouseId] ?? { id: playerHouseId }),
+      court_officers: {
+        steward: "p_legacy_steward"
+      }
+    }
+  };
+  return state;
+}
+
 describe("play screen court agenda", () => {
   it("renders registry-backed court agenda stubs instead of the legacy mixed shortlist", () => {
     const previewState = buildAgendaPreviewState();
@@ -186,16 +214,17 @@ describe("play screen court agenda", () => {
 
     expect(items.map((item) => item.id)).toEqual([
       "agenda_obligations_enforcement_liege",
-      "agenda_offices_required_vacancy_house:house:h_player:steward",
       "agenda_prospects_expiring_prospect_grant_expiring",
       `agenda_portfolio_outlier_outlier_highest_arrears_coin_${anchorManorId}`,
-      "agenda_offices_realm_transition_realm:actor:earl:chancellor"
+      "agenda_offices_realm_transition_realm:actor:earl:chancellor",
+      "agenda_obligations_due_church"
     ]);
+    expect(items.map((item) => item.id)).not.toContain("agenda_offices_required_vacancy_house:house:h_player:steward");
     expect(items[0]).toMatchObject({
       title: "Penalty pressure is active",
       anchor: PLAY_ANCHORS.obligations
     });
-    expect(items[3]).toMatchObject({
+    expect(items[2]).toMatchObject({
       title: "A portfolio outlier needs attention",
       anchor: PLAY_ANCHORS.portfolio,
       cta_label: "View portfolio"
@@ -231,9 +260,10 @@ describe("play screen court agenda", () => {
     const householdItems = items.filter((item) => item.anchor === PLAY_ANCHORS.household);
 
     expect(householdItems.map((item) => item.id)).toEqual([
-      "agenda_offices_required_vacancy_house:house:h_player:steward",
-      "agenda_offices_realm_transition_realm:actor:earl:chancellor"
+      "agenda_offices_realm_transition_realm:actor:earl:chancellor",
+      "agenda_offices_delegated_action_marriage_scout"
     ]);
+    expect(items.map((item) => item.id)).not.toContain("agenda_offices_required_vacancy_house:house:h_player:steward");
     expect(householdItems.every((item) => item.cta_label === "View household")).toBe(true);
   });
 
@@ -269,5 +299,38 @@ describe("play screen court agenda", () => {
         "Provisioning: Retainer / Court Quarters."
       ])
     );
+  });
+
+  it("does not warn that Steward is vacant when a living legacy steward hydrates office truth", () => {
+    const previewState = buildLegacyStewardOfficeAgendaPreviewState();
+
+    const items = buildCouncilAgendaItems({
+      anchors: PLAY_ANCHORS,
+      copy: {
+        agenda_obligations_title: "Obligations are pressing",
+        agenda_prospect_title: "Opportunity expires soon",
+        agenda_prospect_context: (turnIndex: number) => `A prospect expires end of Turn ${turnIndex}.`,
+        cta_reviewObligations: "Review obligations",
+        cta_viewProspects: "View prospects",
+        cta_viewHousehold: "View household",
+        cta_viewPortfolio: "View portfolio",
+        cta_openDetails: "Open details"
+      },
+      previewState,
+      report: {
+        turn_index: previewState.turn_index,
+        shortage_bushels: 0,
+        prospects_window: null
+      }
+    });
+
+    const itemIds = items.map((item) => item.id);
+
+    expect(itemIds).not.toContain("agenda_offices_required_vacancy_house:house:h_player:steward");
+    expect(itemIds).toContain("agenda_offices_active_service_house:house:h_player:steward:p_legacy_steward:4");
+    expect(
+      items.find((item) => item.id === "agenda_offices_active_service_house:house:h_player:steward:p_legacy_steward:4")
+        ?.context
+    ).toContain("serves as Steward.");
   });
 });

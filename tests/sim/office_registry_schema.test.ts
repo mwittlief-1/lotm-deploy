@@ -390,6 +390,53 @@ describe("office registry schema", () => {
     );
   });
 
+  it("hydrates living legacy house court officers into canonical seats and services", () => {
+    const state = mkState();
+    (state as any).people.p_steward = mkPerson("p_steward", "M", 37);
+    (state as any).houses.h_player.court_officers = {
+      steward: "p_steward",
+    };
+
+    const registry = ensureCourtOfficeRegistry(state);
+    const services = ensureCourtServiceRecordRegistry(state);
+
+    expect(registry.vacant_required_seat_ids).toEqual([]);
+    expect(registry.filled_seat_ids).toContain("house:house:h_player:steward");
+    expect(registry.seats_by_id["house:house:h_player:steward"]).toMatchObject({
+      holder_person_id: "p_steward",
+      holder_house_id: "h_player",
+      holder_kind: "non_family_retainer",
+      active_service_record_id: "house:house:h_player:steward:p_steward:4",
+    });
+    expect(services.active_record_ids).toContain("house:house:h_player:steward:p_steward:4");
+    expect(services.records_by_id["house:house:h_player:steward:p_steward:4"]).toMatchObject({
+      seat_id: "house:house:h_player:steward",
+      holder_person_id: "p_steward",
+      holder_house_id: "h_player",
+      holder_kind: "non_family_retainer",
+      payment_basis: "retainer_upkeep",
+      start_turn_index: 4,
+      end_turn_index: null,
+    });
+  });
+
+  it("does not hydrate dead legacy house court officers into required seats", () => {
+    const state = mkState();
+    const deadSteward = mkPerson("p_dead_steward", "M", 37);
+    deadSteward.alive = false;
+    (state as any).people.p_dead_steward = deadSteward;
+    (state as any).houses.h_player.court_officers = {
+      steward: "p_dead_steward",
+    };
+
+    const registry = ensureCourtOfficeRegistry(state);
+    const services = ensureCourtServiceRecordRegistry(state);
+
+    expect(registry.vacant_required_seat_ids).toEqual(["house:house:h_player:steward"]);
+    expect(registry.seats_by_id["house:house:h_player:steward"]?.holder_person_id).toBeNull();
+    expect(services.active_record_ids).toEqual([]);
+  });
+
   it("plans legacy house court assignments without changing the old variant rules", () => {
     const people = {
       p_steward: { alive: true },

@@ -559,15 +559,104 @@ export function createRealmCourtOfficeRegistry(
   return buildCourtOfficeRegistry([...baselineBySeatId.values(), ...extraDrafts]);
 }
 
+function holderHouseIdForLegacyCourtOfficer(
+  state: RunState,
+  personId: string,
+  holderKind: CourtOfficeHolderKind
+): string | null {
+  const person = (state as any).people?.[personId] as Record<string, unknown> | null | undefined;
+  const personHouseId = normalizeOptionalId(person?.house_id) ?? normalizeOptionalId(person?.residence_house_id);
+  if (personHouseId) return personHouseId;
+  if (holderKind === "household_member" || holderKind === "non_family_retainer") return defaultPlayerHouseId(state);
+  return null;
+}
+
+function findActiveCourtServiceRecordId(
+  registry: CourtServiceRecordRegistryV0,
+  seatId: string,
+  holderPersonId: string
+): string | null {
+  for (const recordId of registry.active_record_ids) {
+    const record = registry.records_by_id[recordId];
+    if (!record) continue;
+    if (record.seat_id === seatId && record.holder_person_id === holderPersonId && record.end_turn_index === null) {
+      return record.record_id;
+    }
+  }
+  return null;
+}
+
+function replaceCourtOfficeSeat(
+  registry: CourtOfficeRegistryV0,
+  seat: CourtOfficeSeatV0
+): CourtOfficeRegistryV0 {
+  return buildCourtOfficeRegistry(registry.seat_ids.map((seatId) => (seatId === seat.seat_id ? seat : registry.seats_by_id[seatId]!)));
+}
+
+function hydrateCourtOfficeRegistryFromLivingLegacyOfficers(
+  state: RunState,
+  registry: CourtOfficeRegistryV0
+): CourtOfficeRegistryV0 {
+  const legacyAssignments = Object.fromEntries(
+    listLegacyFilledHouseCourtOffices(state).map((entry) => [entry.role, entry.person_id])
+  ) as LegacyHouseCourtAssignments;
+  const fillDecisions = planHouseCourtSeatFillDecisions(state, legacyAssignments);
+  if (fillDecisions.length === 0) return registry;
+
+  const houseAny: any = state.house as any;
+  let nextRegistry = registry;
+  let serviceRegistry = ensureCourtServiceRecordRegistry(state);
+  const transitionTurnIndex = normalizeTurnIndex((state as any).turn_index) ?? 0;
+
+  for (const decision of fillDecisions) {
+    const seat = nextRegistry.seats_by_id[decision.seat_id];
+    if (!seat || seat.holder_person_id) continue;
+
+    const holderHouseId = holderHouseIdForLegacyCourtOfficer(state, decision.person_id, decision.holder_kind);
+    const existingRecordId = findActiveCourtServiceRecordId(serviceRegistry, decision.seat_id, decision.person_id);
+
+    if (existingRecordId) {
+      const record = serviceRegistry.records_by_id[existingRecordId]!;
+      const linkedSeat = createCourtOfficeSeat({
+        ...seat,
+        holder_person_id: decision.person_id,
+        holder_house_id: holderHouseId,
+        holder_kind: decision.holder_kind,
+        filled_turn_index: record.start_turn_index ?? transitionTurnIndex,
+        last_transition_turn_index: record.start_turn_index ?? transitionTurnIndex,
+        active_service_record_id: existingRecordId,
+      });
+      nextRegistry = replaceCourtOfficeSeat(nextRegistry, linkedSeat);
+      continue;
+    }
+
+    const transition = appointCourtOfficeHolder(nextRegistry, serviceRegistry, {
+      seat_id: decision.seat_id,
+      holder_person_id: decision.person_id,
+      holder_house_id: holderHouseId,
+      holder_kind: decision.holder_kind,
+      payment_basis: decision.payment_basis,
+      serve_at_actor_id: seat.owner_actor_id,
+      transition_turn_index: transitionTurnIndex,
+    });
+    nextRegistry = transition.registry;
+    serviceRegistry = transition.service_record_registry;
+  }
+
+  houseAny.court_service_record_registry = serviceRegistry;
+  return nextRegistry;
+}
+
 export function ensureCourtOfficeRegistry(state: RunState): CourtOfficeRegistryV0 {
   const houseAny: any = state.house as any;
   const existing = houseAny?.court_office_registry;
-  const normalized =
+  const baseline =
     existing &&
     typeof existing === "object" &&
     existing.schema_version === COURT_OFFICE_REGISTRY_SCHEMA_VERSION
       ? normalizeCourtOfficeRegistry(existing)
       : createHouseCourtOfficeRegistry(defaultHouseOwnerActorId(state));
+  const normalized = hydrateCourtOfficeRegistryFromLivingLegacyOfficers(state, baseline);
 
   houseAny.court_office_registry = normalized;
   return normalized;

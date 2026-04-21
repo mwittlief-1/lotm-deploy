@@ -157,7 +157,6 @@ describe("court agenda registry population", () => {
 
     expect(registry.item_ids).toEqual([
       "agenda_obligations_enforcement_liege",
-      "agenda_offices_required_vacancy_house:house:h_player:steward",
       "agenda_prospects_expiring_prospect_grant_expiring",
       `agenda_portfolio_outlier_outlier_highest_arrears_coin_${anchorManorId}`,
       "agenda_offices_realm_transition_realm:actor:earl:chancellor",
@@ -166,10 +165,10 @@ describe("court agenda registry population", () => {
       "agenda_offices_delegated_action_marriage_scout",
       "agenda_offices_active_service_house:house:h_player:marshal:p_retainer:4"
     ])
+    expect(registry.item_ids).not.toContain("agenda_offices_required_vacancy_house:house:h_player:steward")
 
     expect(registry.items_by_id["agenda_obligations_enforcement_liege"]).toMatchObject({
-      source_key: "obligations.enforcement",
-      subject_ref_id: "p_liege"
+      source_key: "obligations.enforcement"
     })
     expect(registry.items_by_id["agenda_obligations_due_church"]).toMatchObject({
       source_key: "obligations.current_due",
@@ -198,10 +197,10 @@ describe("court agenda registry population", () => {
 
     expect(selected.map((item) => item.agenda_item_id)).toEqual([
       "agenda_obligations_enforcement_liege",
-      "agenda_offices_required_vacancy_house:house:h_player:steward",
       "agenda_prospects_expiring_prospect_grant_expiring",
       `agenda_portfolio_outlier_outlier_highest_arrears_coin_${anchorManorId}`,
-      "agenda_offices_realm_transition_realm:actor:earl:chancellor"
+      "agenda_offices_realm_transition_realm:actor:earl:chancellor",
+      "agenda_obligations_due_church"
     ])
   })
 })
