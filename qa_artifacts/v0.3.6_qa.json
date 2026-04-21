@@ -1,0 +1,30 @@
+{
+  "gate": "qa_gate_v1",
+  "app_version": "v0.3.6",
+  "started_at": "2026-04-21T16:33:11.042Z",
+  "completed_at": "2026-04-21T16:53:06.055Z",
+  "ok": true,
+  "status": "pass",
+  "evidence": {
+    "summary_relpath": "qa_artifacts/v0.3.6_qa.json",
+    "uat_gate_relpath": "qa_artifacts/v0.3.6_uat_gate.json",
+    "vitest_relpath": "qa_artifacts/v0.3.6_vitest.json"
+  },
+  "legacy_paths_refreshed": {
+    "uat_gate_relpath": "qa_artifacts/uat_gate.json",
+    "vitest_relpath": "qa_artifacts/vitest.json"
+  },
+  "vitest": {
+    "num_failed_test_suites": 0,
+    "num_failed_tests": 0,
+    "num_passed_tests": 535,
+    "num_total_test_suites": 365,
+    "num_total_tests": 535,
+    "success": true
+  },
+  "uat_gate": {
+    "failed": 0,
+    "passed": 12,
+    "success": true
+  }
+}
