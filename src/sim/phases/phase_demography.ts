@@ -7,7 +7,7 @@ import {
   TURN_YEARS
 } from "../constants";
 import { getCourtExcludeIds, getCourtExtraIds, getCourtOfficerIds } from "../court";
-import { processNobleFertility, processNobleMarriages, processNobleMortality } from "../demography";
+import { MIN_NOBLE_BIRTH_SPACING_YEARS, processNobleFertility, processNobleMarriages, processNobleMortality } from "../demography";
 import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "../demographyCurves";
 import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
 import { Rng } from "../rng";
@@ -170,7 +170,7 @@ export function applyHouseholdDemographyPhase(
     const spouse = state.house.spouse;
     const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
     const lastBirthYear = (spouse as any).last_birth_year;
-    const spacingOk = !(typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && (worldYear - Math.trunc(lastBirthYear) < 2));
+    const spacingOk = !(typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && (worldYear - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS));
     if (fertileAge && spacingOk) {
       const fert = clampInt(spouse.traits.fertility, 1, 5);
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
@@ -295,7 +295,7 @@ export function applyHouseholdDemographyPhase(
       if (!fertileAge) continue;
 
       const lastBirthYear = (mother as any)?.last_birth_year;
-      if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && worldYear - Math.trunc(lastBirthYear) < 2) continue;
+      if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && worldYear - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS) continue;
 
       const fert = clampInt((mother.traits?.fertility ?? 3) as any, 1, 5);
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);

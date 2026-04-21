@@ -103,6 +103,72 @@ function summarizeObligations(sections: ObligationsCounterpartyContractSection[]
     .join(" ");
 }
 
+function formatTransitionItem(value: any): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length ? trimmed : null;
+  }
+  if (!value || typeof value !== "object") return null;
+  const name = typeof value.name === "string" && value.name.trim().length ? value.name.trim() : null;
+  const id = typeof value.id === "string" && value.id.trim().length
+    ? value.id.trim()
+    : typeof value.person_id === "string" && value.person_id.trim().length
+      ? value.person_id.trim()
+      : null;
+  if (name && id) return `${name} (${id})`;
+  return name ?? id;
+}
+
+function transitionList(value: any): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => formatTransitionItem(item))
+    .filter((item): item is string => Boolean(item));
+}
+
+function addTransitionLine(lines: string[], line: string | null | undefined): void {
+  if (!line) return;
+  const normalized = line.trim();
+  if (!normalized || lines.includes(normalized)) return;
+  lines.push(normalized);
+}
+
+function summarizeDynasticTransitions(report: any, currentHouseLog: any[]): string[] {
+  const lines: string[] = [];
+  const household = report?.household && typeof report.household === "object" ? report.household : {};
+  const births = transitionList((household as any).births);
+  const deaths = transitionList((household as any).deaths);
+  const aggregateDeaths = Number((household as any).deaths_unitemized_count ?? 0);
+
+  if (births.length) addTransitionLine(lines, `Births: ${births.join(", ")}.`);
+  if (deaths.length) addTransitionLine(lines, `Deaths: ${deaths.join(", ")}.`);
+  if (Number.isFinite(aggregateDeaths) && aggregateDeaths > 0) {
+    addTransitionLine(lines, `Peasant losses: ${Math.trunc(aggregateDeaths)} aggregate shortage death${Math.trunc(aggregateDeaths) === 1 ? "" : "s"}.`);
+  }
+
+  const notes = Array.isArray(report?.notes) ? report.notes : [];
+  for (const note of notes) {
+    if (typeof note !== "string" || !/marri/i.test(note)) continue;
+    const trimmed = note.trim();
+    if (!trimmed) continue;
+    addTransitionLine(lines, trimmed.endsWith(".") ? trimmed : `${trimmed}.`);
+  }
+
+  const logEvents = Array.isArray(currentHouseLog) ? currentHouseLog : [];
+  for (const event of logEvents) {
+    if (!event || typeof event !== "object") continue;
+    if (event.kind === "widowed" && typeof event.survivor_name === "string" && typeof event.deceased_name === "string") {
+      addTransitionLine(lines, `${event.survivor_name} was widowed after ${event.deceased_name} died.`);
+    } else if (event.kind === "succession" && typeof event.new_ruler_name === "string") {
+      addTransitionLine(lines, `Succession settled on ${event.new_ruler_name}.`);
+    } else if (event.kind === "heir_selected" && typeof event.heir_name === "string") {
+      addTransitionLine(lines, `Heir selected: ${event.heir_name}.`);
+    }
+  }
+
+  return lines;
+}
+
 export function TurnReportPanel({
   accruedThisTurn,
   anchorFood,
@@ -144,6 +210,7 @@ export function TurnReportPanel({
   const coinHeadlineDetail = headlineCauseDetail(headlineCauses, "coin");
   const unrestHeadlineDetail = headlineCauseDetail(headlineCauses, "unrest");
   const obligationsSummary = summarizeObligations(obligationsSections);
+  const dynasticTransitionLines = summarizeDynasticTransitions(report, currentHouseLog);
 
   return (
     <div style={PLAY_SCREEN_PANEL_STYLE}>
@@ -163,6 +230,19 @@ export function TurnReportPanel({
         showDetails={showHouseholdDetails}
         onToggleDetails={toggleHouseholdDetails}
       />
+
+      <div data-turn-report-section="dynastic_transitions" style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12, marginTop: 12 }}>
+        <div style={{ fontSize: 11, letterSpacing: 0.5, opacity: 0.68, textTransform: "uppercase" }}>Household changes</div>
+        {dynasticTransitionLines.length ? (
+          <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
+            {dynasticTransitionLines.map((line) => (
+              <li key={line} style={{ marginTop: 4 }}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <div style={{ marginTop: 6, fontSize: 12, opacity: 0.82 }}>No births, deaths, marriages, or succession changes were recorded this turn.</div>
+        )}
+      </div>
 
       {summaryRole ? (
         <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 12, marginTop: 12 }}>

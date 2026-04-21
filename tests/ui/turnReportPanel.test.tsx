@@ -132,4 +132,70 @@ describe("TurnReportPanel", () => {
 
     expect(html).toContain("Arrears pressure (+4) pushed unrest up while Relief: Harvest Festival (-1) eased it.");
   });
+
+  it("surfaces household transition summaries on the resolved turn report", () => {
+    const state = createNewRun("lotm_v026_seed_001_baseline");
+    const ctx = proposeTurn(state);
+    const obligationsContract = buildObligationsCounterpartyContract({
+      courtDecisionBudget: null,
+      previewState: ctx.preview_state
+    });
+    const report = {
+      ...ctx.report,
+      household: {
+        ...ctx.report.household,
+        births: ["Anne (p_child_1)"],
+        deaths: ["Lord Hugh (p_old)"],
+        deaths_unitemized_count: 1
+      },
+      notes: [...(ctx.report.notes ?? []), "Marriage accepted between Cedric and Alice"]
+    };
+
+    const html = renderToStaticMarkup(
+      <TurnReportPanel
+        accruedThisTurn={{ coin: 1, bushels: 0 }}
+        anchorFood="food"
+        anchorHousehold="household"
+        arrearsCarried={{ coin: 0, bushels: 0 }}
+        baselineConsPerTurn={3}
+        builderExtraPerTurn={1}
+        consBuilders={0}
+        consFarmers={0}
+        consIdle={0}
+        copy={COPY}
+        courtConsumptionBushels={0}
+        courtRosterEntries={[]}
+        courtSize={0}
+        currentHouseLog={[
+          { kind: "widowed", survivor_name: "Matilda", deceased_name: "Hugh", turn_index: report.turn_index },
+          { kind: "succession", new_ruler_name: "Cedric", turn_index: report.turn_index }
+        ]}
+        dueEntering={{ coin: 1, bushels: 1 }}
+        fmtObAmount={(value: { bushels?: number; coin?: number }) => `${value.coin ?? 0} coin / ${value.bushels ?? 0} bushels`}
+        hasConsumptionSplit={false}
+        idle={0}
+        manor={ctx.preview_state.manor}
+        obligationsSections={obligationsContract?.counterpartySections ?? []}
+        onOpenObligationsDetails={() => undefined}
+        peasantConsumptionBushels={0}
+        pricingSurface={buildEconomyPricingSurface(ctx.preview_state)}
+        previewState={ctx.preview_state}
+        report={report}
+        showHouseholdDetails={false}
+        state={state}
+        toggleHouseholdDetails={() => undefined}
+        totalConsumptionBushels={ctx.report.total_consumption_bushels}
+        totalObligations={{ coin: 1, bushels: 1 }}
+        turnYears={3}
+      />
+    );
+
+    expect(html).toContain("Household changes");
+    expect(html).toContain("Births: Anne (p_child_1).");
+    expect(html).toContain("Deaths: Lord Hugh (p_old).");
+    expect(html).toContain("Peasant losses: 1 aggregate shortage death.");
+    expect(html).toContain("Marriage accepted between Cedric and Alice.");
+    expect(html).toContain("Matilda was widowed after Hugh died.");
+    expect(html).toContain("Succession settled on Cedric.");
+  });
 });

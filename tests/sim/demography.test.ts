@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { processNobleFertility, type BirthEvent } from '../../src/sim/demography';
+import { MIN_NOBLE_BIRTH_SPACING_YEARS, processNobleFertility, type BirthEvent } from '../../src/sim/demography';
 
 /**
  * These tests are intentionally minimal and self-contained.
@@ -73,19 +73,20 @@ describe('processNobleFertility (Tier0/1)', () => {
     expect(out.births.length).toBe(0);
   });
 
-  it('enforces >=2-year birth spacing per mother', () => {
+  it('enforces minimum noble birth spacing per mother', () => {
+    const lastBirthYear = 1025;
     const state: any = {
       people: {
-        p1: { person_id: 'p1', sex: 'F', birth_year: 1000, is_alive: true, last_birth_year: 1025 },
+        p1: { person_id: 'p1', sex: 'F', birth_year: 1000, is_alive: true, last_birth_year: lastBirthYear },
         p2: { person_id: 'p2', sex: 'M', birth_year: 998, is_alive: true },
       },
       houses: { h1: { house_id: 'h1', head_person_id: 'p2', member_person_ids: ['p1', 'p2'] } },
       kinship_edges: [{ kind: 'spouse_of', from_person_id: 'p1', to_person_id: 'p2' }],
       flags: {},
     };
-    const blocked = processNobleFertility(state, { tier0_house_ids: ['h1'] }, { float01: () => 0 }, { year: 1026 });
+    const blocked = processNobleFertility(state, { tier0_house_ids: ['h1'] }, { float01: () => 0 }, { year: lastBirthYear + MIN_NOBLE_BIRTH_SPACING_YEARS - 1 });
     expect(blocked.births.length).toBe(0);
-    const allowed = processNobleFertility(state, { tier0_house_ids: ['h1'] }, { float01: () => 0 }, { year: 1027 });
+    const allowed = processNobleFertility(state, { tier0_house_ids: ['h1'] }, { float01: () => 0 }, { year: lastBirthYear + MIN_NOBLE_BIRTH_SPACING_YEARS });
     expect(allowed.births.length).toBe(1);
   });
 

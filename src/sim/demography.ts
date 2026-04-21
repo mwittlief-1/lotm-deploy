@@ -15,6 +15,8 @@
 import { BIRTH_CHANCE_BY_FERTILITY, BIRTH_FERTILE_AGE_MAX, BIRTH_FERTILE_AGE_MIN, TURN_YEARS } from "./constants";
 import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "./demographyCurves";
 
+export const MIN_NOBLE_BIRTH_SPACING_YEARS = Math.max(3, TURN_YEARS);
+
 // --- TierSets compatibility helpers (v0.2.8.x)
 // We accept either the "TierSets" shape (tier0.houses Set, tier1.houses Set)
 // or the lightweight shape passed from turn.ts ({ tier0_house_ids: string[], tier1_house_ids: string[] }).
@@ -664,7 +666,11 @@ function readTrait01to5(p: PersonLike, key: string, fallback: number): number {
 function birthChancePerTurn(state: RunStateLike, mother: PersonLike, motherAge: number, year: number): number {
   if (motherAge >= 45) return 0;
   const lastBirthYear = (mother as any)?.last_birth_year;
-  if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && year - Math.trunc(lastBirthYear) < 2) return 0;
+  if (
+    typeof lastBirthYear === "number" &&
+    Number.isFinite(lastBirthYear) &&
+    year - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS
+  ) return 0;
 
   const fertilityTrait = readTrait01to5(mother, "fertility", 3);
   const traitBase = (BIRTH_CHANCE_BY_FERTILITY as any)[fertilityTrait] ?? (BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 0.26;
