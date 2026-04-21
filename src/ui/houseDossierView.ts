@@ -1,4 +1,5 @@
 import type { BoundedHouseDossierSummary, HouseDossierSummary, RunState } from "../sim/types";
+import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from "./identityLabels";
 
 export type HouseDossierRecord = HouseDossierSummary | BoundedHouseDossierSummary;
 
@@ -305,8 +306,12 @@ export function buildHouseDossierSurface(
           {
             detail: [
               "Known head",
-              typeof knownHouseRecord?.head_status === "string" ? String(knownHouseRecord.head_status) : null,
-              typeof knownHouseRecord?.head_age === "number" ? `Age ${Math.trunc(knownHouseRecord.head_age)}` : null
+              buildPersonSecondaryIdentifier(previewState, knownHeadId, {
+                age: typeof knownHouseRecord?.head_age === "number" ? Math.trunc(knownHouseRecord.head_age) : null,
+                houseId: dossier.house_id,
+                houseName
+              }),
+              typeof knownHouseRecord?.head_status === "string" ? String(knownHouseRecord.head_status) : null
             ]
               .filter((value): value is string => typeof value === "string" && value.length > 0)
               .join(" · "),
@@ -394,7 +399,12 @@ export function buildHouseDossierSurface(
     relationshipPostureLabel,
     relationshipSummary,
     schemaVersion: dossier.schema_version,
-    subtitle: `${knownnessLabel} · ${relevanceTierLabel} · ${dossier.house_id}`,
+    subtitle:
+      buildHouseSecondaryIdentifier(previewState, dossier.house_id, {
+        dossier,
+        houseName,
+        knownHouse: knownHouseRecord
+      }) ?? `${knownnessLabel} · ${relevanceTierLabel}`,
     successionLabel,
     tierLabel
   };

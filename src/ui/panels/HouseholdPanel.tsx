@@ -1,5 +1,6 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import { buildCourtProvisioningSurface } from "../courtProvisioningView";
 import { buildHouseholdPresenceSurface } from "../householdPresenceView";
 import { findLastSuccession, getPlayerHousehold } from "../stateSelectors";
 import { formatPersonName, Tip } from "../viewHelpers";
@@ -31,6 +32,7 @@ export function HouseholdPanel({
   const household = getPlayerHousehold(previewState);
   const lastSuccession = findLastSuccession(state);
   const householdPresenceSurface = buildHouseholdPresenceSurface(previewState);
+  const courtProvisioningSurface = buildCourtProvisioningSurface(previewState);
 
   return (
     <>
@@ -135,6 +137,72 @@ export function HouseholdPanel({
                 </li>
               ))}
             </ul>
+          </div>
+        ) : null}
+
+        {courtProvisioningSurface?.householdRows.length ? (
+          <div
+            data-household-consumption-provisioning="court_provisioning_view_v1"
+            style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+              <div>
+                <div style={{ fontWeight: 700 }}>Household consumption & provisioning</div>
+                <div style={{ fontSize: 12, opacity: 0.82, marginTop: 2 }}>
+                  Detailed rations are restored here from the accepted provisioning read model. {courtProvisioningSurface.rationingDecision.label}.
+                </div>
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.72 }}>{courtProvisioningSurface.householdRows.length} rows</div>
+            </div>
+            <div style={{ overflowX: "auto", marginTop: 10 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Person</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Class</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Ration</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Requested</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Allocated</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Shortfall</th>
+                    <th align="left" style={{ borderBottom: "1px solid #eee", paddingBottom: 6 }}>Support</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {courtProvisioningSurface.householdRows.map((row) => (
+                    <tr key={row.personId}>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>
+                        <div style={{ fontWeight: 700 }}>
+                          {personCardIds?.has(row.personId) && onOpenPersonCard ? (
+                            <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={row.personId}>
+                              {row.personName}
+                            </PersonCardTrigger>
+                          ) : (
+                            row.personName
+                          )}
+                        </div>
+                        <div style={{ marginTop: 2, opacity: 0.72 }}>{row.roleSummary}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>
+                        {row.provisioningClassLabel}
+                        <div style={{ marginTop: 2, opacity: 0.72 }}>{row.lodgingLevelLabel}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>
+                        {row.rationLevelLabel}
+                        <div style={{ marginTop: 2, opacity: 0.72 }}>{row.statusLabel}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>{row.requestLabel}</td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>{row.allocatedLabel}</td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>{row.shortfallLabel}</td>
+                      <td style={{ borderBottom: "1px solid #f3f3f3", padding: "7px 0" }}>
+                        {row.supportLabel}
+                        <div style={{ marginTop: 2, opacity: 0.72 }}>{row.carryForwardLabel}</div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ fontSize: 12, opacity: 0.78, marginTop: 8 }}>{courtProvisioningSurface.rationingDecision.detail}</div>
           </div>
         ) : null}
       </div>

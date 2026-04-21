@@ -7,14 +7,25 @@ import type {
   MarriageWorkflowViewV1,
   RunState,
 } from "../sim/types";
+import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from "./identityLabels";
 
 export type MarriageWorkflowLinkSurface = {
   detail: string;
+  houseDetail: string | null;
   houseId: string | null;
   houseLabel: string | null;
   personId: string;
   title: string;
 };
+
+export type MarriageWorkflowActionStatus =
+  | "available"
+  | "accepted"
+  | "rejected"
+  | "sent"
+  | "queued"
+  | "resolved"
+  | "no_effect";
 
 export type MarriageWorkflowInboundOfferSurface = {
   acceptDecisionPayload: MarriageWorkflowDecisionPayloadV1;
@@ -23,6 +34,7 @@ export type MarriageWorkflowInboundOfferSurface = {
   entryId: string;
   houseId: string | null;
   houseLabel: string | null;
+  offerIndex: number;
   offerSummary: string;
   rejectDecisionPayload: MarriageWorkflowDecisionPayloadV1;
   rejectOutcomeSummary: string;
@@ -34,6 +46,7 @@ export type MarriageWorkflowSubjectSurface = {
   inboundOffers: MarriageWorkflowInboundOfferSurface[];
   inboundSummary: string;
   latestOfferSummary: string | null;
+  latestOfferStatus: MarriageWorkflowActionStatus | null;
   outboundFeaturedCandidate: MarriageWorkflowLinkSurface | null;
   queueOutboundOfferPayload: MarriageWorkflowDecisionPayloadV1 | null;
   scoutDecisionPayload: MarriageWorkflowDecisionPayloadV1 | null;
@@ -87,14 +100,20 @@ function houseLabel(houseName: string | null | undefined, houseId: string | null
   return null;
 }
 
-function personDetail(ref: MarriageWorkflowPersonRefV1): string {
-  const houseText = houseLabel(ref.house_name, ref.house_id);
-  return houseText ? houseText : "House not recorded on this workflow seam.";
+function personDetail(previewState: RunState, ref: MarriageWorkflowPersonRefV1): string {
+  return (
+    buildPersonSecondaryIdentifier(previewState, ref.person_id, {
+      defaultLabel: "House not recorded on this workflow seam.",
+      houseId: ref.house_id,
+      houseName: ref.house_name
+    }) ?? "House not recorded on this workflow seam."
+  );
 }
 
-function personLink(ref: MarriageWorkflowPersonRefV1): MarriageWorkflowLinkSurface {
+function personLink(previewState: RunState, ref: MarriageWorkflowPersonRefV1): MarriageWorkflowLinkSurface {
   return {
-    detail: personDetail(ref),
+    detail: personDetail(previewState, ref),
+    houseDetail: buildHouseSecondaryIdentifier(previewState, ref.house_id, { houseName: ref.house_name }),
     houseId: ref.house_id,
     houseLabel: houseLabel(ref.house_name, ref.house_id),
     personId: ref.person_id,
@@ -131,6 +150,15 @@ function latestOfferSummary(subjectView: MarriageWorkflowSubjectViewV1): string 
   const latestOffer = subjectView.latest_outbound_offer;
   if (!latestOffer) return null;
   return `Post-submit state: ${latestOffer.resolution_outcome.summary}`;
+}
+
+function latestOfferStatus(subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowActionStatus | null {
+  const latestOffer = subjectView.latest_outbound_offer;
+  if (!latestOffer) return null;
+  if (latestOffer.state === "accepted") return "accepted";
+  if (latestOffer.state === "rejected") return "rejected";
+  if (latestOffer.state === "generated" || latestOffer.state === "pending") return "sent";
+  return "resolved";
 }
 
 function outboundSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
@@ -174,22 +202,23 @@ function outboundTermSummary(subjectView: MarriageWorkflowSubjectViewV1): string
   return `Editable on player tab: ${editableLabels.join(", ")}. Locked on the normal path: ${lockedLabels.join(", ")}.`;
 }
 
-function subjectSurface(subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
+function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
   const inboundOffers = subjectView.inbound_offers.map((offer) => ({
     acceptDecisionPayload: offer.decision_payloads.accept,
     acceptOutcomeSummary: offer.resolution_outcomes.accept.summary,
-    candidate: personLink(offer.candidate),
+    candidate: personLink(previewState, offer.candidate),
     effectSummary: effectSummary(offer.expected_effects),
     entryId: offer.entry_id,
     houseId: offer.candidate.house_id,
     houseLabel: houseLabel(offer.candidate.house_name, offer.candidate.house_id),
+    offerIndex: offer.offer_index,
     offerSummary: inboundOfferSummary(offer),
     rejectDecisionPayload: offer.decision_payloads.reject,
     rejectOutcomeSummary: inboundRejectSummary(offer),
   }));
 
   const outboundFeaturedCandidate = subjectView.outbound_scouting?.featured_candidate
-    ? personLink(subjectView.outbound_scouting.featured_candidate)
+    ? personLink(previewState, subjectView.outbound_scouting.featured_candidate)
     : null;
 
   return {
@@ -201,6 +230,7 @@ function subjectSurface(subjectView: MarriageWorkflowSubjectViewV1): MarriageWor
         ? `${subjectView.inbound_offers.length} inbound proposal${subjectView.inbound_offers.length === 1 ? "" : "s"} waiting on this subject.`
         : "No inbound proposal is active for this subject.",
     latestOfferSummary: latestOfferSummary(subjectView),
+    latestOfferStatus: latestOfferStatus(subjectView),
     outboundFeaturedCandidate,
     queueOutboundOfferPayload: subjectView.outbound_offer_construction?.decision_payloads.queue ?? null,
     scoutDecisionPayload: subjectView.outbound_scouting?.decision_payload ?? null,
@@ -208,11 +238,17 @@ function subjectSurface(subjectView: MarriageWorkflowSubjectViewV1): MarriageWor
     outboundSendOutcomeSummary: outboundSendOutcomeSummary(subjectView),
     outboundTermSummary: outboundTermSummary(subjectView),
     outboundSummary: outboundSummary(subjectView),
-    subject: personLink(subjectView.subject),
+    subject: personLink(previewState, subjectView.subject),
     subjectParents: [...subjectView.subject.parent_refs]
       .sort((left, right) => compareText(left.person_id, right.person_id))
       .map((parent) => ({
-        detail: parent.house_name ? `House ${parent.house_name}` : "House not recorded on this workflow seam.",
+        detail:
+          buildPersonSecondaryIdentifier(previewState, parent.person_id, {
+            defaultLabel: "House not recorded on this workflow seam.",
+            houseId: parent.house_id,
+            houseName: parent.house_name
+          }) ?? "House not recorded on this workflow seam.",
+        houseDetail: buildHouseSecondaryIdentifier(previewState, parent.house_id, { houseName: parent.house_name }),
         houseId: parent.house_id,
         houseLabel: houseLabel(parent.house_name, parent.house_id),
         personId: parent.person_id,
@@ -220,6 +256,18 @@ function subjectSurface(subjectView: MarriageWorkflowSubjectViewV1): MarriageWor
       })),
     workflowId: `workflow:${subjectView.subject.person_id}`,
   };
+}
+
+export function marriageWorkflowInboundActionKey(entryId: string): string {
+  return `marriage_workflow:inbound:${entryId}`;
+}
+
+export function marriageWorkflowOfferActionKey(workflowId: string): string {
+  return `marriage_workflow:outbound_offer:${workflowId}`;
+}
+
+export function marriageWorkflowScoutActionKey(workflowId: string): string {
+  return `marriage_workflow:scout:${workflowId}`;
 }
 
 export function buildMarriageWorkflowSurface(
@@ -236,6 +284,6 @@ export function buildMarriageWorkflowSurface(
     subjects: view.subject_person_ids
       .map((subjectPersonId) => view.subjects_by_person_id[subjectPersonId] ?? null)
       .filter((subjectView): subjectView is MarriageWorkflowSubjectViewV1 => subjectView !== null)
-      .map((subjectView) => subjectSurface(subjectView))
+      .map((subjectView) => subjectSurface(previewState, subjectView))
   };
 }

@@ -108,6 +108,10 @@ describe("HouseholdPanel", () => {
     expect(html).toContain("Rules the household and anchors the court this turn.");
     expect(html).toContain("Lives outside your household but still matters as part of the nearby noble web.");
     expect(html).toContain("Lives outside your household but still drives local obligation and liege continuity.");
+    expect(html).toContain('data-household-consumption-provisioning="court_provisioning_view_v1"');
+    expect(html).toContain("Household consumption &amp; provisioning");
+    expect(html).toContain("Rationing is read-only in v0.3.6");
+    expect(html).toContain("v0.3.6 has no canonical ration-change decision payload");
   });
 
   it("keeps married-in spouses on the household family path after marriage acceptance", () => {

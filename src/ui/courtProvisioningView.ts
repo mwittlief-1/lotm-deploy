@@ -51,6 +51,28 @@ export type CourtProvisioningStipendRow = {
   stipendKey: string;
 };
 
+export type CourtProvisioningHouseholdRow = {
+  allocatedLabel: string;
+  carryForwardLabel: string;
+  contextLabel: string;
+  lodgingLevelLabel: string;
+  personId: string;
+  personName: string;
+  provisioningClassLabel: string;
+  rationLevelLabel: string;
+  requestLabel: string;
+  roleSummary: string;
+  shortfallLabel: string;
+  statusLabel: string;
+  supportLabel: string;
+};
+
+export type CourtProvisioningRationingDecision = {
+  decision: "not_editable_v0_3_6";
+  detail: string;
+  label: string;
+};
+
 export type CourtProvisioningDebugRow = {
   key: string;
   label: string;
@@ -93,7 +115,9 @@ export type CourtProvisioningSurface = {
   debugRows: CourtProvisioningDebugRow[];
   debugStipendRows: CourtProvisioningDebugStipendRow[];
   helperText: string;
+  householdRows: CourtProvisioningHouseholdRow[];
   overrideRows: CourtProvisioningOverrideRow[];
+  rationingDecision: CourtProvisioningRationingDecision;
   schemaVersion: string;
   stipendRows: CourtProvisioningStipendRow[];
   subtitle: string;
@@ -234,6 +258,32 @@ export function buildCourtProvisioningSurface(
     })
     .filter((row): row is CourtProvisioningStipendRow => row !== null);
 
+  const householdRows = policy.allocation_order
+    .map((personId) => {
+      const entry = view.entries_by_person_id[personId];
+      if (!entry) return null;
+
+      return {
+        allocatedLabel: formatRationPair(entry.ration_policy.allocated_food_units, entry.ration_policy.allocated_meat_units),
+        carryForwardLabel: carryForwardLabel(entry.carried_forward_from_prior),
+        contextLabel: `Seats ${formatStringList(entry.active_seat_ids)} · Service ${formatStringList(entry.active_service_record_ids)}`,
+        lodgingLevelLabel: formatToken(entry.lodging_level),
+        personId,
+        personName: entry.person_name,
+        provisioningClassLabel: formatToken(entry.provisioning_class),
+        rationLevelLabel: formatToken(entry.ration_level),
+        requestLabel: formatRationPair(entry.ration_policy.requested_food_units, entry.ration_policy.requested_meat_units),
+        roleSummary: formatStringList(entry.court_role_labels),
+        shortfallLabel:
+          entry.ration_policy.food_shortfall_units > 0 || entry.ration_policy.meat_shortfall_units > 0
+            ? formatRationPair(entry.ration_policy.food_shortfall_units, entry.ration_policy.meat_shortfall_units)
+            : "No shortfall",
+        statusLabel: formatToken(entry.ration_policy.status),
+        supportLabel: `${formatToken(entry.stipend_basis)} · ${stipendAmountLabel(entry)}`
+      };
+    })
+    .filter((row): row is CourtProvisioningHouseholdRow => row !== null);
+
   const summaryCards: CourtProvisioningSummaryCard[] = [
     {
       detail: atRiskNames.length > 0 ? `Risk watch: ${atRiskNames.join(", ")}` : "No undernourishment risk badges are active in this snapshot.",
@@ -242,13 +292,15 @@ export function buildCourtProvisioningSurface(
       value: `${view.person_ids.length} court members`
     },
     {
-      detail: `${policy.allocation_order.length} entries in deterministic allocation order.`,
+      detail: `${policy.allocation_order.length} entries in deterministic allocation order. Meat here is ration stock already on hand, not a separate live market action.`,
       id: "ration_demand",
       label: "Ration demand",
       value: formatRationPair(policy.total_requested_food_units, policy.total_requested_meat_units)
     },
     {
-      detail: atRiskNames.length > 0 ? `${atRiskNames.length} people are currently flagged at risk.` : "Every current ration row is covered or external.",
+      detail: atRiskNames.length > 0
+        ? `${atRiskNames.length} people are currently flagged at risk because current food or meat stock fell short.`
+        : "Every current ration row is covered or external from current food and meat stores.",
       id: "allocation_result",
       label: "Allocation result",
       value: formatRationPair(policy.total_allocated_food_units, policy.total_allocated_meat_units)
@@ -328,8 +380,15 @@ export function buildCourtProvisioningSurface(
     debugRows,
     debugStipendRows,
     helperText:
-      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Rationing is intentionally not editable in v0.3.6.",
+    householdRows,
     overrideRows,
+    rationingDecision: {
+      decision: "not_editable_v0_3_6",
+      detail:
+        "v0.3.6 has no canonical ration-change decision payload. The UI shows effective rations, allocation, and shortfall evidence only; any future ration controls must route through an owned decision flow before mutating sim state.",
+      label: "Rationing is read-only in v0.3.6"
+    },
     schemaVersion: view.schema_version,
     stipendRows,
     subtitle: `${view.person_ids.length} court members · ${formatRationPair(

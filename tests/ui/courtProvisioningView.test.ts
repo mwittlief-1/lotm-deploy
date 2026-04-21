@@ -39,6 +39,16 @@ describe("courtProvisioningView", () => {
     expect(surface?.stipendRows.map((row) => row.stipendKey)).toEqual(
       [...(surface?.stipendRows.map((row) => row.stipendKey) ?? [])].sort()
     );
+    expect(surface?.householdRows.map((row) => row.personId)).toEqual(surface?.allocationRows.map((row) => row.personId));
+    expect(surface?.householdRows[0]).toMatchObject({
+      allocatedLabel: expect.stringContaining("food"),
+      requestLabel: expect.stringContaining("food"),
+      supportLabel: expect.stringContaining("coin")
+    });
+    expect(surface?.rationingDecision).toMatchObject({
+      decision: "not_editable_v0_3_6",
+      label: "Rationing is read-only in v0.3.6"
+    });
     expect(surface?.subtitle).toContain("court members");
   });
 });

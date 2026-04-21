@@ -266,4 +266,68 @@ describe("turn explanation contract", () => {
       summary: "4 coin went to dues or arrears payments."
     });
   });
+
+  it("canonicalizes unrest causes into reconciled player-facing pressure and relief rows", () => {
+    const before = makeState();
+    const after = makeState();
+    after.manor.unrest = 24;
+
+    const report: TurnReport = {
+      turn_index: 3,
+      weather_multiplier: 1,
+      market: { price_per_bushel: 0.1, sell_cap_bushels: 40 },
+      spoilage: { rate: 0, loss_bushels: 0 },
+      production_bushels: 0,
+      consumption_bushels: 0,
+      peasant_consumption_bushels: 0,
+      court_consumption_bushels: 0,
+      total_consumption_bushels: 0,
+      shortage_bushels: 0,
+      construction: { progress_added: 0, completed_improvement_id: null },
+      obligations: {
+        tax_due_coin: 0,
+        tithe_due_bushels: 0,
+        arrears_coin: 0,
+        arrears_bushels: 0,
+        war_levy_due: null
+      },
+      household: {
+        births: [],
+        deaths: [],
+        population_delta: 0
+      },
+      house_log: [],
+      events: [],
+      top_drivers: [],
+      notes: [],
+      unrest_breakdown: {
+        schema_version: "unrest_breakdown_v1",
+        before: 18,
+        after: 24,
+        delta: 6,
+        increased_by: [
+          { label: "Arrears", amount: 4 },
+          { label: "Village Riot", amount: 2 },
+          { label: "Bridge repairs", amount: 1 }
+        ],
+        decreased_by: [{ label: "Harvest Festival", amount: 1 }]
+      }
+    };
+
+    const turnExplanation = buildTurnExplanationV1(report, before, after, []);
+
+    expect(turnExplanation.unrest_walkdown.reconciles).toBe(true);
+    expect(turnExplanation.unrest_walkdown.rows.map((row) => row.label)).toEqual([
+      "Starting unrest",
+      "Arrears pressure",
+      "Project pressure: Bridge repairs",
+      "Event pressure: Village Riot",
+      "Relief: Harvest Festival",
+      "Net unrest change",
+      "Ending unrest"
+    ]);
+    expect(turnExplanation.headline_causes.find((cause) => cause.metric === "unrest")).toMatchObject({
+      detail: "Arrears pressure (+4) pushed unrest up while Relief: Harvest Festival (-1) eased it."
+    });
+  });
 });
