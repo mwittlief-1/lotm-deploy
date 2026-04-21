@@ -6,6 +6,7 @@ import type {
   HouseholdPresenceViewV1,
   RunState,
 } from "../../types";
+import { buildEconomyObligationsView, type EconomyObligationsViewV1 } from "../experience/obligationsView";
 import { buildCourtProvisioningView, type CourtProvisioningView } from "./courtProvisioningRegistry";
 import { buildPersonCardRegistry } from "./personCardRegistry";
 
@@ -77,10 +78,26 @@ function successionNoteForPerson(state: RunState, personId: string, recentSucces
   return null;
 }
 
+function localContinuityNoteForPerson(
+  personId: string,
+  localRole: HouseholdPresenceEntryV1["local_role"],
+  obligationsView: EconomyObligationsViewV1
+): string | null {
+  if (localRole !== "liege" && localRole !== "clergy") return null;
+
+  const counterpartyKind = localRole === "liege" ? "liege" : "church";
+  const summary = obligationsView.counterparty_summaries.find((entry) => entry.counterparty_kind === counterpartyKind) ?? null;
+  if (!summary) return null;
+  if (summary.collector_state === "active") return null;
+  return summary.collector_summary;
+}
+
 function presenceKindForEntry(
   rosterRole: HouseholdPresenceEntryV1["roster_role"],
-  provisioningClass: string | null
+  provisioningClass: string | null,
+  localRole: HouseholdPresenceEntryV1["local_role"]
 ): HouseholdPresenceKindV1 {
+  if (localRole) return "outsider";
   if (rosterRole === "local_power") return "outsider";
   if (rosterRole === "officer") return "retainer";
   if (provisioningClass === "retainer" || provisioningClass === "realm_holder" || provisioningClass === "institutional_service") {
@@ -102,12 +119,17 @@ function presenceSummaryForEntry(args: {
   if (rosterRole === "head") return "Rules the household and anchors the court this turn.";
   if (rosterRole === "spouse") return "Shares the manor household as the current spouse.";
   if (rosterRole === "child") return "Remains in the active household line under the current ruler.";
-  if (rosterRole === "married_in_spouse") return "Joined the court through marriage and now resides with the household.";
+  if (rosterRole === "married_in_spouse") {
+    return "Joined the court through marriage and now counts as household family on the player path.";
+  }
   if (rosterRole === "officer") {
     return `${personName} serves the court as ${seatLabels[0] ?? "an office holder"} and stays on the household path through active service.`;
   }
-  if (localRole === "liege") return "Lives outside your household but still drives the local obligation and power structure.";
-  if (localRole === "clergy") return "Lives outside your household but still anchors the local church relationship.";
+  if (seatLabels.length > 0 && (provisioningClass === "retainer" || provisioningClass === "realm_holder" || provisioningClass === "institutional_service")) {
+    return `${personName} serves the court as ${seatLabels[0]} and stays on the household path through active service.`;
+  }
+  if (localRole === "liege") return "Lives outside your household but still drives local obligation and liege continuity.";
+  if (localRole === "clergy") return "Lives outside your household but still anchors the local church relationship and collector continuity.";
   if (localRole === "noble") return "Lives outside your household but still matters as part of the nearby noble web.";
   if (presenceKind === "guest") return "Stays at court without a standing office or permanent household claim.";
   if (provisioningClass === "realm_holder") return "Appears here because a realm office still ties this person into the court shell.";
@@ -123,11 +145,17 @@ function entryForPerson(args: {
   personCard: PersonCardView | null;
   provisioningView: CourtProvisioningView;
   recentSuccession: HouseholdPresenceViewV1["recent_succession"];
+  obligationsView: EconomyObligationsViewV1;
 }): HouseholdPresenceEntryV1 {
-  const { state, personId, personName, rosterRole, localRole, personCard, provisioningView, recentSuccession } = args;
+  const { state, personId, personName, rosterRole, localRole, personCard, provisioningView, recentSuccession, obligationsView } = args;
   const provisioningEntry = provisioningView.entries_by_person_id[personId] ?? null;
   const seatLabels = personCard?.office_assignments.map((assignment) => assignment.title).filter(Boolean) ?? [];
-  const presenceKind = presenceKindForEntry(rosterRole, provisioningEntry?.provisioning_class ?? null);
+  const presenceKind = presenceKindForEntry(rosterRole, provisioningEntry?.provisioning_class ?? null, localRole);
+  const householdSuccessionNote = successionNoteForPerson(state, personId, recentSuccession);
+  const localContinuityNote = localContinuityNoteForPerson(personId, localRole, obligationsView);
+  const successionNote = [householdSuccessionNote, localContinuityNote]
+    .filter((value): value is string => typeof value === "string" && value.length > 0)
+    .join(" ");
 
   return {
     schema_version: HOUSEHOLD_PRESENCE_ENTRY_SCHEMA_VERSION,
@@ -152,7 +180,7 @@ function entryForPerson(args: {
       seatLabels
     }),
     turnover_note: turnoverNoteForPerson(state, personId),
-    succession_note: successionNoteForPerson(state, personId, recentSuccession),
+    succession_note: successionNote.length > 0 ? successionNote : null,
   };
 }
 
@@ -163,6 +191,7 @@ export function buildHouseholdPresenceView(
 ): HouseholdPresenceViewV1 {
   const roster = buildCourtRoster_v0_2_4(state);
   const recentSuccession = findLastSuccession(state);
+  const obligationsView = buildEconomyObligationsView(state);
   const entriesByPersonId: Record<string, HouseholdPresenceEntryV1> = {};
   const entryOrder: string[] = [];
 
@@ -171,9 +200,30 @@ export function buildHouseholdPresenceView(
     rosterRole: HouseholdPresenceEntryV1["roster_role"],
     localRole: HouseholdPresenceEntryV1["local_role"] = null
   ) => {
-    if (!personId || typeof personId !== "string" || entryOrder.includes(personId)) return;
+    if (!personId || typeof personId !== "string") return;
     const person = registryPersonFor(state, personId);
     if (!person) return;
+    if (entryOrder.includes(personId)) {
+      if (!localRole) return;
+      const existingEntry = entriesByPersonId[personId];
+      if (!existingEntry || existingEntry.local_role) return;
+      const mergedRosterRole =
+        existingEntry.roster_role === "resident" || existingEntry.roster_role === "local_power"
+          ? "local_power"
+          : existingEntry.roster_role;
+      entriesByPersonId[personId] = entryForPerson({
+        state,
+        personId,
+        personName: person.name ?? personId,
+        rosterRole: mergedRosterRole,
+        localRole,
+        personCard: personCards.entries_by_person_id[personId] ?? null,
+        provisioningView,
+        recentSuccession,
+        obligationsView
+      });
+      return;
+    }
     entryOrder.push(personId);
     entriesByPersonId[personId] = entryForPerson({
       state,
@@ -183,7 +233,8 @@ export function buildHouseholdPresenceView(
       localRole,
       personCard: personCards.entries_by_person_id[personId] ?? null,
       provisioningView,
-      recentSuccession
+      recentSuccession,
+      obligationsView
     });
   };
 

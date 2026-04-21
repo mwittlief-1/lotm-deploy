@@ -27,10 +27,14 @@ describe("OutboundMarriagePanel", () => {
 
     expect(html).toContain("Scout &amp; offer sheet");
     expect(html).toContain("Queue scout");
+    expect(html).toContain("Offer submission");
     expect(html).toContain("Candidate table");
+    expect(html).toContain("Player term access");
     expect(html).toContain("Offer composer");
     expect(html).toContain("Resolver preview");
     expect(html).toContain("Accepted preview");
+    expect(html).toContain("draft.relationshipRespect");
+    expect(html).toContain("offer.relationship_delta.respect");
     expect(html).toContain("Select");
   });
 

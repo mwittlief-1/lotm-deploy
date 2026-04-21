@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: ''
-  last_completed_task_id: V03-R6-006-T01
+  current_task_id: V03-R6-001-T04
+  last_completed_task_id: V03-R6-008-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/v0.3-refactor-kickoff
-  git_commit: 00e5f6e
+  git_commit: eb8eaad
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -16,21 +16,22 @@ last_run:
     qa: blocked_clean_exit
     preflight: fail
     repo_duplicates: not_run
-    seed_replay_batch_twice: fail
+    seed_replay_batch_twice: pass
   replay_hashes:
-    run1: ''
-    run2: ''
+    run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
+    run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
 notes: >-
-  Integrator acceptance advanced again on 2026-04-20. Kickoff now carries the
-  accepted economy verification closeout for V03-R6-003-T02 and V03-R6-003-T03
-  plus the accepted social chain for V03-R6-005-T01 and V03-R6-006-T01. There
-  are no remaining ready lane tasks in the v0.3.6 implementation queue. The
-  only remaining R6 task is V03-R6-008-T03, which stays blocked behind shared
-  release-close conditions and final evidence work. A story-to-task
-  reconciliation note and story-coverage matrix have been added so the 45-story
-  UAT pack can be tracked separately from the compressed 19-task engineering
-  backlog. Shared repo-wide merge debt remains open: preflight reports
-  test3_mismatches=16, seed:replay:batch still fails on the snapshot-cap breach
-  for lotm_v022_seed_001_baseline_extworld at turn 10, and qa has not yet
-  produced a clean branch-wide exit in this workspace.
+  Integrator accepted V03-R6-008-T05 on 2026-04-20 after compacting replay
+  snapshots without backing out the accepted world-map read models. The
+  bounded snapshot now keeps manor detail hidden and non-enumerable, and the
+  serialized map snapshot drops duplicated manor labels while the live UI
+  derives the same labels from selector rows or seat hex ids. The known
+  succession-pressure offender moved from 528401 bytes at turn 13 and 526672
+  bytes at turn 15 down to 495985 and 516997 respectively, and
+  seed:replay:batch passed twice with matching summary hash
+  4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c. Remaining
+  branch-wide blockers are unchanged: preflight still fails with
+  test3_mismatches=16 against the stale v0.2.2 fallback baseline path, and qa
+  still lacks a clean branch-wide exit on the kickoff line. Ready follow-on
+  lane work remains open for UI, economy, social, and tooling.
 active_claims: {}

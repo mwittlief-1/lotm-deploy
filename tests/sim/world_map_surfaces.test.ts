@@ -63,7 +63,6 @@ describe("world map surfaces", () => {
     ]);
     expect(Object.keys(mapRows[0] ?? {})).toEqual([
       "manor_id",
-      "manor_label",
       "is_anchor_manor",
       "seat_hex_id",
       "seat_q",

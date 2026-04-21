@@ -209,6 +209,9 @@ export function ProspectsPanel({
                       Send outcome: {workflow.outboundSendOutcomeSummary}
                     </div>
                   ) : null}
+                  <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                    Terms: {workflow.outboundTermSummary}
+                  </div>
                   {workflow.latestOfferSummary ? (
                     <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
                       {workflow.latestOfferSummary}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createNewRun } from "../../src/sim";
+import { applyDecisions, createNewRun, proposeTurn } from "../../src/sim";
 import {
   COURT_PROVISIONING_VIEW_SCHEMA_VERSION,
   COURT_STIPEND_REGISTRY_SCHEMA_VERSION,
@@ -8,6 +8,47 @@ import {
   buildCourtStipendRegistry,
 } from "../../src/sim/domains/people/courtProvisioningRegistry";
 import { buildPersonCardRegistry } from "../../src/sim/domains/people/personCardRegistry";
+import { createDefaultDecisions } from "../../src/sim/turn";
+
+function buildAcceptedMarriagePreview(seed: string) {
+  const state = createNewRun(seed) as any;
+  const child = state.house.children[0];
+  if (!child) throw new Error("Expected a child eligible for marriage setup.");
+
+  child.age = 18;
+  child.married = false;
+  child.sex = "M";
+  if (state.people?.[child.id]) {
+    state.people[child.id].age = 18;
+    state.people[child.id].married = false;
+    state.people[child.id].sex = "M";
+  }
+  if (state.locals?.nobles?.[0]) {
+    state.locals.nobles[0].sex = "F";
+    if (state.people?.[state.locals.nobles[0].id]) {
+      state.people[state.locals.nobles[0].id].sex = "F";
+    }
+  }
+
+  const preview = proposeTurn(state);
+  const marriage = preview.prospects_window?.prospects.find((prospect) => prospect.type === "marriage");
+  const spouseId = typeof (marriage as any)?.spouse_person_id === "string" ? String((marriage as any).spouse_person_id) : null;
+  if (!marriage || !spouseId) {
+    throw new Error("Expected a generated marriage prospect with a spouse person id.");
+  }
+
+  const decisions: any = createDefaultDecisions(state);
+  decisions.prospects = {
+    kind: "prospects",
+    actions: [{ prospect_id: marriage.id, action: "accept", prospect_i: 0 }]
+  };
+
+  const next = applyDecisions(state, decisions);
+  return {
+    previewState: proposeTurn(next).preview_state,
+    spouseId
+  };
+}
 
 describe("court provisioning registry", () => {
   it("builds deterministic per-court-member provisioning rows and stable stipend keys", () => {
@@ -67,6 +108,21 @@ describe("court provisioning registry", () => {
     expect(stipendRegistry.entries_by_key["stipend:p_court_steward"]).toMatchObject({
       carry_forward_from_prior: true,
       payment_basis: "family_service",
+    });
+  });
+
+  it("treats married-in spouses as household family instead of external guests", () => {
+    const { previewState, spouseId } = buildAcceptedMarriagePreview("court_provisioning_married_in_v036");
+    const personCards = buildPersonCardRegistry(previewState);
+    const view = buildCourtProvisioningView(previewState, personCards);
+
+    expect(personCards.entries_by_person_id[spouseId]?.court_role_labels).toContain("Married-in Spouse");
+    expect(view.entries_by_person_id[spouseId]).toMatchObject({
+      person_id: spouseId,
+      provisioning_class: "household_family",
+      ration_level: "full",
+      lodging_level: "manor_house",
+      stipend_basis: "family_service"
     });
   });
 });

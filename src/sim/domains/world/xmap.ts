@@ -1255,7 +1255,6 @@ function buildMapViewRow(domain: WorldDomainV1, anchorManorId: string, manor: XM
 function compactMapViewRow(row: MapViewRowV1): MapViewSnapshotRowV1 {
   return {
     manor_id: row.manor_id,
-    manor_label: row.manor_label,
     is_anchor_manor: row.is_anchor_manor,
     seat_hex_id: row.seat_hex_id,
     seat_q: row.seat_q,

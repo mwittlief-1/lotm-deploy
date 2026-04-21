@@ -456,7 +456,6 @@ export interface MapViewRowV1 {
 
 export interface MapViewSnapshotRowV1 {
   manor_id: string;
-  manor_label: string;
   is_anchor_manor: boolean;
   seat_hex_id: string;
   seat_q: number;

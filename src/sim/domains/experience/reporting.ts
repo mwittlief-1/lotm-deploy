@@ -75,7 +75,6 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     portfolio: (state as any).portfolio,
     world_topology_view: worldTopologyView,
     map_view_snapshot: mapViewSnapshot,
-    manor_detail_view: manorDetailView,
     known_houses: experienceSurfaces.known_houses,
     house_dossiers: experienceSurfaces.house_dossiers,
     flags: state.flags,
@@ -96,6 +95,12 @@ export function boundedSnapshot(state: RunState): RunSnapshot {
     configurable: true
   });
   (snapshot.house as any).court_delegation_view = deepCopy(delegationView);
+  Object.defineProperty(snapshot, "manor_detail_view", {
+    value: deepCopy(manorDetailView),
+    enumerable: false,
+    writable: true,
+    configurable: true
+  });
   Object.defineProperty(snapshot, "succession_line_summary", {
     value: deepCopy(successionSurfaces.succession_line_summary),
     enumerable: false,

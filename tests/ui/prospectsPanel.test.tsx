@@ -219,6 +219,8 @@ describe("ProspectsPanel", () => {
               helperText: "Inbound and outbound state stay grouped here.",
               inboundOffers: [
                 {
+                  acceptDecisionPayload: {} as any,
+                  acceptOutcomeSummary: "Accepting would marry Alice to Cedric.",
                   candidate: {
                     detail: "House Ashford",
                     houseId: "h_ext_02",
@@ -231,11 +233,12 @@ describe("ProspectsPanel", () => {
                   houseId: "h_ext_02",
                   houseLabel: "House Ashford",
                   offerSummary: "Cedric from House Ashford is waiting for your response.",
+                  rejectDecisionPayload: {} as any,
                   rejectOutcomeSummary: "Rejecting this proposal leaves the match unresolved and adds slight social friction with House Ashford."
                 }
               ],
               inboundSummary: "1 inbound proposal waiting on this subject.",
-              latestOfferSummary: "Last outbound offer: Pending with Cedric of House Ashford.",
+              latestOfferSummary: "Post-submit state: awaiting reply from Cedric of House Ashford.",
               outboundFeaturedCandidate: {
                 detail: "House Ashford",
                 houseId: "h_ext_02",
@@ -243,7 +246,11 @@ describe("ProspectsPanel", () => {
                 personId: "p_suitor_1",
                 title: "Cedric"
               },
+              queueOutboundOfferPayload: {} as any,
+              scoutDecisionPayload: {} as any,
+              sendOutboundOfferPayload: {} as any,
               outboundSendOutcomeSummary: "If you send now: Accepted preview. Outbound marriage offer accepted by House Ashford for Alice.",
+              outboundTermSummary: "Editable on player tab: dowry coin, respect delta, allegiance delta, threat delta. Locked on the normal path: liege delta, risk tags.",
               outboundSummary: "1 shown candidate and 0 held out candidates are grouped here for one outbound workflow path.",
               subject: {
                 detail: "House Player",
@@ -307,5 +314,7 @@ describe("ProspectsPanel", () => {
     expect(html).toContain('data-house-dossier-open="h_ext_02"');
     expect(html).toContain("Rejecting this proposal leaves the match unresolved");
     expect(html).toContain("If you send now: Accepted preview.");
+    expect(html).toContain("Terms: Editable on player tab:");
+    expect(html).toContain("Post-submit state: awaiting reply from Cedric of House Ashford.");
   });
 });

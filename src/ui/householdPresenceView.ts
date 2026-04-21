@@ -39,7 +39,9 @@ function readHouseholdPresenceView(previewState: RunState | null | undefined): H
 function detailForEntry(entry: HouseholdPresenceEntryV1): string {
   const parts = [
     `Presence ${formatToken(entry.presence_kind)}`,
+    entry.local_role ? `Local ${formatToken(entry.local_role)}` : null,
     entry.provisioning_class ? `Provisioning ${formatToken(entry.provisioning_class)}` : null,
+    entry.court_role_labels.length > 0 ? `Court ${entry.court_role_labels.join(", ")}` : null,
     entry.lodging_level ? `Lodging ${formatToken(entry.lodging_level)}` : null,
     entry.stipend_basis ? `Support ${formatToken(entry.stipend_basis)}` : null,
     entry.residence_manor_id ? `Residence ${entry.residence_manor_id}` : null
@@ -67,7 +69,7 @@ export function buildHouseholdPresenceSurface(
         turnoverNote: entry.turnover_note,
       })),
     helperText:
-      "Presence explains why each resident, guest, retainer, or outsider still appears on the player household path.",
+      "Presence explains why each resident, guest, retainer, or outsider still appears on the player household path, using the same household and provisioning truth surfaced elsewhere.",
     recentSuccessionSummary: view.recent_succession
       ? `Recent succession: Turn ${view.recent_succession.turn_index} — ${view.recent_succession.new_ruler_name}.`
       : null,

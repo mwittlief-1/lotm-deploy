@@ -13,17 +13,37 @@ import {
 import { recordEconomyPortfolioPhaseHints } from "../../src/sim/domains/economy/portfolioAnalysis";
 import { buildBoundedWorldTopologyView } from "../../src/sim/domains/world";
 
-function buildAgendaPreviewState() {
-  const state = createNewRun("play_screen_agenda_v033");
-  state.turn_index = 4;
-  state.manor.obligations.tax_due_coin = 6;
-  state.manor.obligations.tithe_due_bushels = 4;
-  state.manor.obligations.arrears.coin = 13;
-  state.manor.obligations.arrears.bushels = 0;
-
-  recordEconomyPortfolioPhaseHints(state, {
-    consumption_shortage_bushels: 9
-  });
+function applyOfficeAgendaFixtures(state: any) {
+  state.people = {
+    ...(state.people ?? {}),
+    p_realm_holder: {
+      ...state.house.head,
+      id: "p_realm_holder",
+      name: "Lady Westmarch",
+      house_id: "h_realm",
+      residence_house_id: "h_realm",
+      married: true
+    },
+    p_retainer: {
+      ...state.house.head,
+      id: "p_retainer",
+      name: "Sir Aldwyn",
+      house_id: state.player_house_id ?? "h_player",
+      residence_house_id: state.player_house_id ?? "h_player",
+      married: false
+    }
+  };
+  state.houses = {
+    ...(state.houses ?? {}),
+    h_realm: {
+      id: "h_realm",
+      house_name: "House Westmarch",
+      head_id: "p_realm_holder",
+      spouse_id: null,
+      child_ids: [],
+      member_person_ids: ["p_realm_holder"]
+    }
+  };
 
   const houseRegistry = createHouseCourtOfficeRegistry("house:h_player");
   const realmRegistry = createRealmCourtOfficeRegistry("actor:earl", [
@@ -72,7 +92,29 @@ function buildAgendaPreviewState() {
   });
   (state.house as any).court_office_registry = retainerFill.registry;
   (state.house as any).court_service_record_registry = retainerFill.service_record_registry;
+}
 
+function buildAgendaPreviewState() {
+  const state = createNewRun("play_screen_agenda_v033");
+  state.turn_index = 4;
+  state.manor.obligations.tax_due_coin = 6;
+  state.manor.obligations.tithe_due_bushels = 4;
+  state.manor.obligations.arrears.coin = 13;
+  state.manor.obligations.arrears.bushels = 0;
+
+  recordEconomyPortfolioPhaseHints(state, {
+    consumption_shortage_bushels: 9
+  });
+
+  applyOfficeAgendaFixtures(state);
+
+  return state;
+}
+
+function buildOfficeOnlyAgendaPreviewState() {
+  const state = createNewRun("play_screen_agenda_office_truth_v033");
+  state.turn_index = 4;
+  applyOfficeAgendaFixtures(state);
   return state;
 }
 
@@ -193,5 +235,39 @@ describe("play screen court agenda", () => {
       "agenda_offices_realm_transition_realm:actor:earl:chancellor"
     ]);
     expect(householdItems.every((item) => item.cta_label === "View household")).toBe(true);
+  });
+
+  it("reuses household and provisioning truth in active-service agenda notes", () => {
+    const previewState = buildOfficeOnlyAgendaPreviewState();
+
+    const items = buildCouncilAgendaItems({
+      anchors: PLAY_ANCHORS,
+      copy: {
+        agenda_obligations_title: "Obligations are pressing",
+        agenda_prospect_title: "Opportunity expires soon",
+        agenda_prospect_context: (turnIndex: number) => `A prospect expires end of Turn ${turnIndex}.`,
+        cta_reviewObligations: "Review obligations",
+        cta_viewProspects: "View prospects",
+        cta_viewHousehold: "View household",
+        cta_viewPortfolio: "View portfolio",
+        cta_openDetails: "Open details"
+      },
+      previewState,
+      report: {
+        turn_index: previewState.turn_index,
+        shortage_bushels: 0,
+        prospects_window: null
+      }
+    });
+
+    const activeServiceItem = items.find((item) => item.id.startsWith("agenda_offices_active_service_"));
+
+    expect(activeServiceItem).toBeTruthy();
+    expect(activeServiceItem?.notes).toEqual(
+      expect.arrayContaining([
+        "Household path: Retainer — Sir Aldwyn serves the court as Marshal and stays on the household path through active service.",
+        "Provisioning: Retainer / Court Quarters."
+      ])
+    );
   });
 });
