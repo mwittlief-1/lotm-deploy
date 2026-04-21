@@ -1,5 +1,6 @@
 import React from "react";
 import { buildEconomyImprovementPreviewCatalog } from "../../sim/domains/economy/maintenance";
+import { buildRunProvenanceV1 } from "../../sim/provenance";
 import type { MarriageWindow, RunState, TurnDecisions } from "../../sim/types";
 import type {
   ObligationsCounterpartyContractSection,
@@ -300,7 +301,7 @@ export function DecisionsPanel({
   turnYears,
   arrearsCarried
 }: DecisionsPanelProps) {
-  const exportCopy = buildPlaytestOpsExportCopy(runSeed);
+  const exportCopy = buildPlaytestOpsExportCopy(runSeed, buildRunProvenanceV1(previewState));
   const builtImprovementIds = new Set(
     Array.isArray(manor.improvements)
       ? manor.improvements.filter((value: unknown): value is string => typeof value === "string" && value.length > 0)

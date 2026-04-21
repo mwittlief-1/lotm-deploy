@@ -26,6 +26,11 @@ describe("playability preset init seam", () => {
     expect(state.run_preset_id).toBeNull();
     expect(summary.seed).toBe("preset_init_seed_v035");
     expect(summary.preset_id).toBeNull();
+    expect(summary.run_provenance_v1).toMatchObject({
+      schema_version: "run_provenance_v1",
+      run_app_version: state.app_version,
+      version_match: true
+    });
   });
 
   it("applies preset provenance through the canonical init seam without forking worldgen", () => {
@@ -51,7 +56,11 @@ describe("playability preset init seam", () => {
     expect(presetState.run_preset_id).toBe(preset!.preset_id);
     expect(buildRunSummary(presetState)).toMatchObject({
       seed: preset!.seed,
-      preset_id: preset!.preset_id
+      preset_id: preset!.preset_id,
+      run_provenance_v1: {
+        schema_version: "run_provenance_v1",
+        run_app_version: presetState.app_version
+      }
     });
     expect({
       ...presetState,

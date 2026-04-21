@@ -1,0 +1,10 @@
+{
+  "schema_version": "preflight_baseline_contract_v1",
+  "release": "v0.3.6",
+  "policy_mode": "baseline_file",
+  "baseline_relpath": "docs/qa/v0.3.6_non_perturbation_baseline_v0.3.6.json",
+  "legacy_fallback_relpath": "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json",
+  "source_commit": "403b543",
+  "source_note": "v0.3.6 preflight compares against an explicit kickoff-line baseline refreshed after accepted tooling snapshot-cap work, rather than silently inheriting the old v0.2.2 fallback bundle.",
+  "updated_at": "2026-04-20T00:00:00Z"
+}

@@ -2,6 +2,7 @@ import { applyPlayabilityPreset, buildNewRunInit } from "../sim";
 import { NEW_RUN_INIT_SEAM_ID, type NewRunInitV1 } from "../sim/state";
 import {
   PLAYABILITY_PRESET_PACK_RELPATH,
+  PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH,
   PLAYABILITY_REGRESSION_SEED_PACK_RELPATH,
   PLAYABILITY_UAT_SCENARIO_PACK_RELPATH,
   listPlayabilityPresetDefinitions,
@@ -10,7 +11,6 @@ import {
   type PlayabilityPresetId,
   type PlayabilitySourcePackId
 } from "./playabilityPresetPack";
-import { PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH } from "./playtestOpsPacket";
 
 export type NewRunPresetSourceRef = {
   packId: PlayabilitySourcePackId;
@@ -43,7 +43,7 @@ export type NewRunPresetSurface = {
 
 function relpathForSourcePack(packId: PlayabilitySourcePackId): string {
   if (packId === "economy_fiscal_regression_seed_pack") return PLAYABILITY_REGRESSION_SEED_PACK_RELPATH;
-  if (packId === "playtest_ops_receipt_bundle_seed_pack") return PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH;
+  if (packId === "playtest_ops_receipt_bundle_seed_pack") return PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH;
   return PLAYABILITY_UAT_SCENARIO_PACK_RELPATH;
 }
 

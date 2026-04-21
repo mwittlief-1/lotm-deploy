@@ -7,6 +7,7 @@ import {
   PLAYABILITY_PRESET_PACK_KIND,
   PLAYABILITY_PRESET_PACK_RELPATH,
   PLAYABILITY_PRESET_PACK_RELEASE,
+  PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH,
   PLAYABILITY_REGRESSION_SEED_PACK_RELPATH,
   PLAYABILITY_SOURCE_PACK_ORDER,
   PLAYABILITY_UAT_SCENARIO_PACK_RELPATH,
@@ -17,7 +18,6 @@ import {
   type PlayabilityPresetPackV1,
   type PlayabilitySourcePackId
 } from "../src/ui/playabilityPresetPack";
-import { PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH } from "../src/ui/playtestOpsPacket";
 import { writeStableArtifact } from "./seed_replay/artifactWriter";
 import { sha256, stableStringify } from "./seed_replay/hash";
 
@@ -150,7 +150,7 @@ function loadSourcePack(packId: PlayabilitySourcePackId): LoadedSourcePack {
       };
     }
     case "playtest_ops_receipt_bundle_seed_pack": {
-      const artifactRelpath = PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH;
+      const artifactRelpath = PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH;
       const payload = readJson<ReceiptBundleSeedPack>(artifactRelpath);
       return {
         pack_id: packId,

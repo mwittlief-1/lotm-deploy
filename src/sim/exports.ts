@@ -1,4 +1,5 @@
 import { buildBoundedRegistryManifest, RUN_STATE_SCHEMA_VERSION } from "./stateSchema";
+import { buildRunProvenanceV1 } from "./provenance";
 import type { RunState, RunSummaryExport } from "./types";
 
 export function buildRunSummary(state: RunState): RunSummaryExport {
@@ -14,6 +15,7 @@ export function buildRunSummary(state: RunState): RunSummaryExport {
     sim_version: state.version,
     state_schema_version: state.state_schema_version ?? RUN_STATE_SCHEMA_VERSION,
     bounded_registry_manifest: buildBoundedRegistryManifest(),
+    run_provenance_v1: buildRunProvenanceV1(state),
     turns_played: state.turn_index,
     game_over_reason: state.game_over?.reason ?? null,
     ending_resources: {

@@ -1,13 +1,13 @@
 {
-  "app_version": "v0.3.4",
+  "app_version": "v0.3.6",
   "sim_version": "mvp_v0_1",
   "code_fingerprint": "72df65449dcc1e3d029d96accda5d89d721d92f700ba0baf7df148b5b7ddb634",
-  "build_time_utc": "2026-04-10T12:38:56Z",
-  "created_at_utc": "2026-04-10T12:38:56Z",
+  "build_time_utc": "2026-04-15T00:00:00Z",
+  "created_at_utc": "2026-04-15T00:00:00Z",
   "policy_ids": [
     "prudent-builder",
     "builder-forward",
     "builder-forward/buffered"
   ],
-  "notes": "v0.3.4 kickoff contract prep: promotes the app/build stamp to the v0.3 line, adds shared obligations gesture decision fields for liege gifts and church offerings, and reserves optional phase_results_v0.fiscal_receipts_v1 transport using the existing FiscalReceiptSnapshotV1 schema. This change is contract/version prep only; it does not activate new UI controls or gameplay behavior by itself."
+  "notes": "v0.3.6 UAT trust and legibility reset: adds shared run provenance, a refreshed packet release contract, and story-shaped fixture and gate evidence so summary, drilldown, and export surfaces can be reviewed against one visible release stamp."
 }

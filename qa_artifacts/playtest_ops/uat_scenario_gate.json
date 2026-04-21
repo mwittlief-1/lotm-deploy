@@ -334,11 +334,11 @@
       "turns": 2
     }
   ],
-  "completed_at": "2026-04-19T22:11:54.336Z",
+  "completed_at": "2026-04-20T21:58:17.623Z",
   "failed": 0,
   "failures": [],
   "gate": "uat_scenario_gate_v1",
-  "hash": "e60037253e7c4c931e5c1260196c2f7aa91d8e631261300968033289cad1b8a6",
+  "hash": "d8a0f2f91fd68d892c8430baed19855512686be3b0d29a741b5f6d24c0fe86da",
   "notes": [
     "scenario uat_meat_hunting_proxy uses fallback visibility: Runtime outputs do not surface hunting/meat; use deterministic hunting-yield proxy instead."
   ],
@@ -355,11 +355,13 @@
     "Select the locked preset in the New Run UI first, then confirm the provenance banner shows the matching preset id and seed before reviewing gameplay surfaces.",
     "Treat qa_artifacts/playtest_ops/v0.3.5/playability_preset_pack.json as the canonical preset list and qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json as the visible-cue checklist.",
     "Use docs/qa/obligations_visibility_evidence_pack_v0.3.6.md plus qa_artifacts/playtest_ops/v0.3.6/obligations_visibility_evidence_pack.json as the canonical obligation evidence bundle for successor, vacancy, and carry review.",
+    "Use qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json when the v0.3.6 story checklist needs deterministic cue text for Explain Changes or Obligations review.",
     "Use --preset=<preset_id> for targeted reruns when a single closure lane needs confirmation; scenario ids remain source-pack detail rather than operator-facing checklist names.",
     "Filtered reruns write a release-scoped gate artifact and preserve qa_artifacts/playtest_ops/uat_scenario_gate.json as the full closure checklist for downstream preset manifests."
   ],
   "passed": 3,
-  "release": "v0.3.5",
+  "provenance_expectation": "Review against release v0.3.6. Manual provenance checks should confirm that New Run, Run Log, run summary export, packet metadata, and BUILD_INFO all agree on the same app version.",
+  "release": "v0.3.6",
   "report_scope": {
     "canonical_artifact_relpath": "qa_artifacts/playtest_ops/uat_scenario_gate.json",
     "mode": "canonical",
@@ -426,7 +428,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.5/locked_preset_scenarios.json",
-      "hash": "e62dba53e1ed016be2ff2ae37b2483e5b3c5a6befb7aa09fb3c9197622264603",
+      "hash": "05492fbcb6a289ea6436aa0734123dbb5192547a40ffc174f84c8f5dec478eb8",
       "kind": "locked_preset_scenarios_v1",
       "label": "locked preset manifest"
     },
@@ -441,7 +443,152 @@
       "hash": "476330ff50c2bb523df0a339695c54335a1241029e5b441c7c9baf2f1c8453c0",
       "kind": "obligations_visibility_evidence_pack_v1",
       "label": "obligations visibility evidence pack"
+    },
+    {
+      "artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "hash": "850e94f3ed20544d1cdc47c5a7e1fb191ebacb923e853c08b6b1bd4a1e2c3742",
+      "kind": "story_uat_fixture_pack_v1",
+      "label": "story fixture pack"
     }
   ],
-  "started_at": "2026-04-19T22:11:52.133Z"
+  "started_at": "2026-04-20T21:58:14.215Z",
+  "story_checklist": [
+    {
+      "fixture_case_ids": [
+        "ledger_explain_changes_story"
+      ],
+      "id": "food_reconciliation",
+      "scenario_ids": [],
+      "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "status": "manual_review",
+      "summary": "Verify the food summary and drilldown tell one ordered story from starting stores through ending stores.",
+      "surfaces": [
+        "Turn Report",
+        "Explain Changes",
+        "Food & Stores"
+      ],
+      "title": "US-01 Food ledger walkdown",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [
+        "ledger_explain_changes_story"
+      ],
+      "id": "coin_reconciliation",
+      "scenario_ids": [],
+      "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "status": "manual_review",
+      "summary": "Verify coin shows a readable start-to-end walkdown, including upkeep, dues, and any offsetting inflows.",
+      "surfaces": [
+        "Turn Report",
+        "Explain Changes",
+        "Coin & Dues"
+      ],
+      "title": "US-02 Coin ledger walkdown",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [
+        "ledger_explain_changes_story"
+      ],
+      "id": "unrest_causal_walkdown",
+      "scenario_ids": [],
+      "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "status": "manual_review",
+      "summary": "Verify unrest shows explicit positive and negative contributors and that the net change matches the headline surface.",
+      "surfaces": [
+        "Manor State",
+        "Explain Changes",
+        "Unrest & Stability"
+      ],
+      "title": "US-03 Unrest causal walkdown",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [
+        "obligations_split_payment_story"
+      ],
+      "id": "obligations_split_payment",
+      "scenario_ids": [],
+      "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "status": "manual_review",
+      "summary": "Verify current dues, arrears carried in, paid this turn, and unpaid carry all remain distinct by counterparty.",
+      "surfaces": [
+        "Obligations",
+        "Turn Report",
+        "Coin & Dues",
+        "Council Agenda"
+      ],
+      "title": "US-06 to US-08 Obligations and arrears truth",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [
+        "obligations_split_payment_story"
+      ],
+      "id": "arrears_consequences",
+      "scenario_ids": [
+        "uat_arrears_enforcement"
+      ],
+      "source_artifact_relpath": "qa_artifacts/playtest_ops/v0.3.6/story_uat_fixture_pack.json",
+      "status": "automated_pass",
+      "summary": "Arrears enforcement must become visible within the short deterministic run and remain legible on the player-facing surfaces.",
+      "surfaces": [
+        "Council Agenda",
+        "Obligations",
+        "Turn Report",
+        "Unrest & Stability"
+      ],
+      "title": "US-09 Arrears consequences",
+      "verification": "automated"
+    },
+    {
+      "fixture_case_ids": [],
+      "id": "project_completion_effects",
+      "scenario_ids": [],
+      "source_artifact_relpath": null,
+      "status": "manual_review",
+      "summary": "Verify completed projects leave a visible cost and effect trail in both headline and drilldown surfaces.",
+      "surfaces": [
+        "Manor State",
+        "Explain Changes",
+        "Construction"
+      ],
+      "title": "US-35 Project completion effects",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [],
+      "id": "relationship_delta_attribution",
+      "scenario_ids": [],
+      "source_artifact_relpath": null,
+      "status": "manual_review",
+      "summary": "Verify relationship movement is presented as a turn delta with a named cause, not as a repeated total value.",
+      "surfaces": [
+        "Diff Ledger",
+        "Explain Changes",
+        "House Dossier",
+        "Person Card"
+      ],
+      "title": "US-38 to US-40 Relationship delta trust",
+      "verification": "manual_review"
+    },
+    {
+      "fixture_case_ids": [],
+      "id": "provenance_parity",
+      "scenario_ids": [],
+      "source_artifact_relpath": null,
+      "status": "manual_review",
+      "summary": "Verify the UI version, run export, packet metadata, and build info agree on the same release provenance.",
+      "surfaces": [
+        "New Run",
+        "Run Log",
+        "Run export",
+        "Run summary",
+        "docs/BUILD_INFO.json"
+      ],
+      "title": "US-45 Provenance parity",
+      "verification": "manual_review"
+    }
+  ]
 }

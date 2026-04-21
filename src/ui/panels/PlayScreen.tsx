@@ -6,7 +6,9 @@ import {
   BUSHELS_PER_PERSON_PER_YEAR,
   TURN_YEARS
 } from "../../sim/constants";
+import { buildRunProvenanceV1 } from "../../sim/provenance";
 import type { RunState, TurnContext, TurnDecisions } from "../../sim/types";
+import { buildCourtProvisioningSurface } from "../courtProvisioningView";
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
 import {
   buildMarriageWorkflowSurface,
@@ -107,6 +109,7 @@ import {
 } from "../playScreenTheme";
 import { buildIntelSections } from "../intelModel";
 import { CouncilAgendaPanel } from "./CouncilAgendaPanel";
+import { CourtProvisioningPanel } from "./CourtProvisioningPanel";
 import { DebugAccordion } from "./DebugAccordion";
 import { DecisionsPanel } from "./DecisionsPanel";
 import { DiffLedgerPanel } from "./DiffLedgerPanel";
@@ -185,6 +188,7 @@ export function PlayScreen({
   const [activeHouseDossierId, setActiveHouseDossierId] = useState<string | null>(null);
   const [obligationsModalRoute, setObligationsModalRoute] = useState<ObligationsModalRoute | null>(null);
   const [activePersonCardId, setActivePersonCardId] = useState<string | null>(null);
+  const [showCourtProvisioning, setShowCourtProvisioning] = useState(false);
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
@@ -246,8 +250,12 @@ export function PlayScreen({
   const knownHousesMain = showAllKnownHouses ? knownHouses : knownHouses.slice(0, 5);
   const hasMoreKnownHouses = knownHouses.length > 5;
   const intelSections = useMemo(() => buildIntelSections({ state, ctx }), [state, ctx]);
+  const courtProvisioningSurface = useMemo(() => buildCourtProvisioningSurface(ctx.preview_state), [ctx.preview_state]);
   const pricingSurface = useMemo(() => buildEconomyPricingSurface(ctx.preview_state), [ctx.preview_state]);
-  const playtestOpsExportCopy = useMemo(() => buildPlaytestOpsExportCopy(state.run_seed), [state.run_seed]);
+  const playtestOpsExportCopy = useMemo(
+    () => buildPlaytestOpsExportCopy(state.run_seed, buildRunProvenanceV1(state)),
+    [state]
+  );
   const provenanceSurface = useMemo(() => buildRunProvenanceSurface(state), [state]);
   const portfolioContract = useMemo(() => buildPortfolioScopeContract(ctx.preview_state), [ctx.preview_state]);
   const activePortfolioManor = portfolioContract ? selectPortfolioManor(portfolioContract, selectedPortfolioManorId) : null;
@@ -745,6 +753,14 @@ export function PlayScreen({
     setActiveHouseDossierId(null);
   }
 
+  function openCourtProvisioning() {
+    setShowCourtProvisioning(true);
+  }
+
+  function closeCourtProvisioning() {
+    setShowCourtProvisioning(false);
+  }
+
   function updateMarriageWorkflowStatus(updates: Record<string, MarriageWorkflowActionStatus>) {
     setMarriageWorkflowActionStatus((current) => ({
       byKey: {
@@ -1032,7 +1048,7 @@ export function PlayScreen({
         laborRequested={laborRequested}
         manor={m}
         courtDecisionBudget={courtDecisionBudget}
-        courtProvisioningSurface={null}
+        courtProvisioningSurface={courtProvisioningSurface}
         marriageWindow={mw}
         marriageWorkflowActive={marriageWorkflowActive}
         maxLaborShift={ctx.max_labor_shift}
@@ -1040,12 +1056,7 @@ export function PlayScreen({
         obligationsSections={allObligationsSections}
         onExportFullRunJson={onExportFullRunJson}
         onExportRunSummary={onExportRunSummary}
-        onOpenCourtProvisioning={() =>
-          setToast({
-            kind: "ok",
-            message: "Court provisioning details live in the household provisioning table for this lane."
-          })
-        }
+        onOpenCourtProvisioning={openCourtProvisioning}
         onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
         onOpenOutboundMarriage={() =>
@@ -1181,6 +1192,15 @@ export function PlayScreen({
           onJumpToDecisions={jumpToObligationsDecisions}
           sections={visibleObligationsSections}
         />
+      </ModalSheet>
+
+      <ModalSheet
+        onClose={closeCourtProvisioning}
+        open={showCourtProvisioning && courtProvisioningSurface !== null}
+        subtitle={courtProvisioningSurface?.subtitle}
+        title="Court provisioning"
+      >
+        {courtProvisioningSurface ? <CourtProvisioningPanel surface={courtProvisioningSurface} /> : null}
       </ModalSheet>
 
       <ModalSheet onClose={closeReceiptViewer} open={receiptViewerRoute !== null} subtitle={receiptsViewerSubtitleText} title={receiptsViewerTitleText}>

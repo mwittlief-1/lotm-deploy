@@ -1,11 +1,11 @@
-import { PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH } from "./playtestOpsPacket";
-
 export const PLAYABILITY_PRESET_PACK_RELEASE = "v0.3.5" as const;
 export const PLAYABILITY_PRESET_PACK_KIND = "playability_preset_pack_v1" as const;
 export const PLAYABILITY_PRESET_PACK_RELPATH =
   `qa_artifacts/playtest_ops/${PLAYABILITY_PRESET_PACK_RELEASE}/playability_preset_pack.json` as const;
 export const PLAYABILITY_REGRESSION_SEED_PACK_RELPATH =
   "qa_artifacts/economy_balance/v0.3.4/regression_seed_pack.json" as const;
+export const PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH =
+  "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json" as const;
 export const PLAYABILITY_UAT_SCENARIO_PACK_RELPATH =
   "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json" as const;
 
@@ -375,7 +375,7 @@ export function summarizePlayabilityPresetPackContract(): {
     sourcePackCount: PLAYABILITY_SOURCE_PACK_ORDER.length,
     sourceSeedPackRelpaths: [
       PLAYABILITY_REGRESSION_SEED_PACK_RELPATH,
-      PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH,
+      PLAYABILITY_RECEIPT_BUNDLE_SEED_PACK_RELPATH,
       PLAYABILITY_UAT_SCENARIO_PACK_RELPATH
     ]
   };

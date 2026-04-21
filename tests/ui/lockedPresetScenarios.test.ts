@@ -92,10 +92,10 @@ describe("locked preset scenarios", () => {
 
     expect(arrears?.review_expectations.find((entry) => entry.expectation_id === "packet_review:arrears_pressure_builder"))
       .toMatchObject({
-        source_artifact_relpath: "qa_artifacts/playtest_ops/v0.3.4/receipt_bundle_seed_pack.json",
+        source_artifact_relpath: "qa_artifacts/playtest_ops/v0.3.6/receipt_bundle_seed_pack.json",
         surface_ids: ["gameplay_decisions_exports", "turn_report_summary", "receipts_viewer_modal", "diff_ledger_summary"],
         cues: expect.arrayContaining([
-          { cue_id: "ending_bushels_stored", label: "Ending bushels stored", value: "402" },
+          { cue_id: "ending_bushels_stored", label: "Ending bushels stored", value: "160" },
           { cue_id: "ending_unrest", label: "Ending unrest", value: "52" }
         ])
       });

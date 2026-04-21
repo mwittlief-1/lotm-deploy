@@ -1270,6 +1270,19 @@ export interface TurnLogEntry {
   deltas: Record<string, number>;
 }
 
+export interface RunProvenanceV1 {
+  schema_version: "run_provenance_v1";
+  ui_app_version: string;
+  run_app_version: string;
+  build_info_app_version: string | null;
+  sim_version: SimVersion;
+  code_fingerprint: string | null;
+  build_time_utc: string | null;
+  created_at_utc: string | null;
+  version_match: boolean;
+  notes: string | null;
+}
+
 export interface RunSummaryExport {
   seed: string;
   app_version: string;

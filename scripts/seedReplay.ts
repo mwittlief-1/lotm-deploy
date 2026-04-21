@@ -5,6 +5,7 @@ import path from "node:path";
 import { buildRunSummary } from "../src/sim/exports";
 import { createNewRun, proposeTurn, applyDecisions } from "../src/sim/index";
 import { canonicalizePolicyId, decide, sanitizePolicyIdForArtifacts, type PolicyId } from "../src/sim/policies";
+import { buildRunProvenanceV1 } from "../src/sim/provenance";
 import type { RunState, TurnLogEntry } from "../src/sim/types";
 import { APP_VERSION } from "../src/version";
 import { defaultReplayOutdir, runArtifactPath, summaryArtifactPath, writeStableArtifact } from "./seed_replay/artifactWriter";
@@ -218,6 +219,7 @@ async function main() {
         turns_played: finalState.turn_index,
         final_signature: finalSignature,
         final_summary: buildRunSummary(finalState),
+        run_provenance_v1: buildRunProvenanceV1(finalState),
         baseline_expected_signature: baselineExpected,
         baseline_match: baselineExpected ? stableStringify(baselineExpected) === stableStringify(finalSignature) : null,
         turn_trace: trace
@@ -243,6 +245,7 @@ async function main() {
     app_version: buildInfo?.app_version ?? APP_VERSION,
     sim_version: buildInfo?.sim_version ?? null,
     code_fingerprint: buildInfo?.code_fingerprint ?? "",
+    run_provenance_v1: buildRunProvenanceV1(),
     mode,
     turns: plan.turns,
     seed_source: plan.seedSource,

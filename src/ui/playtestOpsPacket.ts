@@ -1,13 +1,14 @@
 import { APP_VERSION } from "../version";
+import type { RunProvenanceV1 } from "../sim/types";
 import type { PlaytestOpsSurfaceId } from "./playtestOpsInventory";
 
-export const PLAYTEST_OPS_PACKET_RELEASE = "v0.3.4" as const;
+export const PLAYTEST_OPS_PACKET_RELEASE = APP_VERSION;
 export const PLAYTEST_OPS_PACKET_SCHEMA_VERSION = "playtest_ops_receipt_bundle_v1" as const;
-export const PLAYTEST_OPS_PACKET_ARCHIVE_PREFIX = `lotm_${PLAYTEST_OPS_PACKET_RELEASE}_playtest_receipt_bundle` as const;
-export const PLAYTEST_OPS_PACKET_ROOT_DIR = `qa_artifacts/playtest_ops/${PLAYTEST_OPS_PACKET_RELEASE}/receipt_bundles` as const;
-export const PLAYTEST_OPS_PACKET_DOC_RELPATH = `docs/ux/${PLAYTEST_OPS_PACKET_RELEASE}_playtest_receipt_bundle_conventions.md` as const;
-export const PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH = `qa_artifacts/playtest_ops/${PLAYTEST_OPS_PACKET_RELEASE}/receipt_bundle_seed_pack.json` as const;
-export const PLAYTEST_OPS_PACKET_REPLAY_SUMMARY_RELPATH = "qa_artifacts/seed_replay/v0.2.9/batch/turns_15/summary.json" as const;
+export const PLAYTEST_OPS_PACKET_ARCHIVE_PREFIX = `lotm_${PLAYTEST_OPS_PACKET_RELEASE}_playtest_receipt_bundle`;
+export const PLAYTEST_OPS_PACKET_ROOT_DIR = `qa_artifacts/playtest_ops/${PLAYTEST_OPS_PACKET_RELEASE}/receipt_bundles`;
+export const PLAYTEST_OPS_PACKET_DOC_RELPATH = `docs/ux/${PLAYTEST_OPS_PACKET_RELEASE}_playtest_receipt_bundle_conventions.md`;
+export const PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH = `qa_artifacts/playtest_ops/${PLAYTEST_OPS_PACKET_RELEASE}/receipt_bundle_seed_pack.json`;
+export const PLAYTEST_OPS_PACKET_REPLAY_SUMMARY_RELPATH = `qa_artifacts/seed_replay/${PLAYTEST_OPS_PACKET_RELEASE}/batch/turns_15/summary.json`;
 
 export const PLAYTEST_OPS_PACKET_ARTIFACT_ORDER = [
   "run_summary_json",
@@ -20,6 +21,7 @@ export const PLAYTEST_OPS_PACKET_ARTIFACT_ORDER = [
 
 export type PlaytestOpsPacketArtifactId = (typeof PLAYTEST_OPS_PACKET_ARTIFACT_ORDER)[number];
 export type PlaytestOpsPacketArtifactSource = "ui_export" | "manual_capture" | "qa_reference";
+export type PlaytestOpsPacketVersionStatus = "aligned" | "mismatch";
 
 export type PlaytestOpsPacketArtifact = {
   expectedFilename: string | null;
@@ -29,6 +31,18 @@ export type PlaytestOpsPacketArtifact = {
   source: PlaytestOpsPacketArtifactSource;
   sourceSurfaceId: PlaytestOpsSurfaceId | null;
   summary: string;
+};
+
+export type PlaytestOpsPacketMetadataV1 = {
+  schema_version: "playtest_ops_packet_metadata_v1";
+  packet_release: string;
+  summary_filename: string;
+  full_run_filename: string;
+  replay_summary_relpath: string;
+  seed_pack_relpath: string;
+  doc_relpath: string;
+  run_provenance_v1: RunProvenanceV1;
+  version_status: PlaytestOpsPacketVersionStatus;
 };
 
 function normalizePacketSegment(value: string): string {
@@ -59,6 +73,23 @@ export function formatPlaytestOpsPacketArchiveName(args: { policy: string; scena
     normalizePacketSegment(args.policy),
     normalizePacketSegment(args.seed)
   ].join("_") + ".zip";
+}
+
+export function buildPlaytestOpsPacketMetadata(args: {
+  seed: string;
+  runProvenanceV1: RunProvenanceV1;
+}): PlaytestOpsPacketMetadataV1 {
+  return {
+    schema_version: "playtest_ops_packet_metadata_v1",
+    packet_release: PLAYTEST_OPS_PACKET_RELEASE,
+    summary_filename: formatPlaytestOpsExportFilename("run_summary_json", args.seed),
+    full_run_filename: formatPlaytestOpsExportFilename("full_run_json", args.seed),
+    replay_summary_relpath: PLAYTEST_OPS_PACKET_REPLAY_SUMMARY_RELPATH,
+    seed_pack_relpath: PLAYTEST_OPS_PACKET_SEED_PACK_RELPATH,
+    doc_relpath: PLAYTEST_OPS_PACKET_DOC_RELPATH,
+    run_provenance_v1: args.runProvenanceV1,
+    version_status: args.runProvenanceV1.version_match ? "aligned" : "mismatch"
+  };
 }
 
 export function listPlaytestOpsPacketArtifacts(seed: string): PlaytestOpsPacketArtifact[] {
