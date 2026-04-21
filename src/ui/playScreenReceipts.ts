@@ -29,9 +29,19 @@ export type GroupedReceiptSection = {
   id: ReceiptViewerFocus;
   title: string;
   helper: string;
+  auditRows: GroupedReceiptAuditRow[];
   highlights: ReceiptHighlight[];
   walkdownRows: Array<{ amountLabel: string; id: string; label: string; summary: string }>;
   receipts: ReceiptLine[];
+};
+
+export type GroupedReceiptAuditRow = {
+  detail: string;
+  id: string;
+  label: string;
+  receiptLabel: string;
+  statusLabel: string;
+  walkdownLabel: string;
 };
 
 export type ReceiptLine = {
@@ -181,6 +191,10 @@ function formatReceiptDelta(delta: number): string {
   return delta > 0 ? `+${delta}` : `${delta}`;
 }
 
+function formatAuditAmount(amount: number, unitLabel: string): string {
+  return `${amount} ${unitLabel}`;
+}
+
 function buildStructuredReceiptLine(receipt: FiscalReceiptRow): string {
   const summary = typeof receipt.summary === "string" ? receipt.summary.trim() : "";
   if (summary) return summary;
@@ -270,6 +284,96 @@ function walkdownRowsForMetric(turnExplanation: TurnExplanationV1 | null | undef
   }));
 }
 
+function walkdownAmount(turnExplanation: TurnExplanationV1 | null | undefined, metric: "food" | "coin", rowId: string): number | null {
+  const walkdown = metric === "food" ? turnExplanation?.food_walkdown : turnExplanation?.coin_walkdown;
+  const row = walkdown?.rows.find((candidate) => candidate.id === rowId) ?? null;
+  return row ? Math.max(0, Math.trunc(row.amount)) : null;
+}
+
+function sumStructuredReceiptOutflow(
+  rawPhases: readonly RawReceiptPhase[],
+  predicate: (receipt: ReceiptLine) => boolean
+): number {
+  let total = 0;
+  for (const phase of rawPhases) {
+    for (const receipt of phase.receipts) {
+      if (!receipt.structured || !predicate(receipt)) continue;
+      if (receipt.structured.delta < 0) total += Math.abs(receipt.structured.delta);
+    }
+  }
+  return total;
+}
+
+function isConsumptionReceipt(receipt: ReceiptLine, asset: string): boolean {
+  if (!receipt.structured) return false;
+  const category = receipt.structured.category.toLowerCase();
+  const rule = receipt.structured.ruleLabel.toLowerCase();
+  return receipt.phase === "consumption" && receipt.structured.asset === asset && (category.includes("consumption") || rule.includes("consumption"));
+}
+
+function isMaintenanceReceipt(receipt: ReceiptLine): boolean {
+  if (!receipt.structured) return false;
+  const category = receipt.structured.category.toLowerCase();
+  const summary = receipt.structured.summary.toLowerCase();
+  const rule = receipt.structured.ruleLabel.toLowerCase();
+  return receipt.structured.asset === "coin" && (category.includes("maintenance") || summary.includes("upkeep") || rule.includes("maintenance"));
+}
+
+function auditRowsForMetric(
+  rawPhases: readonly RawReceiptPhase[],
+  turnExplanation: TurnExplanationV1 | null | undefined,
+  metric: ReceiptViewerFocus
+): GroupedReceiptAuditRow[] {
+  if (metric === "food") {
+    const foodReceiptAmount = sumStructuredReceiptOutflow(rawPhases, (receipt) => isConsumptionReceipt(receipt, "food_stores"));
+    const meatReceiptAmount = sumStructuredReceiptOutflow(rawPhases, (receipt) => isConsumptionReceipt(receipt, "meat_stores"));
+    const foodWalkdownAmount = walkdownAmount(turnExplanation, "food", "food_consumption");
+    if (foodReceiptAmount === 0 && meatReceiptAmount === 0 && foodWalkdownAmount === null) return [];
+    const receiptLabel = formatAuditAmount(foodReceiptAmount, "food");
+    const walkdownLabel = foodWalkdownAmount === null ? "No food walkdown row" : formatAuditAmount(foodWalkdownAmount, "food walkdown");
+    const statusLabel =
+      foodReceiptAmount > 0
+        ? foodWalkdownAmount === null || foodReceiptAmount === foodWalkdownAmount
+          ? "Reconciled"
+          : "Needs reconciliation"
+        : "Walkdown only";
+    return [
+      {
+        detail:
+          foodReceiptAmount === 0
+            ? "No structured food consumption receipt was recorded; this audit row is anchored to the ordered food walkdown."
+            : meatReceiptAmount > 0
+            ? `${meatReceiptAmount} meat also moved through structured consumption receipts; meat is tracked separately from the bushel walkdown.`
+            : "No structured meat consumption receipt was recorded; meat remains passive stock unless a receipt exists.",
+        id: "food_consumption_audit",
+        label: "Consumption receipt audit",
+        receiptLabel,
+        statusLabel,
+        walkdownLabel
+      }
+    ];
+  }
+
+  if (metric === "coin") {
+    const maintenanceReceiptAmount = sumStructuredReceiptOutflow(rawPhases, isMaintenanceReceipt);
+    const maintenanceWalkdownAmount = walkdownAmount(turnExplanation, "coin", "coin_maintenance");
+    if (maintenanceReceiptAmount === 0 && maintenanceWalkdownAmount === null) return [];
+    const reconciled = maintenanceWalkdownAmount === null || maintenanceReceiptAmount === maintenanceWalkdownAmount;
+    return [
+      {
+        detail: "Only structured maintenance or upkeep coin receipts count as ledger-paid upkeep here.",
+        id: "coin_maintenance_audit",
+        label: "Maintenance receipt audit",
+        receiptLabel: formatAuditAmount(maintenanceReceiptAmount, "coin"),
+        statusLabel: reconciled ? "Reconciled" : "Needs reconciliation",
+        walkdownLabel: maintenanceWalkdownAmount === null ? "No coin maintenance walkdown row" : formatAuditAmount(maintenanceWalkdownAmount, "coin walkdown")
+      }
+    ];
+  }
+
+  return [];
+}
+
 export function buildReceiptViewerData(args: {
   diffLedgerItems: LedgerItem[];
   obligationsContract?: ObligationsCounterpartyContract | null;
@@ -303,6 +407,7 @@ export function buildReceiptViewerData(args: {
     {
       id: "overview",
       ...GROUPED_SECTION_META.overview,
+      auditRows: [],
       highlights: diffLedgerItems.map((item) => ({
         id: item.id,
         primary: item.primary,
@@ -315,6 +420,7 @@ export function buildReceiptViewerData(args: {
     {
       id: "food",
       ...GROUPED_SECTION_META.food,
+      auditRows: auditRowsForMetric(rawPhases, turnExplanation, "food"),
       highlights: highlightForMetric(diffLedgerItems, "food"),
       walkdownRows: walkdownRowsForMetric(turnExplanation, "food"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("food")))
@@ -322,6 +428,7 @@ export function buildReceiptViewerData(args: {
     {
       id: "coin",
       ...GROUPED_SECTION_META.coin,
+      auditRows: auditRowsForMetric(rawPhases, turnExplanation, "coin"),
       highlights: highlightForMetric(diffLedgerItems, "coin"),
       walkdownRows: walkdownRowsForMetric(turnExplanation, "coin"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("coin")))
@@ -329,6 +436,7 @@ export function buildReceiptViewerData(args: {
     {
       id: "unrest",
       ...GROUPED_SECTION_META.unrest,
+      auditRows: [],
       highlights: highlightForMetric(diffLedgerItems, "unrest"),
       walkdownRows: walkdownRowsForMetric(turnExplanation, "unrest"),
       receipts: rawPhases.flatMap((phase) => phase.receipts.filter((receipt) => receipt.tags.includes("unrest")))

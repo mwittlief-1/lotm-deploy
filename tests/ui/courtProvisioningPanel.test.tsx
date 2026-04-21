@@ -19,6 +19,32 @@ function createSurface(): CourtProvisioningSurface {
         statusLabel: "Shortfall"
       }
     ],
+    consumptionAudit: {
+      reconciled: true,
+      rows: [
+        {
+          detail: "Peasant demand comes from the resolved turn report and is part of the same bushel total used by the food walkdown.",
+          demandLabel: "12 food / 0 meat",
+          groupId: "peasant_household",
+          groupLabel: "Peasant household",
+          ledgerLabel: "12 food / 0 meat",
+          meatTruthLabel: "No peasant meat spend is tracked in the live turn ledger."
+        },
+        {
+          detail: "Court food spend comes from the resolved turn report. Meat remains passive provisioning allocation in v0.3.6, not a separate live spend loop.",
+          demandLabel: "3 food / 1 passive meat requested",
+          groupId: "court_provisioning",
+          groupLabel: "Court provisioning",
+          ledgerLabel: "3 food / 0 meat",
+          meatTruthLabel: "0 passive meat allocated by the provisioning view."
+        }
+      ],
+      statusLabel: "Reconciled",
+      summary: "Consumption detail totals 15 bushels against the food walkdown consumption row of 15 bushels.",
+      totalLedgerFoodLabel: "15 food",
+      totalLedgerMeatLabel: "0 meat ledger-spent",
+      walkdownLabel: "15 food walkdown"
+    },
     debugEntryRows: [
       {
         activeSeatSummary: "None",
@@ -150,6 +176,11 @@ describe("CourtProvisioningPanel", () => {
     expect(html).toContain("Ration policy");
     expect(html).toContain("Rationing is read-only in v0.3.6");
     expect(html).toContain("Household consumption &amp; provisioning");
+    expect(html).toContain("Consumption ledger audit");
+    expect(html).toContain("Consumption detail totals 15 bushels");
+    expect(html).toContain("Peasant household");
+    expect(html).toContain("Court provisioning");
+    expect(html).toContain("3 food / 0 meat");
     expect(html).toContain("3 food / 0 meat");
     expect(html).toContain("Overrides &amp; carry-forward");
     expect(html).toContain("Stipend table");

@@ -261,6 +261,40 @@ export function ReceiptsViewerPanel({
                 </div>
               ) : null}
 
+              {section.auditRows.length ? (
+                <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Audit detail</div>
+                  {section.auditRows.map((row) => (
+                    <div
+                      data-receipts-audit-row={row.id}
+                      key={row.id}
+                      style={{
+                        padding: 10,
+                        borderRadius: 12,
+                        background: "#fff",
+                        border: "1px solid rgba(172, 143, 100, 0.24)"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline", flexWrap: "wrap" }}>
+                        <div style={{ fontWeight: 700 }}>{row.label}</div>
+                        <div style={{ fontSize: 11, opacity: 0.72 }}>{row.statusLabel}</div>
+                      </div>
+                      <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", marginTop: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Receipts</div>
+                          <div style={{ marginTop: 4 }}>{row.receiptLabel}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, letterSpacing: 0.4, opacity: 0.66, textTransform: "uppercase" }}>Walkdown</div>
+                          <div style={{ marginTop: 4 }}>{row.walkdownLabel}</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 12, opacity: 0.82, marginTop: 8 }}>{row.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
               {section.highlights.length ? (
                 <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
                   {section.highlights.map((highlight) => (

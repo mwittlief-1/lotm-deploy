@@ -183,6 +183,54 @@ const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
   }
 ];
 
+const MAINTENANCE_PHASE_RESULTS: PhaseResultV0[] = [
+  PHASE_RESULTS[0]!,
+  PHASE_RESULTS[1]!,
+  {
+    phase: "events",
+    receipts: [],
+    fiscal_receipts_v1: [
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:events:p6:coin:0001",
+        turn: 7,
+        phase: "events",
+        phase_sequence: 6,
+        category: "expense.maintenance",
+        counterparty_kind: "self",
+        counterparty_id: "maintenance:right:franchise:bridge_or_crossing_revenue",
+        counterparty_label: "Bridge & crossing revenue",
+        asset: "coin",
+        delta: -1,
+        balance_after: 8,
+        summary: "Bridge & crossing revenue recurring upkeep charged.",
+        rule_id: "maintenance.right.franchise.bridge_or_crossing_revenue",
+        related_actor_ids: ["p_head"]
+      },
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:events:p6:coin:0002",
+        turn: 7,
+        phase: "events",
+        phase_sequence: 6,
+        category: "expense.maintenance",
+        counterparty_kind: "self",
+        counterparty_id: "maintenance:right:franchise:market_right",
+        counterparty_label: "Market right",
+        asset: "coin",
+        delta: -3,
+        balance_after: 5,
+        summary: "Market right recurring upkeep charged.",
+        rule_id: "maintenance.right.franchise.market_right",
+        related_actor_ids: ["p_head"]
+      }
+    ],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  }
+];
+
 const MAINTENANCE_TURN_EXPLANATION = {
   food_walkdown: {
     rows: [
@@ -417,7 +465,7 @@ describe("playScreenReceipts", () => {
         }
       ],
       obligationsContract: OBLIGATIONS_CONTRACT,
-      phaseResults: PHASE_RESULTS,
+      phaseResults: MAINTENANCE_PHASE_RESULTS,
       turnExplanation: MAINTENANCE_TURN_EXPLANATION
     });
 
@@ -455,6 +503,16 @@ describe("playScreenReceipts", () => {
         label: "Recurring upkeep",
         amountLabel: "-4 coin",
         summary: "Bridge & crossing revenue and Market right required 4 coin of upkeep this turn."
+      }
+    ]);
+    expect(data.groupedSections.find((section) => section.id === "coin")?.auditRows).toEqual([
+      {
+        detail: "Only structured maintenance or upkeep coin receipts count as ledger-paid upkeep here.",
+        id: "coin_maintenance_audit",
+        label: "Maintenance receipt audit",
+        receiptLabel: "4 coin",
+        statusLabel: "Reconciled",
+        walkdownLabel: "4 coin walkdown"
       }
     ]);
   });

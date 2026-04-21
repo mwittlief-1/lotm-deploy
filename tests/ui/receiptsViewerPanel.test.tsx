@@ -34,6 +34,49 @@ const PHASE_RESULTS: PhaseResultV0[] = [
 
 const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
   {
+    phase: "consumption",
+    receipts: [],
+    fiscal_receipts_v1: [
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:consumption:p3:food_stores:0001",
+        turn: 7,
+        phase: "consumption",
+        phase_sequence: 3,
+        category: "consumption.household_rations",
+        counterparty_kind: "household",
+        counterparty_id: "manor:household",
+        counterparty_label: "Household",
+        asset: "food_stores",
+        delta: -18,
+        balance_after: 25,
+        summary: "Consumption drained food stores for Household rations.",
+        rule_id: "consumption.food_stores",
+        related_actor_ids: ["p_head"]
+      },
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:consumption:p3:meat_stores:0002",
+        turn: 7,
+        phase: "consumption",
+        phase_sequence: 3,
+        category: "consumption.household_rations",
+        counterparty_kind: "household",
+        counterparty_id: "manor:household",
+        counterparty_label: "Household",
+        asset: "meat_stores",
+        delta: -2,
+        balance_after: 3,
+        summary: "Consumption drained meat stores for Household rations.",
+        rule_id: "consumption.meat_stores",
+        related_actor_ids: ["p_head"]
+      }
+    ],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  },
+  {
     phase: "obligations",
     receipts: [{ kind: "summary", line: "Legacy obligation receipt that should stay hidden when structured rows are present." }],
     fiscal_receipts_v1: [
@@ -53,6 +96,32 @@ const STRUCTURED_PHASE_RESULTS: PhaseResultV0[] = [
         summary: "Sent a coin gift to House Liege.",
         rule_id: "obligations.liege_gift",
         related_actor_ids: ["p_head", "p_liege"]
+      }
+    ],
+    log_events: [],
+    evidence_events_v0: [],
+    rng_keys_used: []
+  },
+  {
+    phase: "events",
+    receipts: [],
+    fiscal_receipts_v1: [
+      {
+        schema_version: "fiscal_receipt_v1",
+        receipt_id: "ledger:t7:events:p6:coin:0003",
+        turn: 7,
+        phase: "events",
+        phase_sequence: 6,
+        category: "expense.maintenance",
+        counterparty_kind: "self",
+        counterparty_id: "maintenance:building:granary_upgrade",
+        counterparty_label: "Granary Upgrade",
+        asset: "coin",
+        delta: -2,
+        balance_after: 6,
+        summary: "Granary Upgrade recurring upkeep charged.",
+        rule_id: "maintenance.building.granary_upgrade",
+        related_actor_ids: ["p_head"]
       }
     ],
     log_events: [],
@@ -280,6 +349,15 @@ describe("ReceiptsViewerPanel", () => {
     );
 
     expect(markup).toContain("Walkdown");
+    expect(markup).toContain("Audit detail");
+    expect(markup).toContain("Consumption receipt audit");
+    expect(markup).toContain("Maintenance receipt audit");
+    expect(markup).toContain("18 food");
+    expect(markup).toContain("18 food walkdown");
+    expect(markup).toContain("2 coin");
+    expect(markup).toContain("2 coin walkdown");
+    expect(markup).toContain("2 meat also moved through structured consumption receipts");
+    expect(markup).toContain("Reconciled");
     expect(markup).toContain("Dues and tithe");
     expect(markup).toContain("-6 bushels");
     expect(markup).toContain("6 bushels left stores to cover dues or arrears.");

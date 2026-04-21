@@ -112,7 +112,15 @@ export type ObligationsContractTerminalRisk = {
   summary: string;
 };
 
+export type ObligationsContractDetailFact = {
+  detail: string;
+  label: string;
+  value: string;
+};
+
 export type ObligationsCounterpartyContractSection = {
+  consequenceFacts: ObligationsContractDetailFact[];
+  detailFacts: ObligationsContractDetailFact[];
   dueGroup: ObligationsContractGroup;
   gestureGroup: ObligationsContractGestureGroup;
   helper: string;
@@ -159,6 +167,11 @@ type ParsedObligationsViewSummary = {
   supportedPaymentModes: string[];
   tangibleBitePreview: Record<string, unknown> | null;
   terminalRisk: Record<string, unknown> | null;
+  totalOutstanding: number;
+  relationshipDelta: {
+    respect: number;
+    threat: number;
+  };
 };
 
 const COUNTERPARTY_META: Record<
@@ -226,6 +239,10 @@ function readStage(value: unknown): number | null {
 function formatAmount(amount: number, counterpartyId: ObligationsCounterpartyId): string {
   if (counterpartyId === "liege") return `${amount} coin`;
   return `${amount} ${amount === 1 ? "bushel" : "bushels"}`;
+}
+
+function formatSigned(value: number): string {
+  return value > 0 ? `+${value}` : `${value}`;
 }
 
 function gestureActionId(counterpartyId: ObligationsCounterpartyId): "gift_liege" | "offering_church" {
@@ -351,12 +368,110 @@ function receiptGroupRows(summary: ParsedObligationsViewSummary): ObligationsCon
     .filter((group): group is ObligationsContractReceiptGroup => group !== null);
 }
 
+function paidThisTurnAmount(summary: ParsedObligationsViewSummary): number {
+  let total = 0;
+  for (const group of summary.receiptGroups) {
+    const groupRecord = asRecord(group);
+    if (readString(groupRecord?.group_kind) !== "payment") continue;
+    const receipts = Array.isArray(groupRecord?.receipts) ? groupRecord.receipts : [];
+    for (const receipt of receipts) {
+      const receiptRecord = asRecord(receipt);
+      const delta = readNumber(receiptRecord?.delta) ?? 0;
+      if (delta < 0) total += Math.abs(delta);
+    }
+  }
+  return total;
+}
+
 function paymentModes(summary: ParsedObligationsViewSummary): ObligationsContractPaymentModes {
   return {
     acceptedLabels: summary.acceptedPaymentModes.map((mode) => obligationGesturePaymentModeLabel(mode as ObligationsGesturePaymentMode)),
     preferredLabel: obligationGesturePaymentModeLabel((summary.preferredPaymentMode ?? "none") as ObligationsGesturePaymentMode),
     supportedLabels: summary.supportedPaymentModes.map((mode) => obligationGesturePaymentModeLabel(mode as ObligationsGesturePaymentMode))
   };
+}
+
+function collectorStatusFact(summary: ParsedObligationsViewSummary): ObligationsContractDetailFact {
+  if (summary.collectorState === "successor") {
+    return {
+      label: "Collector",
+      value: `Successor: ${summary.collectorSuccessorLabel ?? summary.counterpartyLabel}`,
+      detail: summary.collectorSummary ?? "Dues have rebased to the current successor collector."
+    };
+  }
+  if (summary.collectorState === "vacant") {
+    return {
+      label: "Collector",
+      value: summary.collectorSuccessorLabel ? `Vacant: ${summary.collectorSuccessorLabel}` : "Vacant",
+      detail: summary.collectorSummary ?? "No living collector is active; dues remain with the institution until succession is resolved."
+    };
+  }
+  return {
+    label: "Collector",
+    value: `Active: ${summary.counterpartyLabel}`,
+    detail: summary.collectorSummary ?? "This is the active collector used by the obligations contract."
+  };
+}
+
+function detailFacts(summary: ParsedObligationsViewSummary): ObligationsContractDetailFact[] {
+  return [
+    collectorStatusFact(summary),
+    {
+      label: "Current due",
+      value: formatAmount(summary.dueAmount, summary.counterpartyKind),
+      detail: summary.dueAmount > 0 ? summary.settlementSummary : "No current due remains in the v2 obligations snapshot."
+    },
+    {
+      label: "Arrears carried in",
+      value: formatAmount(summary.arrearsAmount, summary.counterpartyKind),
+      detail: summary.carriedThisTurn
+        ? "Arrears carried in this resolved turn and are visible in the penalty trail."
+        : "No arrears carry was recorded for this counterparty this turn."
+    },
+    {
+      label: "Paid this turn",
+      value: formatAmount(paidThisTurnAmount(summary), summary.counterpartyKind),
+      detail: "Summed from this counterparty's v2 payment receipt group."
+    },
+    {
+      label: "Unpaid carried out",
+      value: formatAmount(summary.totalOutstanding, summary.counterpartyKind),
+      detail: "Current due plus arrears still open in the v2 obligations snapshot."
+    }
+  ];
+}
+
+function consequenceFacts(summary: ParsedObligationsViewSummary): ObligationsContractDetailFact[] {
+  const facts: ObligationsContractDetailFact[] = [
+    {
+      label: "Enforcement consequence",
+      value: enforcementStageLabel(summary),
+      detail: summary.enforcementSummary
+    },
+    {
+      label: "Relationship pressure",
+      value: `Respect ${formatSigned(summary.relationshipDelta.respect)}, threat ${formatSigned(summary.relationshipDelta.threat)}`,
+      detail:
+        summary.relationshipDelta.respect !== 0 || summary.relationshipDelta.threat !== 0
+          ? "Relationship deltas are sourced from the v2 obligation penalty summary."
+          : "No relationship pressure was recorded for this counterparty."
+    },
+    {
+      label: "Terminal risk",
+      value: terminalRisk(summary).statusLabel,
+      detail: terminalRisk(summary).summary
+    }
+  ];
+
+  if (summary.collectorState !== "active") {
+    facts.push({
+      label: "Succession or vacancy",
+      value: summary.collectorState === "successor" ? "Successor collector" : "Vacancy",
+      detail: summary.collectorSummary ?? "Collector state is sourced from the accepted obligations view."
+    });
+  }
+
+  return facts;
 }
 
 function stageRows(summary: ParsedObligationsViewSummary): ObligationsContractStageRow[] {
@@ -486,7 +601,12 @@ function parseSummaryByCounterparty(previewState: RunState): Map<ObligationsCoun
       settledThisTurn: readBoolean(summary.settled_this_turn),
       supportedPaymentModes: readStringArray(summary.supported_payment_modes),
       tangibleBitePreview: asRecord(summary.tangible_bite_preview),
-      terminalRisk: asRecord(summary.terminal_risk)
+      terminalRisk: asRecord(summary.terminal_risk),
+      totalOutstanding: readNumber(summary.total_outstanding) ?? 0,
+      relationshipDelta: {
+        respect: readNumber(asRecord(summary.relationship_delta)?.respect) ?? 0,
+        threat: readNumber(asRecord(summary.relationship_delta)?.threat) ?? 0
+      }
     });
   }
 
@@ -524,6 +644,8 @@ export function buildObligationsCounterpartyContract(args: {
       helper: summary.collectorState === "active" ? meta.helper : summary.collectorSummary ?? meta.helper,
       paymentModes: paymentModes(summary),
       settlementStatus: summary.settlementStatus,
+      detailFacts: detailFacts(summary),
+      consequenceFacts: consequenceFacts(summary),
       stageRows: stageRows(summary),
       receiptCategoryOrder: [...meta.receiptCategoryOrder],
       receiptGroups: receiptGroupRows(summary),

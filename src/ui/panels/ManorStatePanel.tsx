@@ -70,6 +70,54 @@ function unrestCauseLists(
   return fallback;
 }
 
+type MaintenanceLaborAuditRow = {
+  detail: string;
+  id: string;
+  label: string;
+  laborLabel: string;
+};
+
+type MaintenanceLaborAudit = {
+  rows: MaintenanceLaborAuditRow[];
+  summary: string;
+};
+
+function readText(value: unknown): string {
+  return typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
+}
+
+function readWholeNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function maintenanceLaborAudit(report: any): MaintenanceLaborAudit | null {
+  const pressure = report?.maintenance_labor_pressure;
+  if (!pressure || typeof pressure !== "object" || !Array.isArray(pressure.entries) || pressure.entries.length === 0) return null;
+
+  const requiredAfterDelegation = readWholeNumber(pressure.required_labor_after_delegation);
+  const appliedDrag = readWholeNumber(pressure.applied_drag);
+  const unmetLabor = readWholeNumber(pressure.unmet_labor);
+  const delegated = Boolean(pressure.delegated);
+  const rows = pressure.entries
+    .map((entry: any, index: number): MaintenanceLaborAuditRow => {
+      const key = readText(entry?.maintenance_key) || `maintenance_entry_${index + 1}`;
+      const sourceKind = readText(entry?.source_kind) || "custom";
+      const laborRequired = readWholeNumber(entry?.labor_required);
+      return {
+        detail: `${sourceKind.replace(/_/g, " ")} source from the maintenance labor pressure registry.`,
+        id: key,
+        label: readText(entry?.label) || key,
+        laborLabel: `${laborRequired} labor requested`
+      };
+    })
+    .sort((left, right) => left.id.localeCompare(right.id) || left.label.localeCompare(right.label));
+
+  return {
+    rows,
+    summary: `${appliedDrag} of ${requiredAfterDelegation} upkeep labor applied${delegated ? " after delegation" : ""}${unmetLabor > 0 ? `; ${unmetLabor} unmet` : ""}.`
+  };
+}
+
 export function ManorStatePanel({
   anchorUnrest,
   buildRatePerBuilderPerTurn,
@@ -103,8 +151,10 @@ export function ManorStatePanel({
   const biggestFoodRow = biggestWalkdownRow(foodWalkdown);
   const biggestCoinRow = biggestWalkdownRow(coinWalkdown);
   const biggestUnrestRow = biggestWalkdownRow(unrestWalkdown);
+  const maintenanceCoinWalkdownRow = coinWalkdown?.rows.find((row) => row.id === "coin_maintenance") ?? null;
+  const maintenanceLaborDetail = maintenanceLaborAudit(report);
   const maintenanceLaborDrag = Number(report?.maintenance_labor_pressure?.applied_drag ?? 0);
-  const maintenanceLaborApplied = Number(report?.maintenance_labor_pressure?.applied ?? 0);
+  const maintenanceLaborApplied = Number(report?.maintenance_labor_pressure?.applied ?? report?.maintenance_labor_pressure?.applied_drag ?? 0);
   const placeholderCatalogCount = pricingSurface?.catalogLines.filter((line) => line.includes("(placeholder)")).length ?? 0;
 
   return (
@@ -232,6 +282,21 @@ export function ManorStatePanel({
               {placeholderCatalogCount > 0
                 ? ` ${placeholderCatalogCount} catalog line${placeholderCatalogCount === 1 ? "" : "s"} still read as placeholder references, not live actions from this screen.`
                 : " All shown catalog lines are active references."}
+            </div>
+          ) : null}
+          {maintenanceCoinWalkdownRow ? (
+            <div style={{ marginTop: 8, fontSize: 12, opacity: 0.78 }}>
+              Coin walkdown: {maintenanceCoinWalkdownRow.amount} coin. {maintenanceCoinWalkdownRow.summary}
+            </div>
+          ) : null}
+          {maintenanceLaborDetail ? (
+            <div data-maintenance-labor-audit="true" style={{ marginTop: 8, display: "grid", gap: 6 }}>
+              <div style={{ fontSize: 12, opacity: 0.82 }}>{maintenanceLaborDetail.summary}</div>
+              {maintenanceLaborDetail.rows.map((row) => (
+                <div key={row.id} style={{ fontSize: 12, opacity: 0.78 }}>
+                  <b>{row.label}</b>: {row.laborLabel}. {row.detail}
+                </div>
+              ))}
             </div>
           ) : null}
         </div>

@@ -70,6 +70,53 @@ export function CourtProvisioningPanel({
             </div>
           </div>
 
+          {surface.consumptionAudit ? (
+            <div data-court-consumption-ledger-audit={surface.consumptionAudit.statusLabel} style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+                <div>
+                  <div style={PLAY_SCREEN_EYEBROW_STYLE}>Consumption ledger audit</div>
+                  <div style={{ marginTop: 6, fontWeight: 700 }}>{surface.consumptionAudit.statusLabel}</div>
+                </div>
+                <div style={{ fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted }}>
+                  {surface.consumptionAudit.totalLedgerFoodLabel} · {surface.consumptionAudit.totalLedgerMeatLabel}
+                </div>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
+                {surface.consumptionAudit.summary}
+              </div>
+              <div style={{ overflowX: "auto", marginTop: 12 }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Group</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Demand</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Ledger spend</th>
+                      <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Meat truth</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {surface.consumptionAudit.rows.map((row) => (
+                      <tr key={row.groupId}>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                          <div style={{ fontWeight: 700 }}>{row.groupLabel}</div>
+                          <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.detail}</div>
+                        </td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>{row.demandLabel}</td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>{row.ledgerLabel}</td>
+                        <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0", color: PLAY_SCREEN_THEME.inkMuted }}>
+                          {row.meatTruthLabel}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted }}>
+                Walkdown check: {surface.consumptionAudit.walkdownLabel}
+              </div>
+            </div>
+          ) : null}
+
           <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
               <div>

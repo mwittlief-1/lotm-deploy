@@ -56,6 +56,17 @@ function createCourtDecisionBudget(): CourtDecisionBudgetSurface {
 function createObligationsSections(): ObligationsCounterpartyContractSection[] {
   return [
     {
+      consequenceFacts: [],
+      detailFacts: [],
+      paymentModes: { acceptedLabels: [], preferredLabel: "Coin", supportedLabels: [] },
+      receiptGroups: [],
+      stageRows: [],
+      tangibleBitePreview: null,
+      terminalRisk: {
+        boundaryLabel: "Unrest 100",
+        statusLabel: "Armed",
+        summary: "Dispossession occurs if unrest reaches 100 at end of turn."
+      },
       id: "liege",
       title: "House Liege",
       shortTitle: "Liege",
@@ -97,6 +108,17 @@ function createObligationsSections(): ObligationsCounterpartyContractSection[] {
       }
     },
     {
+      consequenceFacts: [],
+      detailFacts: [],
+      paymentModes: { acceptedLabels: [], preferredLabel: "Food stores", supportedLabels: [] },
+      receiptGroups: [],
+      stageRows: [],
+      tangibleBitePreview: null,
+      terminalRisk: {
+        boundaryLabel: "Unrest 100",
+        statusLabel: "Stable",
+        summary: "No terminal risk pressure was recorded for this counterparty."
+      },
       id: "church",
       title: "Parish Church",
       shortTitle: "Church",
@@ -154,6 +176,7 @@ function createCourtProvisioningSurface(): CourtProvisioningSurface {
         statusLabel: "Shortfall"
       }
     ],
+    consumptionAudit: null,
     debugEntryRows: [],
     debugRows: [],
     debugStipendRows: [],

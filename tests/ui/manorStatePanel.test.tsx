@@ -193,4 +193,115 @@ describe("ManorStatePanel", () => {
     expect(html).toContain("Event pressure: Village Riot: 2");
     expect(html).toContain("Relief: Harvest Festival: 1");
   });
+
+  it("renders maintenance labor drivers and coin upkeep walkdown detail", () => {
+    const html = renderToStaticMarkup(
+      <ManorStatePanel
+        anchorUnrest="unrest"
+        buildRatePerBuilderPerTurn={2}
+        builderExtraPerTurn={3}
+        constructionEtaTurns={null}
+        constructionRatePlannedNextTurn={0}
+        constructionRateThisTurn={0}
+        copy={{
+          turnSummary_last3Years: "Resolved above",
+          unrestBreakdownDecreasedBy: "Decreased by",
+          unrestBreakdownIncreasedBy: "Increased by",
+          unrestBreakdownNone: "No unrest movement.",
+          unrestBreakdownTitle: "Unrest breakdown"
+        }}
+        deltaBushels={0}
+        deltaCoin={-2}
+        deltaPop={0}
+        deltaUnrest={0}
+        desiredBuilders={0}
+        fmtSigned={(value: number) => (value > 0 ? `+${value}` : `${value}`)}
+        improvements={{}}
+        manor={{
+          builders: 2,
+          bushels_stored: 40,
+          coin: 8,
+          construction: null,
+          farmers: 8,
+          population: 12,
+          unrest: 10
+        }}
+        onAbandonProject={() => undefined}
+        popChangeSummary={null}
+        report={{
+          construction: {},
+          maintenance_labor_pressure: {
+            schema_version: "maintenance_labor_pressure_v1",
+            ordering_rule: "builders_first",
+            delegated: false,
+            delegated_multiplier_pct: 100,
+            source_keys: ["watch_ward", "granary_upkeep"],
+            total_sources: 2,
+            planned_population: 12,
+            planned_farmers: 8,
+            planned_builders: 2,
+            allocatable_before: 10,
+            required_labor_before_delegation: 3,
+            required_labor_after_delegation: 3,
+            applied_drag: 3,
+            unmet_labor: 0,
+            allocatable_after: 7,
+            effective_farmers: 7,
+            effective_builders: 0,
+            entries: [
+              { maintenance_key: "watch_ward", label: "Watch & Ward", source_kind: "security", labor_required: 1 },
+              { maintenance_key: "granary_upkeep", label: "Granary upkeep", source_kind: "storage", labor_required: 2 }
+            ]
+          }
+        }}
+        showUnrestBreakdown={false}
+        turnExplanation={{
+          schema_version: "turn_explanation_v1",
+          food_walkdown: {
+            schema_version: "turn_explanation_walkdown_v1",
+            metric: "food",
+            unit_label: "bushels",
+            start_amount: 40,
+            end_amount: 40,
+            reconciles: true,
+            rows: []
+          },
+          coin_walkdown: {
+            schema_version: "turn_explanation_walkdown_v1",
+            metric: "coin",
+            unit_label: "coin",
+            start_amount: 10,
+            end_amount: 8,
+            reconciles: true,
+            rows: [
+              { id: "coin_starting_coin", label: "Starting coin", direction: "start", amount: 10, running_total: 10, summary: "10 coin on hand at the start of the turn." },
+              { id: "coin_maintenance", label: "Maintenance and upkeep", direction: "outflow", amount: 2, running_total: 8, summary: "2 coin went to upkeep and recurring maintenance." },
+              { id: "coin_ending_coin", label: "Ending coin", direction: "ending", amount: 8, running_total: 8, summary: "8 coin remain at turn end." }
+            ]
+          },
+          unrest_walkdown: {
+            schema_version: "turn_explanation_walkdown_v1",
+            metric: "unrest",
+            unit_label: "unrest",
+            start_amount: 10,
+            end_amount: 10,
+            reconciles: true,
+            rows: []
+          },
+          headline_causes: [],
+          surface_roles: []
+        }}
+        turnYears={3}
+        unrestBreakdown={null}
+      />
+    );
+
+    expect(html).toContain("3 labor absorbed");
+    expect(html).toContain("3 upkeep labor came off the top");
+    expect(html).toContain("Coin walkdown: 2 coin");
+    expect(html).toContain("Watch &amp; Ward");
+    expect(html).toContain("1 labor requested");
+    expect(html).toContain("Granary upkeep");
+    expect(html).toContain("2 labor requested");
+  });
 });
