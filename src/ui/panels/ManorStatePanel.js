@@ -49,6 +49,7 @@ export function ManorStatePanel({ anchorUnrest, buildRatePerBuilderPerTurn, buil
     const biggestUnrestRow = biggestWalkdownRow(unrestWalkdown);
     const maintenanceLaborDrag = Number(report?.maintenance_labor_pressure?.applied_drag ?? 0);
     const maintenanceLaborApplied = Number(report?.maintenance_labor_pressure?.applied ?? 0);
+    const placeholderCatalogCount = pricingSurface?.catalogLines.filter((line) => line.includes("(placeholder)")).length ?? 0;
     const placeholderCatalogSummary = placeholderCatalogCount > 0
         ? ` ${placeholderCatalogCount} catalog line${placeholderCatalogCount === 1 ? "" : "s"} still read as placeholder references, not live actions from this screen.`
         : " All shown catalog lines are active references.";
