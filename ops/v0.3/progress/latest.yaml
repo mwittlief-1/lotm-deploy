@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-002-T05
+  current_task_id: V03-R6-008-T06
   last_completed_task_id: V03-R6-006-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: e166540aa66e94c89e4e2d561bcb5fe3eddef48a
+  git_commit: ff964e0feb4072a078d079f787f333e089716a4f
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: V03-R6-006-T04 is accepted and V03-R6-006-T07 is now ready for UI rendering from _dynastic_transition_facts_v1. Lane-parallel scheduling is active with current_task_id set to V03-R6-002-T05. Claimable lanes are economy V03-R6-002-T05, social V03-R6-004-T04, and UI V03-R6-006-T07. No active lane claims are currently recorded.
+notes: V03-R6-006-T04 is accepted and V03-R6-006-T07 is now ready for UI rendering from _dynastic_transition_facts_v1. Tooling V03-R6-008-T06 is ready after accepted preflight baseline normalization. Lane-parallel scheduling is active with current_task_id set to V03-R6-008-T06. Claimable lanes are tooling V03-R6-008-T06, economy V03-R6-002-T05, social V03-R6-004-T04, and UI V03-R6-006-T07. No active lane claims are currently recorded.
 active_claims: {}
