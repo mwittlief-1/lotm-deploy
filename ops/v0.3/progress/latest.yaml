@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-001-T04
-  last_completed_task_id: V03-R6-008-T05
+  current_task_id: V03-R6-003-T04
+  last_completed_task_id: V03-R6-007-T02
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
-  git_branch: codex/v0.3-refactor-kickoff
-  git_commit: eb8eaad
+  git_branch: codex/tmp-v036-integrator
+  git_commit: 6429374fd1777e27755d70fc5a7cd44c2a446851
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,18 +20,5 @@ last_run:
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: >-
-  Integrator accepted V03-R6-008-T05 on 2026-04-20 after compacting replay
-  snapshots without backing out the accepted world-map read models. The
-  bounded snapshot now keeps manor detail hidden and non-enumerable, and the
-  serialized map snapshot drops duplicated manor labels while the live UI
-  derives the same labels from selector rows or seat hex ids. The known
-  succession-pressure offender moved from 528401 bytes at turn 13 and 526672
-  bytes at turn 15 down to 495985 and 516997 respectively, and
-  seed:replay:batch passed twice with matching summary hash
-  4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c. Remaining
-  branch-wide blockers are unchanged: preflight still fails with
-  test3_mismatches=16 against the stale v0.2.2 fallback baseline path, and qa
-  still lacks a clean branch-wide exit on the kickoff line. Ready follow-on
-  lane work remains open for UI, economy, social, and tooling.
+notes: Integrator accepted merged social/UI lane work on 2026-04-21 after merging marriage workflow contract, unified marriage UI, household provisioning table, unrest walkdown, family-status, agenda/presence continuity, and identity-disambiguation changes into codex/tmp-v036-integrator. V03-R6-006-T04 remains blocked on demography-owned birth-spacing paths. Lane-parallel scheduling is active with current_task_id set to V03-R6-003-T04 and no active lane claims recorded.
 active_claims: {}

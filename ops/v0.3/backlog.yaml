@@ -3885,7 +3885,7 @@ tasks:
   category: World
   phase: topology
   lane_branch: codex/v0.3-lane-world-topology
-  goal: "Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline."
+  goal: 'Build the first clearly remaining map-coded topology step after checkpoint: add a configurable far-threshold surface on top of the existing numeric distance baseline.'
   deps:
   - V03-XMAP-001
   - V03-R1-001-T02
@@ -11222,7 +11222,7 @@ tasks:
   parent_epic: V03-R6-001
   release: v0.3.6
   title: Add explicit unrest causal walkdown and summary alignment
-  status: ready
+  status: done
   priority: 80
   tranche: 8
   change_type: behavior_change
@@ -12008,7 +12008,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Clarify outbound offer terms and explicit submission state
-  status: ready
+  status: done
   priority: 78
   tranche: 8
   change_type: behavior_change
@@ -12068,7 +12068,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Label married-out and married-in family status consistently
-  status: todo
+  status: done
   priority: 76
   tranche: 8
   change_type: behavior_change
@@ -12189,7 +12189,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Align agenda, household, and provisioning truth
-  status: todo
+  status: done
   priority: 75
   tranche: 8
   change_type: behavior_change
@@ -12251,7 +12251,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Surface court turnover and local succession clearly
-  status: todo
+  status: done
   priority: 74
   tranche: 8
   change_type: behavior_change
@@ -12314,7 +12314,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Tune birth spacing and dynastic transition summaries
-  status: todo
+  status: blocked
   priority: 73
   tranche: 8
   change_type: behavior_change
@@ -12329,7 +12329,7 @@ tasks:
   deps:
   - V03-R6-006-T03
   requires_integrator: false
-  blocked_reason: ''
+  blocked_reason: birth-spacing realism routes through demography-owned files outside the social lane allowed paths; split or reassign before retrying
   allowed_paths:
   - src/sim/domains/people/**
   - src/sim/domains/court/**
@@ -12436,7 +12436,7 @@ tasks:
   parent_epic: V03-R6-007
   release: v0.3.6
   title: Add secondary identifiers for nearby-house disambiguation
-  status: todo
+  status: done
   priority: 72
   tranche: 8
   change_type: behavior_change
