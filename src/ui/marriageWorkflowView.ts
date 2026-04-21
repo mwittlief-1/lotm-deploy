@@ -1,5 +1,5 @@
-import { buildMarriageWindow } from "../sim/domains/people/marriage";
 import type {
+  MarriageWorkflowDecisionPayloadV1,
   MarriageWorkflowEffectSummaryV1,
   MarriageWorkflowInboundOfferV1,
   MarriageWorkflowPersonRefV1,
@@ -7,11 +7,6 @@ import type {
   MarriageWorkflowViewV1,
   RunState,
 } from "../sim/types";
-import {
-  buildOutboundMarriageOfferPreview,
-  buildOutboundMarriageSurface,
-  createOutboundMarriageOfferDraft
-} from "./outboundMarriageView";
 
 export type MarriageWorkflowLinkSurface = {
   detail: string;
@@ -22,11 +17,14 @@ export type MarriageWorkflowLinkSurface = {
 };
 
 export type MarriageWorkflowInboundOfferSurface = {
+  acceptDecisionPayload: MarriageWorkflowDecisionPayloadV1;
+  acceptOutcomeSummary: string;
   effectSummary: string;
   entryId: string;
   houseId: string | null;
   houseLabel: string | null;
   offerSummary: string;
+  rejectDecisionPayload: MarriageWorkflowDecisionPayloadV1;
   rejectOutcomeSummary: string;
   candidate: MarriageWorkflowLinkSurface;
 };
@@ -37,6 +35,9 @@ export type MarriageWorkflowSubjectSurface = {
   inboundSummary: string;
   latestOfferSummary: string | null;
   outboundFeaturedCandidate: MarriageWorkflowLinkSurface | null;
+  queueOutboundOfferPayload: MarriageWorkflowDecisionPayloadV1 | null;
+  scoutDecisionPayload: MarriageWorkflowDecisionPayloadV1 | null;
+  sendOutboundOfferPayload: MarriageWorkflowDecisionPayloadV1 | null;
   outboundSendOutcomeSummary: string | null;
   outboundTermSummary: string;
   outboundSummary: string;
@@ -122,37 +123,14 @@ function inboundOfferSummary(offer: MarriageWorkflowInboundOfferV1): string {
   return `${offer.candidate.person_name}${candidateHouse ? ` from ${candidateHouse}` : ""} is waiting for your response.`;
 }
 
-function inboundRejectSummary(offerCount: number, firstHouseLabel: string | null): string {
-  if (offerCount <= 0) {
-    return "No inbound offers are pending.";
-  }
-  if (offerCount === 1 && firstHouseLabel) {
-    return `Rejecting this proposal leaves the match unresolved and adds slight social friction with ${firstHouseLabel}.`;
-  }
-  return "Rejecting all current proposals leaves the match unresolved and adds slight social friction this turn.";
+function inboundRejectSummary(offer: MarriageWorkflowInboundOfferV1): string {
+  return offer.resolution_outcomes.reject.summary;
 }
 
 function latestOfferSummary(subjectView: MarriageWorkflowSubjectViewV1): string | null {
   const latestOffer = subjectView.latest_outbound_offer;
   if (!latestOffer) return null;
-  const candidateHouse = houseLabel(latestOffer.candidate.house_name, latestOffer.candidate.house_id);
-  const candidateLabel = candidateHouse ? `${latestOffer.candidate.person_name} of ${candidateHouse}` : latestOffer.candidate.person_name;
-  if (latestOffer.state === "pending") {
-    return `Post-submit state: awaiting reply from ${candidateLabel}.`;
-  }
-  if (latestOffer.state === "accepted") {
-    return `Post-submit state: accepted by ${candidateLabel}.`;
-  }
-  if (latestOffer.state === "rejected") {
-    return `Post-submit state: rejected by ${candidateLabel}.`;
-  }
-  if (latestOffer.state === "expired") {
-    return `Post-submit state: the offer to ${candidateLabel} expired before a match closed.`;
-  }
-  if (latestOffer.state === "withdrawn") {
-    return `Post-submit state: the latest offer to ${candidateLabel} was withdrawn.`;
-  }
-  return `Post-submit state: ${formatToken(latestOffer.state)} with ${candidateLabel}.`;
+  return `Post-submit state: ${latestOffer.resolution_outcome.summary}`;
 }
 
 function outboundSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
@@ -164,52 +142,50 @@ function outboundSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
   return `${scouting.shown_candidate_count} shown candidate${scouting.shown_candidate_count === 1 ? "" : "s"} and ${scouting.held_out_candidate_count} held out candidate${scouting.held_out_candidate_count === 1 ? "" : "s"} are grouped here for one outbound workflow path.`;
 }
 
-function outboundSendOutcomeSummary(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): string | null {
-  const scouting = subjectView.outbound_scouting;
-  const featuredCandidateId = scouting?.featured_candidate?.person_id ?? null;
-  if (!scouting || !featuredCandidateId) return null;
+function outboundSendOutcomeSummary(subjectView: MarriageWorkflowSubjectViewV1): string | null {
+  const outcome = subjectView.outbound_offer_construction?.resolution_outcomes.send ?? null;
+  if (!outcome) return null;
+  const previewLabel =
+    outcome.status === "accepted"
+      ? "Accepted preview"
+      : outcome.status === "rejected"
+        ? "Rejected preview"
+        : outcome.status === "blocked"
+          ? "Blocked preview"
+          : `${formatToken(outcome.status)} preview`;
 
-  const marriageWindow = buildMarriageWindow(previewState);
-  const surface = buildOutboundMarriageSurface(previewState, marriageWindow);
-  if (!surface || surface.subjectPersonId !== subjectView.subject.person_id) return null;
-
-  const draft = createOutboundMarriageOfferDraft(surface, { selectedCandidateId: featuredCandidateId });
-  const preview = buildOutboundMarriageOfferPreview(surface, draft);
-  if (!preview) return null;
-
-  return `If you send now: ${preview.outcomeLabel}. ${preview.summary}`;
+  return `If you send now: ${previewLabel}. ${outcome.summary}`;
 }
 
-function outboundTermSummary(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): string {
-  const marriageWindow = buildMarriageWindow(previewState);
-  const surface = buildOutboundMarriageSurface(previewState, marriageWindow);
-  if (!surface || surface.subjectPersonId !== subjectView.subject.person_id) {
+function outboundTermSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
+  const termControls = subjectView.outbound_offer_construction?.term_controls ?? [];
+  if (termControls.length === 0) {
     return "Player-term access is unavailable until the bounded outbound offer sheet loads for this subject.";
   }
 
-  const editableLabels = surface.playerTermRows
-    .filter((row) => row.playerAccessLabel === "Editable on player tab")
+  const editableLabels = termControls
+    .filter((row) => row.player_access === "editable_player_tab")
     .slice(0, 4)
     .map((row) => row.label.toLowerCase());
-  const lockedLabels = surface.playerTermRows
-    .filter((row) => row.playerAccessLabel === "Locked to advanced contract")
+  const lockedLabels = termControls
+    .filter((row) => row.player_access === "advanced_contract_only")
     .map((row) => row.label.toLowerCase());
 
   return `Editable on player tab: ${editableLabels.join(", ")}. Locked on the normal path: ${lockedLabels.join(", ")}.`;
 }
 
-function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
+function subjectSurface(subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
   const inboundOffers = subjectView.inbound_offers.map((offer) => ({
+    acceptDecisionPayload: offer.decision_payloads.accept,
+    acceptOutcomeSummary: offer.resolution_outcomes.accept.summary,
     candidate: personLink(offer.candidate),
     effectSummary: effectSummary(offer.expected_effects),
     entryId: offer.entry_id,
     houseId: offer.candidate.house_id,
     houseLabel: houseLabel(offer.candidate.house_name, offer.candidate.house_id),
     offerSummary: inboundOfferSummary(offer),
-    rejectOutcomeSummary: inboundRejectSummary(
-      subjectView.inbound_offers.length,
-      houseLabel(subjectView.inbound_offers[0]?.candidate.house_name, subjectView.inbound_offers[0]?.candidate.house_id)
-    ),
+    rejectDecisionPayload: offer.decision_payloads.reject,
+    rejectOutcomeSummary: inboundRejectSummary(offer),
   }));
 
   const outboundFeaturedCandidate = subjectView.outbound_scouting?.featured_candidate
@@ -226,8 +202,11 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
         : "No inbound proposal is active for this subject.",
     latestOfferSummary: latestOfferSummary(subjectView),
     outboundFeaturedCandidate,
-    outboundSendOutcomeSummary: outboundSendOutcomeSummary(previewState, subjectView),
-    outboundTermSummary: outboundTermSummary(previewState, subjectView),
+    queueOutboundOfferPayload: subjectView.outbound_offer_construction?.decision_payloads.queue ?? null,
+    scoutDecisionPayload: subjectView.outbound_scouting?.decision_payload ?? null,
+    sendOutboundOfferPayload: subjectView.outbound_offer_construction?.decision_payloads.send ?? null,
+    outboundSendOutcomeSummary: outboundSendOutcomeSummary(subjectView),
+    outboundTermSummary: outboundTermSummary(subjectView),
     outboundSummary: outboundSummary(subjectView),
     subject: personLink(subjectView.subject),
     subjectParents: [...subjectView.subject.parent_refs]
@@ -257,6 +236,6 @@ export function buildMarriageWorkflowSurface(
     subjects: view.subject_person_ids
       .map((subjectPersonId) => view.subjects_by_person_id[subjectPersonId] ?? null)
       .filter((subjectView): subjectView is MarriageWorkflowSubjectViewV1 => subjectView !== null)
-      .map((subjectView) => subjectSurface(previewState, subjectView))
+      .map((subjectView) => subjectSurface(subjectView))
   };
 }

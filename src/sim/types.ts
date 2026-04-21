@@ -442,23 +442,180 @@ export interface MarriageWorkflowEffectSummaryV1 {
   risk_tags: string[];
 }
 
+export interface MarriageWorkflowSettlementRequestV1 {
+  coin: number;
+  food_stores: number;
+  meat_stores: number;
+}
+
+export interface MarriageWorkflowOutboundOfferDraftV1 {
+  selected_candidate_person_id: string;
+  offer_key: string;
+  offer: MarriageOffer;
+  dowry_requested_delta_by_asset: MarriageWorkflowSettlementRequestV1;
+  dower_requested_delta_by_asset: MarriageWorkflowSettlementRequestV1;
+}
+
+export type MarriageWorkflowDecisionActionV1 =
+  | "accept_inbound_offer"
+  | "reject_inbound_offers"
+  | "scout_outbound_candidates"
+  | "send_outbound_offer"
+  | "queue_outbound_offer";
+
+export type MarriageWorkflowDecisionEnvelopeV1 =
+  | {
+      kind: "marriage";
+      action: "accept";
+      child_id: string;
+      offer_index: number;
+      offer_key: string;
+    }
+  | {
+      kind: "marriage";
+      action: "reject_all";
+      subject_person_id: string;
+      offer_keys: string[];
+    }
+  | {
+      kind: "marriage";
+      action: "scout";
+      subject_person_id: string;
+    }
+  | {
+      kind: "marriage";
+      action: "send_outbound_offer";
+      subject_person_id: string;
+      candidate_person_id: string;
+      offer_key: string;
+      draft: MarriageWorkflowOutboundOfferDraftV1;
+    }
+  | {
+      kind: "marriage";
+      action: "queue_outbound_offer";
+      subject_person_id: string;
+      candidate_person_id: string;
+      offer_key: string;
+      draft: MarriageWorkflowOutboundOfferDraftV1;
+    };
+
+export interface MarriageWorkflowDecisionPayloadV1 {
+  schema_version: "marriage_workflow_decision_payload_v1";
+  action_id: string;
+  action: MarriageWorkflowDecisionActionV1;
+  label: string;
+  subject_person_id: string;
+  candidate_person_id: string | null;
+  offer_key: string | null;
+  enabled: boolean;
+  disabled_reason: string | null;
+  payload: MarriageWorkflowDecisionEnvelopeV1;
+}
+
+export type MarriageWorkflowResolutionStatusV1 =
+  | "available"
+  | "accepted"
+  | "rejected"
+  | "blocked"
+  | "pending"
+  | "queued"
+  | "no_effect";
+
+export type MarriageWorkflowResolutionEffectV1 =
+  | "relationship_and_settlement"
+  | "relationship_only"
+  | "settlement_only"
+  | "state_only"
+  | "no_effect";
+
+export interface MarriageWorkflowResolutionOutcomeV1 {
+  schema_version: "marriage_workflow_resolution_outcome_v1";
+  outcome_id: string;
+  action: MarriageWorkflowDecisionActionV1;
+  status: MarriageWorkflowResolutionStatusV1;
+  effect: MarriageWorkflowResolutionEffectV1;
+  subject_person_id: string;
+  candidate_person_id: string | null;
+  offer_key: string | null;
+  expected_effects: MarriageWorkflowEffectSummaryV1 | null;
+  blocked_reason: string | null;
+  summary: string;
+}
+
 export interface MarriageWorkflowInboundOfferV1 {
   schema_version: "marriage_workflow_inbound_offer_v1";
   entry_id: string;
   offer_index: number;
-  offer_key: string | null;
+  offer_key: string;
   state: "received";
   candidate: MarriageWorkflowPersonRefV1;
   expected_effects: MarriageWorkflowEffectSummaryV1;
+  decision_payloads: {
+    accept: MarriageWorkflowDecisionPayloadV1;
+    reject: MarriageWorkflowDecisionPayloadV1;
+  };
+  resolution_outcomes: {
+    accept: MarriageWorkflowResolutionOutcomeV1;
+    reject: MarriageWorkflowResolutionOutcomeV1;
+  };
+}
+
+export interface MarriageWorkflowOutboundSearchResultV1 {
+  schema_version: "marriage_workflow_outbound_search_result_v1";
+  candidate: MarriageWorkflowPersonRefV1;
+  rank_index: number;
+  rank_group: "shown" | "held_out";
+  match_ready: boolean;
+  ranking_score: number;
+  scope_status: "admitted" | "rejected" | "unmapped";
+  scope_bucket: string | null;
+  distance_band: "near" | "far" | null;
+  route_hop_distance: number | null;
+  travel_cost_distance: number | null;
+  include_reasons: string[];
+  exclude_reasons: string[];
+  relevance_reasons: string[];
 }
 
 export interface MarriageWorkflowOutboundScoutingV1 {
   schema_version: "marriage_workflow_outbound_scouting_v1";
   scouting_status: "available" | "empty";
+  candidate_ids: string[];
+  shown_candidate_ids: string[];
+  held_out_candidate_ids: string[];
   shown_candidate_count: number;
   held_out_candidate_count: number;
   total_candidates_considered: number;
   featured_candidate: MarriageWorkflowPersonRefV1 | null;
+  search_results: MarriageWorkflowOutboundSearchResultV1[];
+  decision_payload: MarriageWorkflowDecisionPayloadV1;
+  resolution_outcome: MarriageWorkflowResolutionOutcomeV1;
+}
+
+export interface MarriageWorkflowTermControlV1 {
+  schema_version: "marriage_workflow_term_control_v1";
+  draft_field_path: string;
+  resolver_field_path: string;
+  label: string;
+  player_access: "editable_player_tab" | "advanced_contract_only";
+  helper_text: string;
+}
+
+export interface MarriageWorkflowOutboundOfferConstructionV1 {
+  schema_version: "marriage_workflow_outbound_offer_construction_v1";
+  offer_key: string;
+  subject_person_id: string;
+  candidate: MarriageWorkflowPersonRefV1;
+  default_draft: MarriageWorkflowOutboundOfferDraftV1;
+  term_controls: MarriageWorkflowTermControlV1[];
+  decision_payloads: {
+    send: MarriageWorkflowDecisionPayloadV1;
+    queue: MarriageWorkflowDecisionPayloadV1;
+  };
+  resolution_outcomes: {
+    send: MarriageWorkflowResolutionOutcomeV1;
+    queue: MarriageWorkflowResolutionOutcomeV1;
+  };
 }
 
 export interface MarriageWorkflowLatestOfferV1 {
@@ -467,6 +624,7 @@ export interface MarriageWorkflowLatestOfferV1 {
   state: "generated" | "pending" | "accepted" | "rejected" | "expired" | "withdrawn";
   candidate: MarriageWorkflowPersonRefV1;
   expected_effects: MarriageWorkflowEffectSummaryV1;
+  resolution_outcome: MarriageWorkflowResolutionOutcomeV1;
 }
 
 export interface MarriageWorkflowSubjectViewV1 {
@@ -475,6 +633,7 @@ export interface MarriageWorkflowSubjectViewV1 {
   inbound_offer_count: number;
   inbound_offers: MarriageWorkflowInboundOfferV1[];
   outbound_scouting: MarriageWorkflowOutboundScoutingV1 | null;
+  outbound_offer_construction: MarriageWorkflowOutboundOfferConstructionV1 | null;
   latest_outbound_offer: MarriageWorkflowLatestOfferV1 | null;
 }
 
