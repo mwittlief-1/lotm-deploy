@@ -15,6 +15,7 @@ import {
   marriageWorkflowScoutActionKey,
   type MarriageWorkflowActionStatus,
   type MarriageWorkflowInboundOfferSurface,
+  type MarriageWorkflowOutboundOfferDraftSurface,
   type MarriageWorkflowSubjectSurface
 } from "../marriageWorkflowView";
 import { buildPersonCardSurface } from "../personCardView";
@@ -821,8 +822,21 @@ export function PlayScreen({
     updateMarriageWorkflowStatus({ [marriageWorkflowOfferActionKey(workflow.workflowId)]: "no_effect" });
     setToast({
       kind: "ok",
+      message: `Outbound offer draft is ready for ${workflow.subject.title}. Review the terms, then queue it from the marriage workflow.`
+    });
+  }
+
+  function handleMarriageWorkflowQueueOffer(
+    workflow: MarriageWorkflowSubjectSurface,
+    draft: MarriageWorkflowOutboundOfferDraftSurface
+  ) {
+    updateMarriageWorkflowStatus({ [marriageWorkflowOfferActionKey(workflow.workflowId)]: "queued" });
+    const candidateLabel = workflow.outboundFeaturedCandidate?.title ?? draft.candidatePersonId ?? "the selected candidate";
+    setToast({
+      kind: "ok",
       message:
-        "Outbound offer construction is visible in the unified workflow. Final submission waits for the Social lane contract, so no sim decision payload was queued."
+        `Outbound offer queued in the workflow UI for ${workflow.subject.title} and ${candidateLabel}. ` +
+        "Final simulation send waits for the Social lane contract, so no durable decision payload was invented."
     });
   }
 
@@ -956,6 +970,7 @@ export function PlayScreen({
         onMarriageWorkflowAcceptInbound={handleMarriageWorkflowAcceptInbound}
         onMarriageWorkflowClearScout={handleMarriageWorkflowClearScout}
         onMarriageWorkflowConstructOffer={handleMarriageWorkflowConstructOffer}
+        onMarriageWorkflowQueueOffer={handleMarriageWorkflowQueueOffer}
         onMarriageWorkflowRejectInbound={handleMarriageWorkflowRejectInbound}
         onMarriageWorkflowScout={handleMarriageWorkflowScout}
         onOpenHouseDossier={openHouseDossier}

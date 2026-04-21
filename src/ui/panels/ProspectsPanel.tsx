@@ -5,6 +5,7 @@ import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from ".
 import type {
   MarriageWorkflowActionStatus,
   MarriageWorkflowInboundOfferSurface,
+  MarriageWorkflowOutboundOfferDraftSurface,
   MarriageWorkflowSubjectSurface,
   MarriageWorkflowSurface
 } from "../marriageWorkflowView";
@@ -41,6 +42,10 @@ type ProspectsPanelProps = {
   ) => void;
   onMarriageWorkflowClearScout?: (workflow: MarriageWorkflowSubjectSurface) => void;
   onMarriageWorkflowConstructOffer?: (workflow: MarriageWorkflowSubjectSurface) => void;
+  onMarriageWorkflowQueueOffer?: (
+    workflow: MarriageWorkflowSubjectSurface,
+    draft: MarriageWorkflowOutboundOfferDraftSurface
+  ) => void;
   onMarriageWorkflowRejectInbound?: (
     workflow: MarriageWorkflowSubjectSurface,
     offer: MarriageWorkflowInboundOfferSurface
@@ -106,8 +111,47 @@ function workflowStatusDetail(status: MarriageWorkflowActionStatus, availableDet
   }
 }
 
+function workflowOutboundOfferStatusDetail(status: MarriageWorkflowActionStatus, availableDetail: string): string {
+  if (status === "queued") {
+    return "Queued in this workflow UI; the final simulation send waits for the Social lane contract.";
+  }
+  return workflowStatusDetail(status, availableDetail);
+}
+
 const workflowPendingContractTitle =
   "Final outbound offer submission waits on the Social lane's canonical marriage workflow contract.";
+
+function coerceWorkflowInputNumber(value: string): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.trunc(parsed) : 0;
+}
+
+function createDefaultOutboundOfferDraft(workflow: MarriageWorkflowSubjectSurface): MarriageWorkflowOutboundOfferDraftSurface {
+  return {
+    candidatePersonId: workflow.outboundFeaturedCandidate?.personId ?? null,
+    dowryCoinDelta: 0,
+    relationshipAllegiance: 0,
+    relationshipRespect: 0,
+    relationshipThreat: 0
+  };
+}
+
+function readOutboundOfferDraft(
+  workflow: MarriageWorkflowSubjectSurface,
+  draftsByWorkflow: Record<string, MarriageWorkflowOutboundOfferDraftSurface | undefined>
+): MarriageWorkflowOutboundOfferDraftSurface {
+  const defaultDraft = createDefaultOutboundOfferDraft(workflow);
+  const current = draftsByWorkflow[workflow.workflowId];
+  if (!current) return defaultDraft;
+  return {
+    ...defaultDraft,
+    ...current,
+    candidatePersonId:
+      current.candidatePersonId && current.candidatePersonId === workflow.outboundFeaturedCandidate?.personId
+        ? current.candidatePersonId
+        : defaultDraft.candidatePersonId
+  };
+}
 
 export function ProspectsPanel({
   anchorId,
@@ -127,6 +171,7 @@ export function ProspectsPanel({
   onMarriageWorkflowAcceptInbound,
   onMarriageWorkflowClearScout,
   onMarriageWorkflowConstructOffer,
+  onMarriageWorkflowQueueOffer,
   onMarriageWorkflowRejectInbound,
   onMarriageWorkflowScout,
   onOpenHouseDossier,
@@ -148,6 +193,9 @@ export function ProspectsPanel({
   shownIds,
   uncertaintyLabel
 }: ProspectsPanelProps) {
+  const [outboundOfferDraftsByWorkflow, setOutboundOfferDraftsByWorkflow] = React.useState<
+    Record<string, MarriageWorkflowOutboundOfferDraftSurface | undefined>
+  >({});
   const people: any = (previewState as any).people;
   const grantTemplate = getGrantProspectTemplate();
   const canOpenHouseDossier = (houseId: string | null | undefined): houseId is string =>
@@ -174,6 +222,19 @@ export function ProspectsPanel({
       scouting/search, and outbound offer construction so proposals do not appear in two conflicting places.
     </div>
   ) : null;
+  const updateOutboundOfferDraft = <K extends keyof MarriageWorkflowOutboundOfferDraftSurface>(
+    workflow: MarriageWorkflowSubjectSurface,
+    key: K,
+    value: MarriageWorkflowOutboundOfferDraftSurface[K]
+  ) => {
+    setOutboundOfferDraftsByWorkflow((current) => ({
+      ...current,
+      [workflow.workflowId]: {
+        ...readOutboundOfferDraft(workflow, current),
+        [key]: value
+      }
+    }));
+  };
 
   return (
     <>
@@ -197,10 +258,12 @@ export function ProspectsPanel({
               marriageWorkflowActionStatus?.[marriageWorkflowOfferActionKey(workflow.workflowId)] ??
               workflow.latestOfferStatus ??
               "available";
+            const offerDraft = readOutboundOfferDraft(workflow, outboundOfferDraftsByWorkflow);
             const canScout = Boolean(onMarriageWorkflowScout) && scoutStatus === "available";
             const canClearScout = Boolean(onMarriageWorkflowClearScout) && scoutStatus !== "no_effect";
-            const canConstructOffer =
-              Boolean(onMarriageWorkflowConstructOffer) &&
+            const canConstructOffer = Boolean(onMarriageWorkflowConstructOffer) && Boolean(workflow.outboundFeaturedCandidate);
+            const canQueueOffer =
+              Boolean(onMarriageWorkflowQueueOffer) &&
               Boolean(workflow.outboundFeaturedCandidate) &&
               (offerStatus === "available" || offerStatus === "no_effect");
 
@@ -399,7 +462,7 @@ export function ProspectsPanel({
                   >
                     <div style={{ fontWeight: 700 }}>Outbound offer construction</div>
                     <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82 }}>
-                      Offer terms stay read-only until the Social lane publishes the canonical submission contract.
+                      Build the offer here, then queue it for the Social lane contract. No durable send payload is invented by this UI.
                     </div>
                     <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", marginTop: 8 }}>
                       <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
@@ -410,27 +473,71 @@ export function ProspectsPanel({
                         />
                       </label>
                       <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
-                        Dowry/dower terms
-                        <input readOnly value="Contract pending" />
+                        Dowry coin
+                        <input
+                          onChange={(event) =>
+                            updateOutboundOfferDraft(workflow, "dowryCoinDelta", coerceWorkflowInputNumber(event.target.value))
+                          }
+                          type="number"
+                          value={offerDraft.dowryCoinDelta}
+                        />
                       </label>
                       <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
-                        Relationship terms
-                        <input readOnly value="Preview only" />
+                        Respect delta
+                        <input
+                          onChange={(event) =>
+                            updateOutboundOfferDraft(workflow, "relationshipRespect", coerceWorkflowInputNumber(event.target.value))
+                          }
+                          type="number"
+                          value={offerDraft.relationshipRespect}
+                        />
                       </label>
+                      <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+                        Allegiance delta
+                        <input
+                          onChange={(event) =>
+                            updateOutboundOfferDraft(workflow, "relationshipAllegiance", coerceWorkflowInputNumber(event.target.value))
+                          }
+                          type="number"
+                          value={offerDraft.relationshipAllegiance}
+                        />
+                      </label>
+                      <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+                        Threat delta
+                        <input
+                          onChange={(event) =>
+                            updateOutboundOfferDraft(workflow, "relationshipThreat", coerceWorkflowInputNumber(event.target.value))
+                          }
+                          type="number"
+                          value={offerDraft.relationshipThreat}
+                        />
+                      </label>
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 12, opacity: 0.82 }}>
+                      Settlement asset terms remain locked until Social owns the canonical offer payload.
                     </div>
                     <div style={{ marginTop: 8, fontSize: 12 }}>
                       Offer status: <b>{workflowStatusLabel(offerStatus)}</b>.{" "}
-                      {workflowStatusDetail(offerStatus, workflowPendingContractTitle)}
+                      {workflowOutboundOfferStatusDetail(offerStatus, workflowPendingContractTitle)}
                     </div>
-                    <button
-                      disabled={!canConstructOffer}
-                      onClick={() => onMarriageWorkflowConstructOffer?.(workflow)}
-                      style={{ marginTop: 8 }}
-                      title={workflowPendingContractTitle}
-                      type="button"
-                    >
-                      Construct outbound offer
-                    </button>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                      <button
+                        disabled={!canConstructOffer}
+                        onClick={() => onMarriageWorkflowConstructOffer?.(workflow)}
+                        title={workflow.outboundFeaturedCandidate ? "" : "Select a candidate before constructing an offer."}
+                        type="button"
+                      >
+                        Construct outbound offer
+                      </button>
+                      <button
+                        disabled={!canQueueOffer}
+                        onClick={() => onMarriageWorkflowQueueOffer?.(workflow, offerDraft)}
+                        title={workflowPendingContractTitle}
+                        type="button"
+                      >
+                        Queue outbound offer
+                      </button>
+                    </div>
                   </div>
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.8 }}>{workflow.helperText}</div>
                 </div>
