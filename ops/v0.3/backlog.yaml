@@ -11679,7 +11679,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Show project benefits before commitment on player surfaces
-  status: ready
+  status: done
   priority: 79
   tranche: 8
   change_type: behavior_change
@@ -11740,7 +11740,7 @@ tasks:
   parent_epic: V03-R6-003
   release: v0.3.6
   title: Finish meat and live-resource truth on player surfaces
-  status: todo
+  status: done
   priority: 77
   tranche: 8
   change_type: behavior_change
@@ -12669,7 +12669,7 @@ tasks:
   parent_epic: V03-R6-008
   release: v0.3.6
   title: Normalize preflight baseline contract for v0.3.x
-  status: ready
+  status: done
   priority: 81
   tranche: 8
   change_type: refactor
@@ -13094,7 +13094,7 @@ tasks:
   parent_epic: V03-R6-005
   release: v0.3.6
   title: Close unified marriage workflow action gaps
-  status: ready
+  status: done
   priority: 84
   tranche: 8
   change_type: behavior_change
@@ -13153,7 +13153,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Restore Agenda View Portfolio target
-  status: ready
+  status: done
   priority: 82
   tranche: 8
   change_type: behavior_change

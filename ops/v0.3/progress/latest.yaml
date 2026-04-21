@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-003-T04
-  last_completed_task_id: V03-R6-007-T02
+  current_task_id: V03-R6-006-T04
+  last_completed_task_id: V03-R6-008-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: 73136e798e4acf38605a73a673ea08c8e3ffa60f
+  git_commit: 7d7c13c55090c6f625f9425f309c05d25c097045
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -14,11 +14,11 @@ runtime:
 last_run:
   gates:
     qa: blocked_clean_exit
-    preflight: fail
+    preflight: pass
     repo_duplicates: not_run
     seed_replay_batch_twice: pass
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: Virtual UAT gap closeout tasks were added on 2026-04-21 for obligations detail, consumption/maintenance audit detail, relationship baseline suppression, marriage workflow actions, Agenda portfolio routing, steward office truth, Decisions action routing, and dynastic transition rendering. Lane-parallel scheduling is active with current_task_id set to V03-R6-003-T04. No active lane claims are currently recorded; V03-R6-006-T04 is now integrator-owned because it touches demography phase surfaces.
+notes: Integrator accepted economy project-preview and meat-truth work, UI marriage-action and Agenda portfolio-target work, and tooling preflight-baseline normalization on 2026-04-21. Focused Vitest integration passed 12 files / 32 tests, and npm run preflight now passes against docs/qa/v0.3.6_preflight_baseline_contract.json. Lane-parallel scheduling is active with current_task_id set to integrator-owned V03-R6-006-T04 and no active lane claims recorded.
 active_claims: {}
