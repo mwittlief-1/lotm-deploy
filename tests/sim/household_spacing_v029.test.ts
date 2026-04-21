@@ -37,7 +37,7 @@ describe("v0.2.9 household fertility alignment", () => {
     blocked.house.children = [];
     blocked.house.spouse.age = 28;
     blocked.house.spouse.traits.fertility = 5;
-    blocked.house.spouse.last_birth_year = 0;
+    blocked.house.spouse.last_birth_year = 1;
 
     const pAllow = proposeTurn(allow);
     const pBlocked = proposeTurn(blocked);

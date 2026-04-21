@@ -150,6 +150,7 @@ type Couple = { a: string; b: string };
 const FLAG_SEQ = 'demography_next_person_seq';
 const FLAG_PREFIX = 'demography_person_id_prefix';
 const FLAG_JOINER = 'demography_person_id_joiner';
+export const MIN_NOBLE_BIRTH_SPACING_YEARS = 3;
 
 // Be tolerant to minor schema drift in kinship edge kinds.
 const SPOUSE_EDGE_KINDS = new Set<string>([
@@ -664,7 +665,13 @@ function readTrait01to5(p: PersonLike, key: string, fallback: number): number {
 function birthChancePerTurn(state: RunStateLike, mother: PersonLike, motherAge: number, year: number): number {
   if (motherAge >= 45) return 0;
   const lastBirthYear = (mother as any)?.last_birth_year;
-  if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && year - Math.trunc(lastBirthYear) < 2) return 0;
+  if (
+    typeof lastBirthYear === "number" &&
+    Number.isFinite(lastBirthYear) &&
+    year - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS
+  ) {
+    return 0;
+  }
 
   const fertilityTrait = readTrait01to5(mother, "fertility", 3);
   const traitBase = (BIRTH_CHANCE_BY_FERTILITY as any)[fertilityTrait] ?? (BIRTH_CHANCE_BY_FERTILITY as any)[3] ?? 0.26;

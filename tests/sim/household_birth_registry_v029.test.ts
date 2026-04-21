@@ -44,5 +44,20 @@ describe("v0.2.9 household birth registry sync", () => {
     const fatherEdge = edges.some((e) => e?.kind === "parent_of" && e?.parent_id === p.preview_state.house.head.id && e?.child_id === childId);
     expect(motherEdge).toBe(true);
     expect(fatherEdge).toBe(true);
+
+    const transitionFacts = p.preview_state.flags._dynastic_transition_facts_v1;
+    expect(transitionFacts).toMatchObject({
+      schema_version: "dynastic_transition_facts_v1",
+      turn_index: p.preview_state.turn_index
+    });
+    expect(transitionFacts.facts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "birth",
+          person_id: childId,
+          source: "household_demography"
+        })
+      ])
+    );
   });
 });

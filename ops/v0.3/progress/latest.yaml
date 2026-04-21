@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-006-T04
-  last_completed_task_id: V03-R6-008-T04
+  current_task_id: V03-R6-002-T05
+  last_completed_task_id: V03-R6-006-T04
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: 7d7c13c55090c6f625f9425f309c05d25c097045
+  git_commit: 0bfbaadeeb3becf7fa055c8de9bf7a705b845648
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: Integrator accepted economy project-preview and meat-truth work, UI marriage-action and Agenda portfolio-target work, and tooling preflight-baseline normalization on 2026-04-21. Focused Vitest integration passed 12 files / 32 tests, and npm run preflight now passes against docs/qa/v0.3.6_preflight_baseline_contract.json. Lane-parallel scheduling is active with current_task_id set to integrator-owned V03-R6-006-T04 and no active lane claims recorded.
+notes: Integrator accepted V03-R6-006-T04 on 2026-04-21 after tightening birth spacing to a three-year minimum and emitting bounded _dynastic_transition_facts_v1 facts. Focused demography tests passed 5 files / 11 tests, and one seed replay batch passed with summary_hash c286fdcd8ab62ef5ed45a342884d644308b4a9d03fbc67b4d937a350098ac37b. Lane-parallel scheduling is active with current_task_id set to V03-R6-002-T05 and no active lane claims recorded.
 active_claims: {}

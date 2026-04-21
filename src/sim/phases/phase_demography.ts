@@ -7,7 +7,12 @@ import {
   TURN_YEARS
 } from "../constants";
 import { getCourtExcludeIds, getCourtExtraIds, getCourtOfficerIds } from "../court";
-import { processNobleFertility, processNobleMarriages, processNobleMortality } from "../demography";
+import {
+  MIN_NOBLE_BIRTH_SPACING_YEARS,
+  processNobleFertility,
+  processNobleMarriages,
+  processNobleMortality
+} from "../demography";
 import { fertilityAnnualProbabilityByAge, mortalityAnnualProbabilityByAge } from "../demographyCurves";
 import { syncClergyPlacementPersistence } from "../domains/people/clergyPlacementPersistence";
 import { Rng } from "../rng";
@@ -19,6 +24,113 @@ import type { TierSets } from "../tiers";
 type HouseholdDemographyDeps = {
   syncPlayerHouseSummaryFromRegistry: (state: RunState) => void;
 };
+
+type DynasticTransitionFactV1 = {
+  kind: "birth" | "death" | "marriage";
+  person_id: string | null;
+  person_name: string;
+  house_id: string | null;
+  house_label: string | null;
+  year: number | null;
+  source: "household_demography" | "world_noble_demography";
+  summary: string;
+};
+
+const DYNASTIC_TRANSITION_FACTS_FLAG = "_dynastic_transition_facts_v1";
+const DYNASTIC_TRANSITION_FACT_LIMIT = 32;
+
+function houseLabelForId(state: RunState, houseId: string | null): string | null {
+  if (!houseId) return null;
+  const house: any = (state as any).houses?.[houseId];
+  const rawName =
+    typeof house?.name === "string" && house.name.trim().length > 0
+      ? house.name.trim()
+      : typeof house?.house_name === "string" && house.house_name.trim().length > 0
+        ? house.house_name.trim()
+        : null;
+  return rawName ? `House ${rawName}` : houseId;
+}
+
+function personHouseId(person: any): string | null {
+  const raw = person?.house_id ?? person?.residence_house_id ?? null;
+  return typeof raw === "string" && raw.length > 0 ? raw : null;
+}
+
+function personLabel(person: any, fallbackId: string | null): string {
+  return typeof person?.name === "string" && person.name.trim().length > 0 ? person.name.trim() : fallbackId ?? "Unknown person";
+}
+
+function appendDynasticTransitionFact(state: RunState, fact: DynasticTransitionFactV1): void {
+  const flags: any = state.flags as any;
+  const existing = flags[DYNASTIC_TRANSITION_FACTS_FLAG];
+  const current =
+    existing &&
+    typeof existing === "object" &&
+    existing.schema_version === "dynastic_transition_facts_v1" &&
+    existing.turn_index === state.turn_index &&
+    Array.isArray(existing.facts)
+      ? existing
+      : {
+          schema_version: "dynastic_transition_facts_v1",
+          turn_index: state.turn_index,
+          facts: [],
+          omitted_count: 0
+        };
+
+  if (current.facts.length < DYNASTIC_TRANSITION_FACT_LIMIT) {
+    current.facts.push(fact);
+  } else if (fact.source === "household_demography") {
+    const replaceIndex = current.facts
+      .map((existingFact: DynasticTransitionFactV1) => existingFact.source)
+      .lastIndexOf("world_noble_demography");
+    if (replaceIndex >= 0) {
+      current.facts.splice(replaceIndex, 1);
+      current.facts.push(fact);
+      current.omitted_count = Math.max(0, Math.trunc(Number(current.omitted_count) || 0)) + 1;
+    } else {
+      current.omitted_count = Math.max(0, Math.trunc(Number(current.omitted_count) || 0)) + 1;
+    }
+  } else {
+    current.omitted_count = Math.max(0, Math.trunc(Number(current.omitted_count) || 0)) + 1;
+  }
+
+  flags[DYNASTIC_TRANSITION_FACTS_FLAG] = current;
+}
+
+function appendBirthFact(state: RunState, person: any, year: number | null, source: DynasticTransitionFactV1["source"]): void {
+  const personId = typeof person?.id === "string" ? person.id : typeof person?.person_id === "string" ? person.person_id : null;
+  const houseId = personHouseId(person);
+  const houseLabel = houseLabelForId(state, houseId);
+  const name = personLabel(person, personId);
+  appendDynasticTransitionFact(state, {
+    kind: "birth",
+    person_id: personId,
+    person_name: name,
+    house_id: houseId,
+    house_label: houseLabel,
+    year,
+    source,
+    summary: `${name} was born${houseLabel ? ` into ${houseLabel}` : ""}.`
+  });
+}
+
+function appendDeathFact(state: RunState, person: any, year: number | null, source: DynasticTransitionFactV1["source"]): void {
+  const personId = typeof person?.id === "string" ? person.id : typeof person?.person_id === "string" ? person.person_id : null;
+  const houseId = personHouseId(person);
+  const houseLabel = houseLabelForId(state, houseId);
+  const name = personLabel(person, personId);
+  const age = typeof person?.age === "number" && Number.isFinite(person.age) ? Math.trunc(person.age) : null;
+  appendDynasticTransitionFact(state, {
+    kind: "death",
+    person_id: personId,
+    person_name: name,
+    house_id: houseId,
+    house_label: houseLabel,
+    year,
+    source,
+    summary: `${name} died${age !== null ? ` at age ${age}` : ""}${houseLabel ? ` of ${houseLabel}` : ""}.`
+  });
+}
 
 function tuningObj(state: RunState): Record<string, unknown> {
   const anyFlags: any = state.flags as any;
@@ -123,6 +235,7 @@ export function applyHouseholdDemographyPhase(
     if (deathRoll(p)) {
       p.alive = false;
       deaths.push(`${p.name} (${p.id})`);
+      appendDeathFact(state, p, state.turn_index * TURN_YEARS, "household_demography");
     }
   }
 
@@ -170,7 +283,11 @@ export function applyHouseholdDemographyPhase(
     const spouse = state.house.spouse;
     const fertileAge = spouse.age >= BIRTH_FERTILE_AGE_MIN && spouse.age <= BIRTH_FERTILE_AGE_MAX;
     const lastBirthYear = (spouse as any).last_birth_year;
-    const spacingOk = !(typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && (worldYear - Math.trunc(lastBirthYear) < 2));
+    const spacingOk = !(
+      typeof lastBirthYear === "number" &&
+      Number.isFinite(lastBirthYear) &&
+      worldYear - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS
+    );
     if (fertileAge && spacingOk) {
       const fert = clampInt(spouse.traits.fertility, 1, 5);
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
@@ -206,6 +323,7 @@ export function applyHouseholdDemographyPhase(
         anyState.kinship_edges.push({ kind: "parent_of", parent_id: state.house.head.id, child_id: childId });
         (spouse as any).last_birth_year = timing.birthYear;
         births.push(`${baby.name} (${baby.id})`);
+        appendBirthFact(state, baby, timing.birthYear, "household_demography");
         state.manor.population = asNonNegInt(state.manor.population + 1);
         popDelta += 1;
       }
@@ -295,7 +413,11 @@ export function applyHouseholdDemographyPhase(
       if (!fertileAge) continue;
 
       const lastBirthYear = (mother as any)?.last_birth_year;
-      if (typeof lastBirthYear === "number" && Number.isFinite(lastBirthYear) && worldYear - Math.trunc(lastBirthYear) < 2) continue;
+      if (
+        typeof lastBirthYear === "number" &&
+        Number.isFinite(lastBirthYear) &&
+        worldYear - Math.trunc(lastBirthYear) < MIN_NOBLE_BIRTH_SPACING_YEARS
+      ) continue;
 
       const fert = clampInt((mother.traits?.fertility ?? 3) as any, 1, 5);
       const traitAdj = (BIRTH_CHANCE_BY_FERTILITY[fert] ?? 0.24) / (BIRTH_CHANCE_BY_FERTILITY[3] ?? 0.24);
@@ -332,6 +454,7 @@ export function applyHouseholdDemographyPhase(
         if (!memberIds.includes(childId)) memberIds.push(childId);
 
         births.push(`${baby.name} (${baby.id})`);
+        appendBirthFact(state, baby, timing.birthYear, "household_demography");
         state.manor.population = asNonNegInt(state.manor.population + 1);
         popDelta += 1;
       }
@@ -415,11 +538,14 @@ export function applyNobleDemographyPhase(state: RunState, tierSets: TierSets): 
     const mortalityRng = new Rng(state.run_seed, "demography", state.turn_index, `mortality:y${yi}`);
     const fertilityRng = new Rng(state.run_seed, "demography", state.turn_index, `fertility:y${yi}`);
 
-    processNobleMortality(state as any,
+    const mortality = processNobleMortality(state as any,
       tierArg,
       { float01: (label: string) => mortalityRng.fork(label).next() },
       { year }
     );
+    for (const death of mortality.deaths) {
+      appendDeathFact(state, ((state as any).people ?? {})[death.person_id], death.year, "world_noble_demography");
+    }
 
     const demog = processNobleFertility(state as any,
       tierArg,
@@ -427,7 +553,12 @@ export function applyNobleDemographyPhase(state: RunState, tierSets: TierSets): 
       { year }
     );
 
-    if (demog && Array.isArray((demog as any).births)) birthsThisTurn += (demog as any).births.length;
+    if (demog && Array.isArray((demog as any).births)) {
+      birthsThisTurn += (demog as any).births.length;
+      for (const birth of (demog as any).births) {
+        appendBirthFact(state, ((state as any).people ?? {})[birth.child_person_id], birth.year, "world_noble_demography");
+      }
+    }
     ageOneYear();
   }
 
