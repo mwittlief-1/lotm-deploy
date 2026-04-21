@@ -157,7 +157,24 @@ function createCourtProvisioningSurface(): CourtProvisioningSurface {
     debugRows: [],
     debugStipendRows: [],
     helperText:
-      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Rationing is intentionally not editable in v0.3.6.",
+    householdRows: [
+      {
+        allocatedLabel: "3 food / 0 meat",
+        carryForwardLabel: "Seeded this turn",
+        contextLabel: "Seats None · Service None",
+        lodgingLevelLabel: "Manor House",
+        personId: "p_head",
+        personName: "Roger",
+        provisioningClassLabel: "Head Of House",
+        rationLevelLabel: "Full",
+        requestLabel: "3 food / 1 meat",
+        roleSummary: "Head of House",
+        shortfallLabel: "0 food / 1 meat",
+        statusLabel: "Shortfall",
+        supportLabel: "Family Service · 0 coin"
+      }
+    ],
     overrideRows: [
       {
         carryForwardLabel: "Seeded this turn",
@@ -172,6 +189,12 @@ function createCourtProvisioningSurface(): CourtProvisioningSurface {
         statusLabel: "Shortfall"
       }
     ],
+    rationingDecision: {
+      decision: "not_editable_v0_3_6",
+      detail:
+        "v0.3.6 has no canonical ration-change decision payload. The UI shows effective rations, allocation, and shortfall evidence only; any future ration controls must route through an owned decision flow before mutating sim state.",
+      label: "Rationing is read-only in v0.3.6"
+    },
     schemaVersion: "court_provisioning_view_v1",
     stipendRows: [
       {

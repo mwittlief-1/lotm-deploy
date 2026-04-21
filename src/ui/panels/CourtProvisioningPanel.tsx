@@ -62,6 +62,68 @@ export function CourtProvisioningPanel({
             ))}
           </div>
 
+          <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14, background: "rgba(255, 250, 241, 0.92)" }}>
+            <div style={PLAY_SCREEN_EYEBROW_STYLE}>Rationing control</div>
+            <div style={{ marginTop: 8, fontSize: 18, fontWeight: 700 }}>{surface.rationingDecision.label}</div>
+            <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: PLAY_SCREEN_THEME.inkMuted }}>
+              {surface.rationingDecision.detail}
+            </div>
+          </div>
+
+          <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
+              <div>
+                <div style={PLAY_SCREEN_EYEBROW_STYLE}>Household consumption & provisioning</div>
+                <div style={{ marginTop: 6, fontWeight: 700 }}>One row per provisioned court member, from the accepted read model</div>
+              </div>
+              <div style={{ fontSize: 12, color: PLAY_SCREEN_THEME.inkMuted }}>{surface.householdRows.length} rows</div>
+            </div>
+            <div style={{ overflowX: "auto", marginTop: 12 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Person</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Provisioning</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Ration</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Requested</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Allocated</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Shortfall</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Support</th>
+                    <th align="left" style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.12)", paddingBottom: 6 }}>Context</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.householdRows.map((row) => (
+                    <tr key={row.personId}>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                        <div style={{ fontWeight: 700 }}>{row.personName}</div>
+                        <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.roleSummary}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                        {row.provisioningClassLabel}
+                        <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.lodgingLevelLabel}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                        {row.rationLevelLabel}
+                        <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.statusLabel}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>{row.requestLabel}</td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>{row.allocatedLabel}</td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>{row.shortfallLabel}</td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0" }}>
+                        {row.supportLabel}
+                        <div style={{ marginTop: 2, color: PLAY_SCREEN_THEME.inkMuted }}>{row.carryForwardLabel}</div>
+                      </td>
+                      <td style={{ borderBottom: "1px solid rgba(15, 23, 42, 0.08)", padding: "8px 0", color: PLAY_SCREEN_THEME.inkMuted }}>
+                        {row.contextLabel}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, padding: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
               <div>
