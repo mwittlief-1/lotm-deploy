@@ -13271,7 +13271,7 @@ tasks:
   parent_epic: V03-R6-006
   release: v0.3.6
   title: Render dynastic transition summaries from accepted facts
-  status: todo
+  status: ready
   priority: 76
   tranche: 8
   change_type: behavior_change

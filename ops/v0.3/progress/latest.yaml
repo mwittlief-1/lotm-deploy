@@ -6,7 +6,7 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: 0bfbaadeeb3becf7fa055c8de9bf7a705b845648
+  git_commit: e166540aa66e94c89e4e2d561bcb5fe3eddef48a
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: Integrator accepted V03-R6-006-T04 on 2026-04-21 after tightening birth spacing to a three-year minimum and emitting bounded _dynastic_transition_facts_v1 facts. Focused demography tests passed 5 files / 11 tests, and one seed replay batch passed with summary_hash c286fdcd8ab62ef5ed45a342884d644308b4a9d03fbc67b4d937a350098ac37b. Lane-parallel scheduling is active with current_task_id set to V03-R6-002-T05 and no active lane claims recorded.
+notes: V03-R6-006-T04 is accepted and V03-R6-006-T07 is now ready for UI rendering from _dynastic_transition_facts_v1. Lane-parallel scheduling is active with current_task_id set to V03-R6-002-T05. Claimable lanes are economy V03-R6-002-T05, social V03-R6-004-T04, and UI V03-R6-006-T07. No active lane claims are currently recorded.
 active_claims: {}
