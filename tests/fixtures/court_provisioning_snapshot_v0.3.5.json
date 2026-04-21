@@ -6,7 +6,7 @@
     "surface": {
       "schema_version": "court_provisioning_view_v1",
       "subtitle": "8 court members · 14 food / 2 meat requested · 0 coin stipends",
-      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Meat here is passive ration stock already on hand, not a separate market control.",
       "summary_cards": [
         {
           "detail": "Risk watch: Geoffrey, Alice",
@@ -15,13 +15,13 @@
           "value": "8 court members"
         },
         {
-          "detail": "8 entries in deterministic allocation order.",
+          "detail": "8 entries in deterministic allocation order. Meat here is ration stock already on hand, not a separate live market action.",
           "id": "ration_demand",
           "label": "Ration demand",
           "value": "14 food / 2 meat"
         },
         {
-          "detail": "2 people are currently flagged at risk.",
+          "detail": "2 people are currently flagged at risk because current food or meat stock fell short.",
           "id": "allocation_result",
           "label": "Allocation result",
           "value": "14 food / 0 meat"
@@ -334,7 +334,7 @@
     "surface": {
       "schema_version": "court_provisioning_view_v1",
       "subtitle": "7 court members · 11 food / 2 meat requested · 0 coin stipends",
-      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Meat here is passive ration stock already on hand, not a separate market control.",
       "summary_cards": [
         {
           "detail": "Risk watch: Roger, Hugh, Agnes",
@@ -343,13 +343,13 @@
           "value": "7 court members"
         },
         {
-          "detail": "7 entries in deterministic allocation order.",
+          "detail": "7 entries in deterministic allocation order. Meat here is ration stock already on hand, not a separate live market action.",
           "id": "ration_demand",
           "label": "Ration demand",
           "value": "11 food / 2 meat"
         },
         {
-          "detail": "3 people are currently flagged at risk.",
+          "detail": "3 people are currently flagged at risk because current food or meat stock fell short.",
           "id": "allocation_result",
           "label": "Allocation result",
           "value": "11 food / 0 meat"
@@ -411,7 +411,7 @@
     "surface": {
       "schema_version": "court_provisioning_view_v1",
       "subtitle": "7 court members · 12 food / 2 meat requested · 3 coin stipends",
-      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Meat here is passive ration stock already on hand, not a separate market control.",
       "summary_cards": [
         {
           "detail": "Risk watch: Edmund, Margery",
@@ -420,13 +420,13 @@
           "value": "7 court members"
         },
         {
-          "detail": "7 entries in deterministic allocation order.",
+          "detail": "7 entries in deterministic allocation order. Meat here is ration stock already on hand, not a separate live market action.",
           "id": "ration_demand",
           "label": "Ration demand",
           "value": "12 food / 2 meat"
         },
         {
-          "detail": "2 people are currently flagged at risk.",
+          "detail": "2 people are currently flagged at risk because current food or meat stock fell short.",
           "id": "allocation_result",
           "label": "Allocation result",
           "value": "12 food / 0 meat"
@@ -534,7 +534,7 @@
     "surface": {
       "schema_version": "court_provisioning_view_v1",
       "subtitle": "8 court members · 14 food / 2 meat requested · 0 coin stipends",
-      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly.",
+      "helper_text": "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Meat here is passive ration stock already on hand, not a separate market control.",
       "debug_keys": [
         "provisioning_schema_version",
         "stipend_registry_schema_version",

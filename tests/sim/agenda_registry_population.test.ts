@@ -169,7 +169,7 @@ describe("court agenda registry population", () => {
 
     expect(registry.items_by_id["agenda_obligations_enforcement_liege"]).toMatchObject({
       source_key: "obligations.enforcement",
-      subject_ref_id: "p_liege"
+      subject_ref_id: "p_head"
     })
     expect(registry.items_by_id["agenda_obligations_due_church"]).toMatchObject({
       source_key: "obligations.current_due",

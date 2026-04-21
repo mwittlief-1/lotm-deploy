@@ -76,7 +76,7 @@
       "summary": "Catch manor-count drift or freeze against the single-manor baseline reference."
     }
   ],
-  "hash": "5035ee60d3d9c396d07f56659b1bdd11c47306e0387a44513993797282687f76",
+  "hash": "4aa5c5b4cc702e1382ccfee321d2a53517278f60605ff2f799cf532a2651d8d0",
   "init_contract": {
     "current_mode": "seed_only",
     "entrypoint": "createNewRun",
@@ -337,7 +337,7 @@
     },
     {
       "artifact_relpath": "qa_artifacts/playtest_ops/uat_scenarios_v0.3.json",
-      "hash": "aec150374b1c1278cc7e709bbb7752e9705b4bb1685d750b5f3fbd9ed8e6d9f6",
+      "hash": "f55863a3429a440027664cfedd10eb279cf45d753a9934fbe2729b7aa9dd7cd0",
       "kind": "uat_scenario_pack_v0.3",
       "pack_id": "uat_scenario_pack",
       "scenario_count": 3

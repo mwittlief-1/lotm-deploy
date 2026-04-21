@@ -1,5 +1,6 @@
 import { IMPROVEMENTS, hasImprovement } from "../../content/improvements";
 import { canSpendEnergy, spendEnergy } from "../domains/court/energy";
+import { buildMaintenanceLaborPressure } from "../domains/court/maintenance";
 import {
   applyConstructionWork,
   clearConstructionProject,
@@ -9,7 +10,7 @@ import {
 import { applyBushelDelta, applyCoinDelta, canAffordCoin, setBushelBalance, spendBushels, spendCoin } from "../domains/economy/ledger";
 import { recordEconomyPortfolioPhaseHints, refreshEconomyPortfolioState } from "../domains/economy/portfolioAnalysis";
 import { Rng } from "../rng";
-import type { RunState, TurnContext, TurnDecisions } from "../types";
+import type { MaintenanceLaborPressureV1, RunState, TurnContext, TurnDecisions } from "../types";
 import { asNonNegInt, clampInt } from "../util";
 import {
   BASE_FERTILITY,
@@ -107,11 +108,19 @@ export function computeWeatherMarketPhase(
 export function applyProductionAndConstructionPhase(
   state: RunState,
   weather_multiplier: number
-): { production_bushels: number; construction_progress_added: number; completed_improvement_id?: string } {
+): {
+  production_bushels: number;
+  construction_progress_added: number;
+  completed_improvement_id?: string;
+  maintenance_labor_pressure?: MaintenanceLaborPressureV1;
+} {
+  const maintenanceLaborPressure = buildMaintenanceLaborPressure(state);
   const farmerPenalty = Math.trunc(consumeMod(state, "farmer_penalty", 0));
   const builderPenalty = Math.trunc(consumeMod(state, "builder_penalty", 0));
-  const effectiveFarmers = Math.max(0, state.manor.farmers - farmerPenalty);
-  const effectiveBuilders = Math.max(0, state.manor.builders - builderPenalty);
+  const pressureFarmers = maintenanceLaborPressure?.effective_farmers ?? state.manor.farmers;
+  const pressureBuilders = maintenanceLaborPressure?.effective_builders ?? state.manor.builders;
+  const effectiveFarmers = Math.max(0, pressureFarmers - farmerPenalty);
+  const effectiveBuilders = Math.max(0, pressureBuilders - builderPenalty);
 
   const baseProduction = effectiveFarmers * BUSHELS_PER_FARMER_PER_YEAR * TURN_YEARS;
   const prodMult = weather_multiplier
@@ -133,7 +142,12 @@ export function applyProductionAndConstructionPhase(
     }
   }
 
-  return { production_bushels: production, construction_progress_added: progressAdded, completed_improvement_id: completed };
+  return {
+    production_bushels: production,
+    construction_progress_added: progressAdded,
+    completed_improvement_id: completed,
+    maintenance_labor_pressure: maintenanceLaborPressure ?? undefined,
+  };
 }
 
 export function applyConsumptionAndShortagePhase(state: RunState, court_consumption_bushels: number): {

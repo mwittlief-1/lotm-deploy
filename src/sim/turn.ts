@@ -481,6 +481,7 @@ export function proposeTurn(state: RunState): TurnContext {
   }
   if (prod.maintenance_labor_pressure) {
     report.maintenance_labor_pressure = prod.maintenance_labor_pressure;
+    report.notes.push(...maintenanceLaborPressureSummaryLines(prod.maintenance_labor_pressure));
   }
 
   // v0.2.3.2: unrest delta breakdown (contributors up/down).

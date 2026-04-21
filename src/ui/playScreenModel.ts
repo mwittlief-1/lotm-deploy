@@ -8,6 +8,7 @@ import { buildEconomyPortfolioAnalysisFromState } from "../sim/domains/economy/p
 import { buildEconomyObligationsView } from "../sim/domains/experience/obligationsView";
 import { buildCourtProvisioningView } from "../sim/domains/people/courtProvisioningRegistry";
 import { buildHouseholdPresenceView } from "../sim/domains/people/householdPresenceView";
+import { buildMaintenancePressureSurface } from "./maintenancePressureView";
 import { formatPersonName } from "./viewHelpers";
 
 export const PLAY_ANCHORS = {
@@ -194,6 +195,23 @@ export function buildDiffLedgerItems(args: {
     if (source === "decision" || source === "event" || source === "system_pressure" || source === "prospect") return source;
     return "system_pressure";
   };
+  const sortLedgerItems = (left: LedgerItem, right: LedgerItem) =>
+    right.sort_mag - left.sort_mag || left.tie_key.localeCompare(right.tie_key);
+  const maintenanceSurface = buildMaintenancePressureSurface({ previewState, report });
+  const maintenanceRow = maintenanceSurface?.currentManorRow ?? null;
+  const maintenanceLedgerItem: LedgerItem | null =
+    maintenanceRow && maintenanceSurface?.explainPrimary
+      ? {
+          id: "maintenance",
+          sort_mag: maintenanceRow.laborRequired + maintenanceRow.coinCost,
+          tie_key: "04_maintenance",
+          primary: maintenanceSurface.explainPrimary,
+          why:
+            maintenanceSurface.explainWhy ??
+            "Upkeep remains visible here so labor and coin pressure does not disappear into lower output totals.",
+          source: "system_pressure"
+        }
+      : null;
 
   if (Array.isArray(reportLedgerRaw) && reportLedgerRaw.length > 0) {
     const parsed: LedgerItem[] = [];
@@ -226,7 +244,11 @@ export function buildDiffLedgerItems(args: {
         source: normalizeSource(item.source ?? item.source_tag ?? item.sourceTag ?? item.kind)
       });
     }
-    if (parsed.length) return parsed;
+    if (parsed.length) {
+      if (maintenanceLedgerItem && !parsed.some((item) => item.id === maintenanceLedgerItem.id)) parsed.push(maintenanceLedgerItem);
+      parsed.sort(sortLedgerItems);
+      return parsed;
+    }
   }
 
   const items: LedgerItem[] = [];
@@ -290,6 +312,7 @@ export function buildDiffLedgerItems(args: {
       weatherHarmedHarvestWhy
     })
   });
+  if (maintenanceLedgerItem) items.push(maintenanceLedgerItem);
 
   const playerHeadId: string | null =
     typeof previewState?.house?.head?.id === "string" ? previewState.house.head.id : typeof state.house?.head?.id === "string" ? state.house.head.id : null;
@@ -334,7 +357,7 @@ export function buildDiffLedgerItems(args: {
       });
     }
 
-    items.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+    items.sort(sortLedgerItems);
     return items;
   }
 
@@ -452,7 +475,7 @@ export function buildDiffLedgerItems(args: {
     });
   }
 
-  items.sort((a, b) => b.sort_mag - a.sort_mag || a.tie_key.localeCompare(b.tie_key));
+  items.sort(sortLedgerItems);
   return items;
 }
 
