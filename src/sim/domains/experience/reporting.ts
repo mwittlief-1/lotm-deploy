@@ -15,7 +15,7 @@ import type {
 import { deepCopy } from "../../util";
 import { buildAiRailDebugPacket } from "../ai/debug";
 import { buildCourtDelegationView } from "../court/delegationRegistry";
-import { buildEconomyMaintenanceView } from "../economy/maintenance";
+import { buildEconomyImprovementPreview, buildEconomyMaintenanceView } from "../economy/maintenance";
 import { buildEconomyObligationsView } from "./obligationsView";
 import { buildEconomyPricingView } from "./pricingView";
 import { buildGrantAcquisitionExperienceSurfaces } from "../people/grantAcquisitionRegistry";
@@ -958,13 +958,16 @@ function buildHeadlineCauses(
   });
 
   if (report.construction.completed_improvement_id) {
+    const improvementPreview = buildEconomyImprovementPreview(report.construction.completed_improvement_id);
     causes.push({
       id: "headline_project_completion",
       metric: "project",
       source: "decision",
       magnitude: 1,
       summary: `Project completed: ${report.construction.completed_improvement_id}`,
-      detail: "The turn completed a manor improvement and its effects should be visible in the walkdowns and state surfaces."
+      detail: improvementPreview
+        ? `${improvementPreview.expected_benefit_summary} Ongoing upkeep: ${improvementPreview.recurring_maintenance_coin_cost} coin and ${improvementPreview.recurring_maintenance_labor_required} labor once built.`
+        : "The turn completed a manor improvement and its effects should be visible in the walkdowns and state surfaces."
     });
   }
 

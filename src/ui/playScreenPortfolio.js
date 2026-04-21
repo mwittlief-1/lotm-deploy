@@ -30,7 +30,7 @@ const TOTAL_CARD_CONFIG = [
         label: "Meat stores",
         key: "meat_stores",
         source: "asset",
-        helper: "Total preserved meat carried by the tracked manors.",
+        helper: "Passive preserved meat stock carried by the tracked manors. This snapshot does not expose a separate meat market action.",
         tone: "neutral",
         valueKind: "meat"
     },
@@ -95,7 +95,7 @@ const SELECTED_MANOR_CARD_CONFIG = [
         label: "Meat stores",
         key: "meat_stores",
         source: "asset",
-        helper: "Preserved meat currently held at the selected manor.",
+        helper: "Passive preserved meat stock currently held at the selected manor. This view does not expose a separate meat market or spend control.",
         tone: "neutral",
         valueKind: "meat"
     },

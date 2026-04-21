@@ -380,7 +380,7 @@ export function buildCourtProvisioningSurface(
     debugRows,
     debugStipendRows,
     helperText:
-      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Rationing is intentionally not editable in v0.3.6.",
+      "This sheet stays on the accepted provisioning view and stipend registry. It explains current ration allocation, carry-forward defaults, and stipend placeholders without mutating sim state directly. Rationing is intentionally not editable in v0.3.6. Meat here is passive ration stock already on hand, not a separate market control.",
     householdRows,
     overrideRows,
     rationingDecision: {
