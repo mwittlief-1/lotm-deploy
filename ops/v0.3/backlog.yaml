@@ -12313,28 +12313,29 @@ tasks:
 - id: V03-R6-006-T04
   parent_epic: V03-R6-006
   release: v0.3.6
-  title: Tune birth spacing and dynastic transition summaries
-  status: blocked
+  title: Tune birth-spacing realism and emit dynastic transition facts
+  status: ready
   priority: 73
   tranche: 8
   change_type: behavior_change
-  category: Court
-  phase: none
-  lane_branch: codex/v0.3-lane-social-mechanics
-  goal: Improve noble household birth-spacing realism and make births, deaths, and household growth legible on the resolved-turn path.
+  category: Demography
+  phase: demography
+  lane_branch: codex/v0.3-refactor-kickoff
+  goal: Improve noble household birth-spacing realism and expose deterministic transition facts for player-facing summaries.
   exact_deliverables:
   - normal noble household runs must avoid obviously implausible birth-spacing patterns at a glance
-  - resolved-turn summaries must name important births, deaths, marriages, and household size changes
-  - dynastic transition summaries must remain deterministic and reviewable in fixtures
+  - demography and household-growth changes must emit deterministic summary facts that UI/social surfaces can consume
+  - dynastic transition facts must remain deterministic and reviewable in fixtures
   deps:
   - V03-R6-006-T03
-  requires_integrator: false
-  blocked_reason: birth-spacing realism routes through demography-owned files outside the social lane allowed paths; split or reassign before retrying
+  requires_integrator: true
+  blocked_reason: ''
   allowed_paths:
+  - src/sim/demography.ts
+  - src/sim/phases/phase_demography.ts
   - src/sim/domains/people/**
   - src/sim/domains/court/**
   - src/sim/domains/experience/**
-  - src/ui/**
   - tests/**
   - docs/**
   forbidden_paths:
@@ -12352,16 +12353,16 @@ tasks:
     run_id: ''
   definition_of_done:
   - family growth looks broadly believable in routine household views
-  - the player can tell why household size changed on the resolved-turn path
+  - downstream surfaces can tell why household size changed from deterministic transition facts
   - any intentional simulation outcome drift is explicitly reviewed and justified
   done_conditions:
   - birth-spacing realism improves in deterministic fixtures or seed review
-  - births, deaths, and marriages are summarized clearly for the player
+  - births, deaths, marriages, or household-size changes produce deterministic transition facts
   - golden-review notes exist for any intended sim-output drift
   required_test_updates:
   - add deterministic demographic fixtures or seed reviews for spacing changes
-  - extend turn-report or household UI tests for dynastic transition summaries
-  - focused command: npm exec vitest run tests/ui/householdPanel.test.tsx tests/ui/turnReportPanel.test.tsx tests/sim/*demograph*.test.ts
+  - extend sim/reporting tests for emitted dynastic transition facts
+  - focused command: npm exec vitest run tests/sim/*demograph*.test.ts tests/sim/turn_explanation_contract.test.ts
   stop_rules:
   - stop and escalate if this work expands into a broad fertility or aging refactor rather than bounded realism tuning
   - do not claim completion without explicit golden-review notes if simulation outcomes change
@@ -12371,7 +12372,7 @@ tasks:
   handoff:
     report_path: ops/v0.3/progress/runs/V03-R6-006-T04.md
   handoff_requirements:
-  - include one believable-spacing example and one dynastic transition summary example
+  - include one believable-spacing example and one emitted transition-fact example
 - id: V03-R6-007-T01
   parent_epic: V03-R6-007
   release: v0.3.6
@@ -12599,19 +12600,27 @@ tasks:
   - V03-R6-008-T04
   - V03-R6-008-T05
   - V03-R6-008-T06
+  - V03-R6-001-T05
   - V03-R6-001-T04
   - V03-R6-002-T04
+  - V03-R6-002-T05
   - V03-R6-003-T03
   - V03-R6-003-T04
   - V03-R6-003-T05
+  - V03-R6-003-T06
+  - V03-R6-004-T04
   - V03-R6-007-T01
   - V03-R6-005-T01
+  - V03-R6-005-T04
   - V03-R6-006-T01
   - V03-R6-005-T02
   - V03-R6-005-T03
   - V03-R6-006-T02
   - V03-R6-006-T03
   - V03-R6-006-T04
+  - V03-R6-006-T05
+  - V03-R6-006-T06
+  - V03-R6-006-T07
   - V03-R6-007-T02
   requires_integrator: true
   blocked_reason: release closeout must wait for the decomposed partially-covered story tasks and the explicit gate-remediation tasks to be accepted
@@ -12839,3 +12848,481 @@ tasks:
     report_path: ops/v0.3/progress/runs/V03-R6-008-T06.md
   handoff_requirements:
   - include the exact qa artifact path, final exit status, and any stale-path cleanup performed
+- id: V03-R6-001-T05
+  parent_epic: V03-R6-001
+  release: v0.3.6
+  title: Route Decisions section actions to live decision paths
+  status: todo
+  priority: 78
+  tranche: 8
+  change_type: behavior_change
+  category: UI
+  phase: decisions
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Make the Decisions section a live action router instead of a passive status list.
+  exact_deliverables:
+  - decisions cards must route to the accepted live action surfaces for obligations, improvements, and marriage
+  - cards that cannot yet execute a decision must say why and point to the right actionable surface
+  - no player-facing action button may be visually enabled without either queueing a deterministic decision or opening a working decision surface
+  deps:
+  - V03-R6-002-T05
+  - V03-R6-003-T04
+  - V03-R6-005-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - tests/ui/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - Decisions is actionable for the decision classes already supported in v0.3.6
+  - dead buttons are removed, disabled with explanation, or routed to a working surface
+  - the decision path stays deterministic and does not mutate sim state directly from UI
+  done_conditions:
+  - obligations, improvement, and marriage decision prompts either open a working surface or queue accepted payloads
+  - non-actionable cards include explicit copy rather than pretending to be live
+  - UI tests cover at least two action routes and one intentionally non-actionable route
+  required_test_updates:
+  - extend Decisions or PlayScreen UI tests for live route behavior
+  - focused command: npm exec vitest run tests/ui/decisionsPanelCourtBudget.test.tsx tests/ui/playScreenObligations.test.ts tests/ui/prospectsPanel.test.tsx
+  stop_rules:
+  - stop and escalate if a card requires a new simulation decision type instead of routing to an existing accepted one
+  - do not directly mutate sim state from the UI
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-001-T05.md
+  handoff_requirements:
+  - include the exact cards audited and the action route or disabled reason for each
+- id: V03-R6-002-T05
+  parent_epic: V03-R6-002
+  release: v0.3.6
+  title: Populate Obligations detail sheet from v2 counterparty truth
+  status: ready
+  priority: 84
+  tranche: 8
+  change_type: behavior_change
+  category: Economy
+  phase: obligations
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Fix the empty Obligations detail modal by rendering the accepted economy_obligations_view_v2 data with current, arrears, payment, and consequence detail.
+  exact_deliverables:
+  - the Open Detail Sheet path must show per-counterparty current due, arrears carried in, paid this turn, unpaid carried out, and collector state
+  - obligation consequence fields must be visible when arrears create unrest, relationship pressure, enforcement, vacancy, or succession effects
+  - the detail sheet must agree with Coin & Dues and Council Agenda rather than becoming a parallel summary
+  deps:
+  - V03-R6-002-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - opening the obligations detail sheet explains what is owed, to whom, what was paid, and what remains
+  - dead or vacant collectors use the same successor/vacancy labels as the accepted obligations contract
+  - the modal no longer opens as an information-empty shell
+  done_conditions:
+  - obligations detail contains v2 counterparty rows and consequence notes
+  - tests prove the detail sheet is populated for at least one current-due and one arrears case
+  - Coin & Dues, Council Agenda, and detail sheet labels stay aligned
+  required_test_updates:
+  - extend obligations UI and sim tests for populated detail rows
+  - focused command: npm exec vitest run tests/ui/playScreenObligations.test.ts tests/sim/obligations_view.test.ts
+  stop_rules:
+  - stop and escalate if the detail sheet needs fields that economy_obligations_view_v2 cannot truthfully provide
+  - do not invent synthetic obligation rows outside the accepted registry/view contract
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-002-T05.md
+  handoff_requirements:
+  - include one populated modal example with current, arrears, paid, unpaid, and consequence fields
+- id: V03-R6-003-T06
+  parent_epic: V03-R6-003
+  release: v0.3.6
+  title: Restore consumption and maintenance detail audit surfaces
+  status: ready
+  priority: 83
+  tranche: 8
+  change_type: behavior_change
+  category: Economy
+  phase: balance
+  lane_branch: codex/v0.3-lane-economy-fiscal
+  goal: Restore the v0.3.5-style detailed household consumption and maintenance audit path while proving upkeep participates in player-visible ledger math.
+  exact_deliverables:
+  - food or provisioning detail must again show household consumption rows with bushel and meat totals by relevant household/provisioning groups
+  - maintenance detail must show specific labor and coin upkeep drivers, not only a generic Explain Changes line
+  - maintenance and consumption detail rows must reconcile to the main food/coin walkdowns when they affect gameplay
+  deps:
+  - V03-R6-003-T03
+  - V03-R6-002-T05
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/economy/**
+  - src/sim/domains/court/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - consumption detail is visible without exported JSON and includes bushel/meat totals where the model tracks them
+  - maintenance detail names the coin and labor upkeep drivers behind the headline line
+  - ledger walkdowns and detail tables reconcile rather than living outside gameplay math
+  done_conditions:
+  - household consumption table is available from the player path
+  - maintenance coin and labor rows are visible and auditable
+  - food and coin walkdowns include or reconcile to the same maintenance and consumption numbers
+  required_test_updates:
+  - extend ReceiptsViewer, ManorState, provisioning, or turn explanation tests for detail-table visibility and reconciliation
+  - focused command: npm exec vitest run tests/ui/receiptsViewerPanel.test.tsx tests/ui/manorStatePanel.test.tsx tests/ui/courtProvisioningPanel.test.tsx tests/sim/turn_explanation_contract.test.ts
+  stop_rules:
+  - stop and escalate if restoring the table requires changing provisioning semantics rather than reading existing consumption data
+  - do not mark complete if detail rows are visible but not connected to the walkdown numbers
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-003-T06.md
+  handoff_requirements:
+  - include one consumption-table example and one maintenance-detail reconciliation example
+- id: V03-R6-004-T04
+  parent_epic: V03-R6-004
+  release: v0.3.6
+  title: Prevent relationship baselines from rendering as turn deltas
+  status: ready
+  priority: 85
+  tranche: 8
+  change_type: behavior_change
+  category: People
+  phase: relationships
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Close the virtual-UAT regression where absolute A/R/T standings such as A +50 / R +50 / T +20 render as if they were per-turn relationship movement.
+  exact_deliverables:
+  - Diff Ledger must only show relationship rows when there is true per-turn movement or clearly label current standing outside the delta path
+  - relationship rows must carry cause text from relationship_change_log_v1 or remain hidden when no cause-backed change exists
+  - the supplied UAT export must no longer produce House Ivydale, House Ketterby, or spouse baseline rows as fake deltas
+  deps:
+  - V03-R6-004-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/people/**
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - baseline relationship standings are never presented as turn movement
+  - true relationship deltas remain visible with a named cause and scope
+  - dossier/person standing and Diff Ledger movement remain visually distinct
+  done_conditions:
+  - no +50/+50/+20 baseline rows appear in Diff Ledger for the supplied export unless there was an actual turn delta of that size
+  - cause-backed relationship changes still appear and are attributable
+  - tests cover baseline suppression and true-delta rendering
+  required_test_updates:
+  - add or extend relationship/diff-ledger tests with a baseline-only edge and a real changed edge
+  - focused command: npm exec vitest run tests/ui/diffLedgerPanel.test.tsx tests/ui/playScreenModel.test.ts tests/sim/turn_explanation_contract.test.ts
+  stop_rules:
+  - stop and escalate if fixing this requires direct relationship-store writes outside the relationship engine
+  - do not paper over the bug by hiding all relationship movement
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-004-T04.md
+  handoff_requirements:
+  - include the before/after result for the supplied export or an equivalent regression fixture
+- id: V03-R6-005-T04
+  parent_epic: V03-R6-005
+  release: v0.3.6
+  title: Close unified marriage workflow action gaps
+  status: ready
+  priority: 84
+  tranche: 8
+  change_type: behavior_change
+  category: People
+  phase: marriage
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Make the new unified marriage workflow fully actionable by restoring scouting/search, accept/reject, and outbound offer construction/send from one coherent path.
+  exact_deliverables:
+  - the new marriage workflow must include the scouting/search capability that existed before the redesign
+  - inbound proposals must not exist as contradictory old and new action paths; accept/reject must live on or route through the unified workflow
+  - outbound offers must support construction and deterministic send or queue payloads rather than stopping at preview copy
+  deps:
+  - V03-R6-005-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - src/sim/domains/people/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - the new workflow can scout/search, accept/reject inbound proposals, and construct/send or queue outbound offers
+  - old duplicate proposal surfaces are removed, demoted, or routed so they no longer contradict the new workflow
+  - all action paths queue accepted deterministic decision payloads and show immediate post-action state
+  done_conditions:
+  - scouting/search is available from the unified marriage area
+  - inbound accept/reject actions are available and no longer require using the old-only mechanic
+  - outbound construction produces send_outbound_offer or queue_outbound_offer payloads when submitted
+  required_test_updates:
+  - extend prospects/marriage workflow UI tests for search, inbound accept/reject, and outbound submit
+  - focused command: npm exec vitest run tests/ui/prospectsPanel.test.tsx tests/ui/marriageWorkflowView.test.ts tests/sim/marriage_decision_budget.test.ts
+  stop_rules:
+  - stop and escalate if the accepted social contract lacks enough payload data to queue a deterministic decision
+  - do not reintroduce a second independent marriage workflow as the fix
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-005-T04.md
+  handoff_requirements:
+  - include one scouting/search example, one inbound accept or reject example, and one outbound submit payload example
+- id: V03-R6-006-T05
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Restore Agenda View Portfolio target
+  status: ready
+  priority: 82
+  tranche: 8
+  change_type: behavior_change
+  category: UI
+  phase: agenda
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Make the Agenda View Portfolio action land on a rendered portfolio section instead of pointing to a missing or inert target.
+  exact_deliverables:
+  - PLAY_SCREEN_CARD_ORDER or equivalent layout wiring must render the portfolio_overview target when the portfolio contract exists
+  - the Agenda View Portfolio button must scroll, open, or navigate to that target consistently
+  - tests must prove the action is not a dead button
+  deps:
+  - V03-R6-006-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/ui/**
+  - tests/ui/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - View Portfolio is visibly actionable from Agenda
+  - the portfolio card target is part of the normal play-screen layout when data exists
+  - layout tests reflect the accepted card order
+  done_conditions:
+  - portfolio_overview renders in the card order or equivalent route
+  - Agenda View Portfolio resolves to the rendered target
+  - UI tests fail if the target disappears again
+  required_test_updates:
+  - extend play-screen layout or agenda tests for the portfolio target
+  - focused command: npm exec vitest run tests/ui/playScreenAgenda.test.ts tests/ui/playScreenLayout.test.ts tests/ui/playScreenPortfolio.test.ts
+  stop_rules:
+  - stop and escalate if the portfolio surface itself is missing rather than only disconnected from layout
+  - do not change simulation portfolio semantics in this UI routing task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T05.md
+  handoff_requirements:
+  - include the rendered target id and one Agenda action assertion
+- id: V03-R6-006-T06
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Hydrate court office registry from living legacy officers
+  status: ready
+  priority: 83
+  tranche: 8
+  change_type: behavior_change
+  category: Court
+  phase: agenda
+  lane_branch: codex/v0.3-lane-social-mechanics
+  goal: Prevent false Steward vacant warnings by hydrating the canonical office registry from living legacy court officers when the registry is missing.
+  exact_deliverables:
+  - ensureCourtOfficeRegistry or equivalent court registry path must mirror living legacy court_officers into canonical seat state
+  - dead, missing, or invalid legacy officer ids must not create phantom filled seats
+  - Agenda, household presence, and provisioning surfaces must agree on steward vacancy truth
+  deps:
+  - V03-R6-006-T03
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/court/**
+  - src/sim/domains/people/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - a living steward in the court roster cannot coexist with a false vacant-steward Agenda warning
+  - dead or absent legacy officers do not mask real vacancies
+  - office truth remains deterministic and test-covered
+  done_conditions:
+  - missing office registry hydrates living legacy officers
+  - Agenda vacancy warnings match hydrated office truth
+  - tests cover living, dead, and absent officer cases
+  required_test_updates:
+  - extend agenda registry or court office tests for legacy hydration
+  - focused command: npm exec vitest run tests/sim/agenda_registry.test.ts tests/ui/playScreenAgenda.test.ts tests/ui/householdPanel.test.tsx
+  stop_rules:
+  - stop and escalate if office hydration requires changing phase order or turn orchestration
+  - do not create filled office seats for dead or unknown persons
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T06.md
+  handoff_requirements:
+  - include living-steward, dead-steward, and absent-steward fixture evidence
+- id: V03-R6-006-T07
+  parent_epic: V03-R6-006
+  release: v0.3.6
+  title: Render dynastic transition summaries from accepted facts
+  status: todo
+  priority: 76
+  tranche: 8
+  change_type: behavior_change
+  category: Court
+  phase: demography
+  lane_branch: codex/v0.3-lane-ui-experience
+  goal: Surface births, deaths, marriages, and household-size changes on the resolved-turn player path using accepted deterministic transition facts.
+  exact_deliverables:
+  - Turn Report, Household Details, or Explain Changes must summarize important births, deaths, marriages, and household growth
+  - the summary must consume the accepted transition facts from V03-R6-006-T04 rather than inventing UI-only inference
+  - the player must be able to tell why household size changed without opening debug data
+  deps:
+  - V03-R6-006-T04
+  requires_integrator: false
+  blocked_reason: ''
+  allowed_paths:
+  - src/sim/domains/experience/**
+  - src/ui/**
+  - tests/**
+  - docs/**
+  forbidden_paths:
+  - src/sim/turn.ts
+  required_gates:
+  - qa
+  - preflight
+  - seed_replay_batch_twice
+  requires_golden_change: false
+  claim:
+    status: unclaimed
+    claimed_by: ''
+    claimed_at: ''
+    claim_expires_at: ''
+    run_id: ''
+  definition_of_done:
+  - household and dynastic changes are visible in the same resolved turn they matter
+  - summaries are player-facing and source-backed
+  - no debug-only dynastic event list is required for basic comprehension
+  done_conditions:
+  - birth, death, marriage, or household-growth summary appears on the player path when transition facts exist
+  - household-size change explanation is visible in tests or fixtures
+  - player copy avoids schema-shaped event names
+  required_test_updates:
+  - extend Turn Report, Household, or Explain Changes UI tests for transition summary rendering
+  - focused command: npm exec vitest run tests/ui/turnReportPanel.test.tsx tests/ui/householdPanel.test.tsx tests/sim/turn_explanation_contract.test.ts
+  stop_rules:
+  - stop and escalate if V03-R6-006-T04 does not expose enough source-backed facts to render a truthful summary
+  - do not tune birth spacing in this UI/rendering task
+  escalation_triggers:
+  - unexpected_golden_diff
+  - replay_mismatch
+  handoff:
+    report_path: ops/v0.3/progress/runs/V03-R6-006-T07.md
+  handoff_requirements:
+  - include one household-size-change summary example and the source fact it consumed

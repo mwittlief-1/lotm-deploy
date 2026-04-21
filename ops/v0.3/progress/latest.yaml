@@ -6,7 +6,7 @@ runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: 6429374fd1777e27755d70fc5a7cd44c2a446851
+  git_commit: 73136e798e4acf38605a73a673ea08c8e3ffa60f
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
     run2: 4c3f0f38d3a6796b60640e9b180f674b2d4fa63b14486be001cfb274bc77095c
-notes: Integrator accepted merged social/UI lane work on 2026-04-21 after merging marriage workflow contract, unified marriage UI, household provisioning table, unrest walkdown, family-status, agenda/presence continuity, and identity-disambiguation changes into codex/tmp-v036-integrator. V03-R6-006-T04 remains blocked on demography-owned birth-spacing paths. Lane-parallel scheduling is active with current_task_id set to V03-R6-003-T04 and no active lane claims recorded.
+notes: Virtual UAT gap closeout tasks were added on 2026-04-21 for obligations detail, consumption/maintenance audit detail, relationship baseline suppression, marriage workflow actions, Agenda portfolio routing, steward office truth, Decisions action routing, and dynastic transition rendering. Lane-parallel scheduling is active with current_task_id set to V03-R6-003-T04. No active lane claims are currently recorded; V03-R6-006-T04 is now integrator-owned because it touches demography phase surfaces.
 active_claims: {}
