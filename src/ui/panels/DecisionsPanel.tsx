@@ -54,6 +54,7 @@ type DecisionsPanelProps = {
   courtDecisionBudget: CourtDecisionBudgetSurface | null;
   courtProvisioningSurface: CourtProvisioningSurface | null;
   marriageWindow: MarriageWindow | null;
+  marriageWorkflowActive?: boolean;
   maxLaborShift: number;
   obligations: any;
   obligationsSections: ObligationsCounterpartyContractSection[];
@@ -273,6 +274,7 @@ export function DecisionsPanel({
   courtDecisionBudget,
   courtProvisioningSurface,
   marriageWindow,
+  marriageWorkflowActive = false,
   maxLaborShift,
   obligations,
   obligationsSections,
@@ -422,7 +424,20 @@ export function DecisionsPanel({
         </div>
       ) : null}
 
-      {outboundMarriageSurface ? (
+      {marriageWorkflowActive ? (
+        <div
+          data-marriage-decisions-demoted="true"
+          style={{ ...PLAY_SCREEN_SUBCARD_STYLE, marginTop: 12, padding: 12 }}
+        >
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.6, opacity: 0.75, textTransform: "uppercase" }}>
+            Marriage workflow
+          </div>
+          <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82, lineHeight: 1.45 }}>
+            Marriage replies, scouting/search, and outbound offer construction now live together in the Prospects marriage
+            workflow. The old decision-panel marriage controls are hidden so proposals do not appear in two places.
+          </div>
+        </div>
+      ) : outboundMarriageSurface ? (
         <div style={{ ...PLAY_SCREEN_SUBCARD_STYLE, marginTop: 12, padding: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "baseline", flexWrap: "wrap" }}>
             <div>
@@ -760,7 +775,7 @@ export function DecisionsPanel({
         </div>
       </div>
 
-      {marriageWindow && prospectsTotalCount === 0 ? (
+      {marriageWindow && prospectsTotalCount === 0 && !marriageWorkflowActive ? (
         <LegacyMarriageWindowPanel
           eligibleMaidensLocalRaw={eligibleMaidensLocalRaw}
           manor={manor}

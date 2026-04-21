@@ -8,7 +8,15 @@ import {
 } from "../../sim/constants";
 import type { RunState, TurnContext, TurnDecisions } from "../../sim/types";
 import { buildHouseDossierSurface, listHouseDossierIds } from "../houseDossierView";
-import { buildMarriageWorkflowSurface } from "../marriageWorkflowView";
+import {
+  buildMarriageWorkflowSurface,
+  marriageWorkflowInboundActionKey,
+  marriageWorkflowOfferActionKey,
+  marriageWorkflowScoutActionKey,
+  type MarriageWorkflowActionStatus,
+  type MarriageWorkflowInboundOfferSurface,
+  type MarriageWorkflowSubjectSurface
+} from "../marriageWorkflowView";
 import { buildPersonCardSurface } from "../personCardView";
 import {
   buildHouseIndexes,
@@ -179,6 +187,10 @@ export function PlayScreen({
   const [portfolioScopeMode, setPortfolioScopeMode] = useState<PortfolioScopeMode>("portfolio");
   const [selectedPortfolioManorId, setSelectedPortfolioManorId] = useState<string | null>(null);
   const [receiptViewerRoute, setReceiptViewerRoute] = useState<ReceiptViewerRoute | null>(null);
+  const [marriageWorkflowActionStatus, setMarriageWorkflowActionStatus] = useState<{
+    byKey: Record<string, MarriageWorkflowActionStatus>;
+    turnIndex: number;
+  }>({ byKey: {}, turnIndex: ctx.report.turn_index });
   const m = ctx.preview_state.manor;
   const ob = ctx.preview_state.manor.obligations;
   const mw = ctx.marriage_window;
@@ -536,6 +548,40 @@ export function PlayScreen({
   }, [ctx.preview_state]);
   const dossierHouseIds = useMemo(() => new Set(listHouseDossierIds(ctx.preview_state)), [ctx.preview_state]);
   const marriageWorkflowSurface = useMemo(() => buildMarriageWorkflowSurface(ctx.preview_state), [ctx.preview_state]);
+  const marriageWorkflowActive = Boolean(marriageWorkflowSurface?.subjects.length);
+  const marriageWorkflowActionStatusByKey = useMemo(() => {
+    const byKey: Record<string, MarriageWorkflowActionStatus> =
+      marriageWorkflowActionStatus.turnIndex === ctx.report.turn_index
+        ? { ...marriageWorkflowActionStatus.byKey }
+        : {};
+    const marriageDecision: any = decisions.marriage;
+
+    if (marriageWorkflowSurface && marriageDecision?.action === "scout") {
+      for (const workflow of marriageWorkflowSurface.subjects) {
+        byKey[marriageWorkflowScoutActionKey(workflow.workflowId)] = "queued";
+      }
+    }
+
+    if (marriageWorkflowSurface && marriageDecision?.action === "reject_all") {
+      for (const workflow of marriageWorkflowSurface.subjects) {
+        for (const offer of workflow.inboundOffers) {
+          byKey[marriageWorkflowInboundActionKey(offer.entryId)] = "rejected";
+        }
+      }
+    }
+
+    if (marriageWorkflowSurface && marriageDecision?.action === "accept") {
+      const workflow = marriageWorkflowSurface.subjects.find(
+        (subjectWorkflow) => subjectWorkflow.subject.personId === marriageDecision.child_id
+      );
+      const offer = workflow?.inboundOffers.find((entry) => entry.offerIndex === marriageDecision.offer_index);
+      if (offer) {
+        byKey[marriageWorkflowInboundActionKey(offer.entryId)] = "accepted";
+      }
+    }
+
+    return byKey;
+  }, [ctx.report.turn_index, decisions.marriage, marriageWorkflowActionStatus, marriageWorkflowSurface]);
   const activePersonCardSurface = useMemo(
     () => (activePersonCardId ? buildPersonCardSurface(ctx.preview_state, activePersonCardId) : null),
     [activePersonCardId, ctx.preview_state]
@@ -698,6 +744,88 @@ export function PlayScreen({
     setActiveHouseDossierId(null);
   }
 
+  function updateMarriageWorkflowStatus(updates: Record<string, MarriageWorkflowActionStatus>) {
+    setMarriageWorkflowActionStatus((current) => ({
+      byKey: {
+        ...(current.turnIndex === ctx.report.turn_index ? current.byKey : {}),
+        ...updates
+      },
+      turnIndex: ctx.report.turn_index
+    }));
+  }
+
+  function handleMarriageWorkflowAcceptInbound(
+    workflow: MarriageWorkflowSubjectSurface,
+    offer: MarriageWorkflowInboundOfferSurface
+  ) {
+    setDecisions((current: any) => ({
+      ...current,
+      marriage: {
+        kind: "marriage",
+        action: "accept",
+        child_id: workflow.subject.personId,
+        offer_index: offer.offerIndex
+      }
+    }));
+    updateMarriageWorkflowStatus({ [marriageWorkflowInboundActionKey(offer.entryId)]: "accepted" });
+    setToast({
+      kind: "ok",
+      message: `Accepted proposal for ${workflow.subject.title} queued in this turn plan.`
+    });
+  }
+
+  function handleMarriageWorkflowRejectInbound(
+    workflow: MarriageWorkflowSubjectSurface,
+    _offer: MarriageWorkflowInboundOfferSurface
+  ) {
+    const updates: Record<string, MarriageWorkflowActionStatus> = {};
+    for (const offer of workflow.inboundOffers) {
+      updates[marriageWorkflowInboundActionKey(offer.entryId)] = "rejected";
+    }
+    setDecisions((current: any) => ({
+      ...current,
+      marriage: { kind: "marriage", action: "reject_all" }
+    }));
+    updateMarriageWorkflowStatus(updates);
+    setToast({
+      kind: "ok",
+      message: `Rejected inbound proposals for ${workflow.subject.title} in this turn plan.`
+    });
+  }
+
+  function handleMarriageWorkflowScout(workflow: MarriageWorkflowSubjectSurface) {
+    setDecisions((current: any) => ({
+      ...current,
+      marriage: { kind: "marriage", action: "scout" }
+    }));
+    updateMarriageWorkflowStatus({ [marriageWorkflowScoutActionKey(workflow.workflowId)]: "queued" });
+    setToast({
+      kind: "ok",
+      message: `Scout/search queued for ${workflow.subject.title}.`
+    });
+  }
+
+  function handleMarriageWorkflowClearScout(workflow: MarriageWorkflowSubjectSurface) {
+    setDecisions((current: any) => ({
+      ...current,
+      marriage: { kind: "marriage", action: "none" }
+    }));
+    updateMarriageWorkflowStatus({ [marriageWorkflowScoutActionKey(workflow.workflowId)]: "no_effect" });
+    setToast({
+      kind: "ok",
+      message: `Scout/search cleared for ${workflow.subject.title}.`
+    });
+  }
+
+  function handleMarriageWorkflowConstructOffer(workflow: MarriageWorkflowSubjectSurface) {
+    updateMarriageWorkflowStatus({ [marriageWorkflowOfferActionKey(workflow.workflowId)]: "no_effect" });
+    setToast({
+      kind: "ok",
+      message:
+        "Outbound offer construction is visible in the unified workflow. Final submission waits for the Social lane contract, so no sim decision payload was queued."
+    });
+  }
+
   function openObligationsDetails(origin: "turn_report" | "decisions", focus: ObligationsModalFocus = "overview") {
     setObligationsModalRoute(createObligationsModalRoute(origin, focus));
   }
@@ -823,7 +951,13 @@ export function PlayScreen({
         hiddenCount={prospectsHiddenCount}
         hiddenIds={prospectsHiddenIds}
         houseLabel={houseLabel}
+        marriageWorkflowActionStatus={marriageWorkflowActionStatusByKey}
         marriageWorkflowSurface={marriageWorkflowSurface}
+        onMarriageWorkflowAcceptInbound={handleMarriageWorkflowAcceptInbound}
+        onMarriageWorkflowClearScout={handleMarriageWorkflowClearScout}
+        onMarriageWorkflowConstructOffer={handleMarriageWorkflowConstructOffer}
+        onMarriageWorkflowRejectInbound={handleMarriageWorkflowRejectInbound}
+        onMarriageWorkflowScout={handleMarriageWorkflowScout}
         onOpenHouseDossier={openHouseDossier}
         onOpenPersonCard={openPersonCard}
         personNameFromRegistry={personNameFromRegistry}
@@ -883,14 +1017,29 @@ export function PlayScreen({
         laborRequested={laborRequested}
         manor={m}
         courtDecisionBudget={courtDecisionBudget}
+        courtProvisioningSurface={null}
         marriageWindow={mw}
+        marriageWorkflowActive={marriageWorkflowActive}
         maxLaborShift={ctx.max_labor_shift}
         obligations={ob}
         obligationsSections={allObligationsSections}
         onExportFullRunJson={onExportFullRunJson}
         onExportRunSummary={onExportRunSummary}
+        onOpenCourtProvisioning={() =>
+          setToast({
+            kind: "ok",
+            message: "Court provisioning details live in the household provisioning table for this lane."
+          })
+        }
         onOpenLog={onOpenLog}
         onOpenObligationsDetails={(focus) => openObligationsDetails("decisions", focus)}
+        onOpenOutboundMarriage={() =>
+          setToast({
+            kind: "ok",
+            message: "Use the unified marriage workflow in Prospects for scouting and outbound offers."
+          })
+        }
+        outboundMarriageSurface={null}
         pfHouseLabelById={pfHouseIx.houseLabelById}
         pfParentsByChild={pfParentsByChild}
         pfPeopleRec={pfPeopleRec}

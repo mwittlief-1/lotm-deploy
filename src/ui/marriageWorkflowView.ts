@@ -23,11 +23,22 @@ export type MarriageWorkflowLinkSurface = {
   title: string;
 };
 
+export type MarriageWorkflowActionStatus =
+  | "available"
+  | "accepted"
+  | "rejected"
+  | "sent"
+  | "queued"
+  | "resolved"
+  | "no_effect";
+
 export type MarriageWorkflowInboundOfferSurface = {
+  acceptOutcomeSummary: string;
   effectSummary: string;
   entryId: string;
   houseId: string | null;
   houseLabel: string | null;
+  offerIndex: number;
   offerSummary: string;
   rejectOutcomeSummary: string;
   candidate: MarriageWorkflowLinkSurface;
@@ -38,6 +49,7 @@ export type MarriageWorkflowSubjectSurface = {
   inboundOffers: MarriageWorkflowInboundOfferSurface[];
   inboundSummary: string;
   latestOfferSummary: string | null;
+  latestOfferStatus: MarriageWorkflowActionStatus | null;
   outboundFeaturedCandidate: MarriageWorkflowLinkSurface | null;
   outboundSendOutcomeSummary: string | null;
   outboundSummary: string;
@@ -129,6 +141,11 @@ function inboundOfferSummary(offer: MarriageWorkflowInboundOfferV1): string {
   return `${offer.candidate.person_name}${candidateHouse ? ` from ${candidateHouse}` : ""} is waiting for your response.`;
 }
 
+function inboundAcceptSummary(offer: MarriageWorkflowInboundOfferV1): string {
+  const candidateHouse = houseLabel(offer.candidate.house_name, offer.candidate.house_id);
+  return `Accepting queues this proposal for resolution${candidateHouse ? ` with ${candidateHouse}` : ""}.`;
+}
+
 function inboundRejectSummary(offerCount: number, firstHouseLabel: string | null): string {
   if (offerCount <= 0) {
     return "No inbound offers are pending.";
@@ -145,6 +162,15 @@ function latestOfferSummary(subjectView: MarriageWorkflowSubjectViewV1): string 
   const candidateHouse = houseLabel(latestOffer.candidate.house_name, latestOffer.candidate.house_id);
   const candidateLabel = candidateHouse ? `${latestOffer.candidate.person_name} of ${candidateHouse}` : latestOffer.candidate.person_name;
   return `Last outbound offer: ${formatToken(latestOffer.state)} with ${candidateLabel}.`;
+}
+
+function latestOfferStatus(subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowActionStatus | null {
+  const latestOffer = subjectView.latest_outbound_offer;
+  if (!latestOffer) return null;
+  if (latestOffer.state === "accepted") return "accepted";
+  if (latestOffer.state === "rejected") return "rejected";
+  if (latestOffer.state === "generated" || latestOffer.state === "pending") return "sent";
+  return "resolved";
 }
 
 function outboundSummary(subjectView: MarriageWorkflowSubjectViewV1): string {
@@ -174,11 +200,13 @@ function outboundSendOutcomeSummary(previewState: RunState, subjectView: Marriag
 
 function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSubjectViewV1): MarriageWorkflowSubjectSurface {
   const inboundOffers = subjectView.inbound_offers.map((offer) => ({
+    acceptOutcomeSummary: inboundAcceptSummary(offer),
     candidate: personLink(previewState, offer.candidate),
     effectSummary: effectSummary(offer.expected_effects),
     entryId: offer.entry_id,
     houseId: offer.candidate.house_id,
     houseLabel: houseLabel(offer.candidate.house_name, offer.candidate.house_id),
+    offerIndex: offer.offer_index,
     offerSummary: inboundOfferSummary(offer),
     rejectOutcomeSummary: inboundRejectSummary(
       subjectView.inbound_offers.length,
@@ -199,6 +227,7 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
         ? `${subjectView.inbound_offers.length} inbound proposal${subjectView.inbound_offers.length === 1 ? "" : "s"} waiting on this subject.`
         : "No inbound proposal is active for this subject.",
     latestOfferSummary: latestOfferSummary(subjectView),
+    latestOfferStatus: latestOfferStatus(subjectView),
     outboundFeaturedCandidate,
     outboundSendOutcomeSummary: outboundSendOutcomeSummary(previewState, subjectView),
     outboundSummary: outboundSummary(subjectView),
@@ -220,6 +249,18 @@ function subjectSurface(previewState: RunState, subjectView: MarriageWorkflowSub
       })),
     workflowId: `workflow:${subjectView.subject.person_id}`,
   };
+}
+
+export function marriageWorkflowInboundActionKey(entryId: string): string {
+  return `marriage_workflow:inbound:${entryId}`;
+}
+
+export function marriageWorkflowOfferActionKey(workflowId: string): string {
+  return `marriage_workflow:outbound_offer:${workflowId}`;
+}
+
+export function marriageWorkflowScoutActionKey(workflowId: string): string {
+  return `marriage_workflow:scout:${workflowId}`;
 }
 
 export function buildMarriageWorkflowSurface(

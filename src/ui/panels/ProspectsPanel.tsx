@@ -2,7 +2,17 @@ import React from "react";
 import { getGrantProspectTemplate } from "../../content/experienceContent";
 import type { RunState } from "../../sim/types";
 import { buildHouseSecondaryIdentifier, buildPersonSecondaryIdentifier } from "../identityLabels";
-import type { MarriageWorkflowSurface } from "../marriageWorkflowView";
+import type {
+  MarriageWorkflowActionStatus,
+  MarriageWorkflowInboundOfferSurface,
+  MarriageWorkflowSubjectSurface,
+  MarriageWorkflowSurface
+} from "../marriageWorkflowView";
+import {
+  marriageWorkflowInboundActionKey,
+  marriageWorkflowOfferActionKey,
+  marriageWorkflowScoutActionKey
+} from "../marriageWorkflowView";
 import { Tip, formatParentsLine } from "../viewHelpers";
 import { HouseDossierTrigger } from "./HouseDossierTrigger";
 import { PersonCardTrigger } from "./PersonCardTrigger";
@@ -23,7 +33,19 @@ type ProspectsPanelProps = {
   hiddenIds: string[];
   hiddenCount: number;
   houseLabel: (houseId: string | null | undefined) => string;
+  marriageWorkflowActionStatus?: Record<string, MarriageWorkflowActionStatus | undefined>;
   marriageWorkflowSurface?: MarriageWorkflowSurface | null;
+  onMarriageWorkflowAcceptInbound?: (
+    workflow: MarriageWorkflowSubjectSurface,
+    offer: MarriageWorkflowInboundOfferSurface
+  ) => void;
+  onMarriageWorkflowClearScout?: (workflow: MarriageWorkflowSubjectSurface) => void;
+  onMarriageWorkflowConstructOffer?: (workflow: MarriageWorkflowSubjectSurface) => void;
+  onMarriageWorkflowRejectInbound?: (
+    workflow: MarriageWorkflowSubjectSurface,
+    offer: MarriageWorkflowInboundOfferSurface
+  ) => void;
+  onMarriageWorkflowScout?: (workflow: MarriageWorkflowSubjectSurface) => void;
   onOpenHouseDossier?: (houseId: string) => void;
   onOpenPersonCard?: (personId: string) => void;
   personNameFromRegistry: (personId: string | null | undefined) => string | null;
@@ -44,6 +66,49 @@ type ProspectsPanelProps = {
   uncertaintyLabel: (uncertainty: string | null | undefined) => string | null;
 };
 
+function workflowStatusLabel(status: MarriageWorkflowActionStatus): string {
+  switch (status) {
+    case "accepted":
+      return "Accepted";
+    case "rejected":
+      return "Rejected";
+    case "sent":
+      return "Sent";
+    case "queued":
+      return "Queued";
+    case "resolved":
+      return "Resolved";
+    case "no_effect":
+      return "No effect";
+    case "available":
+    default:
+      return "Available";
+  }
+}
+
+function workflowStatusDetail(status: MarriageWorkflowActionStatus, availableDetail: string): string {
+  switch (status) {
+    case "accepted":
+      return "Accepted in the current turn plan.";
+    case "rejected":
+      return "Rejected in the current turn plan.";
+    case "sent":
+      return "Sent and waiting for resolution.";
+    case "queued":
+      return "Queued for the next turn resolution.";
+    case "resolved":
+      return "Already resolved in the visible workflow state.";
+    case "no_effect":
+      return "No decision effect is queued.";
+    case "available":
+    default:
+      return availableDetail;
+  }
+}
+
+const workflowPendingContractTitle =
+  "Final outbound offer submission waits on the Social lane's canonical marriage workflow contract.";
+
 export function ProspectsPanel({
   anchorId,
   copy,
@@ -57,7 +122,13 @@ export function ProspectsPanel({
   hiddenIds,
   hiddenCount,
   houseLabel,
+  marriageWorkflowActionStatus,
   marriageWorkflowSurface,
+  onMarriageWorkflowAcceptInbound,
+  onMarriageWorkflowClearScout,
+  onMarriageWorkflowConstructOffer,
+  onMarriageWorkflowRejectInbound,
+  onMarriageWorkflowScout,
   onOpenHouseDossier,
   onOpenPersonCard,
   personNameFromRegistry,
@@ -81,6 +152,28 @@ export function ProspectsPanel({
   const grantTemplate = getGrantProspectTemplate();
   const canOpenHouseDossier = (houseId: string | null | undefined): houseId is string =>
     Boolean(houseId && dossierHouseIds?.has(houseId) && onOpenHouseDossier);
+  const unifiedMarriageWorkflowActive = Boolean(marriageWorkflowSurface && marriageWorkflowSurface.subjects.length > 0);
+  const visibleProspectsShown = unifiedMarriageWorkflowActive
+    ? prospectsShown.filter((prospect) => prospect?.type !== "marriage")
+    : prospectsShown;
+  const hiddenLegacyMarriageCount = unifiedMarriageWorkflowActive
+    ? prospectsShown.length - visibleProspectsShown.length
+    : 0;
+  const visibleProspectsShownCount = unifiedMarriageWorkflowActive
+    ? visibleProspectsShown.length
+    : prospectsShownCount;
+  const visibleProspectsTotalCount = unifiedMarriageWorkflowActive
+    ? Math.max(visibleProspectsShown.length, prospectsTotalCount - hiddenLegacyMarriageCount)
+    : prospectsTotalCount;
+  const legacyMarriageDemotionNotice = unifiedMarriageWorkflowActive ? (
+    <div
+      data-marriage-legacy-demoted="true"
+      style={{ marginTop: 10, padding: 10, border: "1px solid #eadfca", background: "#fffaf0", fontSize: 12, lineHeight: 1.45 }}
+    >
+      Legacy marriage proposal cards are retired here. Use the unified marriage workflow above for inbound replies,
+      scouting/search, and outbound offer construction so proposals do not appear in two conflicting places.
+    </div>
+  ) : null;
 
   return (
     <>
@@ -97,8 +190,22 @@ export function ProspectsPanel({
             <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{marriageWorkflowSurface.helperText}</div>
           </div>
 
-          {marriageWorkflowSurface.subjects.map((workflow) => (
-            <div key={workflow.workflowId} style={{ padding: 10, border: "1px solid #eee", background: "#fff" }}>
+          {marriageWorkflowSurface.subjects.map((workflow) => {
+            const scoutStatus =
+              marriageWorkflowActionStatus?.[marriageWorkflowScoutActionKey(workflow.workflowId)] ?? "available";
+            const offerStatus =
+              marriageWorkflowActionStatus?.[marriageWorkflowOfferActionKey(workflow.workflowId)] ??
+              workflow.latestOfferStatus ??
+              "available";
+            const canScout = Boolean(onMarriageWorkflowScout) && scoutStatus === "available";
+            const canClearScout = Boolean(onMarriageWorkflowClearScout) && scoutStatus !== "no_effect";
+            const canConstructOffer =
+              Boolean(onMarriageWorkflowConstructOffer) &&
+              Boolean(workflow.outboundFeaturedCandidate) &&
+              (offerStatus === "available" || offerStatus === "no_effect");
+
+            return (
+              <div key={workflow.workflowId} style={{ padding: 10, border: "1px solid #eee", background: "#fff" }}>
               <div style={{ fontWeight: 700 }}>
                 {personCardIds?.has(workflow.subject.personId) && onOpenPersonCard ? (
                   <PersonCardTrigger onOpenPersonCard={onOpenPersonCard} personId={workflow.subject.personId}>
@@ -138,8 +245,14 @@ export function ProspectsPanel({
 
                   {workflow.inboundOffers.length > 0 ? (
                     <div style={{ marginTop: 8, display: "grid", gap: 8 }}>
-                      {workflow.inboundOffers.map((offer) => (
-                        <div key={offer.entryId} style={{ paddingTop: 8, borderTop: "1px solid #f0ede4" }}>
+                      {workflow.inboundOffers.map((offer) => {
+                        const inboundStatus =
+                          marriageWorkflowActionStatus?.[marriageWorkflowInboundActionKey(offer.entryId)] ?? "available";
+                        const canAcceptInbound = Boolean(onMarriageWorkflowAcceptInbound) && inboundStatus === "available";
+                        const canRejectInbound = Boolean(onMarriageWorkflowRejectInbound) && inboundStatus === "available";
+
+                        return (
+                          <div key={offer.entryId} style={{ paddingTop: 8, borderTop: "1px solid #f0ede4" }}>
                           <div style={{ fontSize: 12, opacity: 0.85 }}>{offer.offerSummary}</div>
                           <div style={{ marginTop: 4 }}>
                             Candidate:{" "}
@@ -171,10 +284,36 @@ export function ProspectsPanel({
                             Expected effects: {offer.effectSummary}
                           </div>
                           <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
+                            Accept outcome: {offer.acceptOutcomeSummary}
+                          </div>
+                          <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>
                             Reject outcome: {offer.rejectOutcomeSummary}
                           </div>
-                        </div>
-                      ))}
+                          <div style={{ marginTop: 6, fontSize: 12 }}>
+                            Status: <b>{workflowStatusLabel(inboundStatus)}</b>.{" "}
+                            {workflowStatusDetail(inboundStatus, "Waiting for your response.")}
+                          </div>
+                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                            <button
+                              disabled={!canAcceptInbound}
+                              onClick={() => onMarriageWorkflowAcceptInbound?.(workflow, offer)}
+                              title={onMarriageWorkflowAcceptInbound ? "" : "Inbound action wiring is supplied by the current turn decision flow."}
+                              type="button"
+                            >
+                              Accept proposal
+                            </button>
+                            <button
+                              disabled={!canRejectInbound}
+                              onClick={() => onMarriageWorkflowRejectInbound?.(workflow, offer)}
+                              title={onMarriageWorkflowRejectInbound ? "" : "Inbound action wiring is supplied by the current turn decision flow."}
+                              type="button"
+                            >
+                              Reject proposals
+                            </button>
+                          </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : null}
                 </div>
@@ -182,6 +321,28 @@ export function ProspectsPanel({
                 <div style={{ padding: 10, border: "1px solid #f0ede4", background: "#fffcf5" }}>
                   <div style={{ fontWeight: 700 }}>Outbound scouting & offer</div>
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.85 }}>{workflow.outboundSummary}</div>
+                  <div style={{ marginTop: 6, fontSize: 12 }}>
+                    Search status: <b>{workflowStatusLabel(scoutStatus)}</b>.{" "}
+                    {workflowStatusDetail(scoutStatus, "Ready to scout/search for outbound candidates.")}
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                    <button
+                      disabled={!canScout}
+                      onClick={() => onMarriageWorkflowScout?.(workflow)}
+                      title={onMarriageWorkflowScout ? "" : "Scouting/search uses the current turn decision flow when available."}
+                      type="button"
+                    >
+                      Scout/search candidates
+                    </button>
+                    <button
+                      disabled={!canClearScout}
+                      onClick={() => onMarriageWorkflowClearScout?.(workflow)}
+                      title={onMarriageWorkflowClearScout ? "" : "Scouting/search uses the current turn decision flow when available."}
+                      type="button"
+                    >
+                      Clear search
+                    </button>
+                  </div>
                   {workflow.outboundFeaturedCandidate ? (
                     <div style={{ marginTop: 6, fontSize: 12, opacity: 0.9 }}>
                       Featured candidate:{" "}
@@ -232,21 +393,65 @@ export function ProspectsPanel({
                       {workflow.latestOfferSummary}
                     </div>
                   ) : null}
+                  <div
+                    data-marriage-outbound-offer-form={workflow.workflowId}
+                    style={{ marginTop: 10, padding: 10, border: "1px solid #eadfca", background: "#fffaf0" }}
+                  >
+                    <div style={{ fontWeight: 700 }}>Outbound offer construction</div>
+                    <div style={{ marginTop: 4, fontSize: 12, opacity: 0.82 }}>
+                      Offer terms stay read-only until the Social lane publishes the canonical submission contract.
+                    </div>
+                    <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", marginTop: 8 }}>
+                      <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+                        Candidate
+                        <input
+                          readOnly
+                          value={workflow.outboundFeaturedCandidate?.title ?? "No candidate selected"}
+                        />
+                      </label>
+                      <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+                        Dowry/dower terms
+                        <input readOnly value="Contract pending" />
+                      </label>
+                      <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
+                        Relationship terms
+                        <input readOnly value="Preview only" />
+                      </label>
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 12 }}>
+                      Offer status: <b>{workflowStatusLabel(offerStatus)}</b>.{" "}
+                      {workflowStatusDetail(offerStatus, workflowPendingContractTitle)}
+                    </div>
+                    <button
+                      disabled={!canConstructOffer}
+                      onClick={() => onMarriageWorkflowConstructOffer?.(workflow)}
+                      style={{ marginTop: 8 }}
+                      title={workflowPendingContractTitle}
+                      type="button"
+                    >
+                      Construct outbound offer
+                    </button>
+                  </div>
                   <div style={{ marginTop: 4, fontSize: 12, opacity: 0.8 }}>{workflow.helperText}</div>
                 </div>
               </div>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       ) : null}
 
       {(() => {
-        const anyVisibleExpired = prospectsShown.some(
+        const anyVisibleExpired = visibleProspectsShown.some(
           (p) => typeof p?.expires_turn === "number" && reportTurnIndex > (p.expires_turn as number)
         );
         const showExpiredMsg = hasProspectExpiredThisTurn && !anyVisibleExpired;
 
-        if (prospectsTotalCount === 0) {
+        if (visibleProspectsTotalCount === 0) {
+          if (unifiedMarriageWorkflowActive) {
+            return legacyMarriageDemotionNotice;
+          }
+
           return (
             <div style={{ opacity: 0.8 }}>
               {copy.prospectsEmpty_noneThisTurn}
@@ -255,7 +460,20 @@ export function ProspectsPanel({
           );
         }
 
-        if (prospectsShownCount === 0) {
+        if (visibleProspectsShownCount === 0) {
+          if (unifiedMarriageWorkflowActive) {
+            return (
+              <>
+                {legacyMarriageDemotionNotice}
+                <div style={{ opacity: 0.8, marginTop: 10 }}>
+                  {hiddenCount > 0 ? copy.prospectsEmpty_noneShown : copy.prospectsEmpty_noneAvailableYet}
+                  {hiddenCount > 0 ? <div style={{ marginTop: 6 }}>{copy.prospectsEmpty_noneShownHelper}</div> : null}
+                  {showExpiredMsg ? <div style={{ marginTop: 6 }}>{copy.prospectExpiredThisTurnMessage}</div> : null}
+                </div>
+              </>
+            );
+          }
+
           return (
             <div style={{ opacity: 0.8 }}>
               {hiddenCount > 0 ? copy.prospectsEmpty_noneShown : copy.prospectsEmpty_noneAvailableYet}
@@ -267,17 +485,18 @@ export function ProspectsPanel({
 
         return (
           <>
+            {legacyMarriageDemotionNotice}
             {showExpiredMsg ? <div style={{ fontSize: 12, marginTop: 6 }}>{copy.prospectExpiredThisTurnMessage}</div> : null}
 
             {hiddenCount > 0 ? (
               <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
-                {copy.prospectsShownHiddenSummary(prospectsShownCount, prospectsTotalCount, hiddenCount)}{" "}
+                {copy.prospectsShownHiddenSummary(visibleProspectsShownCount, visibleProspectsTotalCount, hiddenCount)}{" "}
                 <span title={copy.prospectsHiddenTooltip}>ⓘ</span>
               </div>
             ) : null}
 
             <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-              {prospectsShown.map((p, idx) => {
+              {visibleProspectsShown.map((p, idx) => {
                 const id = typeof p?.id === "string" ? p.id : `prospect_${idx}`;
                 const t = typeof p?.type === "string" ? p.type : null;
                 const typeLabel = prospectTypeLabel(t);
@@ -521,7 +740,7 @@ export function ProspectsPanel({
             <details style={{ marginTop: 10 }}>
               <summary>{copy.prospectsLogTitle}</summary>
               <div style={{ fontSize: 12, marginTop: 6 }}>
-                <div>{copy.prospectsLogShown(prospectsShownCount, shownIds.length ? shownIds : undefined)}</div>
+                <div>{copy.prospectsLogShown(visibleProspectsShownCount, shownIds.length ? shownIds : undefined)}</div>
                 <div>{copy.prospectsLogHidden(hiddenCount, hiddenIds.length ? hiddenIds : undefined)}</div>
                 {hiddenCount > 0 ? <div style={{ marginTop: 6 }}>{copy.prospectsHiddenTooltip}</div> : null}
 
