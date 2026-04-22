@@ -12852,7 +12852,7 @@ tasks:
   parent_epic: V03-R6-001
   release: v0.3.6
   title: Route Decisions section actions to live decision paths
-  status: ready
+  status: done
   priority: 78
   tranche: 8
   change_type: behavior_change

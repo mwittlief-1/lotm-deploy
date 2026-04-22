@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-001-T05
-  last_completed_task_id: V03-R6-006-T06
+  current_task_id: V03-R6-006-T07
+  last_completed_task_id: V03-R6-001-T05
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: a4a356e10da0c8411d4c3425a82b5ad68505d5a6
+  git_commit: 009e5c7e46fc1ed0de6744b789f310af218291e0
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
     run2: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
-notes: Integrated the economy, social, and tooling lane handoffs; accepted V03-R6-002-T05, V03-R6-003-T06, V03-R6-004-T04, V03-R6-006-T06, and V03-R6-008-T06. Branch-wide qa, preflight, and replay-twice gates pass after bounding legacy smoke loops and removing run-local replay paths from summary hashes. Next claimable task is UI lane V03-R6-001-T05, followed by V03-R6-006-T07.
+notes: Accepted V03-R6-001-T05 on the integrator branch after focused UI verification confirmed the live Decisions routing and unified marriage workflow behavior were already present in equal-or-stronger form. Branch-wide qa, preflight, and replay-twice gates remain green from the accepted baseline; next claimable task is UI lane V03-R6-006-T07.
 active_claims: {}
