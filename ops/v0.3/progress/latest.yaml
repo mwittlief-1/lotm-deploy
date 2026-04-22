@@ -1,12 +1,12 @@
 version: 2
 cursor:
-  current_task_id: V03-R6-006-T07
-  last_completed_task_id: V03-R6-001-T05
+  current_task_id: ''
+  last_completed_task_id: V03-R6-006-T07
 runtime:
   node_version: v24.13.1
   npm_version: 11.8.0
   git_branch: codex/tmp-v036-integrator
-  git_commit: 009e5c7e46fc1ed0de6744b789f310af218291e0
+  git_commit: 22bf450cb8316d94905a83843abccaa2465561ee
   ci_env: ''
   vercel_env: ''
   pr_url: ''
@@ -20,5 +20,5 @@ last_run:
   replay_hashes:
     run1: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
     run2: d5896089286077feef57076f38e4c09d1b1ebacda652ebd9ada034842dabce89
-notes: Accepted V03-R6-001-T05 on the integrator branch after focused UI verification confirmed the live Decisions routing and unified marriage workflow behavior were already present in equal-or-stronger form. Branch-wide qa, preflight, and replay-twice gates remain green from the accepted baseline; next claimable task is UI lane V03-R6-006-T07.
+notes: Completed V03-R6-006-T07 on the integrator branch by rendering source-backed dynastic transition summaries from `_dynastic_transition_facts_v1` and accepted house-log marriage facts on the player path. Focused UI and turn-explanation tests pass; no further non-blocked lane task is claimable right now.
 active_claims: {}

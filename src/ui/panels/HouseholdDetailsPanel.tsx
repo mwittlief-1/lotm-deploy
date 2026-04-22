@@ -1,5 +1,6 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
+import { buildDynasticTransitionSurface } from "../dynasticTransitionSummary";
 import { findLastSuccession, getAllHouseLogEntries, getPlayerHousehold } from "../stateSelectors";
 import { Badge, formatNameParts, formatPersonName, Tip } from "../viewHelpers";
 import { PersonCardTrigger } from "./PersonCardTrigger";
@@ -27,6 +28,11 @@ export function HouseholdDetailsPanel({
 }: HouseholdDetailsPanelProps) {
   const household = getPlayerHousehold(previewState);
   const lastSuccession = findLastSuccession(state);
+  const dynasticTransitionSurface = buildDynasticTransitionSurface({
+    currentHouseLog,
+    previewState,
+    report: { household: { population_delta: (previewState as any)?.report?.household?.population_delta ?? 0 } }
+  });
 
   function houseNameFromRegistry(house_id: string | null | undefined): string | null {
     const hid = typeof house_id === "string" ? house_id : null;
@@ -195,6 +201,24 @@ export function HouseholdDetailsPanel({
           )}
         </ul>
       </div>
+
+      {dynasticTransitionSurface ? (
+        <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>Dynastic transitions</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>{dynasticTransitionSurface.headline}</div>
+          <div style={{ fontSize: 12, opacity: 0.78, marginTop: 4 }}>{dynasticTransitionSurface.helperText}</div>
+          <ul style={{ margin: "10px 0 0 18px" }}>
+            {dynasticTransitionSurface.items.map((item) => (
+              <li key={item} style={{ marginBottom: 6, fontSize: 12, opacity: 0.9 }}>
+                {item}
+              </li>
+            ))}
+          </ul>
+          {dynasticTransitionSurface.omittedNote ? (
+            <div style={{ fontSize: 12, opacity: 0.74, marginTop: 6 }}>{dynasticTransitionSurface.omittedNote}</div>
+          ) : null}
+        </div>
+      ) : null}
 
       <div style={{ padding: 12, border: "1px solid #ddd7cb", background: "#fff" }}>
         <div style={{ fontWeight: 700, marginBottom: 6 }}>{copy.houseLog}</div>

@@ -141,4 +141,55 @@ describe("HouseholdPanel", () => {
     expect(html).toContain("Joined the court through marriage and now counts as household family on the player path.");
     expect(html).toContain("Court Married-in Spouse");
   });
+
+  it("renders dynastic transition summaries from accepted facts when they exist", () => {
+    const state = createNewRun("household_panel_dynastic_summary");
+    const ctx = proposeTurn(state);
+    (ctx.preview_state as any).flags._dynastic_transition_facts_v1 = {
+      schema_version: "dynastic_transition_facts_v1",
+      turn_index: ctx.preview_state.turn_index,
+      facts: [
+        {
+          kind: "birth",
+          person_id: "p_newborn",
+          person_name: "Anne",
+          house_id: "h_player",
+          house_label: "House Player",
+          year: 9,
+          source: "household_demography",
+          summary: "Anne was born into House Player."
+        }
+      ],
+      omitted_count: 0
+    };
+    (ctx.report as any).household.population_delta = 1;
+
+    const html = renderToStaticMarkup(
+      <HouseholdPanel
+        anchorId="household"
+        copy={HOUSEHOLD_COPY}
+        courtSize={4}
+        currentHouseLog={[
+          {
+            kind: "marriage_resolved",
+            turn_index: ctx.preview_state.turn_index,
+            child_name: "Alice",
+            spouse_name: "Cedric"
+          }
+        ]}
+        onOpenPersonCard={() => undefined}
+        onToggleDetails={() => undefined}
+        personCardIds={new Set([ctx.preview_state.house.head.id])}
+        previewState={ctx.preview_state}
+        report={ctx.report}
+        showDetails={false}
+        state={state}
+      />
+    );
+
+    expect(html).toContain('data-dynastic-transition-summary="dynastic_transition_summary_v1"');
+    expect(html).toContain("Household size grew by 1 this turn.");
+    expect(html).toContain("Anne was born into House Player.");
+    expect(html).toContain("Alice married Cedric.");
+  });
 });

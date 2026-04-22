@@ -1,6 +1,7 @@
 import React from "react";
 import type { RunState } from "../../sim/types";
 import { buildCourtProvisioningSurface } from "../courtProvisioningView";
+import { buildDynasticTransitionSurface } from "../dynasticTransitionSummary";
 import { buildHouseholdPresenceSurface } from "../householdPresenceView";
 import { findLastSuccession, getPlayerHousehold } from "../stateSelectors";
 import { formatPersonName, Tip } from "../viewHelpers";
@@ -10,6 +11,7 @@ type HouseholdPanelProps = {
   anchorId: string;
   copy: any;
   courtSize: number | null;
+  currentHouseLog?: any[];
   onOpenPersonCard?: (personId: string) => void;
   personCardIds?: Set<string>;
   previewState: RunState;
@@ -23,6 +25,7 @@ export function HouseholdPanel({
   anchorId,
   copy,
   courtSize,
+  currentHouseLog = [],
   onOpenPersonCard,
   personCardIds,
   previewState,
@@ -35,6 +38,11 @@ export function HouseholdPanel({
   const lastSuccession = findLastSuccession(state);
   const householdPresenceSurface = buildHouseholdPresenceSurface(previewState);
   const courtProvisioningSurface = buildCourtProvisioningSurface(previewState, { report });
+  const dynasticTransitionSurface = buildDynasticTransitionSurface({
+    currentHouseLog,
+    previewState,
+    report
+  });
 
   return (
     <>
@@ -139,6 +147,27 @@ export function HouseholdPanel({
                 </li>
               ))}
             </ul>
+          </div>
+        ) : null}
+
+        {dynasticTransitionSurface ? (
+          <div
+            data-dynastic-transition-summary="dynastic_transition_summary_v1"
+            style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 10 }}
+          >
+            <div style={{ fontWeight: 700, marginBottom: 6 }}>Dynastic transitions</div>
+            <div style={{ fontSize: 12, opacity: 0.82 }}>{dynasticTransitionSurface.headline}</div>
+            <div style={{ fontSize: 12, opacity: 0.78, marginTop: 4 }}>{dynasticTransitionSurface.helperText}</div>
+            <ul style={{ margin: "8px 0 0 18px" }}>
+              {dynasticTransitionSurface.items.map((item) => (
+                <li key={item} style={{ marginBottom: 4, fontSize: 12, opacity: 0.88 }}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            {dynasticTransitionSurface.omittedNote ? (
+              <div style={{ fontSize: 12, opacity: 0.74, marginTop: 6 }}>{dynasticTransitionSurface.omittedNote}</div>
+            ) : null}
           </div>
         ) : null}
 

@@ -159,6 +159,7 @@ export function TurnReportPanel({
         anchorId={anchorHousehold}
         copy={copy}
         courtSize={courtSize}
+        currentHouseLog={currentHouseLog}
         previewState={previewState}
         report={report}
         state={state}
