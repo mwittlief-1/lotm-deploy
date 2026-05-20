@@ -78,7 +78,24 @@ export function applyEventsPhase(state: RunState): EventResult[] {
       construction_progress: state.manor.construction ? state.manor.construction.progress : 0
     };
 
-    const effects = chosen.def.apply(state, rng.fork(`apply:${chosen.def.id}`));
+    const flags = state.flags as any;
+    const priorEventReceiptContext = flags._active_event_receipt_context_v1;
+    flags._active_event_receipt_context_v1 = {
+      id: chosen.def.id,
+      title: chosen.def.title,
+      category: chosen.def.category,
+      phase_sequence: i + 1
+    };
+    let effects: string[];
+    try {
+      effects = chosen.def.apply(state, rng.fork(`apply:${chosen.def.id}`));
+    } finally {
+      if (priorEventReceiptContext === undefined) {
+        delete flags._active_event_receipt_context_v1;
+      } else {
+        flags._active_event_receipt_context_v1 = priorEventReceiptContext;
+      }
+    }
 
     const after = {
       bushels: state.manor.bushels_stored,

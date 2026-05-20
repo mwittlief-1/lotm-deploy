@@ -2,7 +2,19 @@ import type { RunState, EventCategory } from "../sim/types";
 import type { Rng } from "../sim/rng";
 import { clampInt, asNonNegInt } from "../sim/util";
 import { applyConstructionProgressDelta } from "../sim/domains/economy/construction";
-import { applyBushelDelta, applyCoinDelta, applyTaxDueCoinDelta, applyTitheDueBushelsDelta, setWarLevyDue } from "../sim/domains/economy/ledger";
+import {
+  applyBushelDelta,
+  applyCoinDelta,
+  applyTaxDueCoinDelta,
+  applyTitheDueBushelsDelta,
+  setWarLevyDue,
+  type LedgerReceiptContextV1
+} from "../sim/domains/economy/ledger";
+import {
+  assertV04LocalMatterLiveMutationAllowed,
+  v04LocalMatterLiveRowForEvent,
+  type V04LocalMatterEffectClass
+} from "../sim/domains/experience/localMatters";
 import { hasImprovement } from "./improvements";
 
 export interface ContentEventDef {
@@ -25,11 +37,63 @@ function addMod(state: RunState, key: string, value: number): void {
   mods[key] = (mods[key] ?? 1) * value;
 }
 
+type ActiveEventReceiptContextV1 = {
+  id: string;
+  title: string;
+  category: EventCategory;
+  phase_sequence: number;
+};
+
+function activeEventReceiptContext(state: RunState): ActiveEventReceiptContextV1 | null {
+  const raw = (state.flags as any)?._active_event_receipt_context_v1;
+  if (!raw || typeof raw !== "object") return null;
+  if (typeof raw.id !== "string" || typeof raw.title !== "string") return null;
+  const phaseSequence = typeof raw.phase_sequence === "number" && Number.isFinite(raw.phase_sequence)
+    ? Math.trunc(raw.phase_sequence)
+    : 1;
+  return {
+    id: raw.id,
+    title: raw.title,
+    category: String(raw.category ?? "event") as EventCategory,
+    phase_sequence: Math.max(1, phaseSequence)
+  };
+}
+
+function localMatterEffectClassForReceipt(ruleSuffix: string): V04LocalMatterEffectClass {
+  if (ruleSuffix === "coin") return "existing_event_ledger_coin_delta";
+  if (ruleSuffix === "food_stores" || ruleSuffix === "tithe_due_bushels") return "food_delta";
+  return "condition_delta";
+}
+
+function eventReceiptContext(state: RunState, assetLabel: string, delta: number, ruleSuffix: string): LedgerReceiptContextV1 | undefined {
+  const active = activeEventReceiptContext(state);
+  if (!active) return undefined;
+  if (!v04LocalMatterLiveRowForEvent(active.id)) return undefined;
+  assertV04LocalMatterLiveMutationAllowed(active.id, localMatterEffectClassForReceipt(ruleSuffix));
+  const signed = delta >= 0 ? `+${Math.trunc(delta)}` : `${Math.trunc(delta)}`;
+  return {
+    phase: "events",
+    phase_sequence: active.phase_sequence,
+    category: `event.${active.category}`,
+    counterparty_kind: "event",
+    counterparty_id: `event:${active.id}`,
+    counterparty_label: active.title,
+    summary: `${active.title}: ${assetLabel} changed by ${signed}.`,
+    rule_id: `event.${active.id}.${ruleSuffix}`
+  };
+}
+
 function addBushels(state: RunState, delta: number): void {
-  applyBushelDelta(state, delta);
+  applyBushelDelta(state, delta, eventReceiptContext(state, "food stores", delta, "food_stores"));
 }
 function addCoin(state: RunState, delta: number): void {
-  applyCoinDelta(state, delta);
+  applyCoinDelta(state, delta, eventReceiptContext(state, "coin", delta, "coin"));
+}
+function addTaxDueCoin(state: RunState, delta: number): void {
+  applyTaxDueCoinDelta(state, delta, eventReceiptContext(state, "tax due", delta, "tax_due_coin"));
+}
+function addTitheDueBushels(state: RunState, delta: number): void {
+  applyTitheDueBushelsDelta(state, delta, eventReceiptContext(state, "tithe due", delta, "tithe_due_bushels"));
 }
 function addUnrest(state: RunState, delta: number): void {
   state.manor.unrest = clampInt(state.manor.unrest + Math.trunc(delta), 0, 100);
@@ -209,6 +273,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     cooldown: 4,
     getWeight: (s) => baseWeight(s.manor.construction ? 0.6 : 0.2, [s.manor.construction ? "Active construction is vulnerable." : "Minor risk."]),
     apply: (s, rng) => {
+      assertV04LocalMatterLiveMutationAllowed("evt_tool_breakage", "existing_event_ledger_coin_delta");
       const coin = rng.int(1, 3);
       addCoin(s, -coin);
       return [`Repairs and replacements: -${coin} coin.`];
@@ -350,7 +415,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.5 + (s.manor.obligations.arrears.bushels > 0 ? 0.2 : 0), [s.manor.obligations.arrears.bushels > 0 ? "Clergy pressures existing arrears." : "Routine collection."]),
     apply: (s, rng) => {
       const extra = rng.int(0, 12);
-      applyTitheDueBushelsDelta(s, extra);
+      addTitheDueBushels(s, extra);
       return [extra ? `Extra tithe demanded: +${extra} bushels due.` : "Routine tithe reminder (no extra due)."];
     }
   },
@@ -387,7 +452,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.35, ["The liege tightens his hand."]),
     apply: (s, rng) => {
       const extra = rng.int(1, 3);
-      applyTaxDueCoinDelta(s, extra);
+      addTaxDueCoin(s, extra);
       addUnrest(s, 1);
       return [`Extra tax demanded: +${extra} coin due.`, "+1 unrest."];
     }
@@ -400,7 +465,7 @@ export const EVENT_DECK: ContentEventDef[] = [
     getWeight: (s) => baseWeight(0.20, ["A rare mercy."]),
     apply: (s, rng) => {
       const relief = rng.int(1, 3);
-      applyTaxDueCoinDelta(s, -relief);
+      addTaxDueCoin(s, -relief);
       addUnrest(s, -1);
       return [`Tax eased: -${relief} coin due.`, "-1 unrest."];
     }
@@ -504,7 +569,7 @@ const FLAVOR: Array<{ id: string; title: string; category: EventCategory; cooldo
   { id: "evt_clergy_rebuke", title: "Clergy Rebuke", category: "religious", cooldown: 9, w: 0.15, apply: (s, r) => { addUnrest(s,2); return ["Public rebuke: +2 unrest."]; } },
   { id: "evt_muddy_roads", title: "Muddy Roads", category: "economic", cooldown: 6, w: 0.20, apply: (s, r) => { addMod(s,"sell_cap_mult",0.9); return ["Trade slows: sell cap lower next turn."]; } },
   { id: "evt_clear_roads", title: "Clear Roads", category: "economic", cooldown: 6, w: 0.20, apply: (s, r) => { addMod(s,"sell_cap_mult",1.1); return ["Trade flows: sell cap higher next turn."]; } },
-  { id: "evt_local_scribe", title: "Local Scribe", category: "political", cooldown: 10, w: 0.12, apply: (s, r) => { const relief = r.int(1,2); applyTaxDueCoinDelta(s, -relief); return [`A scribe finds an exemption: -${relief} coin tax due.`]; } },
+  { id: "evt_local_scribe", title: "Local Scribe", category: "political", cooldown: 10, w: 0.12, apply: (s, r) => { const relief = r.int(1,2); addTaxDueCoin(s, -relief); return [`A scribe finds an exemption: -${relief} coin tax due.`]; } },
   { id: "evt_ale_shortage", title: "Ale Shortage", category: "social", cooldown: 9, w: 0.18, apply: (s, r) => { addUnrest(s,2); return ["Ale runs thin: +2 unrest."]; } },
   { id: "evt_ale_plenty", title: "Ale Plenty", category: "social", cooldown: 9, w: 0.18, apply: (s, r) => { addUnrest(s,-2); return ["Ale flows: -2 unrest."]; } },
   { id: "evt_muster_practice", title: "Muster Practice", category: "military", cooldown: 10, w: 0.14, apply: (s, r) => { addUnrest(s,1); return ["Muster drills disrupt work: +1 unrest."]; } },
