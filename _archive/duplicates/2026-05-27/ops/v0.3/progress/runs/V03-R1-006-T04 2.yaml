@@ -1,0 +1,42 @@
+version: 1
+run_id: V03-R1-006-T01-20260409T144355-0400
+task_id: V03-R1-006-T04
+status: done
+date: 2026-04-09
+branch: codex/v0.3-lane-social-mechanics
+commit: a2212de6dabfdb5ce98c8e923298644cfff0e28c
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+  run2: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+artifacts:
+  reporting_module: src/sim/domains/experience/reporting.ts
+  household_module: src/sim/domains/people/playerHousehold.ts
+  snapshot_test: tests/sim/residence_manor_snapshot.test.ts
+findings:
+  - Preview-state and bounded snapshots now carry hidden residence-manor ids, selector contexts, and numeric-distance hooks for relevant actors.
+  - Higher-level consumers can read one canonical selector surface directly instead of inferring manor visibility or distance from unrelated house or topology fields.
+  - The snapshot contract stays replay-stable because the new manor surfaces are non-enumerable and therefore do not perturb serialized output.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-006-T05
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T04 delivered the snapshot-safe selector exposure and allowed the chain to move into invariants and release docs.
