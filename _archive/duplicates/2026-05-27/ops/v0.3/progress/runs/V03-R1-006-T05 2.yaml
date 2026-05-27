@@ -1,0 +1,42 @@
+version: 1
+run_id: V03-R1-006-T01-20260409T144355-0400
+task_id: V03-R1-006-T05
+status: done
+date: 2026-04-09
+branch: codex/v0.3-lane-social-mechanics
+commit: a2212de6dabfdb5ce98c8e923298644cfff0e28c
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+  run2: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+artifacts:
+  closeout_doc: docs/releases/v0.3.1_residence_manor_assignment_closeout.md
+  invariant_test: tests/sim/residence_manor_invariants.test.ts
+  epic_report: ops/v0.3/progress/runs/V03-R1-006.md
+findings:
+  - The invariant suite now locks canonical anchor-manor bindings, selector ordering, and the non-enumerable serialization contract for residence-manor metadata.
+  - The release-facing closeout records the accepted rules, explicit non-goals, and handoff assumptions for later portfolio, family, clergy, and UI work.
+  - The residence-manor baseline epic is ready to remain done in backlog state after the kickoff-truth refresh and same-lane execution chain.
+stop_reason: no_same_lane_follow_on
+next_task_cursor: ''
+next_task_ready: false
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T05 closed the residence-manor chain, and no next same-lane follow-on was dispatched in the current backlog snapshot.

@@ -1,0 +1,44 @@
+version: 1
+run_id: V03-R1-006-T01-20260409T144355-0400
+task_id: V03-R1-006-T03
+status: done
+date: 2026-04-09
+branch: codex/v0.3-lane-social-mechanics
+commit: a2212de6dabfdb5ce98c8e923298644cfff0e28c
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  ops_v03_scheduler_dry_run: pass
+  ops_v03_rebase_dry_run: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+  run2: e1fc1a891d122f8c29e9211da117f99f06bfea2c881a8b903537667a7971cb41
+artifacts:
+  residence_registry_module: src/sim/domains/people/residenceManorRegistry.ts
+  marriage_hook: src/sim/domains/people/marriage.ts
+  clergy_hook: src/sim/domains/people/clergyTrackRegistry.ts
+  institution_holder_hook: src/sim/domains/people/institutionHolderRegistry.ts
+  transition_test: tests/sim/residence_manor_registry.test.ts
+findings:
+  - Player-local residents now resolve to the bounded world anchor manor through one people-domain builder instead of ad hoc inferred placement.
+  - Marriage, clergy placement, institution-holder updates, and player-side office or service continuity all refresh manor bindings coherently through the shared seam.
+  - External-house candidates remain explicitly unmapped, which keeps the baseline honest while still making transition updates deterministic and testable.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-006-T04
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T03 closed cleanly and immediately handed the chain into snapshot exposure work.

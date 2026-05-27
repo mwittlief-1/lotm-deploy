@@ -1,0 +1,36 @@
+version: 1
+run_id: 2026-04-08_manual_acceptance_round26
+task_id: V03-R3-006-T01
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-engine-core
+commit: d067e0e3f49561b1f390450ba27f9c8ad4513272
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  ops_v03_validate: pass
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+  repo_duplicates: not_run
+replay_hashes:
+  run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+  run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+artifacts:
+  audit_doc: docs/releases/v0.3.3_AI_RAIL_BASELINE_AUDIT.md
+findings:
+  - The baseline AI seam already exists in evidence, beliefs, and neutral policy hooks, but capture is still orchestrator-owned and detail-string oriented.
+  - Marriage preview has subject-scoped evidence today, while marriage resolution and obligations still fall back to generic note synthesis instead of typed domain emitters.
+  - Grant generation and resolution already exist as deterministic seams, but current AI capture loses sponsor, source-entry, and blocker provenance and can still produce subjectless grant evidence on the fallback path.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R3-006-T02
+next_task_ready: true
+blocking_dependency: ''
+control_plane_notes:
+  ops_v0_3_validate: pass
+  reason: T01 completed as a descriptive audit and the accepted same-lane chain advanced directly into the belief-payload task.

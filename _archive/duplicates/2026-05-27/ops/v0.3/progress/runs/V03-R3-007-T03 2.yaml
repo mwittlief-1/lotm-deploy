@@ -1,0 +1,33 @@
+version: 1
+run_id: manual-ui-v03-r3-007-t03-20260408T160205-0400
+task_id: V03-R3-007-T03
+status: done
+date: 2026-04-08
+branch: codex/v0.3-lane-ui-experience
+commit: f20cc9ea83f17471373cffde4481a79c6cfc3afc
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+  run2: 4d630db7f2cf8f56da8dee8661e478355e18d6ba662d0141ca58a58837781e64
+artifacts:
+  content_registry: src/content/experienceContent.ts
+  content_test: tests/ui/experienceContent.test.ts
+findings:
+  - Added a typed grant outcome template family with deterministic confirm, helper, and accept-or-reject toast copy so later UI wiring no longer has to lean on generic prospect strings.
+  - Added a typed marriage outcome template family that covers accept copy, dowry-aware confirmation text, rejection copy, and immediate household outcome strings for join-or-leave court results.
+  - Updated the content-slot registry so the grant and marriage families now point at shared content functions instead of the earlier App-level copy constants.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R3-007-T04
+next_task_ready: true
+control_plane_notes:
+  reason: T03 closed cleanly after the required gates passed, and same-lane continuation immediately claimed T04.

@@ -1,0 +1,102 @@
+schema_version: 1
+created: 2026-05-27
+track: blessed-spine-cleanup
+owner: repo-cleanup-track
+purpose: >
+  Register the current promotion, quarantine, and evidence-only status for
+  repository material while v0.4 rebuild work promotes only verified source
+  into the future main spine.
+
+status_definitions:
+  Candidate:
+    meaning: "May be promoted after packet review and validation."
+    allowed_use: "Reference and promotion packet input."
+  Preserved:
+    meaning: "Must be retained as control/canon material, but does not by itself authorize runtime behavior."
+    allowed_use: "Planning, arbitration, and source-of-truth resolution."
+  Quarantine:
+    meaning: "Historical or hazardous material retained outside active source paths."
+    allowed_use: "Evidence lookup only unless a promotion packet explicitly restores it."
+  EvidenceOnly:
+    meaning: "Generated output, proof material, review packets, or QA artifacts."
+    allowed_use: "Audit and comparison only."
+  LegacyRuntime:
+    meaning: "Runtime/UI code from the dirty working tree that is not sacred for the rebuild."
+    allowed_use: "Mine for useful implementation patterns only after packet review."
+
+register:
+  - id: BS-CANON-CORE
+    status: Preserved
+    source_truth_layer: CanonControl
+    paths:
+      - "SOURCE_STATUS_INDEX.md"
+      - "AGENTS.md"
+      - "docs/product/**"
+      - "docs/architecture/**"
+      - "docs/DUPLICATE_DOCS_STATUS.md"
+      - "ops/v0.3/CODEX_CANON_HANDOFF_README.md"
+      - "ops/v0.3/STOP_RULES.md"
+      - "ops/v0.3/DECISION_AUTHORITY_MATRIX.md"
+      - "ops/v0.3/CODEX_AUTONOMY_LADDER.md"
+    current_packet: "BS-CLEAN-001_CANON_CONTROL_PRESERVATION_PACKET_2026-05-27.md"
+    promotion_rule: "Preserve first, promote only by explicit packet."
+
+  - id: BS-CONTROL-V04
+    status: Candidate
+    source_truth_layer: OpsControl
+    paths:
+      - "ops/v0.4/control/**"
+      - "ops/v0.4/PTL_RESPONSE_TO_ENGINEERING.md"
+      - "ops/v0.4/blessed_spine/**"
+    current_packet: "BS-PROMOTE-000_CANON_CONTROL_SOURCE_STATUS_PACKET_2026-05-27.md"
+    promotion_rule: "May define cleanup and promotion workflow; does not authorize simulation behavior."
+
+  - id: BS-DUPLICATES-ACTIVE
+    status: Quarantine
+    source_truth_layer: HistoricalArtifact
+    paths:
+      - "docs/**/numbered duplicates"
+      - "ops/v0.3/progress/runs/**/numbered duplicates"
+      - "qa_artifacts/playtest_ops/**/numbered duplicates"
+    quarantine_target: "_archive/duplicates/2026-05-27/"
+    current_packet: "BS-CLEAN-002_DUPLICATE_QUARANTINE_MANIFEST_2026-05-27.md"
+    promotion_rule: "Do not import, edit, or cite as source truth from active paths."
+
+  - id: BS-EVIDENCE-QA-ARTIFACTS
+    status: EvidenceOnly
+    source_truth_layer: GeneratedEvidence
+    paths:
+      - "qa_artifacts/**"
+    current_packet: "BS-CLEAN-003_EVIDENCE_MANIFEST_2026-05-27.md"
+    promotion_rule: "Retain for audit; regenerate from promoted code before using as baselines."
+
+  - id: BS-EVIDENCE-REVIEW-PACKETS
+    status: EvidenceOnly
+    source_truth_layer: ReviewEvidence
+    paths:
+      - "review_packets/**"
+    current_packet: "BS-CLEAN-003_EVIDENCE_MANIFEST_2026-05-27.md"
+    promotion_rule: "Retain for audit; do not treat packaged output as live requirements."
+
+  - id: BS-RUNTIME-LEGACY-CORE
+    status: LegacyRuntime
+    source_truth_layer: RuntimeEvidence
+    paths:
+      - "src/App.tsx"
+      - "src/content/events.ts"
+      - "src/sim/turn.ts"
+      - "src/sim/**"
+      - "src/ui/**"
+      - "tests/**"
+    current_packet: "FIRST_PROMOTION_TRANCHE_RECOMMENDATION_2026-05-27.md"
+    promotion_rule: "No runtime file is promoted by existence; each tranche must prove boundaries and replay posture."
+
+  - id: BS-REFWORLD-XMAP-ALPHA
+    status: Candidate
+    source_truth_layer: FixedWorldData
+    paths:
+      - "data/map/xmap_alpha_v1/**"
+      - "src/sim/domains/world/xmap*.ts"
+      - "src/sim/domains/world/worldTopologyInvariants.ts"
+    current_packet: "BS-PROMOTE-001_XMAP_ALPHA_FIXED_ARTIFACT_VERIFICATION_REPORT_2026-05-27.md"
+    promotion_rule: "Promote data first, then validators/importers, then read-model consumers."

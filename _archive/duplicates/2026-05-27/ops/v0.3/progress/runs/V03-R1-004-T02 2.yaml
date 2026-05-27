@@ -1,0 +1,36 @@
+version: 1
+run_id: V03-R1-004-T02-20260405T011746-0400
+task_id: V03-R1-004-T02
+status: done
+date: 2026-04-05
+branch: codex/v0.3-lane-social-mechanics
+commit: 24a8492f681aab8ad4c001077ce4b0096d201dd9
+runtime:
+  node_version: v24.13.1
+  npm_version: 11.8.0
+  ci_env: ''
+  vercel_env: ''
+  pr_url: ''
+  pr_status: ''
+gates:
+  qa: pass
+  preflight: pass
+  seed_replay_batch_twice: pass
+replay_hashes:
+  run1: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+  run2: 7b196da2593b2b05f25550733389f4061af4907e084afaea7ec9c26f4e9f9e3a
+artifacts:
+  schema_module: src/sim/domains/people/successionRegistry.ts
+  schema_test: tests/sim/succession_registry.test.ts
+findings:
+  - Added a behavior-preserving succession registry seam that mirrors the current heir law into deterministic ordered line entries for direct descendants and male-line collateral fallback without changing phase orchestration.
+  - Added a bounded claimant registry view that carries current-heir blocking, adult-line position, and household-member fallback compatibility so later claim generation can reuse current household surfaces instead of inventing parallel heuristics.
+  - The next succession task is now safe for same-lane continuation because inheritance-claim prospect generation routes through people-domain helpers and no longer requires direct phase edits for the baseline seam.
+stop_reason: continued_to_next_same_lane_task
+next_task_cursor: V03-R1-004-T03
+next_task_ready: true
+control_plane_notes:
+  ops_v0_3_validate: pass
+  ops_v0_3_scheduler_dry_run: pass
+  ops_v0_3_rebase_dry_run: pass
+  reason: T02 is accepted on kickoff and the phase boundary is carved; T03 is now the active Social follow-on.
