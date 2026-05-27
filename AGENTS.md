@@ -6,6 +6,19 @@ This file applies to the entire repository unless a deeper `AGENTS.md` overrides
 ## Mission
 Enable the `v0.3` refactor and parallel workstreams without breaking deterministic replay, golden baselines, or the `v0.2final` stabilization line.
 
+## Canon Corpus
+The Final Canon Complete Corpus v0.1 is now controlling context for product and runtime interpretation. Before deriving requirements, planning implementation, or resolving source conflicts, read `SOURCE_STATUS_INDEX.md`, `ops/v0.3/CODEX_CANON_HANDOFF_README.md`, `ops/v0.3/STOP_RULES.md`, `docs/product/PRODUCT_CONSTITUTION.md`, `docs/product/V1_SCOPE_GUARDRAILS.md`, `docs/architecture/SOURCE_OF_TRUTH_HIERARCHY.md`, `docs/architecture/RUNTIME_RESET_CANON.md`, `docs/architecture/OVERLAY_RECEIPT_READMODEL_DOCTRINE.md`, and `docs/architecture/DETERMINISM_CONTRACT.md`.
+
+Authority order is:
+1. Product Constitution / V1 Guardrails
+2. Architecture / Runtime Spine
+3. Domain Doctrines
+4. Mechanical Specs
+5. Catalog Seeds
+6. Requirements / Codex Ops
+
+Older release docs, QA packets, proof reports, progress logs, runtime inventories, and backlog entries are consolidation evidence unless `SOURCE_STATUS_INDEX.md` classifies them as active canon. Mechanical specs or catalogs marked `MECHANICAL_SPEC_NEEDED`, `CPO_DECISION_NEEDED`, `CATALOG_CONTENT`, or `RED_ZONE_BLOCKED` do not authorize live behavior, schema promotion, UI integration, turn-pipeline integration, or golden updates.
+
 ## Hard Rules
 1. Behavior-preserving seam carving comes first.
    - Prefer moving code over changing outcomes.
