@@ -14,10 +14,6 @@ on:
         description: A previously current, known-good Vercel deployment URL
         required: true
         type: string
-      production_url:
-        description: The canonical production URL verified after routing changes
-        required: true
-        type: string
       smoke_house_id:
         description: An admitted House selector used by deployment smoke
         required: true
@@ -43,6 +39,10 @@ jobs:
   stage:
     if: inputs.operation == 'release'
     runs-on: ubuntu-latest
+    env:
+      ROLLBACK_URL: ${{ inputs.rollback_url }}
+      HOUSE_ID: ${{ inputs.smoke_house_id }}
+      HOUSEHOLD_ENTITY_ID: ${{ inputs.smoke_household_entity_id }}
     outputs:
       deployment_url: ${{ steps.deploy.outputs.deployment_url }}
       source_sha: ${{ steps.provenance.outputs.source_sha }}
@@ -92,24 +92,44 @@ jobs:
           deployment_url="$(pnpm dlx vercel@${VERCEL_CLI_VERSION} deploy --prebuilt --prod --skip-domain --token="$VERCEL_TOKEN")"
           echo "deployment_url=$deployment_url" >> "$GITHUB_OUTPUT"
 
+      - name: Verify staged deployment ownership
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+        run: |
+          node scripts/verifyCourtosVercelDeployment.mjs \
+            --deployment-url "$DEPLOYMENT_URL" \
+            | tee courtos-staged-deployment-verification.json
+
       - name: Smoke the staged candidate
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ steps.deploy.outputs.deployment_url }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ steps.deploy.outputs.deployment_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$DEPLOYMENT_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-staged-smoke-report.json
 
-      - name: Verify the known-good rollback deployment
+      - name: Verify known-good rollback deployment ownership
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          node scripts/verifyCourtosVercelDeployment.mjs \
+            --deployment-url "$ROLLBACK_URL" \
+            | tee courtos-rollback-deployment-verification.json
+
+      - name: Smoke the known-good rollback deployment
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ inputs.rollback_url }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ inputs.rollback_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$ROLLBACK_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-rollback-smoke-report.json
 
       - name: Record the immutable staged release
@@ -128,7 +148,9 @@ jobs:
           path: |
             courtos-staged-release-manifest.json
             courtos-tracked-input-report.json
+            courtos-staged-deployment-verification.json
             courtos-staged-smoke-report.json
+            courtos-rollback-deployment-verification.json
             courtos-rollback-smoke-report.json
           if-no-files-found: error
 
@@ -137,6 +159,12 @@ jobs:
     needs: stage
     runs-on: ubuntu-latest
     environment: courtos-production
+    env:
+      DEPLOYMENT_URL: ${{ needs.stage.outputs.deployment_url }}
+      ROLLBACK_URL: ${{ inputs.rollback_url }}
+      PRODUCTION_URL: ${{ vars.COURTOS_PRODUCTION_URL }}
+      HOUSE_ID: ${{ inputs.smoke_house_id }}
+      HOUSEHOLD_ENTITY_ID: ${{ inputs.smoke_household_entity_id }}
     steps:
       - name: Checkout the exact staged source
         uses: actions/checkout@v4
@@ -148,37 +176,62 @@ jobs:
         with:
           node-version: 20
 
+      - name: Require protected canonical production configuration
+        run: test -n "$PRODUCTION_URL" || { echo "COURTOS_PRODUCTION_URL environment variable is required" >&2; exit 1; }
+
+      - name: Re-verify staged deployment ownership
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          node scripts/verifyCourtosVercelDeployment.mjs \
+            --deployment-url "$DEPLOYMENT_URL" \
+            | tee courtos-prepromotion-deployment-verification.json
+
       - name: Re-smoke the exact immutable deployment before promotion
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ needs.stage.outputs.deployment_url }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ needs.stage.outputs.deployment_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$DEPLOYMENT_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-prepromotion-smoke-report.json
 
       - name: Promote the verified deployment
         id: promote
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx --yes vercel@${VERCEL_CLI_VERSION} promote "${{ needs.stage.outputs.deployment_url }}" --yes --token="$VERCEL_TOKEN"
+        run: npx --yes vercel@${VERCEL_CLI_VERSION} promote "$DEPLOYMENT_URL" --yes --token="$VERCEL_TOKEN"
 
       - name: Smoke the canonical production route
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ vars.COURTOS_PRODUCTION_URL }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ inputs.production_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$PRODUCTION_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-production-smoke-report.json
 
       - name: Restore known-good production after a failed canonical smoke
         if: failure() && steps.promote.outcome == 'success'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx --yes vercel@${VERCEL_CLI_VERSION} rollback "${{ inputs.rollback_url }}" --yes --token="$VERCEL_TOKEN"
+        run: npx --yes vercel@${VERCEL_CLI_VERSION} rollback "$ROLLBACK_URL" --yes --token="$VERCEL_TOKEN"
+
+      - name: Verify canonical production after automatic rollback
+        if: failure() && steps.promote.outcome == 'success'
+        env:
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ vars.COURTOS_PRODUCTION_URL }}
+        run: |
+          node scripts/smokeCourtosDeployment.mjs \
+            --base-url "$PRODUCTION_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
+            | tee courtos-automatic-rollback-smoke-report.json
 
       - name: Retain promotion evidence
         if: always()
@@ -186,14 +239,21 @@ jobs:
         with:
           name: courtos-production-promotion-${{ github.run_id }}
           path: |
+            courtos-prepromotion-deployment-verification.json
             courtos-prepromotion-smoke-report.json
             courtos-production-smoke-report.json
+            courtos-automatic-rollback-smoke-report.json
           if-no-files-found: warn
 
   rollback:
     if: inputs.operation == 'rollback'
     runs-on: ubuntu-latest
     environment: courtos-production
+    env:
+      ROLLBACK_URL: ${{ inputs.rollback_url }}
+      PRODUCTION_URL: ${{ vars.COURTOS_PRODUCTION_URL }}
+      HOUSE_ID: ${{ inputs.smoke_house_id }}
+      HOUSEHOLD_ENTITY_ID: ${{ inputs.smoke_household_entity_id }}
     steps:
       - name: Checkout smoke contract
         uses: actions/checkout@v4
@@ -203,29 +263,42 @@ jobs:
         with:
           node-version: 20
 
+      - name: Require protected canonical production configuration
+        run: test -n "$PRODUCTION_URL" || { echo "COURTOS_PRODUCTION_URL environment variable is required" >&2; exit 1; }
+
+      - name: Verify requested rollback deployment ownership
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          node scripts/verifyCourtosVercelDeployment.mjs \
+            --deployment-url "$ROLLBACK_URL" \
+            | tee courtos-prerollback-deployment-verification.json
+
       - name: Verify the requested rollback target before routing traffic
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ inputs.rollback_url }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ inputs.rollback_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$ROLLBACK_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-prerollback-smoke-report.json
 
       - name: Roll back production routing
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx --yes vercel@${VERCEL_CLI_VERSION} rollback "${{ inputs.rollback_url }}" --yes --token="$VERCEL_TOKEN"
+        run: npx --yes vercel@${VERCEL_CLI_VERSION} rollback "$ROLLBACK_URL" --yes --token="$VERCEL_TOKEN"
 
       - name: Verify canonical production after rollback
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          COURTOS_SMOKE_ALLOWED_ORIGIN: ${{ vars.COURTOS_PRODUCTION_URL }}
         run: |
           node scripts/smokeCourtosDeployment.mjs \
-            --base-url "${{ inputs.production_url }}" \
-            --house-id "${{ inputs.smoke_house_id }}" \
-            --household-entity-id "${{ inputs.smoke_household_entity_id }}" \
+            --base-url "$PRODUCTION_URL" \
+            --house-id "$HOUSE_ID" \
+            --household-entity-id "$HOUSEHOLD_ENTITY_ID" \
             | tee courtos-postrollback-smoke-report.json
 
       - name: Retain rollback evidence
@@ -234,6 +307,7 @@ jobs:
         with:
           name: courtos-production-rollback-${{ github.run_id }}
           path: |
+            courtos-prerollback-deployment-verification.json
             courtos-prerollback-smoke-report.json
             courtos-postrollback-smoke-report.json
           if-no-files-found: warn

@@ -132,6 +132,10 @@ describe("CourtOS packaged deployment adapter", () => {
       resolve(root, "scripts/smokeCourtosDeployment.mjs"),
       "utf8",
     );
+    const deploymentVerification = readFileSync(
+      resolve(root, "scripts/verifyCourtosVercelDeployment.mjs"),
+      "utf8",
+    );
 
     expect(workflow).toContain("--skip-domain");
     expect(workflow).toContain("group: courtos-production-release");
@@ -144,9 +148,17 @@ describe("CourtOS packaged deployment adapter", () => {
     expect(workflow).toContain("courtos-staged-release-manifest.json");
     expect(workflow).toContain("tracked_input_report_sha256");
     expect(workflow).toContain("Verify canonical production after rollback");
+    expect(workflow).toContain("Verify canonical production after automatic rollback");
+    expect(workflow).toContain("vars.COURTOS_PRODUCTION_URL");
+    expect(workflow).toContain("verifyCourtosVercelDeployment.mjs");
+    expect(workflow).not.toMatch(/run:[^\n]*\$\{\{\s*inputs\./);
     expect(smoke).toContain("/courtos-home.html");
     expect(smoke).toContain("/api/courtos/1120");
     expect(smoke).toContain("/api/household/1120");
     expect(smoke).toContain("/api/council-room/1120");
+    expect(smoke).toContain('redirect: "error"');
+    expect(smoke).toContain("COURTOS_SMOKE_ALLOWED_ORIGIN");
+    expect(deploymentVerification).toContain("deployment?.projectId !== projectId");
+    expect(deploymentVerification).toContain('deployment?.readyState !== "READY"');
   });
 });

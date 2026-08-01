@@ -26,11 +26,12 @@ Configure these repository secrets:
 
 Configure the `courtos-production` GitHub environment with required reviewers. That environment gates both promotion and rollback.
 
+Configure `COURTOS_PRODUCTION_URL` as a variable on that protected environment. Keeping the canonical route out of dispatch input prevents a release operator from redirecting post-promotion verification to an arbitrary host.
+
 ## Release
 
 Run **CourtOS staged release** with operation `release`. Supply:
 
-- the canonical `production_url`;
 - the prior known-good immutable `rollback_url`; and
 - an admitted `smoke_house_id` plus its corresponding `smoke_household_entity_id`.
 
@@ -41,9 +42,10 @@ The workflow:
 3. runs `pnpm run qa:engineering`;
 4. builds using the Vercel production environment;
 5. deploys with `--prod --skip-domain`, so no production domain moves;
-6. checks the landing document and all three API contracts on both the staged candidate and the rollback target;
-7. records the source SHA and checksum of the tracked-input verification report; and
-8. retains the immutable URLs, provenance, and smoke evidence as workflow artifacts.
+6. verifies through the Vercel API that both deployment URLs belong to the configured CourtOS project and are `READY`;
+7. checks the landing document and all three API contracts on both the staged candidate and the rollback target;
+8. records the source SHA and checksum of the tracked-input verification report; and
+9. retains the immutable URLs, provenance, ownership checks, and smoke evidence as workflow artifacts.
 
 A failed step leaves production routing unchanged.
 
@@ -51,7 +53,7 @@ After staging passes, the promotion job waits on the `courtos-production` GitHub
 
 ## Roll back
 
-Keep the prior known-good immutable deployment URL in the release record. If production must be restored outside a release attempt, run the workflow with operation `rollback`, that `rollback_url`, the canonical `production_url`, and the same source-derived smoke selectors. GitHub environment approval is required.
+Keep the prior known-good immutable deployment URL in the release record. If production must be restored outside a release attempt, run the workflow with operation `rollback`, that `rollback_url`, and the same source-derived smoke selectors. The canonical route comes only from the protected `COURTOS_PRODUCTION_URL` environment variable. GitHub environment approval is required.
 
 The workflow smokes the rollback target before routing traffic and the canonical route after the rollback. Rollback does not rebuild the application or mutate its pinned read data.
 
