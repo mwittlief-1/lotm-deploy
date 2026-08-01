@@ -145,6 +145,18 @@ describe("CourtOS internal UAT harness", () => {
     }
   });
 
+  it("keeps agent lanes filesystem-read-only while allowing only the local preview network", () => {
+    const runner = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosInternalUat.mjs"),
+      "utf8",
+    );
+    expect(runner).toContain('permissions.courtos-uat-readonly.extends=":read-only"');
+    expect(runner).toContain("permissions.courtos-uat-readonly.network.enabled=true");
+    expect(runner).toContain('"127.0.0.1" = "allow"');
+    expect(runner).toContain('"localhost" = "allow"');
+    expect(runner).toContain("features.network_proxy.enabled=true");
+  });
+
   it("pins immutable read contracts and rebuilds spatial output deterministically", () => {
     const manifest = readJson("config/courtos-runtime-inputs.v1.json");
     expect(manifest.schema_version).toBe("courtos_runtime_inputs_v1");
