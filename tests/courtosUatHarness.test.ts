@@ -70,6 +70,13 @@ describe("CourtOS internal UAT harness", () => {
       "uat:internal:dry-run": "node scripts/runCourtosInternalUat.mjs --dry-run",
       "uat:internal": "node scripts/runCourtosInternalUat.mjs"
     });
+    const engineeringRunner = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosEngineeringQa.mjs"),
+      "utf8",
+    );
+    expect(packageJson.engines.node).toBe("20.x");
+    expect(engineeringRunner).toContain('name: "runtime-toolchain"');
+    expect(engineeringRunner).toContain("const nodeBinary = process.execPath");
   });
 
   it("requires a complete independent production-architecture review", () => {
