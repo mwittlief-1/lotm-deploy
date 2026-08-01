@@ -69,11 +69,12 @@ function runtimeInputManifest() {
 }
 
 function mapgenRuntimeInputManifest() {
-  // Hash the exact executable/data/config seam used by the three CourtOS renderers.
-  // Source art directories are represented by their renderer data/asset manifests;
-  // unrelated MapGen experiments must not perturb the CourtOS build identity.
+  // Hash the exact executable/data/config/art seam used by the three CourtOS renderers.
+  // Runtime art must be present, not merely described by an asset manifest; unrelated
+  // MapGen experiments remain outside the build identity.
   const roots = [
     "package.json",
+    "package-lock.json",
     "vite.config.ts",
     "public/courtos-cartography-theme.v1.js",
     "public/courtos-embedded-adapter.v1.js",
@@ -92,9 +93,14 @@ function mapgenRuntimeInputManifest() {
     "public/pearwick-single-hex-assets.js",
     "public/pearwick-road-geometry.js",
     "public/vendor/three",
-    "public/assets/pearwick/2p5d-poc-v1/asset-contract.json",
-    "public/assets/pearwick/hybrid-v1/asset-contract.json",
-    "public/assets/manor-pilot-v2/asset-manifest-v2.json",
+    "assets/microhex_art/v2_2/merecross_trunk_road_straight_edge_clean_v2_2.png",
+    "public/assets/manor-pilot-v1",
+    "public/assets/manor-pilot-v2",
+    "public/assets/landscape-composition",
+    "public/assets/pearwick/2p5d-poc-v1",
+    "public/assets/pearwick/environment-v1",
+    "public/assets/pearwick/hybrid-v1",
+    "public/assets/pearwick/vegetation",
     "qa_artifacts/V07-PEARWICK-MICROHEX-PILOT-001/pearwick_microhex_pilot_v1.json",
   ];
   if (!fs.existsSync(mapgenRoot)) {
