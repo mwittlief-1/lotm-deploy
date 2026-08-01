@@ -155,6 +155,38 @@ describe("CourtOS internal UAT harness", () => {
     expect(runner).toContain('"127.0.0.1" = "allow"');
     expect(runner).toContain('"localhost" = "allow"');
     expect(runner).toContain("features.network_proxy.enabled=true");
+    expect(runner).toContain('permissions.courtos-uat-readonly.filesystem.:tmpdir="write"');
+    expect(runner).toContain("COURTOS_UAT_BROWSER_BROKER_URL");
+  });
+
+  it("runs bounded persona lanes, independent verification, and final adjudication", () => {
+    const runner = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosInternalUat.mjs"),
+      "utf8",
+    );
+    expect(runner).toContain("runBounded(");
+    expect(runner).toContain("COURTOS_UAT_PERSONA_CONCURRENCY");
+    expect(runner).toContain("independent-verifier");
+    expect(runner).toContain("personaReportPaths");
+    expect(fs.existsSync(path.resolve(root, "qa/uat/prompts/verifier.md"))).toBe(true);
+  });
+
+  it("uses a constrained localhost broker for browser evidence from read-only agents", () => {
+    const driver = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosUatBrowser.mjs"),
+      "utf8",
+    );
+    const broker = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosUatBrowserBroker.mjs"),
+      "utf8",
+    );
+    expect(driver).toContain("CourtOS UAT browser accepts only local HTTP preview URLs");
+    expect(driver).toContain("must remain inside the UAT artifact directory");
+    expect(driver).toContain("COURTOS_UAT_BROWSER_BROKER_TOKEN");
+    expect(broker).toContain('host !== "127.0.0.1"');
+    expect(broker).toContain("browserQueue.push");
+    expect(broker).toContain("acquireBrowserSlot");
+    expect(broker).toContain("Bearer ${token}");
   });
 
   it("pins immutable read contracts and rebuilds spatial output deterministically", () => {

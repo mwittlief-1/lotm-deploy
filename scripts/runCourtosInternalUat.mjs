@@ -12,6 +12,11 @@ function valueAfter(flag) {
   return index >= 0 ? argv[index + 1] : undefined;
 }
 
+function boundedNumber(value, fallback, minimum, maximum) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
+}
+
 const dryRun = argv.includes("--dry-run");
 const skipEngineering = argv.includes("--skip-engineering");
 const suppliedBaseUrl = valueAfter("--base-url");
@@ -19,6 +24,9 @@ const suppliedMapGenBaseUrl = valueAfter("--mapgen-base-url") ?? process.env.COU
 const mapgenRoot = path.resolve(process.env.MAPGEN_ROOT ?? path.join(root, "..", "lotm-mapgen"));
 const runId = valueAfter("--run-id") ?? `courtos-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
 const config = JSON.parse(fs.readFileSync(path.resolve(root, "qa/uat/uat.config.json"), "utf8"));
+const scenarioCatalog = JSON.parse(
+  fs.readFileSync(path.resolve(root, config.scenarioCatalog), "utf8"),
+);
 const artifactDir = path.resolve(root, config.artifactRoot, runId);
 
 function assertRuntimeInputMaterialized(absolutePath, label) {
@@ -204,9 +212,58 @@ function readPrompt(relativePath, envelope) {
   return `${fs.readFileSync(path.resolve(root, relativePath), "utf8")}\n\n## Run envelope\n\n${JSON.stringify(envelope, null, 2)}\n`;
 }
 
+function personaPrompt(lane, envelope) {
+  const scenarios = scenarioCatalog.scenarios.filter((scenario) => scenario.lane === lane.id);
+  return `${fs.readFileSync(path.resolve(root, lane.persona), "utf8")}
+
+## Execution contract
+
+You are one bounded, independent, read-only persona lane. Do not edit repository source.
+Test only the assigned scenarios against the exact runtime and build below. For visual and
+interaction evidence, use this repository-owned browser driver:
+
+node scripts/runCourtosUatBrowser.mjs --url <runtime-url> --actions-json '<json-array>' --screenshot evidence/${lane.id}/screen.png --output evidence/${lane.id}/screen.json
+
+Supported actions are click, fill, press, select, waitFor, and wait. Prefer semantic locators
+such as role/name, label, placeholder, or text. Evidence paths are relative to the supplied
+report artifact directory. You may use curl and read repository/read-model source to establish
+truth, but browser evidence is required for interaction or presentation conclusions.
+
+Return one laneResults entry named ${lane.id}. First-pass P0/P1 findings must use status
+"unverified" and independentlyVerified false; the separate verifier decides whether they block.
+Return only JSON conforming to the UAT report schema.
+
+## Assigned scenarios
+
+${JSON.stringify(scenarios, null, 2)}
+
+## Run envelope
+
+${JSON.stringify(envelope, null, 2)}
+`;
+}
+
+async function runBounded(items, limit, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+  async function consume() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await worker(items[index], index);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(Math.max(1, limit), items.length) }, () => consume()),
+  );
+  return results;
+}
+
 function runCodexLane({ name, prompt, schemaPath, outputPath }) {
   const eventPath = path.join(artifactDir, `${name}.events.jsonl`);
   const errorPath = path.join(artifactDir, `${name}.stderr.log`);
+  const laneTempDir = path.join(artifactDir, "agent-tmp", name);
+  fs.mkdirSync(laneTempDir, { recursive: true });
   const timeoutMs = Number(process.env.COURTOS_UAT_AGENT_TIMEOUT_MS ?? 2_700_000);
 
   return new Promise((resolve) => {
@@ -227,6 +284,12 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
         'permissions.courtos-uat-readonly.network.domains={ "127.0.0.1" = "allow", "localhost" = "allow" }',
         "--config",
         "features.network_proxy.enabled=true",
+        "--config",
+        'permissions.courtos-uat-readonly.filesystem.:tmpdir="write"',
+        "--config",
+        'permissions.courtos-uat-readonly.filesystem.:slash_tmp="write"',
+        "--config",
+        `permissions.courtos-uat-readonly.filesystem.${artifactDir}="write"`,
         "--json",
         "--output-schema",
         path.resolve(root, schemaPath),
@@ -236,7 +299,18 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
         root,
         "-"
       ],
-      { cwd: root, env: process.env, stdio: ["pipe", "pipe", "pipe"] }
+      {
+        cwd: root,
+        env: {
+          ...process.env,
+          TMPDIR: laneTempDir,
+          COURTOS_UAT_ARTIFACT_DIR: artifactDir,
+          COURTOS_UAT_BROWSER_TEMP_DIR: path.join(laneTempDir, "browser"),
+          COURTOS_UAT_BROWSER_BROKER_URL: browserBrokerUrl,
+          COURTOS_UAT_BROWSER_BROKER_TOKEN: browserBrokerToken,
+        },
+        stdio: ["pipe", "pipe", "pipe"],
+      }
     );
     const eventStream = fs.createWriteStream(eventPath);
     const errorStream = fs.createWriteStream(errorPath);
@@ -308,7 +382,9 @@ if (dryRun) {
         engineeringGate: skipEngineering ? "skipped by explicit flag" : "node scripts/runCourtosEngineeringQa.mjs",
         runtime: suppliedBaseUrl ?? "built Vite preview on an available local port",
         mapgenRuntime: suppliedMapGenBaseUrl ?? `managed preview from ${mapgenRoot}`,
-        parallelIndependentLanes: ["uat_orchestrator", "production_architecture"],
+        parallelIndependentLanes: ["persona_swarm", "production_architecture"],
+        verificationLane: "independent_verifier_after_persona_reports",
+        adjudicationLane: "uat_orchestrator_after_verification",
         personaLanes: requiredLaneIds(),
         scenarioCount: JSON.parse(fs.readFileSync(path.resolve(root, config.scenarioCatalog), "utf8")).scenarios.length,
         runtimeInputCount: runtimeInputs.files.length,
@@ -327,6 +403,9 @@ if (dryRun) {
 fs.mkdirSync(artifactDir, { recursive: true });
 let preview;
 let mapgenPreview;
+let browserBroker;
+let browserBrokerUrl;
+let browserBrokerToken;
 let engineering = skipEngineering ? "skipped" : "fail";
 let runtimeInputs = null;
 let mapgenRuntimeInputs = null;
@@ -416,6 +495,28 @@ try {
   }
   await waitForRuntime(runtimeUrl);
 
+  const browserBrokerPort = await availablePort();
+  browserBrokerUrl = `http://127.0.0.1:${browserBrokerPort}/probe`;
+  browserBrokerToken = crypto.randomBytes(32).toString("hex");
+  browserBroker = spawn(
+    "node",
+    ["scripts/runCourtosUatBrowserBroker.mjs", "--host", "127.0.0.1", "--port", String(browserBrokerPort)],
+    {
+      cwd: root,
+      env: {
+        ...process.env,
+        COURTOS_UAT_ARTIFACT_DIR: artifactDir,
+        COURTOS_UAT_BROWSER_BROKER_TOKEN: browserBrokerToken,
+      },
+      stdio: [
+        "ignore",
+        fs.openSync(path.join(artifactDir, "browser-broker.stdout.log"), "a"),
+        fs.openSync(path.join(artifactDir, "browser-broker.stderr.log"), "a"),
+      ],
+    },
+  );
+  await waitForRuntime(`http://127.0.0.1:${browserBrokerPort}/health`);
+
   const envelope = {
     runId,
     buildId,
@@ -432,25 +533,115 @@ try {
 
   const uatOutput = path.join(artifactDir, "uat-report.json");
   const architectureOutput = path.join(artifactDir, "architecture-report.json");
-  console.log(`[internal-uat] Running UAT Orchestrator and Production Architecture Review in parallel for ${runtimeUrl}`);
+  const architecturePromise = runCodexLane({
+    name: "production-architecture",
+    prompt: readPrompt("qa/uat/prompts/architecture-review.md", envelope),
+    schemaPath: config.architectureSchema,
+    outputPath: architectureOutput,
+  });
+  console.log(
+    `[internal-uat] Running ${config.lanes.length} persona agents and Production Architecture Review in parallel for ${runtimeUrl}`,
+  );
+  const personaConcurrency = boundedNumber(
+    process.env.COURTOS_UAT_PERSONA_CONCURRENCY,
+    3,
+    1,
+    config.lanes.length,
+  );
+  const personaRuns = await runBounded(
+    config.lanes,
+    personaConcurrency,
+    async (lane) => {
+      const outputPath = path.join(artifactDir, `persona-${lane.id}.json`);
+      return runCodexLane({
+        name: `persona-${lane.id}`,
+        prompt: personaPrompt(lane, envelope),
+        schemaPath: config.reportSchema,
+        outputPath,
+      });
+    },
+  );
+  const failedPersonaRuns = personaRuns.filter((run) => run.code !== 0);
+  if (failedPersonaRuns.length > 0) {
+    await architecturePromise;
+    throw new Error(
+      `Persona agent failure: ${failedPersonaRuns.map((run) => `${run.name}=${run.code}`).join(", ")}. Inspect ${artifactDir}.`,
+    );
+  }
 
-  const [uatRun, architectureRun] = await Promise.all([
-    runCodexLane({
-      name: "uat-orchestrator",
-      prompt: readPrompt("qa/uat/prompts/orchestrator.md", envelope),
+  const personaReports = personaRuns.map((run) => ({
+    path: run.outputPath,
+    report: parseReport(run.outputPath),
+  }));
+  const verificationCandidates = personaReports.flatMap(({ report }) =>
+    report.findings.filter(
+      (finding) =>
+        ["P0", "P1"].includes(finding.severity) ||
+        (finding.severity === "P2" && (finding.requiresHumanJudgment || !finding.reproducible)),
+    ),
+  );
+  const verifierOutput = path.join(artifactDir, "independent-verifier.json");
+  let verifierRun = { name: "independent-verifier", code: 0, outputPath: verifierOutput };
+  if (verificationCandidates.length > 0) {
+    console.log(
+      `[internal-uat] Independently verifying ${verificationCandidates.length} candidate blocking/intermittent finding(s).`,
+    );
+    verifierRun = await runCodexLane({
+      name: "independent-verifier",
+      prompt: readPrompt("qa/uat/prompts/verifier.md", {
+        ...envelope,
+        personaReportPaths: personaReports.map(({ path: reportPath }) => reportPath),
+        verificationCandidates,
+      }),
       schemaPath: config.reportSchema,
-      outputPath: uatOutput
-    }),
-    runCodexLane({
-      name: "production-architecture",
-      prompt: readPrompt("qa/uat/prompts/architecture-review.md", envelope),
-      schemaPath: config.architectureSchema,
-      outputPath: architectureOutput
-    })
-  ]);
+      outputPath: verifierOutput,
+    });
+  } else {
+    fs.writeFileSync(
+      verifierOutput,
+      JSON.stringify(
+        {
+          runId,
+          buildId,
+          runtimeUrl,
+          verdict: "pass",
+          summary: "No P0/P1 or intermittent/subjective P2 findings required independent replay.",
+          laneResults: [
+            {
+              lane: "independent_verifier",
+              status: "pass",
+              scenarioIds: [],
+              evidenceSummary: "No candidate findings were submitted for verification.",
+            },
+          ],
+          findings: [],
+        },
+        null,
+        2,
+      ) + "\n",
+    );
+  }
+  if (verifierRun.code !== 0) {
+    await architecturePromise;
+    throw new Error(`Independent verifier failure: ${verifierRun.code}. Inspect ${artifactDir}.`);
+  }
 
+  console.log("[internal-uat] Adjudicating persona and verifier reports.");
+  const uatRun = await runCodexLane({
+    name: "uat-orchestrator",
+    prompt: readPrompt("qa/uat/prompts/orchestrator.md", {
+      ...envelope,
+      personaReportPaths: personaReports.map(({ path: reportPath }) => reportPath),
+      verifierReportPath: verifierOutput,
+    }),
+    schemaPath: config.reportSchema,
+    outputPath: uatOutput,
+  });
+  const architectureRun = await architecturePromise;
   if (uatRun.code !== 0 || architectureRun.code !== 0) {
-    throw new Error(`Agent lane failure: UAT=${uatRun.code}, architecture=${architectureRun.code}. Inspect ${artifactDir}.`);
+    throw new Error(
+      `Agent lane failure: UAT=${uatRun.code}, architecture=${architectureRun.code}. Inspect ${artifactDir}.`,
+    );
   }
 
   const uat = parseReport(uatOutput);
@@ -478,4 +669,5 @@ try {
 } finally {
   if (preview && !preview.killed) preview.kill("SIGTERM");
   if (mapgenPreview && !mapgenPreview.killed) mapgenPreview.kill("SIGTERM");
+  if (browserBroker && !browserBroker.killed) browserBroker.kill("SIGTERM");
 }
