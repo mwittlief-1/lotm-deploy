@@ -1,0 +1,227 @@
+{
+  "package_id": "courtos_uat_m5_pas_calibration_v0_population_proposal_v1",
+  "proposal_id": "M5-W7-PAS-CALIBRATION-V0-POPULATION-PROPOSAL-001",
+  "status": "INTEGRATION_READY_PROPOSAL_ONLY_NO_POPULATION_NO_PROMOTION",
+  "effective_date": "1120-01-01",
+  "calibration_version": "courtos_pas_uat_calibration_v0_proposed_2026_07_18",
+  "worker_id": "M5-W7-PAS-CALIBRATION-V0",
+  "builder": {
+    "path": "scripts/buildCourtOSUatM5PasCalibrationV0PopulationProposal.mjs",
+    "sha256": "21b9e4f8ec01de4790019da77ccf88d3dfbf89e56544741bb89824b4a2d7e03b"
+  },
+  "locked_predecessor_generation_id": "d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9",
+  "authority": "non_mutating_uat_calibration_population_proposal_only",
+  "inputs": [
+    {
+      "source_path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
+      "source_sha256": "0929255c270ac259e28dc750e4ec3cad8f438d50d8e0bb4cde9b34cccb966a8b",
+      "read_mode": "sqlite_mode_ro_immutable_1_query_only",
+      "authority_use": "immutable_d338_witness",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/SHA256SUMS.txt",
+      "source_sha256": "a7231286cd6d6a57a5508f9f6ec5f8d06a454019d3e04a5c670d75504278f51b",
+      "read_mode": "read_only",
+      "authority_use": "immutable_d338_witness",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_workload_driver_candidate_v1/courtos_uat_m4_workload_driver_candidate.sqlite",
+      "source_sha256": "7949bb40c54698aceab293681a8901707e06b7b4a9836f47bdf9abc952be68a3",
+      "read_mode": "sqlite_mode_ro_immutable_1_query_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_workload_driver_candidate_v1/SHA256SUMS.txt",
+      "source_sha256": "cc7f6ef1ce5bf13eef9215b65e3d8a0f120d08fa64ba13dab91d76661c39259e",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_approved_candidate_chain_v1/SHA256SUMS.txt",
+      "source_sha256": "5a3a74bb9d43e1e8197b81f9985712ac9a6474525c5fdde89a6099faa95d6f74",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_approved_candidate_chain_v1/workload_observation_state.csv",
+      "source_sha256": "dce98e520b6440c82c3373f1cd95a05d3a7aaacaefb736a7ccdf66cf9e38f5c1",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_approved_candidate_chain_v1/specialized_responsibility_demand.csv",
+      "source_sha256": "44b7130e675efc47f81f0c2b8e5c22226b0756c880d2e1e8ec8e5f3dea059b0b",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_approved_candidate_chain_v1/specialized_demand_driver_link.csv",
+      "source_sha256": "c659cb155d144e083199d769aef42b0b8c069c7ffd13a2d6da4f74b3b06f15ca",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m5_numeric_parameter_sensitivity_proposal_v1/SHA256SUMS.txt",
+      "source_sha256": "275f489ff47073f43c3920d320374f5ca092135fb6b0094d4ae5d29819aae312",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m5_numeric_parameter_sensitivity_proposal_v1/responsibility_type_proposal_ranges.csv",
+      "source_sha256": "fed0275f490ac17053f7d9daf6520d9556599bf7e83d8a7d434cc65f5482fb4a",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m5_numeric_parameter_sensitivity_proposal_v1/numeric_parameter_proposal_ranges.csv",
+      "source_sha256": "ba21adacb7841a9737544a541bfe77fb412101a9ea74ce785b23942553b59132",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m5_workload_evidence_expansion_proposal_v1/SHA256SUMS.txt",
+      "source_sha256": "e35c01b83add1b6b8b50699b4b328c928d626c8178e0b6a78e7bf254642d4cdc",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_partial_numeric_diagnostic_v1/SHA256SUMS.txt",
+      "source_sha256": "94c24a52582f36f2b50c2b7d9a7a3a9995603b80f828fe0cb8036cdc8ceb4bae",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_partial_numeric_diagnostic_v1/person_partial_utilization_diagnostic.csv",
+      "source_sha256": "be6242fb825476e07eca50d7e8a7eda12115649e33b9ebaaeeb7a920abeae693",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m4_turn1_initialization_unblock_v1/candidate_standing_order_routes.csv",
+      "source_sha256": "c27379278f03896b14e24bac3b7a0cf464d0ff5ac03afdf611e3c27abb36e8cf",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_m5_genesis_freeze_readiness_v1/SHA256SUMS.txt",
+      "source_sha256": "b134682486ef11c58d59bf459d26a48232df7cd8d281a88ca579b9b543b910d0",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "data/genrun/courtos_uat_uiux_read_model_handoff_v1/SHA256SUMS.txt",
+      "source_sha256": "5651ac06b08939de7acddb0c2f43a75bfe34c178f720d12f5a3b7e95fb5723b3",
+      "read_mode": "read_only",
+      "authority_use": "proposal_evidence_only",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "src/ui/readModels/courtos1120/householdOrdersProjection.ts",
+      "source_sha256": "3c23f02004048fb336c6547d2249581c92387623ac587ac3ae8af01a7194b9bd",
+      "read_mode": "read_only",
+      "authority_use": "current_ui_shape_witness_no_write",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "src/ui/readModels/courtos1120/service.ts",
+      "source_sha256": "567a589930f7aa831acbb6ee659d13275e31dc8f7ebee024c8a3bfdbd1393575",
+      "read_mode": "read_only",
+      "authority_use": "current_ui_shape_witness_no_write",
+      "source_mutated": 0
+    },
+    {
+      "source_path": "src/ui/panels/HouseholdOrders1120Screen.tsx",
+      "source_sha256": "1b65ac3b07a245e5f1c0a4a6751ce077410f79389ff0167b3739ab69d0871a36",
+      "read_mode": "read_only",
+      "authority_use": "current_ui_shape_witness_no_write",
+      "source_mutated": 0
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "responsibility_reference_coefficients.csv",
+      "row_count": 35
+    },
+    {
+      "name": "numeric_parameter_dispositions.csv",
+      "row_count": 19
+    },
+    {
+      "name": "realm_demand_pas_preview.csv",
+      "row_count": 18662
+    },
+    {
+      "name": "realm_computability_summary.csv",
+      "row_count": 15
+    },
+    {
+      "name": "person_pas_impact_preview.csv",
+      "row_count": 23548
+    },
+    {
+      "name": "pearwick_hall_segment_impact_preview.csv",
+      "row_count": 33
+    },
+    {
+      "name": "decision_docket.csv",
+      "row_count": 10
+    },
+    {
+      "name": "gate_sequence.csv",
+      "row_count": 7
+    },
+    {
+      "name": "no_silent_default_assertions.csv",
+      "row_count": 8
+    },
+    {
+      "name": "provenance.csv",
+      "row_count": 20
+    },
+    {
+      "name": "reconciliation.csv",
+      "row_count": 21
+    },
+    {
+      "name": "ui_pas_state_contract_v1.schema.json",
+      "row_count": 1
+    },
+    {
+      "name": "freeze_recommendation.json",
+      "row_count": 1
+    },
+    {
+      "name": "validation.json",
+      "row_count": 1
+    }
+  ],
+  "invariants": [
+    "baseline.value must never populate or alias effective.value",
+    "current household_orders_v0 segment_pas_value remains unchanged until a separately approved UI contract migration",
+    "baseline width requires a visible calibration-prior badge and tooltip state",
+    "effective value is null whenever any required driver is missing or the observation-to-PAS transform is unapproved",
+    "null zero not-applicable held partial and unavailable are distinct states"
+  ],
+  "non_authorization": [
+    "no_parameter_coefficient_workload_value_task_assignment_commitment_population_or_promotion",
+    "no_source_canon_runtime_office_working_truth_economy_art_ui_fixture_golden_or_genesis_mutation",
+    "no_effective_pas_without_complete_required_drivers_and_approved_transform",
+    "no_w6_full_numeric_rebuild_or_final_executable_freeze_authority"
+  ]
+}

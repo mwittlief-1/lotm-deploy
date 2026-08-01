@@ -1,0 +1,8 @@
+# CourtOS immutable runtime databases and reviewed production art are large,
+# binary inputs. Keep their bytes in Git LFS so ordinary Git history stays
+# reviewable while clean clones and Vercel builds can materialize them.
+data/uat/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
+data/map/mapgen_exports/pearwick_microhex_pilot_v1.json filter=lfs diff=lfs merge=lfs -text
+data/ready/world_1120_turn0/readmodels/council_room_ready_index_v1/*.json filter=lfs diff=lfs merge=lfs -text
+public/assets/council-command-room/**/*.png filter=lfs diff=lfs merge=lfs -text
+public/assets/heraldry/**/*.png filter=lfs diff=lfs merge=lfs -text

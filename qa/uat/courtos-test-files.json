@@ -1,0 +1,20 @@
+{
+  "schema_version": "courtos_test_file_manifest_v1",
+  "files": [
+    "tests/courtosInformationArchitecture.test.ts",
+    "tests/courtosRoute.test.ts",
+    "tests/courtosSpatialReadModel.test.ts",
+    "tests/courtosUatHarness.test.ts",
+    "tests/server/courtos1120ApiHandler.test.ts",
+    "tests/server/courtos1120DeploymentAdapter.test.ts",
+    "tests/ui/appCourtOs1120Route.test.ts",
+    "tests/ui/courtos1120ReadOnlyProjection.test.ts",
+    "tests/ui/embeddedMapContract.test.ts",
+    "tests/ui/houseIdentityAssets.test.ts",
+    "tests/ui/household1120ReadModel.test.ts",
+    "tests/ui/householdUatModel.test.ts",
+    "tests/ui/householdVerticalSlice.test.ts",
+    "tests/ui/identityAssetManifest.test.ts",
+    "tests/ui/portraitBankResolver.test.ts"
+  ]
+}

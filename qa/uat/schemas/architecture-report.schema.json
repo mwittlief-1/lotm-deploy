@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://merecross.local/schemas/courtos-architecture-report-v1.json",
+  "title": "CourtOS Production Architecture Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["runId", "buildId", "verdict", "summary", "checks", "findings"],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "buildId": { "type": "string", "minLength": 1 },
+    "verdict": { "enum": ["pass", "fail", "incomplete"] },
+    "summary": { "type": "string", "minLength": 1 },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "area", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^ARCH-[0-9]{3}$" },
+          "area": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pass", "fail", "incomplete", "not_applicable"] },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "severity", "area", "title", "failureMode", "evidence", "recommendation"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+          "area": {
+            "enum": [
+              "runtime_boundary",
+              "deployment",
+              "source_truth",
+              "generalization",
+              "resilience",
+              "authority",
+              "maintainability",
+              "performance",
+              "security",
+              "observability",
+              "release_engineering"
+            ]
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "failureMode": { "type": "string", "minLength": 1 },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "recommendation": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

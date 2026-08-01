@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://merecross.local/schemas/courtos-promotion-report-v1.json",
+  "title": "CourtOS Internal Promotion Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "buildId",
+    "createdAt",
+    "engineering",
+    "uat",
+    "architecture",
+    "blockingFindingIds",
+    "promotedToHumanPlaytest"
+  ],
+  "properties": {
+    "runId": { "type": "string" },
+    "buildId": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "engineering": { "enum": ["pass", "fail", "skipped"] },
+    "uat": { "enum": ["pass", "fail", "incomplete"] },
+    "architecture": { "enum": ["pass", "fail", "incomplete"] },
+    "blockingFindingIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "promotedToHumanPlaytest": { "type": "boolean" }
+  }
+}

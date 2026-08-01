@@ -4,16 +4,27 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "npm run courtos:spatial:build",
     "dev": "vite",
+    "prebuild": "npm run courtos:spatial:build",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
     "qa": "node scripts/qaGate.js",
+    "qa:engineering": "node scripts/runCourtosEngineeringQa.mjs",
+    "uat:config": "node scripts/validateCourtosUatConfig.mjs",
+    "uat:internal:dry-run": "node scripts/runCourtosInternalUat.mjs --dry-run",
+    "uat:internal": "node scripts/runCourtosInternalUat.mjs",
     "sim:batch": "tsx scripts/simBatch.ts",
     "matrices": "tsx scripts/generateMatrices.ts",
     "sim:batch:no-deps": "node scripts/simBatchNoDeps.mjs",
     "preflight": "node scripts/preflightNoDeps.mjs",
-    "prospects:stub": "node scripts/prospectsStub.mjs"
+    "prospects:stub": "node scripts/prospectsStub.mjs",
+    "courtos:spatial:build": "node scripts/buildCourtosSpatialReadModelV1.mjs",
+    "courtos:generated:verify": "node scripts/verifyCourtosGeneratedArtifacts.mjs",
+    "courtos:typecheck": "tsc --noEmit -p tsconfig.courtos.json",
+    "courtos:public:prepare": "node scripts/prepareCourtosPublic.mjs",
+    "courtos:test": "node scripts/runCourtosTestSuite.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

@@ -24,11 +24,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test
-        run: pnpm test
-
-      - name: Preflight
-        run: pnpm run preflight
-
-      - name: QA
-        run: pnpm run qa
+      - name: CourtOS engineering production gate
+        run: pnpm run qa:engineering

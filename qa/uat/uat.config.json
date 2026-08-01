@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "product": "Merecross CourtOS",
+  "runtimeEntry": "/courtos-home.html",
+  "artifactRoot": "qa_artifacts/courtos_uat",
+  "scenarioCatalog": "qa/uat/scenarios/courtos-v1.json",
+  "reportSchema": "qa/uat/schemas/uat-report.schema.json",
+  "architectureSchema": "qa/uat/schemas/architecture-report.schema.json",
+  "lanes": [
+    {
+      "id": "source_fidelity",
+      "persona": "qa/uat/personas/source-fidelity.md",
+      "required": true
+    },
+    {
+      "id": "authority_adversary",
+      "persona": "qa/uat/personas/authority-adversary.md",
+      "required": true
+    },
+    {
+      "id": "interaction_explorer",
+      "persona": "qa/uat/personas/interaction-explorer.md",
+      "required": true
+    },
+    {
+      "id": "house_scale",
+      "persona": "qa/uat/personas/house-scale.md",
+      "required": true
+    },
+    {
+      "id": "temporal",
+      "persona": "qa/uat/personas/temporal.md",
+      "required": true
+    },
+    {
+      "id": "experience_brand",
+      "persona": "qa/uat/personas/experience-brand.md",
+      "required": true
+    }
+  ],
+  "independentLanes": [
+    {
+      "id": "production_architecture",
+      "prompt": "qa/uat/prompts/architecture-review.md",
+      "required": true
+    }
+  ],
+  "promotion": {
+    "blockSeverities": ["P0", "P1"],
+    "requireEngineeringPass": true,
+    "requireUatPass": true,
+    "requireArchitecturePass": true,
+    "requireAllRequiredLanes": true,
+    "requireIndependentVerification": ["P0", "P1"]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "courtos_runtime_inputs_v1",
+  "generated_artifacts": [
+    {
+      "path": "public/data/ready/courtos_spatial_read_model_v1.json",
+      "builder": "scripts/buildCourtosSpatialReadModelV1.mjs",
+      "tracked": false
+    }
+  ],
+  "pinned_inputs": [
+    {
+      "path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
+      "sha256": "0929255c270ac259e28dc750e4ec3cad8f438d50d8e0bb4cde9b34cccb966a8b",
+      "role": "immutable_courtos_read_contract",
+      "storage": "git_lfs"
+    },
+    {
+      "path": "data/uat/household_wave2_read_contract_v1/generations/9e58577246a3a381395f5a03b520d9790e94ab2d12287999c9bae362466014c0/household_wave2_read_contract_1120_01_01_v1.sqlite",
+      "sha256": "4e5cd5c687ef4e862cdda459fa93b6999ada6a4f9a3881b3abd891f70eb631c4",
+      "role": "immutable_household_read_contract",
+      "storage": "git_lfs"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/readmodels/council_room_ready_index_v1/council_room_ready_index_v1.json",
+      "sha256": "9b68d1c8e75e43357fb4fb571963fbb30812113eb8e49e29841163b6a6e7c6eb",
+      "role": "promoted_council_room_read_model",
+      "storage": "git_lfs"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m5_pas_calibration_v0_population_proposal_v1/MANIFEST.json",
+      "sha256": "bf74636feb8fb66860b581a6ff00310062b50dcb4c6b4945578c4c9c24ffb1d4",
+      "role": "pas_proposal_manifest",
+      "storage": "git"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m5_pas_calibration_v0_population_proposal_v1/pearwick_hall_segment_impact_preview.csv",
+      "sha256": "889dd738a6b802259afe678eb6e72a6d9b6b2fd3257900194d1558cffb13665a",
+      "role": "pas_proposal_preview",
+      "storage": "git"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/graph_v1/House__c.jsonl",
+      "sha256": "3fbf1b42c71da2c81ebabe19b93b366d58be4e215caa8ae516454751b232a8c9",
+      "role": "canonical_house_source",
+      "storage": "git"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/manor_operator_crosswalk_step4m_v1/ManorOperatorCrosswalk__c.jsonl",
+      "sha256": "2f600ab78b9026384aafae5759f7f28743d5118608f7f0609532a668bef18b8e",
+      "role": "spatial_operator_crosswalk",
+      "storage": "git"
+    },
+    {
+      "path": "data/map/xmap_alpha_v1/manor_units_v1.json",
+      "sha256": "c5903a01ebeded22cfc9223008951dec5fdb87e099bb412f4ce394c8a7c3d525",
+      "role": "courtos_xmap_snapshot",
+      "storage": "git"
+    },
+    {
+      "path": "data/naming/place_name_catalog_working_authority_v1/locked_name_catalog_combined_view_v1.csv",
+      "sha256": "2a119ccedb5f8913c1e882af8aceb934033623ae3ee2c2f8a21a5c2534f6fb5e",
+      "role": "locked_place_name_catalog",
+      "storage": "git"
+    },
+    {
+      "path": "data/map/mapgen_exports/courtos_mapgen_export_manifest_v1.json",
+      "sha256": "85586bb8c507f7d97b345abc2da57e8cbf77f7f027694146303ec749c4d9d201",
+      "role": "mapgen_export_manifest",
+      "storage": "git"
+    },
+    {
+      "path": "data/map/mapgen_exports/pearwick_microhex_pilot_v1.json",
+      "sha256": "71687e30867d94eb9396a2215d2a5778be65797dd7740f0383df8953f32451c9",
+      "role": "versioned_mapgen_renderer_export",
+      "storage": "git_lfs"
+    }
+  ]
+}

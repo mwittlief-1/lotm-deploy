@@ -2,3 +2,8 @@ node_modules
 dist
 artifacts
 .DS_Store
+
+# Deterministic CourtOS build products and local promotion evidence.
+public/data/ready/courtos_spatial_read_model_v1.json
+.courtos-public/
+qa_artifacts/courtos_uat/

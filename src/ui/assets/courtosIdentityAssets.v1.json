@@ -1,0 +1,124 @@
+{
+  "schema_version": "courtos_identity_assets_v1",
+  "source_status": "runtime_asset_binding_manifest",
+  "identity_source_ref": "world_1120_turn0 admitted protected person and House identifiers",
+  "asset_source_ref": "public/assets reviewed CourtOS portrait, heraldry, and integrated-room assets",
+  "houses": [
+    {
+      "house_id": "t0h_bcae5bd911ab10f4c7fdfea0",
+      "display_name": "House Pearwick Hall",
+      "assets": {
+        "shield": "/assets/heraldry/house-pearwick-hall/shield.png",
+        "compact": "/assets/heraldry/house-pearwick-hall/compact.png",
+        "seal": "/assets/heraldry/house-pearwick-hall/seal.png",
+        "livery": "/assets/heraldry/house-pearwick-hall/livery.png",
+        "banner_tab": "/assets/heraldry/house-pearwick-hall/banner-tab.png",
+        "integrated_council_room": "/assets/council-command-room/command-surfaces/council-pearwick-hall-integrated-v2.png"
+      }
+    },
+    {
+      "house_id": "t0h_1ed8d543f12b387ed751f1a6",
+      "display_name": "House Holtcross",
+      "assets": {
+        "shield": "/assets/heraldry/house-holtcross/shield.png",
+        "compact": "/assets/heraldry/house-holtcross/compact.png",
+        "seal": "/assets/heraldry/house-holtcross/seal.png",
+        "livery": "/assets/heraldry/house-holtcross/livery.png",
+        "banner_tab": "/assets/heraldry/house-holtcross/banner-tab.png",
+        "integrated_council_room": "/assets/council-command-room/command-surfaces/council-holtcross-integrated-v1.png"
+      }
+    }
+  ],
+  "people": [
+    {
+      "person_id": "t0p_56033e4ecf3e86ff0dd615c4",
+      "display_name": "Edmund of Pearwick Hall",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/edmund-of-pearwick-hall__p2-m-dun-tp07-ph-d__lower-noble-hoh-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_f63d867e50e9b500f536e28f",
+      "display_name": "Isabel of Ridgestead",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/isabel-of-ridgestead__p2-f-har-tp06-ph-a__lower-noble-hoh-full-pal-10.png"
+    },
+    {
+      "person_id": "t0p_9ca824d05753ee92f2305a5a",
+      "display_name": "Aveline of Lily Croft",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/aveline-of-lily-croft__p2-f-kes-t0-ph-a__other-noble-collateral-full-pal-10.png"
+    },
+    {
+      "person_id": "t0p_d46018cec3d07ea31283ceed",
+      "display_name": "Aethelred Black, household clerk records keeper",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/aethelred-black__p2-m-har-tn06-ph-a__commoner-in-service-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_1a435b2adb59bfd7d0c79d28",
+      "display_name": "Ralph Woolman",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/ralph-woolman__p2-age-ya-m-dom-029__commoner-in-service-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_b21c9327a2680555558e2d7c",
+      "display_name": "Ralph Scriven",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/ralph-scriven__p2-m-orc-tn04-ph-c__other-noble-collateral-broad-pal-11.png"
+    },
+    {
+      "person_id": "t0p_1a651f26b966680a3f01d361",
+      "display_name": "Gilbert Waxman",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/gilbert-waxman__p2-m-har-tp06-ph-a__other-noble-collateral-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_4c0db3b36235e233ca0cd4d6",
+      "display_name": "Michael Moorbrook",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/michael-moorbrook__p2-m-gls-tn04-ph-c-old-age__other-noble-collateral-broad-pal-05.png"
+    },
+    {
+      "person_id": "t0p_a8bb623f1d194c7735180e29",
+      "display_name": "Gerard Scrivener",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/gerard-scrivener__p2-m-gls-t0-ph-d__high-church-service-narrow-fixed.png"
+    },
+    {
+      "person_id": "t0p_88f787fdeb16b923a5f05efe",
+      "display_name": "Thierry Shield, retainer captain muster lead",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/thierry-shield__p2-m-gls-t0-ph-c__other-noble-martial-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_334927a7b877bbb47382f107",
+      "display_name": "Wulfstan Ford",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/wulfstan-ford__p2-m-mrw-tp04-ph-d__commoner-in-service-broad-pal-10.png"
+    },
+    {
+      "person_id": "t0p_8136ecf3214b14e620376ded",
+      "display_name": "Gilbert of Holtcross",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/gilbert-of-holtcross.png"
+    },
+    {
+      "person_id": "t0p_e863fde465f25465614b155c",
+      "display_name": "Gunnilda of Glastonmere",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/gunnilda-of-glastonmere.png"
+    },
+    {
+      "person_id": "t0p_881222dcd073c07d29428069",
+      "display_name": "Laurence of Holtcross",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/laurence-of-holtcross.png"
+    },
+    {
+      "person_id": "t0p_20f876de77c2cd7589564419",
+      "display_name": "Aelfwine of Holtcross",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/aelfwine-of-holtcross.png"
+    },
+    {
+      "person_id": "t0p_1743dfc4c41362870312616f",
+      "display_name": "Odo of Holtcross",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/odo-of-holtcross.png"
+    },
+    {
+      "person_id": "t0p_771a6c64db4bcc590d9f4a56",
+      "display_name": "Joia of Holtcross",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/joia-of-holtcross.png"
+    },
+    {
+      "person_id": "t0p_831066d46d6465c18f858649",
+      "display_name": "Gilbert Tanner",
+      "portrait_path": "/assets/council-command-room/portraits/holtcross/gilbert-tanner.png"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "checks": [
+    {
+      "id": "ARCH-001",
+      "area": "release_engineering",
+      "title": "Clean-checkout runtime reproducibility",
+      "blocking": true,
+      "requirement": "Every CourtOS runtime input, asset, read contract, and build script needed by a clean checkout is tracked or reproducibly materialized by a documented build step."
+    },
+    {
+      "id": "ARCH-002",
+      "area": "deployment",
+      "title": "Production API adapter",
+      "blocking": true,
+      "requirement": "The deployed runtime serves every /api/courtos, /api/household, and /api/council-room contract through a production-capable adapter rather than relying only on Vite development or preview middleware."
+    },
+    {
+      "id": "ARCH-003",
+      "area": "runtime_boundary",
+      "title": "Hermetic spatial materialization",
+      "blocking": true,
+      "requirement": "Spatial build outputs are reproducible without an undocumented sibling repository or machine-specific home-directory state."
+    },
+    {
+      "id": "ARCH-004",
+      "area": "source_truth",
+      "title": "Admitted data only",
+      "blocking": true,
+      "requirement": "Candidate, provisional, fixture, and presentation-only records cannot silently become UI authority."
+    },
+    {
+      "id": "ARCH-005",
+      "area": "generalization",
+      "title": "House-agnostic identity and asset resolution",
+      "blocking": true,
+      "requirement": "Names, heraldry, portraits, people, responsibilities, and room population work for any admitted House without Pearwick/Holtcross-only branches or wrong-person fallbacks."
+    },
+    {
+      "id": "ARCH-006",
+      "area": "authority",
+      "title": "Authority and knowledge boundaries",
+      "blocking": true,
+      "requirement": "UI visibility and commands preserve actor authority, delegated responsibility, Council membership distinctions, and fuzzy knowledge precision."
+    },
+    {
+      "id": "ARCH-007",
+      "area": "resilience",
+      "title": "Loading, unavailable, empty, degraded, and error states",
+      "blocking": true,
+      "requirement": "Every runtime dependency and drill-down has honest bounded fallback behavior with recovery or actionable diagnostics."
+    },
+    {
+      "id": "ARCH-008",
+      "area": "security",
+      "title": "Client payload minimization and embedding safety",
+      "blocking": true,
+      "requirement": "The client does not download out-of-scope realm data or internal identifiers merely to filter locally, and embedded surfaces use appropriate origin and sandbox controls."
+    },
+    {
+      "id": "ARCH-009",
+      "area": "maintainability",
+      "title": "Module boundaries and type safety",
+      "blocking": false,
+      "requirement": "CourtOS presentation, navigation, source adapters, and projections are separable, typed, reviewable, and testable without monolithic coupling."
+    },
+    {
+      "id": "ARCH-010",
+      "area": "performance",
+      "title": "Performance and asset budgets",
+      "blocking": false,
+      "requirement": "Bundle size, first meaningful room render, portrait/heraldry loading, spatial payload, and map responsiveness have measured budgets."
+    },
+    {
+      "id": "ARCH-011",
+      "area": "observability",
+      "title": "Reproducible runtime evidence",
+      "blocking": true,
+      "requirement": "A UAT defect can be tied to a content-aware build identity, route, House, actor, source contract, console/network evidence, and exact runtime inputs."
+    },
+    {
+      "id": "ARCH-012",
+      "area": "release_engineering",
+      "title": "CI, deployment smoke, and rollback",
+      "blocking": true,
+      "requirement": "CI reproduces the candidate from clean inputs, exercises production endpoints and the browser entry, and preserves an identifiable rollback artifact."
+    }
+  ]
+}

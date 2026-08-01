@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://merecross.local/schemas/courtos-uat-report-v1.json",
+  "title": "CourtOS UAT Orchestrator Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "buildId",
+    "runtimeUrl",
+    "verdict",
+    "summary",
+    "laneResults",
+    "findings"
+  ],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "buildId": { "type": "string", "minLength": 1 },
+    "runtimeUrl": { "type": "string", "minLength": 1 },
+    "verdict": { "enum": ["pass", "fail", "incomplete"] },
+    "summary": { "type": "string", "minLength": 1 },
+    "laneResults": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lane", "status", "scenarioIds", "evidenceSummary"],
+        "properties": {
+          "lane": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["pass", "fail", "incomplete"] },
+          "scenarioIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "evidenceSummary": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "lane",
+        "scenarioId",
+        "severity",
+        "category",
+        "title",
+        "status",
+        "confidence",
+        "reproducible",
+        "independentlyVerified",
+        "requiresHumanJudgment",
+        "houseSelector",
+        "actorContext",
+        "route",
+        "expected",
+        "actual",
+        "reproductionSteps",
+        "evidence"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "lane": { "type": "string", "minLength": 1 },
+        "scenarioId": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["P0", "P1", "P2", "P3"] },
+        "category": {
+          "enum": [
+            "truth",
+            "authority",
+            "continuity",
+            "interaction",
+            "presentation",
+            "performance",
+            "language",
+            "accessibility",
+            "resilience"
+          ]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["verified", "unverified", "rejected", "accepted_exception"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reproducible": { "type": "boolean" },
+        "independentlyVerified": { "type": "boolean" },
+        "requiresHumanJudgment": { "type": "boolean" },
+        "houseSelector": { "type": "string", "minLength": 1 },
+        "actorContext": { "type": "string", "minLength": 1 },
+        "route": { "type": "string", "minLength": 1 },
+        "expected": { "type": "string", "minLength": 1 },
+        "actual": { "type": "string", "minLength": 1 },
+        "reproductionSteps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "location", "detail"],
+            "properties": {
+              "kind": {
+                "enum": ["screenshot", "console", "network", "source", "api", "read_model", "timing", "other"]
+              },
+              "location": { "type": "string", "minLength": 1 },
+              "detail": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

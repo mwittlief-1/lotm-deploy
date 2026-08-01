@@ -1,0 +1,19 @@
+{
+  "schema_version": "courtos_mapgen_export_manifest_v1",
+  "exports": [
+    {
+      "export_id": "pearwick_microhex_pilot_v1",
+      "path": "data/map/mapgen_exports/pearwick_microhex_pilot_v1.json",
+      "sha256": "71687e30867d94eb9396a2215d2a5778be65797dd7740f0383df8953f32451c9",
+      "source_repository": "lotm-mapgen",
+      "source_path": "qa_artifacts/V07-PEARWICK-MICROHEX-PILOT-001/pearwick_microhex_pilot_v1.json",
+      "source_status": "versioned_renderer_export",
+      "runtime_use": "read_only_estate_detail_coverage",
+      "authority": {
+        "world_truth": false,
+        "runtime_authority": false,
+        "command_authority": false
+      }
+    }
+  ]
+}
