@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 
 import {
-  SqliteCliReadonlyDriver,
+  NativeSqliteReadonlyDriver,
   type World1116ReadonlySqliteDriver
 } from "../world1116/sqliteReadonlyDriver";
 import {
@@ -173,7 +173,7 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
     if (actualSha !== COURTOS_1120_SQLITE_SHA256) {
       throw new Error(`CourtOS SQLite SHA mismatch: expected ${COURTOS_1120_SQLITE_SHA256}, got ${actualSha}.`);
     }
-    const driver = new SqliteCliReadonlyDriver(databasePath);
+    const driver = new NativeSqliteReadonlyDriver(databasePath);
     await driver.assertReadPolicy();
     return new CourtOs1120ReadModel(databasePath, driver);
   }

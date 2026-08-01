@@ -15,6 +15,8 @@ const ENTRYPOINTS = [
 ];
 const REQUIRED_REPOSITORY_INPUTS = [
   ".gitattributes",
+  ".github/workflows/ci.yml",
+  ".github/workflows/courtos-release.yml",
   ".gitignore",
   ".node-version",
   "AGENTS.md",
@@ -32,6 +34,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/runCourtosTestSuite.mjs",
   "scripts/runCourtosUatBrowser.mjs",
   "scripts/runCourtosUatBrowserBroker.mjs",
+  "scripts/smokeCourtosDeployment.mjs",
   "scripts/validateCourtosUatConfig.mjs",
   "scripts/verifyCourtosTrackedInputs.mjs",
   "scripts/verifyCourtosGeneratedArtifacts.mjs",

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
 
 import {
-  SqliteCliReadonlyDriver,
+  NativeSqliteReadonlyDriver,
   type World1116ReadonlySqliteDriver,
 } from "../world1116/sqliteReadonlyDriver";
 import {
@@ -69,7 +69,7 @@ export class Household1120ReadModel implements Household1120ReadModelSessionCont
         `Household SQLite SHA mismatch: expected ${HOUSEHOLD_1120_SQLITE_SHA256}, got ${actualSha}.`,
       );
     }
-    const driver = new SqliteCliReadonlyDriver(databasePath);
+    const driver = new NativeSqliteReadonlyDriver(databasePath);
     await driver.assertReadPolicy();
     return new Household1120ReadModel(driver);
   }

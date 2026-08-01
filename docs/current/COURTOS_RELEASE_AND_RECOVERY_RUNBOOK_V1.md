@@ -1,0 +1,69 @@
+# CourtOS Release and Recovery Runbook V1
+
+## Purpose
+
+CourtOS production releases use immutable, source-derived builds. A deployment is staged and smoke-tested before any production domain is moved. The release workflow pauses at an approval-gated production environment before promotion; rollback is also available as a separate approval-gated operation.
+
+This runbook does not replace the repository promotion order in `AGENTS.md`. Internal agent UAT and the independent architecture review must pass before a human playtest candidate is promoted.
+
+## Runtime data contract
+
+- The two admitted 1120 SQLite contracts are checksum-pinned in `config/courtos-runtime-inputs.v1.json`.
+- Vercel packages those SQLite files with the three read-only API functions.
+- Each SQLite-backed function packages only its own exact pinned contract path. The Council function packages neither database.
+- The production binding resolves to the pinned repository paths by default. `COURTOS_1120_SQLITE_PATH` and `HOUSEHOLD_1120_SQLITE_PATH` are explicit operator overrides, not required hidden configuration.
+- The API uses an in-process, read-only SQLite driver. Production does not depend on an unprovisioned host `sqlite3` executable.
+- All API reads retain their endpoint-specific `503` failure contracts and `Cache-Control: no-store` behavior.
+
+## Required GitHub configuration
+
+Configure these repository secrets:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+- `VERCEL_AUTOMATION_BYPASS_SECRET` when deployment protection is enabled
+
+Configure the `courtos-production` GitHub environment with required reviewers. That environment gates both promotion and rollback.
+
+## Release
+
+Run **CourtOS staged release** with operation `release`. Supply:
+
+- the canonical `production_url`;
+- the prior known-good immutable `rollback_url`; and
+- an admitted `smoke_house_id` plus its corresponding `smoke_household_entity_id`.
+
+The workflow:
+
+1. checks out Git LFS inputs;
+2. installs with pinned Node and pnpm versions;
+3. runs `pnpm run qa:engineering`;
+4. builds using the Vercel production environment;
+5. deploys with `--prod --skip-domain`, so no production domain moves;
+6. checks the landing document and all three API contracts on both the staged candidate and the rollback target;
+7. records the source SHA and checksum of the tracked-input verification report; and
+8. retains the immutable URLs, provenance, and smoke evidence as workflow artifacts.
+
+A failed step leaves production routing unchanged.
+
+After staging passes, the promotion job waits on the `courtos-production` GitHub environment. It checks out the exact staged source SHA, re-smokes the immutable deployment, promotes it, and then smokes the canonical production route. If that post-promotion smoke fails, the workflow immediately restores the supplied known-good rollback deployment.
+
+## Roll back
+
+Keep the prior known-good immutable deployment URL in the release record. If production must be restored outside a release attempt, run the workflow with operation `rollback`, that `rollback_url`, the canonical `production_url`, and the same source-derived smoke selectors. GitHub environment approval is required.
+
+The workflow smokes the rollback target before routing traffic and the canonical route after the rollback. Rollback does not rebuild the application or mutate its pinned read data.
+
+## Local smoke
+
+The same smoke contract can run against a local preview or remote candidate:
+
+```sh
+node scripts/smokeCourtosDeployment.mjs \
+  --base-url http://127.0.0.1:4173 \
+  --house-id <admitted-house-id> \
+  --household-entity-id <corresponding-admitted-household-entity-id>
+```
+
+Selectors must come from admitted current source data. The script intentionally contains no Pearwick, Holtcross, person, portrait, manor, or responsibility fixture.

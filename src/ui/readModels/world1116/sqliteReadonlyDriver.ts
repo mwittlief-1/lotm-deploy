@@ -1,6 +1,8 @@
 import { execFile } from "node:child_process";
 import { pathToFileURL } from "node:url";
 
+import Database from "better-sqlite3";
+
 import type { World1116RawRow } from "./types";
 
 export interface World1116ReadonlySqliteDriver {
@@ -8,7 +10,7 @@ export interface World1116ReadonlySqliteDriver {
   readonly databaseUri: string;
   readonly policy: {
     mode: "ro";
-    immutable: true;
+    immutable: boolean;
     queryOnly: true;
   };
   assertReadPolicy(): Promise<void>;
@@ -66,6 +68,58 @@ function runSqlite(
 export interface SqliteCliReadonlyDriverOptions {
   sqliteExecutable?: string;
   maxBufferBytes?: number;
+}
+
+/**
+ * In-process production driver. Unlike the development CLI adapter below, it
+ * does not depend on a host-provided `sqlite3` executable. The database is
+ * opened read-only, the connection is query-only, and the same SQL allowlist
+ * is enforced before SQLite sees a statement. Snapshot immutability is enforced
+ * by the read-model service's checksum verification before this driver opens;
+ * better-sqlite3 does not consume SQLite URI immutable flags.
+ */
+export class NativeSqliteReadonlyDriver implements World1116ReadonlySqliteDriver {
+  readonly databasePath: string;
+  readonly databaseUri: string;
+  readonly policy = Object.freeze({ mode: "ro" as const, immutable: false, queryOnly: true as const });
+
+  private readonly database: Database.Database;
+  private closed = false;
+
+  constructor(databasePath: string) {
+    this.databasePath = databasePath;
+    this.databaseUri = pathToFileURL(databasePath).href;
+    this.database = new Database(databasePath, {
+      readonly: true,
+      fileMustExist: true,
+    });
+    this.database.pragma("query_only = ON");
+  }
+
+  async assertReadPolicy(): Promise<void> {
+    if (this.closed) throw new Error("World 1116 SQLite driver is closed.");
+    const row = this.database
+      .prepare(
+        "SELECT (SELECT query_only FROM pragma_query_only) AS query_only, " +
+          "(SELECT file FROM pragma_database_list WHERE name = 'main') AS database_path",
+      )
+      .get() as { query_only?: number; database_path?: string } | undefined;
+    if (!row || Number(row.query_only) !== 1) {
+      throw new Error("SQLite PRAGMA query_only did not remain enabled.");
+    }
+  }
+
+  async all<T extends object = World1116RawRow>(sql: string): Promise<readonly T[]> {
+    if (this.closed) throw new Error("World 1116 SQLite driver is closed.");
+    const statement = validateReadStatement(sql);
+    return this.database.prepare(statement).all() as T[];
+  }
+
+  async close(): Promise<void> {
+    if (this.closed) return;
+    this.closed = true;
+    this.database.close();
+  }
 }
 
 /**

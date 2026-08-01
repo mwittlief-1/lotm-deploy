@@ -1,5 +1,6 @@
 import {
   createCourtOs1120ReadModelService,
+  repositoryCourtOs1120Sources,
   type CourtOs1120ReadModelSources,
 } from "./readModelService";
 import type { CourtOs1120ApiService } from "./contracts";
@@ -15,13 +16,16 @@ function configuredPath(
 
 export function productionCourtOs1120Sources(
   environment: NodeJS.ProcessEnv = process.env,
+  rootDirectory = process.cwd(),
 ): CourtOs1120ReadModelSources {
+  const repositorySources = repositoryCourtOs1120Sources(rootDirectory);
   return {
-    courtOsSqlitePath: configuredPath(environment, "COURTOS_1120_SQLITE_PATH"),
-    householdSqlitePath: configuredPath(
-      environment,
-      "HOUSEHOLD_1120_SQLITE_PATH",
-    ),
+    courtOsSqlitePath:
+      configuredPath(environment, "COURTOS_1120_SQLITE_PATH") ??
+      repositorySources.courtOsSqlitePath,
+    householdSqlitePath:
+      configuredPath(environment, "HOUSEHOLD_1120_SQLITE_PATH") ??
+      repositorySources.householdSqlitePath,
   };
 }
 
