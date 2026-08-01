@@ -9,11 +9,13 @@ type Household1120ApiResponse =
 export type Household1120LoadState =
   | { status: "loading"; data: null; error: null }
   | { status: "ready"; data: Household1120ReadOnlyProjection; error: null }
+  | { status: "blocked"; data: null; error: { code: string; message: string } }
   | { status: "error"; data: null; error: { code: string; message: string } };
 
 export function useHousehold1120Data(input: {
   householdEntityId: string | null;
   houseId: string | null;
+  reloadKey?: number;
 }): Household1120LoadState {
   const [state, setState] = React.useState<Household1120LoadState>({
     status: "loading",
@@ -23,7 +25,14 @@ export function useHousehold1120Data(input: {
 
   React.useEffect(() => {
     if (!input.householdEntityId || !input.houseId) {
-      setState({ status: "loading", data: null, error: null });
+      setState({
+        status: "blocked",
+        data: null,
+        error: {
+          code: "HOUSEHOLD_CONTEXT_REQUIRED",
+          message: "A resolved House and Household are required before this record can be opened.",
+        },
+      });
       return;
     }
     const controller = new AbortController();
@@ -61,7 +70,7 @@ export function useHousehold1120Data(input: {
         });
       });
     return () => controller.abort();
-  }, [input.householdEntityId, input.houseId]);
+  }, [input.householdEntityId, input.houseId, input.reloadKey]);
 
   return state;
 }

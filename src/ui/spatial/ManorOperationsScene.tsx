@@ -375,6 +375,8 @@ export function EstateHoldingsScene({
           key={src}
           ref={frame}
           className="uat-spatial-frame uat-spatial-frame-current"
+          referrerPolicy="strict-origin"
+          sandbox="allow-same-origin allow-scripts"
           src={src}
           title={`${level === "realm" ? "Estate survey" : level === "county" ? "Jurisdictional survey" : "Detailed ground plan"} for ${model.house.displayName}`}
           onError={() => {
@@ -388,6 +390,8 @@ export function EstateHoldingsScene({
           key={incomingSrc}
           ref={incomingFrame}
           className="uat-spatial-frame uat-spatial-frame-incoming"
+          referrerPolicy="strict-origin"
+          sandbox="allow-same-origin allow-scripts"
           src={incomingSrc}
           title={`${pendingLevel === "realm" ? "Estate survey" : pendingLevel === "county" ? "Jurisdictional survey" : "Detailed ground plan"} for ${model.house.displayName}`}
           onError={() => {

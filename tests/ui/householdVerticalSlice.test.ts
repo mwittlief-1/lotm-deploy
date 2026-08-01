@@ -1,4 +1,6 @@
 import React from "react";
+import fs from "node:fs";
+import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
@@ -71,5 +73,36 @@ describe("HouseholdVerticalSlice", () => {
     expect(positions[2].y).toBe(positions[4].y);
     expect(positions[5].x + positions[6].x).toBe(100);
     expect(positions[5].y).toBe(positions[6].y);
+  });
+
+  it("keeps every Council domain reachable in a 390px-class viewport above the fixed route bar", () => {
+    const css = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/panels/householdVerticalSlice.css"),
+      "utf8",
+    );
+
+    expect(css).toMatch(
+      /@media \(max-width: 720px\)[\s\S]*?\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*0/,
+    );
+    expect(css).toMatch(
+      /\.uat-council-scene\s*\{\s*height:\s*auto;\s*min-height:\s*1320px/,
+    );
+    expect(css).toContain("overscroll-behavior-y: contain");
+    expect(css).toContain("scroll-padding-bottom: 82px");
+    expect(css).toMatch(/\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*0/);
+    expect(css).toMatch(/\.uat-council-domain-objects\s*\{[\s\S]*?bottom:\s*82px/);
+  });
+
+  it("provides bounded recovery without exposing raw dependency errors", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/panels/HouseholdVerticalSlice.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("Try the record again");
+    expect(source).toContain("COURTOS_SHELL_SOURCE_MISMATCH");
+    expect(source).toContain("HOUSEHOLD_SOURCE_MISMATCH");
+    expect(source).not.toContain("detail={courtOsState.error.message}");
+    expect(source).toContain("The Household read contract is unavailable.");
   });
 });

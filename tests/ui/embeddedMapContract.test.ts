@@ -80,4 +80,17 @@ describe("CourtOS direct embedded map contract", () => {
       }
     }
   });
+
+  it("contains embedded MapGen frames to the capabilities required by the protocol", async () => {
+    const source = await readFile(
+      new URL("../../src/ui/spatial/ManorOperationsScene.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source.match(/sandbox="allow-same-origin allow-scripts"/g)).toHaveLength(2);
+    expect(source.match(/referrerPolicy="strict-origin"/g)).toHaveLength(2);
+    expect(source).not.toContain("allow-popups");
+    expect(source).not.toContain("allow-forms");
+    expect(source).not.toContain("allow-top-navigation");
+  });
 });

@@ -1711,6 +1711,27 @@ button:focus-visible {
   line-height: 1.45;
 }
 
+.uat-data-state code {
+  color: #907d60;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.uat-data-state button {
+  margin-top: 8px;
+  padding: 10px 16px;
+  color: #f0dfbf;
+  cursor: pointer;
+  border: 1px solid rgba(205, 158, 86, 0.68);
+  background: linear-gradient(145deg, rgba(78, 49, 25, 0.94), rgba(23, 15, 10, 0.97));
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 @keyframes uat-arrive {
   from {
     opacity: 0;
@@ -1848,13 +1869,19 @@ button:focus-visible {
 
   .uat-venue {
     inset: 68px 0 56px;
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scroll-padding-bottom: 82px;
     background-position: 51% top;
   }
 
-  .uat-venue[data-scene="council"],
+  .uat-venue[data-scene="council"] {
+    min-height: 0;
+  }
+
   .uat-venue[data-scene="household"] {
-    min-height: 850px;
+    min-height: 0;
   }
 
   .uat-council-scene,
@@ -2107,10 +2134,11 @@ button:focus-visible {
 
 @media (max-width: 720px) {
   .uat-venue[data-scene="council"] {
-    min-height: 1320px;
+    min-height: 0;
   }
 
   .uat-council-scene {
+    height: auto;
     min-height: 1320px;
     padding: 86px 12px 630px;
   }
@@ -2141,7 +2169,7 @@ button:focus-visible {
   .uat-council-domain-objects {
     top: auto;
     right: 12px;
-    bottom: 18px;
+    bottom: 82px;
     left: 12px;
     height: 570px;
     display: grid;

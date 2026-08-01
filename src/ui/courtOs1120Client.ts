@@ -17,6 +17,7 @@ export function useCourtOs1120Data(
     entityId?: string | null;
     houseId?: string | null;
     entityLabel?: string | null;
+    reloadKey?: number;
   } = {},
 ): CourtOs1120LoadState {
   const [state, setState] = React.useState<CourtOs1120LoadState>({
@@ -28,6 +29,7 @@ export function useCourtOs1120Data(
   const entityId = input.entityId ?? null;
   const houseId = input.houseId ?? null;
   const entityLabel = input.entityLabel ?? null;
+  const reloadKey = input.reloadKey ?? 0;
 
   React.useEffect(() => {
     const controller = new AbortController();
@@ -64,7 +66,7 @@ export function useCourtOs1120Data(
       });
 
     return () => controller.abort();
-  }, [entityId, entityLabel, houseId]);
+  }, [entityId, entityLabel, houseId, reloadKey]);
 
   return state;
 }

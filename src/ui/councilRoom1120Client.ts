@@ -9,10 +9,12 @@ type CouncilRoom1120ApiResponse =
 export type CouncilRoom1120LoadState =
   | { status: "loading"; data: null; error: null }
   | { status: "ready"; data: CouncilRoomReadyProjectionV1; error: null }
+  | { status: "blocked"; data: null; error: { code: string; message: string } }
   | { status: "error"; data: null; error: { code: string; message: string } };
 
 export function useCouncilRoom1120Data(
   houseId: string | null,
+  reloadKey = 0,
 ): CouncilRoom1120LoadState {
   const [state, setState] = React.useState<CouncilRoom1120LoadState>({
     status: "loading",
@@ -22,7 +24,14 @@ export function useCouncilRoom1120Data(
 
   React.useEffect(() => {
     if (!houseId) {
-      setState({ status: "loading", data: null, error: null });
+      setState({
+        status: "blocked",
+        data: null,
+        error: {
+          code: "COUNCIL_ROOM_HOUSE_REQUIRED",
+          message: "A selected House is required before the Council source can be opened.",
+        },
+      });
       return;
     }
     const controller = new AbortController();
@@ -58,7 +67,7 @@ export function useCouncilRoom1120Data(
         });
       });
     return () => controller.abort();
-  }, [houseId]);
+  }, [houseId, reloadKey]);
 
   return state;
 }

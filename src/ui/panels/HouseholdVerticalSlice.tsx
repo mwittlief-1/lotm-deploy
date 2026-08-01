@@ -273,7 +273,7 @@ function AppHeader({
         <strong>
           Turn 1 · {model.turn.year}–{model.turn.year + 2}
         </strong>
-        <span>Authority rests with {model.head.display_name}</span>
+        <span>{model.authority.label}</span>
       </div>
     </header>
   );
@@ -1291,9 +1291,13 @@ function RouteBar({
 function DataState({
   state,
   detail,
+  code,
+  onRetry,
 }: {
-  state: "loading" | "error";
+  state: "loading" | "error" | "blocked";
   detail?: string | null;
+  code?: string | null;
+  onRetry?: (() => void) | null;
 }) {
   return (
     <main className="uat-app">
@@ -1303,13 +1307,21 @@ function DataState({
         <h1>
           {state === "loading"
             ? "Opening the House record"
-            : "The House record could not be opened"}
+            : state === "blocked"
+              ? "The House record needs more context"
+              : "The House record could not be opened"}
         </h1>
         <p>
           {state === "loading"
             ? "Reading the selected House’s January 1120 CourtOS record."
             : detail ?? "No substitute record will be shown."}
         </p>
+        {code ? <code>{code}</code> : null}
+        {onRetry ? (
+          <button onClick={onRetry} type="button">
+            Try the record again
+          </button>
+        ) : null}
       </section>
     </main>
   );
@@ -1333,7 +1345,9 @@ function sceneArt(scene: Scene, houseId: string): string {
 
 export function HouseholdVerticalSlice() {
   const [houseId] = useState(requestedHouseId);
-  const courtOsState = useCourtOs1120Data({ houseId });
+  const [reloadKey, setReloadKey] = useState(0);
+  const retrySources = () => setReloadKey((current) => current + 1);
+  const courtOsState = useCourtOs1120Data({ houseId, reloadKey });
   const resolvedHouseId =
     courtOsState.status === "ready"
       ? courtOsState.data.selected_entity.protected_graph_entity_id
@@ -1344,8 +1358,9 @@ export function HouseholdVerticalSlice() {
         ? courtOsState.data.selected_entity.entity_id
         : null,
     houseId: resolvedHouseId,
+    reloadKey,
   });
-  const councilState = useCouncilRoom1120Data(resolvedHouseId ?? houseId);
+  const councilState = useCouncilRoom1120Data(resolvedHouseId ?? houseId, reloadKey);
   const spatialState = useCourtOsSpatialPortfolio(resolvedHouseId ?? houseId);
   const shellRuntime = useMemo(() => {
     if (courtOsState.status !== "ready" || councilState.status !== "ready") {
@@ -1556,13 +1571,37 @@ export function HouseholdVerticalSlice() {
   }, [dialog]);
 
   if (courtOsState.status === "error") {
-    return <DataState detail={courtOsState.error.message} state="error" />;
+    return (
+      <DataState
+        code={courtOsState.error.code}
+        detail="The CourtOS read contract is unavailable. No substitute record will be shown."
+        onRetry={retrySources}
+        state="error"
+      />
+    );
   }
   if (councilState.status === "error") {
-    return <DataState detail={councilState.error.message} state="error" />;
+    return (
+      <DataState
+        code={councilState.error.code}
+        detail="The Council source projection is unavailable. No substitute Council will be shown."
+        onRetry={retrySources}
+        state="error"
+      />
+    );
+  }
+  if (councilState.status === "blocked") {
+    return <DataState code={councilState.error.code} detail={councilState.error.message} state="blocked" />;
   }
   if (shellRuntime?.error) {
-    return <DataState detail={shellRuntime.error} state="error" />;
+    return (
+      <DataState
+        code="COURTOS_SHELL_SOURCE_MISMATCH"
+        detail="The House and Council records could not be reconciled. No mixed record will be shown."
+        onRetry={retrySources}
+        state="error"
+      />
+    );
   }
   if (
     courtOsState.status !== "ready" ||
@@ -1582,10 +1621,27 @@ export function HouseholdVerticalSlice() {
           )
         : false;
   if (householdRoute && householdState.status === "error") {
-    return <DataState detail={householdState.error.message} state="error" />;
+    return (
+      <DataState
+        code={householdState.error.code}
+        detail="The Household read contract is unavailable. No substitute Household will be shown."
+        onRetry={retrySources}
+        state="error"
+      />
+    );
+  }
+  if (householdRoute && householdState.status === "blocked") {
+    return <DataState code={householdState.error.code} detail={householdState.error.message} state="blocked" />;
   }
   if (householdRoute && householdRuntime?.error) {
-    return <DataState detail={householdRuntime.error} state="error" />;
+    return (
+      <DataState
+        code="HOUSEHOLD_SOURCE_MISMATCH"
+        detail="The Household sources could not be reconciled. No mixed record will be shown."
+        onRetry={retrySources}
+        state="error"
+      />
+    );
   }
   if (
     householdRoute &&

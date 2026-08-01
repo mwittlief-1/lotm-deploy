@@ -12,6 +12,11 @@ export interface CourtOsShellRuntimeModel {
     label: string;
   };
   head: CouncilRoomReadyProjectionV1["head_ref"];
+  authority: {
+    status: "head" | "regency_required";
+    actor: CouncilRoomReadyProjectionV1["head_ref"] | null;
+    label: string;
+  };
   council: readonly CouncilRoomReadyProjectionV1["inner_council_seats"][number][];
   effectiveDate: string;
 }
@@ -38,6 +43,17 @@ export function buildCourtOsShellRuntimeModel(input: {
       label: input.council.turn.label,
     },
     head: input.council.head_ref,
+    authority: input.council.council_body.regency_required
+      ? {
+          status: "regency_required",
+          actor: null,
+          label: "Regency required · acting authority not recorded",
+        }
+      : {
+          status: "head",
+          actor: input.council.head_ref,
+          label: `Authority rests with ${input.council.head_ref.display_name}`,
+        },
     council: input.council.inner_council_seats,
     effectiveDate: input.courtOs.contract.effective_date,
   };

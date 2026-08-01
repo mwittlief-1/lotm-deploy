@@ -116,8 +116,23 @@ describe("Household UAT runtime model", () => {
 
     expect(shell.house.displayName).toBe("House Pearwick Hall");
     expect(shell.council).toHaveLength(4);
+    expect(shell.authority).toMatchObject({
+      status: "head",
+      label: "Authority rests with Edmund of Pearwick Hall",
+    });
     expect(shell.effectiveDate).toBe("1120-01-01");
     expect(shell).not.toHaveProperty("responsibilities");
+  });
+
+  it("does not present a minor head as acting authority when the source requires regency", async () => {
+    const shell = await shellFor("t0h_8d6243f2356c0d5d5590d96e");
+
+    expect(shell.head.display_name).toBe("Henry of Alderwick");
+    expect(shell.authority).toEqual({
+      status: "regency_required",
+      actor: null,
+      label: "Regency required · acting authority not recorded",
+    });
   });
 
   it("reconstructs a second House from the same code and source contracts", async () => {
