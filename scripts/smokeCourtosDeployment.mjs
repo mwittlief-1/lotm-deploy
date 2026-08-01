@@ -23,12 +23,26 @@ function required(values, name) {
 
 const values = argumentsByName(process.argv.slice(2));
 const baseUrl = new URL(required(values, "base-url"));
-if (!new Set(["http:", "https:"]).has(baseUrl.protocol)) {
-  throw new Error("--base-url must use http or https.");
+const localOrigin = new Set(["127.0.0.1", "localhost", "[::1]"]).has(
+  baseUrl.hostname,
+);
+if (baseUrl.protocol !== "https:" && !(baseUrl.protocol === "http:" && localOrigin)) {
+  throw new Error("--base-url must use HTTPS except for a loopback-only local smoke.");
+}
+if (baseUrl.username || baseUrl.password) {
+  throw new Error("--base-url must not contain credentials.");
+}
+const allowedOrigin = process.env.COURTOS_SMOKE_ALLOWED_ORIGIN?.trim();
+if (allowedOrigin && new URL(allowedOrigin).origin !== baseUrl.origin) {
+  throw new Error("--base-url does not match COURTOS_SMOKE_ALLOWED_ORIGIN.");
 }
 
 const houseId = required(values, "house-id");
 const householdEntityId = required(values, "household-entity-id");
+const SAFE_SELECTOR = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$/;
+if (!SAFE_SELECTOR.test(houseId) || !SAFE_SELECTOR.test(householdEntityId)) {
+  throw new Error("Smoke selectors must use the admitted identifier character set.");
+}
 const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
 const headers = bypassSecret
   ? {
@@ -48,7 +62,7 @@ function endpoint(path, query = {}) {
 async function request(url, expectedContentType) {
   const response = await fetch(url, {
     headers,
-    redirect: "follow",
+    redirect: "error",
     signal: AbortSignal.timeout(30_000),
   });
   const contentType = response.headers.get("content-type") ?? "";
