@@ -7,7 +7,7 @@
     "tests/courtosUatHarness.test.ts",
     "tests/server/courtos1120ApiHandler.test.ts",
     "tests/server/courtos1120DeploymentAdapter.test.ts",
-    "tests/ui/appCourtOs1120Route.test.ts",
+    "tests/ui/courtosEntrypoint.test.ts",
     "tests/ui/courtos1120ReadOnlyProjection.test.ts",
     "tests/ui/embeddedMapContract.test.ts",
     "tests/ui/houseIdentityAssets.test.ts",

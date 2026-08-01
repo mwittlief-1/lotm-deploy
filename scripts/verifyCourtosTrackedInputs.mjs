@@ -31,6 +31,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/runCourtosInternalUat.mjs",
   "scripts/runCourtosTestSuite.mjs",
   "scripts/validateCourtosUatConfig.mjs",
+  "scripts/verifyCourtosTrackedInputs.mjs",
   "scripts/verifyCourtosGeneratedArtifacts.mjs",
 ];
 const IMPORT_EXTENSIONS = [
@@ -183,8 +184,34 @@ function isUnmaterializedLfsPointer(relativePath) {
 
 const manifest = readRuntimeManifest();
 const closure = runtimeImportClosure(ENTRYPOINTS);
+const preflightClosure = runtimeImportClosure([
+  "dist_batch/src/sim/index.js",
+  "dist_batch/src/sim/policies.js",
+  "dist_batch/src/version.js",
+]);
 const importedRuntimeAssets = runtimeAssetPaths(closure.files);
 const qaPackageFiles = repositoryFilesUnder("qa/uat");
+const testManifest = JSON.parse(
+  fs.readFileSync(absolute("qa/uat/courtos-test-files.json"), "utf8"),
+);
+if (testManifest.schema_version !== "courtos_test_file_manifest_v1") {
+  throw new Error("Unsupported CourtOS test-file manifest schema.");
+}
+const testClosure = runtimeImportClosure(testManifest.files);
+const testSupportFiles = testManifest.support_files ?? [];
+const preflightInputs = [
+  "scripts/preflightNoDeps.mjs",
+  "docs/BUILD_INFO.json",
+  "docs/schemas/prospects_window_v1.schema.json",
+  "docs/qa/v0.2.3_non_perturbation_baseline_v0.2.2.json",
+  "docs/qa/v0.2.4_non_perturbation_baseline_v0.2.4.json",
+  "docs/qa/v0.2.5_non_perturbation_baseline_v0.2.5.json",
+  "docs/qa/v0.2.6_non_perturbation_baseline_v0.2.6.json",
+  "docs/qa/v0.2.6.2_non_perturbation_baseline_v0.2.6.2.json",
+  "docs/qa/v0.2.7.1_non_perturbation_baseline_v0.2.7.1.json",
+  "docs/qa/v0.2.9_non_perturbation_baseline_v0.2.9.json",
+  ...preflightClosure.files,
+];
 const pinnedInputs = manifest.pinned_inputs.map((input) => input.path);
 const requiredTrackedInputs = [
   ...new Set([
@@ -192,6 +219,9 @@ const requiredTrackedInputs = [
     ...closure.files,
     ...importedRuntimeAssets,
     ...qaPackageFiles,
+    ...testClosure.files,
+    ...testSupportFiles,
+    ...preflightInputs,
     ...pinnedInputs,
   ]),
 ].sort();
@@ -199,6 +229,12 @@ const requiredTrackedInputs = [
 const errors = [];
 for (const missingImport of closure.missingImports) {
   errors.push(`Unresolved runtime import: ${missingImport}`);
+}
+for (const missingImport of preflightClosure.missingImports) {
+  errors.push(`Unresolved preflight import: ${missingImport}`);
+}
+for (const missingImport of testClosure.missingImports) {
+  errors.push(`Unresolved CourtOS test import: ${missingImport}`);
 }
 
 const missingFiles = requiredTrackedInputs.filter(

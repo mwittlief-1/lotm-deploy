@@ -18,6 +18,12 @@ for (const relativePath of manifest.files) {
   }
 }
 
+for (const relativePath of manifest.support_files ?? []) {
+  if (!fs.existsSync(path.resolve(ROOT, relativePath))) {
+    throw new Error(`CourtOS test support file is missing: ${relativePath}`);
+  }
+}
+
 const result = spawnSync(
   "node",
   ["node_modules/vitest/vitest.mjs", "run", ...manifest.files],
