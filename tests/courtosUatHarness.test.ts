@@ -57,11 +57,13 @@ describe("CourtOS internal UAT harness", () => {
   });
 
   it("provides structured schemas and executable package commands", () => {
-    expect(readJson(config.reportSchema).title).toBe("CourtOS UAT Orchestrator Report");
+    const uatSchema = readJson(config.reportSchema);
+    const promotionSchema = readJson("qa/uat/schemas/promotion-report.schema.json");
+    expect(uatSchema.title).toBe("CourtOS UAT Orchestrator Report");
     expect(readJson(config.architectureSchema).title).toBe("CourtOS Production Architecture Review");
-    expect(readJson("qa/uat/schemas/promotion-report.schema.json").title).toBe(
-      "CourtOS Internal Promotion Report"
-    );
+    expect(promotionSchema.title).toBe("CourtOS Internal Promotion Report");
+    expect(JSON.stringify(uatSchema)).not.toContain('"uniqueItems"');
+    expect(JSON.stringify(promotionSchema)).not.toContain('"uniqueItems"');
     expect(packageJson.scripts).toMatchObject({
       "qa:engineering": "node scripts/runCourtosEngineeringQa.mjs",
       "uat:config": "node scripts/validateCourtosUatConfig.mjs",

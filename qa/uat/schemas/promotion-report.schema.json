@@ -23,8 +23,7 @@
     "architecture": { "enum": ["pass", "fail", "incomplete"] },
     "blockingFindingIds": {
       "type": "array",
-      "items": { "type": "string" },
-      "uniqueItems": true
+      "items": { "type": "string" }
     },
     "promotedToHumanPlaytest": { "type": "boolean" }
   }
