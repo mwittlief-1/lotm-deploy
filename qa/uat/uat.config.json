@@ -2,6 +2,13 @@
   "version": "1.0.0",
   "product": "Merecross CourtOS",
   "runtimeEntry": "/courtos-home.html",
+  "humanPlaytest": {
+    "principal": "local_player",
+    "entitlement": "house_controller",
+    "houseName": "Pearwick Hall",
+    "houseId": "t0h_bcae5bd911ab10f4c7fdfea0",
+    "entry": "/courtos-home.html?houseId=t0h_bcae5bd911ab10f4c7fdfea0"
+  },
   "artifactRoot": "qa_artifacts/courtos_uat",
   "scenarioCatalog": "qa/uat/scenarios/courtos-v1.json",
   "reportSchema": "qa/uat/schemas/uat-report.schema.json",

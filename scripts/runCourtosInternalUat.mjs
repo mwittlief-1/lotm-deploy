@@ -444,6 +444,7 @@ try {
     ...process.env,
     MAPGEN_ROOT: mapgenRoot,
     VITE_MAPGEN_BASE_URL: mapgenBaseUrl,
+    VITE_COURTOS_PLAYER_HOUSE_ID: config.humanPlaytest.houseId,
   };
   if (!skipEngineering) {
     runSync(process.execPath, ["scripts/runCourtosEngineeringQa.mjs"], {
@@ -495,7 +496,10 @@ try {
   let runtimeUrl = suppliedBaseUrl;
   if (!runtimeUrl) {
     const port = await availablePort();
-    runtimeUrl = `http://127.0.0.1:${port}${config.runtimeEntry}`;
+    runtimeUrl = new URL(
+      config.humanPlaytest.entry,
+      `http://127.0.0.1:${port}`,
+    ).toString();
     preview = spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", String(port), "--strictPort"], {
       cwd: root,
       env: runtimeEnvironment,
@@ -534,6 +538,7 @@ try {
     mapgenBuildId: mapgenRuntimeInputs.contentHash,
     repositoryRoot: root,
     configPath: "qa/uat/uat.config.json",
+    humanPlaytest: config.humanPlaytest,
     scenarioCatalog: config.scenarioCatalog,
     requiredPersonaLanes: requiredLaneIds(),
     reportArtifactDirectory: artifactDir,

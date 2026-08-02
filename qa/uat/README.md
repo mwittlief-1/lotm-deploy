@@ -11,6 +11,21 @@ This package separates build ownership from internal acceptance.
 
 UAT agents and the architecture reviewer are read-only. They report findings; they do not fix them.
 
+## Human player context
+
+CourtOS is a local single-player game surface, not a multi-user web application. The
+human player controls one House; that House entitlement is distinct from the
+in-world person who may speak or act for it. Death, succession, incapacity, and
+regency can change the effective in-world actor without changing the player's
+House.
+
+The current human-playtest configuration in `uat.config.json` binds the local
+player to House Pearwick Hall. This is launch configuration, not a component
+fallback: a runtime request without an explicit House selector fails closed. The
+current Council sidecar does not admit an acting person, so the UI may identify
+the player House while continuing to label the head and Council projection as
+provisional and non-authoritative.
+
 ## Commands
 
 ```bash

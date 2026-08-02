@@ -11,6 +11,13 @@ export interface CourtOsShellRuntimeModel {
     year: number;
     label: string;
   };
+  player: {
+    principal: "local_player";
+    status: "house_controller" | "read_only_view" | "unconfigured";
+    entitlement: "house_controller" | null;
+    houseId: string | null;
+    label: string;
+  };
   head: CouncilRoomReadyProjectionV1["head_ref"];
   authority: {
     status: "unadmitted" | "regency_required";
@@ -28,6 +35,7 @@ export interface CourtOsShellRuntimeModel {
 export function buildCourtOsShellRuntimeModel(input: {
   courtOs: CourtOs1120ReadOnlyProjection;
   council: CouncilRoomReadyProjectionV1;
+  playerHouseId?: string | null;
 }): CourtOsShellRuntimeModel {
   const courtHouseId = input.courtOs.selected_entity.protected_graph_entity_id;
   if (!courtHouseId || courtHouseId !== input.council.house_ref.entity_id) {
@@ -38,6 +46,30 @@ export function buildCourtOsShellRuntimeModel(input: {
       source.authority_status?.toLowerCase().includes("candidate"),
     ),
   );
+  const playerHouseId = input.playerHouseId?.trim() || null;
+  const player: CourtOsShellRuntimeModel["player"] = !playerHouseId
+    ? {
+        principal: "local_player",
+        status: "unconfigured",
+        entitlement: null,
+        houseId: null,
+        label: "House record view · player House not configured",
+      }
+    : playerHouseId === courtHouseId
+      ? {
+          principal: "local_player",
+          status: "house_controller",
+          entitlement: "house_controller",
+          houseId: playerHouseId,
+          label: `Player House · ${input.courtOs.selected_entity.display_label ?? input.council.house_ref.display_name}`,
+        }
+      : {
+          principal: "local_player",
+          status: "read_only_view",
+          entitlement: null,
+          houseId: playerHouseId,
+          label: "Read-only House inspection · no player entitlement",
+        };
 
   return {
     house: {
@@ -51,6 +83,7 @@ export function buildCourtOsShellRuntimeModel(input: {
       year: input.council.turn.year,
       label: input.council.turn.label,
     },
+    player,
     head: input.council.head_ref,
     authority: input.council.council_body.regency_required
       ? {

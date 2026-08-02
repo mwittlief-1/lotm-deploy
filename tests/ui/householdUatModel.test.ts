@@ -40,6 +40,7 @@ async function runtimeFor(houseId: string) {
       shell: buildCourtOsShellRuntimeModel({
         courtOs: courtProjection,
         council: councilProjection,
+        playerHouseId: "t0h_bcae5bd911ab10f4c7fdfea0",
       }),
       runtime: buildHouseholdUatRuntimeModel({
         courtOs: courtProjection,
@@ -58,6 +59,7 @@ async function shellFor(houseId: string) {
     return buildCourtOsShellRuntimeModel({
       courtOs: await courtOs.projection({ houseId }),
       council: buildCouncilRoomReadyProjection({ houseId, turnYear: 1120 }),
+      playerHouseId: "t0h_bcae5bd911ab10f4c7fdfea0",
     });
   } finally {
     await courtOs.close();
@@ -125,6 +127,13 @@ describe("Household UAT runtime model", () => {
       status: "candidate_projection",
       label: "provisional Council membership · candidate source",
     });
+    expect(shell.player).toEqual({
+      principal: "local_player",
+      status: "house_controller",
+      entitlement: "house_controller",
+      houseId: "t0h_bcae5bd911ab10f4c7fdfea0",
+      label: "Player House · House Pearwick Hall",
+    });
     expect(shell.effectiveDate).toBe("1120-01-01");
     expect(shell).not.toHaveProperty("responsibilities");
   });
@@ -150,6 +159,13 @@ describe("Household UAT runtime model", () => {
     );
     expect(holtcross.runtime.head.display_name).toBe("Gilbert of Holtcross");
     expect(holtcross.runtime.council).toHaveLength(7);
+    expect(holtcross.shell.player).toEqual({
+      principal: "local_player",
+      status: "read_only_view",
+      entitlement: null,
+      houseId: "t0h_bcae5bd911ab10f4c7fdfea0",
+      label: "Read-only House inspection · no player entitlement",
+    });
     expect(holtcross.householdProjection.query.house_id).toBe(
       "t0h_1ed8d543f12b387ed751f1a6",
     );

@@ -34,6 +34,28 @@ function requireFile(relativePath, label) {
 const config = readJson(configPath, "UAT config");
 
 if (config) {
+  const humanPlaytest = config.humanPlaytest ?? {};
+  if (humanPlaytest.principal !== "local_player") {
+    errors.push("Human playtest principal must be local_player for the single-player UAT runtime.");
+  }
+  if (humanPlaytest.entitlement !== "house_controller") {
+    errors.push("Human playtest entitlement must be house_controller.");
+  }
+  if (typeof humanPlaytest.houseId !== "string" || !humanPlaytest.houseId.trim()) {
+    errors.push("Human playtest must declare a non-empty source House id.");
+  }
+  if (typeof humanPlaytest.houseName !== "string" || !humanPlaytest.houseName.trim()) {
+    errors.push("Human playtest must declare a non-empty source House name.");
+  }
+  if (typeof humanPlaytest.entry !== "string" || !humanPlaytest.entry.startsWith(config.runtimeEntry)) {
+    errors.push("Human playtest entry must extend the configured CourtOS runtime entry.");
+  } else {
+    const entry = new URL(humanPlaytest.entry, "http://courtos.invalid");
+    if (entry.searchParams.get("houseId") !== humanPlaytest.houseId) {
+      errors.push("Human playtest entry House selector must match humanPlaytest.houseId.");
+    }
+  }
+
   const laneIds = new Set();
   const lanes = Array.isArray(config.lanes) ? config.lanes : [];
   if (lanes.length < 6) errors.push("UAT config must define at least six persona lanes.");

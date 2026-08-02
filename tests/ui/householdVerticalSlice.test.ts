@@ -116,6 +116,9 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).toContain("return value || null");
     expect(source).not.toContain("recorded knowledge");
     expect(source).toContain("Candidate membership projection · not admitted source truth");
+    expect(source).toContain("Candidate Council seat");
+    expect(source).not.toContain("Recorded Council seat");
+    expect(source).toContain("VITE_COURTOS_PLAYER_HOUSE_ID");
     expect(source).toContain("data-council-source={model.councilSource.status}");
   });
 });

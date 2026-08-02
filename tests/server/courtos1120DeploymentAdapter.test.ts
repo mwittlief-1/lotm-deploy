@@ -4,9 +4,12 @@ import { describe, expect, it } from "vitest";
 
 import { productionCourtOs1120Sources } from "../../src/server/courtos1120Api/productionRuntime";
 import {
+  createCourtOs1120ReadModelService,
   COURTOS_1120_SQLITE_REPOSITORY_PATH,
   HOUSEHOLD_1120_SQLITE_REPOSITORY_PATH,
+  repositoryCourtOs1120Sources,
 } from "../../src/server/courtos1120Api/readModelService";
+import { createCourtOs1120FetchHandler } from "../../src/server/courtos1120Api/webAdapter";
 import { NativeSqliteReadonlyDriver } from "../../src/ui/readModels/world1116/sqliteReadonlyDriver";
 
 const root = process.cwd();
@@ -75,6 +78,31 @@ describe("CourtOS packaged deployment adapter", () => {
     });
     expect(existsSync(sources.courtOsSqlitePath!)).toBe(true);
     expect(existsSync(sources.householdSqlitePath!)).toBe(true);
+  });
+
+  it("keeps proposal and realm-wide fields out of real House API payloads", async () => {
+    const service = createCourtOs1120ReadModelService(
+      repositoryCourtOs1120Sources(root),
+    );
+    const handler = createCourtOs1120FetchHandler("courtos", service);
+    try {
+      for (const houseId of [
+        "t0h_bcae5bd911ab10f4c7fdfea0",
+        "t0h_1ed8d543f12b387ed751f1a6",
+      ]) {
+        const response = await handler(
+          new Request(`https://example.test/api/courtos/1120?houseId=${houseId}`),
+        );
+        expect(response.status).toBe(200);
+        const payload = await response.json();
+        expect(payload).not.toHaveProperty("pas_calibration");
+        expect(payload.data).not.toHaveProperty("global_summary");
+        expect(payload.data).not.toHaveProperty("provenance_readiness");
+        expect(payload.data.query.house_id).toBe(houseId);
+      }
+    } finally {
+      await service.close();
+    }
   });
 
   it("permits explicit production source overrides without partial fallback gaps", () => {

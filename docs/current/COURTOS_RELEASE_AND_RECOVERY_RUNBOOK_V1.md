@@ -15,6 +15,25 @@ This runbook does not replace the repository promotion order in `AGENTS.md`. Int
 - The API uses an in-process, read-only SQLite driver. Production does not depend on an unprovisioned host `sqlite3` executable.
 - All API reads retain their endpoint-specific `503` failure contracts and `Cache-Control: no-store` behavior.
 
+## Player and access boundary
+
+CourtOS currently operates as a local single-player runtime. The player controls
+the House selected by the saved-game or UAT launch configuration; this does not
+make the player a particular in-world person. Effective acting authority must be
+resolved separately from admitted source data and may change during play.
+
+The House selector scopes the read model but is not web authentication. Any
+internet-accessible preview or production deployment must remain behind platform
+deployment protection. Do not expose an unprotected CourtOS URL on the public
+internet. The current human-playtest launch is House Pearwick Hall as declared in
+`qa/uat/uat.config.json`; UI code contains no Pearwick fallback.
+
+For a deployed build, configure `VITE_COURTOS_PLAYER_HOUSE_ID` in the protected
+Vercel production environment to the admitted House id declared by
+`humanPlaytest.houseId`. This is a build-time player entitlement, not a selector
+default. Changing it requires a new immutable build and the complete promotion
+path; never infer it from a request query parameter.
+
 ## Required GitHub configuration
 
 Configure these repository secrets:

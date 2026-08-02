@@ -65,6 +65,9 @@ type DialogState =
   | { kind: "education_plan"; plan: Household1120EducationLearnerPlanRow }
   | null;
 
+const CONFIGURED_PLAYER_HOUSE_ID =
+  import.meta.env.VITE_COURTOS_PLAYER_HOUSE_ID?.trim() || null;
+
 function householdResponsibilityForDesignKey(
   designKey: string,
 ): HouseholdResponsibilityKey | null {
@@ -271,7 +274,7 @@ function AppHeader({
         <strong>
           Turn 1 · {model.turn.year}–{model.turn.year + 2}
         </strong>
-        <span>{model.authority.label}</span>
+        <span>{model.player.label} · {model.authority.label}</span>
       </div>
     </header>
   );
@@ -1048,14 +1051,17 @@ function ResponsibilityScene({
 
 function RecordDialog({
   dialog,
+  councilSource,
   onClose,
 }: {
   dialog: Exclude<DialogState, null>;
+  councilSource: CourtOsShellRuntimeModel["councilSource"];
   onClose: () => void;
 }) {
   let title = "";
   let kicker = "";
   let body: React.ReactNode = null;
+  let footerLabel = "Recorded inspection · no order issued";
 
   if (dialog.kind === "council_person") {
     const portrait = portraitArtForPerson({
@@ -1064,8 +1070,9 @@ function RecordDialog({
       age: dialog.person.person_ref.age_turn0,
       sex: dialog.person.person_ref.sex,
     });
-    kicker = "Inner Council";
+    kicker = "Provisional Council reference";
     title = dialog.person.person_ref.display_name;
+    footerLabel = "Candidate projection inspected · no source admission or order issued";
     body = (
       <div className="uat-person-report">
         {portrait ? (
@@ -1075,21 +1082,21 @@ function RecordDialog({
         )}
         <dl>
           <div>
-            <dt>Council portfolio</dt>
+            <dt>Projected Council portfolio</dt>
             <dd>{sentenceCase(dialog.person.portfolio)}</dd>
           </div>
           <div>
-            <dt>Seat</dt>
+            <dt>Projected seat</dt>
             <dd>{dialog.person.seat_rank ?? "Summoned attendee"}</dd>
           </div>
           <div>
-            <dt>Membership</dt>
-            <dd>{dialog.person.meta_label || "Recorded Council seat"}</dd>
+            <dt>Candidate membership</dt>
+            <dd>{dialog.person.meta_label || "Candidate Council seat"}</dd>
           </div>
         </dl>
         <p>
-          No general report or matter commentary is recorded for this Council
-          seat.
+          {councilSource.label}. No general report or matter commentary is
+          admitted for this projected Council seat.
         </p>
       </div>
     );
@@ -1200,7 +1207,7 @@ function RecordDialog({
         </header>
         {body}
         <footer>
-          <span>Recorded inspection · no order issued</span>
+          <span>{footerLabel}</span>
           <button onClick={onClose} type="button">
             Return
           </button>
@@ -1377,6 +1384,7 @@ export function HouseholdVerticalSlice() {
         data: buildCourtOsShellRuntimeModel({
           courtOs: courtOsState.data,
           council: councilState.data,
+          playerHouseId: CONFIGURED_PLAYER_HOUSE_ID,
         }),
         error: null,
       };
@@ -1782,7 +1790,13 @@ export function HouseholdVerticalSlice() {
       <span className="uat-source-stamp">
         As of {model.effectiveDate} · {model.councilSource.label}
       </span>
-      {dialog ? <RecordDialog dialog={dialog} onClose={closeDialog} /> : null}
+      {dialog ? (
+        <RecordDialog
+          councilSource={model.councilSource}
+          dialog={dialog}
+          onClose={closeDialog}
+        />
+      ) : null}
     </main>
   );
 }

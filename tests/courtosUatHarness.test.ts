@@ -187,6 +187,8 @@ describe("CourtOS internal UAT harness", () => {
     expect(runner).toContain("personaReportPaths");
     expect(runner).toContain("COURTOS_UAT_CODEX_BINARY");
     expect(runner).toContain('child.once("error"');
+    expect(runner).toContain("config.humanPlaytest.entry");
+    expect(runner).toContain("VITE_COURTOS_PLAYER_HOUSE_ID: config.humanPlaytest.houseId");
     expect(fs.existsSync(path.resolve(root, "qa/uat/prompts/verifier.md"))).toBe(true);
   });
 
