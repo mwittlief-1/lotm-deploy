@@ -265,10 +265,11 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
   const laneTempDir = path.join(artifactDir, "agent-tmp", name);
   fs.mkdirSync(laneTempDir, { recursive: true });
   const timeoutMs = Number(process.env.COURTOS_UAT_AGENT_TIMEOUT_MS ?? 2_700_000);
+  const codexBinary = process.env.COURTOS_UAT_CODEX_BINARY?.trim() || "codex";
 
   return new Promise((resolve) => {
     const child = spawn(
-      "codex",
+      codexBinary,
       [
         "exec",
         "--ephemeral",
@@ -314,17 +315,25 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
     );
     const eventStream = fs.createWriteStream(eventPath);
     const errorStream = fs.createWriteStream(errorPath);
-    child.stdout.pipe(eventStream);
-    child.stderr.pipe(errorStream);
-    child.stdin.end(prompt);
-
-    const timer = setTimeout(() => child.kill("SIGTERM"), timeoutMs);
-    child.once("close", (code) => {
+    let settled = false;
+    let timer;
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
       clearTimeout(timer);
       eventStream.end();
       errorStream.end();
       resolve({ name, code: code ?? 1, outputPath, eventPath, errorPath });
+    };
+    child.stdout?.pipe(eventStream);
+    child.stderr?.pipe(errorStream);
+    child.once("error", (error) => {
+      errorStream.write(`Unable to start ${codexBinary}: ${error.message}\n`);
+      finish(1);
     });
+    child.once("close", finish);
+    child.stdin?.end(prompt);
+    timer = setTimeout(() => child.kill("SIGTERM"), timeoutMs);
   });
 }
 

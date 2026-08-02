@@ -185,6 +185,8 @@ describe("CourtOS internal UAT harness", () => {
     expect(runner).toContain("COURTOS_UAT_PERSONA_CONCURRENCY");
     expect(runner).toContain("independent-verifier");
     expect(runner).toContain("personaReportPaths");
+    expect(runner).toContain("COURTOS_UAT_CODEX_BINARY");
+    expect(runner).toContain('child.once("error"');
     expect(fs.existsSync(path.resolve(root, "qa/uat/prompts/verifier.md"))).toBe(true);
   });
 
