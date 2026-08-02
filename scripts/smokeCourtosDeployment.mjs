@@ -86,16 +86,34 @@ const apiChecks = [
     name: "courtos",
     url: endpoint("/api/courtos/1120", { houseId }),
     schema: "courtos_1120_read_only_uat_projection_v1",
+    validate(data) {
+      return (
+        data?.query?.house_id === houseId &&
+        data?.contract?.sqlite_integrity === "ok" &&
+        typeof data?.contract?.sqlite_sha256 === "string"
+      );
+    },
   },
   {
     name: "council-room",
     url: endpoint("/api/council-room/1120", { houseId }),
     schema: "council_room_ready_projection_v1",
+    validate(data) {
+      return data?.house_ref?.entity_id === houseId;
+    },
   },
   {
     name: "household",
     url: endpoint("/api/household/1120", { houseId, householdEntityId }),
     schema: "household_1120_read_only_projection_v2",
+    validate(data) {
+      return (
+        data?.query?.house_id === houseId &&
+        data?.query?.household_entity_id === householdEntityId &&
+        data?.contract?.sqlite_integrity === "ok" &&
+        typeof data?.contract?.sqlite_sha256 === "string"
+      );
+    },
   },
 ];
 
@@ -106,7 +124,11 @@ for (const check of apiChecks) {
     throw new Error(`${check.name} did not return Cache-Control: no-store.`);
   }
   const payload = await response.json();
-  if (payload?.ok !== true || payload?.data?.schema_version !== check.schema) {
+  if (
+    payload?.ok !== true ||
+    payload?.data?.schema_version !== check.schema ||
+    !check.validate(payload.data)
+  ) {
     throw new Error(
       `${check.name} returned an invalid contract: ${JSON.stringify(payload).slice(0, 1000)}`,
     );

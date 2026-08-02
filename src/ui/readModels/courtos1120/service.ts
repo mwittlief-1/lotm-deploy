@@ -161,7 +161,8 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
       databasePath,
       connectionPolicy: {
         mode: "ro",
-        immutable: true,
+        sqliteImmutableUri: false,
+        sourceSnapshotChecksumPinned: true,
         queryOnly: true,
         generationPinnedForSession: true
       }

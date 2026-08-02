@@ -19,7 +19,8 @@ describe("CourtOS 1120 read-only projection", () => {
       expect(session.descriptor.sqliteSha256).toBe(COURTOS_1120_SQLITE_SHA256);
       expect(session.descriptor.connectionPolicy).toMatchObject({
         mode: "ro",
-        immutable: true,
+        sqliteImmutableUri: false,
+        sourceSnapshotChecksumPinned: true,
         queryOnly: true,
         generationPinnedForSession: true
       });

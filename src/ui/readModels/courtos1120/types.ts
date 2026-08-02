@@ -311,7 +311,8 @@ export interface CourtOs1120ReadModelSessionContract {
     databasePath: string;
     connectionPolicy: {
       mode: "ro";
-      immutable: true;
+      sqliteImmutableUri: false;
+      sourceSnapshotChecksumPinned: true;
       queryOnly: true;
       generationPinnedForSession: true;
     };

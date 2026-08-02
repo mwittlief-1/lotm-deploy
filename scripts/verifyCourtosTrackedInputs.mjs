@@ -35,6 +35,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/runCourtosUatBrowser.mjs",
   "scripts/runCourtosUatBrowserBroker.mjs",
   "scripts/smokeCourtosDeployment.mjs",
+  "scripts/verifyCourtosVercelDeployment.mjs",
   "scripts/validateCourtosUatConfig.mjs",
   "scripts/verifyCourtosTrackedInputs.mjs",
   "scripts/verifyCourtosGeneratedArtifacts.mjs",
