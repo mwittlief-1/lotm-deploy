@@ -176,6 +176,13 @@ function educationPlanStateLabel(value: string): string {
   return sentenceCase(value);
 }
 
+function educationCapacityStateLabel(value: string): string {
+  if (value === "unavailable_not_a_market_or_live_capacity_surface") {
+    return "Provider capacity not established";
+  }
+  return sentenceCase(value);
+}
+
 function sourceSurfaceLabel(value: string): string {
   const labels: Record<string, string> = {
     ro_household_responsibility_summary_v1: "Responsibility assignments",
@@ -213,6 +220,30 @@ function HouseMark({
         <small>CourtOS</small>
       </span>
     </span>
+  );
+}
+
+export function HouseRoomStandard({
+  houseId,
+  houseName,
+}: {
+  houseId: string;
+  houseName: string;
+}) {
+  const assets = houseIdentityAssets(houseId);
+  if (!assets.heraldry) return null;
+  return (
+    <figure
+      aria-label={`${houseName} house standard`}
+      className="uat-room-house-standard"
+      data-house-id={houseId}
+    >
+      <span aria-hidden="true">
+        <i />
+        <img src={assets.heraldry.bannerTab} alt="" />
+      </span>
+      <figcaption>{houseName}</figcaption>
+    </figure>
   );
 }
 
@@ -479,6 +510,10 @@ function HouseholdScene({
 }) {
   return (
     <section className="uat-scene uat-household-scene" aria-label="The Household Solar">
+      <HouseRoomStandard
+        houseId={model.house.houseId}
+        houseName={model.house.displayName}
+      />
       <div className="uat-room-introduction">
         <small>Household</small>
         <h2>The work of maintaining the House</h2>
@@ -508,13 +543,18 @@ function HouseholdScene({
 
 function DomainRoomScene({
   domain,
+  houseId,
+  houseName,
   onOpenResponsibility,
 }: {
   domain: CourtOsDomainDefinition;
+  houseId: string;
+  houseName: string;
   onOpenResponsibility: (responsibility: CourtOsResponsibilityDesignKey) => void;
 }) {
   return (
     <section className="uat-scene uat-domain-scene" aria-label={domain.venue}>
+      <HouseRoomStandard houseId={houseId} houseName={houseName} />
       <header className="uat-domain-room-hero">
         <small>{domain.label}</small>
         <h2>{domain.venue}</h2>
@@ -555,11 +595,15 @@ function DomainRoomScene({
 
 function UnavailableResponsibilityScene({
   domain,
+  houseId,
+  houseName,
   responsibilityKey,
   onSelect,
   journeyContext,
 }: {
   domain: CourtOsDomainDefinition;
+  houseId: string;
+  houseName: string;
   responsibilityKey: CourtOsResponsibilityDesignKey;
   onSelect: (responsibility: CourtOsResponsibilityDesignKey) => void;
   journeyContext?: React.ReactNode;
@@ -571,6 +615,7 @@ function UnavailableResponsibilityScene({
       className="uat-scene uat-responsibility-scene"
       data-responsibility={responsibility.key}
     >
+      <HouseRoomStandard houseId={houseId} houseName={houseName} />
       <nav className="uat-responsibility-rail" aria-label={`${domain.label} responsibilities`}>
         {domain.responsibilities.map((candidate, index) => (
           <button
@@ -885,8 +930,8 @@ function EducationRecords({
     <section className="uat-learner-ledger">
       <header>
         <div>
-          <small>Current state</small>
-          <h3>Learner plans</h3>
+          <small>Turn-opening recommendations</small>
+          <h3>Education plans · not yet executed</h3>
         </div>
         <span>{projection.education_plans.length}</span>
       </header>
@@ -896,6 +941,7 @@ function EducationRecords({
             key={plan.education_assignment_id}
             onClick={() => onOpenPlan(plan)}
             type="button"
+            data-plan-state={plan.contract_state}
           >
             <span className="uat-learner-name">
               <strong>{plan.learner_name}</strong>
@@ -905,12 +951,16 @@ function EducationRecords({
               </small>
             </span>
             <span className="uat-learner-track">
-              <small>Formation</small>
+              <small>Recommended formation</small>
               <strong>{plan.recommended_track}</strong>
             </span>
             <span className="uat-learner-provider">
-              <small>Provider</small>
+              <small>Proposed provider</small>
               <strong>{plan.primary_provider_name ?? "Not named"}</strong>
+            </span>
+            <span className="uat-learner-posture">
+              <small>{educationPlanStateLabel(plan.contract_state)}</small>
+              <small>{educationCapacityStateLabel(plan.capacity_availability_state)}</small>
             </span>
             <i aria-hidden="true">›</i>
           </button>
@@ -1019,6 +1069,10 @@ function ResponsibilityScene({
         className="uat-workspace"
         data-surface="working-folio"
       >
+        <HouseRoomStandard
+          houseId={model.house.houseId}
+          houseName={model.house.displayName}
+        />
         <header className="uat-workspace-hero">
           <div>
             <small>Household responsibility</small>
@@ -1173,7 +1227,7 @@ function RecordDialog({
       <div className="uat-source-record">
         <dl>
           <div>
-            <dt>Formation</dt>
+            <dt>Recommended formation</dt>
             <dd>{dialog.plan.recommended_track}</dd>
           </div>
           <div>
@@ -1184,7 +1238,7 @@ function RecordDialog({
             </dd>
           </div>
           <div>
-            <dt>Provider</dt>
+            <dt>Proposed provider</dt>
             <dd>{dialog.plan.primary_provider_name ?? "Not named"}</dd>
           </div>
           <div>
@@ -1198,6 +1252,14 @@ function RecordDialog({
           <div>
             <dt>Plan state</dt>
             <dd>{educationPlanStateLabel(dialog.plan.contract_state)}</dd>
+          </div>
+          <div>
+            <dt>Provider capacity</dt>
+            <dd>
+              {educationCapacityStateLabel(
+                dialog.plan.capacity_availability_state,
+              )}
+            </dd>
           </div>
         </dl>
         <p>
@@ -1837,6 +1899,8 @@ function AuthorizedHouseholdVerticalSlice({
         route.place.domain !== "estate_holdings" ? (
           <DomainRoomScene
             domain={courtOsDomain(route.place.domain)}
+            houseId={model.house.houseId}
+            houseName={model.house.displayName}
             onOpenResponsibility={(responsibility) =>
               navigate(courtOsResponsibilityRoute({ responsibility }))
             }
@@ -1850,6 +1914,8 @@ function AuthorizedHouseholdVerticalSlice({
         ) ? (
           <UnavailableResponsibilityScene
             domain={courtOsDomain(responsibilityPlace.domain)}
+            houseId={model.house.houseId}
+            houseName={model.house.displayName}
             journeyContext={
               journeyCourtOsModel ? (
                 <JourneyResponsibilityContext

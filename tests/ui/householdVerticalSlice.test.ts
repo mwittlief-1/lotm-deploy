@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   councilSeatPosition,
+  HouseRoomStandard,
   HouseholdVerticalSlice,
 } from "../../src/ui/panels/HouseholdVerticalSlice";
 import {
@@ -63,6 +64,21 @@ describe("HouseholdVerticalSlice", () => {
         ),
       ),
     ).toBe(true);
+  });
+
+  it("carries source-resolved House heraldry into non-Council room environments", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(HouseRoomStandard, {
+        houseId: DEFAULT_COUNCIL_ROOM_HOUSE_ID,
+        houseName: "House Pearwick Hall",
+      }),
+    );
+
+    expect(html).toContain('data-house-id="t0h_bcae5bd911ab10f4c7fdfea0"');
+    expect(html).toContain(
+      "/assets/heraldry/house-pearwick-hall/banner-tab.png",
+    );
+    expect(html).toContain("House Pearwick Hall house standard");
   });
 
   it("extends the Pearwick seat hierarchy symmetrically for a seven-seat council", () => {
@@ -130,6 +146,12 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).toContain("No operational record has been requested");
     expect(source).toContain('data-layout="room-folio"');
     expect(source).toContain('data-surface="working-folio"');
+    expect(source).toContain("Turn-opening recommendations");
+    expect(source).toContain("Education plans · not yet executed");
+    expect(source).toContain("Recommended formation");
+    expect(source).toContain("Proposed provider");
+    expect(source).toContain("Provider capacity not established");
+    expect(source.match(/<HouseRoomStandard/g)?.length).toBeGreaterThanOrEqual(4);
     expect(source).not.toContain("admitted rows");
     expect(source).toContain("Source surface admitted");
     expect(source).toContain("canonicalSearch");
