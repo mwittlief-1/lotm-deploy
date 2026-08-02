@@ -38,7 +38,7 @@ function assertRuntimeInputMaterialized(absolutePath, label) {
 }
 
 function runtimeInputManifest() {
-  const verifier = spawnSync("node", ["scripts/verifyCourtosTrackedInputs.mjs", "--json"], {
+  const verifier = spawnSync(process.execPath, ["scripts/verifyCourtosTrackedInputs.mjs", "--json"], {
     cwd: root,
     encoding: "utf8",
     timeout: 60_000,
@@ -372,7 +372,7 @@ if (dryRun) {
   const runtimeInputs = runtimeInputManifest();
   const mapgenRuntimeInputs = mapgenRuntimeInputManifest();
   const buildId = gitBuildId(runtimeInputs, mapgenRuntimeInputs);
-  runSync("node", ["scripts/validateCourtosUatConfig.mjs"]);
+  runSync(process.execPath, ["scripts/validateCourtosUatConfig.mjs"]);
   console.log(
     JSON.stringify(
       {
@@ -417,11 +417,11 @@ try {
     if (!fs.existsSync(path.join(mapgenRoot, "node_modules/vite/bin/vite.js"))) {
       throw new Error(`MapGen runtime dependencies are unavailable at ${mapgenRoot}. Supply --mapgen-base-url or MAPGEN_ROOT.`);
     }
-    runSync("node", ["node_modules/vite/bin/vite.js", "build"], { cwd: mapgenRoot });
+    runSync(process.execPath, ["node_modules/vite/bin/vite.js", "build"], { cwd: mapgenRoot });
     const mapgenPort = await availablePort();
     mapgenBaseUrl = `http://127.0.0.1:${mapgenPort}`;
     mapgenPreview = spawn(
-      "node",
+      process.execPath,
       ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", String(mapgenPort), "--strictPort"],
       {
         cwd: mapgenRoot,
@@ -437,12 +437,12 @@ try {
     VITE_MAPGEN_BASE_URL: mapgenBaseUrl,
   };
   if (!skipEngineering) {
-    runSync("node", ["scripts/runCourtosEngineeringQa.mjs"], {
+    runSync(process.execPath, ["scripts/runCourtosEngineeringQa.mjs"], {
       env: { ...runtimeEnvironment, COURTOS_UAT_RUN_DIR: artifactDir }
     });
     engineering = "pass";
   } else {
-    runSync("node", ["scripts/validateCourtosUatConfig.mjs"]);
+    runSync(process.execPath, ["scripts/validateCourtosUatConfig.mjs"]);
   }
 
   // Engineering QA may regenerate the spatial projection. Build identity must
@@ -487,7 +487,7 @@ try {
   if (!runtimeUrl) {
     const port = await availablePort();
     runtimeUrl = `http://127.0.0.1:${port}${config.runtimeEntry}`;
-    preview = spawn("node", ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", String(port), "--strictPort"], {
+    preview = spawn(process.execPath, ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", String(port), "--strictPort"], {
       cwd: root,
       env: runtimeEnvironment,
       stdio: ["ignore", fs.openSync(path.join(artifactDir, "preview.stdout.log"), "a"), fs.openSync(path.join(artifactDir, "preview.stderr.log"), "a")]
@@ -499,7 +499,7 @@ try {
   browserBrokerUrl = `http://127.0.0.1:${browserBrokerPort}/probe`;
   browserBrokerToken = crypto.randomBytes(32).toString("hex");
   browserBroker = spawn(
-    "node",
+    process.execPath,
     ["scripts/runCourtosUatBrowserBroker.mjs", "--host", "127.0.0.1", "--port", String(browserBrokerPort)],
     {
       cwd: root,

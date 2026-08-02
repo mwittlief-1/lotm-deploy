@@ -25,7 +25,7 @@ for (const relativePath of manifest.support_files ?? []) {
 }
 
 const result = spawnSync(
-  "node",
+  process.execPath,
   ["node_modules/vitest/vitest.mjs", "run", ...manifest.files],
   { cwd: ROOT, stdio: "inherit", env: process.env },
 );

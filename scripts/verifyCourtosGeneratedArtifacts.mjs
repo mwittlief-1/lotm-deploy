@@ -20,7 +20,7 @@ function sha256File(relativePath) {
 }
 
 function runBuilder(builder) {
-  const result = spawnSync("node", [builder], {
+  const result = spawnSync(process.execPath, [builder], {
     cwd: ROOT,
     stdio: "inherit",
     env: process.env,

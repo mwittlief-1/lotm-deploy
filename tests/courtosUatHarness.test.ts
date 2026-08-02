@@ -77,6 +77,16 @@ describe("CourtOS internal UAT harness", () => {
     expect(packageJson.engines.node).toBe("20.x");
     expect(engineeringRunner).toContain('name: "runtime-toolchain"');
     expect(engineeringRunner).toContain("const nodeBinary = process.execPath");
+    const testRunner = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosTestSuite.mjs"),
+      "utf8",
+    );
+    const generatedVerifier = fs.readFileSync(
+      path.resolve(root, "scripts/verifyCourtosGeneratedArtifacts.mjs"),
+      "utf8",
+    );
+    expect(testRunner).toContain("spawnSync(\n  process.execPath");
+    expect(generatedVerifier).toContain("spawnSync(process.execPath");
   });
 
   it("requires a complete independent production-architecture review", () => {
@@ -113,7 +123,7 @@ describe("CourtOS internal UAT harness", () => {
       "utf8",
     );
     const engineeringIndex = runner.lastIndexOf(
-      'runSync("node", ["scripts/runCourtosEngineeringQa.mjs"]',
+      'runSync(process.execPath, ["scripts/runCourtosEngineeringQa.mjs"]',
     );
     const identityIndex = runner.lastIndexOf(
       "runtimeInputs = runtimeInputManifest()",
