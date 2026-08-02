@@ -19,12 +19,13 @@ in-world person who may speak or act for it. Death, succession, incapacity, and
 regency can change the effective in-world actor without changing the player's
 House.
 
-The current human-playtest configuration in `uat.config.json` binds the local
-player to House Pearwick Hall. This is launch configuration, not a component
-fallback: a runtime request without an explicit House selector fails closed. The
-current Council sidecar does not admit an acting person, so the UI may identify
-the player House while continuing to label the head and Council projection as
-provisional and non-authoritative.
+The versioned runtime contract in `config/courtos-player-context.v1.json` binds
+the local player to House Pearwick Hall. `uat.config.json` must match that
+contract. This is launch configuration, not a component fallback: a runtime
+request without an explicit House selector fails closed. The current Council
+sidecar does not admit an acting person, so the UI may identify the player House
+while continuing to label the head and Council projection as provisional and
+non-authoritative.
 
 ## Commands
 
@@ -36,10 +37,13 @@ pnpm run uat:internal
 
 `uat:internal` performs the engineering gate, starts the built Vite preview on an available local port, runs the UAT and architecture lanes concurrently, and writes immutable run evidence to `qa_artifacts/courtos_uat/<run-id>/`.
 
-Use `--base-url` to assess an already-running build. `--skip-engineering` is diagnostic only: it can gather agent evidence but cannot promote a build to human playtest because the runner has no engineering-gate proof.
+Use `--base-url` to assess an already-running build. The runner normalizes the
+supplied origin or page to the configured Pearwick playtest entry. `--skip-engineering`
+is diagnostic only: it can gather agent evidence but cannot promote a build to
+human playtest because the runner has no engineering-gate proof.
 
 ```bash
-node scripts/runCourtosInternalUat.mjs --base-url http://127.0.0.1:4173/courtos-home.html
+node scripts/runCourtosInternalUat.mjs --base-url http://127.0.0.1:4173
 node scripts/runCourtosInternalUat.mjs --skip-engineering
 ```
 

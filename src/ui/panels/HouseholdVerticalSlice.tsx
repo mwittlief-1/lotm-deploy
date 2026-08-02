@@ -27,6 +27,7 @@ import {
   buildCourtOsShellRuntimeModel,
   type CourtOsShellRuntimeModel,
 } from "../courtosShellModel";
+import { COURTOS_PLAYER_CONTEXT } from "../courtosPlayerContext";
 import {
   councilRoomArtForHouse,
   houseIdentityAssets,
@@ -64,9 +65,6 @@ type DialogState =
   | { kind: "assignment"; responsibility: HouseholdResponsibilityRuntime }
   | { kind: "education_plan"; plan: Household1120EducationLearnerPlanRow }
   | null;
-
-const CONFIGURED_PLAYER_HOUSE_ID =
-  import.meta.env.VITE_COURTOS_PLAYER_HOUSE_ID?.trim() || null;
 
 function householdResponsibilityForDesignKey(
   designKey: string,
@@ -1384,7 +1382,7 @@ export function HouseholdVerticalSlice() {
         data: buildCourtOsShellRuntimeModel({
           courtOs: courtOsState.data,
           council: councilState.data,
-          playerHouseId: CONFIGURED_PLAYER_HOUSE_ID,
+          playerHouseId: COURTOS_PLAYER_CONTEXT.house_id,
         }),
         error: null,
       };
@@ -1449,6 +1447,7 @@ export function HouseholdVerticalSlice() {
     } else {
       window.history.pushState({}, "", nextUrl);
     }
+    window.scrollTo({ top: 0, behavior: "auto" });
   }
 
   function navigateScene(next: Scene, options?: { replace?: boolean }) {

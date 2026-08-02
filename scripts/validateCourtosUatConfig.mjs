@@ -32,6 +32,10 @@ function requireFile(relativePath, label) {
 }
 
 const config = readJson(configPath, "UAT config");
+const playerContext = readJson(
+  path.resolve(root, "config/courtos-player-context.v1.json"),
+  "CourtOS player context",
+);
 
 if (config) {
   const humanPlaytest = config.humanPlaytest ?? {};
@@ -53,6 +57,20 @@ if (config) {
     const entry = new URL(humanPlaytest.entry, "http://courtos.invalid");
     if (entry.searchParams.get("houseId") !== humanPlaytest.houseId) {
       errors.push("Human playtest entry House selector must match humanPlaytest.houseId.");
+    }
+  }
+  if (playerContext) {
+    if (playerContext.schema_version !== "courtos_player_context_v1") {
+      errors.push("CourtOS player context schema must be courtos_player_context_v1.");
+    }
+    if (playerContext.principal !== humanPlaytest.principal) {
+      errors.push("UAT principal must match the versioned CourtOS player context.");
+    }
+    if (playerContext.entitlement !== humanPlaytest.entitlement) {
+      errors.push("UAT entitlement must match the versioned CourtOS player context.");
+    }
+    if (playerContext.house_id !== humanPlaytest.houseId) {
+      errors.push("UAT House id must match the versioned CourtOS player context.");
     }
   }
 

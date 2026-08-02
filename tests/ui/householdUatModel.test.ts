@@ -8,6 +8,7 @@ import {
   houseIdentityAssets,
 } from "../../src/ui/houseIdentityAssets";
 import { buildCourtOsShellRuntimeModel } from "../../src/ui/courtosShellModel";
+import { COURTOS_PLAYER_CONTEXT } from "../../src/ui/courtosPlayerContext";
 import { buildHouseholdUatRuntimeModel } from "../../src/ui/householdUatModel";
 import { CourtOs1120ReadModel } from "../../src/ui/readModels/courtos1120/service";
 import { Household1120ReadModel } from "../../src/ui/readModels/household1120/service";
@@ -67,6 +68,15 @@ async function shellFor(houseId: string) {
 }
 
 describe("Household UAT runtime model", () => {
+  it("loads the player House from the versioned runtime contract", () => {
+    expect(COURTOS_PLAYER_CONTEXT).toEqual({
+      schema_version: "courtos_player_context_v1",
+      principal: "local_player",
+      entitlement: "house_controller",
+      house_id: "t0h_bcae5bd911ab10f4c7fdfea0",
+    });
+  });
+
   it("builds the official four-responsibility Pearwick runtime without a Family Book destination", async () => {
     const result = await runtimeFor("t0h_bcae5bd911ab10f4c7fdfea0");
 

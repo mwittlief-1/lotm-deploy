@@ -444,7 +444,6 @@ try {
     ...process.env,
     MAPGEN_ROOT: mapgenRoot,
     VITE_MAPGEN_BASE_URL: mapgenBaseUrl,
-    VITE_COURTOS_PLAYER_HOUSE_ID: config.humanPlaytest.houseId,
   };
   if (!skipEngineering) {
     runSync(process.execPath, ["scripts/runCourtosEngineeringQa.mjs"], {
@@ -493,7 +492,9 @@ try {
     }, null, 2) + "\n",
   );
 
-  let runtimeUrl = suppliedBaseUrl;
+  let runtimeUrl = suppliedBaseUrl
+    ? new URL(config.humanPlaytest.entry, suppliedBaseUrl).toString()
+    : null;
   if (!runtimeUrl) {
     const port = await availablePort();
     runtimeUrl = new URL(

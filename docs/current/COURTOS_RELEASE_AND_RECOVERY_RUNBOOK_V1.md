@@ -26,13 +26,11 @@ The House selector scopes the read model but is not web authentication. Any
 internet-accessible preview or production deployment must remain behind platform
 deployment protection. Do not expose an unprotected CourtOS URL on the public
 internet. The current human-playtest launch is House Pearwick Hall as declared in
-`qa/uat/uat.config.json`; UI code contains no Pearwick fallback.
-
-For a deployed build, configure `VITE_COURTOS_PLAYER_HOUSE_ID` in the protected
-Vercel production environment to the admitted House id declared by
-`humanPlaytest.houseId`. This is a build-time player entitlement, not a selector
-default. Changing it requires a new immutable build and the complete promotion
-path; never infer it from a request query parameter.
+`config/courtos-player-context.v1.json`, with the UAT launch cross-checked in
+`qa/uat/uat.config.json`; UI components contain no Pearwick fallback. The tracked
+player-context contract is part of build provenance for local and deployed
+runtimes. Changing it requires a new immutable build and the complete promotion
+path; never infer player entitlement from a request query parameter.
 
 ## Required GitHub configuration
 
