@@ -8,7 +8,7 @@ import {
   houseIdentityAssets,
 } from "../../src/ui/houseIdentityAssets";
 import { buildCourtOsShellRuntimeModel } from "../../src/ui/courtosShellModel";
-import { COURTOS_PLAYER_CONTEXT } from "../../src/ui/courtosPlayerContext";
+import { COURTOS_PLAYER_CONTEXT } from "../../src/courtosPlayerContext";
 import { buildHouseholdUatRuntimeModel } from "../../src/ui/householdUatModel";
 import { CourtOs1120ReadModel } from "../../src/ui/readModels/courtos1120/service";
 import { Household1120ReadModel } from "../../src/ui/readModels/household1120/service";

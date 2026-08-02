@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 const ROOT = process.cwd();
 const TARGET_ROOT = path.resolve(ROOT, ".courtos-public");
 const verifier = spawnSync(
-  "node",
+  process.execPath,
   ["scripts/verifyCourtosTrackedInputs.mjs", "--json"],
   { cwd: ROOT, encoding: "utf8", timeout: 60_000 },
 );
@@ -16,10 +16,14 @@ if (verifier.status !== 0) {
 }
 
 const report = JSON.parse(verifier.stdout);
-const publicInputs = [
-  ...report.runtimeAssets,
-  ...report.generatedArtifacts.map((artifact) => artifact.path),
-];
+const publicInputs = [...report.runtimeAssets];
+
+for (const artifact of report.generatedArtifacts) {
+  const source = path.resolve(ROOT, artifact.path);
+  if (!fs.existsSync(source)) {
+    throw new Error(`CourtOS generated runtime input is missing: ${artifact.path}`);
+  }
+}
 
 fs.rmSync(TARGET_ROOT, { recursive: true, force: true });
 for (const relativePath of [...new Set(publicInputs)].sort()) {

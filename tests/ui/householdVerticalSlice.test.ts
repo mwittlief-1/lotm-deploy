@@ -122,5 +122,22 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).not.toContain("VITE_COURTOS_PLAYER_HOUSE_ID");
     expect(source).toContain('window.scrollTo({ top: 0, behavior: "auto" })');
     expect(source).toContain("data-council-source={model.councilSource.status}");
+    expect(source).toContain("COURTOS_HOUSE_ACCESS_DENIED");
+    expect(source).toContain("No operational record has been requested");
+    expect(source).toContain('data-layout="room-folio"');
+    expect(source).toContain('data-surface="working-folio"');
+  });
+
+  it("keeps the inhabited responsibility room larger than its working folio", () => {
+    const css = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/panels/householdVerticalSlice.css"),
+      "utf8",
+    );
+    expect(css).toMatch(
+      /@media \(min-width: 981px\)[\s\S]*?\.uat-workspace\s*\{[\s\S]*?width:\s*min\(820px, 60vw\)[\s\S]*?max-height:\s*min\(610px, 68svh\)/,
+    );
+    expect(css).toMatch(
+      /@media \(min-width: 981px\)[\s\S]*?\.uat-responsibility-rail\s*\{[\s\S]*?background:\s*transparent/,
+    );
   });
 });

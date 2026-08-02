@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
@@ -12,8 +13,38 @@ import {
   rendererUrl,
   resolveMapGenBaseUrl,
 } from "../../src/ui/spatial/embeddedMapContract";
+import { isCourtOsSpatialHouseProjection } from "../../src/ui/spatial/courtosSpatialContract";
 
 describe("CourtOS direct embedded map contract", () => {
+  it("accepts only admitted, non-empty House-scoped spatial payloads", () => {
+    expect(
+      isCourtOsSpatialHouseProjection({
+        schema_version: "courtos_spatial_house_projection_v1",
+        effective_date: "1120-01-01",
+        read_only: true,
+        command_authority: false,
+        query: { house_id: "h1" },
+        availability: "not_admitted",
+        portfolio: null,
+      }),
+    ).toBe(true);
+    expect(
+      isCourtOsSpatialHouseProjection({
+        schema_version: "courtos_spatial_house_projection_v1",
+        effective_date: "1120-01-01",
+        read_only: true,
+        command_authority: false,
+        query: { house_id: "h1" },
+        availability: "admitted",
+        portfolio: {
+          house_id: "h2",
+          association_posture: "ui_admitted",
+          manors: [{}],
+        },
+      }),
+    ).toBe(false);
+  });
+
   it("opens the admitted renderer directly with an origin-scoped headless contract", () => {
     const url = rendererUrl({
       baseUrl: "http://127.0.0.1:4173/merecross-map-viewer.html",
@@ -65,20 +96,17 @@ describe("CourtOS direct embedded map contract", () => {
     })).toBe("https://maps.merecross.example/runtime");
   });
 
-  it("retains provisional associations only when no UI-admitted associations exist", async () => {
+  it("keeps candidate manor associations out of the server-only spatial catalog", async () => {
     const projection = JSON.parse(await readFile(
-      new URL("../../public/data/ready/courtos_spatial_read_model_v1.json", import.meta.url),
+      new URL("../../.courtos-generated/courtos_spatial_read_model_v1.json", import.meta.url),
       "utf8",
     ));
     for (const portfolio of projection.portfolios) {
-      if (portfolio.association_posture === "ui_admitted") {
-        expect(portfolio.manors.every((manor: { ui_authority: boolean }) => manor.ui_authority)).toBe(true);
-      } else {
-        expect(portfolio.association_posture).toBe("provisional_operator_crosswalk");
-        expect(portfolio.association_note).toContain("not an assignment or tenure lock");
-        expect(portfolio.manors.every((manor: { ui_authority: boolean }) => !manor.ui_authority)).toBe(true);
-      }
+      expect(portfolio.association_posture).toBe("ui_admitted");
+      expect(portfolio.manors.length).toBeGreaterThan(0);
     }
+    expect(JSON.stringify(projection)).not.toContain("provisional_operator_crosswalk");
+    expect(existsSync(new URL("../../public/data/ready/courtos_spatial_read_model_v1.json", import.meta.url))).toBe(false);
   });
 
   it("contains embedded MapGen frames to the capabilities required by the protocol", async () => {

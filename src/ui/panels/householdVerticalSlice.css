@@ -199,8 +199,8 @@ button:focus-visible {
 .uat-venue[data-scene="education"]::before,
 .uat-venue[data-scene="service_care"]::before {
   background:
-    linear-gradient(90deg, rgba(4, 3, 2, 0.66), transparent 24%, transparent 70%, rgba(4, 3, 2, 0.52)),
-    linear-gradient(180deg, rgba(4, 2, 1, 0.06), rgba(4, 2, 1, 0.18) 45%, rgba(4, 2, 1, 0.68));
+    linear-gradient(90deg, rgba(4, 3, 2, 0.38), transparent 24%, transparent 70%, rgba(4, 3, 2, 0.32)),
+    linear-gradient(180deg, rgba(4, 2, 1, 0.04), rgba(4, 2, 1, 0.1) 45%, rgba(4, 2, 1, 0.42));
 }
 
 /* Authoritative CourtOS room architecture */
@@ -1105,11 +1105,48 @@ button:focus-visible {
   gap: clamp(18px, 2vw, 30px);
 }
 
-.uat-workspace-body > main {
+.uat-workspace-records {
   min-width: 0;
   display: grid;
   align-content: start;
   gap: 18px;
+}
+
+@media (min-width: 981px) {
+  .uat-responsibility-rail {
+    top: 50%;
+    bottom: auto;
+    width: 210px;
+    height: auto;
+    padding: 0;
+    justify-content: flex-start;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .uat-workspace {
+    top: auto;
+    right: clamp(28px, 5vw, 76px);
+    bottom: clamp(28px, 5vh, 52px);
+    left: auto;
+    width: min(820px, 60vw);
+    height: auto;
+    max-height: min(610px, 68svh);
+    padding: 22px;
+    overflow: auto;
+    border-radius: 2px 12px 2px 12px;
+    background:
+      linear-gradient(112deg, rgba(27, 17, 11, 0.91), rgba(48, 30, 17, 0.84) 52%, rgba(20, 13, 9, 0.92)),
+      repeating-linear-gradient(0deg, transparent 0 31px, rgba(230, 197, 143, 0.018) 32px);
+    backdrop-filter: none;
+  }
+
+  .uat-workspace-body {
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 190px);
+    gap: 16px;
+  }
 }
 
 .uat-workspace-side {
@@ -2030,7 +2067,7 @@ button:focus-visible {
   .uat-responsibility-rail {
     position: sticky;
     z-index: 20;
-    top: 0;
+    top: 68px;
     width: 100%;
     min-width: 0;
     height: 66px;
@@ -2050,11 +2087,12 @@ button:focus-visible {
     right: auto;
     bottom: auto;
     left: auto;
-    min-height: calc(100svh - 190px);
-    margin: 170px 9px 14px;
+    min-height: 0;
+    max-height: none;
+    margin: clamp(220px, 34svh, 320px) 9px 14px;
     padding: 15px;
     overflow: visible;
-    backdrop-filter: blur(3px);
+    backdrop-filter: none;
   }
 
   .uat-workspace-hero {
@@ -2075,7 +2113,7 @@ button:focus-visible {
   }
 
   .uat-workspace-side {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 
   .uat-authority-card > img,

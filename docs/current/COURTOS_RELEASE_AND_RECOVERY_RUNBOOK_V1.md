@@ -9,7 +9,7 @@ This runbook does not replace the repository promotion order in `AGENTS.md`. Int
 ## Runtime data contract
 
 - The two admitted 1120 SQLite contracts are checksum-pinned in `config/courtos-runtime-inputs.v1.json`.
-- Vercel packages those SQLite files with the three read-only API functions.
+- Vercel packages those SQLite files and the server-only spatial catalog with the four read-only API functions.
 - Each SQLite-backed function packages only its own exact pinned contract path. The Council function packages neither database.
 - The production binding resolves to the pinned repository paths by default. `COURTOS_1120_SQLITE_PATH` and `HOUSEHOLD_1120_SQLITE_PATH` are explicit operator overrides, not required hidden configuration.
 - The API uses an in-process, read-only SQLite driver. Production does not depend on an unprovisioned host `sqlite3` executable.
@@ -60,7 +60,7 @@ The workflow:
 4. builds using the Vercel production environment;
 5. deploys with `--prod --skip-domain`, so no production domain moves;
 6. verifies through the Vercel API that both deployment URLs belong to the configured CourtOS project and are `READY`;
-7. checks the landing document and all three API contracts on both the staged candidate and the rollback target;
+7. checks the landing document and all four API contracts on both the staged candidate and the rollback target;
 8. records the source SHA and checksum of the tracked-input verification report; and
 9. retains the immutable URLs, provenance, ownership checks, and smoke evidence as workflow artifacts.
 

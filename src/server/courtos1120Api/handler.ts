@@ -5,6 +5,7 @@ import type {
   CourtOs1120TransportRequest,
   CourtOs1120TransportResponse,
 } from "./contracts";
+import { CourtOsHouseAccessDenied } from "./accessPolicy";
 
 const JSON_NO_STORE_HEADERS = Object.freeze({
   "Content-Type": "application/json; charset=utf-8",
@@ -15,6 +16,7 @@ const SOURCE_ERROR_CODES: Readonly<Record<CourtOs1120Endpoint, string>> = {
   courtos: "COURTOS_READ_MODEL_UNAVAILABLE",
   household: "HOUSEHOLD_READ_MODEL_UNAVAILABLE",
   "council-room": "COUNCIL_ROOM_SOURCE_UNAVAILABLE",
+  spatial: "SPATIAL_READ_MODEL_UNAVAILABLE",
 };
 
 function response(
@@ -28,6 +30,15 @@ function sourceUnavailable(
   endpoint: CourtOs1120Endpoint,
   error: unknown,
 ): CourtOs1120TransportResponse {
+  if (error instanceof CourtOsHouseAccessDenied) {
+    return response(403, {
+      ok: false,
+      error: {
+        code: error.code,
+        message: error.message,
+      },
+    });
+  }
   return response(503, {
     ok: false,
     error: {
@@ -86,6 +97,12 @@ export async function handleCourtOs1120Request(
 
     const houseId = url.searchParams.get("houseId")?.trim();
     if (!houseId) throw new Error("houseId is required.");
+    if (endpoint === "spatial") {
+      return response(200, {
+        ok: true,
+        data: await service.spatial({ houseId }),
+      });
+    }
     return response(200, {
       ok: true,
       data: await service.councilRoom({ houseId }),

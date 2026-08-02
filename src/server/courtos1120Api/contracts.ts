@@ -1,4 +1,8 @@
-export type CourtOs1120Endpoint = "courtos" | "household" | "council-room";
+export type CourtOs1120Endpoint =
+  | "courtos"
+  | "household"
+  | "council-room"
+  | "spatial";
 
 export interface CourtOs1120ApiService {
   courtOs(input: { houseId: string }): Promise<unknown>;
@@ -7,6 +11,7 @@ export interface CourtOs1120ApiService {
     houseId: string;
   }): Promise<unknown>;
   councilRoom(input: { houseId: string }): Promise<unknown>;
+  spatial(input: { houseId: string }): Promise<unknown>;
   close(): Promise<void>;
 }
 

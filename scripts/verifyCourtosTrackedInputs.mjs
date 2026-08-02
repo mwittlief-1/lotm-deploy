@@ -12,6 +12,7 @@ const ENTRYPOINTS = [
   "api/courtos/1120.ts",
   "api/household/1120.ts",
   "api/council-room/1120.ts",
+  "api/spatial/1120.ts",
 ];
 const REQUIRED_REPOSITORY_INPUTS = [
   ".gitattributes",

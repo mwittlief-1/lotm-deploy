@@ -41,15 +41,7 @@ function coverageLabel(manor: CourtOsSpatialManor): string {
 }
 
 function knowledgeLabel(manor: CourtOsSpatialManor): string {
-  if (manor.ui_authority) return "Current House estate record";
-  if (manor.source_posture === "provisional_read_only") {
-    return "Provisional operator crosswalk · not an assignment lock";
-  }
-  return "Recorded geography · operating detail unavailable";
-}
-
-function portfolioIsAdmitted(portfolio: CourtOsSpatialPortfolio): boolean {
-  return portfolio.association_posture === "ui_admitted";
+  return "Current House estate record";
 }
 
 function SpatialUnavailable({ state }: { state: CourtOsSpatialState }) {
@@ -63,7 +55,7 @@ function SpatialUnavailable({ state }: { state: CourtOsSpatialState }) {
           ? "Joining the selected House to the recorded manor geography."
           : state.status === "error"
             ? state.message
-            : "No admitted or provisional operating records resolve to this House. No substitute holdings have been invented."}
+            : "No UI-admitted House-to-manor association is available. No substitute holdings have been invented."}
       </p>
     </section>
   );
@@ -83,12 +75,10 @@ function PortfolioRail({
   return (
     <aside className="uat-spatial-portfolio">
       <header>
-        <small>{portfolioIsAdmitted(portfolio) ? "House lands" : "Provisional geography"}</small>
-        <h2>{portfolioIsAdmitted(portfolio) ? "Estate & Holdings" : "Estate associations"}</h2>
+        <small>House lands</small>
+        <h2>Estate & Holdings</h2>
         <p>
-          {portfolio.manors.length} {portfolioIsAdmitted(portfolio)
-            ? `admitted ${portfolio.manors.length === 1 ? "holding" : "holdings"}`
-            : `provisional ${portfolio.manors.length === 1 ? "association" : "associations"}`}
+          {portfolio.manors.length} admitted {portfolio.manors.length === 1 ? "holding" : "holdings"}
         </p>
       </header>
       <div className="uat-spatial-manor-list">
@@ -96,7 +86,7 @@ function PortfolioRail({
           <button
             aria-current={manor.manor_id === selected.manor_id ? "true" : undefined}
             disabled={locked}
-            key={manor.protected_manor_id}
+            key={manor.manor_id}
             onClick={() => onSelect(manor)}
             type="button"
           >
@@ -105,18 +95,11 @@ function PortfolioRail({
               <strong>{manor.display_name}</strong>
               <small>
                 {manor.county_name ?? "County not recorded"} · {manor.hex_count} {manor.hex_count === 1 ? "hex" : "hexes"}
-                {manor.ui_authority ? "" : " · provisional"}
               </small>
             </span>
           </button>
         ))}
       </div>
-      {!portfolioIsAdmitted(portfolio) ? (
-        <footer>
-          <strong>Non-authoritative association</strong>
-          <span>{portfolio.association_note}</span>
-        </footer>
-      ) : null}
     </aside>
   );
 }
@@ -211,7 +194,6 @@ export function EstateHoldingsScene({
         focus: manorFocus(nextSelected),
         manors: portfolio.manors.map((manor) => ({
           id: manor.manor_id,
-          protectedId: manor.protected_manor_id,
           name: manor.display_name,
           countyId: manor.county_id,
           countyName: manor.county_name,
@@ -219,9 +201,6 @@ export function EstateHoldingsScene({
           r: manor.seat_r,
           hexId: manor.seat_hex_id,
           coverage: manor.detailed_coverage.coverage_state,
-          sourcePosture: manor.source_posture,
-          sourceStatus: manor.source_status,
-          uiAuthority: manor.ui_authority,
         })),
       },
     });
@@ -419,7 +398,7 @@ export function EstateHoldingsScene({
             <button
               aria-current={manor.manor_id === selected.manor_id ? "page" : undefined}
               disabled={transitionPhase !== "idle"}
-              key={manor.protected_manor_id}
+              key={manor.manor_id}
               onClick={() => selectManor(manor)}
               type="button"
             >
@@ -434,7 +413,7 @@ export function EstateHoldingsScene({
       )}
       <nav className="uat-spatial-levels" aria-label="Map scale">
         <button aria-pressed={(pendingLevel ?? level) === "realm"} disabled={transitionPhase !== "idle"} onClick={() => chooseLevel("realm")} type="button">
-          {portfolioIsAdmitted(portfolio) ? "House lands" : "Associated lands"}
+          House lands
         </button>
         <button aria-pressed={(pendingLevel ?? level) === "county"} disabled={!canOpenCounty || transitionPhase !== "idle"} onClick={() => chooseLevel("county")} type="button">County</button>
         <button aria-pressed={(pendingLevel ?? level) === "estate"} disabled={!canOpenEstate || transitionPhase !== "idle"} onClick={() => chooseLevel("estate")} type="button">Manor</button>
@@ -495,9 +474,7 @@ export function EstateHoldingsScene({
               <h2>{selected.display_name}</h2>
               <p>{selected.county_name ?? "County not recorded"}</p>
             </div>
-            <span data-state={selected.ui_authority ? "available" : "unavailable"}>
-              {selected.ui_authority ? "House operating record" : "Operating account unavailable"}
-            </span>
+            <span data-state="available">House operating record</span>
           </header>
           <div className="uat-manor-workspace-body">
             <main>
@@ -507,7 +484,7 @@ export function EstateHoldingsScene({
                   <div><dt>Recorded extent</dt><dd>{selected.hex_count} map hexes</dd></div>
                   <div><dt>Households</dt><dd>{selected.estimated_peasant_households?.toLocaleString() ?? "Not disclosed"}</dd></div>
                   <div><dt>Ground record</dt><dd>{coverageLabel(selected)}</dd></div>
-                  <div><dt>Accountable owner</dt><dd>{selected.ui_authority ? "Named in the operating record" : "No admitted assignment"}</dd></div>
+                  <div><dt>Accountable owner</dt><dd>Named in the operating record</dd></div>
                 </dl>
                 <p>
                   Geography or estimated extent does not establish current condition,
@@ -529,7 +506,7 @@ export function EstateHoldingsScene({
               <section>
                 <small>Accountability</small>
                 <span className="uat-manor-empty-portrait" aria-hidden="true" />
-                <strong>{selected.ui_authority ? "Recorded manor operator" : "No admitted assignment"}</strong>
+                <strong>Recorded manor operator</strong>
                 <p>Assignment, authority, and support require the responsibility workspace projection.</p>
               </section>
               <section>

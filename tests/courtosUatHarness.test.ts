@@ -134,7 +134,7 @@ describe("CourtOS internal UAT harness", () => {
     );
 
     expect(runtimeManifest).toContain(
-      "public/data/ready/courtos_spatial_read_model_v1.json",
+      ".courtos-generated/courtos_spatial_read_model_v1.json",
     );
     expect(runtimeManifest).toContain(
       "data/ready/world_1120_turn0/sources/manor_operator_crosswalk_step4m_v1/ManorOperatorCrosswalk__c.jsonl",
@@ -224,7 +224,7 @@ describe("CourtOS internal UAT harness", () => {
     );
     expect(manifest.generated_artifacts).toContainEqual(
       expect.objectContaining({
-        path: "public/data/ready/courtos_spatial_read_model_v1.json",
+        path: ".courtos-generated/courtos_spatial_read_model_v1.json",
         builder: "scripts/buildCourtosSpatialReadModelV1.mjs",
         tracked: false,
       }),

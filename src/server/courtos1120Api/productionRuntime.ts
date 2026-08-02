@@ -26,12 +26,14 @@ export function productionCourtOs1120Sources(
     householdSqlitePath:
       configuredPath(environment, "HOUSEHOLD_1120_SQLITE_PATH") ??
       repositorySources.householdSqlitePath,
+    spatialProjectionPath: repositorySources.spatialProjectionPath,
   };
 }
 
 export function productionCourtOs1120Service(): CourtOs1120ApiService {
   productionService ??= createCourtOs1120ReadModelService(
     productionCourtOs1120Sources(),
+    { accessMode: "player_runtime" },
   );
   return productionService;
 }

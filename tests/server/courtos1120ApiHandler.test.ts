@@ -18,13 +18,17 @@ function serviceStub(): CourtOs1120ApiService {
       schema_version: "council_room_ready_projection_v1",
       query: input,
     })),
+    spatial: vi.fn(async (input) => ({
+      schema_version: "courtos_spatial_house_projection_v1",
+      query: { house_id: input.houseId },
+    })),
     close: vi.fn(async () => undefined),
   };
 }
 
 describe("CourtOS 1120 provider-neutral endpoint contract", () => {
   it("preserves GET-only, no-store JSON behavior for every endpoint", async () => {
-    for (const endpoint of ["courtos", "household", "council-room"] as const) {
+    for (const endpoint of ["courtos", "household", "council-room", "spatial"] as const) {
       const service = serviceStub();
       const result = await handleCourtOs1120Request(
         endpoint,
@@ -45,6 +49,7 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       expect(service.courtOs).not.toHaveBeenCalled();
       expect(service.household).not.toHaveBeenCalled();
       expect(service.councilRoom).not.toHaveBeenCalled();
+      expect(service.spatial).not.toHaveBeenCalled();
     }
   });
 
@@ -146,11 +151,31 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
     expect(service.councilRoom).not.toHaveBeenCalled();
   });
 
+  it("requires a House-scoped spatial request", async () => {
+    const service = serviceStub();
+    const missing = await handleCourtOs1120Request(
+      "spatial",
+      { method: "GET", url: "https://example.test/api/spatial/1120" },
+      service,
+    );
+    expect(missing).toMatchObject({
+      status: 503,
+      body: {
+        error: {
+          code: "SPATIAL_READ_MODEL_UNAVAILABLE",
+          message: "houseId is required.",
+        },
+      },
+    });
+    expect(service.spatial).not.toHaveBeenCalled();
+  });
+
   it("maps source failures to the endpoint-specific existing error contracts", async () => {
     const cases = [
       ["courtos", "COURTOS_READ_MODEL_UNAVAILABLE", "courtOs"],
       ["household", "HOUSEHOLD_READ_MODEL_UNAVAILABLE", "household"],
       ["council-room", "COUNCIL_ROOM_SOURCE_UNAVAILABLE", "councilRoom"],
+      ["spatial", "SPATIAL_READ_MODEL_UNAVAILABLE", "spatial"],
     ] as const;
     for (const [endpoint, code, method] of cases) {
       const service = serviceStub();

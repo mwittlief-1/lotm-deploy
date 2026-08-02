@@ -1,4 +1,4 @@
-import playerContext from "../../config/courtos-player-context.v1.json";
+import playerContext from "../config/courtos-player-context.v1.json";
 
 export interface CourtOsPlayerContextV1 {
   schema_version: "courtos_player_context_v1";

@@ -9,6 +9,7 @@ import {
 export function courtOs1120ReadModelApiPlugin(): Plugin {
   const service = createCourtOs1120ReadModelService(
     repositoryCourtOs1120Sources(),
+    { accessMode: "player_runtime" },
   );
 
   function install(server: ViteDevServer | PreviewServer): void {
@@ -26,6 +27,10 @@ export function courtOs1120ReadModelApiPlugin(): Plugin {
     server.middlewares.use(
       "/api/council-room/1120",
       createCourtOs1120NodeHandler("council-room", service),
+    );
+    server.middlewares.use(
+      "/api/spatial/1120",
+      createCourtOs1120NodeHandler("spatial", service),
     );
   }
 

@@ -11,6 +11,10 @@
     },
     "api/council-room/1120.ts": {
       "maxDuration": 30
+    },
+    "api/spatial/1120.ts": {
+      "includeFiles": ".courtos-generated/courtos_spatial_read_model_v1.json",
+      "maxDuration": 30
     }
   },
   "rewrites": [

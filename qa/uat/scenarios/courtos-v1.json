@@ -146,50 +146,50 @@
     {
       "id": "C-UAT-013",
       "lane": "house_scale",
-      "title": "Smallest admitted House uses the same runtime system",
-      "houseSelector": { "strategy": "smallest_admitted_house_by_manor_count" },
-      "actor": "source-resolved Head of House",
+      "title": "Configured player House uses the shared runtime system",
+      "houseSelector": { "strategy": "configured_player_house" },
+      "actor": "local player controlling the configured House; in-world actor unadmitted",
       "startingRoute": "/courtos-home.html",
-      "objective": "Verify Council, domain rooms, responsibilities, portraits, and heraldry without Pearwick-only assumptions or decorative empty slots.",
-      "invariants": ["No House-specific hard coding", "Empty states remain intentional"],
-      "evidenceRequired": ["runtime screenshots", "source-selected House proof"]
+      "objective": "Verify Council, domain rooms, responsibilities, portraits, and heraldry resolve from the configured player context and source contracts rather than component fallbacks.",
+      "invariants": ["No House-specific component fallback", "Empty states remain intentional"],
+      "evidenceRequired": ["runtime screenshots", "player-context and source proof"]
     },
     {
       "id": "C-UAT-014",
       "lane": "house_scale",
-      "title": "Multi-manor House remains legible",
-      "houseSelector": { "strategy": "admitted_house_nearest_manor_count", "value": 6 },
-      "actor": "source-resolved Head of House",
+      "title": "Unadmitted manor associations fail closed",
+      "houseSelector": { "strategy": "configured_player_house" },
+      "actor": "local player controlling the configured House; in-world actor unadmitted",
       "startingRoute": "/courtos-home.html",
-      "objective": "Enter Estate and Holdings, inspect Manor Stewardship, compare multiple manors, and verify scaling without layout or selection failure.",
-      "invariants": ["Manor lists derive from source data", "Selected manor persists through details"],
-      "evidenceRequired": ["runtime screenshots", "API/read-model comparison"]
+      "objective": "Enter Estate & Holdings and verify the current zero-admission spatial contract presents an explicit unavailable state without provisional manor names, selectors, or operating details.",
+      "invariants": ["Candidate manor associations never enter the player runtime", "No substitute holdings are invented"],
+      "evidenceRequired": ["unavailable-state screenshot", "House-scoped spatial API comparison"]
     },
     {
       "id": "C-UAT-015",
       "lane": "house_scale",
-      "title": "Largest admitted House avoids overflow and accidental protagonist framing",
-      "houseSelector": { "strategy": "largest_admitted_house_by_manor_count" },
-      "actor": "source-resolved Head of House",
+      "title": "Alternate House selectors do not gain operational access",
+      "houseSelector": { "strategy": "first_non_player_house_from_admitted_house_source" },
+      "actor": "local player without entitlement to the selected House",
       "startingRoute": "/courtos-home.html",
-      "objective": "Inspect Council and estate navigation with the largest admitted data shape and verify counts, names, assets, and rooms remain usable.",
-      "invariants": ["No arbitrary truncation without disclosure", "Commercial-style protagonist framing does not enter the runtime"],
-      "evidenceRequired": ["runtime screenshots", "source-selected House proof"]
+      "objective": "Attempt an alternate-House product deep link and verify the UI and all operational APIs deny access before returning Council, Household, person, responsibility, or spatial data.",
+      "invariants": ["URL selection never grants House entitlement", "Denied responses contain no selected-House details"],
+      "evidenceRequired": ["blocked-surface screenshot", "403 API evidence"]
     },
     {
       "id": "C-UAT-016",
       "lane": "house_scale",
-      "title": "Map selection preserves House and manor context",
-      "houseSelector": { "strategy": "first_ui_admitted_multi_manor_house_with_spatial_data_else_first_explicitly_provisional_multi_manor_association" },
-      "actor": "source-resolved Head of House",
+      "title": "Spatial absence preserves House and place context",
+      "houseSelector": { "strategy": "configured_player_house" },
+      "actor": "local player controlling the configured House; in-world actor unadmitted",
       "startingRoute": "/courtos-home.html",
-      "objective": "Use the subordinate spatial surface to understand manor relationships, select a manor, inspect it, and return without losing the House or domain context.",
+      "objective": "Open Estate & Holdings with no UI-admitted House-to-manor association and return to the Council without losing the configured House or place hierarchy.",
       "invariants": [
         "Map supports rather than replaces the operational room",
-        "Spatial claims resolve from the current map contract",
-        "A provisional operator crosswalk is visibly identified as non-authoritative and is never described as an admitted holding, assignment, or tenure lock"
+        "Spatial claims resolve only from the admitted House-scoped contract",
+        "Provisional operator crosswalk rows are absent from browser payloads and UI"
       ],
-      "evidenceRequired": ["map and manor screenshots", "spatial read-model comparison"]
+      "evidenceRequired": ["Estate unavailable-state screenshot", "spatial API and navigation evidence"]
     },
     {
       "id": "C-UAT-017",

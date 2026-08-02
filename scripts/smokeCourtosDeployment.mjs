@@ -115,6 +115,19 @@ const apiChecks = [
       );
     },
   },
+  {
+    name: "spatial",
+    url: endpoint("/api/spatial/1120", { houseId }),
+    schema: "courtos_spatial_house_projection_v1",
+    validate(data) {
+      return (
+        data?.query?.house_id === houseId &&
+        data?.read_only === true &&
+        data?.command_authority === false &&
+        !Array.isArray(data?.portfolios)
+      );
+    },
+  },
 ];
 
 const checks = [{ name: "landing", status: "pass" }];

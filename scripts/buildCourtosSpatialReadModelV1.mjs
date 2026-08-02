@@ -4,7 +4,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const OUT = path.join(ROOT, "public/data/ready/courtos_spatial_read_model_v1.json");
+const OUT = path.join(ROOT, ".courtos-generated/courtos_spatial_read_model_v1.json");
+const LEGACY_PUBLIC_OUT = path.join(
+  ROOT,
+  "public/data/ready/courtos_spatial_read_model_v1.json",
+);
 const GRAPH_HOUSES = path.join(ROOT, "data/ready/world_1120_turn0/sources/graph_v1/House__c.jsonl");
 const OPERATOR_CROSSWALK = path.join(
   ROOT,
@@ -83,12 +87,6 @@ function parseCsv(text) {
 
 function protectedManorId(rawManorId) {
   return `t0man_${sha256(`${MANOR_ID_SALT}|Manor__c|${rawManorId}`).slice(0, 24)}`;
-}
-
-function sourcePosture(row) {
-  if (row.ui_authority === true && row.runtime_authority === true) return "admitted_runtime";
-  if (row.ui_authority === true) return "admitted_read_only";
-  return "provisional_read_only";
 }
 
 function labelForManor(nameRow, manor) {
@@ -178,7 +176,6 @@ for (const row of crosswalk) {
   };
   portfolio.manors.push({
     manor_id: manor.manor_id,
-    protected_manor_id: row.manor_id,
     display_name: labelForManor(name, manor),
     county_id: manor.county_id,
     county_name: name?.county_name || null,
@@ -189,15 +186,7 @@ for (const row of crosswalk) {
     estimated_peasant_households: manor.estimated_peasant_households,
     holding_type: manor.holding_type,
     manor_size_class: manor.manor_size_class,
-    operation_state: row.operations_closure_state,
-    operator_state: row.local_operator_state,
-    operator_resolution_status: row.operator_resolution_status,
-    principal_operator_person_ids: row.exact_manor_office_holder_person_ids ?? [],
-    source_posture: sourcePosture(row),
-    source_status: row.source_status,
     ui_authority: row.ui_authority === true,
-    runtime_authority: row.runtime_authority === true,
-    command_authority: row.command_authority === true,
     detailed_coverage: detailedCoverage.get(manor.manor_id) ?? {
       coverage_state: "macro_only",
       renderer_level: manor.county_id === "c_5" ? "county" : "realm",
@@ -218,15 +207,16 @@ const portfolios = [...grouped.values()]
       ...portfolio,
       association_posture: hasAdmittedAssociations
         ? "ui_admitted"
-        : "provisional_operator_crosswalk",
+        : "unavailable",
       association_note: hasAdmittedAssociations
         ? "UI-admitted House-to-manor associations only."
-        : "Provisional operator crosswalk associations; not an assignment or tenure lock.",
-      manors: (hasAdmittedAssociations ? admittedManors : portfolio.manors).sort((left, right) =>
-        left.display_name.localeCompare(right.display_name),
-      ),
+        : "No UI-admitted House-to-manor association is available.",
+      manors: admittedManors
+        .map(({ ui_authority: _uiAuthority, ...manor }) => manor)
+        .sort((left, right) => left.display_name.localeCompare(right.display_name)),
     };
   })
+  .filter((portfolio) => portfolio.manors.length > 0)
   .sort((left, right) => left.house_name.localeCompare(right.house_name));
 
 const result = {
@@ -267,6 +257,7 @@ const result = {
   portfolios,
 };
 
+fs.rmSync(LEGACY_PUBLIC_OUT, { force: true });
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, `${JSON.stringify(result, null, 2)}\n`);
 console.log(

@@ -27,7 +27,7 @@ import {
   buildCourtOsShellRuntimeModel,
   type CourtOsShellRuntimeModel,
 } from "../courtosShellModel";
-import { COURTOS_PLAYER_CONTEXT } from "../courtosPlayerContext";
+import { COURTOS_PLAYER_CONTEXT } from "../../courtosPlayerContext";
 import {
   councilRoomArtForHouse,
   houseIdentityAssets,
@@ -992,14 +992,21 @@ function ResponsibilityScene({
     <section
       className="uat-scene uat-responsibility-scene"
       data-responsibility={selected}
+      data-layout="room-folio"
       aria-label={responsibility.definition.title}
     >
       <ResponsibilityRail model={model} onSelect={onSelect} selected={selected} />
-      <div className="uat-workspace">
+      <article
+        aria-labelledby={`responsibility-title-${selected}`}
+        className="uat-workspace"
+        data-surface="working-folio"
+      >
         <header className="uat-workspace-hero">
           <div>
             <small>Household responsibility</small>
-            <h2>{responsibility.definition.title}</h2>
+            <h2 id={`responsibility-title-${selected}`}>
+              {responsibility.definition.title}
+            </h2>
             <p>{responsibility.definition.purpose}</p>
           </div>
           <span data-state={responsibility.state}>
@@ -1007,7 +1014,7 @@ function ResponsibilityScene({
           </span>
         </header>
         <div className="uat-workspace-body">
-          <main>
+          <section className="uat-workspace-records" aria-label="Working records">
             {selected === "stores" ? (
               <StoresRecords
                 projection={projection}
@@ -1033,7 +1040,7 @@ function ResponsibilityScene({
                 responsibility={responsibility}
               />
             ) : null}
-          </main>
+          </section>
           <div className="uat-workspace-side">
             <AuthorityCard
               onInspect={() => onInspectAssignment(responsibility)}
@@ -1042,7 +1049,7 @@ function ResponsibilityScene({
             <CycleRecord responsibility={responsibility} />
           </div>
         </div>
-      </div>
+      </article>
     </section>
   );
 }
@@ -1354,7 +1361,7 @@ function sceneArt(scene: Scene, houseId: string): string {
   );
 }
 
-export function HouseholdVerticalSlice() {
+function AuthorizedHouseholdVerticalSlice() {
   const [houseId] = useState(requestedHouseId);
   const [reloadKey, setReloadKey] = useState(0);
   const retrySources = () => setReloadKey((current) => current + 1);
@@ -1798,4 +1805,21 @@ export function HouseholdVerticalSlice() {
       ) : null}
     </main>
   );
+}
+
+export function HouseholdVerticalSlice() {
+  const selectedHouseId = requestedHouseId();
+  if (
+    selectedHouseId &&
+    selectedHouseId !== COURTOS_PLAYER_CONTEXT.house_id
+  ) {
+    return (
+      <DataState
+        code="COURTOS_HOUSE_ACCESS_DENIED"
+        detail="This player runtime can open only its configured House. No operational record has been requested."
+        state="blocked"
+      />
+    );
+  }
+  return <AuthorizedHouseholdVerticalSlice />;
 }
