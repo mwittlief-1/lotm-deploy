@@ -224,13 +224,18 @@ interaction evidence, use this repository-owned browser driver:
 
 node scripts/runCourtosUatBrowser.mjs --url <runtime-url> --actions-json '<json-array>' --screenshot evidence/${lane.id}/screen.png --output evidence/${lane.id}/screen.json
 
-Supported actions are click, fill, press, select, waitFor, and wait. Prefer semantic locators
+Supported actions are click, fill, press, select, waitFor, wait, goBack, and goForward. Prefer semantic locators
 such as role/name, label, placeholder, or text. Evidence paths are relative to the supplied
 report artifact directory. You may use curl and read repository/read-model source to establish
 truth, but browser evidence is required for interaction or presentation conclusions.
 
 Return one laneResults entry named ${lane.id}. First-pass P0/P1 findings must use status
 "unverified" and independentlyVerified false; the separate verifier decides whether they block.
+Set the lane status to fail only for a P0/P1 defect. Record P2/P3 debt without failing the lane.
+When an assigned scenario explicitly permits an unavailable alternative, source-backed proof that
+the state is honestly unavailable completes that scenario; do not mark the lane incomplete merely
+because the unadmitted branch cannot be exercised. Use incomplete only when required evidence could
+not be collected and the scenario defines no explicit unavailable alternative.
 Return only JSON conforming to the UAT report schema.
 
 ## Assigned scenarios
@@ -540,6 +545,7 @@ try {
     repositoryRoot: root,
     configPath: "qa/uat/uat.config.json",
     humanPlaytest: config.humanPlaytest,
+    targetPlatform: config.targetPlatform,
     scenarioCatalog: config.scenarioCatalog,
     requiredPersonaLanes: requiredLaneIds(),
     reportArtifactDirectory: artifactDir,

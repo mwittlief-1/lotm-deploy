@@ -25,6 +25,31 @@ describe("CourtOS internal UAT harness", () => {
     );
   });
 
+  it("targets Steam desktop and keeps nonblocking debt nonblocking", () => {
+    expect(config.targetPlatform).toEqual({
+      name: "Steam desktop",
+      minimumViewport: { width: 1280, height: 720 },
+      referenceViewport: { width: 1920, height: 1080 },
+      mobileInScope: false,
+    });
+    const personaContract = fs.readFileSync(
+      path.resolve(root, "scripts/runCourtosInternalUat.mjs"),
+      "utf8",
+    );
+    const architecturePrompt = fs.readFileSync(
+      path.resolve(root, "qa/uat/prompts/architecture-review.md"),
+      "utf8",
+    );
+    const orchestratorPrompt = fs.readFileSync(
+      path.resolve(root, "qa/uat/prompts/orchestrator.md"),
+      "utf8",
+    );
+    expect(personaContract).toContain("Record P2/P3 debt without failing the lane");
+    expect(personaContract).toContain("goBack, and goForward");
+    expect(architecturePrompt).toContain("failed non-blocking check");
+    expect(orchestratorPrompt).toContain("only P2/P3 findings remains `pass`");
+  });
+
   it("defines the six required read-only UAT perspectives with source files", () => {
     const ids = config.lanes.map((lane: { id: string }) => lane.id);
     expect(ids).toEqual([

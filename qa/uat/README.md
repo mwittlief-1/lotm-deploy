@@ -31,6 +31,9 @@ personal reports, dialogue, assignment mutation, and commands remain
 unavailable while the head and Council projection stay provisional and
 non-authoritative.
 
+Phase V targets Steam desktop. Required visual and interaction coverage runs at
+1920×1080 and the supported 1280×720 minimum; mobile is explicitly out of scope.
+
 ## Commands
 
 ```bash
@@ -61,6 +64,10 @@ A build passes internal UAT only when:
 - no unresolved P0 or P1 finding exists;
 - all required lanes return evidence;
 - any accepted P2 exception is explicitly recorded.
+
+P2/P3 debt does not by itself fail a lane or architecture review. A source-backed
+unavailable result completes a scenario when that scenario explicitly defines an
+unavailable alternative.
 
 The runner computes the final promotion result mechanically from the two independent reports. It does not allow the implementation agent to waive a failed lane.
 

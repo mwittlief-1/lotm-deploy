@@ -89,6 +89,12 @@ async function executeAction(page, action) {
     case "wait":
       await page.waitForTimeout(boundedNumber(action.ms, 250, 0, 5_000));
       return;
+    case "goBack":
+      await page.goBack({ waitUntil: "domcontentloaded", timeout });
+      return;
+    case "goForward":
+      await page.goForward({ waitUntil: "domcontentloaded", timeout });
+      return;
     default:
       throw new Error(`Unsupported browser action: ${String(action.type)}`);
   }

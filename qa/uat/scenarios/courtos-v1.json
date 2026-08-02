@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "fixedRegressionIds": [
     "C-UAT-001",
     "C-UAT-002",
@@ -138,13 +138,13 @@
     {
       "id": "C-UAT-012",
       "lane": "interaction_explorer",
-      "title": "Narrow viewport retains the governing flow",
+      "title": "Minimum Steam desktop viewport retains the governing flow",
       "houseSelector": { "strategy": "configured_player_house" },
       "actor": "local player controlling the configured House; in-world actor unadmitted",
       "startingRoute": "/courtos-home.html",
-      "objective": "Repeat Council to domain to responsibility to detail at a narrow viewport and verify navigation, hierarchy, reading order, and modal dismissal.",
-      "invariants": ["Responsive treatment does not collapse into an unexplained worksheet", "Primary actions remain reachable"],
-      "evidenceRequired": ["narrow-viewport screenshots", "interaction observations"]
+      "objective": "Repeat Council to domain to responsibility to detail at the supported 1280×720 Steam desktop viewport and verify navigation, hierarchy, reading order, and modal dismissal.",
+      "invariants": ["Desktop treatment does not collapse into an unexplained worksheet", "Primary actions remain reachable"],
+      "evidenceRequired": ["1280×720 screenshots", "interaction observations"]
     },
     {
       "id": "C-UAT-013",
@@ -234,7 +234,7 @@
       "houseSelector": { "strategy": "configured_player_house" },
       "actor": "local player controlling the configured House; in-world actor unadmitted",
       "startingRoute": "/courtos-home.html",
-      "objective": "Review the Pearwick Council room and one built domain flow for integrated heraldry, room identity, hierarchy, overlays, and avoidance of dashboard/worksheet treatment.",
+      "objective": "Review the Pearwick Council room and one built domain flow at reference and minimum Steam desktop viewports for integrated heraldry, room identity, hierarchy, overlays, and avoidance of dashboard/worksheet treatment. Mobile is out of scope.",
       "invariants": ["House identity belongs in the environment", "Responsibility work occurs in a domain place", "Messy details appear above the place", "The map remains subordinate"],
       "evidenceRequired": ["matched screenshots across the room flow", "locked-system comparison"]
     },

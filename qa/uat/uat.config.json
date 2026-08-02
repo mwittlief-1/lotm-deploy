@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "product": "Merecross CourtOS",
   "runtimeEntry": "/courtos-home.html",
   "humanPlaytest": {
@@ -8,6 +8,12 @@
     "houseName": "Pearwick Hall",
     "houseId": "t0h_bcae5bd911ab10f4c7fdfea0",
     "entry": "/courtos-home.html?houseId=t0h_bcae5bd911ab10f4c7fdfea0"
+  },
+  "targetPlatform": {
+    "name": "Steam desktop",
+    "minimumViewport": { "width": 1280, "height": 720 },
+    "referenceViewport": { "width": 1920, "height": 1080 },
+    "mobileInScope": false
   },
   "artifactRoot": "qa_artifacts/courtos_uat",
   "scenarioCatalog": "qa/uat/scenarios/courtos-v1.json",

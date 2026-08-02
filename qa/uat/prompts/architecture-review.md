@@ -21,3 +21,10 @@ Evaluate:
 Explicitly verify that a clean checkout contains or can reproduce the runtime, that the deployed environment serves the APIs used by the browser, that spatial materialization is hermetic, and that the report's build identity includes working-tree content rather than only the last Git commit.
 
 Prioritize evidence-backed architectural findings. A production-blocking issue must identify the concrete failure mode and supporting file/symbol or command evidence. Return only a JSON object conforming to the supplied architecture report schema.
+
+## Verdict policy
+
+- Return `pass` when every blocking architecture check passes and there is no P0/P1 finding.
+- A failed non-blocking check must be recorded as P2/P3 debt but does not change the overall verdict to `fail`.
+- Return `fail` only when a blocking check fails or a P0/P1 production-readiness finding exists.
+- Return `incomplete` only when evidence for a required blocking check could not be obtained.

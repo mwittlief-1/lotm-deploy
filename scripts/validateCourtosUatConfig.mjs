@@ -40,6 +40,19 @@ const playerContext = readJson(
 
 if (config) {
   const humanPlaytest = config.humanPlaytest ?? {};
+  const targetPlatform = config.targetPlatform ?? {};
+  if (targetPlatform.name !== "Steam desktop") {
+    errors.push("Phase V UAT target platform must be Steam desktop.");
+  }
+  if (targetPlatform.mobileInScope !== false) {
+    errors.push("Phase V UAT must explicitly exclude mobile.");
+  }
+  if (targetPlatform.minimumViewport?.width !== 1280 || targetPlatform.minimumViewport?.height !== 720) {
+    errors.push("Steam desktop minimum viewport must be 1280x720.");
+  }
+  if (targetPlatform.referenceViewport?.width !== 1920 || targetPlatform.referenceViewport?.height !== 1080) {
+    errors.push("Steam desktop reference viewport must be 1920x1080.");
+  }
   if (humanPlaytest.principal !== "local_player") {
     errors.push("Human playtest principal must be local_player for the single-player UAT runtime.");
   }

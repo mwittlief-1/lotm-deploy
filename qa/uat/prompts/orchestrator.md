@@ -18,9 +18,13 @@ You do not implement fixes and must not edit the repository. Your job is to exec
 ## Acceptance discipline
 
 - A missing or failed required persona lane is a UAT failure.
+- A completed lane with only P2/P3 findings remains `pass`; preserve those findings as recorded debt.
+- When a scenario explicitly permits an unavailable alternative, source-backed proof that the state is honestly unavailable completes the scenario and may pass the lane.
+- Use `incomplete` only when required evidence could not be collected and the scenario defines no explicit unavailable alternative.
 - Unsupported opinion is not a verified defect.
 - A screenshot alone cannot prove a source-fidelity or authority defect; include the source/API/read-model comparison.
 - Do not treat unavailable data as permission to invent a fact.
 - Do not allow an agent to fix, waive, or self-verify its own finding.
 - Mark aesthetic or experiential questions that require Matt's judgment with `requiresHumanJudgment: true`; they may be non-blocking unless they violate a locked brand/system rule.
 - The build cannot pass with a verified unresolved P0 or P1.
+- The build may pass with recorded P2/P3 debt because the configured promotion severities are P0/P1.
