@@ -4,13 +4,22 @@ import process from "node:process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export function verifiedMapGenBaseUrl(value) {
+export function verifiedMapGenBaseUrl(
+  value,
+  { allowLoopbackHttp = false } = {},
+) {
   const raw = value?.trim();
   if (!raw) {
     throw new Error("VITE_MAPGEN_BASE_URL is required for a production CourtOS build.");
   }
   const url = new URL(raw);
-  if (url.protocol !== "https:") {
+  const loopback =
+    url.hostname === "127.0.0.1" ||
+    url.hostname === "localhost" ||
+    url.hostname === "[::1]";
+  const allowedLocalUatUrl =
+    allowLoopbackHttp && loopback && url.protocol === "http:";
+  if (url.protocol !== "https:" && !allowedLocalUatUrl) {
     throw new Error("VITE_MAPGEN_BASE_URL must use HTTPS in production.");
   }
   if (url.username || url.password || url.search || url.hash) {

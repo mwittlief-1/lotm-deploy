@@ -341,4 +341,23 @@ describe("CourtOS packaged deployment adapter", () => {
       verdict: "pass",
     });
   });
+
+  it("allows HTTP MapGen only for an explicit loopback UAT validation", async () => {
+    const { verifiedMapGenBaseUrl } = await import(
+      "../../scripts/verifyCourtosMapGenConfiguration.mjs"
+    );
+    expect(() =>
+      verifiedMapGenBaseUrl("http://127.0.0.1:4173/"),
+    ).toThrow("must use HTTPS");
+    expect(
+      verifiedMapGenBaseUrl("http://127.0.0.1:4173/", {
+        allowLoopbackHttp: true,
+      }).origin,
+    ).toBe("http://127.0.0.1:4173");
+    expect(() =>
+      verifiedMapGenBaseUrl("http://maps.example.test/", {
+        allowLoopbackHttp: true,
+      }),
+    ).toThrow("must use HTTPS");
+  });
 });

@@ -50,7 +50,9 @@ if (process.env.COURTOS_PRODUCTION_BUILD === "1" && !configuredMapGenBaseUrl) {
   throw new Error("A production CourtOS public build requires VITE_MAPGEN_BASE_URL.");
 }
 const mapGenBaseUrl = configuredMapGenBaseUrl
-  ? verifiedMapGenBaseUrl(configuredMapGenBaseUrl)
+  ? verifiedMapGenBaseUrl(configuredMapGenBaseUrl, {
+      allowLoopbackHttp: process.env.COURTOS_PRODUCTION_BUILD !== "1",
+    })
   : null;
 const manifestDirectory = path.resolve(TARGET_ROOT, ".well-known");
 fs.mkdirSync(manifestDirectory, { recursive: true });
