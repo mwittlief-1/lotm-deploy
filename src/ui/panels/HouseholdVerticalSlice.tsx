@@ -40,7 +40,13 @@ import {
   type HouseholdResponsibilityRuntime,
   type HouseholdUatRuntimeModel,
 } from "../householdUatModel";
+import {
+  JourneyHouseCommandContext,
+  JourneyResponsibilityContext,
+  type JourneyCourtOsCommandSelectionV1,
+} from "./JourneyCourtOsSurfaces";
 import { portraitArtForPerson } from "../portraitBankResolver";
+import type { JourneyCourtOsReadModelV1 } from "../readModels/phaseFive/journeyCourtOsReadModel";
 import type {
   Household1120EducationLearnerPlanRow,
   Household1120MembershipRow,
@@ -551,10 +557,12 @@ function UnavailableResponsibilityScene({
   domain,
   responsibilityKey,
   onSelect,
+  journeyContext,
 }: {
   domain: CourtOsDomainDefinition;
   responsibilityKey: CourtOsResponsibilityDesignKey;
   onSelect: (responsibility: CourtOsResponsibilityDesignKey) => void;
+  journeyContext?: React.ReactNode;
 }) {
   const responsibility = courtOsResponsibility(responsibilityKey);
   return (
@@ -602,6 +610,7 @@ function UnavailableResponsibilityScene({
                 </p>
               </div>
             </div>
+            {journeyContext}
           </main>
           <div className="uat-workspace-side">
             <aside className="uat-authority-card">
@@ -626,12 +635,18 @@ function UnavailableResponsibilityScene({
   );
 }
 
-function ReservedCourtOsSurface({ scene }: { scene: "house_command" | "council_docket" }) {
+function ReservedCourtOsSurface({
+  scene,
+  journeyContext,
+}: {
+  scene: "house_command" | "council_docket";
+  journeyContext?: React.ReactNode;
+}) {
   const command = scene === "house_command";
   const appointments = courtOsResponsibility("office_post_appointments");
   return (
     <section className="uat-scene uat-reserved-scene" aria-label={command ? "House Command" : "Council Docket"}>
-      <div>
+      <div className={journeyContext ? "uat-reserved-content--with-journey" : undefined}>
         <small>{command ? "House banner" : "Council table"}</small>
         <h2>{command ? "House Command" : "The Council Docket"}</h2>
         <p>
@@ -655,6 +670,7 @@ function ReservedCourtOsSurface({ scene }: { scene: "house_command" | "council_d
             </p>
           </article>
         ) : null}
+        {command ? journeyContext : null}
       </div>
     </section>
   );
@@ -976,6 +992,7 @@ function ResponsibilityScene({
   onSelect,
   onInspectAssignment,
   onOpenPlan,
+  journeyContext,
 }: {
   model: HouseholdUatRuntimeModel;
   projection: Household1120ReadOnlyProjection;
@@ -983,6 +1000,7 @@ function ResponsibilityScene({
   onSelect: (key: HouseholdResponsibilityKey) => void;
   onInspectAssignment: (responsibility: HouseholdResponsibilityRuntime) => void;
   onOpenPlan: (plan: Household1120EducationLearnerPlanRow) => void;
+  journeyContext?: React.ReactNode;
 }) {
   const responsibility = model.responsibilities.find(
     (item) => item.definition.key === selected,
@@ -1040,6 +1058,7 @@ function ResponsibilityScene({
                 responsibility={responsibility}
               />
             ) : null}
+            {journeyContext}
           </section>
           <div className="uat-workspace-side">
             <AuthorityCard
@@ -1361,7 +1380,37 @@ function sceneArt(scene: Scene, houseId: string): string {
   );
 }
 
-function AuthorizedHouseholdVerticalSlice() {
+export interface HouseholdVerticalSliceProps {
+  /**
+   * Injected from the admitted Journey + Knowledge read port.  Absence means
+   * that no Journey claim is made; the shell never fabricates an empty runtime.
+   */
+  journeyCourtOsModel?: JourneyCourtOsReadModelV1 | null;
+}
+
+export function courtOsRouteForJourneyCommand(
+  selection: JourneyCourtOsCommandSelectionV1,
+): CourtOsRoute | null {
+  const queryIndex = selection.owning_workspace_ref.indexOf("?");
+  if (queryIndex < 0) return null;
+  const target = courtOsRouteFromSearch(
+    selection.owning_workspace_ref.slice(queryIndex),
+  );
+  if (target.place.kind === "responsibility") {
+    const expectedOwner = `courtos.responsibility.${target.place.responsibility}`;
+    return selection.command_owner_ref === expectedOwner ? target : null;
+  }
+  if (target.place.kind === "house_command") {
+    return selection.command_owner_ref.startsWith("courtos.responsibility.")
+      ? null
+      : target;
+  }
+  return null;
+}
+
+function AuthorizedHouseholdVerticalSlice({
+  journeyCourtOsModel = null,
+}: HouseholdVerticalSliceProps = {}) {
   const [houseId] = useState(requestedHouseId);
   const [reloadKey, setReloadKey] = useState(0);
   const retrySources = () => setReloadKey((current) => current + 1);
@@ -1490,6 +1539,13 @@ function AuthorizedHouseholdVerticalSlice() {
       return;
     }
     navigate(courtOsDomainRoute(next as CourtOsDomainKey), options);
+  }
+
+  function openJourneyOwningWorkspace(
+    selection: JourneyCourtOsCommandSelectionV1,
+  ) {
+    const target = courtOsRouteForJourneyCommand(selection);
+    if (target) navigate(target);
   }
 
   useEffect(() => {
@@ -1715,7 +1771,17 @@ function AuthorizedHouseholdVerticalSlice() {
           />
         ) : null}
         {scene === "house_command" || scene === "council_docket" ? (
-          <ReservedCourtOsSurface scene={scene} />
+          <ReservedCourtOsSurface
+            journeyContext={
+              scene === "house_command" && journeyCourtOsModel ? (
+                <JourneyHouseCommandContext
+                  model={journeyCourtOsModel}
+                  onDomainCommand={openJourneyOwningWorkspace}
+                />
+              ) : null
+            }
+            scene={scene}
+          />
         ) : null}
         {scene === "household" ? (
           householdModel ? <HouseholdScene
@@ -1754,6 +1820,16 @@ function AuthorizedHouseholdVerticalSlice() {
             }}
             selectedManorId={selectedManorId}
             spatialState={spatialState}
+            journeyContext={
+              scene === "manor_stewardship" && journeyCourtOsModel ? (
+                <JourneyResponsibilityContext
+                  model={journeyCourtOsModel}
+                  onDomainCommand={openJourneyOwningWorkspace}
+                  responsibility="manor_stewardship"
+                  scopeId={selectedManor?.manor_id ?? null}
+                />
+              ) : null
+            }
           />
         ) : null}
         {route.place.kind === "domain" &&
@@ -1774,6 +1850,16 @@ function AuthorizedHouseholdVerticalSlice() {
         ) ? (
           <UnavailableResponsibilityScene
             domain={courtOsDomain(responsibilityPlace.domain)}
+            journeyContext={
+              journeyCourtOsModel ? (
+                <JourneyResponsibilityContext
+                  model={journeyCourtOsModel}
+                  onDomainCommand={openJourneyOwningWorkspace}
+                  responsibility={responsibilityPlace.responsibility}
+                  scopeId={responsibilityPlace.scopeId}
+                />
+              ) : null
+            }
             onSelect={(responsibility) =>
               navigate(courtOsResponsibilityRoute({ responsibility }))
             }
@@ -1792,6 +1878,16 @@ function AuthorizedHouseholdVerticalSlice() {
             onSelect={(key) => navigateScene(key)}
             projection={projection}
             selected={scene}
+            journeyContext={
+              journeyCourtOsModel && responsibilityPlace ? (
+                <JourneyResponsibilityContext
+                  model={journeyCourtOsModel}
+                  onDomainCommand={openJourneyOwningWorkspace}
+                  responsibility={responsibilityPlace.responsibility}
+                  scopeId={responsibilityPlace.scopeId}
+                />
+              ) : null
+            }
           /> : null
         ) : null}
       </div>
@@ -1819,7 +1915,9 @@ function AuthorizedHouseholdVerticalSlice() {
   );
 }
 
-export function HouseholdVerticalSlice() {
+export function HouseholdVerticalSlice(
+  props: HouseholdVerticalSliceProps = {},
+) {
   const selectedHouseId = requestedHouseId();
   if (
     selectedHouseId &&
@@ -1833,5 +1931,5 @@ export function HouseholdVerticalSlice() {
       />
     );
   }
-  return <AuthorizedHouseholdVerticalSlice />;
+  return <AuthorizedHouseholdVerticalSlice {...props} />;
 }

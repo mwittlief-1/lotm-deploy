@@ -8,7 +8,10 @@
     "C-UAT-010",
     "C-UAT-013",
     "C-UAT-016",
-    "C-UAT-020"
+    "C-UAT-020",
+    "C-UAT-021",
+    "C-UAT-022",
+    "C-UAT-023"
   ],
   "scenarios": [
     {
@@ -234,6 +237,39 @@
       "objective": "Review the Pearwick Council room and one built domain flow for integrated heraldry, room identity, hierarchy, overlays, and avoidance of dashboard/worksheet treatment.",
       "invariants": ["House identity belongs in the environment", "Responsibility work occurs in a domain place", "Messy details appear above the place", "The map remains subordinate"],
       "evidenceRequired": ["matched screenshots across the room flow", "locked-system comparison"]
+    },
+    {
+      "id": "C-UAT-021",
+      "lane": "authority_adversary",
+      "title": "Journey remains a shared service under purpose-owning authority",
+      "houseSelector": { "strategy": "first_house_with_admitted_journey_else_player_house" },
+      "actor": "source-entitled House controller",
+      "startingRoute": "/courtos-home.html?place=house_command",
+      "objective": "If an admitted Journey is visible, verify that House Command provides only calendar context and that every action returns to its purpose-owning responsibility or proceeding. If none is admitted, verify that the UI does not fabricate a Journey, destination, or command.",
+      "invariants": ["Journey is not a room or responsibility", "No generic free-travel command", "Council membership does not grant Journey detail"],
+      "evidenceRequired": ["runtime screenshot or explicit unavailable proof", "authority and owning-workspace comparison"]
+    },
+    {
+      "id": "C-UAT-022",
+      "lane": "interaction_explorer",
+      "title": "House Command Journey context returns to the exact owning workspace",
+      "houseSelector": { "strategy": "first_house_with_admitted_scoped_journey_else_player_house" },
+      "actor": "source-entitled Head or responsibility owner",
+      "startingRoute": "/courtos-home.html?place=house_command",
+      "objective": "Open an admitted calendar commitment from House Command and verify CourtOS returns to the exact current-24 responsibility and scope, including the correct manor when applicable. If no commitment is admitted, record the scenario as unavailable rather than inventing one.",
+      "invariants": ["Place-first hierarchy is preserved", "A manor-scoped Journey cannot leak into another manor", "No standalone Journey navigation"],
+      "evidenceRequired": ["before-and-after routes", "runtime screenshots or explicit unavailable proof"]
+    },
+    {
+      "id": "C-UAT-023",
+      "lane": "temporal",
+      "title": "Journey lifecycle follows monthly receipts without premature presence",
+      "houseSelector": { "strategy": "first_house_with_admitted_journey_else_player_house" },
+      "actor": "source-entitled principal owner",
+      "startingRoute": "/courtos-home.html?place=house_command",
+      "objective": "Compare scheduled, in-transit, destination, returning, and completed Journey states when admitted evidence exists; otherwise verify explicit unavailability. A plan or calendar row must never prove departure, arrival, or return before its monthly receipt.",
+      "invariants": ["Planned is not departed", "Arrival and return require lifecycle receipts", "Candidate or development-provisional routes are not presented as production truth"],
+      "evidenceRequired": ["runtime screenshots or explicit unavailable proof", "monthly lifecycle/read-port comparison"]
     }
   ]
 }

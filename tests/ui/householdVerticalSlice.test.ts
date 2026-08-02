@@ -122,6 +122,10 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).not.toContain("VITE_COURTOS_PLAYER_HOUSE_ID");
     expect(source).toContain('window.scrollTo({ top: 0, behavior: "auto" })');
     expect(source).toContain("data-council-source={model.councilSource.status}");
+    expect(source).toContain("JourneyHouseCommandContext");
+    expect(source).toContain("JourneyResponsibilityContext");
+    expect(source).toContain("journeyCourtOsModel = null");
+    expect(source).toContain("no Journey claim is made");
     expect(source).toContain("COURTOS_HOUSE_ACCESS_DENIED");
     expect(source).toContain("No operational record has been requested");
     expect(source).toContain('data-layout="room-folio"');

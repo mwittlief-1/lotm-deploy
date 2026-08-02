@@ -1,0 +1,45 @@
+{
+  "schema_version": "phase_five_journey_foundation_a_config_v1",
+  "config_id": "journey_foundation_a_round_one_2026_08_01",
+  "authority": {
+    "source_status": "foundation_a_provisional",
+    "runtime_authority": false,
+    "founder_posture": "Use the connected XMAP manor graph as the provisional Foundation A path spine; overlay macro corridor, crossing, and financial-lane evidence without turning freight into named presence."
+  },
+  "travel_time_calibration": {
+    "schema_version": "phase_five_journey_travel_time_calibration_v1",
+    "calibration_id": "journey_travel_time_round_one_v1",
+    "source_status": "foundation_a_provisional",
+    "runtime_authority": false,
+    "cost_units_per_day_by_profile": {
+      "light_personal": 35,
+      "small_noble_retinue": 25,
+      "ceremonial_progress": 18,
+      "household_transfer": 15,
+      "protected_transfer": 20,
+      "martial_party": 18
+    },
+    "condition_duration_multiplier": {
+      "normal": 1,
+      "adverse": 1.3333333333333333
+    },
+    "cutpoint_model": "thirty_day_month_opening_midmonth_closing",
+    "source_refs": [
+      "docs/current/PHASE_FIVE_TRAVEL_TIME_CALIBRATION_FIRST_ESTIMATE_V1.md",
+      "docs/current/PHASE_FIVE_JOURNEY_ROUTE_AND_LODGING_FOUNDER_DOCKET_V1.md"
+    ]
+  },
+  "default_route_posture_support": {
+    "fastest_viable": "available_from_weighted_manor_graph",
+    "domain_required": "available_only_with_exact_waypoint_anchors",
+    "safest_viable": "withheld_until_edge_security_risk_is_injected",
+    "lowest_support_burden": "withheld_until_stop_support_cost_is_injected"
+  },
+  "hard_boundaries": [
+    "no_source_promotion",
+    "no_person_movement_from_financial_lane",
+    "no_lodging_without_access_acceptance_and_capacity",
+    "no_automatic_reroute_for_blocked_unviable_condition",
+    "no_direct_gl_resource_art_or_domain_mutation"
+  ]
+}

@@ -4,6 +4,7 @@ import path from "node:path";
 const root = process.cwd();
 const configPath = path.resolve(root, "qa/uat/uat.config.json");
 const errors = [];
+let validatedScenarioCount = 0;
 
 function readJson(filePath, label) {
   try {
@@ -125,6 +126,7 @@ if (config) {
   if (scenarioPath) {
     const catalog = readJson(scenarioPath, "Scenario catalog");
     const scenarios = Array.isArray(catalog?.scenarios) ? catalog.scenarios : [];
+    validatedScenarioCount = scenarios.length;
     if (scenarios.length < 20) errors.push("The V1 UAT catalog must contain at least 20 scenarios.");
     const scenarioIds = new Set();
     const coveredLanes = new Set();
@@ -173,4 +175,8 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("CourtOS UAT configuration valid: 6 persona lanes, 1 independent architecture lane, 20 scenarios.");
+console.log(
+  `CourtOS UAT configuration valid: ${config?.lanes?.length ?? 0} persona lanes, ` +
+    `${config?.independentLanes?.length ?? 0} independent architecture lane, ` +
+    `${validatedScenarioCount} scenarios.`,
+);

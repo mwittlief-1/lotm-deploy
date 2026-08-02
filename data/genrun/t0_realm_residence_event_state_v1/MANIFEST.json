@@ -1,0 +1,176 @@
+{
+  "authority": "founder_directed_turn0_residence_reconciliation_2026_08_01",
+  "counts": {
+    "capacity_pressure_manors": 4,
+    "education_hosting_changes": 1,
+    "generic_residence_changes": 1283,
+    "mobility_dependencies": 208,
+    "move_groups": 776,
+    "office_assignment_changes": 1,
+    "opening_people": 23548,
+    "residence_change_receipts": 1335,
+    "responsibility_assignment_changes": 2,
+    "royal_residence_changes": 52,
+    "royal_site_designations": 4,
+    "service_residences": 6,
+    "support_arrangements": 776,
+    "unchanged_people": 22213
+  },
+  "effective_from": "1120-01-01",
+  "input_hashes": [
+    {
+      "path": "config/turn0_residence_reconciliation_v1.json",
+      "sha256": "5a88c238a83f84ba92efc2a5716d0d3cdece72c6069d93aa8cd670f5da0d8f57"
+    },
+    {
+      "path": "data/genrun/t0_household_status_receipt_candidate_v2/HouseholdStatusReceiptCandidate__c.jsonl",
+      "sha256": "0c1cf66a1395429becb4627ac3be05300b07a64e8468f6d8703b40da5fd0e673"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/graph_v1/Person__c.jsonl",
+      "sha256": "4f7ecb339546d4867d9d7d0959aa2d983a92380529ebe51b85f821c62092a5c7"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/ResidenceReassignmentCandidate__c.jsonl",
+      "sha256": "883625077bf76f19457ed26f491464b65cc008816d2c66339a4c69c375a59c87"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/ManorResidenceSupportArrangementCandidate__c.jsonl",
+      "sha256": "853d0cb1beaca4ec863b661082552be3e670bcacf2e529e473e29fe9159a64d6"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/PersonResidenceDispositionCandidate__c.jsonl",
+      "sha256": "4cd95672358eb38fbc3d4933e3a0106a75ffbe6f76f0e90add384bb8303a50c0"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/ManorResidentialCapacityCandidate__c.jsonl",
+      "sha256": "b179e0959fb590d79f717eb41a81268ed8e837d38f88c19ab3f74c19e52e6336"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/ManorOccupancyAuditCandidate__c.jsonl",
+      "sha256": "4cc424032e4ca9e06ac3d8d37b4f3f56ab7d866933848117510804f42c7d20f6"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/ManorResidenceExceptionDocket__c.jsonl",
+      "sha256": "7d1d7e1a60ed241ef4373b6789495b7757a0ab6bc7ce4b2cd97f330c9675bfc0"
+    },
+    {
+      "path": "data/genrun/t0_manor_residential_capacity_occupancy_reconciled_v1/MANIFEST.json",
+      "sha256": "de010526a79e86cec973eb5759523ee8b90cf2cbf300e4f041920917348ceac4"
+    },
+    {
+      "path": "data/genrun/t0_manor_residence_cross_domain_reconciliation_reconciled_v1/ResidenceMoveCrossDomainReconciliationCandidate__c.jsonl",
+      "sha256": "7bad8cdebd22d1efd15e0a20c7eb2c59a2e565e7e2bd409497c0be35ad26a169"
+    },
+    {
+      "path": "data/genrun/t0_manor_residence_cross_domain_reconciliation_reconciled_v1/validation_report.json",
+      "sha256": "2ea75a290605ec38837b74311d0d9e9ec8e8399a1a2e9bc5595180c2a94d91f8"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/council_room_sidecars_v1/OfficeAssignment__c.jsonl",
+      "sha256": "ad3c86fcfe156d6aefe179a241669ad56c15373f83e4f6653919af35a2b4140e"
+    },
+    {
+      "path": "data/genrun/t0_education_pilot_royal_three_comital_v1/EducationAssignmentPilotCandidate__c.jsonl",
+      "sha256": "7e0911cf9b102476237aaf2f200e763940f3b123d615162c3e006a382278c0ad"
+    },
+    {
+      "path": "data/genrun/t0_education_remaining_landed_nobility_v1/EducationAssignmentRemainingLandedCandidate__c.jsonl",
+      "sha256": "d145f5ddfe86f4bbe7ae4e75235bcf9c10423f65361b339e41ab2fe960d8c59e"
+    },
+    {
+      "path": "data/genrun/t0_education_unlanded_common_named_v1/EducationAssignmentNamedNonlandedCandidate__c.jsonl",
+      "sha256": "5d2e8d3159eb2afd6629d83ee63c55bcfb3ac57b9805480d6b1e85fe21e1a77f"
+    }
+  ],
+  "legacy_runtime_authority": false,
+  "outputs": [
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceChangeReceipt__c.jsonl",
+      "rows": 1335,
+      "sha256": "9506735865b4913be2fd13c3801c9b5f9ec907c4b712ba235e28c9e877d7cced"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceMoveGroupReceipt__c.jsonl",
+      "rows": 776,
+      "sha256": "cf62d30a107151294c298d766798dd93a2a9a6c8c3789eb5a8d6b39d4758fb30"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceSupportArrangement__c.jsonl",
+      "rows": 776,
+      "sha256": "0a63321d9dcc84d9dc53bca435bc03b02b87ab6155ed2fd618dcb941b90077a1"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceMobilityDependencyReceipt__c.jsonl",
+      "rows": 208,
+      "sha256": "3dd856fe1d4db91ff7de6eb923a6efbf7343cf5df069104d143869dada105625"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/PersonResidenceCurrentState__c.jsonl",
+      "rows": 23548,
+      "sha256": "8eb1d91105f6ca4de5e9b011d6104d9680e85d7db9adb3b2ff0e3352d327cc67"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ServiceResidenceAssignmentReceipt__c.jsonl",
+      "rows": 6,
+      "sha256": "dfb1a2e148e1310c74fcdd13840196a44c8007804cc028aff2487f966ecc6200"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceCapacityCurrentState__c.jsonl",
+      "rows": 1250,
+      "sha256": "2b53a5928f602000aa95a802a7f3619f132546bb49885a5cf3ae901f30fa88f3"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResidenceCapacityPressureReceipt__c.jsonl",
+      "rows": 4,
+      "sha256": "f586a001e68c1f3a358a970347c4266fe143d4c7be91d3d01c7deb62c40c090a"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/OfficeAssignmentChangeReceipt__c.jsonl",
+      "rows": 1,
+      "sha256": "bf54ac892d5a5660612148c3891559ebe3fd2bd1e74a449b3c7185049de7be7d"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/ResponsibilityAssignmentChangeReceipt__c.jsonl",
+      "rows": 2,
+      "sha256": "57c9a69ad0b807bcdf57f14c914d7fc16b40c66336e98fe5a02bab49bfbfb713"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/EducationHostingChangeReceipt__c.jsonl",
+      "rows": 1,
+      "sha256": "cf1fb0757b9607e344cba6a9d58a396c851f4bdcbaf221410d3bffc2947d99f2"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/RoyalResidenceSiteDesignationReceipt__c.jsonl",
+      "rows": 4,
+      "sha256": "9a520b9e137187c8c98ca6cefa992d60b56655c3b0eae850829de3660008e191"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/turn0_realm_residence_event_state_v1.sqlite",
+      "rows": null,
+      "sha256": "9e7ca6731282684e18c67f98349dc0a16d8f95aaeb168dcfe945492d5ab4944e"
+    },
+    {
+      "path": "data/genrun/t0_realm_residence_event_state_v1/validation_report.json",
+      "rows": null,
+      "sha256": "1f701e6d5fbaeb864bc487cc53c62f9f7341bd0915b198282ad2b6ff3e8933a1"
+    }
+  ],
+  "package_id": "t0_realm_residence_event_state_v1",
+  "runtime_authority": false,
+  "source_authority": "founder_directed_turn0_residence_reconciliation",
+  "sqlite_readiness_authority": true,
+  "status": "founder_directed_materialized_source_successor_pending_runtime_admission",
+  "supersession": {
+    "adds": "event ledger plus projected current state",
+    "does_not_mutate": [
+      "House membership",
+      "tenure",
+      "office remuneration",
+      "ART values",
+      "live runtime"
+    ],
+    "preserves": "t0_household_status_receipt_candidate_v2 immutable opening facts"
+  },
+  "ui_authority": false
+}

@@ -112,6 +112,7 @@ export function EstateHoldingsScene({
   onSelectedManorChange,
   onOpenManorStewardship,
   onReturnToEstate,
+  journeyContext,
 }: {
   model: CourtOsShellRuntimeModel;
   spatialState: CourtOsSpatialState;
@@ -120,6 +121,7 @@ export function EstateHoldingsScene({
   onSelectedManorChange?: (manorId: string) => void;
   onOpenManorStewardship: (manor: CourtOsSpatialManor) => void;
   onReturnToEstate?: () => void;
+  journeyContext?: React.ReactNode;
 }) {
   const portfolio = spatialState.status === "ready" ? spatialState.portfolio : null;
   const [localSelectedManorId, setLocalSelectedManorId] = useState<string | null>(null);
@@ -491,6 +493,7 @@ export function EstateHoldingsScene({
                   custody, completed work, or direct inspection.
                 </p>
               </section>
+              {journeyContext}
               <section className="uat-manor-workspace-section">
                 <small>Matters</small>
                 <h3>No admitted Manor Stewardship Matter</h3>

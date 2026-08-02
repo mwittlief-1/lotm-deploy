@@ -1,0 +1,90 @@
+{
+  "schema_version": "phase_five_journey_party_profiles_v1",
+  "status": "runtime_tuning_config",
+  "basis": "Round One aggregate-retinue calibration; anonymous service and animal counts only",
+  "profiles": {
+    "light_personal": {
+      "ordinary_attendants": 0,
+      "guards": 0,
+      "handlers": 0,
+      "other_service": 0,
+      "riding_animals_per_named_person": 1,
+      "pack_animals": 0,
+      "carts": 0,
+      "baggage": "light"
+    },
+    "small_noble_retinue": {
+      "ordinary_attendants": 2,
+      "guards": 3,
+      "handlers": 2,
+      "other_service": 0,
+      "riding_animals_per_named_person": 1,
+      "pack_animals": 2,
+      "carts": 0,
+      "baggage": "ordinary"
+    },
+    "ceremonial_progress": {
+      "ordinary_attendants": 6,
+      "guards": 6,
+      "handlers": 4,
+      "other_service": 2,
+      "riding_animals_per_named_person": 1,
+      "pack_animals": 4,
+      "carts": 2,
+      "baggage": "heavy"
+    },
+    "household_transfer": {
+      "ordinary_attendants": 3,
+      "guards": 3,
+      "handlers": 4,
+      "other_service": 1,
+      "riding_animals_per_named_person": 0.5,
+      "pack_animals": 4,
+      "carts": 2,
+      "baggage": "heavy"
+    },
+    "protected_transfer": {
+      "ordinary_attendants": 1,
+      "guards": 7,
+      "handlers": 2,
+      "other_service": 0,
+      "riding_animals_per_named_person": 1,
+      "pack_animals": 2,
+      "carts": 1,
+      "baggage": "ordinary"
+    },
+    "martial_party": {
+      "ordinary_attendants": 2,
+      "guards": 12,
+      "handlers": 4,
+      "other_service": 2,
+      "riding_animals_per_named_person": 1,
+      "pack_animals": 4,
+      "carts": 1,
+      "baggage": "heavy"
+    }
+  },
+  "house_posture_adjustments": {
+    "lesser": { "attendants": 0, "guards": 0, "pack_animals": 0 },
+    "baronial": { "attendants": 1, "guards": 1, "pack_animals": 1 },
+    "comital": { "attendants": 3, "guards": 3, "pack_animals": 2 },
+    "royal": { "attendants": 7, "guards": 7, "pack_animals": 4 }
+  },
+  "means_adjustments": {
+    "constrained": { "optional_attendant_delta": -1, "pack_animal_delta": -1 },
+    "ordinary": { "optional_attendant_delta": 0, "pack_animal_delta": 0 },
+    "ample": { "optional_attendant_delta": 2, "pack_animal_delta": 1 }
+  },
+  "armed_posture_minimum_guards": {
+    "none": 0,
+    "ordinary_escort": 2,
+    "protected": 6,
+    "military": 12
+  },
+  "winter_extra_pack_animals": 1,
+  "source_refs": [
+    "docs/current/PHASE_FIVE_JOURNEY_ROUTE_AND_LODGING_FOUNDER_DOCKET_V1.md",
+    "docs/current/PHASE_FIVE_TRAVEL_TRIGGER_AND_PARTY_MANIFEST_RECONCILIATION_V1.md",
+    "docs/current/PHASE_FIVE_NAMED_JOURNEY_FREQUENCY_CALIBRATION_V1.md"
+  ]
+}

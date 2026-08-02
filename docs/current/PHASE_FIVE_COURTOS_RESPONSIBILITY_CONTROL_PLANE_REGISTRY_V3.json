@@ -1,0 +1,2057 @@
+{
+  "artifact_id": "phase_five_courtos_responsibility_control_plane_registry_v3",
+  "effective_as_of": "2026-07-31",
+  "status": "canonical_product_control_plane",
+  "authority_boundary": {
+    "purpose": "UI- and runtime-neutral product taxonomy, placement, instantiation, handoff, and readiness control plane",
+    "does_not_authorize": [
+      "source_promotion",
+      "schema_change",
+      "runtime_registration",
+      "assignment",
+      "capacity_allocation",
+      "SQLite_change",
+      "Turn_0_change",
+      "economic_posting",
+      "UI_fact_promotion"
+    ]
+  },
+  "catalog_policy": {
+    "stable_key_namespace": "courtos.responsibility",
+    "stable_keys_are_not_runtime_ids": true,
+    "legacy_source_labels_permitted_in_ui": false,
+    "legacy_source_labels_permitted_in_runtime_contracts": false,
+    "ui_may_render_catalog_total": false,
+    "clients_must_derive_applicable_instances_from_instance_rules": true,
+    "one_accountable_owner_per_instance": true,
+    "support_assignees_do_not_split_an_instance": true,
+    "role_packages_expand_to_atomic_assignments": true,
+    "assignment_does_not_create_legal_fiscal_contractual_custodial_or_material_authority": true,
+    "design_key_count": 24,
+    "current_active_type_count": 24,
+    "conditional_pending_founder_type_count": 0,
+    "control_plane_defaults_do_not_require_carrier_or_child_configuration": true,
+    "legacy_aliases_are_internal_crosswalk_only": true
+  },
+  "readiness_vocabulary": {
+    "ready": "Controlling doctrine or an accepted implementation layer is complete for the stated boundary.",
+    "partial": "Substantive accepted work exists, but the layer is not complete or fully admitted.",
+    "not_ready": "No accepted current implementation or admission exists for the canonical type.",
+    "blocked": "A named unresolved predecessor or failed acceptance gate prevents the layer from advancing.",
+    "pending_decision": "A founder or competent control-plane decision is still required.",
+    "not_applicable": "The layer does not apply to this object."
+  },
+  "placements": [
+    {
+      "key": "house_command",
+      "label": "House Command",
+      "placement_kind": "governance_surface",
+      "operational_room": false,
+      "order": 0
+    },
+    {
+      "key": "household",
+      "label": "Household",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 1
+    },
+    {
+      "key": "marriage_dynasty",
+      "label": "Marriage & Dynasty",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 2
+    },
+    {
+      "key": "estate_holdings",
+      "label": "Estate & Holdings",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 3
+    },
+    {
+      "key": "resources_finance",
+      "label": "Resources & Finance",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 4
+    },
+    {
+      "key": "records_correspondence",
+      "label": "Records & Correspondence",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 5
+    },
+    {
+      "key": "security_readiness",
+      "label": "Security & Readiness",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 6
+    },
+    {
+      "key": "court_relations",
+      "label": "Court & Relations",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 7
+    },
+    {
+      "key": "church",
+      "label": "Church",
+      "placement_kind": "operational_room",
+      "operational_room": true,
+      "order": 8
+    }
+  ],
+  "responsibility_types": [
+    {
+      "key": "courtos.responsibility.household_stores_provisioning_procurement",
+      "label": "Household Stores, Provisioning & Procurement",
+      "placement": "household",
+      "order": 1,
+      "purpose": "Maintain the House household's ordinary provision, stores, mobility support, and bounded procurement posture.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "resource posture",
+          "supplier option",
+          "route",
+          "delivery",
+          "receipt"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "partial",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "partial",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The Stores evaluator, common Household kernel, and read-contract work exist; admitted mutable stock/custody, complete fulfillment integration, and whole-world proof do not.",
+      "primary_handoff_targets": [
+        "economy_material_gateway_service",
+        "journey_presence_route_service",
+        "courtos.responsibility.house_fiscal_administration",
+        "courtos.responsibility.correspondence_dispatch"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.household_stores_provisioning_procurement",
+        "alias_set_key": "courtos.alias.household_stores_provisioning_procurement",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.adult_kin_support",
+      "label": "Adult Kin Support",
+      "placement": "household",
+      "order": 2,
+      "purpose": "Own the House-backed support and credible transition route for adult kin who remain a current House accountability.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "adult support case",
+          "placement lead",
+          "support arrangement",
+          "destination handoff"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The roster and lifecycle doctrine are locked, but active House-accountability, support arrangements, destination acceptance, and the runtime adapter remain incomplete or withheld.",
+      "primary_handoff_targets": [
+        "household_residence_governance_overlay",
+        "protected_person_mandate_custody_overlay",
+        "courtos.responsibility.education_formation",
+        "courtos.responsibility.marriage_dynasty_stewardship",
+        "courtos.responsibility.office_post_appointments",
+        "journey_presence_route_service",
+        "economy_material_gateway_service"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.adult_kin_support",
+        "alias_set_key": "courtos.alias.adult_kin_support",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.education_formation",
+      "label": "Education & Formation",
+      "placement": "household",
+      "order": 3,
+      "purpose": "Manage House-accountable education tracks, providers, locations, terms, progress, and transition handoffs.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "learner plan",
+          "provider option",
+          "education commitment",
+          "formation episode",
+          "cycle report"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "partial",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "blocked",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Education is the leading vertical, but combined admission is incomplete and the commitment/economy bridge suite timed out rather than earning acceptance.",
+      "primary_handoff_targets": [
+        "protected_person_mandate_custody_overlay",
+        "journey_presence_route_service",
+        "economy_material_gateway_service",
+        "courtos.responsibility.correspondence_dispatch",
+        "art_evidence_service"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.education_formation",
+        "alias_set_key": "courtos.alias.education_formation",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.household_service_care",
+      "label": "Household Service & Care",
+      "placement": "household",
+      "order": 4,
+      "purpose": "Own pooled household service/care posture and the House-side route for serious or persistent care needs without becoming the Health Engine.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "continuing-care dossier",
+          "care commitment",
+          "caregiver arrangement",
+          "Health Watch",
+          "coverage exception"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The consolidation and Health boundary are locked; the House service/care adapter, admitted care projections, and integrated runtime proof remain outstanding.",
+      "primary_handoff_targets": [
+        "health_engine_service",
+        "pooled_hsu_service",
+        "economy_material_gateway_service",
+        "journey_presence_route_service",
+        "art_evidence_service",
+        "watch_reporting_control"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.household_service_care",
+        "alias_set_key": "courtos.alias.household_service_care",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.marriage_dynasty_stewardship",
+      "label": "Marriage & Dynasty Stewardship",
+      "placement": "marriage_dynasty",
+      "order": 1,
+      "purpose": "Own the House marriage objective, Knowledge-limited search, offer, betrothal, recognition readiness, union handoff, and dynasty review lifecycle.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "person watch",
+          "active marriage case",
+          "accord",
+          "betrothal",
+          "line and continuity review"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Product doctrine is locked, while current Phase Five marriage state, accepted lifecycle runtime, travel/hosting integration, and Knowledge-safe read models remain incomplete; legacy mechanics are not authority.",
+      "primary_handoff_targets": [
+        "marriage_lifecycle_marketplace_service",
+        "autonomous_church_service",
+        "courtos.responsibility.patronage_hospitality_gifts",
+        "journey_presence_route_service",
+        "economy_material_gateway_service",
+        "household_residence_governance_overlay",
+        "succession_fertility_lifecycle_service",
+        "art_evidence_service"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.marriage_dynasty_stewardship",
+        "alias_set_key": "courtos.alias.marriage_dynasty_stewardship",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.patronage_hospitality_gifts",
+      "label": "Patronage, Hospitality & Gifts",
+      "placement": "marriage_dynasty",
+      "order": 2,
+      "purpose": "Own ordinary social reciprocity, invitations, hosted occasions, visits, gifts, and honours within House policy.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "request",
+          "invitation",
+          "hosted occasion",
+          "relationship to tend",
+          "gift or honour"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The responsibility and policy families are locked; realized hospitality history, common Journey integration, accepted resource handoffs, and a current read model are not.",
+      "primary_handoff_targets": [
+        "courtos.responsibility.household_stores_provisioning_procurement",
+        "journey_presence_route_service",
+        "economy_material_gateway_service",
+        "art_evidence_service",
+        "ceremony_event_presentation"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.patronage_hospitality_gifts",
+        "alias_set_key": "courtos.alias.patronage_hospitality_gifts",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.manor_stewardship",
+      "label": "Manor Stewardship",
+      "placement": "estate_holdings",
+      "order": 1,
+      "purpose": "Own customary operation, demesne work, tenant/custom administration, routine upkeep, local incidents, informal grievances, and reporting for one manor.",
+      "instance_rule": {
+        "grain": "governing_actor_accountable_manor",
+        "cardinality": "exactly_one_per_admitted_governing_actor_accountable_manor",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "The manor and its exact governing actor's operating accountability are admitted. The default exists across House, Crown/public, Church, and other institutional authority walls even when the named carrier or child operating data is partial.",
+        "identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "authority_projection": {
+          "house": "House CourtOS only within the player's exact authority and Knowledge entitlement",
+          "non_house": "autonomous or institution-facing shared-kernel instance; never an ordinary House player card"
+        },
+        "child_records_not_instances": [
+          "demesne plan",
+          "tenant/custom issue",
+          "minor repair",
+          "local grievance",
+          "operator report"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The admitted manor/governing-actor fabric creates the shared-kernel default across authority walls. Realm operator rows are candidate owner evidence; current assignments, local operating state, grievance adapter, and integrated runtime remain incomplete.",
+      "primary_handoff_targets": [
+        "lcu_labor_service",
+        "grievance_formation_justice_service",
+        "courtos.responsibility.manor_fiscal_administration",
+        "courtos.responsibility.estate_fabric_maintenance_oversight",
+        "courtos.responsibility.works_project_supervision",
+        "tenure_operating_mode_registry"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.manor_stewardship",
+        "alias_set_key": "courtos.alias.manor_stewardship",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "governing_actor_accountable_manor",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.estate_fabric_maintenance_oversight",
+      "label": "Estate Fabric & Maintenance Oversight",
+      "placement": "estate_holdings",
+      "order": 2,
+      "purpose": "Maintain a Knowledge-safe cross-location condition picture, inspection posture, and maintenance priority route.",
+      "instance_rule": {
+        "grain": "explicit_location_portfolio",
+        "cardinality": "one_per_non_overlapping_same_purpose_portfolio_with_a_default_whole_house_portfolio",
+        "admission_predicate": "At least one admitted House-controlled location or facility is in scope; a split portfolio must be explicit and independently assignable.",
+        "identity_fields": [
+          "house_id",
+          "portfolio_id"
+        ],
+        "deduplication_rule": "Same-purpose portfolios may not silently omit or double-count the same location; the whole-House default is replaced, not overlapped, when the responsibility is split.",
+        "child_records_not_instances": [
+          "asset observation",
+          "inspection",
+          "maintenance priority",
+          "minor repair referral",
+          "works referral"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "not_ready",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Doctrine and portfolio delegation are locked, but the reconciled physical-asset spine, admitted observations/condition, current assignments, evaluator, and read model are absent.",
+      "primary_handoff_targets": [
+        "physical_asset_security_disposition_registry",
+        "courtos.responsibility.manor_stewardship",
+        "courtos.responsibility.works_project_supervision",
+        "journey_presence_route_service"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.estate_fabric_maintenance_oversight",
+        "alias_set_key": "courtos.alias.estate_fabric_maintenance_oversight",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "explicit_location_portfolio",
+        "instance_identity_fields": [
+          "house_id",
+          "portfolio_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.works_project_supervision",
+      "label": "Works Project Supervision",
+      "placement": "estate_holdings",
+      "order": 3,
+      "purpose": "Coordinate scope, sequence, evidence, bounded variance, exception routing, and completion recommendation for an accepted project.",
+      "instance_rule": {
+        "grain": "accepted_project",
+        "cardinality": "exactly_one_for_each_accepted_active_project",
+        "admission_predicate": "A competent authority has accepted a project arrangement with an exact site, objective, scope, sponsor, and lifecycle identifier.",
+        "identity_fields": [
+          "project_id"
+        ],
+        "termination_rule": "The responsibility instance closes when the project is accepted, cancelled, superseded, or otherwise formally closed; its receipts remain durable.",
+        "child_records_not_instances": [
+          "milestone",
+          "provider task",
+          "material request",
+          "inspection",
+          "variance"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "partial",
+        "data_admission": "not_ready",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The type is provisionally retained and its authority boundary is clear; no admitted active-project set, provider/labor execution, progress contract, or accepted project read model exists.",
+      "primary_handoff_targets": [
+        "courtos.responsibility.household_stores_provisioning_procurement",
+        "economy_material_gateway_service",
+        "lcu_labor_service",
+        "physical_asset_security_disposition_registry",
+        "journey_presence_route_service"
+      ],
+      "instance_activation_class": "current_source_predicate_conditional",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.works_project_supervision",
+        "alias_set_key": "courtos.alias.works_project_supervision",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "accepted_project",
+        "instance_identity_fields": [
+          "project_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.franchise_operations",
+      "label": "Franchise Operations",
+      "placement": "estate_holdings",
+      "order": 4,
+      "purpose": "Operate an admitted recurring facility or franchise within its exact right, access, custody, and operating bounds.",
+      "instance_rule": {
+        "grain": "facility_or_operating_package",
+        "cardinality": "one_per_independently_operable_admitted_facility_or_coherent_package",
+        "admission_predicate": "An admitted right or facility has independent recurring operating work and a real operator/accountability boundary.",
+        "identity_fields": [
+          "governing_actor_id",
+          "operating_scope_id"
+        ],
+        "package_rule": "A coherent package is allowed only when all constituents share one operator, instrument-defined operating authority, custody route, and operating cycle and could not meaningfully be assigned separately; otherwise each facility is a separate instance.",
+        "child_records_not_instances": [
+          "operating occurrence",
+          "queue",
+          "access exception",
+          "custody exception",
+          "profile-specific service receipt"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "not_ready",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The collapsed type and profiles are locked; exact six-leg rights/facilities, operators, operating state, per-profile evaluators, and current UI/read models remain unadmitted.",
+      "primary_handoff_targets": [
+        "rights_instruments_registry",
+        "courtos.responsibility.revenue_right_administration_collection",
+        "courtos.responsibility.manor_fiscal_administration",
+        "courtos.responsibility.security_asset_protection",
+        "economy_material_gateway_service"
+      ],
+      "instance_activation_class": "current_source_predicate_conditional",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.franchise_operations",
+        "alias_set_key": "courtos.alias.franchise_operations",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "facility_or_operating_package",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "operating_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.portfolio_oversight",
+      "label": "Portfolio Oversight",
+      "placement": "estate_holdings",
+      "order": 5,
+      "purpose": "Synthesize and prioritize across an explicit administrative portfolio without acquiring constituent operating, fiscal, tenure, or material authority.",
+      "instance_rule": {
+        "grain": "explicit_administrative_portfolio",
+        "cardinality": "zero_or_more_per_governing_actor",
+        "admission_predicate": "A named portfolio has multiple admitted constituents and real cross-scope reporting, prioritization, conflict, or transfer-recommendation work.",
+        "identity_fields": [
+          "governing_actor_id",
+          "portfolio_id"
+        ],
+        "deduplication_rule": "Same-purpose constituent interests may not be silently omitted or double-counted across portfolio instances.",
+        "child_records_not_instances": [
+          "constituent report",
+          "cross-holding comparison",
+          "follow-up",
+          "recommendation"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The manager-of-managers doctrine is locked and coarse candidates exist, but explicit portfolio composition, no-overlap admission, authority bounds, and a current synthesizer remain incomplete.",
+      "primary_handoff_targets": [
+        "courtos.responsibility.manor_stewardship",
+        "courtos.responsibility.estate_fabric_maintenance_oversight",
+        "courtos.responsibility.house_fiscal_administration",
+        "courtos.responsibility.manor_fiscal_administration",
+        "tenure_change_proceeding"
+      ],
+      "instance_activation_class": "current_source_predicate_conditional",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.portfolio_oversight",
+        "alias_set_key": "courtos.alias.portfolio_oversight",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "explicit_administrative_portfolio",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "portfolio_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.house_fiscal_administration",
+      "label": "House Fiscal Administration",
+      "placement": "resources_finance",
+      "order": 1,
+      "purpose": "Administer House treasury/books, House obligations and settlements, incoming remittance reconciliation, and consolidated fiscal reporting.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "account",
+          "treasury custody",
+          "obligation",
+          "settlement",
+          "transfer demand",
+          "returned receipt"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Fiscal doctrine and balanced candidate evidence are strong, but opening/current custody, account authority, admitted obligations, runtime posting gateway, and accepted current-state read models are incomplete.",
+      "primary_handoff_targets": [
+        "economy_material_gateway_service",
+        "courtos.responsibility.manor_fiscal_administration",
+        "courtos.responsibility.correspondence_dispatch",
+        "journey_presence_route_service",
+        "courtos.responsibility.security_asset_protection"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.house_fiscal_administration",
+        "alias_set_key": "courtos.alias.house_fiscal_administration",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.manor_fiscal_administration",
+      "label": "Manor Fiscal Administration",
+      "placement": "resources_finance",
+      "order": 2,
+      "purpose": "Administer local books, obligations, custody evidence, authorized disbursement administration, reconciliation, and remittance for one manor.",
+      "instance_rule": {
+        "grain": "governing_actor_accountable_manor",
+        "cardinality": "exactly_one_per_admitted_governing_actor_accountable_manor",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "The manor and its exact governing actor's accountable operating scope are admitted. The default fiscal responsibility exists across House, Crown/public, Church, and other institutional authority walls even when the named carrier, books, custody, or remittance configuration is partial.",
+        "identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "authority_projection": {
+          "house": "House CourtOS only within the player's exact authority and Knowledge entitlement",
+          "non_house": "autonomous or institution-facing shared-kernel instance; never an ordinary House player card"
+        },
+        "child_records_not_instances": [
+          "local account",
+          "collection",
+          "custody",
+          "disbursement",
+          "remittance",
+          "fiscal exception"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The founder-locked per-manor responsibility is a shared-kernel default across admitted governing actors. Exact fiscal carriers are partial; missing carrier, custody, books, or remittance configuration remains unknown and does not erase the instance.",
+      "primary_handoff_targets": [
+        "economy_material_gateway_service",
+        "courtos.responsibility.house_fiscal_administration",
+        "courtos.responsibility.revenue_right_administration_collection",
+        "courtos.responsibility.correspondence_dispatch",
+        "journey_presence_route_service",
+        "courtos.responsibility.security_asset_protection"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.manor_fiscal_administration",
+        "alias_set_key": "courtos.alias.manor_fiscal_administration",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "governing_actor_accountable_manor",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.revenue_right_administration_collection",
+      "label": "Revenue Right Administration & Collection",
+      "placement": "resources_finance",
+      "order": 3,
+      "purpose": "Administer lawful assessment, collection, custody, remittance, beneficiary receipt, reconciliation, and exceptions for an admitted income-producing right.",
+      "instance_rule": {
+        "grain": "right_or_collection_package",
+        "cardinality": "one_per_admitted_income_right_or_coherent_collection_package",
+        "admission_predicate": "An income-producing right has an exact instrument, holder/beneficiary, assessment basis, competent rate authority, collector/custody path, and remittance destination.",
+        "identity_fields": [
+          "governing_actor_id",
+          "collection_scope_id"
+        ],
+        "package_rule": "Rights may share one instance only when the same instrument authority, collector, custody path, assessment cadence, beneficiary, and remittance route make them operationally indivisible; otherwise each right is separate.",
+        "child_records_not_instances": [
+          "assessment",
+          "collection",
+          "custody leg",
+          "remittance",
+          "beneficiary receipt",
+          "reconciliation exception"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "not_ready",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The atomic boundary is locked, but exact six-leg rights, competent rate authority, collectors, custody/remittance, and current assessment activity are not admitted.",
+      "primary_handoff_targets": [
+        "rights_instruments_registry",
+        "economy_material_gateway_service",
+        "courtos.responsibility.house_fiscal_administration",
+        "courtos.responsibility.manor_fiscal_administration",
+        "justice_case_proceeding"
+      ],
+      "instance_activation_class": "current_source_predicate_conditional",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.revenue_right_administration_collection",
+        "alias_set_key": "courtos.alias.revenue_right_administration_collection",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "right_or_collection_package",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "collection_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.reception_intake",
+      "label": "Reception & Intake",
+      "placement": "records_correspondence",
+      "order": 1,
+      "purpose": "Receive, preserve, safely hold or return, and route an approach or item at an admitted clearinghouse, channel, or location without deciding its substance.",
+      "instance_rule": {
+        "grain": "house_default_reception_scope_or_independently_admitted_operating_scope",
+        "cardinality": "exactly_one_default_per_admitted_house_plus_zero_or_more_independently_admitted_distinct_intake_operations",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "An admitted House creates one default Reception responsibility. An additional instance requires an independently governed intake operation with a materially distinct custody and routing boundary that cannot truthfully be represented as child configuration of the default.",
+        "identity_fields": [
+          "governing_actor_id",
+          "intake_scope_id"
+        ],
+        "default_identity_projection": {
+          "governing_actor_id": "house_id",
+          "intake_scope_id": "house_id",
+          "scope_kind": "house_default_reception"
+        },
+        "default_instance_rule": {
+          "child_configuration_required_for_existence": false,
+          "accountable_owner_required": true,
+          "missing_child_configuration_state": "unknown_or_unconfigured_never_inapplicable",
+          "persisted_scope_id_created_by_this_registry": false
+        },
+        "extra_instance_predicate": "A separate governing actor, or a materially distinct custody and routing policy under the same actor, is independently admitted with an accountable carrier and cannot be modeled as a channel of the House default.",
+        "deduplication_rule": "Door, desk, oral/written form, messenger handoff, or co-location never creates another instance by itself. Each admitted extra must be disjoint from the House default or another extra in governing authority plus custody/routing scope.",
+        "child_records_not_instances": [
+          "door or desk",
+          "oral or written channel",
+          "visitor or messenger handoff point",
+          "location",
+          "custody instruction",
+          "routing policy",
+          "intake receipt",
+          "safe hold",
+          "return",
+          "ambiguity report"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The admitted House roster is sufficient to create the default instance. Existing correspondence intermediaries are candidate owner evidence; exact channels, locations, custody instructions, routing policy, and accepted assignments remain partial or absent.",
+      "primary_handoff_targets": [
+        "courtos.responsibility.correspondence_dispatch",
+        "courtos.responsibility.records_archives",
+        "knowledge_news_diffusion_service",
+        "matter_council_synthesis_service"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.reception_intake",
+        "alias_set_key": "courtos.alias.reception_intake",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house_default_reception_scope_or_independently_admitted_operating_scope",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "intake_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.records_archives",
+      "label": "Records & Archives",
+      "placement": "records_correspondence",
+      "order": 2,
+      "purpose": "Preserve, index, restrict, compare, search, and return durable House or institutional evidence without creating the underlying fact or competent decision.",
+      "instance_rule": {
+        "grain": "house_default_records_scope_or_independently_admitted_custody_scope",
+        "cardinality": "exactly_one_default_per_admitted_house_plus_zero_or_more_independently_admitted_custody_scopes",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "An admitted House creates one default Records responsibility for its durable House record-family bundle. An additional instance requires an independently governed custody boundary with its own keeper and access rule.",
+        "identity_fields": [
+          "governing_actor_id",
+          "archive_scope_id"
+        ],
+        "default_identity_projection": {
+          "governing_actor_id": "house_id",
+          "archive_scope_id": "house_id",
+          "scope_kind": "house_default_records"
+        },
+        "default_instance_rule": {
+          "child_configuration_required_for_existence": false,
+          "accountable_owner_required": true,
+          "missing_child_configuration_state": "unknown_or_unconfigured_never_inapplicable",
+          "persisted_scope_id_created_by_this_registry": false
+        },
+        "extra_instance_predicate": "A real independently governed custody boundary with its own keeper and access rule is admitted and cannot be represented as a child repository or access profile of the House default.",
+        "deduplication_rule": "Record category, book, room, cabinet, copy, office profile, or co-location never creates another instance by itself. House, court, Crown/public, and Church custody remain authority-walled.",
+        "child_records_not_instances": [
+          "durable record family",
+          "book or register",
+          "physical repository",
+          "index",
+          "access class",
+          "record",
+          "copy",
+          "extract",
+          "attestation",
+          "retention or condition state",
+          "source conflict",
+          "search request"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The admitted House roster is sufficient to create the default instance. Existing records/treasury holders are candidate owner evidence; record-family, repository, access, custody, and accepted assignment data remain partial.",
+      "primary_handoff_targets": [
+        "core_schedule_projection",
+        "family_book_chronicle_reference",
+        "knowledge_news_diffusion_service",
+        "courtos.responsibility.correspondence_dispatch",
+        "justice_case_proceeding"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.records_archives",
+        "alias_set_key": "courtos.alias.records_archives",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house_default_records_scope_or_independently_admitted_custody_scope",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "archive_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.correspondence_dispatch",
+      "label": "Correspondence & Dispatch",
+      "placement": "records_correspondence",
+      "order": 3,
+      "purpose": "Prepare, authenticate where authorized, carry, deliver, and report the status of admitted messages and formal notices without owning their substantive decision.",
+      "instance_rule": {
+        "grain": "dispatch_clearinghouse_or_distinct_operating_scope",
+        "cardinality": "one_house_clearinghouse_by_default_with_additional_instances_only_for_admitted_distinct_operations",
+        "admission_predicate": "The House default always exists; an additional scope requires distinct custody/routing authority, accountable ownership, and an evidenced operational need that cannot be represented as a channel under the default.",
+        "identity_fields": [
+          "governing_actor_id",
+          "dispatch_scope_id"
+        ],
+        "child_records_not_instances": [
+          "message",
+          "formal notice",
+          "dispatch",
+          "route leg",
+          "delivery receipt",
+          "delivery exception"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Correspondence capability and infrastructure facts exist, but there is no admitted Turn 0 message/delivery history, carrier/route runtime, current clearinghouse assignment fabric, or accepted delivery read model.",
+      "primary_handoff_targets": [
+        "journey_presence_route_service",
+        "knowledge_news_diffusion_service",
+        "courtos.responsibility.records_archives",
+        "core_schedule_projection"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.correspondence_dispatch",
+        "alias_set_key": "courtos.alias.correspondence_dispatch",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "dispatch_clearinghouse_or_distinct_operating_scope",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "dispatch_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.security_asset_protection",
+      "label": "Security & Asset Protection",
+      "placement": "security_readiness",
+      "order": 1,
+      "purpose": "Maintain deterministic protective coverage for an ordinary manor/site bundle or independently classified physical asset and route qualified protective responses.",
+      "instance_rule": {
+        "grain": "security_scope",
+        "cardinality": "one_per_parent_manor_or_site_bundle_plus_one_per_independent_active_asset_scope",
+        "admission_state_by_scope": {
+          "parent_manor_or_site_bundle": "control_plane_admitted_default",
+          "independent_active_asset_scope": "source_predicate_admitted_conditional",
+          "inactive_until_commissioned": "source_candidate_pending_or_inapplicable"
+        },
+        "admission_predicate": "The physical-asset registry classifies the scope as embedded_parent_scope or independent_asset_scope; inactive_until_commissioned assets create no instance.",
+        "identity_fields": [
+          "governing_actor_id",
+          "security_scope_id"
+        ],
+        "parent_default_identity_projection": {
+          "governing_actor_id": "the admitted manor or site governing_actor_id",
+          "security_scope_id": "manor_id or admitted parent_site_id",
+          "scope_kind": "embedded_parent_scope"
+        },
+        "authority_projection": {
+          "house": "House CourtOS only within the player's exact authority and Knowledge entitlement",
+          "non_house": "autonomous or institution-facing shared-kernel instance; never an ordinary House player card"
+        },
+        "deduplication_rule": "Every admitted operational asset has exactly one security disposition; embedded assets are covered only by their parent instance and independent assets only by their own instance.",
+        "child_records_not_instances": [
+          "access exception",
+          "custody exception",
+          "threat",
+          "protective response",
+          "named post vacancy",
+          "coverage report"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "partial",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "partial",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Security operating state and facility coverage code/tests exist, but the reconciled physical-asset spine, all public-seat locations, threat/incident runtime, shared labor, mobility, and full CourtOS integration remain incomplete.",
+      "primary_handoff_targets": [
+        "physical_asset_security_disposition_registry",
+        "lcu_labor_service",
+        "courtos.responsibility.martial_stores_horse_capacity",
+        "courtos.responsibility.office_post_appointments",
+        "justice_case_proceeding",
+        "vezdaran_command_overlay"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.security_asset_protection",
+        "alias_set_key": "courtos.alias.security_asset_protection",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "security_scope",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "security_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.martial_readiness_training",
+      "label": "Martial Readiness & Training",
+      "placement": "security_readiness",
+      "order": 2,
+      "purpose": "Maintain callable-roll evidence, annual training/exercise posture, readiness assessment, and recommendations for an admitted obligation catchment.",
+      "instance_rule": {
+        "grain": "house_honor_readiness_portfolio_or_separately_admitted_competent_public_portfolio",
+        "cardinality": "one_default_per_admitted_noble_house_with_explicit_complete_non_overlapping_split_portfolios_replacing_the_default_plus_one_per_separately_admitted_non_house_competent_portfolio",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "An admitted noble House creates one default House/Honor readiness portfolio. A House split requires explicit complete non-overlapping portfolio constituents and replaces the default. County, Crown, or other public portfolios require separately admitted competent authority and scope.",
+        "identity_fields": [
+          "governing_actor_id",
+          "service_catchment_id"
+        ],
+        "default_identity_projection": {
+          "governing_actor_id": "house_id",
+          "service_catchment_id": "house_id",
+          "scope_kind": "house_default_readiness_portfolio"
+        },
+        "default_instance_rule": {
+          "child_configuration_required_for_existence": false,
+          "accountable_owner_required": true,
+          "missing_service_or_roster_evidence_state": "unknown_never_no_instance",
+          "persisted_scope_id_created_by_this_registry": false
+        },
+        "portfolio_replacement_rule": "Explicit House/Honor splits replace the whole-House default and must cover the intended portfolio without overlaps or omissions. A House default and its split children may not coexist in the denominator.",
+        "extra_instance_predicate": "An explicit non-overlapping House/Honor split or a separately admitted competent non-House authority portfolio has exact constituents, scope, and authority.",
+        "deduplication_rule": "The same person, obligation, manor, LCU contribution, or readiness package may not be counted twice inside one governing portfolio or across overlapping split portfolios.",
+        "child_records_not_instances": [
+          "service obligation evidence",
+          "callable roll",
+          "exercise",
+          "training plan",
+          "readiness package",
+          "assessment",
+          "recommendation"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Founder-locked doctrine creates one default readiness portfolio per admitted noble House. Legacy House command rows are candidate owner evidence; exact split/public portfolios, obligation evidence, LCU allocation, training runtime, and accepted assignments remain partial or absent.",
+      "primary_handoff_targets": [
+        "strategic_martial_readiness_control",
+        "call_to_arms_service",
+        "lcu_labor_service",
+        "courtos.responsibility.martial_stores_horse_capacity",
+        "accountable_capacity_service"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.martial_readiness_training",
+        "alias_set_key": "courtos.alias.martial_readiness_training",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house_honor_readiness_portfolio_or_separately_admitted_competent_public_portfolio",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "service_catchment_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.martial_stores_horse_capacity",
+      "label": "Martial Stores & Horse Capacity",
+      "placement": "security_readiness",
+      "order": 3,
+      "purpose": "Maintain semantic condition, sufficiency, custody-support, maintenance, and qualified repair/procurement posture for martial equipment and horses.",
+      "instance_rule": {
+        "grain": "house_honor_martial_support_portfolio_or_separately_admitted_competent_public_portfolio",
+        "cardinality": "one_default_per_admitted_noble_house_with_explicit_complete_non_overlapping_split_portfolios_replacing_the_default_plus_one_per_separately_admitted_non_house_competent_portfolio",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "An admitted noble House creates one default House/Honor martial-support portfolio paired to its readiness portfolio. A House split requires explicit complete non-overlapping portfolio constituents and replaces the default. County, Crown, or other public portfolios require separately admitted competent authority and scope.",
+        "identity_fields": [
+          "governing_actor_id",
+          "martial_support_scope_id"
+        ],
+        "default_identity_projection": {
+          "governing_actor_id": "house_id",
+          "martial_support_scope_id": "house_id",
+          "scope_kind": "house_default_martial_support_portfolio"
+        },
+        "default_instance_rule": {
+          "child_configuration_required_for_existence": false,
+          "accountable_owner_required": true,
+          "missing_armory_equipment_horse_or_custody_evidence_state": "unknown_never_no_instance",
+          "persisted_scope_id_created_by_this_registry": false
+        },
+        "paired_portfolio_rule": "The default or split portfolio identity must match the corresponding Martial Readiness & Training portfolio; different people may own the two atomic responsibilities.",
+        "portfolio_replacement_rule": "Explicit House/Honor splits replace the whole-House default and must cover the intended portfolio without overlaps or omissions. A House default and its split children may not coexist in the denominator.",
+        "extra_instance_predicate": "An explicit non-overlapping House/Honor split or a separately admitted competent non-House authority portfolio has exact constituents, support destination, and authority. A separate keeper or facility exists only from separately admitted custody facts.",
+        "deduplication_rule": "Ordinary manor stable/store care and semantic kit/horse evidence remain child inputs. They do not create armories, horses, inventories, custodians, or extra responsibility instances.",
+        "child_records_not_instances": [
+          "semantic equipment posture",
+          "semantic horse capacity posture",
+          "ordinary stable or store care",
+          "kit reference",
+          "maintenance exception",
+          "repair request",
+          "procurement request",
+          "issue or return evidence"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Founder-approved doctrine creates one default martial-support portfolio per admitted noble House without inventing armories, equipment, horses, inventory, or custody. Exact split/public portfolios, condition/custody evidence, fulfillment runtime, and accepted assignments remain partial or absent.",
+      "primary_handoff_targets": [
+        "physical_asset_security_disposition_registry",
+        "economy_material_gateway_service",
+        "courtos.responsibility.household_stores_provisioning_procurement",
+        "courtos.responsibility.works_project_supervision",
+        "call_to_arms_service"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.martial_stores_horse_capacity",
+        "alias_set_key": "courtos.alias.martial_stores_horse_capacity",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house_honor_martial_support_portfolio_or_separately_admitted_competent_public_portfolio",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "martial_support_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.external_relations_representation",
+      "label": "External Relations & Representation",
+      "placement": "court_relations",
+      "order": 1,
+      "purpose": "Manage the House's target relationship portfolio, representation, court attendance, contact preparation, and returned reports within retained bounds.",
+      "instance_rule": {
+        "grain": "house_target_portfolio",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_predicate": "An admitted House exists; the target portfolio may be empty but is never split into one responsibility instance per target.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "child_records_not_instances": [
+          "target House",
+          "target Church institution",
+          "relationship posture",
+          "court occasion",
+          "representative mandate",
+          "attendance report"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The relationship-portfolio and court-attendance fold are founder-locked; admitted target portfolios, court calendars/summonses, representation runtime, travel/correspondence integration, and current read models are not built.",
+      "primary_handoff_targets": [
+        "court_attendance_representation_control",
+        "courtos.responsibility.correspondence_dispatch",
+        "courtos.responsibility.patronage_hospitality_gifts",
+        "journey_presence_route_service",
+        "art_evidence_service",
+        "great_council_convocation_proceeding"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.external_relations_representation",
+        "alias_set_key": "courtos.alias.external_relations_representation",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house_target_portfolio",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.household_observance_chaplaincy",
+      "label": "Household Observance & Chaplaincy",
+      "placement": "church",
+      "order": 1,
+      "purpose": "Maintain the House observance posture, parish/chaplain or institutional service route, and House-side support for named event-owned rites.",
+      "instance_rule": {
+        "grain": "house",
+        "cardinality": "exactly_one_per_admitted_house",
+        "admission_state": "control_plane_admitted_default",
+        "admission_predicate": "An admitted House exists. An ordinary parish route is sufficient; no retained chaplain, chapel, rite, provider acceptance, or complete route configuration is required for the House-side responsibility to exist.",
+        "identity_fields": [
+          "house_id"
+        ],
+        "default_instance_rule": {
+          "child_configuration_required_for_existence": false,
+          "accountable_owner_required": true,
+          "missing_parish_chaplain_or_route_configuration_state": "unknown_or_unconfigured_never_inapplicable"
+        },
+        "child_records_not_instances": [
+          "observance posture",
+          "parish route",
+          "chaplain arrangement",
+          "named rite request",
+          "Church response",
+          "official record receipt"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "not_ready",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "Existing founder authority admits one House-side default per House. The 129 legacy chaplain/confessor posts are candidate owner/provider evidence only; parish/home route, precedence, Church actor/provider data, accepted assignments, runtime, and read models remain incomplete.",
+      "primary_handoff_targets": [
+        "house_observance_posture_control",
+        "autonomous_church_service",
+        "courtos.responsibility.patronage_hospitality_gifts",
+        "courtos.responsibility.records_archives",
+        "journey_presence_route_service",
+        "ceremony_event_presentation"
+      ],
+      "instance_activation_class": "current_control_plane_default",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.household_observance_chaplaincy",
+        "alias_set_key": "courtos.alias.household_observance_chaplaincy",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "house",
+        "instance_identity_fields": [
+          "house_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.church_rights_institutional_affairs",
+      "label": "Church Rights & Institutional Affairs",
+      "placement": "church",
+      "order": 2,
+      "purpose": "Manage exact Church patronage rights, bilateral instruments, consequential recognition or record cases, and referral to the competent substantive domain.",
+      "instance_rule": {
+        "grain": "exact_right_instrument_or_active_formal_case",
+        "cardinality": "zero_or_more_per_governing_actor",
+        "admission_predicate": "An exact patronage/advowson right, bilateral Church instrument, or active formal Church case with competent parties and scope is admitted.",
+        "identity_fields": [
+          "governing_actor_id",
+          "church_affair_scope_id"
+        ],
+        "deduplication_rule": "Each exact right or instrument has one standing instance; a formal case receives its own case instance and links to, rather than replaces or duplicates, the underlying right/instrument instance.",
+        "child_records_not_instances": [
+          "vacancy",
+          "presentation",
+          "recognition question",
+          "record search",
+          "Church report",
+          "support proposal",
+          "referral"
+        ],
+        "admission_state": "source_predicate_admitted_conditional"
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "blocked",
+        "runtime": "not_ready",
+        "read_model": "not_ready",
+        "ui": "not_ready",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The House-side type and authority firewall are approved. The completed audit found zero exact current rights, live bilateral instruments, or active formal Church cases; fiscal patron labels, historic dispensations, chaplains, and parish geography do not pass the predicate.",
+      "primary_handoff_targets": [
+        "rights_instruments_registry",
+        "autonomous_church_service",
+        "courtos.responsibility.records_archives",
+        "courtos.responsibility.correspondence_dispatch",
+        "courtos.responsibility.house_fiscal_administration",
+        "tenure_change_proceeding",
+        "justice_case_proceeding"
+      ],
+      "instance_activation_class": "current_source_predicate_conditional",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.church_rights_institutional_affairs",
+        "alias_set_key": "courtos.alias.church_rights_institutional_affairs",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "exact_right_instrument_or_active_formal_case",
+        "instance_identity_fields": [
+          "governing_actor_id",
+          "church_affair_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    },
+    {
+      "key": "courtos.responsibility.office_post_appointments",
+      "label": "Office & Post Appointments",
+      "placement": "house_command",
+      "order": 1,
+      "purpose": "Fill, renew, replace, remove, and hand over admitted posts within one exact appointing scope without creating the post or proving operational performance.",
+      "instance_rule": {
+        "grain": "appointing_scope",
+        "cardinality": "one_per_exact_admitted_appointing_scope",
+        "admission_predicate": "A competent appointing authority and exact House, honor, manor, county-public, Crown, March, or Church-institution scope are admitted.",
+        "identity_fields": [
+          "appointing_authority_actor_id",
+          "appointing_scope_kind",
+          "appointing_scope_id"
+        ],
+        "deduplication_rule": "Co-located or related posts do not merge appointing scopes across House, public, Crown, March, or Church authority; one person may own several separate instances.",
+        "child_records_not_instances": [
+          "post",
+          "vacancy",
+          "candidate",
+          "appointment",
+          "term",
+          "removal",
+          "handover"
+        ]
+      },
+      "catalog_status": "current",
+      "readiness": {
+        "doctrine": "ready",
+        "data_admission": "partial",
+        "runtime": "not_ready",
+        "read_model": "partial",
+        "ui": "partial",
+        "unit_uat": "not_ready",
+        "full_world_uat": "not_ready"
+      },
+      "readiness_note": "The atom and appointing scopes are founder-directed; security subsets and candidate office evidence exist, but the full post/authority registry, lifecycle runtime, assignment bridge, and cross-domain UAT remain incomplete.",
+      "primary_handoff_targets": [
+        "office_post_registry",
+        "delegation_assignment_authority_control",
+        "courtos.responsibility.records_archives",
+        "courtos.responsibility.correspondence_dispatch",
+        "economy_material_gateway_service",
+        "accountable_capacity_service"
+      ],
+      "instance_activation_class": "current_control_plane_default_plus_independently_admitted_or_replacement_scopes",
+      "assignment_join": {
+        "stable_successor_design_key": "courtos.responsibility.office_post_appointments",
+        "alias_set_key": "courtos.alias.office_post_appointments",
+        "alias_resolution": "internal_crosswalk_only",
+        "instance_grain": "appointing_scope",
+        "instance_identity_fields": [
+          "appointing_authority_actor_id",
+          "appointing_scope_kind",
+          "appointing_scope_id"
+        ],
+        "governing_scope_match": "exact_authority_actor_and_every_required_identity_field_or_documented_default_identity_projection",
+        "provisional_source_use": "candidate_owner_or_scope_evidence_only",
+        "accepted_assignment_authority": false,
+        "type_eligibility": "current"
+      }
+    }
+  ],
+  "non_responsibility_catalog": {
+    "controls": [
+      {
+        "key": "delegation_assignment_authority_control",
+        "label": "Delegation, Assignment & Authority Bounds",
+        "placement": "house_command",
+        "rule": "Selects managers, owners, supporters, retained decisions, and semantic limits; creates no underlying legal, fiscal, contractual, custodial, or material power."
+      },
+      {
+        "key": "household_supply_standard_control",
+        "label": "Household Standard",
+        "placement": "courtos.responsibility.household_stores_provisioning_procurement",
+        "rule": "A standing supply policy of austere, customary, or generous; it changes planned demand posture, not ownership or stock truth."
+      },
+      {
+        "key": "household_reserve_posture_control",
+        "label": "Household Reserve Posture",
+        "placement": "courtos.responsibility.household_stores_provisioning_procurement",
+        "rule": "A standing reserve policy of lean, customary, or deep; it governs exception tolerance, not a fabricated inventory."
+      },
+      {
+        "key": "strategic_martial_readiness_control",
+        "label": "Strategic Martial Readiness Posture",
+        "placement": "house_command",
+        "rule": "A competent HoH/public-authority control with allow_lapse, economize, maintain_customary, or prepare_for_strain; it is not capacity-bearing work."
+      },
+      {
+        "key": "court_attendance_representation_control",
+        "label": "Court Attendance & Representation Posture",
+        "placement": "house_command",
+        "rule": "Sets usual representative, substitute, personal-HoH thresholds, and travel/entourage bounds; External Relations performs the work."
+      },
+      {
+        "key": "house_observance_posture_control",
+        "label": "House Observance Posture",
+        "placement": "house_command",
+        "rule": "Sets the House's bounded observance posture; Church actors retain service, rite, and recognition authority."
+      },
+      {
+        "key": "coverage_mobility_posture_control",
+        "label": "Domain Coverage & Mobility Posture",
+        "placement": "house_command",
+        "rule": "Selects resident-court, circuit, or itinerant/response-led management posture; it does not create travel or occupancy."
+      },
+      {
+        "key": "watch_reporting_control",
+        "label": "Watch / Requested Update",
+        "placement": "contextual",
+        "rule": "Requests visibility for a named concern or person; it changes no causal evaluation, priority, capacity, authority, or Knowledge entitlement."
+      }
+    ],
+    "overlays": [
+      {
+        "key": "protected_person_mandate_custody_overlay",
+        "label": "Protected Person Mandate & Custody",
+        "placement": "house_command_and_subject_dossier",
+        "rule": "Appears only for an admitted regency, guardianship, wardship, adult-incapacity mandate, political custody/hosting instrument, or unresolved handover."
+      },
+      {
+        "key": "household_residence_governance_overlay",
+        "label": "Household Residence Governance",
+        "placement": "house_command",
+        "rule": "Shows who resides where and why; residence changes are caused by competent support, office, education, marriage, tenure, or mandate lifecycles."
+      },
+      {
+        "key": "succession_regency_authority_overlay",
+        "label": "Succession, Acting Authority & Regency",
+        "placement": "house_command",
+        "rule": "Changes who may exercise House authority and triggers continuity review; it is not a second management responsibility."
+      },
+      {
+        "key": "domain_coverage_mobility_overlay",
+        "label": "Domain Coverage & Mobility",
+        "placement": "house_command_and_instance_context",
+        "rule": "Derives coverage, travel, absence, deputy, handover, and multi-location load from actual assignments and commitments without inventing trips."
+      },
+      {
+        "key": "personal_correspondence_art_overlay",
+        "label": "Personal Correspondence / Relationship Continuity",
+        "placement": "person_and_art_context",
+        "rule": "A triennial relationship contribution; no routine message, delivery, or archive population is created."
+      },
+      {
+        "key": "vezdaran_command_overlay",
+        "label": "Vezdaran Crown Regional Command",
+        "placement": "crown_command_context",
+        "rule": "Supersedes local security only inside an explicitly Crown-held station, gate, crossing, or transferred-custody footprint."
+      }
+    ],
+    "registries": [
+      {
+        "key": "tenure_operating_mode_registry",
+        "label": "Tenure & Operating Mode Registry",
+        "placement": "house_command_and_estate_reference",
+        "rule": "Durable holding, superior, term, operator-mode, and reserved-power truth; assignment cannot edit it."
+      },
+      {
+        "key": "residence_household_distribution_registry",
+        "label": "Residence & Household Distribution Registry",
+        "placement": "house_command_and_dossiers",
+        "rule": "Durable current residence, support basis, and Household accountability projection; it is changed only by competent lifecycles."
+      },
+      {
+        "key": "office_post_registry",
+        "label": "Office & Post Registry",
+        "placement": "house_command_and_institution_context",
+        "rule": "Durable post existence, appointing authority, holder, term, scope, and handover truth; the appointment responsibility acts against it."
+      },
+      {
+        "key": "rights_instruments_registry",
+        "label": "Rights & Instruments Registry",
+        "placement": "estate_finance_church_reference",
+        "rule": "Preserves grantor, instrument, holder, operator, collection/custody/remittance, compliance, expiry, and reversion as distinct facts."
+      },
+      {
+        "key": "physical_asset_security_disposition_registry",
+        "label": "Physical Asset & Security Disposition Registry",
+        "placement": "estate_and_security_reference",
+        "rule": "Deduplicates the shared asset spine and assigns exactly one of embedded_parent_scope, independent_asset_scope, or inactive_until_commissioned."
+      },
+      {
+        "key": "core_schedule_projection",
+        "label": "Core Schedule / House-Known Calendar",
+        "placement": "cross_domain_reference",
+        "rule": "Projects real dates, windows, reviews, and expiries emitted by instruments and commitments; it is not an action budget or responsibility."
+      },
+      {
+        "key": "family_book_chronicle_reference",
+        "label": "Family Book & House Chronicle",
+        "placement": "courtos.responsibility.records_archives",
+        "rule": "A Knowledge-safe reference surface; it does not create kinship, life events, succession, or another Household responsibility."
+      }
+    ],
+    "proceedings": [
+      {
+        "key": "tenure_change_proceeding",
+        "label": "Tenure Change Proceeding",
+        "placement": "estate_rights_context",
+        "families": [
+          "succession_or_continuation",
+          "subinfeudation_or_new_subordinate_fee",
+          "transfer_exchange_surrender_or_partition",
+          "escheat_reversion_forfeiture_or_regrant",
+          "high_tenure_or_honor_grant"
+        ],
+        "rule": "A competent event-driven legal change with exact authority, instrument, scope, parties, terms, approvals, and downstream posture; it is not standing work."
+      },
+      {
+        "key": "justice_case_proceeding",
+        "label": "Court / Justice Case Lifecycle",
+        "placement": "competent_court_or_justice_context",
+        "rule": "Owns formal intake, jurisdiction, parties, evidence, procedure, disposition, remedy, and review; no generic House Justice responsibility is created."
+      },
+      {
+        "key": "coercive_enforcement_episode",
+        "label": "Qualified Coercive Enforcement Episode",
+        "placement": "originating_justice_case",
+        "rule": "A rare time-bounded execution episode under an independently admitted lawful authority; named officers consume temporary capacity but gain no generic enforcement responsibility."
+      },
+      {
+        "key": "great_council_convocation_proceeding",
+        "label": "Lordly / Great Council Convocation",
+        "placement": "competent_lordly_matter",
+        "rule": "Matter to preliminary decision to admitted convocation to procedural result to competent final instrument; the forum creates no substantive authority."
+      },
+      {
+        "key": "succession_regency_review_proceeding",
+        "label": "Succession / Regency Continuity Review",
+        "placement": "house_command",
+        "rule": "Confirms acting authority and reviews continued delegation after an admitted succession or regency transition without silently cancelling valid grants."
+      }
+    ],
+    "event_presentations": [
+      {
+        "key": "ceremony_event_presentation",
+        "label": "Event-Owned Ceremony Presentation",
+        "placement": "owning_event_context",
+        "supported_event_families": [
+          "marriage",
+          "birth_or_local_baptism",
+          "death_observance",
+          "office_or_oath_or_investiture",
+          "tenure",
+          "named_church_rite",
+          "martial_call_or_return",
+          "hosted_honour_or_feast"
+        ],
+        "rule": "Presents an admitted event and its House-side venue, attendance, hosting, and support; it is never a generic Ceremony responsibility or travel generator."
+      }
+    ],
+    "autonomous_services": [
+      {
+        "key": "monthly_world_clock_service",
+        "label": "Monthly World Clock & Ordered Execution",
+        "rule": "Advances commitments, movement, cases, services, events, and receipts; ordinary CourtOS inspection does not consume time."
+      },
+      {
+        "key": "accountable_capacity_service",
+        "label": "Annual Accountable Capacity",
+        "rule": "Evaluates one owner's and any supporters' annual allocation, presence, travel, commitments, and contention for each indivisible instance."
+      },
+      {
+        "key": "matter_council_synthesis_service",
+        "label": "Matter Routing & Core Council Synthesis",
+        "rule": "Thresholds domain-owned exceptions and compiles visible triennial decisions without creating facts, authority, or a ninth domain."
+      },
+      {
+        "key": "knowledge_news_diffusion_service",
+        "label": "Knowledge, Report & Realm-News Diffusion",
+        "rule": "Projects source-attributed facts/reports and shareable event receipts to entitled recipients; delivery never becomes truth by itself."
+      },
+      {
+        "key": "health_engine_service",
+        "label": "Health Engine",
+        "rule": "Owns conditions, hidden severity/course, care-fit input, mortality contribution, and semantic evidence; the House chooses only the care route."
+      },
+      {
+        "key": "economy_material_gateway_service",
+        "label": "Economy & Material Gateway",
+        "rule": "Accepts qualified requests and returns custody/material/economic receipts; no CourtOS type directly changes resources or the GL."
+      },
+      {
+        "key": "journey_presence_route_service",
+        "label": "Journey, Presence, Route & Delivery",
+        "rule": "Owns parties, routes, travel, absence, lodging, carrier/custody legs, and arrival; one itinerary deduplicates compatible work."
+      },
+      {
+        "key": "art_evidence_service",
+        "label": "ART Evidence & Semantic Relationship Expression",
+        "rule": "Consumes attributable domain evidence and owns relationship mutation/expression; responsibilities never write ART directly."
+      },
+      {
+        "key": "grievance_formation_justice_service",
+        "label": "Grievance Formation, Expression & Justice",
+        "rule": "Creates or exposes grievance signals, routes competent cases, and owns adjudication/remedy lifecycles outside ordinary Manor Stewardship cure."
+      },
+      {
+        "key": "autonomous_church_service",
+        "label": "Autonomous Church Operation",
+        "rule": "Owns routine service/rites/records, patronage/recognition, pastoral/relief/hospitality, and internal governance while reusing shared kernels."
+      },
+      {
+        "key": "pooled_hsu_service",
+        "label": "Pooled Household Service Units",
+        "rule": "Supplies annual anonymous household service/care capacity; it is not named accountable work and does not fabricate caregivers."
+      },
+      {
+        "key": "lcu_labor_service",
+        "label": "LCU Annual Labor",
+        "rule": "Supplies shared local labor/service capacity to admitted demands without becoming an assignable responsibility or being double-counted."
+      },
+      {
+        "key": "call_to_arms_service",
+        "label": "Call to Arms",
+        "rule": "Activates only from a competent call or summons and owns response, substitution/exemption, activation, absence, service, release, return, and loss receipts."
+      },
+      {
+        "key": "marriage_lifecycle_marketplace_service",
+        "label": "Marriage Lifecycle & Knowledge-Limited Marketplace",
+        "rule": "Owns prospect availability, offerability, counterpart response, betrothal progression, union admission, and lifecycle execution under competent House decisions."
+      },
+      {
+        "key": "succession_fertility_lifecycle_service",
+        "label": "Succession, Fertility & Life-Cycle Resolution",
+        "rule": "Owns lawful succession and biological/lifecycle outcomes; marriage and records responsibilities explain or preserve results but do not determine them."
+      }
+    ]
+  },
+  "global_invariants": [
+    "The Inner Council Room exposes House Command, a Council table, and the eight operational rooms in placement order.",
+    "No Local Order, Justice, Health, Ceremony, Travel, Schedule, Council, or General Mail room or responsibility may be synthesized from a non-responsibility object.",
+    "Per-House, per-manor, per-asset, per-right, per-portfolio, per-project, and conditional-case instances are distinct grains and may not be collapsed by a role package.",
+    "A control-plane admitted default exists when its admitted base actor or base scope exists; missing carrier or child configuration remains partial/unknown and does not erase the instance. Predicate-driven instances still fail closed unless every exact predicate and identity field resolves.",
+    "Accepted decisions create qualified instructions or commitments; later receipts, not UI confirmation, prove execution.",
+    "Every player projection remains viewer-, House-, time-, source-, authority-, and Knowledge-scoped.",
+    "The separate internal provenance crosswalk is not a UI import and has no runtime authority.",
+    "Admission state is explicit: control-plane admitted default, source-predicate admitted conditional, planning scope pending exact mapping, or source candidate/pending/inapplicable.",
+    "A House/Honor martial split must be complete, explicit, and non-overlapping; it replaces the House default rather than double-counting it.",
+    "Legacy aliases resolve only through docs/current/PHASE_FIVE_COURTOS_RESPONSIBILITY_PROVENANCE_CROSSWALK_INTERNAL_V2.csv and never appear in canonical UI/runtime contracts."
+  ],
+  "schema_version": "phase_five_courtos_responsibility_control_plane_registry_v3",
+  "supersedes": [
+    "docs/current/PHASE_FIVE_COURTOS_RESPONSIBILITY_CONTROL_PLANE_REGISTRY_V2.json"
+  ],
+  "version_notes": [
+    "The 24 stable design keys and all nine placements are unchanged from V1.",
+    "Reception & Intake and Records & Archives are current House defaults; missing child configuration does not erase their control-plane admitted instances.",
+    "Martial Readiness & Training and Martial Stores & Horse Capacity are current House/Honor defaults; an explicit complete non-overlapping split replaces the House default.",
+    "Household Observance & Chaplaincy is a current House default and Church Rights & Institutional Affairs is a current source-predicate conditional type with zero present predicate passes.",
+    "Legacy and interim aliases remain only in the separate internal V2 provenance crosswalk.",
+    "Manor Stewardship, Manor Fiscal Administration, and parent-scope Security are shared-kernel defaults across exact House, Crown/public, Church, and other institutional governing actors; non-House projection remains autonomous and authority-walled.",
+    "V3 applies the completed Church admission audit under existing founder-approved C1-C4 and P5-101/P5-105-P5-108 authority; autonomous Church work remains outside House assignment and UI authority.",
+    "The completed P5-196 physical-mapping audit finds 9 exact physical anchors, 1 strong provisional mapping, 15 ambiguous mappings, and 0 unresolved mappings, but zero admission-grade independent security/custody joins; all 25 public-seat rows remain planning."
+  ],
+  "admission_state_vocabulary": {
+    "control_plane_admitted_default": "The type doctrine creates one current default instance when its admitted base actor or base scope exists. Partial or missing carrier/configuration data does not demote or erase it.",
+    "source_predicate_admitted_conditional": "A current predicate-driven instance exists only when the type-specific exact source and authority predicate passes.",
+    "planning_scope_pending_exact_mapping": "Doctrine indicates a likely scope, but exact actor, physical, custody, jurisdiction, or portfolio mapping is still required before admission.",
+    "source_candidate_pending_or_inapplicable": "Evidence is candidate, pending, rejected, superseded, or inapplicable and creates no current instance."
+  },
+  "type_state_summary": {
+    "design_keys_total": 24,
+    "current_active_types": 24,
+    "current_default_bearing_types": 19,
+    "current_predicate_conditional_types": 5,
+    "conditional_pending_founder_types": 0,
+    "conditional_pending_founder_keys": []
+  },
+  "assignment_join_contract": {
+    "stable_type_key_field": "key",
+    "alias_set_key_field": "assignment_join.alias_set_key",
+    "alias_resolution_artifact": "docs/current/PHASE_FIVE_COURTOS_RESPONSIBILITY_PROVENANCE_CROSSWALK_INTERNAL_V2.csv",
+    "alias_resolution_sha256": "6eaad9a77be4d61bd871c14cb3a2ef2fdf8b678a4fb3686a241848f11ac9c822",
+    "source_alias_lookup_field": "legacy_id",
+    "alias_destination_field": "current_destination_key",
+    "source_id_field_candidates": [
+      "responsibility_id",
+      "responsibility_family_id",
+      "source_responsibility_id"
+    ],
+    "instance_grain_field": "instance_rule.grain",
+    "instance_identity_fields_field": "instance_rule.identity_fields",
+    "join_order": [
+      "resolve_internal_alias_to_stable_successor_design_key",
+      "match_exact_governing_actor_and_authority_wall",
+      "match_every_required_instance_identity_field_or_apply_an_explicit_default_identity_projection",
+      "match_effective_interval",
+      "apply_control_plane_or_source_predicate_admission_state",
+      "retain_source_and_assignment_authority_status"
+    ],
+    "authority_wall": "House, Crown/public, Church, and other institutional scopes must match exactly; geography, title, co-location, or lineage does not bridge authority.",
+    "provisional_assignment_rows": "candidate_carrier_evidence_only",
+    "accepted_assignment_requirement": "a_separate_admitted_current_ontology_assignment_record",
+    "missing_child_configuration": "does_not_erase_a_control_plane_admitted_default",
+    "unknowns": "remain_unknown_and_never_create_fabricated_scope_custody_asset_or_inventory"
+  },
+  "shared_kernel_projection": {
+    "current_non_house_manor_count": 411,
+    "current_non_house_kernel_rows": 1233,
+    "authority_breakdown": {
+      "crown_or_public_manors": 135,
+      "church_manors": 276
+    },
+    "types": [
+      {
+        "key": "courtos.responsibility.manor_stewardship",
+        "current_default_rows": 411,
+        "identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "exact_carrier_evidence_rows": 411
+      },
+      {
+        "key": "courtos.responsibility.manor_fiscal_administration",
+        "current_default_rows": 411,
+        "identity_fields": [
+          "governing_actor_id",
+          "manor_id"
+        ],
+        "exact_carrier_evidence_rows": 278,
+        "carrier_gap_rows": 133
+      },
+      {
+        "key": "courtos.responsibility.security_asset_protection",
+        "scope_class": "embedded_parent_scope",
+        "current_default_rows": 411,
+        "identity_fields": [
+          "governing_actor_id",
+          "security_scope_id"
+        ],
+        "parent_default_scope_id_projection": "manor_id"
+      }
+    ],
+    "projection_rule": "All non-House rows run through the shared kernel as autonomous or institution-facing responsibilities. They never appear as ordinary House CourtOS cards and never authorize cross-wall assignment.",
+    "denominator_effect": "No V2 delta; all 1233 rows were already present in the validated current-defensible whole-world base."
+  },
+  "decision_basis": [
+    {
+      "source": "docs/current/PHASE_FIVE_COURTOS_SYNTHESIS_AND_RECEPTION_FOUNDER_DOCKET_V1.md",
+      "use": "founder-approved Reception clearinghouse responsibility"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_RECORDS_CORRESPONDENCE_CATEGORY_LOCK_V1.md",
+      "use": "founder-approved durable House Records responsibility and child record-family boundary"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_RECEPTION_RECORDS_INSTANCE_ADMISSION_EVIDENCE_AUDIT_V1.md",
+      "use": "read-only admission audit proving configuration is child data and carrier rows are candidate evidence only"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_MARTIAL_EQUIPMENT_STORES_FOUNDER_PACKET_V1.md",
+      "use": "founder-approved one House/Honor martial-material portfolio and no-fake-inventory boundary"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_DECISION_LOG.md#P5-198",
+      "use": "founder-locked House/Honor strategic readiness posture consumed by the split operating responsibilities"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_MARTIAL_RESPONSIBILITY_REBASE_V2.md",
+      "use": "founder-locked split between readiness/training and stores/horse capacity"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_CHURCH_DOMAIN_CPO_RECOMMENDATION_V2.md",
+      "use": "controlling two-type Church recommendation applied by the completed V3 admission audit under existing founder authority"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_CHURCH_INSTITUTION_SERVICE_AND_PATRONAGE_FOUNDER_DOCKET_V1.md",
+      "use": "founder-approved Church autonomy and House-interface authority wall preserved by the V3 catalog promotion"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_COURTOS_CONDITIONAL_ADMISSION_AND_WHOLE_WORLD_CAPACITY_BASELINE_V1.md",
+      "use": "validated denominator ledger and 10340-row capacity-planning working set"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_COURTOS_CHURCH_CONTROL_PLANE_ADMISSION_AUDIT_V1.md",
+      "use": "completed audit applying existing founder authority to promote both Church types while preserving the autonomous Church firewall"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_P5_196_PUBLIC_SEAT_SECURITY_PHYSICAL_MAPPING_DOCKET_V1.csv",
+      "use": "25-row physical mapping disposition with 9 exact anchors, 1 strong provisional mapping, 15 ambiguous mappings, and zero pre-PAS admissions"
+    },
+    {
+      "source": "docs/current/PHASE_FIVE_P5_196_PUBLIC_SEAT_SECURITY_PHYSICAL_MAPPING_REVIEW_V1.md",
+      "use": "multi-source review preserving Crown, county, and autonomous Church security walls and the 25-row planning ledger"
+    }
+  ],
+  "denominator_impact": {
+    "control_plane_stage": "post_Church_promotion_and_post_public_seat_physical_mapping_audit_with_zero_security_scope_promotions",
+    "admitted_house_count": 435,
+    "newly_control_plane_admitted_default_keys": [
+      "courtos.responsibility.household_observance_chaplaincy"
+    ],
+    "newly_current_predicate_conditional_keys": [
+      "courtos.responsibility.church_rights_institutional_affairs"
+    ],
+    "default_rows_added": 435,
+    "current_Church_Rights_predicate_pass_rows": 0,
+    "before_v3": {
+      "house_current_defensible_rows": 9038,
+      "house_structural_target_rows": 9042,
+      "whole_world_current_default_rows": 10271,
+      "whole_world_structural_target_rows": 10275,
+      "source_predicate_admitted_conditional_rows": 44,
+      "current_or_eligible_rows": 10315,
+      "planning_scope_pending_exact_mapping_rows": 25,
+      "capacity_planning_working_set_rows": 10340
+    },
+    "after_v3": {
+      "house_current_defensible_rows": 9473,
+      "house_structural_target_rows": 9477,
+      "whole_world_current_default_rows": 10706,
+      "whole_world_structural_target_rows": 10710,
+      "source_predicate_admitted_conditional_rows": 44,
+      "current_or_eligible_rows": 10750,
+      "planning_scope_pending_exact_mapping_rows": 25,
+      "capacity_planning_working_set_rows": 10775
+    },
+    "reconciliation_rule": "Household Observance adds one current default for each of 435 admitted Houses. Church Rights adds no row until an exact right, live bilateral instrument, or active formal case passes. The completed P5-196 audit records 9 exact physical anchors, 1 strong provisional mapping, and 15 ambiguous mappings, but no admission-grade independent security/custody join; all 25 public-seat Security scopes remain planning.",
+    "unknown_additions_not_counted": [
+      "independently_admitted_extra_Reception_operations",
+      "independently_admitted_extra_Records_custody_scopes",
+      "explicit_non_overlapping_martial_split_portfolios",
+      "separately_admitted_non_House_martial_portfolios",
+      "future_exact_Church_Rights_instances",
+      "other_unmapped_conditional_scopes"
+    ]
+  },
+  "founder_decision_resolution": {
+    "status": "resolved_by_CPO_application_of_existing_founder_authority",
+    "basis": [
+      "founder_approved_C1_C4_Church_doctrine",
+      "P5_101",
+      "P5_105",
+      "P5_106",
+      "P5_107",
+      "P5_108",
+      "prior_founder_delegation_to_keep_and_run_with_the_Church_direction",
+      "docs/current/PHASE_FIVE_COURTOS_CHURCH_CONTROL_PLANE_ADMISSION_AUDIT_V1.md"
+    ],
+    "effect": {
+      "household_observance_chaplaincy": "current control-plane admitted default, exactly one per admitted House",
+      "church_rights_institutional_affairs": "current source-predicate conditional, zero present exact passes"
+    },
+    "further_founder_decision_required": false
+  }
+}

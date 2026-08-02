@@ -1,0 +1,317 @@
+{
+  "registry_id": "turn0_person_household_state_lock_registry_v9",
+  "generated_at": "2026-08-01T00:00:00.000Z",
+  "lock_date": "2026-08-01",
+  "status": "authoritative_turn0_person_household_state_lock_registry",
+  "lock_authority": "founder",
+  "effective_from": "1120-01-01",
+  "authoritative_packages": [
+    {
+      "domain": "Health",
+      "role": "whole_population_hidden_health_and_inheritance_state",
+      "package_id": "t0_health_inheritance_candidate_v1",
+      "manifest": "data/genrun/t0_health_inheritance_candidate_v1/health_inheritance_manifest_v1.json",
+      "status": "turn0_health_inheritance_data_locked_pending_engineering_sqlite_construction",
+      "locked_at": "2026-07-23",
+      "supersedes": [],
+      "verified_output_count": 3
+    },
+    {
+      "domain": "Health",
+      "role": "living_active_conditions_specialized_care_demands_and_war_casualties",
+      "package_id": "t0_health_world_state_candidate_v1",
+      "manifest": "data/genrun/t0_health_world_state_candidate_v1/health_world_state_manifest_v1.json",
+      "status": "turn0_health_data_locked_pending_engineering_sqlite_construction",
+      "locked_at": "2026-07-21",
+      "supersedes": [],
+      "verified_output_count": 3
+    },
+    {
+      "domain": "Traits",
+      "role": "living_person_trait_state",
+      "package_id": "t0_trait_state_candidate_v1_1",
+      "manifest": "data/genrun/t0_trait_state_candidate_v1_1/trait_state_manifest_v1_1.json",
+      "status": "turn0_living_trait_data_locked_v1_1_pending_engineering_sqlite_construction",
+      "locked_at": "2026-07-22",
+      "supersedes": [],
+      "verified_output_count": 3
+    },
+    {
+      "domain": "Capabilities",
+      "role": "living_person_capability_state",
+      "package_id": "t0_capability_state_candidate_v1",
+      "manifest": "data/genrun/t0_capability_state_candidate_v1/capability_state_manifest_v1.json",
+      "status": "turn0_capability_data_locked_v1_8_pending_engineering_sqlite_construction",
+      "locked_at": "2026-07-22",
+      "supersedes": [],
+      "verified_output_count": 5
+    },
+    {
+      "domain": "Traits + Capabilities",
+      "role": "deceased_person_state_at_death",
+      "package_id": "t0_historical_person_state_candidate_v1_1",
+      "manifest": "data/genrun/t0_historical_person_state_candidate_v1_1/manifest.json",
+      "status": "turn0_historical_person_data_locked_v1_1_pending_engineering_sqlite_construction",
+      "locked_at": "2026-07-22",
+      "supersedes": [
+        "t0_historical_trait_state_candidate_v1"
+      ],
+      "verified_output_count": 4
+    },
+    {
+      "domain": "A/R/T",
+      "role": "entity_evidence_and_recognition_graph",
+      "package_id": "t0_entity_art_evidence_candidate_v1",
+      "manifest": "data/genrun/t0_entity_art_evidence_candidate_v1/manifest.json",
+      "status": "founder_approved_turn0_locked",
+      "locked_at": "2026-07-22",
+      "supersedes": [],
+      "verified_output_count": 8
+    },
+    {
+      "domain": "A/R/T",
+      "role": "entity_alpha_scores_and_deterministic_feuds",
+      "package_id": "t0_entity_art_alpha_scored_candidate_v1",
+      "manifest": "data/genrun/t0_entity_art_alpha_scored_candidate_v1/manifest.json",
+      "status": "founder_approved_turn0_locked",
+      "locked_at": "2026-07-22",
+      "supersedes": [],
+      "verified_output_count": 7
+    },
+    {
+      "domain": "A/R/T",
+      "role": "person_direct_relationship_graph",
+      "package_id": "t0_person_art_candidate_v6",
+      "manifest": "data/genrun/t0_person_art_candidate_v6/manifest.json",
+      "status": "founder_approved_turn0_locked",
+      "locked_at": "2026-07-23",
+      "supersedes": [],
+      "verified_output_count": 28
+    },
+    {
+      "domain": "Inner Council",
+      "role": "domestic_landed_house_turn0_membership_roster",
+      "package_id": "t0_inner_council_candidate_v1",
+      "manifest": "data/genrun/t0_inner_council_candidate_v1/inner_council_lock_manifest_v1.json",
+      "status": "founder_ratified_locked_turn0_roster",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 5
+    },
+    {
+      "domain": "Education",
+      "role": "instruction_age_assignment_provider_setting_and_host_state",
+      "package_id": "t0_education_turn0_lock_v1",
+      "manifest": "data/genrun/t0_education_turn0_lock_v1/education_turn0_lock_manifest_v1.json",
+      "status": "founder_ratified_turn0_source_data_lock",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 9
+    },
+    {
+      "domain": "Education Service/Hosting",
+      "role": "service_hosting_payment_posture_and_instrument_profile",
+      "package_id": "t0_education_service_hosting_profile_v1",
+      "manifest": "data/genrun/t0_education_service_hosting_profile_v1/service_hosting_profile_lock_manifest_v1.json",
+      "status": "founder_ratified_locked_data_profile",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 3
+    },
+    {
+      "domain": "Correspondence",
+      "role": "personal_literacy_mediation_and_house_infrastructure_state",
+      "package_id": "t0_correspondence_access_candidate_v1",
+      "manifest": "data/genrun/t0_correspondence_access_candidate_v1/correspondence_access_lock_manifest_v1.json",
+      "status": "founder_ratified_locked_data_profile",
+      "locked_at": "2026-07-23",
+      "verified_output_count": 5
+    },
+    {
+      "domain": "Household/Residence",
+      "role": "living_person_opening_household_status_and_primary_residence_attachment",
+      "package_id": "t0_household_status_receipt_candidate_v2",
+      "manifest": "data/genrun/t0_household_status_receipt_candidate_v2/household_status_receipt_candidate_manifest_v2.json",
+      "status": "founder_ratified_locked",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 11
+    },
+    {
+      "domain": "Residence Reconciliation",
+      "role": "education_move_effects_on_person_art_and_correspondence_context",
+      "package_id": "t0_residence_dependent_person_state_reconciliation_v1",
+      "manifest": "data/genrun/t0_residence_dependent_person_state_reconciliation_v1/residence_dependent_person_state_reconciliation_lock_manifest_v1.json",
+      "status": "founder_ratified_locked",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 5
+    },
+    {
+      "domain": "Regency",
+      "role": "materialized_governance_guardianship_wardship_and_residence_support_facets",
+      "package_id": "t0_regency_guardianship_wardship_receipt_v1",
+      "manifest": "data/genrun/t0_regency_guardianship_wardship_receipt_v1/regency_guardianship_wardship_receipt_lock_manifest_v1.json",
+      "status": "founder_ratified_locked",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 7
+    },
+    {
+      "domain": "Specialized Care",
+      "role": "binary_hsu_or_full_time_specialist_care_route_provider_locality_coverage_and_30_6_3_remuneration",
+      "package_id": "t0_specialized_care_commitment_v5",
+      "manifest": "data/genrun/t0_specialized_care_commitment_v5/specialized_care_commitment_lock_manifest_v5.json",
+      "status": "turn0_specialized_care_full_time_provider_and_30_6_3_remuneration_founder_ratified_locked_pending_engineering_construction",
+      "locked_at": "2026-07-24",
+      "verified_output_count": 7
+    },
+    {
+      "domain": "Household/Residence",
+      "role": "immutable_residence_change_receipts_projected_current_primary_residence_service_lodging_and_capacity_pressure",
+      "package_id": "t0_realm_residence_event_state_v1",
+      "manifest": "data/genrun/t0_realm_residence_event_state_v1/MANIFEST.json",
+      "status": "founder_directed_turn0_residence_current_state_locked_pending_live_runtime_admission",
+      "locked_at": "2026-08-01",
+      "supersedes": [],
+      "extends": [
+        "t0_household_status_receipt_candidate_v2"
+      ],
+      "verified_output_count": 14
+    }
+  ],
+  "superseded_or_non_authoritative_packages": [
+    {
+      "package_id": "t0_historical_trait_state_candidate_v1",
+      "disposition": "superseded_by_t0_historical_person_state_candidate_v1_1_for_all_historical_trait_reads"
+    },
+    {
+      "package_id": "t0_person_art_candidate_v1",
+      "disposition": "superseded_review_artifact_not_turn0_authority"
+    },
+    {
+      "package_id": "t0_person_art_candidate_v2",
+      "disposition": "superseded_review_artifact_not_turn0_authority"
+    },
+    {
+      "package_id": "t0_person_art_candidate_v3",
+      "disposition": "superseded_review_artifact_not_turn0_authority"
+    },
+    {
+      "package_id": "t0_person_art_candidate_v4",
+      "disposition": "superseded_review_artifact_not_turn0_authority"
+    },
+    {
+      "package_id": "t0_person_art_candidate_v5",
+      "disposition": "superseded_review_artifact_not_turn0_authority"
+    },
+    {
+      "package_id": "turn0_domestic_regency_model_actor_map_v1",
+      "disposition": "retained_as_source_doctrine_and_subsumed_by_t0_regency_guardianship_wardship_receipt_v1"
+    },
+    {
+      "package_id": "t0_household_status_receipt_candidate_v1",
+      "disposition": "superseded_by_founder_locked_review_closed_t0_household_status_receipt_candidate_v2"
+    },
+    {
+      "package_id": "t0_specialized_care_commitment_v1",
+      "disposition": "superseded_by_v2_local_lcu_provider_selection_and_exact_remuneration"
+    },
+    {
+      "package_id": "t0_specialized_care_commitment_v2",
+      "disposition": "provider_and_locality_facts_preserved_in_v5_but_pressure_unit_remuneration_rejected"
+    },
+    {
+      "package_id": "t0_specialized_care_commitment_v3",
+      "disposition": "provider_and_locality_facts_preserved_in_v5_but_hsu_equivalent_remuneration_rejected"
+    },
+    {
+      "package_id": "t0_specialized_care_commitment_v4",
+      "disposition": "provider_and_locality_facts_preserved_in_v5_but_fractional_specialist_employment_rejected"
+    }
+  ],
+  "semantic_defaults_and_omissions": {
+    "health": [
+      "Every pedigree person has an explicit five-marker Health personal state.",
+      "Absence of an active HealthCondition row means no instantiated active durable condition at Turn 0; it does not mean unknown.",
+      "Ordinary care is household burden; only specialized landed-house demand rows require future Care Commitment construction.",
+      "Specialized-care demand rows do not identify or assign a caregiver."
+    ],
+    "traits": [
+      "Every living and deceased person has all eight Trait tiers explicitly stored.",
+      "Historical Trait state is anchored at death."
+    ],
+    "capabilities": [
+      "Capabilities begin at age 15.",
+      "Eligible people default to Tier 3 when no sparse override row exists.",
+      "People under 15 have no Capability state; absence is not Tier 3 and not unknown.",
+      "Historical Capability state is anchored at death and does not decline due to Health impairment."
+    ],
+    "art": [
+      "Entity and Person A/R/T use a zero-centered -100..100 scale.",
+      "Person A/R/T is sparse and requires direct personal evidence; otherwise the entity posture or unknown state applies.",
+      "No person may retain more than 15 distinct living personal counterparties across incoming and outgoing directions together.",
+      "Reciprocal directions count as one counterparty.",
+      "Commoner/unlanded-to-commoner/unlanded Person pairs are omitted."
+    ],
+    "regency": [
+      "Legal majority is 18; the minor remains legal Head of House.",
+      "The acting Head is a temporary player and governance actor, never a succession substitute.",
+      "Governance, personal guardianship, economic wardship rights, residence, and support are distinct materialized facets.",
+      "Exact support economics remain deferred until after specialized-care fulfillment."
+    ],
+    "inner_council": [
+      "Every active domestic landed House has four to eight inner-council members excluding the legal and acting Head.",
+      "Office creates eligibility, not automatic membership; absent Person A/R/T is structurally unscored rather than distrust.",
+      "The eleven selected people aged 15–17 are non-deliberative apprentices.",
+      "Rejected candidates and numerical selection scores are review artifacts, not runtime doctrine."
+    ],
+    "education": [
+      "Every named learner aged 7–17 in scope has one locked track, provider, setting, and host/guardian evidence profile.",
+      "Anonymous LCU children are outside the named assignment population.",
+      "Education and hosting profiles create no contract, payment, custody, residence, or runtime authority."
+    ],
+    "correspondence": [
+      "Letters and Learning shapes expression and comprehension but is not a personal-literacy flag.",
+      "Personal reading, personal writing, documentary literacy, mediation, confidentiality, formal validity, and delivery are separate facts.",
+      "Household, office, institutional, paid, or parish mediation can provide access without personal literacy.",
+      "Authoring access never creates a message, delivery, seal, knowledge assertion, or legal validity."
+    ],
+    "household_residence": [
+      "Every living named person has one opening Household Status receipt and one active primary Household attachment.",
+      "All 897 prior review cases are closed; zero V2 rows remain review-required.",
+      "Physical residence and household membership are distinct; duty presence does not silently replace primary residence.",
+      "Education hosting may move physical residence for a term without changing household membership."
+    ],
+    "residence_reconciliation": [
+      "Immediate former co-residence remains direct Person A/R/T memory at the Turn 0 boundary; no locked score changes.",
+      "A new education host creates observation context but no automatic Person A/R/T edge.",
+      "Personal literacy remains unchanged; mediation follows the host House or church institution for the term.",
+      "No message, delivery, or Knowledge assertion is created."
+    ],
+    "specialized_care": [
+      "Ordinary continuing care increases pooled HSU and condition Goods demand; it creates no named provider.",
+      "Specialized ongoing care requires a named qualified full-time practitioner; HSU cannot substitute.",
+      "The 17 locked Care Commitments are specialized; six use internal qualified practitioners and eleven use external retainers.",
+      "Each external appointment is full-time at 1.0 employment PAS even though the named recipient directly draws 0.25 PAS.",
+      "Beneficiary PAS is not an employment fraction and creates no fractional remuneration discount.",
+      "Each external provider receives 30 Coin, 6 Food, and 3 Goods annually.",
+      "Provider package Goods remain distinct from condition-level Health Goods.",
+      "Seven external providers are exact-local-LCU and four are bounded nearest-LCU exceptions.",
+      "A retained appointment creates duty presence, not a primary household or residence change."
+    ]
+  },
+  "deferred_topics": [
+    {
+      "sequence": 1,
+      "topic": "remaining_exact_opening_support_economics",
+      "status": "specialized_care_complete; education_regency_and_other_approved_surfaces_remain"
+    }
+  ],
+  "out_of_scope": [
+    {
+      "topic": "knowledge_state",
+      "disposition": "owned_in_separate_workstream"
+    }
+  ],
+  "change_control": [
+    "Any locked-fact change requires founder approval and a new versioned package. Downstream CPO and engineering work must preserve these facts and boundaries. This registry grants no SQLite, schema, runtime, contract, economic, UI, fixture, golden, or legacy-runtime authority.",
+    "The immutable opening Household Status receipt remains source evidence; residence changes are appended as later receipts and current state is projected.",
+    "Any future primary-residence change must append a receipt with reason, authority, support, and cross-domain dependency evidence."
+  ],
+  "audit_report": "data/genrun/t0_person_household_state_cross_domain_audit_v9/cross_domain_integrity_report.json"
+}
