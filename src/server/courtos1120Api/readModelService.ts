@@ -1,8 +1,6 @@
 import { resolve } from "node:path";
 
 import { buildCouncilRoomReadyProjection } from "../../ready/councilRoomReadyProjection";
-import { loadCourtOs1120PasCalibrationProposalV0 } from "../../ui/readModels/courtos1120/pasCalibrationProposalLoader";
-import type { CourtOs1120PasCalibrationProposalV0 } from "../../ui/readModels/courtos1120/pasCalibrationTypes";
 import { CourtOs1120ReadModel } from "../../ui/readModels/courtos1120/service";
 import type { CourtOs1120ReadModelSessionContract } from "../../ui/readModels/courtos1120/types";
 import { Household1120ReadModel } from "../../ui/readModels/household1120/service";
@@ -52,10 +50,6 @@ export function createCourtOs1120ReadModelService(
   let householdSessionPromise:
     | Promise<Household1120ReadModelSessionContract>
     | undefined;
-  let pasCalibrationPromise:
-    | Promise<CourtOs1120PasCalibrationProposalV0>
-    | undefined;
-
   return {
     async courtOs(input) {
       courtOsSessionPromise ??= CourtOs1120ReadModel.open(
@@ -64,15 +58,8 @@ export function createCourtOs1120ReadModelService(
           "COURTOS_1120_SQLITE_PATH",
         ),
       );
-      pasCalibrationPromise ??= loadCourtOs1120PasCalibrationProposalV0();
-      const [session, pasCalibration] = await Promise.all([
-        courtOsSessionPromise,
-        pasCalibrationPromise,
-      ]);
-      return {
-        data: await session.projection(input),
-        pasCalibration,
-      };
+      const session = await courtOsSessionPromise;
+      return session.projection(input);
     },
 
     async household(input) {

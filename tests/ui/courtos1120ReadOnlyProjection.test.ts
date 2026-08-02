@@ -35,6 +35,8 @@ describe("CourtOS 1120 read-only projection", () => {
       );
       expect(projection.selected_entity.display_label).toBe("House Pearwick Hall");
       expect(projection.selected_entity.runtime_authority).toBe(0);
+      expect(projection).not.toHaveProperty("global_summary");
+      expect(projection).not.toHaveProperty("provenance_readiness");
       expect(projection.totals).toMatchObject({
         office_count: 6,
         occupied_office_count: 6,
@@ -72,6 +74,17 @@ describe("CourtOS 1120 read-only projection", () => {
         capacity_values_available: false,
         initialized_orders_available: false
       });
+    } finally {
+      await session.close();
+    }
+  });
+
+  it("fails closed instead of defaulting to a named House", async () => {
+    const session = await CourtOs1120ReadModel.open(databasePath);
+    try {
+      await expect(session.projection({})).rejects.toThrow(
+        "A CourtOS entityId, houseId, or entityLabel selector is required.",
+      );
     } finally {
       await session.close();
     }

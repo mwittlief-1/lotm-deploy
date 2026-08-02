@@ -117,8 +117,13 @@ describe("Household UAT runtime model", () => {
     expect(shell.house.displayName).toBe("House Pearwick Hall");
     expect(shell.council).toHaveLength(4);
     expect(shell.authority).toMatchObject({
-      status: "head",
-      label: "Authority rests with Edmund of Pearwick Hall",
+      status: "unadmitted",
+      actor: null,
+      label: "Provisional head reference: Edmund of Pearwick Hall · acting authority not admitted",
+    });
+    expect(shell.councilSource).toEqual({
+      status: "candidate_projection",
+      label: "provisional Council membership · candidate source",
     });
     expect(shell.effectiveDate).toBe("1120-01-01");
     expect(shell).not.toHaveProperty("responsibilities");
@@ -131,7 +136,7 @@ describe("Household UAT runtime model", () => {
     expect(shell.authority).toEqual({
       status: "regency_required",
       actor: null,
-      label: "Regency required · acting authority not recorded",
+      label: "Regency indicated · acting authority not admitted",
     });
   });
 

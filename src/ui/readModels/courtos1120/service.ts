@@ -9,14 +9,11 @@ import {
   COURTOS_1120_CONTRACT_GENERATION,
   COURTOS_1120_READ_ONLY_PROJECTION_SCHEMA_VERSION,
   COURTOS_1120_SQLITE_SHA256,
-  DEFAULT_COURTOS_1120_ENTITY_LABEL,
   type CourtOs1120EntitySummaryRow,
-  type CourtOs1120EntityTypeSummary,
   type CourtOs1120JsonObject,
   type CourtOs1120OfficeRow,
   type CourtOs1120OfficeViewRow,
   type CourtOs1120PersonAssignmentRow,
-  type CourtOs1120ProvenanceReadinessRow,
   type CourtOs1120ReadModelSessionContract,
   type CourtOs1120ReadOnlyProjection,
   type CourtOs1120ResidencePresenceRow,
@@ -33,7 +30,6 @@ const MAX_PERSON_ROWS = 120;
 const MAX_HOUSEHOLD_PERSON_ROWS = 240;
 const MAX_RESIDENCE_ROWS = 140;
 const MAX_DOCKET_ROWS = 160;
-const MAX_PROVENANCE_ROWS = 60;
 
 async function sha256File(path: string): Promise<string> {
   const hash = createHash("sha256");
@@ -132,7 +128,6 @@ function assertNoRuntimeAuthority(input: {
   people: readonly CourtOs1120PersonAssignmentRow[];
   residences: readonly CourtOs1120ResidencePresenceRow[];
   docket: readonly CourtOs1120ReviewDocketRow[];
-  provenance: readonly CourtOs1120ProvenanceReadinessRow[];
 }): void {
   const rowCount =
     runtimeAuthorityRows(input.entityRows) +
@@ -141,8 +136,7 @@ function assertNoRuntimeAuthority(input: {
     runtimeAuthorityRows(input.standingOrderTasks) +
     runtimeAuthorityRows(input.people) +
     runtimeAuthorityRows(input.residences) +
-    runtimeAuthorityRows(input.docket) +
-    runtimeAuthorityRows(input.provenance);
+    runtimeAuthorityRows(input.docket);
   if (rowCount !== 0) {
     throw new Error(`CourtOS read-only contract query returned ${rowCount} runtime-authorized row(s).`);
   }
@@ -184,13 +178,19 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
       entityId?: string | null;
       houseId?: string | null;
       entityLabel?: string | null;
-    } = {},
+    },
   ): Promise<CourtOs1120ReadOnlyProjection> {
-    const entityFilter = input.entityId
-      ? `entity_id = ${sqlString(input.entityId)}`
-      : input.houseId
-        ? `protected_graph_entity_id = ${sqlString(input.houseId)}`
-      : `display_label = ${sqlString(input.entityLabel?.trim() || DEFAULT_COURTOS_1120_ENTITY_LABEL)}`;
+    const requestedEntityId = input.entityId?.trim() || null;
+    const requestedHouseId = input.houseId?.trim() || null;
+    const requestedEntityLabel = input.entityLabel?.trim() || null;
+    if (!requestedEntityId && !requestedHouseId && !requestedEntityLabel) {
+      throw new Error("A CourtOS entityId, houseId, or entityLabel selector is required.");
+    }
+    const entityFilter = requestedEntityId
+      ? `entity_id = ${sqlString(requestedEntityId)}`
+      : requestedHouseId
+        ? `protected_graph_entity_id = ${sqlString(requestedHouseId)}`
+        : `display_label = ${sqlString(requestedEntityLabel as string)}`;
     const entityRows = await this.driver.all<CourtOs1120EntitySummaryRow>(
       `SELECT * FROM ro_entity_courtos_summary_v1 WHERE ${entityFilter} ` +
         "ORDER BY CASE identity_state WHEN 'accepted_uat_identity_crosswalk' THEN 0 ELSE 1 END, " +
@@ -198,20 +198,10 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
     );
     const selectedEntity = entityRows[0];
     if (!selectedEntity) {
-      throw new Error(`CourtOS entity not found for ${input.entityId ?? input.entityLabel ?? DEFAULT_COURTOS_1120_ENTITY_LABEL}.`);
+      throw new Error(`CourtOS entity not found for ${requestedEntityId ?? requestedHouseId ?? requestedEntityLabel}.`);
     }
 
-    const [globalSummary, officesRaw, responsibilities, standingOrderTasks, provenance] = await Promise.all([
-      this.driver.all<CourtOs1120EntityTypeSummary>(
-        "SELECT entity_type, count(*) AS entity_count, " +
-          "sum(office_definition_count) AS office_definition_count, " +
-          "sum(occupied_office_count) AS occupied_office_count, " +
-          "sum(vacant_office_count) AS vacant_office_count, " +
-          "sum(unresolved_office_count) AS unresolved_office_count, " +
-          "sum(responsibility_demand_count) AS responsibility_demand_count, " +
-          "sum(review_item_count) AS review_item_count " +
-          "FROM ro_entity_courtos_summary_v1 GROUP BY entity_type ORDER BY entity_type"
-      ),
+    const [officesRaw, responsibilities, standingOrderTasks] = await Promise.all([
       this.driver.all<CourtOs1120OfficeRow>(
         `SELECT * FROM ro_office_detail_v1 WHERE authority_entity_id = ${sqlString(selectedEntity.entity_id)} ` +
           `ORDER BY review_required DESC, office_title, office_id LIMIT ${MAX_OFFICE_ROWS}`
@@ -223,9 +213,6 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
       this.driver.all<CourtOs1120StandingOrderTaskRow>(
         `SELECT * FROM ro_standing_order_task_state_v1 WHERE demand_entity_id = ${sqlString(selectedEntity.entity_id)} ` +
           `ORDER BY review_required DESC, standing_responsibility_id, protected_person_id, standing_order_task_state_id LIMIT ${MAX_STANDING_ORDER_ROWS}`
-      ),
-      this.driver.all<CourtOs1120ProvenanceReadinessRow>(
-        `SELECT * FROM ro_provenance_readiness_v1 ORDER BY record_kind, record_key LIMIT ${MAX_PROVENANCE_ROWS}`
       )
     ]);
 
@@ -265,8 +252,7 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
       standingOrderTasks,
       people: [...people, ...householdPeople],
       residences,
-      docket,
-      provenance
+      docket
     });
 
     const offices = withOfficeJson(officesRaw);
@@ -281,12 +267,11 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
         sqlite_integrity: "ok"
       },
       query: {
-        entity_id: input.entityId ?? null,
-        house_id: input.houseId ?? selectedEntity.protected_graph_entity_id ?? null,
-        entity_label: input.entityLabel?.trim() || DEFAULT_COURTOS_1120_ENTITY_LABEL
+        entity_id: requestedEntityId,
+        house_id: requestedHouseId ?? selectedEntity.protected_graph_entity_id ?? null,
+        entity_label: requestedEntityLabel ?? selectedEntity.display_label ?? selectedEntity.entity_id
       },
       selected_entity: selectedEntity,
-      global_summary: globalSummary,
       offices,
       responsibilities,
       standing_order_tasks: standingOrderTasks,
@@ -294,7 +279,6 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
       household_people: householdPeople,
       residence_presence: residences,
       review_docket: docket,
-      provenance_readiness: provenance,
       totals: {
         office_count: offices.length,
         occupied_office_count: offices.filter((row) => row.assignment_state === "occupied").length,

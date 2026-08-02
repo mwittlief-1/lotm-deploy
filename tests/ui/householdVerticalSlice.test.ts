@@ -35,7 +35,7 @@ describe("HouseholdVerticalSlice", () => {
     expect(html).not.toContain("fixture");
   });
 
-  it("uses the four instantiated Pearwick Hall Council seats as the Council truth", () => {
+  it("keeps the four projected Pearwick Hall Council seats visibly provisional", () => {
     const projection = buildCouncilRoomReadyProjection({
       houseId: DEFAULT_COUNCIL_ROOM_HOUSE_ID,
       turnYear: 1120,
@@ -54,6 +54,15 @@ describe("HouseholdVerticalSlice", () => {
         (seat) => seat.person_ref.display_name === "Ralph Woolman",
       ),
     ).toBe(false);
+    expect(
+      projection.inner_council_seats.every((seat) =>
+        seat.source_refs.every(
+          (source) =>
+            source.runtime_authority === false &&
+            source.authority_status?.includes("source_candidate"),
+        ),
+      ),
+    ).toBe(true);
   });
 
   it("extends the Pearwick seat hierarchy symmetrically for a seven-seat council", () => {
@@ -82,14 +91,13 @@ describe("HouseholdVerticalSlice", () => {
     );
 
     expect(css).toMatch(
-      /@media \(max-width: 720px\)[\s\S]*?\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*0/,
+      /@media \(max-width: 720px\)[\s\S]*?\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*1320px/,
     );
     expect(css).toMatch(
       /\.uat-council-scene\s*\{\s*height:\s*auto;\s*min-height:\s*1320px/,
     );
-    expect(css).toContain("overscroll-behavior-y: contain");
-    expect(css).toContain("scroll-padding-bottom: 82px");
-    expect(css).toMatch(/\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*0/);
+    expect(css).toMatch(/\.uat-venue\s*\{[\s\S]*?position:\s*relative;[\s\S]*?overflow:\s*visible/);
+    expect(css).toMatch(/\.uat-venue\[data-scene="council"\]\s*\{\s*min-height:\s*1320px/);
     expect(css).toMatch(/\.uat-council-domain-objects\s*\{[\s\S]*?bottom:\s*82px/);
   });
 
@@ -104,5 +112,10 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).toContain("HOUSEHOLD_SOURCE_MISMATCH");
     expect(source).not.toContain("detail={courtOsState.error.message}");
     expect(source).toContain("The Household read contract is unavailable.");
+    expect(source).not.toContain("DEFAULT_UAT_HOUSE_ID");
+    expect(source).toContain("return value || null");
+    expect(source).not.toContain("recorded knowledge");
+    expect(source).toContain("Candidate membership projection · not admitted source truth");
+    expect(source).toContain("data-council-source={model.councilSource.status}");
   });
 });

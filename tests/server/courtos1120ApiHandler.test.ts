@@ -7,8 +7,8 @@ import { createCourtOs1120FetchHandler } from "../../src/server/courtos1120Api/w
 function serviceStub(): CourtOs1120ApiService {
   return {
     courtOs: vi.fn(async (input) => ({
-      data: { schema_version: "courtos_1120_read_only_projection_v1", query: input },
-      pasCalibration: { schema_version: "pas_calibration_proposal_v0" },
+      schema_version: "courtos_1120_read_only_projection_v1",
+      query: input,
     })),
     household: vi.fn(async (input) => ({
       schema_version: "household_1120_read_only_projection_v2",
@@ -48,7 +48,7 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
     }
   });
 
-  it("passes only the documented CourtOS selectors to the read service", async () => {
+  it("uses only the required House selector for the production CourtOS projection", async () => {
     const service = serviceStub();
     const result = await handleCourtOs1120Request(
       "courtos",
@@ -58,17 +58,36 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       },
       service,
     );
-    expect(service.courtOs).toHaveBeenCalledWith({
-      entityId: "e1",
-      houseId: "h1",
-      entityLabel: "House One",
-    });
+    expect(service.courtOs).toHaveBeenCalledWith({ houseId: "h1" });
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({
       ok: true,
       data: { schema_version: "courtos_1120_read_only_projection_v1" },
-      pas_calibration: { schema_version: "pas_calibration_proposal_v0" },
     });
+    expect(result.body).not.toHaveProperty("pas_calibration");
+  });
+
+  it("rejects a CourtOS request without an explicit House selector", async () => {
+    const service = serviceStub();
+    const result = await handleCourtOs1120Request(
+      "courtos",
+      {
+        method: "GET",
+        url: "https://example.test/api/courtos/1120?entityLabel=House%20Pearwick%20Hall",
+      },
+      service,
+    );
+    expect(result).toMatchObject({
+      status: 503,
+      body: {
+        ok: false,
+        error: {
+          code: "COURTOS_READ_MODEL_UNAVAILABLE",
+          message: "houseId is required.",
+        },
+      },
+    });
+    expect(service.courtOs).not.toHaveBeenCalled();
   });
 
   it("requires both scoped Household selectors before reading", async () => {

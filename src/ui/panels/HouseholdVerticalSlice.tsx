@@ -91,8 +91,6 @@ function sceneForRoute(route: CourtOsRoute): Scene {
 
 const HOUSEHOLD_SOLAR_ART =
   "/assets/council-command-room/household-vertical-slice/household-place-wide-v1.png";
-const DEFAULT_UAT_HOUSE_ID = "t0h_bcae5bd911ab10f4c7fdfea0";
-
 type CouncilSeatPosition = {
   x: number;
   y: number;
@@ -130,10 +128,10 @@ export function councilSeatPosition(
   return layout?.[index] ?? person.table_position;
 }
 
-function requestedHouseId(): string {
-  if (typeof window === "undefined") return DEFAULT_UAT_HOUSE_ID;
+function requestedHouseId(): string | null {
+  if (typeof window === "undefined") return null;
   const value = new URLSearchParams(window.location.search).get("houseId")?.trim();
-  return value || DEFAULT_UAT_HOUSE_ID;
+  return value || null;
 }
 
 function sentenceCase(value: string): string {
@@ -361,8 +359,16 @@ function CouncilScene({
   onOpenPerson: (person: CouncilRoomParticipantV1) => void;
 }) {
   return (
-    <section className="uat-scene uat-council-scene" aria-label="The Inner Council">
+    <section
+      className="uat-scene uat-council-scene"
+      aria-label="The Inner Council"
+      data-council-source={model.councilSource.status}
+    >
       <CouncilHouseHeraldry houseId={model.house.houseId} />
+      <div className="uat-council-source-posture" role="note">
+        <strong>Provisional Council</strong>
+        <span>Candidate membership projection · not admitted source truth</span>
+      </div>
       <button
         className="uat-council-command-object"
         onClick={onOpenHouseCommand}
@@ -1774,7 +1780,7 @@ export function HouseholdVerticalSlice() {
         selectedManor={selectedManor}
       />
       <span className="uat-source-stamp">
-        As of {model.effectiveDate} · recorded knowledge
+        As of {model.effectiveDate} · {model.councilSource.label}
       </span>
       {dialog ? <RecordDialog dialog={dialog} onClose={closeDialog} /> : null}
     </main>

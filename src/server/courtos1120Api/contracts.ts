@@ -1,11 +1,7 @@
 export type CourtOs1120Endpoint = "courtos" | "household" | "council-room";
 
 export interface CourtOs1120ApiService {
-  courtOs(input: {
-    entityId: string | null;
-    houseId: string | null;
-    entityLabel: string | null;
-  }): Promise<{ data: unknown; pasCalibration: unknown | null }>;
+  courtOs(input: { houseId: string }): Promise<unknown>;
   household(input: {
     householdEntityId: string;
     houseId: string;
@@ -27,6 +23,6 @@ export interface CourtOs1120TransportResponse {
   status: number;
   headers: Readonly<Record<string, string>>;
   body:
-    | { ok: true; data: unknown; pas_calibration?: unknown | null }
+    | { ok: true; data: unknown }
     | { ok: false; error: { code: string; message: string } };
 }

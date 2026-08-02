@@ -13,8 +13,12 @@ export interface CourtOsShellRuntimeModel {
   };
   head: CouncilRoomReadyProjectionV1["head_ref"];
   authority: {
-    status: "head" | "regency_required";
+    status: "unadmitted" | "regency_required";
     actor: CouncilRoomReadyProjectionV1["head_ref"] | null;
+    label: string;
+  };
+  councilSource: {
+    status: "candidate_projection" | "non_authoritative_projection";
     label: string;
   };
   council: readonly CouncilRoomReadyProjectionV1["inner_council_seats"][number][];
@@ -29,6 +33,11 @@ export function buildCourtOsShellRuntimeModel(input: {
   if (!courtHouseId || courtHouseId !== input.council.house_ref.entity_id) {
     throw new Error("CourtOS shell sources do not resolve to the same House.");
   }
+  const candidateCouncil = input.council.inner_council_seats.some((seat) =>
+    seat.source_refs.some((source) =>
+      source.authority_status?.toLowerCase().includes("candidate"),
+    ),
+  );
 
   return {
     house: {
@@ -47,12 +56,21 @@ export function buildCourtOsShellRuntimeModel(input: {
       ? {
           status: "regency_required",
           actor: null,
-          label: "Regency required · acting authority not recorded",
+          label: "Regency indicated · acting authority not admitted",
         }
       : {
-          status: "head",
-          actor: input.council.head_ref,
-          label: `Authority rests with ${input.council.head_ref.display_name}`,
+          status: "unadmitted",
+          actor: null,
+          label: `Provisional head reference: ${input.council.head_ref.display_name} · acting authority not admitted`,
+        },
+    councilSource: candidateCouncil
+      ? {
+          status: "candidate_projection",
+          label: "provisional Council membership · candidate source",
+        }
+      : {
+          status: "non_authoritative_projection",
+          label: "Council projection · non-authoritative source",
         },
     council: input.council.inner_council_seats,
     effectiveDate: input.courtOs.contract.effective_date,

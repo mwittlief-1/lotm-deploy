@@ -64,15 +64,12 @@ export async function handleCourtOs1120Request(
         : serviceProvider;
     const url = requestUrl(request);
     if (endpoint === "courtos") {
-      const result = await service.courtOs({
-        entityId: url.searchParams.get("entityId"),
-        houseId: url.searchParams.get("houseId"),
-        entityLabel: url.searchParams.get("entityLabel"),
-      });
+      const houseId = url.searchParams.get("houseId")?.trim();
+      if (!houseId) throw new Error("houseId is required.");
+      const data = await service.courtOs({ houseId });
       return response(200, {
         ok: true,
-        data: result.data,
-        pas_calibration: result.pasCalibration,
+        data,
       });
     }
 

@@ -6,8 +6,6 @@ export const COURTOS_1120_SQLITE_SHA256 =
 
 export const COURTOS_1120_DATABASE_FILENAME = "courtos_read_only_uat_contract_1120_01_01_v1.sqlite" as const;
 
-export const DEFAULT_COURTOS_1120_ENTITY_LABEL = "House Pearwick Hall" as const;
-
 export const COURTOS_1120_READ_ONLY_PROJECTION_SCHEMA_VERSION =
   "courtos_1120_read_only_uat_projection_v1" as const;
 
@@ -260,7 +258,6 @@ export interface CourtOs1120ReadOnlyProjection {
     entity_label: string;
   };
   selected_entity: CourtOs1120EntitySummaryRow;
-  global_summary: readonly CourtOs1120EntityTypeSummary[];
   offices: readonly CourtOs1120OfficeViewRow[];
   responsibilities: readonly CourtOs1120ResponsibilityRow[];
   standing_order_tasks: readonly CourtOs1120StandingOrderTaskRow[];
@@ -268,7 +265,6 @@ export interface CourtOs1120ReadOnlyProjection {
   household_people: readonly CourtOs1120PersonAssignmentRow[];
   residence_presence: readonly CourtOs1120ResidencePresenceRow[];
   review_docket: readonly CourtOs1120ReviewDocketRow[];
-  provenance_readiness: readonly CourtOs1120ProvenanceReadinessRow[];
   totals: {
     office_count: number;
     occupied_office_count: number;
