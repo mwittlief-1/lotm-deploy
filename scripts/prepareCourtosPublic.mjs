@@ -2,6 +2,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { verifiedMapGenBaseUrl } from "./verifyCourtosMapGenConfiguration.mjs";
+import mapGenContract from "../config/courtos-mapgen-runtime-contract.v1.json" with { type: "json" };
 
 const ROOT = process.cwd();
 const TARGET_ROOT = path.resolve(ROOT, ".courtos-public");
@@ -42,5 +44,36 @@ for (const relativePath of [...new Set(publicInputs)].sort()) {
     fs.copyFileSync(source, destination);
   }
 }
+
+const configuredMapGenBaseUrl = process.env.VITE_MAPGEN_BASE_URL?.trim();
+if (process.env.COURTOS_PRODUCTION_BUILD === "1" && !configuredMapGenBaseUrl) {
+  throw new Error("A production CourtOS public build requires VITE_MAPGEN_BASE_URL.");
+}
+const mapGenBaseUrl = configuredMapGenBaseUrl
+  ? verifiedMapGenBaseUrl(configuredMapGenBaseUrl)
+  : null;
+const manifestDirectory = path.resolve(TARGET_ROOT, ".well-known");
+fs.mkdirSync(manifestDirectory, { recursive: true });
+fs.writeFileSync(
+  path.join(manifestDirectory, "courtos-runtime-v1.json"),
+  `${JSON.stringify(
+    {
+      schema_version: "courtos_runtime_manifest_v1",
+      mapgen: mapGenBaseUrl
+        ? {
+            status: "configured",
+            base_url: mapGenBaseUrl.toString(),
+            contract: mapGenContract,
+          }
+        : {
+            status: "not_configured",
+            base_url: null,
+            contract: mapGenContract,
+          },
+    },
+    null,
+    2,
+  )}\n`,
+);
 
 console.log(`Prepared ${publicInputs.length} CourtOS public runtime assets in .courtos-public/.`);

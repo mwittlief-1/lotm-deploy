@@ -43,6 +43,7 @@ jobs:
       ROLLBACK_URL: ${{ inputs.rollback_url }}
       HOUSE_ID: ${{ inputs.smoke_house_id }}
       HOUSEHOLD_ENTITY_ID: ${{ inputs.smoke_household_entity_id }}
+      VITE_MAPGEN_BASE_URL: ${{ vars.COURTOS_MAPGEN_BASE_URL }}
     outputs:
       deployment_url: ${{ steps.deploy.outputs.deployment_url }}
       source_sha: ${{ steps.provenance.outputs.source_sha }}
@@ -63,6 +64,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install deployment-smoke browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Require production MapGen configuration
+        run: node scripts/verifyCourtosMapGenConfiguration.mjs
 
       - name: Engineering production gate
         run: pnpm run qa:engineering
@@ -176,6 +183,15 @@ jobs:
         with:
           node-version: 20
 
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install smoke dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install deployment-smoke browser
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Require protected canonical production configuration
         run: test -n "$PRODUCTION_URL" || { echo "COURTOS_PRODUCTION_URL environment variable is required" >&2; exit 1; }
 
@@ -262,6 +278,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install smoke dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install deployment-smoke browser
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Require protected canonical production configuration
         run: test -n "$PRODUCTION_URL" || { echo "COURTOS_PRODUCTION_URL environment variable is required" >&2; exit 1; }

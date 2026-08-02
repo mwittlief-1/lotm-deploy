@@ -9,6 +9,10 @@ import {
 } from "../../src/ui/houseIdentityAssets";
 import { buildCourtOsShellRuntimeModel } from "../../src/ui/courtosShellModel";
 import { COURTOS_PLAYER_CONTEXT } from "../../src/courtosPlayerContext";
+import {
+  buildCourtOsSessionContext,
+  isCourtOsSessionContextV1,
+} from "../../src/courtosSessionContext";
 import { buildHouseholdUatRuntimeModel } from "../../src/ui/householdUatModel";
 import { CourtOs1120ReadModel } from "../../src/ui/readModels/courtos1120/service";
 import { Household1120ReadModel } from "../../src/ui/readModels/household1120/service";
@@ -35,18 +39,25 @@ async function runtimeFor(houseId: string) {
       houseId,
       turnYear: 1120,
     });
+    const sessionContext = buildCourtOsSessionContext(
+      houseId === COURTOS_PLAYER_CONTEXT.house_id
+        ? "player_runtime"
+        : "generalization_qa",
+      houseId,
+    );
     return {
       courtProjection,
       householdProjection,
       shell: buildCourtOsShellRuntimeModel({
         courtOs: courtProjection,
         council: councilProjection,
-        playerHouseId: "t0h_bcae5bd911ab10f4c7fdfea0",
+        sessionContext,
       }),
       runtime: buildHouseholdUatRuntimeModel({
         courtOs: courtProjection,
         household: householdProjection,
         council: councilProjection,
+        sessionContext,
       }),
     };
   } finally {
@@ -60,7 +71,12 @@ async function shellFor(houseId: string) {
     return buildCourtOsShellRuntimeModel({
       courtOs: await courtOs.projection({ houseId }),
       council: buildCouncilRoomReadyProjection({ houseId, turnYear: 1120 }),
-      playerHouseId: "t0h_bcae5bd911ab10f4c7fdfea0",
+      sessionContext: buildCourtOsSessionContext(
+        houseId === COURTOS_PLAYER_CONTEXT.house_id
+          ? "player_runtime"
+          : "generalization_qa",
+        houseId,
+      ),
     });
   } finally {
     await courtOs.close();
@@ -75,6 +91,42 @@ describe("Household UAT runtime model", () => {
       entitlement: "house_controller",
       house_id: "t0h_bcae5bd911ab10f4c7fdfea0",
     });
+  });
+
+  it("separates House-record inspection from unadmitted actor authority", () => {
+    const context = buildCourtOsSessionContext(
+      "player_runtime",
+      COURTOS_PLAYER_CONTEXT.house_id,
+    );
+    expect(isCourtOsSessionContextV1(context)).toBe(true);
+    expect(context).toMatchObject({
+      principal: "local_player",
+      house_access: "player_house",
+      acting_actor: { status: "unadmitted", person_id: null },
+      knowledge: {
+        lens: "source_bounded_house_records",
+        actor_specific_content: "withheld",
+      },
+      capabilities: {
+        inspect_house_records: true,
+        issue_commands: false,
+        manage_assignments: false,
+        access_correspondence: false,
+        conduct_actor_dialogue: false,
+      },
+    });
+    expect(
+      isCourtOsSessionContextV1({
+        ...context,
+        principal: "qa_agent",
+      }),
+    ).toBe(false);
+    expect(
+      isCourtOsSessionContextV1({
+        ...context,
+        selected_house_id: "another-house",
+      }),
+    ).toBe(false);
   });
 
   it("builds the official four-responsibility Pearwick runtime without a Family Book destination", async () => {
@@ -131,7 +183,7 @@ describe("Household UAT runtime model", () => {
     expect(shell.authority).toMatchObject({
       status: "unadmitted",
       actor: null,
-      label: "Provisional head reference: Edmund of Pearwick Hall · acting authority not admitted",
+      label: "acting person not established",
     });
     expect(shell.councilSource).toEqual({
       status: "candidate_projection",
@@ -139,10 +191,10 @@ describe("Household UAT runtime model", () => {
     });
     expect(shell.player).toEqual({
       principal: "local_player",
-      status: "house_controller",
+      status: "house_record_inspection",
       entitlement: "house_controller",
       houseId: "t0h_bcae5bd911ab10f4c7fdfea0",
-      label: "Player House · House Pearwick Hall",
+      label: "Playing House Pearwick Hall · House records",
     });
     expect(shell.effectiveDate).toBe("1120-01-01");
     expect(shell).not.toHaveProperty("responsibilities");
@@ -155,7 +207,7 @@ describe("Household UAT runtime model", () => {
     expect(shell.authority).toEqual({
       status: "regency_required",
       actor: null,
-      label: "Regency indicated · acting authority not admitted",
+      label: "acting person not established · regency indicated",
     });
   });
 
@@ -170,11 +222,11 @@ describe("Household UAT runtime model", () => {
     expect(holtcross.runtime.head.display_name).toBe("Gilbert of Holtcross");
     expect(holtcross.runtime.council).toHaveLength(7);
     expect(holtcross.shell.player).toEqual({
-      principal: "local_player",
-      status: "read_only_view",
-      entitlement: null,
-      houseId: "t0h_bcae5bd911ab10f4c7fdfea0",
-      label: "Read-only House inspection · no player entitlement",
+      principal: "qa_agent",
+      status: "qa_projection",
+      entitlement: "generalization_qa",
+      houseId: null,
+      label: "Generalization QA · source projection",
     });
     expect(holtcross.householdProjection.query.house_id).toBe(
       "t0h_1ed8d543f12b387ed751f1a6",

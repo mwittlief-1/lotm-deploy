@@ -15,6 +15,14 @@ describe("CourtOS typed route", () => {
     );
   });
 
+  it("serializes an unknown route back to an honest Council URL", () => {
+    const invalid =
+      "?houseId=house-1&place=responsibility&domain=household&responsibility=not_a_real_responsibility";
+    expect(
+      courtOsSearchForRoute(invalid, courtOsRouteFromSearch(invalid)),
+    ).toBe("?houseId=house-1&place=council");
+  });
+
   it("preserves House selection while serializing a responsibility scope", () => {
     const route = courtOsResponsibilityRoute({
       responsibility: "manor_stewardship",

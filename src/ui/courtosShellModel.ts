@@ -1,4 +1,5 @@
 import type { CouncilRoomReadyProjectionV1 } from "../ready/councilRoomReadyProjection";
+import type { CourtOsSessionContextV1 } from "../courtosSessionContext";
 import type { CourtOs1120ReadOnlyProjection } from "./readModels/courtos1120/types";
 
 export interface CourtOsShellRuntimeModel {
@@ -12,9 +13,9 @@ export interface CourtOsShellRuntimeModel {
     label: string;
   };
   player: {
-    principal: "local_player";
-    status: "house_controller" | "read_only_view" | "unconfigured";
-    entitlement: "house_controller" | null;
+    principal: CourtOsSessionContextV1["principal"];
+    status: "house_record_inspection" | "qa_projection";
+    entitlement: "house_controller" | "generalization_qa";
     houseId: string | null;
     label: string;
   };
@@ -35,41 +36,43 @@ export interface CourtOsShellRuntimeModel {
 export function buildCourtOsShellRuntimeModel(input: {
   courtOs: CourtOs1120ReadOnlyProjection;
   council: CouncilRoomReadyProjectionV1;
-  playerHouseId?: string | null;
+  sessionContext: CourtOsSessionContextV1;
 }): CourtOsShellRuntimeModel {
   const courtHouseId = input.courtOs.selected_entity.protected_graph_entity_id;
   if (!courtHouseId || courtHouseId !== input.council.house_ref.entity_id) {
     throw new Error("CourtOS shell sources do not resolve to the same House.");
+  }
+  if (input.sessionContext.selected_house_id !== courtHouseId) {
+    throw new Error("CourtOS session context does not match the selected House.");
+  }
+  if (
+    input.sessionContext.acting_actor.status !== "unadmitted" ||
+    input.sessionContext.acting_actor.person_id !== null ||
+    input.sessionContext.acting_actor.authority_basis !== null
+  ) {
+    throw new Error("CourtOS acting authority requires an admitted authority basis.");
   }
   const candidateCouncil = input.council.inner_council_seats.some((seat) =>
     seat.source_refs.some((source) =>
       source.authority_status?.toLowerCase().includes("candidate"),
     ),
   );
-  const playerHouseId = input.playerHouseId?.trim() || null;
-  const player: CourtOsShellRuntimeModel["player"] = !playerHouseId
-    ? {
-        principal: "local_player",
-        status: "unconfigured",
-        entitlement: null,
-        houseId: null,
-        label: "House record view · player House not configured",
-      }
-    : playerHouseId === courtHouseId
-      ? {
-          principal: "local_player",
-          status: "house_controller",
-          entitlement: "house_controller",
-          houseId: playerHouseId,
-          label: `Player House · ${input.courtOs.selected_entity.display_label ?? input.council.house_ref.display_name}`,
-        }
-      : {
-          principal: "local_player",
-          status: "read_only_view",
-          entitlement: null,
-          houseId: playerHouseId,
-          label: "Read-only House inspection · no player entitlement",
-        };
+  const player: CourtOsShellRuntimeModel["player"] = {
+    principal: input.sessionContext.principal,
+    status:
+      input.sessionContext.house_access === "player_house"
+        ? "house_record_inspection"
+        : "qa_projection",
+    entitlement:
+      input.sessionContext.house_access === "player_house"
+        ? "house_controller"
+        : "generalization_qa",
+    houseId: input.sessionContext.player_house_id,
+    label:
+      input.sessionContext.house_access === "player_house"
+        ? `Playing ${input.courtOs.selected_entity.display_label ?? input.council.house_ref.display_name} · House records`
+        : "Generalization QA · source projection",
+  };
 
   return {
     house: {
@@ -89,12 +92,12 @@ export function buildCourtOsShellRuntimeModel(input: {
       ? {
           status: "regency_required",
           actor: null,
-          label: "Regency indicated · acting authority not admitted",
+          label: "acting person not established · regency indicated",
         }
       : {
           status: "unadmitted",
           actor: null,
-          label: `Provisional head reference: ${input.council.head_ref.display_name} · acting authority not admitted`,
+          label: "acting person not established",
         },
     councilSource: candidateCouncil
       ? {

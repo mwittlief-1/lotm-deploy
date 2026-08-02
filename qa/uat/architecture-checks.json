@@ -41,7 +41,7 @@
       "area": "authority",
       "title": "Authority and knowledge boundaries",
       "blocking": true,
-      "requirement": "UI visibility and commands preserve actor authority, delegated responsibility, Council membership distinctions, and fuzzy knowledge precision."
+      "requirement": "The runtime enforces House isolation, identifies its versioned player session, distinguishes source-bounded House-record inspection from actor knowledge, and fails closed for correspondence, dialogue, assignment mutation, and commands when no acting actor is admitted."
     },
     {
       "id": "ARCH-007",

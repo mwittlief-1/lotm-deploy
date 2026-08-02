@@ -1,3 +1,5 @@
+import mapGenRuntimeContract from "../../../config/courtos-mapgen-runtime-contract.v1.json";
+
 export const COURTOS_CARTOGRAPHY_THEME_ID = "merecross_courtos_cartography_v1";
 export const COURTOS_CARTOGRAPHY_THEME_SCHEMA = "merecross_cartography_theme_v1";
 export const COURTOS_CARTOGRAPHY_THEME_VERSION = "1.0.0";
@@ -11,11 +13,22 @@ export type CourtOsRendererKey =
   | "orchardmere_county_v1"
   | "pearwick_estate_pilot_v1";
 
-const RENDERER_PATHS: Readonly<Record<CourtOsRendererKey, string>> = Object.freeze({
-  merecross_realm_v1: "merecross-3d-prototype.html",
-  orchardmere_county_v1: "orchardmere-county-viewer.html",
-  pearwick_estate_pilot_v1: "pearwick-estate-pilot.html",
-});
+export const COURTOS_REQUIRED_RENDERERS = Object.freeze(
+  mapGenRuntimeContract.required_renderers.map((renderer) => ({
+    rendererKey: renderer.renderer_key as CourtOsRendererKey,
+    path: renderer.path,
+  })),
+);
+
+const RENDERER_PATHS: Readonly<Record<CourtOsRendererKey, string>> =
+  Object.freeze(
+    Object.fromEntries(
+      COURTOS_REQUIRED_RENDERERS.map((renderer) => [
+        renderer.rendererKey,
+        renderer.path,
+      ]),
+    ) as Record<CourtOsRendererKey, string>,
+  );
 
 export function resolveMapGenBaseUrl({
   configuredBaseUrl,

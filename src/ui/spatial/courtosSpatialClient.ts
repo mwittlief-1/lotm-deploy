@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 
 import {
+  isCourtOsSessionContextV1,
+  type CourtOsSessionContextV1,
+} from "../../courtosSessionContext";
+import {
+  courtOsTimeoutError,
+  createCourtOsRequestDeadline,
+} from "../courtosRequestDeadline";
+import {
   isCourtOsSpatialHouseProjection,
   type CourtOsSpatialManor,
   type CourtOsSpatialPortfolio,
@@ -14,7 +22,7 @@ export type {
 
 export type CourtOsSpatialState =
   | { status: "loading" }
-  | { status: "ready"; portfolio: CourtOsSpatialPortfolio | null; effectiveDate: string }
+  | { status: "ready"; context: CourtOsSessionContextV1; portfolio: CourtOsSpatialPortfolio | null; effectiveDate: string }
   | { status: "error"; message: string };
 
 export function useCourtOsSpatialPortfolio(houseId: string | null): CourtOsSpatialState {
@@ -25,10 +33,10 @@ export function useCourtOsSpatialPortfolio(houseId: string | null): CourtOsSpati
       setState({ status: "loading" });
       return;
     }
-    const controller = new AbortController();
+    const deadline = createCourtOsRequestDeadline();
     setState({ status: "loading" });
     fetch(`/api/spatial/1120?houseId=${encodeURIComponent(houseId)}`, {
-      signal: controller.signal,
+      signal: deadline.signal,
     })
       .then(async (response) => {
         if (!response.ok) throw new Error(`Spatial record returned ${response.status}.`);
@@ -37,26 +45,45 @@ export function useCourtOsSpatialPortfolio(houseId: string | null): CourtOsSpati
           envelope && typeof envelope === "object" && "data" in envelope
             ? (envelope as { data?: unknown }).data
             : null;
+        const context =
+          envelope && typeof envelope === "object" && "context" in envelope
+            ? (envelope as { context?: CourtOsSessionContextV1 }).context
+            : null;
         if (!isCourtOsSpatialHouseProjection(value)) {
           throw new Error("Spatial record failed its version or authority gate.");
         }
         if (value.query.house_id !== houseId) {
           throw new Error("Spatial record does not match the selected House.");
         }
+        if (!isCourtOsSessionContextV1(context) || context.selected_house_id !== houseId) {
+          throw new Error("Spatial session context does not match the selected House.");
+        }
         setState({
           status: "ready",
+          context,
           portfolio: value.portfolio,
           effectiveDate: value.effective_date,
         });
       })
       .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
+        if (deadline.signal.aborted && !deadline.didTimeOut()) return;
+        if (deadline.didTimeOut()) {
+          setState({
+            status: "error",
+            message: courtOsTimeoutError(
+              "SPATIAL_REQUEST_TIMEOUT",
+              "The land record",
+            ).message,
+          });
+          return;
+        }
         setState({
           status: "error",
           message: error instanceof Error ? error.message : String(error),
         });
-      });
-    return () => controller.abort();
+      })
+      .finally(() => deadline.clear());
+    return () => deadline.cancel();
   }, [houseId]);
 
   return state;

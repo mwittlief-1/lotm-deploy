@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import type {
   CourtOs1120ApiService,
   CourtOs1120ApiServiceProvider,
@@ -19,6 +21,15 @@ const SOURCE_ERROR_CODES: Readonly<Record<CourtOs1120Endpoint, string>> = {
   spatial: "SPATIAL_READ_MODEL_UNAVAILABLE",
 };
 
+class CourtOsRequestInvalid extends Error {
+  readonly code = "COURTOS_REQUEST_INVALID";
+
+  constructor() {
+    super("Required request context is missing.");
+    this.name = "CourtOsRequestInvalid";
+  }
+}
+
 function response(
   status: number,
   body: CourtOs1120TransportResponse["body"],
@@ -39,11 +50,27 @@ function sourceUnavailable(
       },
     });
   }
+  if (error instanceof CourtOsRequestInvalid) {
+    return response(400, {
+      ok: false,
+      error: { code: error.code, message: error.message },
+    });
+  }
+  const incidentId = randomUUID();
+  console.error("CourtOS read source unavailable", {
+    endpoint,
+    incident_id: incidentId,
+    error:
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack }
+        : { value: String(error) },
+  });
   return response(503, {
     ok: false,
     error: {
       code: SOURCE_ERROR_CODES[endpoint],
-      message: error instanceof Error ? error.message : String(error),
+      message: "The requested read-only record is temporarily unavailable.",
+      incident_id: incidentId,
     },
   });
 }
@@ -76,10 +103,11 @@ export async function handleCourtOs1120Request(
     const url = requestUrl(request);
     if (endpoint === "courtos") {
       const houseId = url.searchParams.get("houseId")?.trim();
-      if (!houseId) throw new Error("houseId is required.");
+      if (!houseId) throw new CourtOsRequestInvalid();
       const data = await service.courtOs({ houseId });
       return response(200, {
         ok: true,
+        context: service.sessionContext({ houseId }),
         data,
       });
     }
@@ -87,24 +115,26 @@ export async function handleCourtOs1120Request(
     if (endpoint === "household") {
       const householdEntityId = url.searchParams.get("householdEntityId")?.trim();
       const houseId = url.searchParams.get("houseId")?.trim();
-      if (!householdEntityId) throw new Error("householdEntityId is required.");
-      if (!houseId) throw new Error("houseId is required.");
+      if (!householdEntityId || !houseId) throw new CourtOsRequestInvalid();
       return response(200, {
         ok: true,
+        context: service.sessionContext({ houseId }),
         data: await service.household({ householdEntityId, houseId }),
       });
     }
 
     const houseId = url.searchParams.get("houseId")?.trim();
-    if (!houseId) throw new Error("houseId is required.");
+    if (!houseId) throw new CourtOsRequestInvalid();
     if (endpoint === "spatial") {
       return response(200, {
         ok: true,
+        context: service.sessionContext({ houseId }),
         data: await service.spatial({ houseId }),
       });
     }
     return response(200, {
       ok: true,
+      context: service.sessionContext({ houseId }),
       data: await service.councilRoom({ houseId }),
     });
   } catch (error) {

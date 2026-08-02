@@ -1,7 +1,12 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import {
+  courtOsTimeoutError,
+  createCourtOsRequestDeadline,
+} from "../../src/ui/courtosRequestDeadline";
 
 import {
   COURTOS_CARTOGRAPHY_THEME_ID,
@@ -16,6 +21,21 @@ import {
 import { isCourtOsSpatialHouseProjection } from "../../src/ui/spatial/courtosSpatialContract";
 
 describe("CourtOS direct embedded map contract", () => {
+  it("bounds every CourtOS browser request with a stable timeout contract", () => {
+    vi.useFakeTimers();
+    const deadline = createCourtOsRequestDeadline(25);
+    expect(deadline.signal.aborted).toBe(false);
+    vi.advanceTimersByTime(25);
+    expect(deadline.signal.aborted).toBe(true);
+    expect(deadline.didTimeOut()).toBe(true);
+    expect(courtOsTimeoutError("READ_TIMEOUT", "The record")).toEqual({
+      code: "READ_TIMEOUT",
+      message: "The record took too long to answer. Try the record again.",
+    });
+    deadline.clear();
+    vi.useRealTimers();
+  });
+
   it("accepts only admitted, non-empty House-scoped spatial payloads", () => {
     expect(
       isCourtOsSpatialHouseProjection({

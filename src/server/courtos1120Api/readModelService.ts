@@ -129,6 +129,10 @@ export function createCourtOs1120ReadModelService(
     | Promise<CourtOsSpatialRealmProjectionV1>
     | undefined;
   return {
+    sessionContext(input) {
+      return assertCourtOsHouseAccess(accessMode, input.houseId);
+    },
+
     async courtOs(input) {
       assertCourtOsHouseAccess(accessMode, input.houseId);
       courtOsSessionPromise ??= CourtOs1120ReadModel.open(

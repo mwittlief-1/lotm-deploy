@@ -1,0 +1,26 @@
+{
+  "schema_version": "courtos_mapgen_runtime_contract_v1",
+  "readiness": {
+    "message_type": "merecross:spatial:ready:v1",
+    "schema_version": "merecross_spatial_adapter_v1",
+    "protocol_version": 1,
+    "theme_id": "merecross_courtos_cartography_v1",
+    "theme_schema_version": "merecross_cartography_theme_v1",
+    "theme_version": "1.0.0",
+    "first_usable_frame": true
+  },
+  "required_renderers": [
+    {
+      "renderer_key": "merecross_realm_v1",
+      "path": "merecross-3d-prototype.html"
+    },
+    {
+      "renderer_key": "orchardmere_county_v1",
+      "path": "orchardmere-county-viewer.html"
+    },
+    {
+      "renderer_key": "pearwick_estate_pilot_v1",
+      "path": "pearwick-estate-pilot.html"
+    }
+  ]
+}

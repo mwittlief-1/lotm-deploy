@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -72,6 +73,9 @@ describe("CourtOS packaged deployment adapter", () => {
     expect(config.rewrites).toEqual([
       { source: "/(.*)", destination: "/index.html" },
     ]);
+    expect((config as { buildCommand?: string }).buildCommand).toBe(
+      "pnpm run courtos:build:production",
+    );
   });
 
   it("binds production to the checksum-pinned repository sources by default", () => {
@@ -108,6 +112,11 @@ describe("CourtOS packaged deployment adapter", () => {
         expect(payload.data).not.toHaveProperty("global_summary");
         expect(payload.data).not.toHaveProperty("provenance_readiness");
         expect(payload.data.query.house_id).toBe(houseId);
+        expect(payload.context).toMatchObject({
+          schema_version: "courtos_session_context_v1",
+          selected_house_id: houseId,
+          capabilities: { issue_commands: false },
+        });
       }
     } finally {
       await service.close();
@@ -192,13 +201,16 @@ describe("CourtOS packaged deployment adapter", () => {
         ),
       );
       expect(response.status).toBe(503);
-      expect(await response.json()).toMatchObject({
+      const payload = await response.json();
+      expect(payload).toMatchObject({
         ok: false,
         error: {
           code: "HOUSEHOLD_READ_MODEL_UNAVAILABLE",
-          message: "Household selector does not belong to the selected House.",
+          message: "The requested read-only record is temporarily unavailable.",
+          incident_id: expect.any(String),
         },
       });
+      expect(JSON.stringify(payload)).not.toContain("does not belong");
     } finally {
       await service.close();
     }
@@ -279,15 +291,54 @@ describe("CourtOS packaged deployment adapter", () => {
     expect(workflow).toContain("Verify canonical production after automatic rollback");
     expect(workflow).toContain("vars.COURTOS_PRODUCTION_URL");
     expect(workflow).toContain("verifyCourtosVercelDeployment.mjs");
+    expect(workflow).toContain("COURTOS_MAPGEN_BASE_URL");
+    expect(workflow).toContain("verifyCourtosMapGenConfiguration.mjs");
+    expect(workflow).toContain("playwright install --with-deps chromium");
     expect(workflow).not.toMatch(/run:[^\n]*\$\{\{\s*inputs\./);
     expect(smoke).toContain("/courtos-home.html");
     expect(smoke).toContain("/api/courtos/1120");
     expect(smoke).toContain("/api/household/1120");
     expect(smoke).toContain("/api/council-room/1120");
     expect(smoke).toContain("/api/spatial/1120");
+    expect(smoke).toContain("/.well-known/courtos-runtime-v1.json");
+    expect(
+      readFileSync(
+        resolve(root, "config/courtos-mapgen-runtime-contract.v1.json"),
+        "utf8",
+      ),
+    ).toContain("merecross:spatial:ready:v1");
+    expect(smoke).toContain("readiness.message_type");
+    expect(smoke).toContain("event.source !== frame.contentWindow");
+    expect(smoke).toContain("payload?.context?.acting_actor?.status");
+    expect(smoke).not.toContain("spatial:init");
     expect(smoke).toContain('redirect: "error"');
     expect(smoke).toContain("COURTOS_SMOKE_ALLOWED_ORIGIN");
     expect(deploymentVerification).toContain("deployment?.projectId !== projectId");
     expect(deploymentVerification).toContain('deployment?.readyState !== "READY"');
+  });
+
+  it("fails a production build before Vite when MapGen configuration is absent or unsafe", () => {
+    const script = resolve(root, "scripts/verifyCourtosMapGenConfiguration.mjs");
+    for (const value of ["", "http://maps.example.test/", "https://maps.example.test/path/"]) {
+      const result = spawnSync(process.execPath, [script], {
+        cwd: root,
+        env: { ...process.env, VITE_MAPGEN_BASE_URL: value },
+        encoding: "utf8",
+      });
+      expect(result.status).not.toBe(0);
+    }
+    const ready = spawnSync(process.execPath, [script], {
+      cwd: root,
+      env: {
+        ...process.env,
+        VITE_MAPGEN_BASE_URL: "https://maps.example.test/",
+      },
+      encoding: "utf8",
+    });
+    expect(ready.status).toBe(0);
+    expect(JSON.parse(ready.stdout)).toMatchObject({
+      mapgen_origin: "https://maps.example.test",
+      verdict: "pass",
+    });
   });
 });

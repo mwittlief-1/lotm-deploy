@@ -300,6 +300,11 @@ export interface CourtOs1120ReadOnlyProjection {
   };
 }
 
+export type CourtOs1120ProjectionSelector =
+  | { houseId: string; entityId?: never; entityLabel?: never }
+  | { entityId: string; houseId?: never; entityLabel?: never }
+  | { entityLabel: string; entityId?: never; houseId?: never };
+
 export interface CourtOs1120ReadModelSessionContract {
   readonly descriptor: {
     generation: typeof COURTOS_1120_CONTRACT_GENERATION;
@@ -313,10 +318,8 @@ export interface CourtOs1120ReadModelSessionContract {
       generationPinnedForSession: true;
     };
   };
-  projection(input?: {
-    entityId?: string | null;
-    houseId?: string | null;
-    entityLabel?: string | null;
-  }): Promise<CourtOs1120ReadOnlyProjection>;
+  projection(
+    input: CourtOs1120ProjectionSelector,
+  ): Promise<CourtOs1120ReadOnlyProjection>;
   close(): Promise<void>;
 }

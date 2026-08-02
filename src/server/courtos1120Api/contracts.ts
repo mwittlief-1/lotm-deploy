@@ -1,3 +1,5 @@
+import type { CourtOsSessionContextV1 } from "../../courtosSessionContext";
+
 export type CourtOs1120Endpoint =
   | "courtos"
   | "household"
@@ -5,6 +7,7 @@ export type CourtOs1120Endpoint =
   | "spatial";
 
 export interface CourtOs1120ApiService {
+  sessionContext(input: { houseId: string }): CourtOsSessionContextV1;
   courtOs(input: { houseId: string }): Promise<unknown>;
   household(input: {
     householdEntityId: string;
@@ -28,6 +31,9 @@ export interface CourtOs1120TransportResponse {
   status: number;
   headers: Readonly<Record<string, string>>;
   body:
-    | { ok: true; data: unknown }
-    | { ok: false; error: { code: string; message: string } };
+    | { ok: true; context: CourtOsSessionContextV1; data: unknown }
+    | {
+        ok: false;
+        error: { code: string; message: string; incident_id?: string };
+      };
 }

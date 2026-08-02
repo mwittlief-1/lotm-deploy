@@ -3,9 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import type { CourtOs1120ApiService } from "../../src/server/courtos1120Api/contracts";
 import { handleCourtOs1120Request } from "../../src/server/courtos1120Api/handler";
 import { createCourtOs1120FetchHandler } from "../../src/server/courtos1120Api/webAdapter";
+import { buildCourtOsSessionContext } from "../../src/courtosSessionContext";
 
 function serviceStub(): CourtOs1120ApiService {
   return {
+    sessionContext: vi.fn((input) =>
+      buildCourtOsSessionContext("generalization_qa", input.houseId),
+    ),
     courtOs: vi.fn(async (input) => ({
       schema_version: "courtos_1120_read_only_projection_v1",
       query: input,
@@ -67,6 +71,11 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({
       ok: true,
+      context: {
+        schema_version: "courtos_session_context_v1",
+        selected_house_id: "h1",
+        capabilities: { issue_commands: false },
+      },
       data: { schema_version: "courtos_1120_read_only_projection_v1" },
     });
     expect(result.body).not.toHaveProperty("pas_calibration");
@@ -83,12 +92,12 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       service,
     );
     expect(result).toMatchObject({
-      status: 503,
+      status: 400,
       body: {
         ok: false,
         error: {
-          code: "COURTOS_READ_MODEL_UNAVAILABLE",
-          message: "houseId is required.",
+          code: "COURTOS_REQUEST_INVALID",
+          message: "Required request context is missing.",
         },
       },
     });
@@ -106,12 +115,12 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       service,
     );
     expect(missing).toMatchObject({
-      status: 503,
+      status: 400,
       body: {
         ok: false,
         error: {
-          code: "HOUSEHOLD_READ_MODEL_UNAVAILABLE",
-          message: "householdEntityId is required.",
+          code: "COURTOS_REQUEST_INVALID",
+          message: "Required request context is missing.",
         },
       },
     });
@@ -140,11 +149,11 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       service,
     );
     expect(missing).toMatchObject({
-      status: 503,
+      status: 400,
       body: {
         error: {
-          code: "COUNCIL_ROOM_SOURCE_UNAVAILABLE",
-          message: "houseId is required.",
+          code: "COURTOS_REQUEST_INVALID",
+          message: "Required request context is missing.",
         },
       },
     });
@@ -159,11 +168,11 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       service,
     );
     expect(missing).toMatchObject({
-      status: 503,
+      status: 400,
       body: {
         error: {
-          code: "SPATIAL_READ_MODEL_UNAVAILABLE",
-          message: "houseId is required.",
+          code: "COURTOS_REQUEST_INVALID",
+          message: "Required request context is missing.",
         },
       },
     });
@@ -171,6 +180,7 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
   });
 
   it("maps source failures to the endpoint-specific existing error contracts", async () => {
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const cases = [
       ["courtos", "COURTOS_READ_MODEL_UNAVAILABLE", "courtOs"],
       ["household", "HOUSEHOLD_READ_MODEL_UNAVAILABLE", "household"],
@@ -193,10 +203,17 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
         status: 503,
         body: {
           ok: false,
-          error: { code, message: "source offline" },
+          error: {
+            code,
+            message: "The requested read-only record is temporarily unavailable.",
+            incident_id: expect.any(String),
+          },
         },
       });
+      expect(JSON.stringify(result.body)).not.toContain("source offline");
     }
+    expect(errorLog).toHaveBeenCalledTimes(cases.length);
+    errorLog.mockRestore();
   });
 });
 
@@ -216,6 +233,7 @@ describe("CourtOS 1120 Web-standard production transport", () => {
   });
 
   it("fails closed when the production source binding is not configured", async () => {
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const handler = createCourtOs1120FetchHandler("courtos", () => {
       throw new Error("COURTOS_1120_SQLITE_PATH is required");
     });
@@ -223,13 +241,16 @@ describe("CourtOS 1120 Web-standard production transport", () => {
       new Request("https://example.test/api/courtos/1120?houseId=h1"),
     );
     expect(response.status).toBe(503);
-    expect(await response.json()).toEqual({
+    expect(await response.json()).toMatchObject({
       ok: false,
       error: {
         code: "COURTOS_READ_MODEL_UNAVAILABLE",
-        message: "COURTOS_1120_SQLITE_PATH is required",
+        message: "The requested read-only record is temporarily unavailable.",
+        incident_id: expect.any(String),
       },
     });
+    expect(errorLog).toHaveBeenCalledOnce();
+    errorLog.mockRestore();
   });
 
   it("rejects non-GET requests before resolving the production source binding", async () => {

@@ -28,6 +28,8 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "tsconfig.courtos.json",
   "vercel.json",
   RUNTIME_MANIFEST_PATH,
+  "config/courtos-mapgen-runtime-contract.v1.json",
+  "scripts/buildCourtosProduction.mjs",
   "scripts/buildCourtosSpatialReadModelV1.mjs",
   "scripts/prepareCourtosPublic.mjs",
   "scripts/runCourtosEngineeringQa.mjs",
@@ -40,6 +42,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/validateCourtosUatConfig.mjs",
   "scripts/verifyCourtosTrackedInputs.mjs",
   "scripts/verifyCourtosGeneratedArtifacts.mjs",
+  "scripts/verifyCourtosMapGenConfiguration.mjs",
 ];
 const IMPORT_EXTENSIONS = [
   "",

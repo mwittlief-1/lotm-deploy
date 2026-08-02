@@ -113,7 +113,7 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).not.toContain("detail={courtOsState.error.message}");
     expect(source).toContain("The Household read contract is unavailable.");
     expect(source).not.toContain("DEFAULT_UAT_HOUSE_ID");
-    expect(source).toContain("return value || null");
+    expect(source).toContain("return value || COURTOS_PLAYER_CONTEXT.house_id");
     expect(source).not.toContain("recorded knowledge");
     expect(source).toContain("Candidate membership projection · not admitted source truth");
     expect(source).toContain("Candidate Council seat");
@@ -126,6 +126,9 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).toContain("No operational record has been requested");
     expect(source).toContain('data-layout="room-folio"');
     expect(source).toContain('data-surface="working-folio"');
+    expect(source).not.toContain("admitted rows");
+    expect(source).toContain("Source surface admitted");
+    expect(source).toContain("canonicalSearch");
   });
 
   it("keeps the inhabited responsibility room larger than its working folio", () => {

@@ -21,10 +21,14 @@ House.
 
 The versioned runtime contract in `config/courtos-player-context.v1.json` binds
 the local player to House Pearwick Hall. `uat.config.json` must match that
-contract. This is launch configuration, not a component fallback: a runtime
-request without an explicit House selector fails closed. The current Council
-sidecar does not admit an acting person, so the UI may identify the player House
-while continuing to label the head and Council projection as provisional and
+contract. The normal browser entry derives Pearwick from this launch contract;
+an explicit different House selector fails closed. Successful API envelopes
+carry a separate session context: the local player may inspect source-bounded
+Pearwick House records, but those records are not represented as the personal
+knowledge of an inferred Head, regent, councillor, or responsibility owner.
+The current Council sidecar does not admit an acting person, so correspondence,
+personal reports, dialogue, assignment mutation, and commands remain
+unavailable while the head and Council projection stay provisional and
 non-authoritative.
 
 ## Commands

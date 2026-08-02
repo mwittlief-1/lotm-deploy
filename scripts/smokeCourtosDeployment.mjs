@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import process from "node:process";
+import { chromium } from "playwright-core";
+import mapGenContract from "../config/courtos-mapgen-runtime-contract.v1.json" with { type: "json" };
 
 function argumentsByName(argv) {
   const values = new Map();
@@ -81,6 +83,102 @@ const landingResponse = await request(
 );
 await landingResponse.text();
 
+const runtimeManifestResponse = await request(
+  endpoint("/.well-known/courtos-runtime-v1.json"),
+  "application/json",
+);
+const runtimeManifest = await runtimeManifestResponse.json();
+if (
+  runtimeManifest?.schema_version !== "courtos_runtime_manifest_v1" ||
+  runtimeManifest?.mapgen?.status !== "configured" ||
+  JSON.stringify(runtimeManifest?.mapgen?.contract) !==
+    JSON.stringify(mapGenContract)
+) {
+  throw new Error("The deployed CourtOS runtime does not declare the exact required MapGen contract.");
+}
+const mapGenBaseUrl = new URL(runtimeManifest.mapgen.base_url);
+if (
+  mapGenBaseUrl.protocol !== "https:" ||
+  mapGenBaseUrl.pathname !== "/" ||
+  mapGenBaseUrl.username ||
+  mapGenBaseUrl.password ||
+  mapGenBaseUrl.search ||
+  mapGenBaseUrl.hash
+) {
+  throw new Error("The deployed CourtOS runtime declares an invalid MapGen production origin.");
+}
+
+async function probeMapGenReadiness() {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ extraHTTPHeaders: headers });
+    await page.goto(endpoint("/courtos-home.html").toString(), {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+    const results = [];
+    for (const renderer of mapGenContract.required_renderers) {
+      const rendererUrl = new URL(renderer.path, mapGenBaseUrl);
+      rendererUrl.searchParams.set("embedded", "1");
+      rendererUrl.searchParams.set("courtos", "1");
+      rendererUrl.searchParams.set("parentOrigin", baseUrl.origin);
+      rendererUrl.searchParams.set("theme", mapGenContract.readiness.theme_id);
+      const result = await page.evaluate(
+        ({ src, expectedOrigin, rendererKey, readiness }) =>
+          new Promise((resolve) => {
+            const frame = document.createElement("iframe");
+            frame.hidden = true;
+            frame.sandbox.add("allow-same-origin", "allow-scripts");
+            const finish = (value) => {
+              window.clearTimeout(timeout);
+              window.removeEventListener("message", onMessage);
+              frame.remove();
+              resolve(value);
+            };
+            const onMessage = (event) => {
+              if (event.source !== frame.contentWindow || event.origin !== expectedOrigin) return;
+              const payload = event.data?.payload;
+              if (
+                event.data?.type === readiness.message_type &&
+                payload?.schemaVersion === readiness.schema_version &&
+                payload?.protocolVersion === readiness.protocol_version &&
+                payload?.rendererKey === rendererKey &&
+                payload?.themeId === readiness.theme_id &&
+                payload?.themeSchemaVersion === readiness.theme_schema_version &&
+                payload?.themeVersion === readiness.theme_version &&
+                payload?.firstUsableFrame === readiness.first_usable_frame
+              ) {
+                finish({ status: "pass", rendererKey });
+              }
+            };
+            const timeout = window.setTimeout(
+              () => finish({ status: "timeout", rendererKey }),
+              30_000,
+            );
+            window.addEventListener("message", onMessage);
+            frame.src = src;
+            document.body.append(frame);
+          }),
+        {
+          src: rendererUrl.toString(),
+          expectedOrigin: mapGenBaseUrl.origin,
+          rendererKey: renderer.renderer_key,
+          readiness: mapGenContract.readiness,
+        },
+      );
+      if (result?.status !== "pass") {
+        throw new Error(`MapGen renderer ${renderer.renderer_key} did not reach its first usable frame.`);
+      }
+      results.push(result);
+    }
+    return results;
+  } finally {
+    await browser.close();
+  }
+}
+
+const mapGenChecks = await probeMapGenReadiness();
+
 const apiChecks = [
   {
     name: "courtos",
@@ -124,13 +222,27 @@ const apiChecks = [
         data?.query?.house_id === houseId &&
         data?.read_only === true &&
         data?.command_authority === false &&
-        !Array.isArray(data?.portfolios)
+        !Array.isArray(data?.portfolios) &&
+        ((data?.availability === "not_admitted" && data?.portfolio === null) ||
+          (data?.availability === "admitted" &&
+            data?.portfolio?.house_id === houseId &&
+            data?.portfolio?.association_posture === "ui_admitted" &&
+            Array.isArray(data?.portfolio?.manors) &&
+            data.portfolio.manors.length > 0))
       );
     },
   },
 ];
 
-const checks = [{ name: "landing", status: "pass" }];
+const checks = [
+  { name: "landing", status: "pass" },
+  { name: "runtime-manifest", status: "pass" },
+  ...mapGenChecks.map((check) => ({
+    name: `mapgen:${check.rendererKey}`,
+    status: "pass",
+    protocol: mapGenContract.readiness.protocol_version,
+  })),
+];
 for (const check of apiChecks) {
   const response = await request(check.url, "application/json");
   if (!(response.headers.get("cache-control") ?? "").includes("no-store")) {
@@ -139,6 +251,11 @@ for (const check of apiChecks) {
   const payload = await response.json();
   if (
     payload?.ok !== true ||
+    payload?.context?.schema_version !== "courtos_session_context_v1" ||
+    payload?.context?.selected_house_id !== houseId ||
+    payload?.context?.acting_actor?.status !== "unadmitted" ||
+    payload?.context?.knowledge?.actor_specific_content !== "withheld" ||
+    payload?.context?.capabilities?.issue_commands !== false ||
     payload?.data?.schema_version !== check.schema ||
     !check.validate(payload.data)
   ) {

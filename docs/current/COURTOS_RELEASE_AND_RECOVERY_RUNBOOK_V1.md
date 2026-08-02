@@ -60,9 +60,10 @@ The workflow:
 4. builds using the Vercel production environment;
 5. deploys with `--prod --skip-domain`, so no production domain moves;
 6. verifies through the Vercel API that both deployment URLs belong to the configured CourtOS project and are `READY`;
-7. checks the landing document and all four API contracts on both the staged candidate and the rollback target;
-8. records the source SHA and checksum of the tracked-input verification report; and
-9. retains the immutable URLs, provenance, ownership checks, and smoke evidence as workflow artifacts.
+7. reads each deployment's own runtime manifest and verifies all three MapGen renderers complete the origin-scoped first-usable-frame handshake;
+8. checks the landing document, session context, and all four API contracts on both the staged candidate and the rollback target;
+9. records the source SHA and checksum of the tracked-input verification report; and
+10. retains the immutable URLs, provenance, ownership checks, and smoke evidence as workflow artifacts.
 
 A failed step leaves production routing unchanged.
 
@@ -76,7 +77,9 @@ The workflow smokes the rollback target before routing traffic and the canonical
 
 ## Local smoke
 
-The same smoke contract can run against a local preview or remote candidate:
+The same smoke contract can run against a local preview or remote candidate after
+the build has emitted `/.well-known/courtos-runtime-v1.json` and a Playwright
+Chromium runtime is installed:
 
 ```sh
 node scripts/smokeCourtosDeployment.mjs \

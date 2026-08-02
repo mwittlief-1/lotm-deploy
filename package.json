@@ -8,6 +8,7 @@
     "dev": "vite",
     "prebuild": "npm run courtos:spatial:build",
     "build": "vite build",
+    "courtos:build:production": "node scripts/buildCourtosProduction.mjs",
     "preview": "vite preview",
     "test": "vitest",
     "qa": "node scripts/qaGate.js",

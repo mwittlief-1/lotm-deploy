@@ -1,4 +1,5 @@
 import type { CouncilRoomReadyProjectionV1 } from "../ready/councilRoomReadyProjection";
+import type { CourtOsSessionContextV1 } from "../courtosSessionContext";
 import type { CourtOs1120ReadOnlyProjection } from "./readModels/courtos1120/types";
 import type {
   Household1120ProvenanceRow,
@@ -255,6 +256,7 @@ export function buildHouseholdUatRuntimeModel(input: {
   courtOs: CourtOs1120ReadOnlyProjection;
   household: Household1120ReadOnlyProjection;
   council: CouncilRoomReadyProjectionV1;
+  sessionContext: CourtOsSessionContextV1;
 }): HouseholdUatRuntimeModel {
   const shell = buildCourtOsShellRuntimeModel(input);
   const courtHouseId = shell.house.houseId;

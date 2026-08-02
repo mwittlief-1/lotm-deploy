@@ -132,7 +132,7 @@ export function councilSeatPosition(
 function requestedHouseId(): string | null {
   if (typeof window === "undefined") return null;
   const value = new URLSearchParams(window.location.search).get("houseId")?.trim();
-  return value || null;
+  return value || COURTOS_PLAYER_CONTEXT.house_id;
 }
 
 function sentenceCase(value: string): string {
@@ -1136,7 +1136,7 @@ function RecordDialog({
               <strong>{sourceSurfaceLabel(row.record_key)}</strong>
               <span>
                 {row.admission_state === "projected_read_ready"
-                  ? `${row.row_count} admitted rows`
+                  ? "Source surface admitted"
                   : row.withheld_reason ?? "Withheld pending admission"}
               </span>
             </article>
@@ -1389,7 +1389,7 @@ function AuthorizedHouseholdVerticalSlice() {
         data: buildCourtOsShellRuntimeModel({
           courtOs: courtOsState.data,
           council: councilState.data,
-          playerHouseId: COURTOS_PLAYER_CONTEXT.house_id,
+          sessionContext: courtOsState.context,
         }),
         error: null,
       };
@@ -1414,6 +1414,7 @@ function AuthorizedHouseholdVerticalSlice() {
           courtOs: courtOsState.data,
           household: householdState.data,
           council: councilState.data,
+          sessionContext: courtOsState.context,
         }),
         error: null,
       };
@@ -1492,6 +1493,17 @@ function AuthorizedHouseholdVerticalSlice() {
   }
 
   useEffect(() => {
+    const canonicalSearch = courtOsSearchForRoute(
+      window.location.search,
+      courtOsRouteFromSearch(window.location.search),
+    );
+    if (canonicalSearch !== window.location.search) {
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${canonicalSearch}${window.location.hash}`,
+      );
+    }
     const onPopState = () => {
       detailPushedInSession.current = false;
       setRoute(courtOsRouteFromSearch(window.location.search));

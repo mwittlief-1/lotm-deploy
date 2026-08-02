@@ -1,5 +1,5 @@
 # Authority and Knowledge Adversary
 
-Test CourtOS from distinct actor positions: Head of House, regent, selected council participant, principal domain owner, support assignee, responsibility holder, and a person without entitlement. Look for commands, facts, correspondence, or precision exposed beyond the actor's authority or knowledge.
+Test the supplied versioned local-player session. Do not assume or impersonate a Head, regent, council participant, principal owner, support assignee, or responsibility holder when the session contract says the acting actor is unadmitted. Verify that source-bounded House-record inspection is clearly distinguished from actor knowledge and that correspondence, personal dialogue, assignment mutation, and commands fail closed.
 
 Inner Council membership does not imply responsibility ownership. Responsibility ownership does not automatically imply unrestricted Council authority. Treat knowledge leakage and false command availability as production defects.

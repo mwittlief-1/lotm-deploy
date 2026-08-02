@@ -1,14 +1,22 @@
 import React from "react";
 
+import {
+  isCourtOsSessionContextV1,
+  type CourtOsSessionContextV1,
+} from "../courtosSessionContext";
 import type { CouncilRoomReadyProjectionV1 } from "../ready/councilRoomReadyProjection";
+import {
+  courtOsTimeoutError,
+  createCourtOsRequestDeadline,
+} from "./courtosRequestDeadline";
 
 type CouncilRoom1120ApiResponse =
-  | { ok: true; data: CouncilRoomReadyProjectionV1 }
+  | { ok: true; context: CourtOsSessionContextV1; data: CouncilRoomReadyProjectionV1 }
   | { ok: false; error: { code: string; message: string } };
 
 export type CouncilRoom1120LoadState =
   | { status: "loading"; data: null; error: null }
-  | { status: "ready"; data: CouncilRoomReadyProjectionV1; error: null }
+  | { status: "ready"; context: CourtOsSessionContextV1; data: CouncilRoomReadyProjectionV1; error: null }
   | { status: "blocked"; data: null; error: { code: string; message: string } }
   | { status: "error"; data: null; error: { code: string; message: string } };
 
@@ -34,13 +42,13 @@ export function useCouncilRoom1120Data(
       });
       return;
     }
-    const controller = new AbortController();
+    const deadline = createCourtOsRequestDeadline();
     const params = new URLSearchParams({ houseId });
     setState({ status: "loading", data: null, error: null });
     void fetch(`/api/council-room/1120?${params}`, {
       cache: "no-store",
       headers: { Accept: "application/json" },
-      signal: controller.signal,
+      signal: deadline.signal,
     })
       .then(async (response) => {
         const payload = (await response.json()) as CouncilRoom1120ApiResponse;
@@ -53,10 +61,27 @@ export function useCouncilRoom1120Data(
             : payload.error;
           throw Object.assign(new Error(error.message), { code: error.code });
         }
-        setState({ status: "ready", data: payload.data, error: null });
+        if (
+          !isCourtOsSessionContextV1(payload.context) ||
+          payload.context.selected_house_id !== houseId
+        ) {
+          throw new Error("Council Room session context is invalid.");
+        }
+        setState({ status: "ready", context: payload.context, data: payload.data, error: null });
       })
       .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
+        if (deadline.signal.aborted && !deadline.didTimeOut()) return;
+        if (deadline.didTimeOut()) {
+          setState({
+            status: "error",
+            data: null,
+            error: courtOsTimeoutError(
+              "COUNCIL_ROOM_REQUEST_TIMEOUT",
+              "The Council record",
+            ),
+          });
+          return;
+        }
         setState({
           status: "error",
           data: null,
@@ -65,8 +90,9 @@ export function useCouncilRoom1120Data(
             message: error instanceof Error ? error.message : String(error),
           },
         });
-      });
-    return () => controller.abort();
+      })
+      .finally(() => deadline.clear());
+    return () => deadline.cancel();
   }, [houseId, reloadKey]);
 
   return state;

@@ -10,6 +10,7 @@ You do not implement fixes and must not edit the repository. Your job is to exec
 2. Confirm that every report names the supplied run ID, build ID, and runtime URL. Reject evidence from any substituted development surface, prototype, fixture page, or design-system artifact.
 3. Treat the supplied persona reports as the bounded read-only subagent executions already dispatched in parallel by the runner. Do not rerun or invent a missing lane.
 4. Require exact route, House-selection strategy, actor/authority context, reproduction steps, expected behavior, actual behavior, and evidence for every finding.
+   A fresh browser inherits the versioned local-game session; it is not an anonymous web visitor and requires no login. Evaluate its explicit API session context. When the acting actor is unadmitted, actor-specific gameplay is unavailable coverage—not permission to assume a Head or regent.
 5. Use the independent-verifier report to adjudicate P0/P1 findings and intermittent or subjective P2 findings. A first-pass agent cannot verify its own finding.
 6. Deduplicate findings and classify each as truth, authority, continuity, interaction, presentation, performance, language, accessibility, or resilience.
 7. Return all six required lane results, even if a lane is incomplete, and only a JSON object conforming to the supplied UAT report schema.
