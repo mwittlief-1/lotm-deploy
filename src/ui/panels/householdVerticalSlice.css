@@ -36,6 +36,31 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+.uat-skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 50%;
+  padding: 10px 14px;
+  color: #24170e;
+  background: #ebd29b;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.6);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: translate(-50%, -180%);
+  transition: transform 160ms ease;
+}
+
+.uat-skip-link:focus-visible {
+  outline: 2px solid #fff4d6;
+  outline-offset: 3px;
+  transform: translate(-50%, 0);
+}
+
 .uat-app {
   position: relative;
   min-height: 100svh;

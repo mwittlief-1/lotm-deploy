@@ -1867,12 +1867,17 @@ function AuthorizedHouseholdVerticalSlice({
 
   return (
     <main className="uat-app" data-dialog-open={Boolean(dialog)}>
+      <a className="uat-skip-link" href="#courtos-active-surface">
+        Skip to the current CourtOS surface
+      </a>
       <AppHeader model={model} route={route} />
       <div
         className="uat-venue"
         data-scene={scene}
         data-room-tone={roomToneForScene(scene)}
+        id="courtos-active-surface"
         key={`${model.house.houseId}:${scene}`}
+        tabIndex={-1}
         style={{ backgroundImage: `url("${background}")` }}
       >
         {scene === "council" ? (
