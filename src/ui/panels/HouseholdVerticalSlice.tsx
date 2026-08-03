@@ -663,6 +663,15 @@ function UnavailableResponsibilityScene({
                 <p>{shell.emptyRecordDetail}</p>
               </div>
             </div>
+            <ol className="uat-workspace-leaves" aria-label="Responsibility workspace">
+              {shell.workbench.map((section) => (
+                <li data-leaf={section.key} key={section.key}>
+                  <small>{section.eyebrow}</small>
+                  <strong>{section.title}</strong>
+                  <span>{section.detail}</span>
+                </li>
+              ))}
+            </ol>
             {journeyContext}
           </main>
           <div className="uat-workspace-side">

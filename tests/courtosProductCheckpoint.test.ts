@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   COURTOS_ACCEPTED_P1_PRODUCT_CHECKPOINT,
+  COURTOS_ACCEPTED_P2_1_RESPONSIBILITY_DEPTH_LINEAGE,
   gateCourtOsP1ProductCheckpoint,
+  gateCourtOsP2_1ResponsibilityDepthLineage,
   gateHouseCommandProjectionConsumption,
 } from "../src/courtosProductCheckpoint";
 
@@ -31,6 +33,23 @@ describe("CourtOS P-1 product checkpoint consumer gate", () => {
     ).toEqual({
       status: "withheld",
       reason: "admitted_house_actor_projection_unavailable",
+    });
+  });
+
+  it("requires the complete P-2.1 responsibility-depth lineage", () => {
+    expect(
+      gateCourtOsP2_1ResponsibilityDepthLineage(
+        COURTOS_ACCEPTED_P2_1_RESPONSIBILITY_DEPTH_LINEAGE,
+      ),
+    ).toMatchObject({ status: "accepted" });
+    expect(
+      gateCourtOsP2_1ResponsibilityDepthLineage({
+        ...COURTOS_ACCEPTED_P2_1_RESPONSIBILITY_DEPTH_LINEAGE,
+        works_doctrine_sha256: "0".repeat(64),
+      }),
+    ).toEqual({
+      status: "withheld",
+      reason: "stale_or_mixed_responsibility_depth_lineage",
     });
   });
 });

@@ -1438,6 +1438,53 @@ button:focus-visible {
   line-height: 1.45;
 }
 
+.uat-workspace-leaves {
+  margin: 15px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+  border: 1px solid rgba(177, 124, 54, 0.34);
+  background: rgba(15, 10, 8, 0.48);
+}
+
+.uat-workspace-leaves li {
+  min-height: 123px;
+  padding: 14px 15px;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  border-left: 1px solid rgba(177, 124, 54, 0.28);
+  background:
+    linear-gradient(160deg, rgba(72, 46, 24, 0.16), transparent 54%),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(255,255,255,.018) 28px);
+}
+
+.uat-workspace-leaves li:first-child {
+  border-left: 0;
+}
+
+.uat-workspace-leaves small {
+  color: var(--uat-brass-light);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.uat-workspace-leaves strong {
+  color: #dfc89c;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.uat-workspace-leaves span {
+  color: #a9977e;
+  font-size: 10px;
+  line-height: 1.36;
+}
+
 .uat-membership-context {
   overflow: hidden;
 }
@@ -2294,6 +2341,21 @@ button:focus-visible {
 
   .uat-workspace-body {
     grid-template-columns: 1fr;
+  }
+
+  .uat-workspace-leaves {
+    grid-template-columns: 1fr;
+  }
+
+  .uat-workspace-leaves li,
+  .uat-workspace-leaves li:first-child {
+    min-height: 0;
+    border-top: 1px solid rgba(177, 124, 54, 0.28);
+    border-left: 0;
+  }
+
+  .uat-workspace-leaves li:first-child {
+    border-top: 0;
   }
 
   .uat-workspace-side {

@@ -42,6 +42,11 @@ describe("CourtOS information architecture", () => {
       expect(shell.responsibility.key).toBe(responsibility.key);
       expect(shell.availability).toBe("withheld");
       expect(shell.emptyRecordDetail).toContain("No assignment, status, matter, receipt, or evidence has been invented.");
+      expect(shell.workbench.map((section) => section.key)).toEqual([
+        "record",
+        "plan",
+        "evidence",
+      ]);
     }
     expect(buildCourtOsWorkspaceShell("office_post_appointments").venue).toBe("House Command");
   });
