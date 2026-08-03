@@ -6,6 +6,7 @@ import {
   courtOsDomainForResponsibility,
   courtOsResponsibilityLocation,
 } from "../src/ui/courtosInformationArchitecture";
+import { buildCourtOsWorkspaceShell } from "../src/ui/courtosWorkspaceShell";
 
 describe("CourtOS information architecture", () => {
   it("exposes the authoritative operational rooms in their player-facing order", () => {
@@ -26,6 +27,23 @@ describe("CourtOS information architecture", () => {
     expect(keys).toHaveLength(24);
     expect(new Set(keys).size).toBe(keys.length);
     expect(keys).toContain("office_post_appointments");
+  });
+
+  it("gives each operational room a differentiated visual treatment", () => {
+    const art = COURTOS_DOMAINS.map((domain) => domain.art);
+    const tones = COURTOS_DOMAINS.map((domain) => domain.visualTone);
+    expect(new Set(tones).size).toBe(8);
+    expect(new Set(art).size).toBe(8);
+  });
+
+  it("builds a shared fail-closed workspace shell for every non-Household responsibility", () => {
+    for (const responsibility of COURTOS_RESPONSIBILITIES) {
+      const shell = buildCourtOsWorkspaceShell(responsibility.key);
+      expect(shell.responsibility.key).toBe(responsibility.key);
+      expect(shell.availability).toBe("withheld");
+      expect(shell.emptyRecordDetail).toContain("No assignment, status, matter, receipt, or evidence has been invented.");
+    }
+    expect(buildCourtOsWorkspaceShell("office_post_appointments").venue).toBe("House Command");
   });
 
   it("keeps Office & Post Appointments in House Command", () => {

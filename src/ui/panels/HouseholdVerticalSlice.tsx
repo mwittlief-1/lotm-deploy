@@ -13,6 +13,7 @@ import {
   type CourtOsDomainKey,
   type CourtOsResponsibilityDesignKey,
 } from "../courtosInformationArchitecture";
+import { buildCourtOsWorkspaceShell } from "../courtosWorkspaceShell";
 import {
   COURTOS_INITIAL_ROUTE,
   courtOsDomainRoute,
@@ -437,6 +438,7 @@ function CouncilScene({
         {COURTOS_DOMAINS.map((domain) => (
           <button
             data-domain={domain.key}
+            data-room-tone={domain.visualTone}
             key={domain.key}
             onClick={() => onEnterDomain(domain.key)}
             type="button"
@@ -553,7 +555,11 @@ function DomainRoomScene({
   onOpenResponsibility: (responsibility: CourtOsResponsibilityDesignKey) => void;
 }) {
   return (
-    <section className="uat-scene uat-domain-scene" aria-label={domain.venue}>
+    <section
+      className="uat-scene uat-domain-scene"
+      aria-label={domain.venue}
+      data-room-tone={domain.visualTone}
+    >
       <HouseRoomStandard houseId={houseId} houseName={houseName} />
       <header className="uat-domain-room-hero">
         <small>{domain.label}</small>
@@ -608,11 +614,13 @@ function UnavailableResponsibilityScene({
   onSelect: (responsibility: CourtOsResponsibilityDesignKey) => void;
   journeyContext?: React.ReactNode;
 }) {
-  const responsibility = courtOsResponsibility(responsibilityKey);
+  const shell = buildCourtOsWorkspaceShell(responsibilityKey);
+  const responsibility = shell.responsibility;
   return (
     <section
       aria-label={responsibility.label}
       className="uat-scene uat-responsibility-scene"
+      data-room-tone={domain.visualTone}
       data-responsibility={responsibility.key}
     >
       <HouseRoomStandard houseId={houseId} houseName={houseName} />
@@ -640,26 +648,22 @@ function UnavailableResponsibilityScene({
             <h2>{responsibility.label}</h2>
             <p>{domain.purpose}</p>
           </div>
-          <span data-state="withheld">Record unavailable</span>
+          <span data-state={shell.availability}>{shell.availabilityLabel}</span>
         </header>
         <div className="uat-workspace-body">
           <main>
             <div className="uat-empty-record">
               <span aria-hidden="true">—</span>
               <div>
-                <strong>No admitted operational projection</strong>
-                <p>
-                  CourtOS knows where this responsibility belongs, but no versioned
-                  source view is admitted for this House and scope. No assignment,
-                  status, matter, or evidence has been invented.
-                </p>
+                <strong>{shell.emptyRecordTitle}</strong>
+                <p>{shell.emptyRecordDetail}</p>
               </div>
             </div>
             {journeyContext}
           </main>
           <div className="uat-workspace-side">
             <aside className="uat-authority-card">
-              <small>Scope</small>
+              <small>{shell.scopeLabel}</small>
               <MissingPortrait label="unresolved accountable owner" />
               <strong>No admitted assignment</strong>
               <span>
@@ -670,7 +674,7 @@ function UnavailableResponsibilityScene({
             </aside>
             <section className="uat-cycle-record">
               <small>Source boundary</small>
-              <strong>No substitute report</strong>
+              <strong>{shell.sourceBoundaryLabel}</strong>
               <span>The room will consume its versioned read model when admitted.</span>
             </section>
           </div>
@@ -1442,6 +1446,21 @@ function sceneArt(scene: Scene, houseId: string): string {
   );
 }
 
+function roomToneForScene(scene: Scene): string {
+  const domain = COURTOS_DOMAINS.find((item) => item.key === scene);
+  if (domain) return domain.visualTone;
+  if (
+    scene === "stores" ||
+    scene === "adult_kin" ||
+    scene === "education" ||
+    scene === "service_care"
+  ) {
+    return "hearth";
+  }
+  if (scene === "manor_stewardship") return "estate";
+  return "command";
+}
+
 export interface HouseholdVerticalSliceProps {
   /**
    * Injected from the admitted Journey + Knowledge read port.  Absence means
@@ -1818,6 +1837,7 @@ function AuthorizedHouseholdVerticalSlice({
       <div
         className="uat-venue"
         data-scene={scene}
+        data-room-tone={roomToneForScene(scene)}
         key={`${model.house.houseId}:${scene}`}
         style={{ backgroundImage: `url("${background}")` }}
       >

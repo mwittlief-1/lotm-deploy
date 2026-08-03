@@ -46,6 +46,16 @@ export type CourtOsDomainDefinition = {
   key: CourtOsDomainKey;
   label: string;
   venue: string;
+  /** A semantic treatment token, not an entitlement or source-data claim. */
+  visualTone:
+    | "hearth"
+    | "dynasty"
+    | "estate"
+    | "ledger"
+    | "record"
+    | "readiness"
+    | "audience"
+    | "chapel";
   purpose: string;
   objectLabel: string;
   objectDetail: string;
@@ -59,11 +69,19 @@ export type CourtOsResponsibilityLocation =
 
 const HOUSEHOLD_ART =
   "/assets/council-command-room/household-vertical-slice/household-place-wide-v1.png";
+const DYNASTY_ART =
+  "/assets/council-command-room/command-surfaces/family-tree.png";
 const ESTATE_ART =
   "/assets/council-command-room/command-surfaces/estate-portfolio.png";
+const FINANCE_ART =
+  "/assets/council-command-room/command-surfaces/atlas-table.png";
 const RECORDS_ART =
   "/assets/council-command-room/command-surfaces/dossier-folio.png";
-const COMMAND_ART =
+const READINESS_ART =
+  "/assets/council-command-room/command-surfaces/orders-board.png";
+const AUDIENCE_ART =
+  "/assets/council-command-room/command-surfaces/council-table.png";
+const CHAPEL_ART =
   "/assets/council-command-room/command-surfaces/council-empty-table-plate.png";
 
 export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
@@ -71,6 +89,7 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "household",
     label: "Household",
     venue: "The Household Solar",
+    visualTone: "hearth",
     purpose: "Provision, adult dependants, formation, service, and continuing care.",
     objectLabel: "Hearth & provision chest",
     objectDetail: "The people and ordinary work that sustain the House.",
@@ -86,10 +105,11 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "marriage_dynasty",
     label: "Marriage & Dynasty",
     venue: "The Dynasty Chamber",
+    visualTone: "dynasty",
     purpose: "Marriage planning, family continuity, patronage, hospitality, and gifts.",
     objectLabel: "Sealed family folio",
     objectDetail: "Unions, successors, guests, and cultivated obligations.",
-    art: COMMAND_ART,
+    art: DYNASTY_ART,
     responsibilities: [
       { key: "marriage_dynasty_stewardship", label: "Marriage & Dynasty Stewardship", shortLabel: "Dynasty Stewardship", scope: "house" },
       { key: "patronage_hospitality_gifts", label: "Patronage, Hospitality & Gifts", shortLabel: "Patronage & Hospitality", scope: "house" },
@@ -99,6 +119,7 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "estate_holdings",
     label: "Estate & Holdings",
     venue: "The Estate Office",
+    visualTone: "estate",
     purpose: "Manors, estate fabric, works, franchises, and portfolio stewardship.",
     objectLabel: "Manor model & survey map",
     objectDetail: "The House lands and the work bound to each place.",
@@ -115,10 +136,11 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "resources_finance",
     label: "Resources & Finance",
     venue: "The Counting Chamber",
+    visualTone: "ledger",
     purpose: "Fiscal custody, local accounts, remittance, and revenue rights.",
     objectLabel: "Abacus & account rolls",
     objectDetail: "What entered custody, what moved, and what remains uncertain.",
-    art: COMMAND_ART,
+    art: FINANCE_ART,
     responsibilities: [
       { key: "house_fiscal_administration", label: "House Fiscal Administration", shortLabel: "House Fiscal", scope: "house" },
       { key: "manor_fiscal_administration", label: "Manor Fiscal Administration", shortLabel: "Manor Fiscal", scope: "manor" },
@@ -129,6 +151,7 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "records_correspondence",
     label: "Records & Correspondence",
     venue: "The Records Room",
+    visualTone: "record",
     purpose: "Intake, archive custody, correspondence, dispatch, and source-aware evidence.",
     objectLabel: "Writing desk & archive chest",
     objectDetail: "What arrived, what is preserved, and what may be sent.",
@@ -143,10 +166,11 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "security_readiness",
     label: "Security & Readiness",
     venue: "The Readiness Chamber",
+    visualTone: "readiness",
     purpose: "Protection, training, martial stores, horses, and credible readiness.",
     objectLabel: "Shield & readiness map",
     objectDetail: "The protection of people, places, stores, and obligations.",
-    art: COMMAND_ART,
+    art: READINESS_ART,
     responsibilities: [
       { key: "security_asset_protection", label: "Security & Asset Protection", shortLabel: "Asset Protection", scope: "manor" },
       { key: "martial_readiness_training", label: "Martial Readiness & Training", shortLabel: "Readiness & Training", scope: "portfolio" },
@@ -157,10 +181,11 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "court_relations",
     label: "Court & Relations",
     venue: "The Audience Chamber",
+    visualTone: "audience",
     purpose: "External relationships, court presence, and representation.",
     objectLabel: "Audience chairs & realm map",
     objectDetail: "The people and institutions the House must cultivate or watch.",
-    art: COMMAND_ART,
+    art: AUDIENCE_ART,
     responsibilities: [
       { key: "external_relations_representation", label: "External Relations & Representation", shortLabel: "External Relations", scope: "target" },
     ],
@@ -169,10 +194,11 @@ export const COURTOS_DOMAINS: readonly CourtOsDomainDefinition[] = [
     key: "church",
     label: "Church",
     venue: "The House Chapel",
+    visualTone: "chapel",
     purpose: "Household observance, chaplaincy, rights, and institutional affairs.",
     objectLabel: "Kneeler & chapel book",
     objectDetail: "The House's observance and its exact institutional obligations.",
-    art: COMMAND_ART,
+    art: CHAPEL_ART,
     responsibilities: [
       { key: "household_observance_chaplaincy", label: "Household Observance & Chaplaincy", shortLabel: "Observance & Chaplaincy", scope: "house" },
       { key: "church_rights_institutional_affairs", label: "Church Rights & Institutional Affairs", shortLabel: "Church Rights", scope: "instrument", conditional: true },

@@ -194,6 +194,42 @@ button:focus-visible {
     linear-gradient(180deg, rgba(4, 2, 1, 0.07), transparent 42%, rgba(4, 2, 1, 0.44));
 }
 
+.uat-venue[data-room-tone="dynasty"]::before {
+  background:
+    linear-gradient(90deg, rgba(40, 10, 12, 0.52), transparent 30%, transparent 70%, rgba(40, 10, 12, 0.48)),
+    linear-gradient(180deg, rgba(73, 30, 26, 0.18), transparent 45%, rgba(8, 4, 3, 0.55));
+}
+
+.uat-venue[data-room-tone="ledger"]::before {
+  background:
+    linear-gradient(90deg, rgba(8, 24, 20, 0.58), transparent 32%, transparent 68%, rgba(8, 24, 20, 0.5)),
+    linear-gradient(180deg, rgba(49, 39, 20, 0.18), transparent 45%, rgba(4, 8, 7, 0.56));
+}
+
+.uat-venue[data-room-tone="record"]::before {
+  background:
+    linear-gradient(90deg, rgba(13, 19, 31, 0.6), transparent 30%, transparent 70%, rgba(13, 19, 31, 0.52)),
+    linear-gradient(180deg, rgba(23, 40, 49, 0.16), transparent 45%, rgba(3, 5, 9, 0.6));
+}
+
+.uat-venue[data-room-tone="readiness"]::before {
+  background:
+    linear-gradient(90deg, rgba(37, 24, 12, 0.62), transparent 31%, transparent 69%, rgba(37, 24, 12, 0.56)),
+    linear-gradient(180deg, rgba(103, 53, 27, 0.14), transparent 48%, rgba(8, 5, 3, 0.6));
+}
+
+.uat-venue[data-room-tone="audience"]::before {
+  background:
+    linear-gradient(90deg, rgba(25, 15, 35, 0.58), transparent 30%, transparent 70%, rgba(25, 15, 35, 0.54)),
+    linear-gradient(180deg, rgba(80, 54, 29, 0.16), transparent 45%, rgba(7, 4, 9, 0.58));
+}
+
+.uat-venue[data-room-tone="chapel"]::before {
+  background:
+    linear-gradient(90deg, rgba(21, 31, 22, 0.6), transparent 31%, transparent 69%, rgba(21, 31, 22, 0.56)),
+    linear-gradient(180deg, rgba(91, 81, 48, 0.16), transparent 45%, rgba(3, 7, 4, 0.6));
+}
+
 .uat-venue[data-scene="stores"]::before,
 .uat-venue[data-scene="adult_kin"]::before,
 .uat-venue[data-scene="education"]::before,
