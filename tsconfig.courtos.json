@@ -11,6 +11,7 @@
     "api/household/1120.ts",
     "api/spatial/1120.ts",
     "src/courtosPlayerContext.ts",
+    "src/courtosProductCheckpoint.ts",
     "src/courtosSessionContext.ts",
     "src/courtos-home.tsx",
     "src/ready/councilRoomReadyProjection.ts",

@@ -30,6 +30,10 @@ import {
 } from "../courtosShellModel";
 import { COURTOS_PLAYER_CONTEXT } from "../../courtosPlayerContext";
 import {
+  COURTOS_ACCEPTED_P1_PRODUCT_CHECKPOINT,
+  gateHouseCommandProjectionConsumption,
+} from "../../courtosProductCheckpoint";
+import {
   councilRoomArtForHouse,
   houseIdentityAssets,
 } from "../houseIdentityAssets";
@@ -687,12 +691,21 @@ function UnavailableResponsibilityScene({
 function ReservedCourtOsSurface({
   scene,
   journeyContext,
+  hasAdmittedHouseActorProjection = false,
 }: {
   scene: "house_command" | "council_docket";
   journeyContext?: React.ReactNode;
+  /** A future admitted Track-2 projection, never inferred from Council seats. */
+  hasAdmittedHouseActorProjection?: boolean;
 }) {
   const command = scene === "house_command";
   const appointments = courtOsResponsibility("office_post_appointments");
+  const houseCommandGate = command
+    ? gateHouseCommandProjectionConsumption({
+        checkpoint: COURTOS_ACCEPTED_P1_PRODUCT_CHECKPOINT,
+        has_admitted_house_actor_projection: hasAdmittedHouseActorProjection,
+      })
+    : null;
   return (
     <section className="uat-scene uat-reserved-scene" aria-label={command ? "House Command" : "Council Docket"}>
       <div className={journeyContext ? "uat-reserved-content--with-journey" : undefined}>
@@ -703,21 +716,33 @@ function ReservedCourtOsSurface({
             ? "Assignments, delegation, scopes, authority bounds, and House-wide controls belong here."
             : "The docket is compiled from eligible domain Matters and reports at the triennial break."}
         </p>
-        <strong>
-          {command
-            ? "The governance read view is not yet available."
-            : "No docket is available outside an admitted Council synthesis."}
-        </strong>
+        <strong>{command
+          ? houseCommandGate?.status === "accepted"
+            ? "An admitted governance projection is ready for controlled consumption."
+            : "Authority and planning controls are withheld pending an admitted House-and-actor projection."
+          : "No docket is available outside an admitted Council synthesis."}</strong>
         {command ? (
-          <article className="uat-command-responsibility">
-            <small>Assignable House Command responsibility</small>
-            <h3>{appointments.label}</h3>
-            <p>
-              Exact appointing scopes, vacancies, continuation, candidate review,
-              removal, terms, and handover belong here. The governance read view is
-              not yet admitted, so no office state is inferred.
-            </p>
-          </article>
+          <div className="uat-command-gates">
+            <article className="uat-command-responsibility">
+              <small>P-1 product checkpoint</small>
+              <h3>Shared planning boundary verified</h3>
+              <p>
+                Authority &amp; Matter, commitment &amp; economic lifecycle, and the
+                24-responsibility closure matrix are pinned as one accepted release.
+                Any stale or mixed identity withholds this surface.
+              </p>
+            </article>
+            <article className="uat-command-responsibility">
+              <small>Assignable House Command responsibility</small>
+              <h3>{appointments.label}</h3>
+              <p>
+                Exact appointing scopes, vacancies, continuation, candidate review,
+                removal, terms, and handover belong here. No office state, actor,
+                Matter, or available action is inferred before the House-scoped
+                authority projection is admitted.
+              </p>
+            </article>
+          </div>
         ) : null}
         {command ? journeyContext : null}
       </div>
@@ -1854,6 +1879,7 @@ function AuthorizedHouseholdVerticalSlice({
         ) : null}
         {scene === "house_command" || scene === "council_docket" ? (
           <ReservedCourtOsSurface
+            hasAdmittedHouseActorProjection={false}
             journeyContext={
               scene === "house_command" && journeyCourtOsModel ? (
                 <JourneyHouseCommandContext

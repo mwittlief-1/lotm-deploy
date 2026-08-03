@@ -564,6 +564,16 @@ button:focus-visible {
   background: rgba(27, 17, 11, 0.76);
 }
 
+.uat-command-gates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.uat-command-gates .uat-command-responsibility {
+  margin-top: 22px;
+}
+
 .uat-command-responsibility h3 {
   margin: 6px 0;
   color: #eddec0;
