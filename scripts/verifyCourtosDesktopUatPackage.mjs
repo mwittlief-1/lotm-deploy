@@ -15,6 +15,17 @@ const appPath = path.resolve(
 const resources = path.join(appPath, "Contents/Resources");
 const asarPath = path.join(resources, "app.asar");
 
+async function sha256File(filePath) {
+  const hash = createHash("sha256");
+  await new Promise((resolvePromise, reject) => {
+    const stream = fs.createReadStream(filePath);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", resolvePromise);
+  });
+  return hash.digest("hex");
+}
+
 if (!fs.existsSync(asarPath)) throw new Error(`Packaged CourtOS app is missing app.asar: ${asarPath}`);
 
 const stagedAsarBinary = "/private/tmp/merecross-courtos-desktop-staging/node_modules/.bin/asar";
@@ -97,6 +108,56 @@ for (const forbidden of ["data/uat", "data/genrun", "data/ready", "data/map/xmap
 }
 console.log("Verified unified immutable SQLite and absence of legacy runtime fan-out.");
 
+const expectedScribeManifest = JSON.parse(
+  fs.readFileSync(path.join(root, "config/courtos-scribe-native-assets.v1.json"), "utf8"),
+);
+const packagedScribeManifestPath = path.join(resources, "courtos-scribe/model-manifest.json");
+if (!fs.existsSync(packagedScribeManifestPath)) {
+  throw new Error("Packaged CourtOS native Scribe manifest is missing.");
+}
+const packagedScribeManifest = JSON.parse(
+  fs.readFileSync(packagedScribeManifestPath, "utf8"),
+);
+if (JSON.stringify(packagedScribeManifest) !== JSON.stringify(expectedScribeManifest)) {
+  throw new Error("Packaged CourtOS native Scribe manifest does not match the tracked build contract.");
+}
+const scribeRoot = path.join(resources, "courtos-scribe");
+const scribeModelPath = path.join(
+  scribeRoot,
+  "local-models",
+  packagedScribeManifest.modelFile,
+);
+const scribeRuntimeRoot = path.join(
+  scribeRoot,
+  "local-runtime",
+  packagedScribeManifest.runtime.directory,
+);
+const scribeCliPath = path.join(scribeRuntimeRoot, packagedScribeManifest.runtime.binaryPath);
+const scribeServerPath = path.join(scribeRuntimeRoot, packagedScribeManifest.runtime.serverPath);
+const modelStats = fs.statSync(scribeModelPath);
+if (modelStats.size !== packagedScribeManifest.expectedDiskBytes) {
+  throw new Error(
+    `Packaged CourtOS Scribe model size mismatch: expected ${packagedScribeManifest.expectedDiskBytes}, got ${modelStats.size}.`,
+  );
+}
+for (const [label, filePath, expectedSha256] of [
+  ["model", scribeModelPath, packagedScribeManifest.expectedSha256],
+  ["CLI", scribeCliPath, packagedScribeManifest.runtime.binarySha256],
+  ["server", scribeServerPath, packagedScribeManifest.runtime.serverSha256],
+]) {
+  const stats = fs.statSync(filePath);
+  if (label !== "model" && (stats.mode & 0o111) === 0) {
+    throw new Error(`Packaged CourtOS Scribe ${label} is not executable.`);
+  }
+  const actualSha256 = await sha256File(filePath);
+  if (actualSha256 !== expectedSha256) {
+    throw new Error(
+      `Packaged CourtOS Scribe ${label} SHA-256 mismatch: expected ${expectedSha256}, got ${actualSha256}.`,
+    );
+  }
+}
+console.log("Verified offline native Scribe model, CLI, server, byte size, executable modes, and SHA-256 identities.");
+
 const exportManifest = JSON.parse(
   fs.readFileSync(
     path.join(resources, "data/map/mapgen_exports/courtos_mapgen_export_manifest_v1.json"),
@@ -110,5 +171,5 @@ for (const entry of exportManifest.exports ?? []) {
 }
 
 console.log(
-  `Verified CourtOS desktop UAT package: 32 rooms, one immutable Foundation A database, bundled MapGen, ${exportManifest.exports?.length ?? 0} manifest-selected exports, non-promotable workspace posture.`,
+  `Verified CourtOS desktop UAT package: 32 rooms, one immutable Foundation A database, bundled MapGen, ${exportManifest.exports?.length ?? 0} manifest-selected exports, pinned offline Scribe, non-promotable workspace posture.`,
 );
