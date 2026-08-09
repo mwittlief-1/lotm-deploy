@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync } from "node:fs";
 import { cp, mkdir, readFile, rm, stat } from "node:fs/promises";
 import { execFile } from "node:child_process";
+import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
 
@@ -12,9 +13,18 @@ const repositoryRoot = resolve(desktopRoot, "..");
 const stageRoot = process.env.COURTOS_DESKTOP_STAGING_ROOT
   ? resolve(process.env.COURTOS_DESKTOP_STAGING_ROOT)
   : "/private/tmp/merecross-courtos-desktop-staging";
-const scribeAssetRoot = process.env.COURTOS_SCRIBE_ASSET_ROOT
-  ? resolve(process.env.COURTOS_SCRIBE_ASSET_ROOT)
-  : resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1");
+const scribeAssetCandidates = [
+  process.env.COURTOS_SCRIBE_ASSET_ROOT
+    ? resolve(process.env.COURTOS_SCRIBE_ASSET_ROOT)
+    : null,
+  resolve(homedir(), "Library/Caches/Merecross/courtos-scribe/v1"),
+  resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1"),
+].filter(Boolean);
+const scribeAssetRoot = scribeAssetCandidates.find((candidate) =>
+  existsSync(resolve(candidate, "local-models/Qwen3-4B-Instruct-Q4_K_M.gguf")) &&
+  existsSync(resolve(candidate, "local-runtime/llama-b10099/llama-cli")) &&
+  existsSync(resolve(candidate, "local-runtime/llama-b10099/llama-server")),
+);
 const scribeManifestPath = resolve(
   repositoryRoot,
   "config/courtos-scribe-native-assets.v1.json",
@@ -32,6 +42,11 @@ async function sha256File(source) {
 }
 
 async function verifyScribeAssets() {
+  if (!scribeAssetRoot) {
+    throw new Error(
+      "CourtOS Scribe assets are unavailable. Set COURTOS_SCRIBE_ASSET_ROOT or provision ~/Library/Caches/Merecross/courtos-scribe/v1.",
+    );
+  }
   const manifest = JSON.parse(await readFile(scribeManifestPath, "utf8"));
   if (
     manifest.manifestVersion !== "courtos-native-scribe-manifest-v1" ||
