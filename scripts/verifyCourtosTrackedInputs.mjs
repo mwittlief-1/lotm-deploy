@@ -66,6 +66,9 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/verifyCourtosMapGenConfiguration.mjs",
   "scripts/verifyCourtosDesktopUatPackage.mjs",
   "scripts/verifyCourtosRoomAssets.mjs",
+  "data/genrun/phase_five_manor_operations_uat1_admission_v1/condition_observation_candidate_v1.csv",
+  "data/genrun/phase_five_manor_operations_uat1_admission_v1/discrete_facility_registry_reconciled_v1.csv",
+  "data/genrun/phase_five_manor_operations_uat1_admission_v1/project_reconstruction_candidate_v1.csv",
 ];
 const IMPORT_EXTENSIONS = [
   "",
