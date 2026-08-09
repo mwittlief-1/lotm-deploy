@@ -1,0 +1,38 @@
+{
+  "artifact_id": "phase_five_foundation_a_uat_24_responsibility_authority_admission_v1",
+  "status": "foundation_a_uat_admitted_resolved_authority_not_canon",
+  "effective_date": "1120-01-01",
+  "counts": {
+    "resolved_authority_instances": 10750,
+    "responsibility_types": 24,
+    "withheld_exceptions": 716,
+    "types_with_resolved_instances": 20,
+    "types_conditional_only": 3,
+    "types_opening_empty": 1
+  },
+  "assertions": {
+    "exactly_24_types": true,
+    "all_resolved_have_named_owner": true,
+    "all_source_candidate_status_preserved": true,
+    "all_issues_withheld": true
+  },
+  "source_inputs": [
+    {
+      "path": "data/genrun/phase_five_current_assignment_reconciliation_candidate_v1/accountable_owner_candidate_relationships_v1.csv",
+      "sha256": "835929c779c756c09e53c6d924de5c470b73c15ec2c671e4c6be9961a20b0c2b"
+    },
+    {
+      "path": "data/genrun/phase_five_current_assignment_reconciliation_candidate_v1/responsibility_reconciliation_coverage_v1.csv",
+      "sha256": "8a1b48a8ec6fa84fba9382846c9d78fba679f7cef35b4374c123c225bf11ff78"
+    },
+    {
+      "path": "data/genrun/phase_five_current_assignment_reconciliation_candidate_v1/withheld_vacancy_collision_unknowns_v1.csv",
+      "sha256": "d8808aa0af4ce28a115714587fbd3bf00f2b9e5fc14ba649f5dc69ccf740aff7"
+    },
+    {
+      "path": "docs/current/PHASE_FIVE_COURTOS_RESPONSIBILITY_CONTROL_PLANE_REGISTRY_V3.json",
+      "sha256": "68e0f7dd7ea13f574f43ddba667d43edcd02e414f701687a3843f603c8b8228a"
+    }
+  ],
+  "non_promotion_boundary": "This Foundation A UAT release admits only resolved responsibility ownership for UAT consumption. It creates no source, office, remuneration, legal, fiscal, PAS, runtime, canon, or production authority."
+}

@@ -3,6 +3,8 @@
 # reviewable while clean clones and Vercel builds can materialize them.
 data/uat/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
 data/genrun/foundation_a_household_runtime_release_v1/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
+data/genrun/foundation_a_household_uat1_release_v1/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
+data/genrun/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
 data/genrun/t0_realm_residence_event_state_v1/*.sqlite filter=lfs diff=lfs merge=lfs -text
 data/genrun/t0_realm_residence_event_state_v1/PersonResidenceCurrentState__c.jsonl filter=lfs diff=lfs merge=lfs -text
 data/map/mapgen_exports/pearwick_microhex_pilot_v1.json filter=lfs diff=lfs merge=lfs -text

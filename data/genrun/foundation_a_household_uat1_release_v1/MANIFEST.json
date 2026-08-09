@@ -1,0 +1,65 @@
+{
+  "package_id": "foundation_a_household_uat1_release_v1",
+  "schema_version": "foundation_a_household_uat1_release_v1",
+  "generation_id": "aeb8937c65b31c11c1980df8ba1406ff09702b20ae28a19fd3b6f2e0928c2195",
+  "effective_date": "1120-01-01",
+  "release_status": "foundation_a_uat1_admitted_read_model",
+  "release_boundary": "Read-only player-planning UAT1 release. It is not a historical 1120 successor, canonical outcome, simulator output, or write authority.",
+  "source_inputs": [
+    {
+      "role": "admitted_household_uat_manifest",
+      "path": "data/genrun/phase_five_household_foundation_a_uat_admission_v1/MANIFEST.json",
+      "sha256": "1ca1926dbc3adab05244cb8b843964343c70dfcc84d63c294527ad2269fb70db"
+    },
+    {
+      "role": "admitted_household_uat_source",
+      "path": "data/genrun/phase_five_household_foundation_a_uat_admission_v1/phase_five_household_foundation_a_uat_admission_v1.sqlite",
+      "sha256": "cc062f25f2ab78a970cc203c10f82d726a9eed5404f8d4124c6f64a791a81800"
+    },
+    {
+      "role": "education_uat1_backcast_manifest",
+      "path": "data/genrun/phase_five_education_1117_1119_backcast_uat1_v1/MANIFEST.json",
+      "sha256": "cab1be85a4c35e93aa9d058309ca0eea85682667afbd9eef0a2e281001eb20d1"
+    },
+    {
+      "role": "education_uat1_backcast_source",
+      "path": "data/genrun/phase_five_education_1117_1119_backcast_uat1_v1/phase_five_education_1117_1119_backcast_uat1_v1.sqlite",
+      "sha256": "6aaba06190dc865fffb2034c6bee0ae68cf1bac2cf9748c445f3941e760e46f2"
+    },
+    {
+      "role": "health_uat1_backcast_manifest",
+      "path": "data/genrun/phase_five_health_1117_1119_backcast_uat1_v1/MANIFEST.json",
+      "sha256": "de2c5d550b56846db8f241a715d0f60691846c9a5c059816a0dd2ca483f1c663"
+    },
+    {
+      "role": "health_uat1_backcast_source",
+      "path": "data/genrun/phase_five_health_1117_1119_backcast_uat1_v1/phase_five_health_1117_1119_backcast_uat1_v1.sqlite",
+      "sha256": "587dbd1c4b080c97aa7181a5c47d6200768290a91fa8c5056afe5dc5e0d792d3"
+    }
+  ],
+  "module_dispositions": {
+    "membership": "admitted_foundation_a_uat",
+    "adult_kin": "admitted_foundation_a_uat_resolved_rows_only",
+    "service_care": "admitted_foundation_a_uat_manager_bound_house_scope",
+    "education_arrangements": "admitted_foundation_a_uat",
+    "responsibility_authority": "admitted_foundation_a_uat_resolved_household_scope",
+    "house_manor_scope": "admitted_foundation_a_uat_read_only",
+    "stores_static_opening_positions": "admitted_foundation_a_uat_static_read_only",
+    "matters": "opening_empty",
+    "education_progress_reports": "provisional_admitted_foundation_a_uat1_fuzzy_only",
+    "health_cycle_receipts": "provisional_admitted_foundation_a_uat1_internal_only",
+    "health_cycle_reports": "provisional_admitted_foundation_a_uat1_deterministic_manager_summary"
+  },
+  "explicit_withholds": {
+    "education_raw_progress_coordinates": "withheld_non_player_visible_even_in_uat1",
+    "education_player_report_prose": "withheld_pending_separate_SLM_presentation_layer",
+    "health_raw_severity_and_coverage_math": "withheld_non_player_visible_even_in_uat1",
+    "stores_custody_reservation_movement_and_history": "withheld_pending_uat2_lifecycle_and_receipts",
+    "opening_matters": "empty_at_opening_forward_runtime_only",
+    "planning_writes": "withheld_pending_shared_authority_and_commitment_boundary"
+  },
+  "artifact": {
+    "path": "data/genrun/foundation_a_household_uat1_release_v1/generations/aeb8937c65b31c11c1980df8ba1406ff09702b20ae28a19fd3b6f2e0928c2195/foundation_a_household_uat1_release_v1.sqlite",
+    "sha256": "0907ed72bb1379f7e85a02d26047503e663715565f1e6ea74f8349115e7f45b3"
+  }
+}

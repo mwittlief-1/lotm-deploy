@@ -20,7 +20,9 @@ const ENTRYPOINTS = [
 ];
 const RUNTIME_DATA_PACKAGES = [
   "data/genrun/foundation_a_household_runtime_release_v1",
+  "data/genrun/foundation_a_household_uat1_release_v1",
   "data/genrun/phase_five_courtos_alternate_steward_eligibility_admission_v1",
+  "data/genrun/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1",
   "data/genrun/phase_five_foundation_a_uat_house_manor_scope_admission_v1",
   "data/genrun/phase_five_church_observance_rights_uat1_admission_v1",
   "data/genrun/phase_five_conditional_estate_governance_uat1_admission_v1",
