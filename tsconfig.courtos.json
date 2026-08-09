@@ -30,6 +30,7 @@
     "src/server/courtosPlanning/sqlitePlanningStore.ts",
     "src/server/courtosFoundationA/unifiedRelease.ts",
     "src/server/courtosPlayerStore.ts",
+    "src/server/worldRuntime/worldReleaseBoundary.ts",
     "src/sim/domains/journey/journeyContracts.ts",
     "src/sim/domains/journey/journeyFoundationResolver.ts",
     "src/sim/domains/journey/journeyFoundationSourceAdapter.node.ts",

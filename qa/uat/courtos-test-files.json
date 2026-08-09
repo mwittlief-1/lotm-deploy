@@ -16,6 +16,7 @@
     "tests/server/courtosPlanningLifecycle.test.ts",
     "tests/server/courtosPlayerStore.test.ts",
     "tests/server/courtosSpatialVisualService.test.ts",
+    "tests/server/courtosWorldReleaseBoundary.test.ts",
     "tests/server/responsibilityWorkspaceProjection.test.ts",
     "tests/sim/phase_five_journey_domain_adapter.test.ts",
     "tests/sim/phase_five_journey_foundation_resolver.test.ts",
