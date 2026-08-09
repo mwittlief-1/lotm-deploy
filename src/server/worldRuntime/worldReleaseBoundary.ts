@@ -102,17 +102,18 @@ export async function inspectAdmittedWorldRelease(
   try {
     requireBoundary(database.pragma("integrity_check", { simple: true }) === "ok", "sqlite_integrity_failed");
     requireBoundary(database.pragma("application_id", { simple: true }) === 1296257603, "sqlite_application_mismatch");
+    const metadataRows = database.prepare("SELECT key, value FROM world_release_metadata_v1").all() as Record<string, unknown>[];
     const metadata = Object.fromEntries(
-      database.prepare("SELECT key, value FROM world_release_metadata_v1").all()
-        .map((row: Record<string, unknown>) => [String(row.key), String(row.value)]),
+      metadataRows.map((row) => [String(row.key), String(row.value)]),
     );
     requireBoundary(metadata.generation_id === manifest.generation_id, "embedded_generation_mismatch");
     requireBoundary(metadata.effective_date === manifest.effective_date, "embedded_effective_date_mismatch");
     requireBoundary(metadata.release_posture === "admitted", "embedded_posture_mismatch");
     requireBoundary(metadata.schema_version === manifest.schema_version, "embedded_schema_mismatch");
 
-    const contracts = database.prepare(`SELECT contract_id, package_id, schema_version, table_names_json
-      FROM world_release_contract_v1 ORDER BY contract_id`).all().map((row: Record<string, unknown>) => {
+    const contractRows = database.prepare(`SELECT contract_id, package_id, schema_version, table_names_json
+      FROM world_release_contract_v1 ORDER BY contract_id`).all() as Record<string, unknown>[];
+    const contracts = contractRows.map((row) => {
       let tableNames: unknown;
       try {
         tableNames = JSON.parse(String(row.table_names_json));
