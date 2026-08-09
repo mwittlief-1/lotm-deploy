@@ -271,6 +271,10 @@ const bundledMapGenFiles = [
   ...bundledMapGenInputs.entries,
   ...bundledMapGenInputs.directories.flatMap((directory) => repositoryFilesUnder(directory)),
 ];
+const courtOsTsConfig = JSON.parse(
+  fs.readFileSync(absolute("tsconfig.courtos.json"), "utf8"),
+);
+const typecheckInputs = courtOsTsConfig.files ?? [];
 const testManifest = JSON.parse(
   fs.readFileSync(absolute("qa/uat/courtos-test-files.json"), "utf8"),
 );
@@ -301,6 +305,7 @@ const requiredTrackedInputs = [
     ...qaPackageFiles,
     ...runtimeDataPackageFiles,
     ...bundledMapGenFiles,
+    ...typecheckInputs,
     ...testClosure.files,
     ...testSupportFiles,
     ...preflightInputs,
