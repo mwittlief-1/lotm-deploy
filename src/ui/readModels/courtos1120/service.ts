@@ -173,6 +173,19 @@ export class CourtOs1120ReadModel implements CourtOs1120ReadModelSessionContract
     return new CourtOs1120ReadModel(databasePath, driver);
   }
 
+  /**
+   * Opens the exact CourtOS tables copied into an already verified immutable
+   * Foundation A release. The outer release reader owns artifact hashing and
+   * exact source-identity validation before this method may be called.
+   */
+  static async openVerifiedEmbeddedCopy(
+    databasePath: string,
+  ): Promise<CourtOs1120ReadModel> {
+    const driver = new NativeSqliteReadonlyDriver(databasePath);
+    await driver.assertReadPolicy();
+    return new CourtOs1120ReadModel(databasePath, driver);
+  }
+
   async projection(
     input: {
       entityId?: string | null;

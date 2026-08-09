@@ -22,9 +22,17 @@ function serviceStub(): CourtOs1120ApiService {
       schema_version: "council_room_ready_projection_v1",
       query: input,
     })),
+    responsibilityWorkspace: vi.fn(async (input) => ({
+      schema_version: "courtos_responsibility_workspace_projection_v1",
+      query: input,
+    })),
     spatial: vi.fn(async (input) => ({
       schema_version: "courtos_spatial_house_projection_v1",
       query: { house_id: input.houseId },
+    })),
+    spatialVisual: vi.fn(async (input) => ({
+      schema_version: "courtos_spatial_visual_proof_v1",
+      query: input,
     })),
     close: vi.fn(async () => undefined),
   };
@@ -32,7 +40,7 @@ function serviceStub(): CourtOs1120ApiService {
 
 describe("CourtOS 1120 provider-neutral endpoint contract", () => {
   it("preserves GET-only, no-store JSON behavior for every endpoint", async () => {
-    for (const endpoint of ["courtos", "household", "council-room", "spatial"] as const) {
+    for (const endpoint of ["courtos", "household", "council-room", "responsibility-workspace", "spatial", "spatial-visual"] as const) {
       const service = serviceStub();
       const result = await handleCourtOs1120Request(
         endpoint,
@@ -53,7 +61,9 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       expect(service.courtOs).not.toHaveBeenCalled();
       expect(service.household).not.toHaveBeenCalled();
       expect(service.councilRoom).not.toHaveBeenCalled();
+      expect(service.responsibilityWorkspace).not.toHaveBeenCalled();
       expect(service.spatial).not.toHaveBeenCalled();
+      expect(service.spatialVisual).not.toHaveBeenCalled();
     }
   });
 
@@ -160,6 +170,32 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
     expect(service.councilRoom).not.toHaveBeenCalled();
   });
 
+  it("requires a House and canonical responsibility selector", async () => {
+    const service = serviceStub();
+    const missing = await handleCourtOs1120Request(
+      "responsibility-workspace",
+      { method: "GET", url: "https://example.test/api/responsibilities/1120?houseId=h1" },
+      service,
+    );
+    expect(missing.status).toBe(400);
+    const invalid = await handleCourtOs1120Request(
+      "responsibility-workspace",
+      { method: "GET", url: "https://example.test/api/responsibilities/1120?houseId=h1&responsibility=verification_synthesis" },
+      service,
+    );
+    expect(invalid.status).toBe(400);
+    const ready = await handleCourtOs1120Request(
+      "responsibility-workspace",
+      { method: "GET", url: "https://example.test/api/responsibilities/1120?houseId=h1&responsibility=records_archives" },
+      service,
+    );
+    expect(ready.status).toBe(200);
+    expect(service.responsibilityWorkspace).toHaveBeenCalledWith({
+      houseId: "h1",
+      responsibility: "records_archives",
+    });
+  });
+
   it("requires a House-scoped spatial request", async () => {
     const service = serviceStub();
     const missing = await handleCourtOs1120Request(
@@ -179,13 +215,36 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
     expect(service.spatial).not.toHaveBeenCalled();
   });
 
+  it("requires an admitted House, manor, and explicit LOD for visual geography", async () => {
+    const service = serviceStub();
+    const missing = await handleCourtOs1120Request(
+      "spatial-visual",
+      { method: "GET", url: "https://example.test/api/spatial/1120/visual?houseId=h1" },
+      service,
+    );
+    expect(missing.status).toBe(400);
+    expect(service.spatialVisual).not.toHaveBeenCalled();
+
+    const ready = await handleCourtOs1120Request(
+      "spatial-visual",
+      { method: "GET", url: "https://example.test/api/spatial/1120/visual?houseId=h1&manorId=m1&lod=mid_hex&parentHexId=hx_1" },
+      service,
+    );
+    expect(ready.status).toBe(200);
+    expect(service.spatialVisual).toHaveBeenCalledWith({
+      houseId: "h1", manorId: "m1", lod: "mid_hex", parentHexId: "hx_1",
+    });
+  });
+
   it("maps source failures to the endpoint-specific existing error contracts", async () => {
     const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const cases = [
       ["courtos", "COURTOS_READ_MODEL_UNAVAILABLE", "courtOs"],
       ["household", "HOUSEHOLD_READ_MODEL_UNAVAILABLE", "household"],
       ["council-room", "COUNCIL_ROOM_SOURCE_UNAVAILABLE", "councilRoom"],
+      ["responsibility-workspace", "RESPONSIBILITY_WORKSPACE_SOURCE_UNAVAILABLE", "responsibilityWorkspace"],
       ["spatial", "SPATIAL_READ_MODEL_UNAVAILABLE", "spatial"],
+      ["spatial-visual", "SPATIAL_VISUAL_PROOF_UNAVAILABLE", "spatialVisual"],
     ] as const;
     for (const [endpoint, code, method] of cases) {
       const service = serviceStub();
@@ -193,6 +252,10 @@ describe("CourtOS 1120 provider-neutral endpoint contract", () => {
       const query =
         endpoint === "household"
           ? "?householdEntityId=e1&houseId=h1"
+          : endpoint === "responsibility-workspace"
+            ? "?houseId=h1&responsibility=records_archives"
+          : endpoint === "spatial-visual"
+            ? "?houseId=h1&manorId=m1&lod=macro"
           : "?houseId=h1";
       const result = await handleCourtOs1120Request(
         endpoint,

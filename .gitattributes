@@ -2,9 +2,15 @@
 # binary inputs. Keep their bytes in Git LFS so ordinary Git history stays
 # reviewable while clean clones and Vercel builds can materialize them.
 data/uat/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
+data/genrun/foundation_a_household_runtime_release_v1/**/*.sqlite filter=lfs diff=lfs merge=lfs -text
 data/genrun/t0_realm_residence_event_state_v1/*.sqlite filter=lfs diff=lfs merge=lfs -text
 data/genrun/t0_realm_residence_event_state_v1/PersonResidenceCurrentState__c.jsonl filter=lfs diff=lfs merge=lfs -text
 data/map/mapgen_exports/pearwick_microhex_pilot_v1.json filter=lfs diff=lfs merge=lfs -text
+data/map/mapgen_exports/roadcote_microhex_pilot_v1.json filter=lfs diff=lfs merge=lfs -text
 data/ready/world_1120_turn0/readmodels/council_room_ready_index_v1/*.json filter=lfs diff=lfs merge=lfs -text
 public/assets/council-command-room/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/assets/heraldry/**/*.png filter=lfs diff=lfs merge=lfs -text
+public/assets/fiscal-office/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/assets/courtos/rooms/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/assets/mapgen-landscape/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/assets/mapgen-manor-v2/**/*.png filter=lfs diff=lfs merge=lfs -text

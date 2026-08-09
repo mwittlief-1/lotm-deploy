@@ -26,7 +26,13 @@ for (const relativePath of manifest.support_files ?? []) {
 
 const result = spawnSync(
   process.execPath,
-  ["node_modules/vitest/vitest.mjs", "run", ...manifest.files],
+  [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--config",
+    "vitest.courtos.config.ts",
+    ...manifest.files,
+  ],
   { cwd: ROOT, stdio: "inherit", env: process.env },
 );
 process.exit(result.status ?? 1);

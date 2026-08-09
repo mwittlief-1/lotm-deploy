@@ -1,0 +1,33 @@
+{
+  "package": "phase_five_security_readiness_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "runtime_authority": false,
+  "counts": {
+    "authority_assignments": 2148,
+    "security_authority_assignments": 1278,
+    "martial_readiness_authority_assignments": 435,
+    "martial_stores_authority_assignments": 435,
+    "house_manor_scope_rows": 823,
+    "security_facilities": 229,
+    "named_posts": 55,
+    "functional_custody": 159,
+    "fortification_profiles": 8,
+    "martial_equipment_rows": 1250,
+    "martial_service_claims": 1250,
+    "lcu_pool_controls": 802
+  },
+  "source_packages": {
+    "authority": "data/genrun/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1.sqlite",
+    "house_manor_scope": "data/genrun/phase_five_foundation_a_uat_house_manor_scope_admission_v1/phase_five_foundation_a_uat_house_manor_scope_admission_v1.sqlite",
+    "security_operating_state": "data/genrun/t0_security_operating_state_materialized_v1",
+    "martial_equipment": "data/genrun/t0_martial_equipment_readiness_admission_candidate_v1",
+    "martial_readiness": "data/genrun/t0_martial_readiness_closure_candidate_v1"
+  },
+  "boundaries": [
+    "UAT1 read model only",
+    "security facility/post/fortification identities and readiness bands are visible without implying a call to arms",
+    "LCU service claims are pooled annual capacity evidence; no activation or double allocation occurs",
+    "no garrison, armory, horse inventory, summons, GL posting, ART mutation, or runtime authority"
+  ]
+}

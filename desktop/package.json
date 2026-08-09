@@ -1,0 +1,27 @@
+{
+  "name": "merecross-courtos-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.mjs",
+  "scripts": {
+    "build:renderer": "node ../scripts/stageCourtosRoomAssets.mjs && vite build --config vite.renderer.config.ts && node ../scripts/verifyCourtosRoomAssets.mjs --root desktop/dist/renderer",
+    "build:main": "vite build --config vite.main.config.ts",
+    "build:preload": "vite build --config vite.preload.config.ts",
+    "build": "npm run build:renderer && npm run build:preload && npm run build:main",
+    "start": "electron .",
+    "stage:package": "node stagePackageWorkspace.mjs",
+    "package:dir:staged": "electron-builder --config electron-builder.config.mjs --dir",
+    "package:staged": "electron-builder --config electron-builder.config.mjs",
+    "package:dir": "npm run build && npm run stage:package && npm --prefix /private/tmp/merecross-courtos-desktop-staging install --no-audit --no-fund && npm --prefix /private/tmp/merecross-courtos-desktop-staging run package:dir:staged",
+    "package": "npm run build && npm run stage:package && npm --prefix /private/tmp/merecross-courtos-desktop-staging install --no-audit --no-fund && npm --prefix /private/tmp/merecross-courtos-desktop-staging run package:staged"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "26.15.3",
+    "vite": "6.1.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.4.1"
+  }
+}

@@ -294,7 +294,7 @@ type CouncilRoomReadyIndexV1 = {
 };
 
 const COUNCIL_ROOM_READY_INDEX_PATH = path.resolve(
-  process.cwd(),
+  process.env.COURTOS_DATA_ROOT || process.cwd(),
   "data/ready/world_1120_turn0/readmodels/council_room_ready_index_v1/council_room_ready_index_v1.json",
 );
 const councilRoomReadyIndex = JSON.parse(

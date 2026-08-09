@@ -6,6 +6,7 @@ import {
 } from "../courtosSessionContext";
 import type { Household1120ReadOnlyProjection } from "./readModels/household1120/types";
 import {
+  COURTOS_LARGE_READ_TIMEOUT_MS,
   courtOsTimeoutError,
   createCourtOsRequestDeadline,
 } from "./courtosRequestDeadline";
@@ -23,6 +24,11 @@ export type Household1120LoadState =
 export function useHousehold1120Data(input: {
   householdEntityId: string | null;
   houseId: string | null;
+  /**
+   * The Household projection is a large room-specific read. Council and
+   * other non-Household places must not pay for it during initial boot.
+   */
+  enabled?: boolean;
   reloadKey?: number;
 }): Household1120LoadState {
   const [state, setState] = React.useState<Household1120LoadState>({
@@ -32,6 +38,10 @@ export function useHousehold1120Data(input: {
   });
 
   React.useEffect(() => {
+    if (input.enabled === false) {
+      setState({ status: "loading", data: null, error: null });
+      return;
+    }
     if (!input.householdEntityId || !input.houseId) {
       setState({
         status: "blocked",
@@ -43,7 +53,7 @@ export function useHousehold1120Data(input: {
       });
       return;
     }
-    const deadline = createCourtOsRequestDeadline();
+    const deadline = createCourtOsRequestDeadline(COURTOS_LARGE_READ_TIMEOUT_MS);
     const params = new URLSearchParams({
       householdEntityId: input.householdEntityId,
       houseId: input.houseId,
@@ -96,7 +106,7 @@ export function useHousehold1120Data(input: {
       })
       .finally(() => deadline.clear());
     return () => deadline.cancel();
-  }, [input.householdEntityId, input.houseId, input.reloadKey]);
+  }, [input.enabled, input.householdEntityId, input.houseId, input.reloadKey]);
 
   return state;
 }

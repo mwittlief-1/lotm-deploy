@@ -43,6 +43,10 @@ export interface Household1120ResponsibilityRow extends Household1120ReadBoundar
   holder_person_id: string | null;
   holder_display_name: string | null;
   authority_posture: string;
+  /** Present only in the Foundation A authority release; legacy rows remain valid. */
+  authority_scope_id?: string | null;
+  authority_scope_label?: string | null;
+  manor_id?: string | null;
 }
 
 export interface Household1120StoresPositionRow extends Household1120ReadBoundary {
@@ -53,6 +57,13 @@ export interface Household1120StoresPositionRow extends Household1120ReadBoundar
   position_state: string;
   custody_id: string | null;
   capacity_id: string | null;
+  availability_posture?: "available" | "committed" | "unknown_withheld";
+  source_effective_date?: string;
+  projection_generation_id?: string;
+  /** Foundation A Stores uses source `manor_hx` as its audited external location key. */
+  manor_id?: string | null;
+  manor_label?: string | null;
+  position_kind?: "house_position" | "custody_position" | "food_capacity";
 }
 
 export interface Household1120StoresHistoryRow extends Household1120ReadBoundary {
@@ -81,6 +92,17 @@ export interface Household1120AdultKinRosterRow extends Household1120ReadBoundar
   household_entity_id: string;
   person_id: string;
   roster_state: string;
+  /** The explicit eligibility value; CourtOS accepts only `managed_adult_kin`. */
+  support_eligibility?: "managed_adult_kin";
+  /** Why the person remains a House accountability, not a residence inference. */
+  classification_reason?: string | null;
+  /** A domain that fully governs support excludes the person from this roster. */
+  linked_governing_domain?: string | null;
+  primary_support_basis?: string | null;
+  independence_qualifier?: string | null;
+  manager_person_id?: string | null;
+  manager_person_name?: string | null;
+  residence_label?: string | null;
 }
 
 export interface Household1120AdultKinArrangementRow extends Household1120ReadBoundary {
@@ -119,6 +141,11 @@ export interface Household1120EducationCycleReportRow extends Household1120ReadB
   learner_person_id: string;
   cycle_year: number;
   report_state: string;
+  report_delivery_route?: string;
+  progress_interpretation?: string;
+  progress_course_interpretation?: string;
+  annual_receipt_count?: number;
+  assignment_continuity_basis?: string;
 }
 
 export interface Household1120HealthRosterRow extends Household1120ReadBoundary {
@@ -133,6 +160,15 @@ export interface Household1120HealthCycleReportRow extends Household1120ReadBoun
   person_id: string;
   cycle_year: number;
   report_state: string;
+  health_condition_id?: string;
+  current_presentation?: string;
+  course_since_last_report?: string;
+  household_consequence?: string;
+  prior_care_reading?: string;
+  current_care_arrangement?: string;
+  review_prompt?: string;
+  evidence_label?: string;
+  evidence_attribution?: string;
 }
 
 export interface Household1120CareArrangementRow extends Household1120ReadBoundary {
@@ -141,6 +177,23 @@ export interface Household1120CareArrangementRow extends Household1120ReadBounda
   commitment_id: string;
   provider_id: string | null;
   arrangement_state: string;
+}
+
+/** Founder-approved provisional 1117–1119 economic-harness evidence. */
+export interface Household1120EconomicActivityLookbackRow extends Household1120ReadBoundary {
+  activity_id: string;
+  source_economic_leg_id: string;
+  activity_year: 1117 | 1118 | 1119;
+  effective_date: string;
+  resource_id: string;
+  flow_family: string;
+  regularity: "regular";
+  direction: string;
+  signed_amount: number;
+  counterparty_entity_id: string | null;
+  counterparty_label: string | null;
+  temporal_basis: "annual_regular_posting";
+  evidence_status: "founder_approved_provisional_economic_lookback";
 }
 
 export interface Household1120ProtectedPersonDossierRow extends Household1120ReadBoundary {
@@ -170,12 +223,63 @@ export interface Household1120ProvenanceRow extends Household1120ReadBoundary {
   withheld_reason: string | null;
 }
 
+export interface CourtOsResponsibilityWorkspaceRecordV1 {
+  responsibility_key: string;
+  record_id: string;
+  record_kind: "authority_scope" | "subject" | "evidence" | "target" | "withheld";
+  scope_id: string | null;
+  scope_label: string | null;
+  subject_id: string | null;
+  subject_label: string | null;
+  state_label: string;
+  evidence_label: string;
+  source_package_id: string;
+  runtime_authority: false;
+}
+
+/** Source-bound proposal candidates; these rows grant no runtime authority. */
+export interface Household1120StewardshipCandidateRow {
+  eligibility_candidate_id: string;
+  generation_id: string;
+  effective_date: string;
+  house_id: string;
+  responsibility_id: string;
+  responsibility_instance_id: string;
+  scope_id: string;
+  person_id: string;
+  person_name: string;
+  eligibility_posture: string;
+  eligibility_bounds: string;
+  deterministic_order: string;
+  selector_priority: string;
+  selector: string;
+  eligibility_basis: string;
+  affiliation_basis: string;
+  evidence_kind: string;
+  evidence_ids: string;
+  provenance_refs: string;
+  authority_boundary: string;
+  source_authority_assignment_id: string;
+  source_authority_generation_id: string;
+  source_candidate_only_lineage: string;
+  foundation_a_authority_admission_disposition: string;
+  source_runtime_authority_posture: string;
+  policy_id: string;
+  policy_sha256: string;
+  capacity_posture: string;
+  runtime_authority: string;
+  canon_status: string;
+}
+
 export interface Household1120ReadOnlyProjection {
-  schema_version: "household_1120_read_only_projection_v2";
+  schema_version:
+    | "household_1120_read_only_projection_v2"
+    | "foundation_a_household_runtime_release_v1"
+    | "foundation_a_household_uat1_release_v1";
   contract: {
-    generation_id: typeof HOUSEHOLD_1120_CONTRACT_GENERATION;
+    generation_id: string;
     effective_date: "1120-01-01";
-    sqlite_sha256: typeof HOUSEHOLD_1120_SQLITE_SHA256;
+    sqlite_sha256: string;
     sqlite_integrity: "ok";
     runtime_authority: false;
   };
@@ -195,9 +299,13 @@ export interface Household1120ReadOnlyProjection {
   health_roster: readonly Household1120HealthRosterRow[];
   health_cycle_reports: readonly Household1120HealthCycleReportRow[];
   care_arrangements: readonly Household1120CareArrangementRow[];
+  economic_activity_lookback: readonly Household1120EconomicActivityLookbackRow[];
   protected_person_dossiers: readonly Household1120ProtectedPersonDossierRow[];
   matters: readonly Household1120MatterRow[];
   provenance: readonly Household1120ProvenanceRow[];
+  responsibility_workspace_records?: readonly CourtOsResponsibilityWorkspaceRecordV1[];
+  responsibility_assignment_candidates?: readonly Household1120StewardshipCandidateRow[];
+  responsibility_assignment_candidate_generation_id?: string | null;
 }
 
 export interface Household1120ReadModelSessionContract {

@@ -17,7 +17,13 @@
     {
       "path": "data/uat/household_wave2_read_contract_v1/generations/9e58577246a3a381395f5a03b520d9790e94ab2d12287999c9bae362466014c0/household_wave2_read_contract_1120_01_01_v1.sqlite",
       "sha256": "4e5cd5c687ef4e862cdda459fa93b6999ada6a4f9a3881b3abd891f70eb631c4",
-      "role": "immutable_household_read_contract",
+      "role": "immutable_household_compatibility_read_contract",
+      "storage": "git_lfs"
+    },
+    {
+      "path": "data/genrun/foundation_a_household_runtime_release_v1/generations/618e2bc4b9362883c1b439d2cb92e4fe62de8ec92e991dea8044da2845278442/foundation_a_household_runtime_release_v1.sqlite",
+      "sha256": "1e67e9c78dabf287047869ab65a990a8b80ba1d0ce7506a962531c18a3e780ac",
+      "role": "foundation_a_household_compiler_input",
       "storage": "git_lfs"
     },
     {
@@ -52,13 +58,19 @@
     },
     {
       "path": "data/map/mapgen_exports/courtos_mapgen_export_manifest_v1.json",
-      "sha256": "85586bb8c507f7d97b345abc2da57e8cbf77f7f027694146303ec749c4d9d201",
+      "sha256": "90fbd583e84c83c020f2a0d3b243344c83ef0308e66119368d2b670eb0e96452",
       "role": "mapgen_export_manifest",
       "storage": "git"
     },
     {
       "path": "data/map/mapgen_exports/pearwick_microhex_pilot_v1.json",
       "sha256": "71687e30867d94eb9396a2215d2a5778be65797dd7740f0383df8953f32451c9",
+      "role": "versioned_mapgen_renderer_export",
+      "storage": "git_lfs"
+    },
+    {
+      "path": "data/map/mapgen_exports/roadcote_microhex_pilot_v1.json",
+      "sha256": "e520f90f81e6fab6b885d6fb00a3a535104cee5323514967aa09744883801731",
       "role": "versioned_mapgen_renderer_export",
       "storage": "git_lfs"
     }

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import type { CourtOsShellRuntimeModel } from "../courtosShellModel";
+import { portraitArtForPerson } from "../portraitBankResolver";
+import type { Household1120ResponsibilityRow } from "../readModels/household1120/types";
 import {
   type CourtOsSpatialManor,
   type CourtOsSpatialPortfolio,
@@ -13,6 +15,7 @@ import {
   rendererUrl,
   resolveMapGenBaseUrl,
 } from "./embeddedMapContract";
+import { CourtOsSpatialCanvas } from "./CourtOsSpatialCanvas";
 import "./manorOperationsScene.css";
 
 const MAPGEN_BASE_URL = resolveMapGenBaseUrl({
@@ -22,6 +25,57 @@ const MAPGEN_BASE_URL = resolveMapGenBaseUrl({
 });
 
 const VIEWER_READY_TIMEOUT_MS = 12_000;
+
+/**
+ * The in-process renderer is permitted only when the admitted manor record
+ * carries the complete immutable XMAP derivation required by all three CourtOS
+ * scales. The renderer service repeats the source-digest check before serving
+ * geometry, so this capability test cannot promote candidate or stale bytes.
+ */
+export function canUseNativeSpatialVisual(manor: CourtOsSpatialManor | null): boolean {
+  const derivation = manor?.visual_derivation;
+  return Boolean(
+    derivation
+    && derivation.disposition === "interpretive_renderer_export"
+    && derivation.source_status === "versioned_renderer_export"
+    && /^[a-f0-9]{64}$/.test(derivation.source_sha256)
+    && derivation.available_lods.includes("xmap_hex")
+    && derivation.available_lods.includes("parcel_cluster")
+    && derivation.available_lods.includes("acre_cell")
+    && derivation.acre_cells_per_parent === 217,
+  );
+}
+
+export type EmbeddedSpatialFramePlanEntry = {
+  key: string;
+  role: "current" | "incoming";
+  level: CourtOsMapLevel;
+  src: string;
+};
+
+/**
+ * Keeps the warmed incoming iframe keyed by its immutable renderer URL. When
+ * its level is promoted, React moves that same keyed DOM node into the current
+ * role instead of constructing a second iframe and re-requesting its source.
+ */
+export function embeddedSpatialFramePlan({
+  currentSrc,
+  currentLevel,
+  incomingSrc,
+  incomingLevel,
+}: {
+  currentSrc: string | null;
+  currentLevel: CourtOsMapLevel;
+  incomingSrc: string | null;
+  incomingLevel: CourtOsMapLevel | null;
+}): EmbeddedSpatialFramePlanEntry[] {
+  const entries: EmbeddedSpatialFramePlanEntry[] = [];
+  if (currentSrc) entries.push({ key: currentSrc, role: "current", level: currentLevel, src: currentSrc });
+  if (incomingSrc && incomingLevel && incomingSrc !== currentSrc) {
+    entries.push({ key: incomingSrc, role: "incoming", level: incomingLevel, src: incomingSrc });
+  }
+  return entries;
+}
 
 function manorFocus(manor: CourtOsSpatialManor) {
   return {
@@ -35,13 +89,37 @@ function manorFocus(manor: CourtOsSpatialManor) {
 
 function coverageLabel(manor: CourtOsSpatialManor): string {
   if (manor.detailed_coverage.coverage_state === "authored_one_acre_detail") {
-    return `${manor.detailed_coverage.authored_acre_count?.toLocaleString() ?? "Authored"} one-acre cells`;
+    return `${manor.detailed_coverage.authored_acre_count?.toLocaleString() ?? "Authored"} fine estate cells`;
   }
   return "Recorded at realm scale";
 }
 
 function knowledgeLabel(manor: CourtOsSpatialManor): string {
   return "Current House estate record";
+}
+
+function visualDerivationLabel(manor: CourtOsSpatialManor): string | null {
+  const derivation = manor.visual_derivation;
+  if (!derivation) return null;
+  const parentLabel = `${derivation.parent_xmap_hex_count} XMAP ${derivation.parent_xmap_hex_count === 1 ? "hex" : "hexes"}`;
+  const acreLabel = `${derivation.acre_cell_count.toLocaleString()} estate cells`;
+  return `${parentLabel} · ${acreLabel}`;
+}
+
+/**
+ * Resolves only a manor-scoped stewardship assignment. A House-wide or a
+ * differently scoped responsibility must never be presented as this manor's
+ * operator simply because it has the same responsibility key.
+ */
+export function manorStewardshipAuthority(
+  manor: CourtOsSpatialManor,
+  authority: readonly Household1120ResponsibilityRow[],
+): Household1120ResponsibilityRow | null {
+  return authority.find(
+    (row) =>
+      row.source_legacy_responsibility_id === "courtos.responsibility.manor_stewardship" &&
+      (row.manor_id === manor.manor_id || row.authority_scope_id === manor.manor_id),
+  ) ?? null;
 }
 
 function SpatialUnavailable({ state }: { state: CourtOsSpatialState }) {
@@ -94,7 +172,7 @@ function PortfolioRail({
             <span>
               <strong>{manor.display_name}</strong>
               <small>
-                {manor.county_name ?? "County not recorded"} · {manor.hex_count} {manor.hex_count === 1 ? "hex" : "hexes"}
+                {manor.is_principal_seat ? "Principal seat · " : ""}{manor.county_name ?? "County not recorded"} · {manor.hex_count} {manor.hex_count === 1 ? "hex" : "hexes"}
               </small>
             </span>
           </button>
@@ -113,6 +191,8 @@ export function EstateHoldingsScene({
   onOpenManorStewardship,
   onReturnToEstate,
   journeyContext,
+  assignmentContext,
+  authority = [],
 }: {
   model: CourtOsShellRuntimeModel;
   spatialState: CourtOsSpatialState;
@@ -122,11 +202,14 @@ export function EstateHoldingsScene({
   onOpenManorStewardship: (manor: CourtOsSpatialManor) => void;
   onReturnToEstate?: () => void;
   journeyContext?: React.ReactNode;
+  assignmentContext?: React.ReactNode;
+  authority?: readonly Household1120ResponsibilityRow[];
 }) {
   const portfolio = spatialState.status === "ready" ? spatialState.portfolio : null;
   const [localSelectedManorId, setLocalSelectedManorId] = useState<string | null>(null);
   const selectedManorId = controlledSelectedManorId ?? localSelectedManorId;
   const [level, setLevel] = useState<CourtOsMapLevel>("realm");
+  const [selectedParentHexId, setSelectedParentHexId] = useState<string | null>(null);
   const [pendingLevel, setPendingLevel] = useState<CourtOsMapLevel | null>(null);
   const [transitionPhase, setTransitionPhase] = useState<"idle" | "preparing" | "crossfading">("idle");
   const [transitionDirection, setTransitionDirection] = useState<"in" | "out">("in");
@@ -139,30 +222,48 @@ export function EstateHoldingsScene({
   const arrivedLevelRef = useRef<CourtOsMapLevel | null>(null);
   const selected =
     portfolio?.manors.find((manor) => manor.manor_id === selectedManorId) ??
+    portfolio?.manors.find((manor) => manor.is_principal_seat) ??
     portfolio?.manors[0] ??
     null;
+  const stewardshipAuthority = selected ? manorStewardshipAuthority(selected, authority) : null;
+  const stewardshipPortrait = portraitArtForPerson({
+    personId: stewardshipAuthority?.holder_person_id,
+    label: stewardshipAuthority?.holder_display_name ?? "Recorded manor steward",
+  });
+  const nativeVisualProof = canUseNativeSpatialVisual(selected);
+  const activeParentHexId = selectedParentHexId ?? selected?.seat_hex_id ?? null;
   const rendererKey = selected?.detailed_coverage.renderers[level] ?? null;
   const src = useMemo(() => {
+    if (nativeVisualProof) return null;
     if (!rendererKey || !MAPGEN_BASE_URL) return null;
     const url = rendererUrl({
       baseUrl: MAPGEN_BASE_URL,
       rendererKey,
       parentOrigin: window.location.origin,
+      manorId: selected?.manor_id,
     });
     if (reloadToken) url.searchParams.set("reload", String(reloadToken));
     return url.toString();
-  }, [rendererKey, reloadToken]);
+  }, [rendererKey, reloadToken, nativeVisualProof]);
   const incomingRendererKey = pendingLevel
     ? selected?.detailed_coverage.renderers[pendingLevel] ?? null
     : null;
   const incomingSrc = useMemo(() => {
+    if (nativeVisualProof) return null;
     if (!incomingRendererKey || !MAPGEN_BASE_URL) return null;
     return rendererUrl({
       baseUrl: MAPGEN_BASE_URL,
       rendererKey: incomingRendererKey,
       parentOrigin: window.location.origin,
+      manorId: selected?.manor_id,
     }).toString();
-  }, [incomingRendererKey]);
+  }, [incomingRendererKey, nativeVisualProof]);
+  const embeddedFrames = embeddedSpatialFramePlan({
+    currentSrc: nativeVisualProof ? null : src,
+    currentLevel: level,
+    incomingSrc: nativeVisualProof ? null : incomingSrc,
+    incomingLevel: pendingLevel,
+  });
 
   function postTo(
     targetFrame: HTMLIFrameElement | null,
@@ -184,6 +285,7 @@ export function EstateHoldingsScene({
     targetFrame = frame.current,
     targetSrc = src,
   ) {
+    if (nativeVisualProof) return;
     if (!portfolio || !nextSelected) return;
     postTo(targetFrame, targetSrc, {
       type: "merecross:spatial:init:v1",
@@ -203,12 +305,26 @@ export function EstateHoldingsScene({
           r: manor.seat_r,
           hexId: manor.seat_hex_id,
           coverage: manor.detailed_coverage.coverage_state,
+          visualDerivation: manor.visual_derivation
+            ? {
+              disposition: manor.visual_derivation.disposition,
+              sourceStatus: manor.visual_derivation.source_status,
+              parentXmapHexCount: manor.visual_derivation.parent_xmap_hex_count,
+              parcelClusterCount: manor.visual_derivation.parcel_cluster_count,
+              acreCellCount: manor.visual_derivation.acre_cell_count,
+              acreCellsPerParent: manor.visual_derivation.acre_cells_per_parent,
+              availableLods: manor.visual_derivation.available_lods,
+              featureFamilies: manor.visual_derivation.feature_families,
+              sourceSha256: manor.visual_derivation.source_sha256,
+            }
+            : undefined,
         })),
       },
     });
   }
 
   useEffect(() => {
+    if (nativeVisualProof) return;
     if (!src || !rendererKey) return;
     const onMessage = (event: MessageEvent) => {
       const fromCurrent = event.source === frame.current?.contentWindow;
@@ -274,13 +390,18 @@ export function EstateHoldingsScene({
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [src, rendererKey, incomingSrc, incomingRendererKey, portfolio, level, pendingLevel, selectedManorId]);
+  }, [src, rendererKey, incomingSrc, incomingRendererKey, portfolio, level, pendingLevel, selectedManorId, nativeVisualProof]);
 
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
 
   useEffect(() => {
+    if (nativeVisualProof) {
+      setViewerFailure(null);
+      setViewerState("ready");
+      return;
+    }
     if (!MAPGEN_BASE_URL) {
       setViewerFailure({
         message: "The MapGen runtime is not configured for this build.",
@@ -308,7 +429,7 @@ export function EstateHoldingsScene({
       setViewerState((current) => current === "ready" ? current : "delayed");
     }, VIEWER_READY_TIMEOUT_MS);
     return () => window.clearTimeout(timeout);
-  }, [src, rendererKey, level]);
+  }, [src, rendererKey, level, nativeVisualProof]);
 
   useEffect(() => {
     if (viewerState === "ready") sendContext();
@@ -321,6 +442,7 @@ export function EstateHoldingsScene({
   function selectManor(manor: CourtOsSpatialManor) {
     if (transitionPhase !== "idle") return;
     setLocalSelectedManorId(manor.manor_id);
+    setSelectedParentHexId(manor.seat_hex_id);
     onSelectedManorChange?.(manor.manor_id);
     if (
       (level === "estate" && manor.detailed_coverage.coverage_state !== "authored_one_acre_detail") ||
@@ -335,6 +457,16 @@ export function EstateHoldingsScene({
     if (next === level || transitionPhase !== "idle") return;
     const order: Record<CourtOsMapLevel, number> = { realm: 0, county: 1, estate: 2 };
     setTransitionDirection(order[next] > order[level] ? "in" : "out");
+    if (nativeVisualProof) {
+      setTransitionPhase("preparing");
+      if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+      transitionTimer.current = window.setTimeout(() => {
+        setLevel(next);
+        setTransitionPhase("idle");
+        transitionTimer.current = null;
+      }, 220);
+      return;
+    }
     setPendingLevel(next);
     setTransitionPhase("preparing");
   }
@@ -345,43 +477,47 @@ export function EstateHoldingsScene({
   return (
     <section
       className="uat-scene uat-spatial-scene"
+      data-level={level}
       data-mode={mode}
       data-transition-direction={transitionDirection}
       data-transition-phase={transitionPhase}
       aria-busy={transitionPhase !== "idle"}
       aria-label={mode === "room" ? "Estate and Holdings" : "Manor Stewardship"}
     >
-      {src ? (
+      {nativeVisualProof && activeParentHexId ? (
+        <CourtOsSpatialCanvas
+          houseId={portfolio.house_id}
+          manorId={selected.manor_id}
+          level={level}
+          selectedParentHexId={activeParentHexId}
+          onSelectedParentHexId={setSelectedParentHexId}
+        />
+      ) : embeddedFrames.map((entry) => (
         <iframe
-          key={src}
-          ref={frame}
-          className="uat-spatial-frame uat-spatial-frame-current"
+          key={entry.key}
+          ref={(node) => {
+            if (entry.role === "current") frame.current = node;
+            else incomingFrame.current = node;
+          }}
+          className={`uat-spatial-frame uat-spatial-frame-${entry.role}`}
+          data-spatial-frame-key={entry.key}
+          data-spatial-frame-role={entry.role}
           referrerPolicy="strict-origin"
           sandbox="allow-same-origin allow-scripts"
-          src={src}
-          title={`${level === "realm" ? "Estate survey" : level === "county" ? "Jurisdictional survey" : "Detailed ground plan"} for ${model.house.displayName}`}
+          src={entry.src}
+          title={`${entry.level === "realm" ? "Estate survey" : entry.level === "county" ? "Jurisdictional survey" : "Detailed ground plan"} for ${model.house.displayName}`}
           onError={() => {
-            setViewerFailure({ message: "The MapGen runtime could not be reached.", recoverable: true });
-            setViewerState("error");
+            if (entry.role === "incoming") {
+              setPendingLevel(null);
+              setTransitionPhase("idle");
+              setViewerFailure({ message: "The next geographic scale could not be reached.", recoverable: true });
+            } else {
+              setViewerFailure({ message: "The MapGen runtime could not be reached.", recoverable: true });
+              setViewerState("error");
+            }
           }}
         />
-      ) : null}
-      {incomingSrc && pendingLevel ? (
-        <iframe
-          key={incomingSrc}
-          ref={incomingFrame}
-          className="uat-spatial-frame uat-spatial-frame-incoming"
-          referrerPolicy="strict-origin"
-          sandbox="allow-same-origin allow-scripts"
-          src={incomingSrc}
-          title={`${pendingLevel === "realm" ? "Estate survey" : pendingLevel === "county" ? "Jurisdictional survey" : "Detailed ground plan"} for ${model.house.displayName}`}
-          onError={() => {
-            setPendingLevel(null);
-            setTransitionPhase("idle");
-            setViewerFailure({ message: "The next geographic scale could not be reached.", recoverable: true });
-          }}
-        />
-      ) : null}
+      ))}
       <div className="uat-spatial-vignette" aria-hidden="true" />
       {mode === "room" ? (
         <PortfolioRail
@@ -450,6 +586,7 @@ export function EstateHoldingsScene({
           <div><dt>Extent</dt><dd>{selected.hex_count} map hexes</dd></div>
           <div><dt>Households</dt><dd>{selected.estimated_peasant_households?.toLocaleString() ?? "Not disclosed"}</dd></div>
           <div><dt>Detail</dt><dd>{coverageLabel(selected)}</dd></div>
+          <div><dt>Stewardship</dt><dd>{stewardshipAuthority?.holder_display_name ?? "No admitted manor operator"}</dd></div>
         </dl>
         <p>
           {canOpenEstate
@@ -486,14 +623,42 @@ export function EstateHoldingsScene({
                   <div><dt>Recorded extent</dt><dd>{selected.hex_count} map hexes</dd></div>
                   <div><dt>Households</dt><dd>{selected.estimated_peasant_households?.toLocaleString() ?? "Not disclosed"}</dd></div>
                   <div><dt>Ground record</dt><dd>{coverageLabel(selected)}</dd></div>
-                  <div><dt>Accountable owner</dt><dd>Named in the operating record</dd></div>
+                  <div><dt>Accountable steward</dt><dd>{stewardshipAuthority?.holder_display_name ?? "No admitted manor operator"}</dd></div>
                 </dl>
                 <p>
                   Geography or estimated extent does not establish current condition,
                   custody, completed work, or direct inspection.
                 </p>
               </section>
+              {selected.visual_derivation ? (
+                <section className="uat-manor-workspace-section uat-manor-visual-derivation">
+                  <small>Visual ground derivation</small>
+                  <h3>{visualDerivationLabel(selected)}</h3>
+                  <p>
+                    The survey derives visual parcel and feature placement from recorded geography.
+                    It is not a report of physical condition, completed works, or possession.
+                  </p>
+                  <dl>
+                    <div><dt>Detail lattice</dt><dd>{selected.visual_derivation.acre_cells_per_parent} cells per XMAP hex</dd></div>
+                    <div><dt>Intermediate parcels</dt><dd>{selected.visual_derivation.parcel_cluster_count === null ? "Not yet authored" : selected.visual_derivation.parcel_cluster_count.toLocaleString()}</dd></div>
+                  </dl>
+                </section>
+              ) : null}
+              {selected.visual_derivation && selected.visual_derivation.feature_families.length > 0 ? (
+                <section className="uat-manor-workspace-section uat-manor-feature-register">
+                  <small>Recorded ground grammar</small>
+                  <h3>Feature families in this survey</h3>
+                  <ul>
+                    {selected.visual_derivation.feature_families.map((family) => <li key={family}>{family}</li>)}
+                  </ul>
+                  <p>
+                    These are renderer-derived feature families from the admitted survey export,
+                    not an assertion of current condition or completed works.
+                  </p>
+                </section>
+              ) : null}
               {journeyContext}
+              {assignmentContext}
               <section className="uat-manor-workspace-section">
                 <small>Matters</small>
                 <h3>No admitted Manor Stewardship Matter</h3>
@@ -508,9 +673,21 @@ export function EstateHoldingsScene({
             <aside>
               <section>
                 <small>Accountability</small>
-                <span className="uat-manor-empty-portrait" aria-hidden="true" />
-                <strong>Recorded manor operator</strong>
-                <p>Assignment, authority, and support require the responsibility workspace projection.</p>
+                {stewardshipPortrait ? (
+                  <img
+                    className="uat-manor-steward-portrait"
+                    src={stewardshipPortrait.src}
+                    alt={stewardshipPortrait.alt}
+                  />
+                ) : (
+                  <span className="uat-manor-empty-portrait" aria-hidden="true" />
+                )}
+                <strong>{stewardshipAuthority?.holder_display_name ?? "No admitted manor operator"}</strong>
+                <p>
+                  {stewardshipAuthority
+                    ? `${stewardshipAuthority.authority_posture} authority · ${stewardshipAuthority.authority_scope_label ?? selected.display_name}`
+                    : "No exact manor-scoped Manor Stewardship assignment is admitted for this record."}
+                </p>
               </section>
               <section>
                 <small>Available review</small>

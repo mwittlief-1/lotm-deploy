@@ -27,6 +27,18 @@ const PEARWICK_DETAIL = path.join(
   ROOT,
   "data/map/mapgen_exports/pearwick_microhex_pilot_v1.json",
 );
+const ROADCOTE_DETAIL = path.join(
+  ROOT,
+  "data/map/mapgen_exports/roadcote_microhex_pilot_v1.json",
+);
+const DETAIL_EXPORTS = [
+  { exportId: "pearwick_microhex_pilot_v1", file: PEARWICK_DETAIL },
+  { exportId: "roadcote_microhex_pilot_v1", file: ROADCOTE_DETAIL },
+];
+const SPATIAL_ADMISSION = path.join(
+  ROOT,
+  "data/uat/courtos_spatial_house_manor_admission_v1.json",
+);
 
 const MANOR_ID_SALT = "lotm.turn0.manor_tenure_a30_sidecar.v1";
 
@@ -105,6 +117,8 @@ for (const required of [
   PLACE_NAMES,
   MAPGEN_EXPORT_MANIFEST,
   PEARWICK_DETAIL,
+  ROADCOTE_DETAIL,
+  SPATIAL_ADMISSION,
 ]) {
   if (!fs.existsSync(required)) throw new Error(`Missing CourtOS spatial source: ${required}`);
 }
@@ -113,26 +127,70 @@ const mapgenExportManifest = readJson(MAPGEN_EXPORT_MANIFEST);
 if (mapgenExportManifest.schema_version !== "courtos_mapgen_export_manifest_v1") {
   throw new Error("Unsupported CourtOS MapGen export manifest schema.");
 }
-const pearwickExport = mapgenExportManifest.exports?.find(
-  (entry) => entry.export_id === "pearwick_microhex_pilot_v1",
-);
-if (!pearwickExport) {
-  throw new Error("CourtOS MapGen export manifest does not declare pearwick_microhex_pilot_v1.");
-}
-const pearwickDetailSha256 = fileSha256(PEARWICK_DETAIL);
-if (pearwickDetailSha256 !== pearwickExport.sha256) {
-  throw new Error(
-    `CourtOS MapGen export SHA mismatch: expected ${pearwickExport.sha256}, got ${pearwickDetailSha256}.`,
+const verifiedDetails = DETAIL_EXPORTS.map(({ exportId, file }) => {
+  const manifestEntry = mapgenExportManifest.exports?.find(
+    (entry) => entry.export_id === exportId,
   );
-}
+  if (!manifestEntry) {
+    throw new Error(`CourtOS MapGen export manifest does not declare ${exportId}.`);
+  }
+  const sourceSha256 = fileSha256(file);
+  if (sourceSha256 !== manifestEntry.sha256) {
+    throw new Error(
+      `CourtOS MapGen export SHA mismatch for ${exportId}: expected ${manifestEntry.sha256}, got ${sourceSha256}.`,
+    );
+  }
+  const detail = readJson(file);
+  if (
+    detail.schema_version !== "merecross_microhex_pilot_v1" ||
+    detail.status !== "interpretive_pilot_not_source_truth" ||
+    typeof detail.target?.manor_id !== "string"
+  ) {
+    throw new Error(`CourtOS MapGen export ${exportId} failed its interpretive visual contract.`);
+  }
+  return { exportId, file, manifestEntry, sourceSha256, detail };
+});
 
 const houses = readJsonl(GRAPH_HOUSES);
 const crosswalk = readJsonl(OPERATOR_CROSSWALK);
 const xmap = readJson(XMAP_MANORS);
+const spatialAdmission = readJson(SPATIAL_ADMISSION);
 const placeNames = parseCsv(fs.readFileSync(PLACE_NAMES, "utf8"));
+if (
+  spatialAdmission.schema_version !== "courtos_spatial_house_manor_admission_v1" ||
+  spatialAdmission.disposition !== "founder_authorized_admitted" ||
+  spatialAdmission.command_authority !== false ||
+  spatialAdmission.source_manifest?.operator_crosswalk_sha256 !== fileSha256(OPERATOR_CROSSWALK) ||
+  spatialAdmission.source_manifest?.xmap_manors_sha256 !== fileSha256(XMAP_MANORS) ||
+  !Array.isArray(spatialAdmission.admitted_associations)
+) {
+  throw new Error("CourtOS spatial admission package failed its source or authority gate.");
+}
+const admissionByHouseAndManor = new Map();
+for (const admission of spatialAdmission.admitted_associations) {
+  if (
+    !admission ||
+    typeof admission.house_id !== "string" ||
+    typeof admission.protected_manor_id !== "string" ||
+    typeof admission.source_crosswalk_id !== "string" ||
+    typeof admission.source_row_sha256 !== "string" ||
+    admission.association_basis !== "named_house_operated" ||
+    typeof admission.principal_seat !== "boolean"
+  ) {
+    throw new Error("CourtOS spatial admission package has an invalid association row.");
+  }
+  const key = `${admission.house_id}|${admission.protected_manor_id}`;
+  if (admissionByHouseAndManor.has(key)) {
+    throw new Error("CourtOS spatial admission package contains a duplicate House/manor association.");
+  }
+  admissionByHouseAndManor.set(key, admission);
+}
 const houseById = new Map(houses.map((house) => [house.id, house]));
 const xmapByProtectedId = new Map(
   xmap.manors.map((manor) => [protectedManorId(manor.manor_id), manor]),
+);
+const xmapByManorId = new Map(
+  xmap.manors.map((manor) => [manor.manor_id, manor]),
 );
 const nameByManorId = new Map(
   placeNames
@@ -141,30 +199,95 @@ const nameByManorId = new Map(
 );
 
 const detailedCoverage = new Map();
-const detail = readJson(PEARWICK_DETAIL);
-const detailedManorId = detail.target?.manor_id;
-if (!detailedManorId) {
-  throw new Error("CourtOS MapGen export has no target manor_id.");
+const detailByManorId = new Map();
+function countyRendererFor(countyId) {
+  if (countyId === "c_5") return "orchardmere_county_v1";
+  if (countyId === "c_11") return "glastonmere_county_v1";
+  return null;
 }
-detailedCoverage.set(detailedManorId, {
-  coverage_state: "authored_one_acre_detail",
-  renderer_level: "estate",
-  available_levels: ["realm", "county", "estate"],
-  parent_hex_count: detail.target?.macro_parent_count ?? 0,
-  authored_acre_count: detail.target?.microhex_count ?? 0,
-  source_sha256: pearwickDetailSha256,
-  renderers: {
-    realm: "merecross_realm_v1",
-    county: "orchardmere_county_v1",
-    estate: "pearwick_estate_pilot_v1",
-  },
-});
+
+for (const verified of verifiedDetails) {
+  const manorId = verified.detail.target.manor_id;
+  if (detailByManorId.has(manorId)) {
+    throw new Error(`CourtOS MapGen exports duplicate manor detail: ${manorId}.`);
+  }
+  detailByManorId.set(manorId, verified);
+  const sourceManor = xmapByManorId.get(manorId);
+  const countyRenderer = countyRendererFor(sourceManor?.county_id);
+  detailedCoverage.set(manorId, {
+    coverage_state: "authored_one_acre_detail",
+    renderer_level: "estate",
+    available_levels: countyRenderer ? ["realm", "county", "estate"] : ["realm", "estate"],
+    parent_hex_count: verified.detail.target?.macro_parent_count ?? 0,
+    authored_acre_count: verified.detail.target?.microhex_count ?? 0,
+    source_sha256: verified.sourceSha256,
+    // Detailed coverage remains source truth; the accepted MapGen renderer is
+    // the presentation layer for the three available viewing distances.
+    renderers: {
+      realm: "merecross_realm_v1",
+      ...(countyRenderer ? { county: countyRenderer } : {}),
+      estate: "pearwick_estate_pilot_v1",
+    },
+  });
+}
+
+function asFiniteNonNegativeInteger(value) {
+  return Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+function uniqueStrings(value) {
+  return Array.isArray(value)
+    ? [...new Set(value.filter((entry) => typeof entry === "string" && entry.trim()))]
+    : [];
+}
+
+function visualDerivationFor(manorId) {
+  const verified = detailByManorId.get(manorId);
+  if (!verified) return undefined;
+  const { detail, manifestEntry, sourceSha256 } = verified;
+  const refinement = detail.refinement ?? {};
+  const artworkBrief = Array.isArray(detail.artwork_brief) ? detail.artwork_brief : [];
+  const featureFamilies = uniqueStrings(artworkBrief.map((brief) => brief?.asset));
+  const acreCellCount = asFiniteNonNegativeInteger(detail.target?.microhex_count);
+  const acreCellsPerParent = asFiniteNonNegativeInteger(refinement.child_count_per_parent);
+  const parentXmapHexCount = asFiniteNonNegativeInteger(detail.target?.macro_parent_count);
+  if (acreCellCount === null || acreCellsPerParent === null || parentXmapHexCount === null) {
+    throw new Error("CourtOS MapGen export has an invalid acre-cell refinement summary.");
+  }
+  if (detail.status !== "interpretive_pilot_not_source_truth") {
+    throw new Error("CourtOS accepts only explicitly interpretive MapGen visual derivations.");
+  }
+  return {
+    disposition: "interpretive_renderer_export",
+    source_status: manifestEntry.source_status,
+    parent_xmap_hex_count: parentXmapHexCount,
+    // The middle LOD has a fixed renderer-only doctrine: every complete XMAP
+    // parent resolves to 31 deterministic, contiguous clusters of seven fine
+    // estate cells. The actual membership lives in the lazy visual-detail
+    // payload; this read model intentionally exposes only the declared shape.
+    parcel_cluster_count: 31,
+    acre_cell_count: acreCellCount,
+    acre_cells_per_parent: acreCellsPerParent,
+    available_lods: ["xmap_hex", "parcel_cluster", "acre_cell"],
+    feature_families: featureFamilies,
+    source_sha256: sourceSha256,
+  };
+}
 
 const grouped = new Map();
 for (const row of crosswalk) {
   const houseId = row.normalized_local_holder_house_id || row.local_holder_house_id;
+  const admission = houseId ? admissionByHouseAndManor.get(`${houseId}|${row.manor_id}`) : null;
   const manor = xmapByProtectedId.get(row.manor_id);
-  if (!houseId || !manor || !houseById.has(houseId)) continue;
+  if (!houseId || !admission || !manor || !houseById.has(houseId)) continue;
+  if (
+    row.id !== admission.source_crosswalk_id ||
+    row.source_row_sha256 !== admission.source_row_sha256 ||
+    row.normalized_local_holder_house_id !== houseId ||
+    row.operations_closure_state !== admission.association_basis
+  ) {
+    throw new Error("CourtOS spatial admission row no longer matches its crosswalk source.");
+  }
   const house = houseById.get(houseId);
   const name = nameByManorId.get(manor.manor_id);
   const portfolio = grouped.get(houseId) || {
@@ -186,23 +309,26 @@ for (const row of crosswalk) {
     estimated_peasant_households: manor.estimated_peasant_households,
     holding_type: manor.holding_type,
     manor_size_class: manor.manor_size_class,
-    ui_authority: row.ui_authority === true,
+    is_principal_seat: admission.principal_seat,
     detailed_coverage: detailedCoverage.get(manor.manor_id) ?? {
       coverage_state: "macro_only",
-      renderer_level: manor.county_id === "c_5" ? "county" : "realm",
-      available_levels: manor.county_id === "c_5" ? ["realm", "county"] : ["realm"],
-      renderers: manor.county_id === "c_5"
-        ? { realm: "merecross_realm_v1", county: "orchardmere_county_v1" }
+      renderer_level: countyRendererFor(manor.county_id) ? "county" : "realm",
+      available_levels: countyRendererFor(manor.county_id) ? ["realm", "county"] : ["realm"],
+      renderers: countyRendererFor(manor.county_id)
+        ? { realm: "merecross_realm_v1", county: countyRendererFor(manor.county_id) }
         : { realm: "merecross_realm_v1" },
     },
+    visual_derivation: visualDerivationFor(manor.manor_id),
   });
   grouped.set(houseId, portfolio);
 }
 
 const portfolios = [...grouped.values()]
   .map((portfolio) => {
-    const admittedManors = portfolio.manors.filter((manor) => manor.ui_authority === true);
-    const hasAdmittedAssociations = admittedManors.length > 0;
+    const hasAdmittedAssociations = portfolio.manors.length > 0;
+    if (portfolio.manors.filter((manor) => manor.is_principal_seat).length > 1) {
+      throw new Error(`CourtOS spatial admission has multiple principal seats for ${portfolio.house_id}.`);
+    }
     return {
       ...portfolio,
       association_posture: hasAdmittedAssociations
@@ -211,8 +337,7 @@ const portfolios = [...grouped.values()]
       association_note: hasAdmittedAssociations
         ? "UI-admitted House-to-manor associations only."
         : "No UI-admitted House-to-manor association is available.",
-      manors: admittedManors
-        .map(({ ui_authority: _uiAuthority, ...manor }) => manor)
+      manors: portfolio.manors
         .sort((left, right) => left.display_name.localeCompare(right.display_name)),
     };
   })
@@ -243,14 +368,15 @@ const result = {
       path: path.relative(ROOT, PLACE_NAMES),
       sha256: fileSha256(PLACE_NAMES),
     },
-    mapgen_detail: {
-      repository: pearwickExport.source_repository,
-      source_path: pearwickExport.source_path,
-      export_path: path.relative(ROOT, PEARWICK_DETAIL),
+    mapgen_details: verifiedDetails.map((verified) => ({
+      target_manor_id: verified.detail.target.manor_id,
+      repository: verified.manifestEntry.source_repository,
+      source_path: verified.manifestEntry.source_path,
+      export_path: path.relative(ROOT, verified.file),
       export_manifest_path: path.relative(ROOT, MAPGEN_EXPORT_MANIFEST),
-      sha256: pearwickDetailSha256,
-      source_status: pearwickExport.source_status,
-    },
+      sha256: verified.sourceSha256,
+      source_status: verified.manifestEntry.source_status,
+    })),
   },
   portfolio_count: portfolios.length,
   manor_count: portfolios.reduce((sum, portfolio) => sum + portfolio.manors.length, 0),

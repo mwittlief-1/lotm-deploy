@@ -6,10 +6,11 @@ import { fileURLToPath } from "node:url";
 
 export function verifiedMapGenBaseUrl(
   value,
-  { allowLoopbackHttp = false } = {},
+  { allowLoopbackHttp = false, allowNativeInProcess = false } = {},
 ) {
   const raw = value?.trim();
   if (!raw) {
+    if (allowNativeInProcess) return null;
     throw new Error("VITE_MAPGEN_BASE_URL is required for a production CourtOS build.");
   }
   const url = new URL(raw);
@@ -35,11 +36,14 @@ if (
   process.argv[1] &&
   fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
 ) {
-  const url = verifiedMapGenBaseUrl(process.env.VITE_MAPGEN_BASE_URL);
+  const url = verifiedMapGenBaseUrl(process.env.VITE_MAPGEN_BASE_URL, {
+    allowNativeInProcess: process.env.COURTOS_NATIVE_MAPGEN === "1",
+  });
   process.stdout.write(
     `${JSON.stringify({
       schema_version: "courtos_mapgen_production_configuration_v1",
-      mapgen_origin: url.origin,
+      renderer: url ? "external_origin" : "native_in_process",
+      mapgen_origin: url?.origin ?? null,
       verdict: "pass",
     })}\n`,
   );

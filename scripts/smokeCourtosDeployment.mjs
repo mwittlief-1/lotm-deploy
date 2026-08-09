@@ -90,22 +90,28 @@ const runtimeManifestResponse = await request(
 const runtimeManifest = await runtimeManifestResponse.json();
 if (
   runtimeManifest?.schema_version !== "courtos_runtime_manifest_v1" ||
-  runtimeManifest?.mapgen?.status !== "configured" ||
+  !["configured", "bundled"].includes(runtimeManifest?.mapgen?.status) ||
   JSON.stringify(runtimeManifest?.mapgen?.contract) !==
     JSON.stringify(mapGenContract)
 ) {
   throw new Error("The deployed CourtOS runtime does not declare the exact required MapGen contract.");
 }
-const mapGenBaseUrl = new URL(runtimeManifest.mapgen.base_url);
-if (
-  mapGenBaseUrl.protocol !== "https:" ||
-  mapGenBaseUrl.pathname !== "/" ||
-  mapGenBaseUrl.username ||
-  mapGenBaseUrl.password ||
-  mapGenBaseUrl.search ||
-  mapGenBaseUrl.hash
-) {
-  throw new Error("The deployed CourtOS runtime declares an invalid MapGen production origin.");
+const mapGenBaseUrl = runtimeManifest.mapgen.status === "bundled"
+  ? new URL("/", baseUrl)
+  : new URL(runtimeManifest.mapgen.base_url);
+if (runtimeManifest.mapgen.status === "configured") {
+  if (
+    mapGenBaseUrl.protocol !== "https:" ||
+    mapGenBaseUrl.pathname !== "/" ||
+    mapGenBaseUrl.username ||
+    mapGenBaseUrl.password ||
+    mapGenBaseUrl.search ||
+    mapGenBaseUrl.hash
+  ) {
+    throw new Error("The deployed CourtOS runtime declares an invalid MapGen production origin.");
+  }
+} else if (runtimeManifest.mapgen.base_url !== "./") {
+  throw new Error("The bundled MapGen runtime must resolve from the CourtOS origin root.");
 }
 
 async function probeMapGenReadiness() {
@@ -214,6 +220,22 @@ const apiChecks = [
     },
   },
   {
+    name: "responsibility-workspace",
+    url: endpoint("/api/responsibilities/1120", {
+      houseId,
+      responsibility: "manor_fiscal_administration",
+    }),
+    schema: "courtos_responsibility_workspace_projection_v1",
+    validate(data) {
+      return (
+        data?.query?.house_id === houseId &&
+        data?.query?.responsibility === "manor_fiscal_administration" &&
+        data?.read_only === true &&
+        data?.command_authority === false
+      );
+    },
+  },
+  {
     name: "spatial",
     url: endpoint("/api/spatial/1120", { houseId }),
     schema: "courtos_spatial_house_projection_v1",
@@ -243,6 +265,7 @@ const checks = [
     protocol: mapGenContract.readiness.protocol_version,
   })),
 ];
+let spatialManorId = null;
 for (const check of apiChecks) {
   const response = await request(check.url, "application/json");
   if (!(response.headers.get("cache-control") ?? "").includes("no-store")) {
@@ -253,9 +276,13 @@ for (const check of apiChecks) {
     payload?.ok !== true ||
     payload?.context?.schema_version !== "courtos_session_context_v1" ||
     payload?.context?.selected_house_id !== houseId ||
-    payload?.context?.acting_actor?.status !== "unadmitted" ||
+    payload?.context?.acting_actor?.status !== "house_head" ||
+    typeof payload?.context?.acting_actor?.person_id !== "string" ||
+    payload?.context?.acting_actor?.authority_basis !==
+      "foundation_a_uat1_succession_head_identity_plus_player_session" ||
     payload?.context?.knowledge?.actor_specific_content !== "withheld" ||
     payload?.context?.capabilities?.issue_commands !== false ||
+    payload?.context?.capabilities?.manage_assignments !== true ||
     payload?.data?.schema_version !== check.schema ||
     !check.validate(payload.data)
   ) {
@@ -263,8 +290,44 @@ for (const check of apiChecks) {
       `${check.name} returned an invalid contract: ${JSON.stringify(payload).slice(0, 1000)}`,
     );
   }
+  if (check.name === "spatial") {
+    spatialManorId = payload.data.portfolio?.manors?.find(
+      (manor) => manor.is_principal_seat,
+    )?.manor_id ?? payload.data.portfolio?.manors?.[0]?.manor_id ?? null;
+  }
   checks.push({ name: check.name, status: "pass", schema: check.schema });
 }
+
+if (!spatialManorId) {
+  throw new Error("The admitted spatial portfolio supplied no manor for visual smoke coverage.");
+}
+const visualResponse = await request(
+  endpoint("/api/spatial/1120/visual", {
+    houseId,
+    manorId: spatialManorId,
+    lod: "macro",
+  }),
+  "application/json",
+);
+if (!(visualResponse.headers.get("cache-control") ?? "").includes("no-store")) {
+  throw new Error("spatial-visual did not return Cache-Control: no-store.");
+}
+const visualPayload = await visualResponse.json();
+if (
+  visualPayload?.ok !== true ||
+  visualPayload?.context?.acting_actor?.status !== "house_head" ||
+  visualPayload?.data?.schema_version !== "courtos_spatial_visual_proof_v1" ||
+  visualPayload?.data?.house_id !== houseId ||
+  visualPayload?.data?.manor_id !== spatialManorId ||
+  visualPayload?.data?.lod !== "macro"
+) {
+  throw new Error(`spatial-visual returned an invalid contract: ${JSON.stringify(visualPayload).slice(0, 1000)}`);
+}
+checks.push({
+  name: "spatial-visual",
+  status: "pass",
+  schema: "courtos_spatial_visual_proof_v1",
+});
 
 process.stdout.write(
   `${JSON.stringify(

@@ -318,6 +318,76 @@
 }
 .uat-spatial-orientation-actions button:disabled { color: #8f8777; background: #2b2923; cursor: not-allowed; }
 
+/*
+ * Close ground review is an inhabited landscape, not a dashboard. Keep the
+ * estate list and record orientation available, but release the lower field
+ * of view so terrain, working ground, and the seat complex remain legible.
+ */
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-portfolio {
+  bottom: auto;
+  width: min(258px, 21vw);
+  max-height: 270px;
+  padding: 18px 16px 14px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-portfolio h2 {
+  font-size: clamp(22px, 1.7vw, 28px);
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-manor-list {
+  margin: 14px -3px 0;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-manor-list button {
+  padding: 9px 8px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-portfolio footer {
+  display: none;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation {
+  top: 104px;
+  right: 24px;
+  bottom: auto;
+  width: min(302px, 25vw);
+  padding: 16px 18px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation h2 {
+  font-size: clamp(22px, 1.8vw, 29px);
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation dl {
+  margin-top: 12px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation dl div {
+  padding: 8px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation p {
+  margin: 10px 0;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-orientation-actions button {
+  min-height: 34px;
+  padding: 7px 9px;
+  font-size: 10px;
+}
+
+.uat-spatial-scene[data-mode="room"][data-level="estate"] .uat-spatial-vignette {
+  background:
+    linear-gradient(90deg, rgb(23 16 10 / 68%) 0, rgb(23 16 10 / 18%) 23%, transparent 43%),
+    linear-gradient(0deg, rgb(20 14 9 / 52%) 0, transparent 18%),
+    linear-gradient(180deg, rgb(108 78 39 / 8%), transparent 22%),
+    inset 0 0 92px rgb(15 10 6 / 34%);
+}
+
 .uat-manor-scope-rail,
 .uat-manor-workspace {
   position: absolute;
@@ -357,6 +427,67 @@
 .uat-manor-scope-rail h2 {
   margin: 5px 0 0;
   font: 700 23px/1.06 Georgia, serif;
+}
+
+.uat-manor-visual-derivation {
+  position: relative;
+  overflow: hidden;
+}
+
+.uat-manor-visual-derivation::after {
+  position: absolute;
+  right: -32px;
+  bottom: -44px;
+  width: 136px;
+  height: 136px;
+  border: 1px solid rgb(201 156 80 / 20%);
+  border-radius: 42% 58% 51% 49%;
+  content: "";
+  opacity: .8;
+  transform: rotate(21deg);
+}
+
+.uat-manor-visual-derivation dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 14px 0 0;
+  border: 1px solid rgb(198 164 98 / 22%);
+  background: rgb(198 164 98 / 18%);
+}
+
+.uat-manor-visual-derivation dl div {
+  padding: 9px 10px;
+  background: rgb(27 22 16 / 78%);
+}
+
+.uat-manor-visual-derivation dt {
+  color: #9f957e;
+  font: 800 8px Arial, sans-serif;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.uat-manor-visual-derivation dd {
+  margin: 4px 0 0;
+  color: #e7d8b7;
+  font: 700 12px/1.25 Georgia, serif;
+}
+.uat-manor-feature-register ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.uat-manor-feature-register li {
+  padding: 5px 7px;
+  color: #d7c7a4;
+  border: 1px solid rgb(198 164 98 / 27%);
+  background: rgb(26 21 15 / 52%);
+  font: 700 9px/1.25 Arial, sans-serif;
+  letter-spacing: .025em;
 }
 
 .uat-manor-scope-rail > button {
@@ -473,6 +604,16 @@
     radial-gradient(circle at 50% 35%, rgb(174 149 105 / 16%) 0 18%, transparent 19%),
     radial-gradient(ellipse at 50% 100%, rgb(174 149 105 / 14%) 0 35%, transparent 36%);
 }
+.uat-manor-steward-portrait {
+  width: 72px;
+  height: 94px;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  border: 1px solid rgb(198 164 98 / 48%);
+  background: #211a13;
+  filter: saturate(.76) sepia(.12) contrast(.98);
+}
 .uat-manor-workspace-body > aside button {
   padding: 10px;
   color: #fff0c7;
@@ -506,6 +647,65 @@
   color: #e7d8b6;
   background: rgb(67 47 27 / 72%);
   cursor: pointer;
+}
+.uat-spatial-webgl-surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 52% 38%, #66776b, #273127 72%);
+}
+.uat-spatial-webgl-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  filter: saturate(.9) contrast(.98);
+}
+.uat-spatial-3d-badge {
+  position: absolute;
+  right: 24px;
+  top: 82px;
+  z-index: 2;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  padding: 6px 9px;
+  color: rgb(239 224 187 / 78%);
+  border: 1px solid rgb(213 180 111 / 28%);
+  background: rgb(24 24 19 / 58%);
+  backdrop-filter: blur(6px);
+  font: 800 8px/1 Arial, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.uat-spatial-3d-badge i {
+  width: 7px;
+  height: 7px;
+  border: 1px solid #d5b46f;
+  transform: rotate(30deg) skew(-8deg);
+}
+.uat-spatial-native-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-content: center;
+  padding: 32px;
+  color: #e9ddc3;
+  background: linear-gradient(145deg, rgb(43 35 25 / 96%), rgb(24 23 18 / 97%));
+  font: 500 15px/1.35 Georgia, serif;
+  text-align: center;
+}
+.uat-spatial-native-loading button {
+  justify-self: center;
+  margin-top: 12px;
+  padding: 8px 12px;
+  color: #f0dfbf;
+  cursor: pointer;
+  border: 1px solid rgb(192 143 69 / 70%);
+  background: rgb(73 48 26 / 94%);
 }
 .uat-spatial-record-ticks {
   display: flex;
@@ -562,4 +762,31 @@
   .uat-manor-workspace { top: 204px; right: 12px; bottom: 12px; left: 12px; }
   .uat-manor-workspace-body { grid-template-columns: 1fr; }
   .uat-manor-workspace-body > aside { border-top: 1px solid rgb(198 164 98 / 22%); border-left: 0; }
+}
+.uat-spatial-a11y-hexes {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.uat-spatial-a11y-hexes:focus-within {
+  width: auto;
+  height: auto;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  clip: auto;
+  margin: 0;
+  padding: .55rem;
+  display: grid;
+  gap: .35rem;
+  background: rgba(20, 17, 13, .96);
+  border: 1px solid rgba(193, 155, 85, .72);
+  white-space: normal;
 }

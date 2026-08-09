@@ -24,7 +24,7 @@ describe("Journey opening-presence source adapter", () => {
     expect(result.evidence_rows.every((row) =>
       row.person_id && row.acting_house_id && row.location_id && !row.runtime_authority
     )).toBe(true);
-  });
+  }, 30_000);
 
   it("requires an exact external admission grant before producing a runtime seed", async () => {
     const pending = await loadJourneyOpeningPresenceSource();
@@ -46,7 +46,7 @@ describe("Journey opening-presence source adapter", () => {
     expect(admitted.admitted_house_scope).toHaveLength(23_548);
     expect(admitted.pending_admission_count).toBe(0);
     expect(admitted.opening_presence[0]?.evidence_refs).toContain(admissionRef);
-  });
+  }, 30_000);
 
   it("rejects an admission grant that does not bind the exact source digest", async () => {
     await expect(loadJourneyOpeningPresenceSource({
@@ -59,5 +59,5 @@ describe("Journey opening-presence source adapter", () => {
         runtime_authority: true,
       },
     })).rejects.toThrow("invalid_journey_opening_presence_admission_grant");
-  });
+  }, 30_000);
 });

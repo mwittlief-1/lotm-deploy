@@ -147,10 +147,14 @@ const browserTempRoot = path.resolve(
 );
 fs.mkdirSync(browserTempRoot, { recursive: true });
 
+const configuredExecutablePath =
+  process.env.COURTOS_UAT_BROWSER_EXECUTABLE_PATH?.trim() || undefined;
 const context = await chromium.launchPersistentContext(
   path.join(browserTempRoot, `profile-${process.pid}`),
   {
-    channel: process.env.COURTOS_UAT_BROWSER_CHANNEL ?? "chrome",
+    ...(configuredExecutablePath
+      ? { executablePath: configuredExecutablePath }
+      : { channel: process.env.COURTOS_UAT_BROWSER_CHANNEL ?? "chrome" }),
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
     viewport,

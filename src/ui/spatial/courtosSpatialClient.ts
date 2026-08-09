@@ -21,14 +21,21 @@ export type {
 } from "./courtosSpatialContract";
 
 export type CourtOsSpatialState =
-  | { status: "loading" }
+  | { status: "idle" | "loading" }
   | { status: "ready"; context: CourtOsSessionContextV1; portfolio: CourtOsSpatialPortfolio | null; effectiveDate: string }
   | { status: "error"; message: string };
 
-export function useCourtOsSpatialPortfolio(houseId: string | null): CourtOsSpatialState {
-  const [state, setState] = useState<CourtOsSpatialState>({ status: "loading" });
+export function useCourtOsSpatialPortfolio(
+  houseId: string | null,
+  options: { enabled?: boolean } = {},
+): CourtOsSpatialState {
+  const [state, setState] = useState<CourtOsSpatialState>({ status: "idle" });
 
   useEffect(() => {
+    if (options.enabled === false) {
+      setState({ status: "idle" });
+      return;
+    }
     if (!houseId) {
       setState({ status: "loading" });
       return;
@@ -84,7 +91,7 @@ export function useCourtOsSpatialPortfolio(houseId: string | null): CourtOsSpati
       })
       .finally(() => deadline.clear());
     return () => deadline.cancel();
-  }, [houseId]);
+  }, [houseId, options.enabled]);
 
   return state;
 }

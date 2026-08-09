@@ -1,0 +1,37 @@
+{
+  "package": "phase_five_manor_operations_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "history_interval": "1117-1119",
+  "runtime_authority": false,
+  "source_mutation": false,
+  "counts": {
+    "project_reconstruction": 1878,
+    "condition_observation": 9439,
+    "four_bucket_assignment": 2588,
+    "discrete_facility_registry": 229
+  },
+  "checks": {
+    "project_rows_1878": true,
+    "condition_rows_9439": true,
+    "assignment_rows_2588": true,
+    "facility_rows_229": true,
+    "four_buckets_present": true,
+    "facility_operation_runtime_false": true,
+    "facility_fiscal_runtime_false": true,
+    "runtime_authority_false": true,
+    "sqlite_exists": true
+  },
+  "dependencies": [
+    "project reconstruction candidate V1",
+    "condition candidate V1",
+    "four-bucket assignment admission V1"
+  ],
+  "boundaries": [
+    "UAT1 read model only",
+    "No GL posting",
+    "No runtime obligation",
+    "No source mutation",
+    "UAT2 consumes the same IDs and adds execution/economic bridges"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "package": "phase_five_resources_finance_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "history_interval": "1117-1119",
+  "runtime_authority": false,
+  "source_mutation": false,
+  "tables": {
+    "fiscal_authority_assignment": 1685,
+    "house_manor_scope": 823,
+    "opening_balance_rollup": 13355,
+    "opening_custody_rollup": 9331,
+    "rights_candidate_withheld": 8
+  },
+  "source_artifacts": {
+    "authority": "data/genrun/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1.sqlite",
+    "house_manor_scope": "data/genrun/phase_five_foundation_a_uat_house_manor_scope_admission_v1/phase_five_foundation_a_uat_house_manor_scope_admission_v1.sqlite",
+    "economy_closure": "data/genrun/phase_five_resources_finance_category_closure_v1"
+  },
+  "boundaries": [
+    "UAT1 read model only",
+    "House and manor fiscal assignments are ID-bound and read-only",
+    "Opening balances and custody are provisional/withheld where protected node binding is not established",
+    "Revenue Rights workspace is empty at opening; 187 candidates remain withheld",
+    "No GL posting, obligation execution, settlement, source mutation, or runtime authority"
+  ]
+}

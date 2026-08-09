@@ -21,7 +21,7 @@ export interface CourtOsShellRuntimeModel {
   };
   head: CouncilRoomReadyProjectionV1["head_ref"];
   authority: {
-    status: "unadmitted" | "regency_required";
+    status: "house_head" | "unadmitted" | "regency_required";
     actor: CouncilRoomReadyProjectionV1["head_ref"] | null;
     label: string;
   };
@@ -45,12 +45,17 @@ export function buildCourtOsShellRuntimeModel(input: {
   if (input.sessionContext.selected_house_id !== courtHouseId) {
     throw new Error("CourtOS session context does not match the selected House.");
   }
-  if (
-    input.sessionContext.acting_actor.status !== "unadmitted" ||
+  if (input.sessionContext.acting_actor.status === "house_head") {
+    if (
+      input.sessionContext.acting_actor.person_id !== input.council.head_ref.entity_id
+    ) {
+      throw new Error("CourtOS acting actor does not match the source-resolved House Head.");
+    }
+  } else if (
     input.sessionContext.acting_actor.person_id !== null ||
     input.sessionContext.acting_actor.authority_basis !== null
   ) {
-    throw new Error("CourtOS acting authority requires an admitted authority basis.");
+    throw new Error("CourtOS unadmitted actor state is malformed.");
   }
   const candidateCouncil = input.council.inner_council_seats.some((seat) =>
     seat.source_refs.some((source) =>
@@ -71,7 +76,7 @@ export function buildCourtOsShellRuntimeModel(input: {
     label:
       input.sessionContext.house_access === "player_house"
         ? `Playing ${input.courtOs.selected_entity.display_label ?? input.council.house_ref.display_name} · House records`
-        : "Generalization QA · source projection",
+        : "Generalization QA · recorded source",
   };
 
   return {
@@ -94,7 +99,13 @@ export function buildCourtOsShellRuntimeModel(input: {
           actor: null,
           label: "acting person not established · regency indicated",
         }
-      : {
+      : input.sessionContext.acting_actor.status === "house_head"
+        ? {
+            status: "house_head",
+            actor: input.council.head_ref,
+            label: `${input.council.head_ref.display_name} · Head of House · planning drafts enabled`,
+          }
+        : {
           status: "unadmitted",
           actor: null,
           label: "acting person not established",
@@ -102,7 +113,7 @@ export function buildCourtOsShellRuntimeModel(input: {
     councilSource: candidateCouncil
       ? {
           status: "candidate_projection",
-          label: "provisional Council membership · candidate source",
+          label: "provisional Council membership · opening record",
         }
       : {
           status: "non_authoritative_projection",

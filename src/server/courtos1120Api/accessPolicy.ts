@@ -1,6 +1,7 @@
 import { COURTOS_PLAYER_CONTEXT } from "../../courtosPlayerContext";
 import {
   buildCourtOsSessionContext,
+  type CourtOsActingActorV1,
   type CourtOsSessionContextV1,
 } from "../../courtosSessionContext";
 
@@ -18,6 +19,11 @@ export class CourtOsHouseAccessDenied extends Error {
 export function assertCourtOsHouseAccess(
   mode: CourtOsAccessMode,
   houseId: string,
+  actingActor: CourtOsActingActorV1 = {
+    status: "unadmitted",
+    person_id: null,
+    authority_basis: null,
+  },
 ): CourtOsSessionContextV1 {
   if (
     mode === "player_runtime" &&
@@ -25,5 +31,13 @@ export function assertCourtOsHouseAccess(
   ) {
     throw new CourtOsHouseAccessDenied();
   }
-  return buildCourtOsSessionContext(mode, houseId);
+  return buildCourtOsSessionContext(
+    mode,
+    houseId,
+    mode === "player_runtime" ? actingActor : {
+      status: "unadmitted",
+      person_id: null,
+      authority_basis: null,
+    },
+  );
 }

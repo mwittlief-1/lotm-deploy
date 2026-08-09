@@ -6,9 +6,9 @@ import { describe, expect, it } from "vitest";
 import { productionCourtOs1120Sources } from "../../src/server/courtos1120Api/productionRuntime";
 import {
   createCourtOs1120ReadModelService,
-  COURTOS_SPATIAL_REPOSITORY_PATH,
+  COURTOS_ROADCOTE_SPATIAL_VISUAL_EXPORT_PATH,
+  COURTOS_SPATIAL_VISUAL_EXPORT_PATH,
   COURTOS_1120_SQLITE_REPOSITORY_PATH,
-  HOUSEHOLD_1120_SQLITE_REPOSITORY_PATH,
   repositoryCourtOs1120Sources,
 } from "../../src/server/courtos1120Api/readModelService";
 import { createCourtOs1120FetchHandler } from "../../src/server/courtos1120Api/webAdapter";
@@ -17,12 +17,14 @@ import { NativeSqliteReadonlyDriver } from "../../src/ui/readModels/world1116/sq
 const root = process.cwd();
 
 describe("CourtOS packaged deployment adapter", () => {
-  it("ships all four Web-standard Vercel function entrypoints", () => {
+  it("ships all six Web-standard Vercel function entrypoints", () => {
     for (const route of [
       "api/courtos/1120.ts",
       "api/household/1120.ts",
       "api/council-room/1120.ts",
+      "api/responsibilities/1120.ts",
       "api/spatial/1120.ts",
+      "api/spatial/1120/visual.ts",
     ]) {
       const path = resolve(root, route);
       expect(existsSync(path)).toBe(true);
@@ -48,25 +50,37 @@ describe("CourtOS packaged deployment adapter", () => {
       $schema?: string;
       functions?: Record<
         string,
-        { includeFiles?: string; maxDuration?: number }
+        { includeFiles?: string | string[]; maxDuration?: number }
       >;
       rewrites?: Array<{ source: string; destination: string }>;
     };
     expect(config.$schema).toBe("https://openapi.vercel.sh/vercel.json");
     expect(config.functions).toEqual({
       "api/courtos/1120.ts": {
-        includeFiles: COURTOS_1120_SQLITE_REPOSITORY_PATH,
+        includeFiles: ".courtos-generated/foundation-a/**",
         maxDuration: 30,
       },
       "api/household/1120.ts": {
-        includeFiles: HOUSEHOLD_1120_SQLITE_REPOSITORY_PATH,
+        includeFiles: ".courtos-generated/foundation-a/**",
         maxDuration: 30,
       },
       "api/council-room/1120.ts": {
+        includeFiles: ".courtos-generated/foundation-a/**",
+        maxDuration: 30,
+      },
+      "api/responsibilities/1120.ts": {
+        includeFiles: ".courtos-generated/foundation-a/**",
         maxDuration: 30,
       },
       "api/spatial/1120.ts": {
-        includeFiles: COURTOS_SPATIAL_REPOSITORY_PATH,
+        includeFiles: ".courtos-generated/foundation-a/**",
+        maxDuration: 30,
+      },
+      "api/spatial/1120/visual.ts": {
+        includeFiles: [
+          ".courtos-generated/foundation-a/**",
+          "data/map/mapgen_exports/**",
+        ],
         maxDuration: 30,
       },
     });
@@ -81,16 +95,33 @@ describe("CourtOS packaged deployment adapter", () => {
   it("binds production to the checksum-pinned repository sources by default", () => {
     const sources = productionCourtOs1120Sources({}, root);
     expect(sources).toEqual({
-      courtOsSqlitePath: resolve(root, COURTOS_1120_SQLITE_REPOSITORY_PATH),
-      householdSqlitePath: resolve(
+      courtOsSqlitePath: null,
+      householdSqlitePath: null,
+      foundationAStaticStoresManifestPath: null,
+      foundationAEducationManifestPath: null,
+      foundationAHouseholdUat1ReleaseManifestPath: null,
+      foundationAHouseholdRuntimeReleaseManifestPath: null,
+      foundationAUnifiedReleaseManifestPath: resolve(
         root,
-        HOUSEHOLD_1120_SQLITE_REPOSITORY_PATH,
+        ".courtos-generated/foundation-a/MANIFEST.json",
       ),
-      spatialProjectionPath: resolve(root, COURTOS_SPATIAL_REPOSITORY_PATH),
+      foundationAHouseholdEconomicActivityManifestPath: null,
+      foundationAResponsibilityAuthorityRootDirectory: null,
+      manorFabricReleaseDirectory: null,
+      manorFabricXmapManorsPath: null,
+      responsibilityPackagesRootDirectory: null,
+      spatialProjectionPath: null,
+      spatialVisualExportPath: resolve(root, COURTOS_SPATIAL_VISUAL_EXPORT_PATH),
+      spatialVisualExportPaths: {
+        manor_hx_38958: resolve(root, COURTOS_SPATIAL_VISUAL_EXPORT_PATH),
+        manor_hx_44835: resolve(
+          root,
+          COURTOS_ROADCOTE_SPATIAL_VISUAL_EXPORT_PATH,
+        ),
+      },
     });
-    expect(existsSync(sources.courtOsSqlitePath!)).toBe(true);
-    expect(existsSync(sources.householdSqlitePath!)).toBe(true);
-    expect(existsSync(sources.spatialProjectionPath!)).toBe(true);
+    expect(existsSync(sources.foundationAUnifiedReleaseManifestPath!)).toBe(true);
+    expect(existsSync(sources.spatialVisualExportPath!)).toBe(true);
   });
 
   it("keeps proposal and realm-wide fields out of real House API payloads", async () => {
@@ -123,6 +154,60 @@ describe("CourtOS packaged deployment adapter", () => {
     }
   });
 
+  it("consumes the unified Foundation A Household runtime release", async () => {
+    const service = createCourtOs1120ReadModelService(
+      repositoryCourtOs1120Sources(root),
+    );
+    try {
+      const projection = await service.household({
+        houseId: "t0h_bcae5bd911ab10f4c7fdfea0",
+        householdEntityId: "uatentity_2feb6d3c5a81604f9bebeb8c",
+      });
+      expect(projection.stores_history).toEqual([]);
+      expect(projection.economic_activity_lookback).toHaveLength(276);
+      expect(projection.economic_activity_lookback).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          activity_year: 1119,
+          evidence_status: "founder_approved_provisional_economic_lookback",
+          runtime_authority: 0,
+        }),
+      ]));
+      expect(projection.supply_routes).toEqual([]);
+      expect(projection.stores_positions).toEqual(expect.arrayContaining([
+        expect.objectContaining({ position_kind: "house_position", availability_posture: "available" }),
+        expect.objectContaining({ position_kind: "food_capacity", resource_id: "food" }),
+      ]));
+      expect(
+        projection.provenance.find((row) => row.record_key === "ro_household_stores_position_v1"),
+      ).toMatchObject({
+        admission_state: "projected_read_ready",
+        row_count: expect.any(Number),
+        runtime_authority: 0,
+      });
+      expect(projection.schema_version).toBe("foundation_a_household_runtime_release_v1");
+      expect(projection.membership_context).toHaveLength(14);
+      expect(projection.responsibility_summary.length).toBeGreaterThan(4);
+      expect(projection.responsibility_summary).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          source_legacy_responsibility_id:
+            "courtos.responsibility.manor_stewardship",
+          authority_scope_id: "manor_hx_38958",
+        }),
+      ]));
+      expect(projection.education_plans).toHaveLength(4);
+      expect(
+        projection.education_plans.every(
+          (row) =>
+            row.knowledge_state ===
+            "withheld_pending_knowledge_safe_report_projection",
+        ),
+      ).toBe(true);
+      expect(projection.education_cycle_reports).toEqual([]);
+    } finally {
+      await service.close();
+    }
+  }, 60_000);
+
   it("serves only a House-scoped admitted spatial payload", async () => {
     const service = createCourtOs1120ReadModelService(
       repositoryCourtOs1120Sources(root),
@@ -139,8 +224,17 @@ describe("CourtOS packaged deployment adapter", () => {
       expect(payload.data).toMatchObject({
         schema_version: "courtos_spatial_house_projection_v1",
         query: { house_id: "t0h_bcae5bd911ab10f4c7fdfea0" },
-        availability: "not_admitted",
-        portfolio: null,
+        availability: "admitted",
+        portfolio: {
+          house_id: "t0h_bcae5bd911ab10f4c7fdfea0",
+          manors: expect.arrayContaining([
+            expect.objectContaining({
+              manor_id: "manor_hx_44835",
+              display_name: "Roadcote Court",
+              is_principal_seat: true,
+            }),
+          ]),
+        },
       });
       expect(payload.data).not.toHaveProperty("portfolios");
       expect(JSON.stringify(payload)).not.toContain("principal_operator_person_ids");
@@ -179,6 +273,32 @@ describe("CourtOS packaged deployment adapter", () => {
         });
         expect(JSON.stringify(payload)).not.toContain("Holtcross");
       }
+    } finally {
+      await service.close();
+    }
+  });
+
+  it("resolves the selected House Head for the player planning workspace", async () => {
+    const service = createCourtOs1120ReadModelService(
+      repositoryCourtOs1120Sources(root),
+      { accessMode: "player_runtime" },
+    );
+    try {
+      await expect(
+        service.sessionContext({ houseId: "t0h_bcae5bd911ab10f4c7fdfea0" }),
+      ).resolves.toMatchObject({
+        selected_house_id: "t0h_bcae5bd911ab10f4c7fdfea0",
+        acting_actor: {
+          status: "house_head",
+          person_id: "t0p_56033e4ecf3e86ff0dd615c4",
+          authority_basis: "foundation_a_uat1_succession_head_identity_plus_player_session",
+        },
+        capabilities: {
+          inspect_house_records: true,
+          manage_assignments: true,
+          issue_commands: false,
+        },
+      });
     } finally {
       await service.close();
     }
@@ -228,7 +348,28 @@ describe("CourtOS packaged deployment adapter", () => {
     ).toEqual({
       courtOsSqlitePath: "/runtime/courtos.sqlite",
       householdSqlitePath: "/runtime/household.sqlite",
-      spatialProjectionPath: resolve(root, COURTOS_SPATIAL_REPOSITORY_PATH),
+      foundationAStaticStoresManifestPath: null,
+      foundationAEducationManifestPath: null,
+      foundationAHouseholdUat1ReleaseManifestPath: null,
+      foundationAHouseholdRuntimeReleaseManifestPath: null,
+      foundationAUnifiedReleaseManifestPath: resolve(
+        root,
+        ".courtos-generated/foundation-a/MANIFEST.json",
+      ),
+      foundationAHouseholdEconomicActivityManifestPath: null,
+      foundationAResponsibilityAuthorityRootDirectory: null,
+      manorFabricReleaseDirectory: null,
+      manorFabricXmapManorsPath: null,
+      responsibilityPackagesRootDirectory: null,
+      spatialProjectionPath: null,
+      spatialVisualExportPath: resolve(root, COURTOS_SPATIAL_VISUAL_EXPORT_PATH),
+      spatialVisualExportPaths: {
+        manor_hx_38958: resolve(root, COURTOS_SPATIAL_VISUAL_EXPORT_PATH),
+        manor_hx_44835: resolve(
+          root,
+          COURTOS_ROADCOTE_SPATIAL_VISUAL_EXPORT_PATH,
+        ),
+      },
     });
   });
 
@@ -238,7 +379,7 @@ describe("CourtOS packaged deployment adapter", () => {
       "src/ui/readModels/household1120/service.ts",
     ]) {
       const source = readFileSync(resolve(root, path), "utf8");
-      expect(source).toContain("NativeSqliteReadonlyDriver");
+      expect(source).toMatch(/NativeSqliteReadonlyDriver|World1116ReadonlySqliteDriver/);
       expect(source).not.toContain("new SqliteCliReadonlyDriver");
     }
   });

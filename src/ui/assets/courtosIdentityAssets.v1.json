@@ -41,6 +41,21 @@
       "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/isabel-of-ridgestead__p2-f-har-tp06-ph-a__lower-noble-hoh-full-pal-10.png"
     },
     {
+      "person_id": "t0p_5a5ab588a81271cedf450f2f",
+      "display_name": "Edith of Pearwick Hall",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/edith-of-pearwick-hall__p2-age-ch-f-dom-009__low-noble-collateral-girl-pal-10__attachment-v3.png"
+    },
+    {
+      "person_id": "t0p_67baa6e35dabaa4ba4bb37d6",
+      "display_name": "Hugh of Pearwick Hall",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/hugh-of-pearwick-hall__p2-age-ch-m-dom-024__low-noble-collateral-boy-pal-10__attachment-v3.png"
+    },
+    {
+      "person_id": "t0p_31a96010392a8dbf80e93469",
+      "display_name": "Gunnora of Pearwick Hall",
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/gunnora-of-pearwick-hall__p2-age-ch-f-dom-025__low-noble-collateral-girl-pal-10__attachment-v3.png"
+    },
+    {
       "person_id": "t0p_9ca824d05753ee92f2305a5a",
       "display_name": "Aveline of Lily Croft",
       "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/aveline-of-lily-croft__p2-f-kes-t0-ph-a__other-noble-collateral-full-pal-10.png"
@@ -78,7 +93,7 @@
     {
       "person_id": "t0p_88f787fdeb16b923a5f05efe",
       "display_name": "Thierry Shield, retainer captain muster lead",
-      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/thierry-shield__p2-m-gls-t0-ph-c__other-noble-martial-broad-pal-10.png"
+      "portrait_path": "/assets/council-command-room/portraits/pearwick-hall/thierry-shield__p2-m-gls-t0-ph-c__other-noble-martial-broad-pal-10__attachment-v3.png"
     },
     {
       "person_id": "t0p_334927a7b877bbb47382f107",

@@ -20,8 +20,6 @@ function boundedNumber(value, fallback, minimum, maximum) {
 const dryRun = argv.includes("--dry-run");
 const skipEngineering = argv.includes("--skip-engineering");
 const suppliedBaseUrl = valueAfter("--base-url");
-const suppliedMapGenBaseUrl = valueAfter("--mapgen-base-url") ?? process.env.COURTOS_UAT_MAPGEN_BASE_URL;
-const mapgenRoot = path.resolve(process.env.MAPGEN_ROOT ?? path.join(root, "..", "lotm-mapgen"));
 const runId = valueAfter("--run-id") ?? `courtos-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
 const config = JSON.parse(fs.readFileSync(path.resolve(root, "qa/uat/uat.config.json"), "utf8"));
 const scenarioCatalog = JSON.parse(
@@ -76,103 +74,13 @@ function runtimeInputManifest() {
   return { contentHash: hash.digest("hex"), files, fileHashes, untrackedInputs: [] };
 }
 
-function mapgenRuntimeInputManifest() {
-  // Hash the exact executable/data/config/art seam used by the three CourtOS renderers.
-  // Runtime art must be present, not merely described by an asset manifest; unrelated
-  // MapGen experiments remain outside the build identity.
-  const roots = [
-    "package.json",
-    "package-lock.json",
-    "vite.config.ts",
-    "public/courtos-cartography-theme.v1.js",
-    "public/courtos-embedded-adapter.v1.js",
-    "public/merecross-3d-prototype.html",
-    "public/merecross-3d-prototype-data.js",
-    "public/realm-zoom-composition-data.js",
-    "public/shared-water-texture.js",
-    "public/shared-land-composition.js",
-    "public/orchardmere-county-viewer.html",
-    "public/orchardmere-county-viewer.js",
-    "public/orchardmere-county-viewer-data.js",
-    "public/orchardmere-composition-surface-data.js",
-    "public/pearwick-estate-pilot.html",
-    "public/pearwick-estate-pilot-3d.js",
-    "public/pearwick-estate-pilot-data.js",
-    "public/pearwick-single-hex-assets.js",
-    "public/pearwick-road-geometry.js",
-    "public/vendor/three",
-    "assets/microhex_art/v2_2/merecross_trunk_road_straight_edge_clean_v2_2.png",
-    "public/assets/manor-pilot-v1",
-    "public/assets/manor-pilot-v2",
-    "public/assets/landscape-composition",
-    "public/assets/pearwick/2p5d-poc-v1",
-    "public/assets/pearwick/environment-v1",
-    "public/assets/pearwick/hybrid-v1",
-    "public/assets/pearwick/vegetation",
-    "qa_artifacts/V07-PEARWICK-MICROHEX-PILOT-001/pearwick_microhex_pilot_v1.json",
-  ];
-  if (!fs.existsSync(mapgenRoot)) {
-    throw new Error(
-      `MapGen repository is unavailable at ${mapgenRoot}. Set MAPGEN_ROOT to the exact renderer source used by this UAT candidate.`,
-    );
-  }
-  const files = [];
-  const visit = (relativePath) => {
-    const absolutePath = path.resolve(mapgenRoot, relativePath);
-    if (!fs.existsSync(absolutePath)) {
-      throw new Error(`Required MapGen runtime input is missing: ${absolutePath}`);
-    }
-    assertRuntimeInputMaterialized(absolutePath, "MapGen runtime input");
-    const stat = fs.statSync(absolutePath);
-    if (stat.isDirectory()) {
-      for (const entry of fs.readdirSync(absolutePath).sort()) visit(path.join(relativePath, entry));
-      return;
-    }
-    if (stat.isFile() && !relativePath.endsWith(".DS_Store")) files.push(relativePath.split(path.sep).join("/"));
-  };
-  for (const relativePath of roots) visit(relativePath);
-
-  const hash = crypto.createHash("sha256");
-  const fileHashes = {};
-  for (const relativePath of files.sort()) {
-    const absolutePath = path.resolve(mapgenRoot, relativePath);
-    const digestResult = spawnSync("shasum", ["-a", "256", absolutePath], {
-      cwd: mapgenRoot,
-      encoding: "utf8",
-      timeout: 10_000,
-    });
-    if (digestResult.status !== 0 || !digestResult.stdout.trim()) {
-      throw new Error(`MapGen runtime input could not be hashed: ${relativePath}`);
-    }
-    const digest = digestResult.stdout.trim().split(/\s+/)[0];
-    fileHashes[relativePath] = digest;
-    hash.update(relativePath);
-    hash.update("\0");
-    hash.update(digest);
-    hash.update("\0");
-  }
-  const trackedResult = spawnSync("git", ["ls-files", "-z", "--", ...roots], {
-    cwd: mapgenRoot,
-    encoding: "utf8",
-    timeout: 15_000
-  });
-  const tracked = new Set(trackedResult.status === 0 ? trackedResult.stdout.split("\0").filter(Boolean) : []);
-  return {
-    repositoryRoot: mapgenRoot,
-    contentHash: hash.digest("hex"),
-    files,
-    fileHashes,
-    untrackedInputs: files.filter((file) => !tracked.has(file))
-  };
-}
-
-function gitBuildId(manifest, mapgenManifest) {
+function gitBuildId(manifest) {
   const result = spawnSync("git", ["rev-parse", "--short=12", "HEAD"], { cwd: root, encoding: "utf8" });
   if (result.status === 0 && result.stdout.trim()) {
-    return `${result.stdout.trim()}+courtos.${manifest.contentHash.slice(0, 12)}.mapgen.${mapgenManifest.contentHash.slice(0, 12)}`;
+    return `${result.stdout.trim()}+courtos.${manifest.contentHash.slice(0, 12)}`;
   }
   const packageJson = JSON.parse(fs.readFileSync(path.resolve(root, "package.json"), "utf8"));
-  return `package-${packageJson.version ?? "unknown"}+courtos.${manifest.contentHash.slice(0, 12)}.mapgen.${mapgenManifest.contentHash.slice(0, 12)}`;
+  return `package-${packageJson.version ?? "unknown"}+courtos.${manifest.contentHash.slice(0, 12)}`;
 }
 
 function runSync(command, args, options = {}) {
@@ -271,15 +179,10 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
   fs.mkdirSync(laneTempDir, { recursive: true });
   const timeoutMs = Number(process.env.COURTOS_UAT_AGENT_TIMEOUT_MS ?? 2_700_000);
   const codexBinary = process.env.COURTOS_UAT_CODEX_BINARY?.trim() || "codex";
-
-  return new Promise((resolve) => {
-    const child = spawn(
-      codexBinary,
-      [
-        "exec",
-        "--ephemeral",
-        "--ignore-user-config",
-        "--ignore-rules",
+  const externallySandboxed = process.env.COURTOS_UAT_EXTERNALLY_SANDBOXED === "1";
+  const isolationArgs = externallySandboxed
+    ? ["--dangerously-bypass-approvals-and-sandbox"]
+    : [
         "--config",
         'default_permissions="courtos-uat-readonly"',
         "--config",
@@ -296,6 +199,17 @@ function runCodexLane({ name, prompt, schemaPath, outputPath }) {
         'permissions.courtos-uat-readonly.filesystem.:slash_tmp="write"',
         "--config",
         `permissions.courtos-uat-readonly.filesystem.${artifactDir}="write"`,
+      ];
+
+  return new Promise((resolve) => {
+    const child = spawn(
+      codexBinary,
+      [
+        "exec",
+        "--ephemeral",
+        "--ignore-user-config",
+        "--ignore-rules",
+        ...isolationArgs,
         "--json",
         "--output-schema",
         path.resolve(root, schemaPath),
@@ -384,8 +298,7 @@ function computePromotion({ engineering, uat, architecture, buildId }) {
 
 if (dryRun) {
   const runtimeInputs = runtimeInputManifest();
-  const mapgenRuntimeInputs = mapgenRuntimeInputManifest();
-  const buildId = gitBuildId(runtimeInputs, mapgenRuntimeInputs);
+  const buildId = gitBuildId(runtimeInputs);
   runSync(process.execPath, ["scripts/validateCourtosUatConfig.mjs"]);
   console.log(
     JSON.stringify(
@@ -395,7 +308,7 @@ if (dryRun) {
         buildId,
         engineeringGate: skipEngineering ? "skipped by explicit flag" : "node scripts/runCourtosEngineeringQa.mjs",
         runtime: suppliedBaseUrl ?? "built Vite preview on an available local port",
-        mapgenRuntime: suppliedMapGenBaseUrl ?? `managed preview from ${mapgenRoot}`,
+        spatialRuntime: "native CourtOS renderer and manifest-bound repository exports",
         parallelIndependentLanes: ["persona_swarm", "production_architecture"],
         verificationLane: "independent_verifier_after_persona_reports",
         adjudicationLane: "uat_orchestrator_after_verification",
@@ -403,8 +316,6 @@ if (dryRun) {
         scenarioCount: JSON.parse(fs.readFileSync(path.resolve(root, config.scenarioCatalog), "utf8")).scenarios.length,
         runtimeInputCount: runtimeInputs.files.length,
         untrackedRuntimeInputCount: runtimeInputs.untrackedInputs.length,
-        mapgenRuntimeInputCount: mapgenRuntimeInputs.files.length,
-        untrackedMapgenRuntimeInputCount: mapgenRuntimeInputs.untrackedInputs.length,
         artifactDir
       },
       null,
@@ -416,39 +327,17 @@ if (dryRun) {
 
 fs.mkdirSync(artifactDir, { recursive: true });
 let preview;
-let mapgenPreview;
 let browserBroker;
 let browserBrokerUrl;
 let browserBrokerToken;
 let engineering = skipEngineering ? "skipped" : "fail";
 let runtimeInputs = null;
-let mapgenRuntimeInputs = null;
 let buildId = "unresolved";
 
 try {
-  let mapgenBaseUrl = suppliedMapGenBaseUrl;
-  if (!mapgenBaseUrl) {
-    if (!fs.existsSync(path.join(mapgenRoot, "node_modules/vite/bin/vite.js"))) {
-      throw new Error(`MapGen runtime dependencies are unavailable at ${mapgenRoot}. Supply --mapgen-base-url or MAPGEN_ROOT.`);
-    }
-    runSync(process.execPath, ["node_modules/vite/bin/vite.js", "build"], { cwd: mapgenRoot });
-    const mapgenPort = await availablePort();
-    mapgenBaseUrl = `http://127.0.0.1:${mapgenPort}`;
-    mapgenPreview = spawn(
-      process.execPath,
-      ["node_modules/vite/bin/vite.js", "preview", "--host", "127.0.0.1", "--port", String(mapgenPort), "--strictPort"],
-      {
-        cwd: mapgenRoot,
-        env: process.env,
-        stdio: ["ignore", fs.openSync(path.join(artifactDir, "mapgen-preview.stdout.log"), "a"), fs.openSync(path.join(artifactDir, "mapgen-preview.stderr.log"), "a")]
-      }
-    );
-  }
-  await waitForRuntime(new URL("/merecross-3d-prototype.html", mapgenBaseUrl).toString());
   const runtimeEnvironment = {
     ...process.env,
-    MAPGEN_ROOT: mapgenRoot,
-    VITE_MAPGEN_BASE_URL: mapgenBaseUrl,
+    COURTOS_NATIVE_MAPGEN: "1",
   };
   if (!skipEngineering) {
     runSync(process.execPath, ["scripts/runCourtosEngineeringQa.mjs"], {
@@ -462,16 +351,10 @@ try {
   // Engineering QA may regenerate the spatial projection. Build identity must
   // be computed from the exact bytes that the preview and agent lanes receive.
   runtimeInputs = runtimeInputManifest();
-  mapgenRuntimeInputs = mapgenRuntimeInputManifest();
-  buildId = gitBuildId(runtimeInputs, mapgenRuntimeInputs);
+  buildId = gitBuildId(runtimeInputs);
   if (runtimeInputs.untrackedInputs.length > 0) {
     throw new Error(
       `CourtOS clean-checkout gate failed: ${runtimeInputs.untrackedInputs.length} runtime inputs are not tracked.`,
-    );
-  }
-  if (mapgenRuntimeInputs.untrackedInputs.length > 0) {
-    throw new Error(
-      `MapGen clean-checkout gate failed: ${mapgenRuntimeInputs.untrackedInputs.length} runtime inputs are not tracked.`,
     );
   }
   fs.writeFileSync(
@@ -481,19 +364,16 @@ try {
       buildId,
       startedAt: new Date().toISOString(),
       suppliedBaseUrl: suppliedBaseUrl ?? null,
-      suppliedMapGenBaseUrl: suppliedMapGenBaseUrl ?? null,
       runtimeInputs,
-      mapgenRuntimeInputs,
     }, null, 2) + "\n",
   );
   fs.writeFileSync(
     path.join(artifactDir, "runtime-configuration.json"),
     JSON.stringify({
-      mapgenBaseUrl,
-      mapgenMode: suppliedMapGenBaseUrl ? "supplied" : "managed_preview",
-      mapgenContentHash: mapgenRuntimeInputs.contentHash,
-      mapgenRuntimeInputCount: mapgenRuntimeInputs.files.length,
-      untrackedMapgenRuntimeInputCount: mapgenRuntimeInputs.untrackedInputs.length,
+      spatialMode: "native_courtos_manifest_bound",
+      spatialInputCount: runtimeInputs.files.filter((file) =>
+        file.startsWith("data/map/") || file.includes("manor_operations"),
+      ).length,
     }, null, 2) + "\n",
   );
 
@@ -540,8 +420,6 @@ try {
     runId,
     buildId,
     runtimeUrl,
-    mapgenBaseUrl,
-    mapgenBuildId: mapgenRuntimeInputs.contentHash,
     repositoryRoot: root,
     configPath: "qa/uat/uat.config.json",
     humanPlaytest: config.humanPlaytest,
@@ -667,6 +545,12 @@ try {
 
   const uat = parseReport(uatOutput);
   const architecture = parseReport(architectureOutput);
+  const postReviewRuntimeInputs = runtimeInputManifest();
+  if (postReviewRuntimeInputs.contentHash !== runtimeInputs.contentHash) {
+    throw new Error(
+      "Independent review mutated a production runtime input; promotion fails closed.",
+    );
+  }
   const promotion = computePromotion({ engineering, uat, architecture, buildId });
   fs.writeFileSync(path.join(artifactDir, "promotion-report.json"), JSON.stringify(promotion, null, 2) + "\n");
 
@@ -689,6 +573,5 @@ try {
   process.exitCode = 1;
 } finally {
   if (preview && !preview.killed) preview.kill("SIGTERM");
-  if (mapgenPreview && !mapgenPreview.killed) mapgenPreview.kill("SIGTERM");
   if (browserBroker && !browserBroker.killed) browserBroker.kill("SIGTERM");
 }

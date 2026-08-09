@@ -1,0 +1,5 @@
+export const FOUNDATION_A_UAT1_RESPONSIBILITY_AUTHORITY_SQLITE_SHA256 =
+  "fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304" as const;
+
+export const FOUNDATION_A_UAT1_RESPONSIBILITY_AUTHORITY_SOURCE_GENERATION =
+  `phase_five_foundation_a_uat_24_responsibility_authority_admission_v1@${FOUNDATION_A_UAT1_RESPONSIBILITY_AUTHORITY_SQLITE_SHA256}` as const;

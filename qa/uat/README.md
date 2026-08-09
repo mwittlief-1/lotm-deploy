@@ -23,13 +23,12 @@ The versioned runtime contract in `config/courtos-player-context.v1.json` binds
 the local player to House Pearwick Hall. `uat.config.json` must match that
 contract. The normal browser entry derives Pearwick from this launch contract;
 an explicit different House selector fails closed. Successful API envelopes
-carry a separate session context: the local player may inspect source-bounded
-Pearwick House records, but those records are not represented as the personal
-knowledge of an inferred Head, regent, councillor, or responsibility owner.
-The current Council sidecar does not admit an acting person, so correspondence,
-personal reports, dialogue, assignment mutation, and commands remain
-unavailable while the head and Council projection stay provisional and
-non-authoritative.
+carry a separate session context: the local player acts as the source-resolved
+Pearwick Head and may inspect House records and save three-year responsibility
+assignment drafts. Those records are not automatically personal knowledge, and
+planning authority is not simulation-execution authority. Correspondence,
+personal reports, dialogue, and unrelated commands remain unavailable until
+their own authority, knowledge, and presentation contracts are admitted.
 
 Phase V targets Steam desktop. Required visual and interaction coverage runs at
 1920×1080 and the supported 1280×720 minimum; mobile is explicitly out of scope.

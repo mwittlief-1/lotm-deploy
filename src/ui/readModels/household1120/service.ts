@@ -197,6 +197,7 @@ export class Household1120ReadModel implements Household1120ReadModelSessionCont
       health_roster: healthRoster,
       health_cycle_reports: healthCycleReports,
       care_arrangements: careArrangements,
+      economic_activity_lookback: [],
       protected_person_dossiers: protectedPersonDossiers,
       matters,
       provenance,

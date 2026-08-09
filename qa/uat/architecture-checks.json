@@ -41,7 +41,7 @@
       "area": "authority",
       "title": "Authority and knowledge boundaries",
       "blocking": true,
-      "requirement": "The runtime enforces House isolation, identifies its versioned player session, distinguishes source-bounded House-record inspection from actor knowledge, and fails closed for correspondence, dialogue, assignment mutation, and commands when no acting actor is admitted."
+      "requirement": "The runtime enforces House isolation, identifies its versioned player session and source-resolved acting Head, distinguishes assignment planning from execution and House-record inspection from actor knowledge, and fails closed for correspondence, dialogue, and runtime commands outside admitted authority."
     },
     {
       "id": "ARCH-007",

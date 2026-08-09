@@ -1,0 +1,48 @@
+{
+  "package": "phase_five_church_observance_rights_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "runtime_authority": false,
+  "counts": {
+    "observance_authority_rows": 435,
+    "parish_rows": 409,
+    "parish_support_rows": 409,
+    "church_institution_type_rows": 62,
+    "church_institution_surface_rows": 418,
+    "patron_support_candidate_rows": 175,
+    "starting_church_seat_rows": 9,
+    "historical_dispensation_rows": 3,
+    "church_rights_current_instances": 0
+  },
+  "checks": {
+    "observance_435": true,
+    "parish_409": true,
+    "parish_support_409": true,
+    "institution_types_62": true,
+    "patron_candidates_175": true,
+    "historical_dispensations_3": true,
+    "rights_zero": true,
+    "church_authority_not_granted": true,
+    "uat1_runtime_false": true,
+    "sqlite_exists": true
+  },
+  "source_files": {
+    "audit_evidence": "0c2b4cd78342f9552b37f377be1506e1621259f8f79339b2e2be3d8e7048e0ac",
+    "audit_summary": "d9922542520ffa8cb33fd7c1c2ad9055a22a1ce3066c0e26fcd5f5324fa01239",
+    "authority": "fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304",
+    "parish": "cfbbf24a2db22f657cf846fcc099aaa625a4a96951f7247861014f06cec2eaef",
+    "parish_support": "d2b53c96dc733a9289de4cd8c1142f540fac3c8dd0b3815e5d6f8613898670b5",
+    "patron": "b1b1a9d88d5b37712124a6b6f333122e23fbb9e11970e862eca8d93dbacde01f",
+    "institution_type": "4f3bad34e0e8fa4eadeaf1c1c9f48f0c57d8a89ba62881d974fa79ef96a260d4",
+    "institution_surface": "ea213ca0f0115f516288fbbcd1887f8c06fcee6fa7c75947de2075a9c13daca3",
+    "starting_seats": "e0c0c6d3a4a1a13642c7d339c11237754463c6be679daee74fedd27337fdc31f",
+    "dispensations": "09508822a3806468b2c0ae9ca52859bf59038d3199e109a671889f30e68250dc"
+  },
+  "boundaries": [
+    "UAT1 read model only",
+    "House owns observance posture but not clergy, rites, records, or Church doctrine",
+    "Church Rights remains an empty conditional workspace",
+    "patronage and historical dispensation rows are evidence only",
+    "no rite, Church case, right, GL, ART, Journey, source, or runtime mutation"
+  ]
+}

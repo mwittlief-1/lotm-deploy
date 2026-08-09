@@ -2,18 +2,30 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/courtos/1120.ts": {
-      "includeFiles": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
+      "includeFiles": ".courtos-generated/foundation-a/**",
       "maxDuration": 30
     },
     "api/household/1120.ts": {
-      "includeFiles": "data/uat/household_wave2_read_contract_v1/generations/9e58577246a3a381395f5a03b520d9790e94ab2d12287999c9bae362466014c0/household_wave2_read_contract_1120_01_01_v1.sqlite",
+      "includeFiles": ".courtos-generated/foundation-a/**",
       "maxDuration": 30
     },
     "api/council-room/1120.ts": {
+      "includeFiles": ".courtos-generated/foundation-a/**",
+      "maxDuration": 30
+    },
+    "api/responsibilities/1120.ts": {
+      "includeFiles": ".courtos-generated/foundation-a/**",
       "maxDuration": 30
     },
     "api/spatial/1120.ts": {
-      "includeFiles": ".courtos-generated/courtos_spatial_read_model_v1.json",
+      "includeFiles": ".courtos-generated/foundation-a/**",
+      "maxDuration": 30
+    },
+    "api/spatial/1120/visual.ts": {
+      "includeFiles": [
+        ".courtos-generated/foundation-a/**",
+        "data/map/mapgen_exports/**"
+      ],
       "maxDuration": 30
     }
   },

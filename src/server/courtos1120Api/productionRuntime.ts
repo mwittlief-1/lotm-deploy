@@ -9,7 +9,9 @@ let productionService: CourtOs1120ApiService | undefined;
 
 function configuredPath(
   environment: NodeJS.ProcessEnv,
-  name: "COURTOS_1120_SQLITE_PATH" | "HOUSEHOLD_1120_SQLITE_PATH",
+  name:
+    | "COURTOS_1120_SQLITE_PATH"
+    | "HOUSEHOLD_1120_SQLITE_PATH",
 ): string | null {
   return environment[name]?.trim() || null;
 }
@@ -26,7 +28,27 @@ export function productionCourtOs1120Sources(
     householdSqlitePath:
       configuredPath(environment, "HOUSEHOLD_1120_SQLITE_PATH") ??
       repositorySources.householdSqlitePath,
+    foundationAStaticStoresManifestPath:
+      repositorySources.foundationAStaticStoresManifestPath,
+    foundationAEducationManifestPath:
+      repositorySources.foundationAEducationManifestPath,
+    foundationAHouseholdUat1ReleaseManifestPath:
+      repositorySources.foundationAHouseholdUat1ReleaseManifestPath,
+    foundationAHouseholdRuntimeReleaseManifestPath:
+      repositorySources.foundationAHouseholdRuntimeReleaseManifestPath,
+    foundationAUnifiedReleaseManifestPath:
+      repositorySources.foundationAUnifiedReleaseManifestPath,
+    foundationAHouseholdEconomicActivityManifestPath:
+      repositorySources.foundationAHouseholdEconomicActivityManifestPath,
+    foundationAResponsibilityAuthorityRootDirectory:
+      repositorySources.foundationAResponsibilityAuthorityRootDirectory,
     spatialProjectionPath: repositorySources.spatialProjectionPath,
+    spatialVisualExportPath: repositorySources.spatialVisualExportPath,
+    spatialVisualExportPaths: repositorySources.spatialVisualExportPaths,
+    manorFabricReleaseDirectory: repositorySources.manorFabricReleaseDirectory,
+    manorFabricXmapManorsPath: repositorySources.manorFabricXmapManorsPath,
+    responsibilityPackagesRootDirectory:
+      repositorySources.responsibilityPackagesRootDirectory,
   };
 }
 

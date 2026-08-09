@@ -42,6 +42,26 @@ describe("CourtOS registered portrait resolution", () => {
       "Wulfstan Ford",
       "wulfstan-ford__p2-m-mrw-tp04-ph-d__commoner-in-service-broad-pal-10.png",
     ],
+    [
+      "t0p_88f787fdeb16b923a5f05efe",
+      "Thierry Shield, retainer captain muster lead",
+      "thierry-shield__p2-m-gls-t0-ph-c__other-noble-martial-broad-pal-10__attachment-v3.png",
+    ],
+    [
+      "t0p_5a5ab588a81271cedf450f2f",
+      "Edith of Pearwick Hall",
+      "edith-of-pearwick-hall__p2-age-ch-f-dom-009__low-noble-collateral-girl-pal-10__attachment-v3.png",
+    ],
+    [
+      "t0p_67baa6e35dabaa4ba4bb37d6",
+      "Hugh of Pearwick Hall",
+      "hugh-of-pearwick-hall__p2-age-ch-m-dom-024__low-noble-collateral-boy-pal-10__attachment-v3.png",
+    ],
+    [
+      "t0p_31a96010392a8dbf80e93469",
+      "Gunnora of Pearwick Hall",
+      "gunnora-of-pearwick-hall__p2-age-ch-f-dom-025__low-noble-collateral-girl-pal-10__attachment-v3.png",
+    ],
   ])("resolves canonical person %s", (personId, label, fileName) => {
     expect(portraitArtForPerson({ personId, label })?.src).toBe(
       `/assets/council-command-room/portraits/pearwick-hall/${fileName}`,
@@ -64,18 +84,25 @@ describe("CourtOS registered portrait resolution", () => {
 });
 
 describe("CourtOS portrait identity safety", () => {
-  it("does not substitute a registered face when an unknown ID uses a known label", () => {
-    expect(
-      portraitResolutionForPerson({
-        personId: "t0p_unregistered_identity",
-        label: "Edmund of Pearwick Hall",
-      }),
-    ).toMatchObject({
-      status: "missing",
+  it("gives every canonical but uncommissioned person a deterministic portrait-bank likeness", () => {
+    const first = portraitResolutionForPerson({
       personId: "t0p_unregistered_identity",
-      reason: "portrait_not_registered",
-      art: null,
+      label: "Gerard Webber",
+      age: 48,
     });
+    const second = portraitResolutionForPerson({
+      personId: "t0p_unregistered_identity",
+      label: "Gerard Webber",
+      age: 48,
+    });
+    expect(first).toMatchObject({
+      status: "portrait_bank",
+      personId: "t0p_unregistered_identity",
+      art: {
+        src: expect.stringMatching(/^\/assets\/portrait-bank\/proof\/portrait_age_pf00[1-6]_mature_adult\.png$/),
+      },
+    });
+    expect(second).toEqual(first);
   });
 
   it("does not use a label or demographic hash when the canonical ID is absent", () => {

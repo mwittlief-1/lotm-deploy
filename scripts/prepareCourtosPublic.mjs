@@ -7,10 +7,19 @@ import mapGenContract from "../config/courtos-mapgen-runtime-contract.v1.json" w
 
 const ROOT = process.cwd();
 const TARGET_ROOT = path.resolve(ROOT, ".courtos-public");
+// The tracked-input verifier walks the complete transitive CourtOS code, test,
+// data, and production-art seam. On a cold desktop checkout, materializing and
+// hashing those inputs can legitimately exceed one minute.
+const COURTOS_INPUT_GATE_TIMEOUT_MS = 600_000;
+const uatWorkspaceBuild = process.env.COURTOS_UAT_WORKSPACE_BUILD === "1";
 const verifier = spawnSync(
   process.execPath,
-  ["scripts/verifyCourtosTrackedInputs.mjs", "--json"],
-  { cwd: ROOT, encoding: "utf8", timeout: 60_000 },
+  [
+    "scripts/verifyCourtosTrackedInputs.mjs",
+    "--json",
+    ...(uatWorkspaceBuild ? ["--allow-untracked-workspace-inputs"] : []),
+  ],
+  { cwd: ROOT, encoding: "utf8", timeout: COURTOS_INPUT_GATE_TIMEOUT_MS },
 );
 
 if (verifier.status !== 0) {
@@ -19,6 +28,50 @@ if (verifier.status !== 0) {
 
 const report = JSON.parse(verifier.stdout);
 const publicInputs = [...report.runtimeAssets];
+
+const bundledMapGenEntries = [
+  "public/merecross-3d-prototype.html",
+  "public/merecross-3d-prototype-data.js",
+  "public/realm-zoom-composition-data.js",
+  "public/shared-water-texture.js",
+  "public/shared-land-composition.js",
+  "public/orchardmere-county-viewer.html",
+  "public/orchardmere-county-viewer-data.js",
+  "public/orchardmere-composition-surface-data.js",
+  "public/orchardmere-county-viewer.js",
+  "public/pearwick-estate-pilot.html",
+  "public/pearwick-estate-pilot-data.js",
+  "public/roadcote-estate-pilot-data.js",
+  "public/pearwick-single-hex-assets.js",
+  "public/roadcote-single-hex-assets.js",
+  "public/pearwick-road-geometry.js",
+  "public/pearwick-estate-pilot-3d.js",
+  "public/courtos-cartography-theme.v1.js",
+  "public/courtos-embedded-adapter.v1.js",
+];
+const bundledMapGenDirectories = [
+  "public/assets/fiscal-office",
+  "public/vendor/three",
+  "public/assets/mapgen-landscape",
+  "public/assets/mapgen-manor-v2",
+  "public/assets/landscape-composition",
+];
+
+function filesBelow(relativeDirectory) {
+  const absoluteDirectory = path.resolve(ROOT, relativeDirectory);
+  if (!fs.existsSync(absoluteDirectory)) {
+    throw new Error(`Bundled MapGen runtime directory is missing: ${relativeDirectory}`);
+  }
+  return fs.readdirSync(absoluteDirectory, { withFileTypes: true }).flatMap((entry) => {
+    const child = path.posix.join(relativeDirectory, entry.name);
+    return entry.isDirectory() ? filesBelow(child) : [child];
+  });
+}
+
+publicInputs.push(
+  ...bundledMapGenEntries,
+  ...bundledMapGenDirectories.flatMap(filesBelow),
+);
 
 for (const artifact of report.generatedArtifacts) {
   const source = path.resolve(ROOT, artifact.path);
@@ -46,9 +99,6 @@ for (const relativePath of [...new Set(publicInputs)].sort()) {
 }
 
 const configuredMapGenBaseUrl = process.env.VITE_MAPGEN_BASE_URL?.trim();
-if (process.env.COURTOS_PRODUCTION_BUILD === "1" && !configuredMapGenBaseUrl) {
-  throw new Error("A production CourtOS public build requires VITE_MAPGEN_BASE_URL.");
-}
 const mapGenBaseUrl = configuredMapGenBaseUrl
   ? verifiedMapGenBaseUrl(configuredMapGenBaseUrl, {
       allowLoopbackHttp: process.env.COURTOS_PRODUCTION_BUILD !== "1",
@@ -61,6 +111,9 @@ fs.writeFileSync(
   `${JSON.stringify(
     {
       schema_version: "courtos_runtime_manifest_v1",
+      build_posture: uatWorkspaceBuild
+        ? "human_uat_workspace_candidate_not_promotable"
+        : "clean_checkout_production_candidate",
       mapgen: mapGenBaseUrl
         ? {
             status: "configured",
@@ -68,8 +121,8 @@ fs.writeFileSync(
             contract: mapGenContract,
           }
         : {
-            status: "not_configured",
-            base_url: null,
+            status: "bundled",
+            base_url: "./",
             contract: mapGenContract,
           },
     },

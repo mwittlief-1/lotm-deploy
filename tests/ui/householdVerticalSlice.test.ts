@@ -8,6 +8,7 @@ import {
   councilSeatPosition,
   HouseRoomStandard,
   HouseholdVerticalSlice,
+  RouteBar,
 } from "../../src/ui/panels/HouseholdVerticalSlice";
 import {
   buildCouncilRoomReadyProjection,
@@ -36,7 +37,7 @@ describe("HouseholdVerticalSlice", () => {
     expect(html).not.toContain("fixture");
   });
 
-  it("keeps the four projected Pearwick Hall Council seats visibly provisional", () => {
+  it("keeps the four projected Pearwick Hall Council seats available to the Inner Council", () => {
     const projection = buildCouncilRoomReadyProjection({
       houseId: DEFAULT_COUNCIL_ROOM_HOUSE_ID,
       turnYear: 1120,
@@ -117,6 +118,55 @@ describe("HouseholdVerticalSlice", () => {
     expect(css).toMatch(/\.uat-council-domain-objects\s*\{[\s\S]*?bottom:\s*82px/);
   });
 
+  it("keeps House Command available from every operational place, not only the Council room", () => {
+    const html = renderToStaticMarkup(
+      React.createElement(RouteBar, {
+        route: {
+          place: {
+            kind: "responsibility",
+            domain: "resources_finance",
+            responsibility: "manor_fiscal_administration",
+            scopeId: "manor_hx_44835",
+          },
+          detail: null,
+        },
+        selectedManor: null,
+        onCouncil: () => undefined,
+        onHouseCommand: () => undefined,
+        onDomain: () => undefined,
+      }),
+    );
+
+    expect(html).toContain("House Command");
+    expect(html).toContain('aria-label="Open House Command: assignments, delegation, and authority"');
+    expect(html).toMatch(
+      /<button(?=[^>]*aria-label="Open House Command: assignments, delegation, and authority")(?![^>]*disabled)[^>]*>/,
+    );
+  });
+
+  it("keeps map code and Household detail out of the Council boot path", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/panels/HouseholdVerticalSlice.tsx"),
+      "utf8",
+    );
+    const householdClient = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/household1120Client.ts"),
+      "utf8",
+    );
+    const spatialClient = fs.readFileSync(
+      path.resolve(process.cwd(), "src/ui/spatial/courtosSpatialClient.ts"),
+      "utf8",
+    );
+
+    expect(source).toContain('React.lazy(async () =>');
+    expect(source).toContain('import("../spatial/ManorOperationsScene")');
+    expect(source).not.toContain('from "../spatial/ManorOperationsScene"');
+    expect(source).toContain("enabled: householdProjectionRequired");
+    expect(source).toContain("enabled: estateProjectionRequired");
+    expect(householdClient).toContain("if (input.enabled === false)");
+    expect(spatialClient).toContain("if (options.enabled === false)");
+  });
+
   it("provides bounded recovery without exposing raw dependency errors", () => {
     const source = fs.readFileSync(
       path.resolve(process.cwd(), "src/ui/panels/HouseholdVerticalSlice.tsx"),
@@ -131,9 +181,14 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).not.toContain("DEFAULT_UAT_HOUSE_ID");
     expect(source).toContain("return value || COURTOS_PLAYER_CONTEXT.house_id");
     expect(source).not.toContain("recorded knowledge");
-    expect(source).toContain("Candidate membership projection · not admitted source truth");
-    expect(source).toContain("Candidate Council seat");
-    expect(source).not.toContain("Recorded Council seat");
+    expect(source).not.toContain("Provisional seats · awaiting a formal House record");
+    expect(source).not.toContain("Provisional Council seat");
+    expect(source).not.toContain("P-1 product checkpoint");
+    expect(source).not.toContain("Shared planning boundary verified");
+    expect(source).not.toContain("pinned as one accepted release");
+    expect(source).not.toContain("stale or mixed identity");
+    expect(source).toContain("The House stewardship record");
+    expect(source).toContain("Inner Council seat");
     expect(source).toContain("COURTOS_PLAYER_CONTEXT.house_id");
     expect(source).not.toContain("VITE_COURTOS_PLAYER_HOUSE_ID");
     expect(source).toContain('window.scrollTo({ top: 0, behavior: "auto" })');
@@ -151,10 +206,52 @@ describe("HouseholdVerticalSlice", () => {
     expect(source).toContain("Recommended formation");
     expect(source).toContain("Proposed provider");
     expect(source).toContain("Provider capacity not established");
-    expect(source.match(/<HouseRoomStandard/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(source).toContain("<HouseMark houseId={model.house.houseId}");
+    expect(source).not.toContain("<HouseRoomStandard");
     expect(source).not.toContain("admitted rows");
-    expect(source).toContain("Source surface admitted");
+    expect(source).toContain("Account ready");
+    expect(source).toContain("No current charge");
+    expect(source).toContain("No verified charge");
+    expect(source).toContain("accountable stewards");
+    expect(source).toContain("Choose a recorded charge to review its accountable steward");
+    expect(source).not.toContain("Opening record ready");
+    expect(source).not.toContain("Conditional · no current instance");
+    expect(source).not.toContain("Record unavailable");
+    expect(source).toContain("No individual entry is recorded");
+    expect(source).toContain("a {planningCycleLabel} assignment plan.");
+    expect(source).toContain("threeYearStewardshipHorizonFrom(");
+    expect(source).toContain("Saved plans preserve the current appointment");
+    expect(source).toContain("onOpenResponsibility(definition.key)");
+    expect(source).toContain("Manage the three-year stewardship plan");
+    expect(source).toContain("stewardshipPlanning.responsibilities");
+    expect(source).toContain("HouseCommandReadSurface");
+    expect(source).toContain("CourtOsResponsibilityHeadsBrief");
+    expect(source).toContain("CourtOsResponsibilityHousePapers");
+    expect(source).toContain("buildCourtOsResponsibilityBrief");
+    expect(source).toContain('papers.querySelector("summary")?.focus()');
     expect(source).toContain("canonicalSearch");
+    expect(source).toContain('kind: "stores_position"');
+    expect(source.match(/<dt>Location<\/dt>/g)).toHaveLength(1);
+    expect(source).toContain('kind: "adult_kin_subject"');
+    expect(source).toContain('kind: "health_record"');
+    expect(source).toContain('kind: "workspace_record"');
+    expect(source).toContain("onOpenPaper={openPaper}");
+    expect(source).toContain("Why this remains Household work");
+    expect(source).toContain("Prior-cycle entries");
+    expect(source).toContain("Course since last report");
+    expect(source).toContain("Household care posture");
+    expect(source).toContain("Formation provider");
+    expect(source).toContain("buildCourtOsStewardshipPlanningProjection");
+    expect(source).toContain("<CourtOsStewardshipPlanner");
+    expect(source).toContain("courtOsStewardshipScopeKey");
+    expect(source).toContain("detailsRef={housePapersRef}");
+    expect(source).toContain("Supporting House papers");
+    expect(source).toContain("CourtOsResponsibilityHeadsBrief");
+    expect(source).not.toContain("function HeadsBrief");
+    expect(source).toContain("Stewardship by room");
+    expect(source).toContain("COURTOS_DOMAINS.map((domain)");
+    expect(source).toContain("of 24 responsibilities have a current House scope");
+    expect(source).toContain("Open only when this work is present");
   });
 
   it("keeps the inhabited responsibility room larger than its working folio", () => {

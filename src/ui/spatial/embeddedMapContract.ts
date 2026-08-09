@@ -10,6 +10,7 @@ export type CourtOsMapLevel = "realm" | "county" | "estate";
 
 export type CourtOsRendererKey =
   | "merecross_realm_v1"
+  | "glastonmere_county_v1"
   | "orchardmere_county_v1"
   | "pearwick_estate_pilot_v1";
 
@@ -47,6 +48,10 @@ export function resolveMapGenBaseUrl({
       return null;
     }
   }
+  // The accepted MapGen renderers are bundled with CourtOS. Development may
+  // still override this URL while MapGen is worked on independently, but the
+  // production/desktop candidate must not depend on a second local server.
+  if (typeof window !== "undefined") return `${window.location.origin}/`;
   return development ? "http://127.0.0.1:4173/" : null;
 }
 
@@ -54,10 +59,12 @@ export function rendererUrl({
   baseUrl,
   rendererKey,
   parentOrigin,
+  manorId,
 }: {
   baseUrl: string;
   rendererKey: CourtOsRendererKey | string;
   parentOrigin: string;
+  manorId?: string | null;
 }): URL {
   const path = RENDERER_PATHS[rendererKey as CourtOsRendererKey];
   if (!path) throw new Error(`Unknown CourtOS spatial renderer: ${rendererKey}`);
@@ -67,6 +74,7 @@ export function rendererUrl({
   url.searchParams.set("courtos", "1");
   url.searchParams.set("parentOrigin", new URL(parentOrigin).origin);
   url.searchParams.set("theme", COURTOS_CARTOGRAPHY_THEME_ID);
+  if (manorId) url.searchParams.set("manorId", manorId);
   return url;
 }
 

@@ -20,8 +20,13 @@ export type CourtOsPlace =
 
 export type CourtOsDetail =
   | { kind: "council_person"; personId: string }
+  | { kind: "command_responsibility"; responsibility: "office_post_appointments" }
   | { kind: "assignment_basis" }
-  | { kind: "education_plan"; recordId: string };
+  | { kind: "education_plan"; recordId: string }
+  | { kind: "stores_position"; recordId: string }
+  | { kind: "adult_kin_subject"; recordId: string }
+  | { kind: "health_record"; recordId: string }
+  | { kind: "workspace_record"; recordId: string };
 
 export type CourtOsRoute = {
   place: CourtOsPlace;
@@ -57,6 +62,13 @@ function detailFromParams(
   if (detail === "council_person" && place.kind === "council" && recordId) {
     return { kind: "council_person", personId: recordId };
   }
+  if (
+    detail === "command_responsibility" &&
+    place.kind === "house_command" &&
+    params.get("responsibility") === "office_post_appointments"
+  ) {
+    return { kind: "command_responsibility", responsibility: "office_post_appointments" };
+  }
   if (detail === "assignment_basis" && place.kind === "responsibility") {
     return { kind: "assignment_basis" };
   }
@@ -67,6 +79,37 @@ function detailFromParams(
     recordId
   ) {
     return { kind: "education_plan", recordId };
+  }
+  if (
+    detail === "stores_position" &&
+    place.kind === "responsibility" &&
+    place.responsibility === "household_stores_provisioning_procurement" &&
+    recordId
+  ) {
+    return { kind: "stores_position", recordId };
+  }
+  if (
+    detail === "adult_kin_subject" &&
+    place.kind === "responsibility" &&
+    place.responsibility === "adult_kin_support" &&
+    recordId
+  ) {
+    return { kind: "adult_kin_subject", recordId };
+  }
+  if (
+    detail === "health_record" &&
+    place.kind === "responsibility" &&
+    place.responsibility === "household_service_care" &&
+    recordId
+  ) {
+    return { kind: "health_record", recordId };
+  }
+  if (
+    detail === "workspace_record" &&
+    place.kind === "responsibility" &&
+    /^(evidence|source):\d+$/.test(recordId)
+  ) {
+    return { kind: "workspace_record", recordId };
   }
   return null;
 }
@@ -127,7 +170,15 @@ export function courtOsSearchForRoute(
     params.set("detail", route.detail.kind);
     if (route.detail.kind === "council_person") {
       params.set("record", route.detail.personId);
-    } else if (route.detail.kind === "education_plan") {
+    } else if (route.detail.kind === "command_responsibility") {
+      params.set("responsibility", route.detail.responsibility);
+    } else if (
+      route.detail.kind === "education_plan" ||
+      route.detail.kind === "stores_position" ||
+      route.detail.kind === "adult_kin_subject" ||
+      route.detail.kind === "health_record" ||
+      route.detail.kind === "workspace_record"
+    ) {
       params.set("record", route.detail.recordId);
     }
   }
@@ -150,7 +201,10 @@ export function courtOsResponsibilityRoute(input: {
 }): CourtOsRoute {
   const location = courtOsResponsibilityLocation(input.responsibility);
   if (location.kind === "house_command") {
-    return { place: { kind: "house_command" }, detail: null };
+    return {
+      place: { kind: "house_command" },
+      detail: { kind: "command_responsibility", responsibility: "office_post_appointments" },
+    };
   }
   return {
     place: {

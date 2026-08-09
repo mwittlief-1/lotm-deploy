@@ -29,6 +29,18 @@ export function courtOs1120ReadModelApiPlugin(): Plugin {
       createCourtOs1120NodeHandler("council-room", service),
     );
     server.middlewares.use(
+      "/api/responsibilities/1120",
+      createCourtOs1120NodeHandler("responsibility-workspace", service),
+    );
+    server.middlewares.use(
+      "/api/spatial/1120/visual-composition",
+      createCourtOs1120NodeHandler("spatial-visual-composition", service),
+    );
+    server.middlewares.use(
+      "/api/spatial/1120/visual",
+      createCourtOs1120NodeHandler("spatial-visual", service),
+    );
+    server.middlewares.use(
       "/api/spatial/1120",
       createCourtOs1120NodeHandler("spatial", service),
     );

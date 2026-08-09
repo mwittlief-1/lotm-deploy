@@ -1,0 +1,110 @@
+.uat-responsibility-house-papers {
+  margin-top: 1rem;
+  color: #d8c9a8;
+  background: rgba(21, 16, 12, 0.92);
+  border: 1px solid rgba(171, 135, 76, 0.42);
+}
+
+.uat-responsibility-house-papers > summary {
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.uat-responsibility-house-papers > summary::-webkit-details-marker { display: none; }
+
+.uat-responsibility-house-papers > summary span {
+  display: grid;
+  gap: 0.16rem;
+}
+
+.uat-responsibility-house-papers > summary small,
+.uat-responsibility-house-papers h3,
+.uat-responsibility-house-papers li small {
+  color: #b7965f;
+  font: 700 0.68rem/1.2 system-ui, sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.uat-responsibility-house-papers > summary strong {
+  color: #f0e3c4;
+  font: 700 1.15rem/1.15 Georgia, serif;
+}
+
+.uat-responsibility-house-papers > summary em {
+  color: #9e927d;
+  font: 600 0.76rem/1.2 system-ui, sans-serif;
+  font-style: normal;
+}
+
+.uat-responsibility-house-papers__contents {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-top: 1px solid rgba(171, 135, 76, 0.35);
+}
+
+.uat-responsibility-house-papers__contents > header {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 70ch;
+}
+
+.uat-responsibility-house-papers__contents > header strong {
+  color: #eee0c0;
+  font: 700 1.15rem/1.2 Georgia, serif;
+}
+
+.uat-responsibility-house-papers__contents p { margin: 0; line-height: 1.45; }
+.uat-responsibility-house-papers h3 { margin: 0 0 0.55rem; }
+.uat-responsibility-house-papers ol { display: grid; gap: 0.45rem; margin: 0; padding: 0; list-style: none; }
+
+.uat-responsibility-house-papers li {
+  min-height: 3.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.8rem;
+  background: rgba(236, 218, 177, 0.055);
+  border-left: 2px solid rgba(171, 135, 76, 0.46);
+}
+
+.uat-responsibility-house-papers li span { display: grid; gap: 0.22rem; }
+.uat-responsibility-house-papers li strong { color: #e8d9b8; font: 700 0.92rem/1.2 Georgia, serif; }
+.uat-responsibility-house-papers li em { color: #9e927d; font-size: 0.75rem; font-style: normal; }
+
+.uat-responsibility-house-papers button {
+  flex: 0 0 auto;
+  min-height: 2.35rem;
+  padding: 0.5rem 0.72rem;
+  color: #e7d7b4;
+  background: #392719;
+  border: 1px solid #785832;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.uat-responsibility-house-papers__recovery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem;
+  color: #eed3b3;
+  background: rgba(112, 52, 38, 0.24);
+}
+
+@media (max-width: 760px) {
+  .uat-responsibility-house-papers li,
+  .uat-responsibility-house-papers__recovery {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

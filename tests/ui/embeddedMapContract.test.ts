@@ -70,6 +70,7 @@ describe("CourtOS direct embedded map contract", () => {
       baseUrl: "http://127.0.0.1:4173/merecross-map-viewer.html",
       rendererKey: "orchardmere_county_v1",
       parentOrigin: "http://127.0.0.1:5174/courtos-home.html",
+      manorId: "manor_hx_44835",
     });
 
     expect(url.pathname).toBe("/orchardmere-county-viewer.html");
@@ -77,6 +78,21 @@ describe("CourtOS direct embedded map contract", () => {
     expect(url.searchParams.get("courtos")).toBe("1");
     expect(url.searchParams.get("parentOrigin")).toBe("http://127.0.0.1:5174");
     expect(url.searchParams.get("theme")).toBe(COURTOS_CARTOGRAPHY_THEME_ID);
+    expect(url.searchParams.get("manorId")).toBe("manor_hx_44835");
+  });
+
+  it("uses a focused Glastonmere lens for Roadcote instead of the Orchardmere county renderer", () => {
+    const url = rendererUrl({
+      baseUrl: "http://127.0.0.1:5174/",
+      rendererKey: "glastonmere_county_v1",
+      parentOrigin: "http://127.0.0.1:5174/courtos-home.html",
+      manorId: "manor_hx_44835",
+    });
+
+    expect(url.pathname).toBe("/merecross-3d-prototype.html");
+    expect(url.searchParams.get("rendererKey")).toBe("glastonmere_county_v1");
+    expect(url.searchParams.get("scope")).toBe("county");
+    expect(url.searchParams.get("manorId")).toBe("manor_hx_44835");
   });
 
   it("requires a renderer-scoped readiness response", () => {
@@ -135,10 +151,41 @@ describe("CourtOS direct embedded map contract", () => {
       "utf8",
     );
 
-    expect(source.match(/sandbox="allow-same-origin allow-scripts"/g)).toHaveLength(2);
-    expect(source.match(/referrerPolicy="strict-origin"/g)).toHaveLength(2);
+    // One keyed iframe template renders both current and warmed incoming
+    // frames; sharing the template prevents capability drift between slots.
+    expect(source.match(/sandbox="allow-same-origin allow-scripts"/g)).toHaveLength(1);
+    expect(source.match(/referrerPolicy="strict-origin"/g)).toHaveLength(1);
+    expect(source).toContain("embeddedFrames.map");
     expect(source).not.toContain("allow-popups");
     expect(source).not.toContain("allow-forms");
     expect(source).not.toContain("allow-top-navigation");
+    expect(source).toContain("const nativeVisualProof = canUseNativeSpatialVisual(selected)");
+  });
+
+  it("bundles the accepted MapGen renderers and Roadcote source adapter", async () => {
+    const requiredFiles = [
+      "../../public/merecross-3d-prototype.html",
+      "../../public/orchardmere-county-viewer.html",
+      "../../public/pearwick-estate-pilot.html",
+      "../../public/pearwick-estate-pilot-3d.js",
+      "../../public/pearwick-estate-pilot-data.js",
+      "../../public/roadcote-estate-pilot-data.js",
+      "../../public/roadcote-single-hex-assets.js",
+    ];
+    for (const relativePath of requiredFiles) {
+      expect(existsSync(new URL(relativePath, import.meta.url))).toBe(true);
+    }
+    const renderer = await readFile(
+      new URL("../../public/pearwick-estate-pilot-3d.js", import.meta.url),
+      "utf8",
+    );
+    expect(renderer).toContain("window.ROADCOTE_MICROHEX_PILOT");
+    expect(renderer).toContain("data.interpretation?.local_routes || []");
+    const realmRenderer = await readFile(
+      new URL("../../public/merecross-3d-prototype.html", import.meta.url),
+      "utf8",
+    );
+    expect(realmRenderer).toContain('requestedRenderer === "glastonmere_county_v1"');
+    expect(realmRenderer).toContain("camera.zoom = 4.4");
   });
 });

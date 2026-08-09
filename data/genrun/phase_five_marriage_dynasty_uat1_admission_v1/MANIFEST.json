@@ -1,0 +1,63 @@
+{
+  "package": "phase_five_marriage_dynasty_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "runtime_authority": false,
+  "counts": {
+    "living_subjects": 23548,
+    "minor_subjects": 7358,
+    "young_adult_subjects": 2622,
+    "adult_subjects": 13568,
+    "union_graph_rows": 14609,
+    "union_partner_rows": 29218,
+    "union_child_rows": 38945,
+    "active_marriage_unions": 3697,
+    "succession_snapshots": 479,
+    "tenure_context_rows": 1250,
+    "scope_rows": 823,
+    "marriage_authority_rows": 435,
+    "patronage_authority_rows": 435,
+    "contract_event_rows": 846,
+    "contract_exposure_rows": 933,
+    "opening_obligation_rows": 841,
+    "wardship_evidence_rows": 90,
+    "contract_component_rows": 10866
+  },
+  "checks": {
+    "living_subjects_23548": true,
+    "active_unions_3697": true,
+    "succession_479": true,
+    "scope_823": true,
+    "marriage_authority_435": true,
+    "patronage_authority_435": true,
+    "kinship_not_materialized": true,
+    "no_runtime_authority": true,
+    "no_pending_clearance_invented": true,
+    "church_cases_withheld_by_contract": true,
+    "sqlite_exists": true
+  },
+  "source_files": {
+    "graph": {
+      "Person__c.jsonl": "4f7ecb339546d4867d9d7d0959aa2d983a92380529ebe51b85f821c62092a5c7",
+      "Union__c.jsonl": "347ffea8e4918252de925ec2823007055653cfbcddba5d2358f44ba2bebb9686",
+      "UnionPartner__c.jsonl": "8d7ee856a99b9a7238fe8c8ecc6c604f5fcf0336f5f99e4e2ae2fee1df9fc37d",
+      "UnionChild__c.jsonl": "d8f2f6072a36dfc4088bf53a1fa624c79cf3c7e37b8b12f97cb8555d3daa5374"
+    },
+    "succession": "c84b1b94e23880829c1aee6fcf3198f204b6018c5255bdc3dc46cac4b27c8303",
+    "tenure": "241d5585d59b106cd6881c3f6f10d854fd6695026d19be8cdd54fcb9ffb270c8",
+    "authority": "fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304",
+    "scope": "e78b02c66b51f72f3d48aead72ba9d8bd17b4832eab60d72e9d06a4942ba6734",
+    "wardship": "98a7ec6673fcd3bec6514d3a5f727eea5bc1c0846358715f039acf16cb9208b2",
+    "contract_components": "13c2017e3716797603f79747de59ad2b580079fe9eeb8ac9728069a4edf2393d",
+    "marriage_contract_events_1106_1119_v1.csv": "c1dd0bff1a34cc55e597dc253c2005085accd79aa24704b987620935821b4283",
+    "marriage_contract_exposure_v1.csv": "d82c9d66a5ddde91eb5727a58d80797768c635162338acbf4adad6ee89b7ef13",
+    "opening_marriage_obligation_v1.csv": "1e8b556f97520484a05711d30b7a1e99685ee58dd0fbf3600827f13ddf9fe5b6"
+  },
+  "boundaries": [
+    "UAT1 read model only",
+    "kinship and consanguinity are runtime-derived",
+    "existing unions are read facts, not new clearance decisions",
+    "Church current-case statuses remain withheld absent admitted evidence",
+    "no market, offer, betrothal, union, succession, ART, GL, Journey, or source mutation"
+  ]
+}

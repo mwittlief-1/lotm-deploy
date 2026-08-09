@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const ROOT = process.cwd();
+const allowUntrackedWorkspaceInputs = process.argv.includes("--allow-untracked-workspace-inputs");
 const RUNTIME_MANIFEST_PATH = "config/courtos-runtime-inputs.v1.json";
 const ENTRYPOINTS = [
   "vite.config.ts",
@@ -12,7 +13,22 @@ const ENTRYPOINTS = [
   "api/courtos/1120.ts",
   "api/household/1120.ts",
   "api/council-room/1120.ts",
+  "api/responsibilities/1120.ts",
   "api/spatial/1120.ts",
+  "api/spatial/1120/visual.ts",
+];
+const RUNTIME_DATA_PACKAGES = [
+  "data/genrun/foundation_a_household_runtime_release_v1",
+  "data/genrun/phase_five_courtos_alternate_steward_eligibility_admission_v1",
+  "data/genrun/phase_five_foundation_a_uat_house_manor_scope_admission_v1",
+  "data/genrun/phase_five_church_observance_rights_uat1_admission_v1",
+  "data/genrun/phase_five_conditional_estate_governance_uat1_admission_v1",
+  "data/genrun/phase_five_information_governance_second_batch_uat1_v1",
+  "data/genrun/phase_five_manor_operations_uat1_admission_v1",
+  "data/genrun/phase_five_marriage_dynasty_uat1_admission_v1",
+  "data/genrun/phase_five_records_correspondence_uat1_admission_v1",
+  "data/genrun/phase_five_resources_finance_uat1_admission_v1",
+  "data/genrun/phase_five_security_readiness_uat1_admission_v1",
 ];
 const REQUIRED_REPOSITORY_INPUTS = [
   ".gitattributes",
@@ -30,8 +46,11 @@ const REQUIRED_REPOSITORY_INPUTS = [
   RUNTIME_MANIFEST_PATH,
   "config/courtos-mapgen-runtime-contract.v1.json",
   "scripts/buildCourtosProduction.mjs",
+  "scripts/buildCourtosFoundationARelease.mts",
   "scripts/buildCourtosSpatialReadModelV1.mjs",
+  "scripts/buildRoadcoteSpatialVisualExportV1.mjs",
   "scripts/prepareCourtosPublic.mjs",
+  "scripts/stageCourtosRoomAssets.mjs",
   "scripts/runCourtosEngineeringQa.mjs",
   "scripts/runCourtosInternalUat.mjs",
   "scripts/runCourtosTestSuite.mjs",
@@ -42,7 +61,11 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/validateCourtosUatConfig.mjs",
   "scripts/verifyCourtosTrackedInputs.mjs",
   "scripts/verifyCourtosGeneratedArtifacts.mjs",
+  "scripts/verifyCourtosFoundationARelease.mts",
+  "scripts/verifyCourtosBundleBudget.mjs",
   "scripts/verifyCourtosMapGenConfiguration.mjs",
+  "scripts/verifyCourtosDesktopUatPackage.mjs",
+  "scripts/verifyCourtosRoomAssets.mjs",
 ];
 const IMPORT_EXTENSIONS = [
   "",
@@ -85,6 +108,25 @@ function repositoryFilesUnder(relativeDirectory) {
   return files;
 }
 
+function runtimePackageFiles(relativeDirectory) {
+  const manifestPath = normalize(path.join(relativeDirectory, "MANIFEST.json"));
+  if (!fs.existsSync(absolute(manifestPath))) return [manifestPath];
+  const manifest = JSON.parse(fs.readFileSync(absolute(manifestPath), "utf8"));
+  const files = new Set([manifestPath]);
+  const sumsPath = normalize(path.join(relativeDirectory, "SHA256SUMS.txt"));
+  if (fs.existsSync(absolute(sumsPath))) {
+    files.add(sumsPath);
+    for (const line of fs.readFileSync(absolute(sumsPath), "utf8").split(/\r?\n/)) {
+      const match = line.trim().match(/^[a-f0-9]{64}\s+\*?(.+)$/i);
+      if (!match?.[1]) continue;
+      const entryPath = normalize(path.join(relativeDirectory, match[1]));
+      if (/\.sqlite$/i.test(entryPath)) files.add(entryPath);
+    }
+  }
+  if (manifest.artifact?.path) files.add(normalize(manifest.artifact.path));
+  return [...files].sort();
+}
+
 function resolveRelativeImport(importer, specifier) {
   const base = path.normalize(path.join(path.dirname(importer), specifier));
   return IMPORT_EXTENSIONS.map((extension) => `${base}${extension}`).find(
@@ -99,6 +141,7 @@ function runtimeImportClosure(entrypoints) {
   const queue = [...entrypoints];
   const importPattern =
     /(?:import|export)\s+(?:[^'\"]*?\s+from\s+)?['\"]([^'\"]+)['\"]/g;
+  const dynamicImportPattern = /(?<!['\"`])\bimport\(\s*['\"]([^'\"]+)['\"]\s*\)/g;
 
   while (queue.length > 0) {
     const relativePath = normalize(queue.shift());
@@ -107,7 +150,10 @@ function runtimeImportClosure(entrypoints) {
     if (!fs.existsSync(absolute(relativePath))) continue;
     if (!/\.(?:[cm]?[jt]sx?)$/.test(relativePath)) continue;
     const source = fs.readFileSync(absolute(relativePath), "utf8");
-    for (const match of source.matchAll(importPattern)) {
+    for (const match of [
+      ...source.matchAll(importPattern),
+      ...source.matchAll(dynamicImportPattern),
+    ]) {
       const specifier = match[1];
       if (!specifier.startsWith(".")) continue;
       const resolved = resolveRelativeImport(relativePath, specifier);
@@ -201,6 +247,9 @@ const preflightClosure = runtimeImportClosure([
 ]);
 const importedRuntimeAssets = runtimeAssetPaths(closure.files);
 const qaPackageFiles = repositoryFilesUnder("qa/uat");
+const runtimeDataPackageFiles = RUNTIME_DATA_PACKAGES.flatMap((directory) =>
+  runtimePackageFiles(directory),
+);
 const testManifest = JSON.parse(
   fs.readFileSync(absolute("qa/uat/courtos-test-files.json"), "utf8"),
 );
@@ -229,6 +278,7 @@ const requiredTrackedInputs = [
     ...closure.files,
     ...importedRuntimeAssets,
     ...qaPackageFiles,
+    ...runtimeDataPackageFiles,
     ...testClosure.files,
     ...testSupportFiles,
     ...preflightInputs,
@@ -257,9 +307,13 @@ for (const relativePath of missingFiles) {
 const materializedInputs = requiredTrackedInputs.filter(
   (relativePath) => fs.existsSync(absolute(relativePath)),
 );
-const tracked = gitTrackedFiles(materializedInputs);
+const tracked = allowUntrackedWorkspaceInputs
+  ? new Set()
+  : gitTrackedFiles(materializedInputs);
 for (const relativePath of materializedInputs) {
-  if (!tracked.has(relativePath)) errors.push(`Untracked runtime input: ${relativePath}`);
+  if (!tracked.has(relativePath) && !allowUntrackedWorkspaceInputs) {
+    errors.push(`Untracked runtime input: ${relativePath}`);
+  }
   if (fs.statSync(absolute(relativePath)).size === 0) {
     errors.push(`Empty runtime input: ${relativePath}`);
   } else if (isUnmaterializedLfsPointer(relativePath)) {
@@ -275,22 +329,22 @@ for (const input of manifest.pinned_inputs) {
       `Pinned input SHA mismatch: ${input.path} expected ${input.sha256}, got ${actualSha256}`,
     );
   }
-  if (input.storage === "git_lfs" && gitAttribute(input.path, "filter") !== "lfs") {
+  if (!allowUntrackedWorkspaceInputs && input.storage === "git_lfs" && gitAttribute(input.path, "filter") !== "lfs") {
     errors.push(`Pinned input is not configured for Git LFS: ${input.path}`);
   }
 }
 
 for (const relativePath of importedRuntimeAssets) {
-  if (gitAttribute(relativePath, "filter") !== "lfs") {
+  if (!allowUntrackedWorkspaceInputs && gitAttribute(relativePath, "filter") !== "lfs") {
     errors.push(`Production art is not configured for Git LFS: ${relativePath}`);
   }
 }
 
 for (const artifact of manifest.generated_artifacts) {
-  if (!isGitIgnored(artifact.path)) {
+  if (!allowUntrackedWorkspaceInputs && !isGitIgnored(artifact.path)) {
     errors.push(`Generated artifact is not ignored: ${artifact.path}`);
   }
-  if (gitTrackedFiles([artifact.path]).has(artifact.path)) {
+  if (!allowUntrackedWorkspaceInputs && gitTrackedFiles([artifact.path]).has(artifact.path)) {
     errors.push(`Generated artifact must not be tracked: ${artifact.path}`);
   }
   if (!tracked.has(artifact.builder) && !requiredTrackedInputs.includes(artifact.builder)) {
@@ -312,6 +366,9 @@ const report = {
   runtimeAssets: importedRuntimeAssets,
   pinnedInputCount: manifest.pinned_inputs.length,
   generatedArtifacts: manifest.generated_artifacts,
+  workspace_input_posture: allowUntrackedWorkspaceInputs
+    ? "uat_workspace_untracked_inputs_allowed"
+    : "clean_checkout_required",
 };
 
 if (process.argv.includes("--json")) {

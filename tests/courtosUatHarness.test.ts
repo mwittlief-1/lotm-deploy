@@ -130,16 +130,14 @@ describe("CourtOS internal UAT harness", () => {
     );
   });
 
-  it("fails closed instead of hashing an empty MapGen runtime", () => {
+  it("runs UAT against the repository-native spatial runtime", () => {
     const runner = fs.readFileSync(
       path.resolve(root, "scripts/runCourtosInternalUat.mjs"),
       "utf8",
     );
-    expect(runner).toContain("MapGen repository is unavailable");
-    expect(runner).toContain("Required MapGen runtime input is missing");
-    expect(runner.indexOf("MapGen repository is unavailable")).toBeLessThan(
-      runner.indexOf('const hash = crypto.createHash("sha256")', runner.indexOf("function mapgenRuntimeInputManifest")),
-    );
+    expect(runner).toContain('COURTOS_NATIVE_MAPGEN: "1"');
+    expect(runner).not.toContain("MapGen repository is unavailable");
+    expect(runner).not.toContain("Required MapGen runtime input is missing");
   });
 
   it("identifies the exact post-build spatial bytes and source seam", () => {
@@ -168,7 +166,7 @@ describe("CourtOS internal UAT harness", () => {
     expect(runner).toContain("trackedReport.generatedArtifacts");
     expect(identityIndex).toBeGreaterThan(engineeringIndex);
     expect(runner).toContain("CourtOS clean-checkout gate failed");
-    expect(runner).toContain("MapGen clean-checkout gate failed");
+    expect(runner).not.toContain("MapGen clean-checkout gate failed");
   });
 
   it("discovers the runtime import graph and enforces generated-artifact separation", () => {
@@ -199,6 +197,11 @@ describe("CourtOS internal UAT harness", () => {
     expect(runner).toContain("features.network_proxy.enabled=true");
     expect(runner).toContain('permissions.courtos-uat-readonly.filesystem.:tmpdir="write"');
     expect(runner).toContain("COURTOS_UAT_BROWSER_BROKER_URL");
+    expect(runner).toContain("COURTOS_UAT_EXTERNALLY_SANDBOXED");
+    expect(runner).toContain("--dangerously-bypass-approvals-and-sandbox");
+    expect(runner).toContain(
+      "Independent review mutated a production runtime input; promotion fails closed.",
+    );
   });
 
   it("runs bounded persona lanes, independent verification, and final adjudication", () => {
@@ -230,6 +233,7 @@ describe("CourtOS internal UAT harness", () => {
     expect(driver).toContain("CourtOS UAT browser accepts only local HTTP preview URLs");
     expect(driver).toContain("must remain inside the UAT artifact directory");
     expect(driver).toContain("COURTOS_UAT_BROWSER_BROKER_TOKEN");
+    expect(driver).toContain("COURTOS_UAT_BROWSER_EXECUTABLE_PATH");
     expect(broker).toContain('host !== "127.0.0.1"');
     expect(broker).toContain("browserQueue.push");
     expect(broker).toContain("acquireBrowserSlot");
@@ -242,7 +246,7 @@ describe("CourtOS internal UAT harness", () => {
     expect(manifest.pinned_inputs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ role: "immutable_courtos_read_contract", storage: "git_lfs" }),
-        expect.objectContaining({ role: "immutable_household_read_contract", storage: "git_lfs" }),
+        expect.objectContaining({ role: "foundation_a_household_compiler_input", storage: "git_lfs" }),
         expect.objectContaining({ role: "promoted_council_room_read_model", storage: "git_lfs" }),
         expect.objectContaining({ role: "versioned_mapgen_renderer_export", storage: "git_lfs" }),
       ]),

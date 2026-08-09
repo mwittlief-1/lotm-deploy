@@ -15,6 +15,10 @@
       "path": "merecross-3d-prototype.html"
     },
     {
+      "renderer_key": "glastonmere_county_v1",
+      "path": "merecross-3d-prototype.html?rendererKey=glastonmere_county_v1&scope=county"
+    },
+    {
       "renderer_key": "orchardmere_county_v1",
       "path": "orchardmere-county-viewer.html"
     },

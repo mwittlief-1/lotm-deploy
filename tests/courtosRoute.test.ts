@@ -34,9 +34,12 @@ describe("CourtOS typed route", () => {
   });
 
   it("routes Office & Post Appointments to House Command", () => {
-    expect(
-      courtOsResponsibilityRoute({ responsibility: "office_post_appointments" }),
-    ).toEqual({ place: { kind: "house_command" }, detail: null });
+    const route = courtOsResponsibilityRoute({ responsibility: "office_post_appointments" });
+    expect(route).toEqual({
+      place: { kind: "house_command" },
+      detail: { kind: "command_responsibility", responsibility: "office_post_appointments" },
+    });
+    expect(courtOsRouteFromSearch(courtOsSearchForRoute("?houseId=house-1", route))).toEqual(route);
   });
 
   it("round-trips an entitled education detail without inventing another surface", () => {

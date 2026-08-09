@@ -35,8 +35,8 @@ export const HOUSEHOLD_RESPONSIBILITIES: readonly HouseholdResponsibilityDefinit
     title: "Household Stores, Provisioning & Procurement",
     shortTitle: "Stores & Provisioning",
     place: "The Household Stores",
-    purpose: "Food, goods, custody, procurement, movements, and receipts.",
-    art: "/assets/council-command-room/household-vertical-slice/household-stores-focus-v1.png",
+    purpose: "Opening stores, Food capacity, and a bounded procurement posture.",
+    art: "/assets/courtos/rooms/household/household-stores-v2.jpg",
     provenanceKeys: [
       "ro_household_responsibility_summary_v1",
       "ro_household_stores_position_v1",
@@ -51,7 +51,7 @@ export const HOUSEHOLD_RESPONSIBILITIES: readonly HouseholdResponsibilityDefinit
     shortTitle: "Adult Kin",
     place: "The Kinship Solar",
     purpose: "Support arrangements, residence posture, service, and placement.",
-    art: "/assets/council-command-room/household-vertical-slice/adult-kin-support-room-v1.png",
+    art: "/assets/courtos/rooms/household/adult-kin-support-v3.jpg",
     provenanceKeys: [
       "ro_adult_kin_support_roster_v1",
       "ro_adult_kin_support_arrangement_v1",
@@ -63,11 +63,11 @@ export const HOUSEHOLD_RESPONSIBILITIES: readonly HouseholdResponsibilityDefinit
     title: "Education & Formation",
     shortTitle: "Education",
     place: "The Scholarium",
-    purpose: "Learner plans, providers, settings, reviews, and formation records.",
-    art: "/assets/council-command-room/household-vertical-slice/education-formation-room-v1.png",
+    purpose: "Learner arrangements, providers, settings, and formation stewardship.",
+    art: "/assets/courtos/rooms/household/education-formation-v3.jpg",
     provenanceKeys: [
       "ro_education_learner_plan_v1",
-      "ro_education_cycle_report_v1",
+      "ro_education_cycle_report_uat1_v1",
     ],
   },
   {
@@ -76,8 +76,8 @@ export const HOUSEHOLD_RESPONSIBILITIES: readonly HouseholdResponsibilityDefinit
     title: "Household Service & Care",
     shortTitle: "Service & Care",
     place: "The Care Chamber",
-    purpose: "Active conditions, care arrangements, providers, and cycle reports.",
-    art: "/assets/council-command-room/household-vertical-slice/health-care-room-v1.png",
+    purpose: "Active conditions, care arrangements, providers, and health-watch stewardship.",
+    art: "/assets/courtos/rooms/household/household-service-care-v2.jpg",
     provenanceKeys: [
       "ro_health_roster_v1",
       "ro_health_cycle_report_v1",
@@ -154,7 +154,8 @@ function recordsFor(
 ): { current: number; cycle: number; total: number } {
   if (key === "stores") {
     const current = projection.stores_positions.length + projection.supply_routes.length;
-    const cycle = projection.stores_history.length;
+    const cycle =
+      projection.stores_history.length + projection.economic_activity_lookback.length;
     return { current, cycle, total: current + cycle };
   }
   if (key === "adult_kin") {
@@ -177,12 +178,17 @@ function responsibilityFor(
   key: HouseholdResponsibilityKey,
   projection: Household1120ReadOnlyProjection,
 ) {
-  if (key !== "stores") return null;
+  const definition = HOUSEHOLD_RESPONSIBILITIES.find(
+    (responsibility) => responsibility.key === key,
+  );
+  if (!definition) return null;
+  // Both the legacy read contract and the Foundation A release expose the
+  // stable design responsibility after `sr_`; do not infer an owner from the
+  // roster or a room-specific fixture.
+  const expectedId = `sr_${definition.designKey}`;
   return (
     projection.responsibility_summary.find(
-      (row) =>
-        row.responsibility_id ===
-        "sr_household_stores_provisioning_procurement",
+      (row) => row.responsibility_id === expectedId,
     ) ?? null
   );
 }
@@ -204,10 +210,21 @@ function buildResponsibility(
         }
       : null;
 
+  const uat1ReadOnly =
+    projection.schema_version === "foundation_a_household_uat1_release_v1";
+  const uat1Explanation: Partial<Record<HouseholdResponsibilityKey, string>> = {
+    stores:
+      "House positions and manor Food capacity are readable for planning. The 1117–1119 regular economic evidence is readable; custody, routes, and later outcomes are not part of this opening record.",
+    education:
+      "Current learner arrangements and 1117–1119 responsible-party reports are readable. Later turns add reports from play.",
+    service_care:
+      "Current health and care arrangements are readable. Condition changes and care outcomes will be determined when the turn is carried out.",
+  };
+
   if (records.total > 0) {
-    const partial = provenance.some(
-      (row) => row.admission_state === "withheld_pending_admission",
-    );
+    const partial =
+      provenance.some((row) => row.admission_state === "withheld_pending_admission") ||
+      Boolean(uat1ReadOnly && uat1Explanation[definition.key]);
     return {
       definition,
       holder,
@@ -218,7 +235,7 @@ function buildResponsibility(
       cycleRecordCount: records.cycle,
       provenance,
       explanation: partial
-        ? "Current records are readable; one or more cycle or execution surfaces are not yet admitted."
+        ? uat1Explanation[definition.key] ?? "Current records are readable; one or more cycle or execution surfaces are not yet admitted."
         : "The current and cycle records are readable from the admitted Household contract.",
     };
   }

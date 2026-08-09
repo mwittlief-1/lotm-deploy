@@ -1,4 +1,8 @@
 export const COURTOS_REQUEST_TIMEOUT_MS = 15_000;
+// Frozen Household releases verify and open a larger SQLite package on the
+// first request. Keep that honest cold start in the loading state instead of
+// presenting a false source failure moments before the verified session is ready.
+export const COURTOS_LARGE_READ_TIMEOUT_MS = 120_000;
 
 export interface CourtOsRequestDeadline {
   readonly signal: AbortSignal;

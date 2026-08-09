@@ -1,0 +1,99 @@
+{
+  "package_id": "foundation_a_household_runtime_release_v1",
+  "schema_version": "foundation_a_household_runtime_release_v1",
+  "generation_id": "618e2bc4b9362883c1b439d2cb92e4fe62de8ec92e991dea8044da2845278442",
+  "effective_date": "1120-01-01",
+  "release_status": "runtime_admitted_foundation_a_uat",
+  "release_boundary": "Bounded January 1120 Foundation A UAT projection. It is not a historical 1120 successor, canonical outcome, or simulator output.",
+  "source_inputs": [
+    {
+      "role": "admission_plan",
+      "path": "data/genrun/foundation_a_household_admission_plan_v1/MANIFEST.json",
+      "sha256": "b982cf978426e9c073492217de557131fb10dbca8a8b847aebab6236a618205f"
+    },
+    {
+      "role": "household_candidate_manifest",
+      "path": "data/genrun/phase_five_household_foundation_a_uat_candidate_v1/MANIFEST.json",
+      "sha256": "d01cfb31620b01047bc2460c8d7723a22497f8ba67f2e78bad6ddd14b4421fa8"
+    },
+    {
+      "role": "household_candidate_sqlite",
+      "path": "data/genrun/phase_five_household_foundation_a_uat_candidate_v1/phase_five_household_foundation_a_uat_candidate_v1.sqlite",
+      "sha256": "d7796f01fcb595bca513324e40aa3cfed01e98dca8aa1484d19fe45947c9dd7a"
+    },
+    {
+      "role": "responsibility_assignment_projection",
+      "path": "data/genrun/phase_five_courtos_admitted_current_assignment_projection_v2/admitted_defensible_responsibility_assignments_v2.csv",
+      "sha256": "5a6f567a1fe2f7347c5f3f8311f3d41a9913984609b4493293360e85098a77ae"
+    },
+    {
+      "role": "static_uat_stores_manifest",
+      "path": "data/uat/foundation_a_static_1120_uat_stores_projection_v1/MANIFEST.json",
+      "sha256": "393720ca4ff3fd91c87774f216f85366d1f0677e1dd55b0774dbad092014ead3"
+    },
+    {
+      "role": "static_uat_stores_sqlite",
+      "path": "data/uat/foundation_a_static_1120_uat_stores_projection_v1/generations/a6786eb643ff64d0cfcdc46e2616119b39b7ec29298dc2aac013a6199fcbd6d6/foundation_a_static_1120_uat_stores_projection_v1.sqlite",
+      "sha256": "96384dbe8ae753ef110263306c7faafe0d174b3c3f6dad6621dec02627953170"
+    },
+    {
+      "role": "foundation_a_economic_activity_manifest",
+      "path": "data/uat/foundation_a_household_economic_activity_projection_v1/MANIFEST.json",
+      "sha256": "f7265e29aed675febf4ca0881fa2a7294de79efd644c8f15f58797c5efd2e014"
+    },
+    {
+      "role": "foundation_a_economic_activity_sqlite",
+      "path": "data/uat/foundation_a_household_economic_activity_projection_v1/generations/5e6b561720519c9d21dd62547c044cbb3f82e48814d4d30f063c8d3de6c8890e/foundation_a_household_economic_activity_projection_v1.sqlite",
+      "sha256": "c9e6029aa63ae005ab6bf33f53b3bcf1706ac675868b69cbc1eda172c9aa3e12"
+    }
+  ],
+  "module_dispositions": {
+    "membership": "runtime_admitted",
+    "adult_kin": "runtime_admitted_resolved_rows_only",
+    "service_care": "runtime_admitted_courtos_house_scope_only",
+    "education_arrangements": "runtime_admitted_without_progress_presentation",
+    "education_progress_presentation": "withheld_pending_knowledge_safe_report_projection",
+    "responsibility_authority": "runtime_admitted_with_four_explicit_scope_holds",
+    "stores_provenance": "runtime_admitted",
+    "stores_positions_and_custody": "runtime_admitted_static_uat_bound_house_and_manor_rows",
+    "economic_activity_1117_1119": "runtime_admitted_founder_approved_provisional_evidence",
+    "house_manor_scope": "withheld_pending_admitted_scope_contract",
+    "matters_opening": "empty_at_opening"
+  },
+  "counts": {
+    "ro_household_membership_v1": 23548,
+    "ro_adult_kin_subject_v1": 1506,
+    "ro_household_demand_evidence_v1": 16031,
+    "ro_support_arrangement_v1": 776,
+    "ro_household_health_roster_v1": 241,
+    "ro_household_care_arrangement_v1": 17,
+    "ro_household_education_arrangement_v1": 1284,
+    "ro_household_stores_position_v1": 3904,
+    "ro_household_economic_activity_lookback_v1": 102765,
+    "ro_responsibility_authority_v1": 10750,
+    "ro_responsibility_authority_withheld_v1": 4,
+    "ro_opening_matters_v1": 0
+  },
+  "assertions": {
+    "membership_complete": true,
+    "managed_adult_kin_only": true,
+    "adult_kin_arrangements_complete": true,
+    "care_roster_manager_bound": true,
+    "care_commitments_complete": true,
+    "education_arrangements_complete": true,
+    "raw_progress_absent": true,
+    "stores_positions_complete": true,
+    "stores_house_only": true,
+    "stores_only_static_uat_epoch": true,
+    "stores_external_manor_key_only": true,
+    "economic_activity_has_three_years": true,
+    "economic_activity_is_nonexecuting": true,
+    "matters_empty": true,
+    "authority_has_twenty_resolved_keys": true,
+    "authority_has_four_explicit_scope_holds": true
+  },
+  "artifact": {
+    "path": "data/genrun/foundation_a_household_runtime_release_v1/generations/618e2bc4b9362883c1b439d2cb92e4fe62de8ec92e991dea8044da2845278442/foundation_a_household_runtime_release_v1.sqlite",
+    "sha256": "1e67e9c78dabf287047869ab65a990a8b80ba1d0ce7506a962531c18a3e780ac"
+  }
+}

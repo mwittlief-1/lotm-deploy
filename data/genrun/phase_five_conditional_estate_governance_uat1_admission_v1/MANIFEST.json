@@ -1,0 +1,43 @@
+{
+  "package": "phase_five_conditional_estate_governance_uat1_admission_v1",
+  "status": "foundation_a_uat1_admitted_read_model_noncanon_runtime_boundary",
+  "effective_cutpoint": "1120-01-01",
+  "runtime_authority": false,
+  "counts": {
+    "portfolio_applicability_houses": 431,
+    "portfolio_eligible_houses": 152,
+    "portfolio_assignment_rows": 54,
+    "revenue_assignment_rows": 187,
+    "revenue_candidate_rows": 187,
+    "franchise_assignment_rows": 177,
+    "facility_rows": 229,
+    "works_assignment_rows": 2170,
+    "works_project_rows_referenced": 1878
+  },
+  "checks": {
+    "scope_rows_823": true,
+    "portfolio_eligible_rule": true,
+    "revenue_187": true,
+    "franchise_177": true,
+    "works_2170": true,
+    "projects_1878_reference": true,
+    "no_runtime_authority": true,
+    "sqlite_exists": true
+  },
+  "source_files": {
+    "authority": "fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304",
+    "scope": "e78b02c66b51f72f3d48aead72ba9d8bd17b4832eab60d72e9d06a4942ba6734",
+    "four_bucket": "73c0bd7a2db042d3281459a7f0ba7bb6766a970ddbe02903d8add2276725b590",
+    "projects": "b9363b34a821d92e19b98b97a3937e612cf8fcdd4d571f11b5e10fe738d16602",
+    "facilities": "4c5f8af62a37aef6b45cd5157ca4c9c4dfa30dd9bab919e13b7eaf0f7aae10a6",
+    "rights": "7bb1ad5c0bca6974b78f286fea09416b985399fc6b274afb8810ce8bb8a470e4",
+    "manor_manifest": "a87bba0d0a2a725062105cf51af87b194a8d6f01abc14a2a252a08c099aa3682"
+  },
+  "boundaries": [
+    "UAT1 read model only",
+    "Portfolio applicability derives only from admitted House/manor scope",
+    "Revenue Rights remains withheld absent an exact right",
+    "Franchise and Works are exact facility/project surfaces",
+    "no GL, project execution, source, runtime, or commitment mutation"
+  ]
+}

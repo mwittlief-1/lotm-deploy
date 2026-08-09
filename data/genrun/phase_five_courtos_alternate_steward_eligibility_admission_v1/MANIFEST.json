@@ -1,0 +1,147 @@
+{
+  "artifact_id": "phase_five_courtos_alternate_steward_eligibility_admission_v1",
+  "artifacts": {
+    "coverage": "responsibility_eligibility_coverage_v1.csv",
+    "csv": "responsibility_assignment_candidate_v1.csv",
+    "sqlite": "courtos_alternate_steward_eligibility_v1.sqlite",
+    "validation": "validation_report.json"
+  },
+  "assertions": {
+    "all_24_responsibility_dispositions": true,
+    "all_effective_1120": true,
+    "all_exact_admitted_scopes": true,
+    "all_living_adults": true,
+    "all_policy_responsibilities": true,
+    "exact_foundation_a_admission_wrapper_required": true,
+    "execution_revalidation_explicit": true,
+    "no_capacity_claim": true,
+    "no_current_holder_duplicates": true,
+    "no_house_head_duplicates": true,
+    "no_public_or_church_scope": true,
+    "no_runtime_or_canon_claim": true,
+    "original_candidate_lineage_preserved": true,
+    "unique_natural_key": true
+  },
+  "authority_boundary": "house_only",
+  "boundaries": [
+    "Current holders and the explicit Head-of-House self-assignment path remain separate.",
+    "No capacity, availability, office, pay, legal power, public authority, Church authority, or canon fact is created.",
+    "UAT1 may plan with these structural candidates; authority and custody are revalidated before any later execution.",
+    "Responsibilities outside the exact accepted 14-type 7,302 assignment-fill policy receive no alternate-candidate rows.",
+    "Every row preserves source_candidate_only=true lineage and is usable only because the exact Foundation-A authority wrapper admits that resolved UAT instance.",
+    "Held, inapplicable, public, Church, and cross-House scope rows remain excluded."
+  ],
+  "counts": {
+    "by_responsibility": {
+      "adult_kin_support": 823,
+      "correspondence_dispatch": 364,
+      "education_formation": 1047,
+      "estate_fabric_maintenance_oversight": 554,
+      "external_relations_representation": 131,
+      "house_fiscal_administration": 789,
+      "household_service_care": 395,
+      "household_stores_provisioning_procurement": 1065,
+      "manor_fiscal_administration": 597,
+      "marriage_dynasty_stewardship": 622,
+      "patronage_hospitality_gifts": 368
+    },
+    "by_selector": {
+      "correspondence_primary_intermediary": 326,
+      "current_house_fiscal_owner": 493,
+      "exact_parent_manor_operator": 104,
+      "existing_role_holder": 820,
+      "inner_council_portfolio_holder": 5012
+    },
+    "candidate_rows": 6755,
+    "coverage_responsibility_types": 24,
+    "houses": 435,
+    "people": 1899,
+    "policy_responsibility_types": 14,
+    "responsibility_types": 11,
+    "scopes": 3673
+  },
+  "coverage_posture": {
+    "accepted_policy_but_no_distinct_alternate": [
+      "manor_stewardship",
+      "security_asset_protection",
+      "office_post_appointments"
+    ],
+    "all_24_responsibilities_dispositioned": true,
+    "no_admitted_alternate_selector_rule": [
+      "works_project_supervision",
+      "franchise_operations",
+      "portfolio_oversight",
+      "revenue_right_administration_collection",
+      "reception_intake",
+      "records_archives",
+      "martial_readiness_training",
+      "martial_stores_horse_capacity",
+      "household_observance_chaplaincy",
+      "church_rights_institutional_affairs"
+    ],
+    "source_backed_alternate_rows_present": [
+      "household_stores_provisioning_procurement",
+      "adult_kin_support",
+      "education_formation",
+      "household_service_care",
+      "marriage_dynasty_stewardship",
+      "patronage_hospitality_gifts",
+      "estate_fabric_maintenance_oversight",
+      "house_fiscal_administration",
+      "manor_fiscal_administration",
+      "correspondence_dispatch",
+      "external_relations_representation"
+    ]
+  },
+  "effective_date": "1120-01-01",
+  "generation_id": "70eb10a309755654694732c3ab9e12ce6dd838099b9ac4ea64409d83eec9ec7c",
+  "schema_version": "courtos_alternate_steward_eligibility_v1",
+  "source_authority_generation_id": "phase_five_foundation_a_uat_24_responsibility_authority_admission_v1@fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304",
+  "source_inputs": [
+    {
+      "path": "data/genrun/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1/phase_five_foundation_a_uat_24_responsibility_authority_admission_v1.sqlite",
+      "sha256": "fb27bfcced022fcf4a73cca3863ad6a8bf1bddb56dd9f4082f7a5ee8ccc9d304"
+    },
+    {
+      "path": "data/genrun/phase_five_courtos_admitted_current_assignment_projection_v2/admitted_defensible_responsibility_assignments_v2.csv",
+      "sha256": "5a6f567a1fe2f7347c5f3f8311f3d41a9913984609b4493293360e85098a77ae"
+    },
+    {
+      "path": "data/genrun/phase_five_courtos_candidate_assignment_compiler_v1/house_carrier_resolution_v1.csv",
+      "sha256": "84777c182c97d16efd7e53c3ea0b042f05651a9d0e5b8e76b21742c0c1ad66c9"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/graph_v1/Person__c.jsonl",
+      "sha256": "4f7ecb339546d4867d9d7d0959aa2d983a92380529ebe51b85f821c62092a5c7"
+    },
+    {
+      "path": "data/ready/world_1120_turn0/sources/graph_v1/House__c.jsonl",
+      "sha256": "3fbf1b42c71da2c81ebabe19b93b366d58be4e215caa8ae516454751b232a8c9"
+    },
+    {
+      "path": "data/genrun/t0_inner_council_candidate_v1/InnerCouncilMembershipCandidate__c.jsonl",
+      "sha256": "effda1ddef4d98ffaa88dafff467a8416e6b622b06bdac1fb7e524a9e6d505c1"
+    },
+    {
+      "path": "data/genrun/t0_capability_state_candidate_v1/CapabilityStateCandidate__c.jsonl",
+      "sha256": "441ba44b64fa75aa151c8c3d67ef3673a79e3043301786f6cc1a2cb0fecefd5d"
+    },
+    {
+      "path": "data/genrun/t0_trait_state_candidate_v1_1/TraitStateCandidate__c.jsonl",
+      "sha256": "6aeacc5086adbc50ca083de90dae5a58f016a64fed44c97638e3d753e7785c02"
+    },
+    {
+      "path": "data/genrun/phase_five_courtos_assignment_fill_policy_v1/assignment_fill_priority_v1.csv",
+      "sha256": "16dfd2b597b27c5900b5287c5d78ca3e91018e28ca25e30e902d28b146d0511b"
+    },
+    {
+      "path": "docs/current/PHASE_FIVE_COURTOS_RESPONSIBILITY_CONTROL_PLANE_REGISTRY_V3.json",
+      "sha256": "68e0f7dd7ea13f574f43ddba667d43edcd02e414f701687a3843f603c8b8228a"
+    },
+    {
+      "path": "data/genrun/foundation_a_household_uat1_release_v1/generations/aeb8937c65b31c11c1980df8ba1406ff09702b20ae28a19fd3b6f2e0928c2195/foundation_a_household_uat1_release_v1.sqlite",
+      "sha256": "0907ed72bb1379f7e85a02d26047503e663715565f1e6ea74f8349115e7f45b3"
+    }
+  ],
+  "status": "foundation_a_uat1_admitted_alternate_steward_eligibility_not_canon"
+}
