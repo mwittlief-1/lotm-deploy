@@ -8,3 +8,4 @@ artifacts
 public/data/ready/courtos_spatial_read_model_v1.json
 .courtos-public/
 qa_artifacts/courtos_uat/
+qa_artifacts/*_preflight.json
