@@ -146,6 +146,11 @@ function runtimeImportClosure(entrypoints) {
   const queue = [...entrypoints];
   const importPattern =
     /(?:import|export)\s+(?:[^'\"]*?\s+from\s+)?['\"]([^'\"]+)['\"]/g;
+  // Minified ESM commonly removes the whitespace between the keyword and the
+  // import/export list (`import{...}from"./module.js"`). Keep those files in
+  // the same transitive clean-checkout gate as authored source modules.
+  const compactImportPattern =
+    /\b(?:import|export)\{[^;]*?\}from['\"]([^'\"]+)['\"]/g;
   const dynamicImportPattern = /(?<!['\"`])\bimport\(\s*['\"]([^'\"]+)['\"]\s*\)/g;
 
   while (queue.length > 0) {
@@ -157,6 +162,7 @@ function runtimeImportClosure(entrypoints) {
     const source = fs.readFileSync(absolute(relativePath), "utf8");
     for (const match of [
       ...source.matchAll(importPattern),
+      ...source.matchAll(compactImportPattern),
       ...source.matchAll(dynamicImportPattern),
     ]) {
       const specifier = match[1];
