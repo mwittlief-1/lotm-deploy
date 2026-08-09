@@ -51,6 +51,12 @@
       "storage": "git"
     },
     {
+      "path": "data/uat/courtos_spatial_house_manor_admission_v1.json",
+      "sha256": "be7581575163c16f23be07676e5eef6696caff0706976356824c8a6a5c10e527",
+      "role": "courtos_spatial_house_manor_admission",
+      "storage": "git"
+    },
+    {
       "path": "data/naming/place_name_catalog_working_authority_v1/locked_name_catalog_combined_view_v1.csv",
       "sha256": "2a119ccedb5f8913c1e882af8aceb934033623ae3ee2c2f8a21a5c2534f6fb5e",
       "role": "locked_place_name_catalog",

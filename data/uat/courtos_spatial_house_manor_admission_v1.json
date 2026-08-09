@@ -1,0 +1,31 @@
+{
+  "schema_version": "courtos_spatial_house_manor_admission_v1",
+  "release_id": "courtos_spatial_house_manor_admission_1120_01_01_v1",
+  "effective_date": "1120-01-01",
+  "disposition": "founder_authorized_admitted",
+  "command_authority": false,
+  "source_manifest": {
+    "operator_crosswalk_path": "data/ready/world_1120_turn0/sources/manor_operator_crosswalk_step4m_v1/ManorOperatorCrosswalk__c.jsonl",
+    "operator_crosswalk_sha256": "2f600ab78b9026384aafae5759f7f28743d5118608f7f0609532a668bef18b8e",
+    "xmap_manors_path": "data/map/xmap_alpha_v1/manor_units_v1.json",
+    "xmap_manors_sha256": "c5903a01ebeded22cfc9223008951dec5fdb87e099bb412f4ce394c8a7c3d525"
+  },
+  "admitted_associations": [
+    {
+      "house_id": "t0h_bcae5bd911ab10f4c7fdfea0",
+      "protected_manor_id": "t0man_0affad9728518bc7c2d2dbfb",
+      "source_crosswalk_id": "t0moc_b69be2646eb2e28dcd837dd2",
+      "source_row_sha256": "1f5ad6ea55f4bfe78387fe614c411d6f2ec997d788a229debe2b2b45b84e4886",
+      "association_basis": "named_house_operated",
+      "principal_seat": true
+    },
+    {
+      "house_id": "t0h_bcae5bd911ab10f4c7fdfea0",
+      "protected_manor_id": "t0man_86b45f2c3e12bf9db30ba5be",
+      "source_crosswalk_id": "t0moc_b47a7d275006dae2ad813d8b",
+      "source_row_sha256": "9bf5833d12f6e6a0bfb06e38e92d99895fc5772556c431a07d2a37fb553b486b",
+      "association_basis": "named_house_operated",
+      "principal_seat": false
+    }
+  ]
+}
