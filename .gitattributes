@@ -11,6 +11,8 @@ data/ready/world_1120_turn0/readmodels/council_room_ready_index_v1/*.json filter
 public/assets/council-command-room/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/assets/heraldry/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/assets/fiscal-office/**/*.jpg filter=lfs diff=lfs merge=lfs -text
+public/assets/fiscal-office/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/assets/courtos/rooms/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 public/assets/mapgen-landscape/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 public/assets/mapgen-manor-v2/**/*.png filter=lfs diff=lfs merge=lfs -text
+public/assets/landscape-composition/**/*.png filter=lfs diff=lfs merge=lfs -text

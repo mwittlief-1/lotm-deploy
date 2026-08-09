@@ -1,0 +1,882 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<body data-map-renderer="merecross_realm_v1">
+<script>
+  (() => {
+    const requestedRenderer = new URLSearchParams(window.location.search).get("rendererKey");
+    if (requestedRenderer === "glastonmere_county_v1") {
+      document.body.dataset.mapRenderer = requestedRenderer;
+    }
+  })();
+</script>
+<main class="prototype-shell">
+  <section class="scene-panel" aria-label="Interactive three-dimensional terrain map of Merecross and the surrounding realms">
+    <canvas id="terrain-canvas" aria-label="Whole-map elevated hex terrain. Drag to recenter, shift-drag to rotate, scroll to zoom, and click a hex to inspect it."></canvas>
+    <div class="scene-title">
+      <strong>Merecross and neighboring realms — whole-map terrain</strong>
+      <span id="map-status">Loading terrain…</span>
+    </div>
+    <button id="compass" class="compass" type="button" aria-label="Turn map to north">
+      <span id="compass-needle" class="compass-needle"><span class="compass-n">N</span></span>
+    </button>
+    <div class="scene-help">Drag to recenter · Shift-drag to rotate · scroll to zoom · click a hex to inspect</div>
+  </section>
+  <aside class="controls" aria-label="Terrain controls and selected hex details">
+    <nav class="scope-nav" aria-label="Map scale">
+      <a href="./merecross-map-viewer.html?level=realm" target="_top" aria-current="page">Realm</a>
+      <a href="./merecross-map-viewer.html?level=county" target="_top">County</a>
+      <a href="./merecross-map-viewer.html?level=estate" target="_top">Estate</a>
+    </nav>
+    <label for="vertical-scale">Vertical exaggeration <output id="vertical-scale-value">1.00×</output></label>
+    <input id="vertical-scale" type="range" min="0.25" max="2" value="1" step="0.05" />
+    <label class="zone-toggle"><input id="show-golden-zones" type="checkbox" /> Show five Merecross golden areas</label>
+    <label class="zone-toggle"><input id="show-kingdom-borders" type="checkbox" checked /> Show realm borders</label>
+    <label class="zone-toggle"><input id="show-county-borders" type="checkbox" checked /> Show county borders</label>
+    <label class="zone-toggle"><input id="show-map-labels" type="checkbox" checked /> Show map labels</label>
+    <label class="zone-toggle"><input id="show-landcover" type="checkbox" checked /> Show land cover</label>
+    <label class="zone-toggle"><input id="show-road-edges" type="checkbox" /> Show authored road edges</label>
+    <label class="zone-toggle"><input id="show-river-edges" type="checkbox" /> Show authored river edges</label>
+    <button id="reset-view" type="button">Reset view</button>
+    <a class="viewer-link" href="./merecross-map-viewer.html?level=estate" target="_top">Open Pearwick estate pilot</a>
+    <section class="detail" aria-live="polite">
+      <h2>Hex inspector</h2>
+      <p id="selected-hex">Select a hex on the terrain.</p>
+    </section>
+    <section class="legend" aria-label="Terrain legend">
+      <h2>Primary terrain</h2>
+      <div><i class="swatch plains"></i>Plains</div>
+      <div><i class="swatch forest"></i>Forest</div>
+      <div><i class="swatch hills"></i>Hills</div>
+      <div><i class="swatch mountains"></i>Mountains</div>
+      <div><i class="swatch marsh"></i>Marsh</div>
+      <div><i class="swatch coast"></i>Coast / lake / sea</div>
+    </section>
+    <section class="legend" aria-label="Authored macro-edge legend">
+      <h2>Authored macro edges</h2>
+      <div><i class="swatch edge-road"></i>Road crossing</div>
+      <div><i class="swatch edge-river"></i>River continuity</div>
+    </section>
+    <section class="legend" aria-label="Golden-area outline key">
+      <h2>Golden areas</h2>
+      <div><i class="swatch zone-river"></i>Dunmere estuary &amp; major river</div>
+      <div><i class="swatch zone-coast"></i>Wyrmford–Dunmere–Harrowfield coast</div>
+      <div><i class="swatch zone-wetland"></i>Wyrmford–Larkspire–Bramholt wetlands</div>
+      <div><i class="swatch zone-march"></i>Vezdaran March borderwater</div>
+      <div><i class="swatch zone-highland"></i>Central Merecross highlands</div>
+    </section>
+  </aside>
+</main>
+
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #121b22; color: #ecf1ed; font-family: ui-serif, Georgia, serif; }
+  .prototype-shell { display: grid; grid-template-columns: minmax(0, 1fr) 278px; height: 100vh; min-height: 620px; }
+  .scene-panel { position: relative; min-height: 620px; overflow: hidden; background: #34352e; }
+  #terrain-canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  #terrain-canvas:active { cursor: grabbing; }
+  .scene-title, .scene-help { position: absolute; left: 18px; background: rgb(14 24 30 / 82%); border: 1px solid rgb(231 241 236 / 20%); border-radius: 7px; }
+  .scene-title { top: 18px; padding: 10px 12px; display: grid; gap: 3px; }
+  .scene-title span, .scene-help, .controls { font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  .scene-title span { color: #c5d3cf; font-size: 12px; }
+  .scene-help { bottom: 18px; padding: 7px 10px; color: #dce7e2; }
+  .compass { position: absolute; z-index: 4; top: 18px; right: 18px; width: 58px; height: 58px; padding: 5px; border: 1px solid rgb(255 255 255 / 28%); border-radius: 50%; background: rgb(14 24 30 / 82%); color: #f5ecd1; cursor: pointer; box-shadow: 0 8px 28px rgb(0 0 0 / 18%); }
+  .compass:hover { background: rgb(38 61 54 / 92%); }
+  .compass-needle { position: relative; display: block; width: 46px; height: 46px; transition: transform 80ms linear; }
+  .compass-needle::before { content: ""; position: absolute; top: 11px; left: 21px; width: 4px; height: 25px; border-radius: 2px; background: linear-gradient(#d9b85f 0 50%, #d7ddd7 50%); }
+  .compass-needle::after { content: ""; position: absolute; top: 7px; left: 17px; border-right: 6px solid transparent; border-bottom: 10px solid #d9b85f; border-left: 6px solid transparent; }
+  .compass-n { position: absolute; top: -1px; left: 18px; color: #f6df9b; font: 700 10px/1 ui-sans-serif, system-ui, sans-serif; }
+  .controls { overflow-y: auto; padding: 22px 18px; background: #17242a; border-left: 1px solid rgb(231 241 236 / 16%); }
+  .controls label { display: flex; justify-content: space-between; gap: 8px; color: #dbe6e1; }
+  .controls output { color: #a7d2bb; font-variant-numeric: tabular-nums; }
+  .zone-toggle { margin: 0 0 14px; justify-content: flex-start !important; align-items: center; }
+  .scope-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 18px; }
+  .scope-nav a { padding: 7px 4px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 5px; color: #c9d5cf; font-size: 11px; text-align: center; text-decoration: none; }
+  .scope-nav a:hover { background: rgb(255 255 255 / 7%); }
+  .scope-nav a[aria-current="page"] { border-color: #8fc9a6; background: #29443c; color: #f1ffe9; }
+  body.embedded-viewer .scope-nav { display: none; }
+  body.courtos-viewer .prototype-shell { grid-template-columns: minmax(0, 1fr); }
+  body.courtos-viewer .controls,
+  body.courtos-viewer .scene-title,
+  body.courtos-viewer .scene-help { display: none; }
+  input[type="range"] { width: 100%; margin: 10px 0 14px; accent-color: #8fc9a6; }
+  button, .viewer-link { width: 100%; padding: 9px 11px; border: 1px solid #8fc9a6; border-radius: 6px; background: #244638; color: #effaf2; cursor: pointer; font: inherit; text-align: center; text-decoration: none; }
+  button:hover, .viewer-link:hover { background: #2d5947; }
+  .viewer-link { display: block; margin-top: 9px; }
+  h2 { margin: 0 0 8px; font: 600 15px/1.2 ui-serif, Georgia, serif; color: #f3f7f4; }
+  .detail, .legend { margin-top: 22px; padding-top: 18px; border-top: 1px solid rgb(231 241 236 / 16%); }
+  .detail p { margin: 0; color: #c7d4ce; white-space: pre-line; }
+  .legend { display: grid; gap: 7px; color: #d4dfd9; }
+  .legend h2 { margin-bottom: 2px; }
+  .swatch { display: inline-block; width: 12px; height: 12px; margin: 0 7px 0 1px; border: 1px solid rgb(255 255 255 / 30%); vertical-align: -1px; }
+  .plains { background: #9dac73; } .forest { background: #597c57; } .hills { background: #a87f58; }
+  .mountains { background: #8a8f97; } .marsh { background: #6f9f94; } .coast { background: #80aeca; }
+  .zone-river { background: #ffd166; } .zone-coast { background: #ef476f; } .zone-wetland { background: #06d6a0; }
+  .zone-march { background: #118ab2; } .zone-highland { background: #c77dff; }
+  .edge-road { background: #68452d; } .edge-river { background: #3b82a0; }
+  @media (max-width: 760px) { .prototype-shell { grid-template-columns: 1fr; height: auto; } .scene-panel { min-height: 520px; height: 70vh; } .controls { overflow: visible; border-left: 0; border-top: 1px solid rgb(231 241 236 / 16%); } }
+</style>
+
+<script src="./courtos-cartography-theme.v1.js"></script>
+<script src="./courtos-embedded-adapter.v1.js"></script>
+<script src="./merecross-3d-prototype-data.js"></script>
+<script src="./realm-zoom-composition-data.js"></script>
+<script src="./shared-water-texture.js"></script>
+<script src="./shared-land-composition.js"></script>
+<script>
+  const embeddedViewer = new URLSearchParams(window.location.search).get("embedded") === "1";
+  const courtOsViewer = new URLSearchParams(window.location.search).get("courtos") === "1";
+  const activeRendererKey = document.body.dataset.mapRenderer || "merecross_realm_v1";
+  const countyLens = activeRendererKey === "glastonmere_county_v1";
+  const configuredParentOrigin = (() => {
+    const value = new URLSearchParams(window.location.search).get("parentOrigin");
+    if (!value) return window.location.origin;
+    try { return new URL(value).origin; } catch { return window.location.origin; }
+  })();
+  document.body.classList.toggle("embedded-viewer", embeddedViewer);
+  document.body.classList.toggle("courtos-viewer", courtOsViewer);
+  const cartographyTheme = window.MERECROSS_CARTOGRAPHY_THEME_V1?.resolve?.(
+    new URLSearchParams(window.location.search).get("theme"),
+  );
+  const canvas = document.getElementById("terrain-canvas");
+  const ctx = canvas.getContext("2d");
+  const sharedWaterTexture = window.MERECROSS_SHARED_WATER?.createCanvas?.(512) ?? null;
+  const compositionLibrary = window.REALM_ZOOM_COMPOSITION_DATA ?? null;
+  const compositionRecipeById = new Map(
+    (compositionLibrary?.recipes ?? []).map((recipe) => [recipe.recipe_id, recipe]),
+  );
+  let sharedLandTextures = null;
+  const scaleInput = document.getElementById("vertical-scale");
+  const scaleValue = document.getElementById("vertical-scale-value");
+  const status = document.getElementById("map-status");
+  const selectedHex = document.getElementById("selected-hex");
+  const resetButton = document.getElementById("reset-view");
+  const goldenZonesInput = document.getElementById("show-golden-zones");
+  const kingdomBordersInput = document.getElementById("show-kingdom-borders");
+  const countyBordersInput = document.getElementById("show-county-borders");
+  const mapLabelsInput = document.getElementById("show-map-labels");
+  const landcoverInput = document.getElementById("show-landcover");
+  const roadEdgesInput = document.getElementById("show-road-edges");
+  const riverEdgesInput = document.getElementById("show-river-edges");
+  const compassNeedle = document.getElementById("compass-needle");
+
+  const terrainColors = courtOsViewer ? {
+    plains: cartographyTheme?.terrain?.plains ?? "#8f895f",
+    forest: cartographyTheme?.terrain?.forest ?? "#506346",
+    hills: cartographyTheme?.terrain?.hills ?? "#8d6d4d",
+    mountains: cartographyTheme?.terrain?.mountains ?? "#777870",
+    marsh: cartographyTheme?.terrain?.marsh ?? "#5c7569",
+    coast: cartographyTheme?.terrain?.coast ?? "#9d8d65",
+    lake: cartographyTheme?.terrain?.water ?? "#526d6d",
+    sea: cartographyTheme?.terrain?.water ?? "#526d6d"
+  } : {
+    plains: "#9dac73", forest: "#597c57", hills: "#a87f58", mountains: "#8a8f97",
+    marsh: "#6f9f94", coast: "#b9aa78", lake: "#527f89", sea: "#527f89"
+  };
+  const terrainSideColors = {
+    plains: "#5d5941", forest: "#334331", hills: "#604b38", mountains: "#52534d",
+    marsh: "#3d514a", coast: "#655b43", lake: "#354d4f", sea: "#354d4f"
+  };
+  const visualTheme = cartographyTheme?.visual;
+  const visualLabels = visualTheme?.labels ?? {};
+  const visualRoutes = visualTheme?.routes ?? {};
+  const visualWater = visualTheme?.water ?? {};
+
+  const camera = { yaw: -0.73, zoom: 1, verticalScale: 1, panX: 0, panY: 0 };
+  let map = null;
+  let core = [];
+  let coreCenter = { x: 0, y: 0 };
+  let projection = null;
+  let dragging = false;
+  let dragMode = null;
+  let moved = false;
+  let lastPointer = null;
+  let selected = null;
+  let coreByCoordinate = new Map();
+  let coreById = new Map();
+  let goldenZones = [];
+  let countyBoundaryEdges = [];
+  let kingdomBoundaryEdges = [];
+  let macroFeatureEdges = [];
+  let regionalBorders = [];
+  let regionalLabels = [];
+  let seatLabels = [];
+  let renderFrame = null;
+  let firstUsableFrameAnnounced = false;
+  let viewerActive = true;
+  let depthOrder = [];
+  let depthOrderYaw = null;
+  let portfolioManors = [];
+  let focusedManorId = null;
+  let pendingFocus = null;
+  const axialDirections = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
+  const edgeCorners = [[0, 1], [5, 0], [4, 5], [3, 4], [2, 3], [1, 2]];
+
+  function elevationFor(hex) {
+    return hex.visual_elevation ?? hex.elevation;
+  }
+
+  function displayHexId(hex) {
+    return hex.hex_id ?? `hx_${hex.q + (hex.r * 281)}`;
+  }
+
+  function axialToPixel(q, r, size) {
+    return { x: size * Math.sqrt(3) * (q + r / 2), y: size * 1.5 * r };
+  }
+
+  function hexCorners(x, y, size) {
+    const corners = [];
+    for (let index = 0; index < 6; index++) {
+      const angle = (Math.PI / 180) * (60 * index - 30);
+      corners.push({ x: x + size * Math.cos(angle), y: y + size * Math.sin(angle) });
+    }
+    return corners;
+  }
+
+  function shade(color, amount) {
+    const value = color.slice(1);
+    const channels = [0, 2, 4].map((offset) => Math.max(0, Math.min(255, parseInt(value.slice(offset, offset + 2), 16) + amount)));
+    return `rgb(${channels.join(" ")})`;
+  }
+
+  function configureCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return rect;
+  }
+
+  function makeProjection(rect) {
+    const cos = Math.cos(camera.yaw);
+    const sin = Math.sin(camera.yaw);
+    const projected = core.map((hex) => {
+      const dx = hex.world.x - coreCenter.x;
+      const dy = hex.world.y - coreCenter.y;
+      return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
+    });
+    const minX = Math.min(...projected.map((point) => point.x));
+    const maxX = Math.max(...projected.map((point) => point.x));
+    const minY = Math.min(...projected.map((point) => point.y));
+    const maxY = Math.max(...projected.map((point) => point.y));
+    const planeHeight = (maxY - minY) * 0.58;
+    const maximumElevation = core.reduce((maximum, hex) => Math.max(maximum, elevationFor(hex)), 0);
+    const elevationHeadroom = Math.max(18, maximumElevation / 1000 * 118 * camera.verticalScale);
+    const scale = Math.min(rect.width * 0.82 / (maxX - minX + 24), rect.height * 0.72 / (planeHeight + elevationHeadroom + 24)) * camera.zoom;
+    const offsetX = rect.width / 2 - ((minX + maxX) / 2) * scale + camera.panX;
+    const offsetY = rect.height * 0.58 - ((minY + maxY) / 2) * 0.58 * scale + elevationHeadroom * scale * 0.28 + camera.panY;
+    return { cos, sin, scale, offsetX, offsetY };
+  }
+
+  function project(point, elevation) {
+    const dx = point.x - coreCenter.x;
+    const dy = point.y - coreCenter.y;
+    const rotatedX = dx * projection.cos - dy * projection.sin;
+    const rotatedY = dx * projection.sin + dy * projection.cos;
+    return {
+      x: projection.offsetX + rotatedX * projection.scale,
+      y: projection.offsetY + (rotatedY * 0.58 - elevation / 1000 * 118 * camera.verticalScale) * projection.scale,
+      depth: rotatedY
+    };
+  }
+
+  function drawPolygon(points, fill, stroke) {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.stroke();
+    }
+  }
+
+  function drawLandPolygon(points, pattern, color, lift, stroke) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
+    ctx.closePath();
+    ctx.fillStyle = pattern;
+    ctx.fill();
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = shade(color, lift);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function pointInPolygon(point, polygon) {
+    let inside = false;
+    for (let current = 0, previous = polygon.length - 1; current < polygon.length; previous = current++) {
+      const a = polygon[current];
+      const b = polygon[previous];
+      if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+    }
+    return inside;
+  }
+
+  function drawGoldenZoneBoundaries() {
+    if (!goldenZonesInput.checked) return;
+    const size = 10;
+    for (const zone of goldenZones) {
+      const hexIds = new Set(zone.hex_ids);
+      ctx.strokeStyle = zone.color;
+      ctx.lineWidth = Math.max(1.4, projection.scale * 0.35);
+      for (const hexId of hexIds) {
+        const hex = coreById.get(hexId);
+        if (!hex) continue;
+        const corners = hexCorners(hex.world.x, hex.world.y, size).map((corner) => project(corner, elevationFor(hex)));
+        for (let edge = 0; edge < axialDirections.length; edge++) {
+          const [dq, dr] = axialDirections[edge];
+          const neighbor = coreByCoordinate.get(`${hex.q + dq},${hex.r + dr}`);
+          if (neighbor && hexIds.has(neighbor.hex_id)) continue;
+          const [start, end] = edgeCorners[edge];
+          ctx.beginPath();
+          ctx.moveTo(corners[start].x, corners[start].y);
+          ctx.lineTo(corners[end].x, corners[end].y);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function drawCountyBoundaries() {
+    if (!countyBordersInput.checked) return;
+    ctx.save();
+    ctx.strokeStyle = visualRoutes.boundary ?? "#6f6856";
+    ctx.lineWidth = Math.max(1, projection.scale * 0.075);
+    ctx.lineCap = "round";
+    for (const boundary of countyBoundaryEdges) {
+      const hex = coreById.get(boundary.hex_id);
+      const neighbor = coreById.get(boundary.neighbor_hex_id);
+      if (!hex || !neighbor) continue;
+      const elevation = Math.max(elevationFor(hex), elevationFor(neighbor)) + 4;
+      const corners = hexCorners(hex.world.x, hex.world.y, 10).map((corner) => project(corner, elevation));
+      const [start, end] = edgeCorners[boundary.edge];
+      ctx.beginPath();
+      ctx.moveTo(corners[start].x, corners[start].y);
+      ctx.lineTo(corners[end].x, corners[end].y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawKingdomBoundaries() {
+    if (!kingdomBordersInput.checked) return;
+    ctx.save();
+    ctx.strokeStyle = visualRoutes.jurisdiction ?? "#342f27";
+    ctx.lineWidth = Math.max(1.6, projection.scale * 0.16);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const boundary of kingdomBoundaryEdges) {
+      const hex = coreById.get(boundary.hex_id);
+      if (!hex) continue;
+      const corners = hexCorners(hex.world.x, hex.world.y, 10).map((corner) => project(corner, elevationFor(hex) + 5));
+      const [start, end] = edgeCorners[boundary.edge];
+      ctx.beginPath();
+      ctx.moveTo(corners[start].x, corners[start].y);
+      ctx.lineTo(corners[end].x, corners[end].y);
+      ctx.stroke();
+    }
+    for (const border of regionalBorders) {
+      const points = border.points.map(({ q, r }) => {
+        const hex = coreByCoordinate.get(`${q},${r}`);
+        const world = hex?.world ?? axialToPixel(q, r, 10);
+        return project(world, (hex ? elevationFor(hex) : 0) + 7);
+      });
+      if (points.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let index = 1; index < points.length; index++) ctx.lineTo(points[index].x, points[index].y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawMacroFeatureEdges() {
+    if (!roadEdgesInput.checked && !riverEdgesInput.checked) return;
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const feature of macroFeatureEdges) {
+      if (feature.feature_kind === "road_crossing" && !roadEdgesInput.checked) continue;
+      if (feature.feature_kind === "river_crossing" && !riverEdgesInput.checked) continue;
+      const from = coreById.get(feature.from_hex_id);
+      const to = coreById.get(feature.to_hex_id);
+      if (!from || !to) continue;
+      const elevation = Math.max(elevationFor(from), elevationFor(to)) + 10;
+      const a = project(from.world, elevation);
+      const b = project(to.world, elevation);
+      ctx.strokeStyle = feature.feature_kind === "road_crossing"
+        ? (visualRoutes.bed ?? "#806343")
+        : (visualWater.shallow ?? "#5f7774");
+      ctx.lineWidth = feature.feature_kind === "road_crossing"
+        ? Math.max(0.8, projection.scale * (feature.feature_class === "trunk" ? 0.11 : feature.feature_class === "regional" ? 0.085 : 0.06))
+        : Math.max(1, projection.scale * (feature.feature_class === "major_river" ? 0.14 : 0.09));
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawActionableLabelPlate(text, x, y, { font, active = false } = {}) {
+    ctx.save();
+    ctx.font = font ?? "600 12px Georgia, serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const width = Math.ceil(ctx.measureText(text).width) + 16;
+    const height = 22;
+    ctx.fillStyle = visualLabels.surface ?? "rgba(31, 25, 18, 0.88)";
+    ctx.fillRect(x - width / 2, y - height / 2, width, height);
+    ctx.strokeStyle = active
+      ? (visualLabels.selectedRule ?? "#d0ad64")
+      : (visualLabels.rule ?? "#9f7d43");
+    ctx.lineWidth = active ? 1.6 : 1;
+    ctx.strokeRect(x - width / 2 + 0.5, y - height / 2 + 0.5, width - 1, height - 1);
+    ctx.fillStyle = visualLabels.placeInk ?? "#ded2b4";
+    ctx.fillText(text, x, y + 0.5);
+    ctx.restore();
+  }
+
+  function drawMapLabels() {
+    if (!mapLabelsInput.checked) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    for (const label of regionalLabels) {
+      const hex = coreByCoordinate.get(`${label.q},${label.r}`);
+      const world = hex?.world ?? axialToPixel(label.q, label.r, 10);
+      const point = project(world, (hex ? elevationFor(hex) : 0) + 20);
+      ctx.font = label.kind === "realm" ? "600 18px Georgia, serif" : "600 12px system-ui, sans-serif";
+      ctx.lineWidth = label.kind === "realm" ? 5 : 4;
+      ctx.strokeStyle = visualLabels.shadow ?? "rgba(11, 9, 6, 0.46)";
+      ctx.fillStyle = label.kind === "sea"
+        ? (visualTheme?.water?.glint ?? "#aaa98e")
+        : (visualLabels.placeInk ?? "#ded2b4");
+      ctx.strokeText(label.label, point.x, point.y);
+      ctx.fillText(label.label, point.x, point.y);
+    }
+    if (camera.zoom >= 1.25) {
+      for (const label of seatLabels) {
+        const hex = coreById.get(label.hex_id);
+        if (!hex) continue;
+        const point = project(hex.world, elevationFor(hex) + 24);
+        drawActionableLabelPlate(label.label, point.x, point.y - 14, {
+          font: label.is_capital ? "600 14px Georgia, serif" : "500 12px Georgia, serif",
+          active: Boolean(label.is_capital),
+        });
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawSelectedLandcoverGlyph() {
+    if (!selected || !landcoverInput.checked) return;
+    const point = project(selected.world, elevationFor(selected));
+    const glyph = selected.landcover_glyph;
+    ctx.save();
+    ctx.translate(point.x, point.y - 1);
+    ctx.strokeStyle = "rgb(31 42 35 / 78%)";
+    ctx.fillStyle = "rgb(31 42 35 / 78%)";
+    ctx.lineWidth = 1.5;
+    if (glyph === "field-strips" || glyph === "terraces") {
+      for (const y of [-4, 0, 4]) { ctx.beginPath(); ctx.moveTo(-6, y); ctx.lineTo(6, y); ctx.stroke(); }
+    } else if (glyph === "hedgerows" || glyph === "edge-trees" || glyph === "scattered-trees") {
+      for (const x of [-5, 0, 5]) { ctx.beginPath(); ctx.arc(x, 0, 2, 0, Math.PI * 2); ctx.fill(); }
+    } else if (glyph === "reeds" || glyph === "water-trees" || glyph === "heather") {
+      for (const x of [-4, 0, 4]) { ctx.beginPath(); ctx.moveTo(x, 5); ctx.lineTo(x - 1, -5); ctx.stroke(); }
+    } else if (glyph === "cliff" || glyph === "cliff-hachures" || glyph === "scree") {
+      for (const x of [-5, 0, 5]) { ctx.beginPath(); ctx.moveTo(x - 2, -5); ctx.lineTo(x + 2, 5); ctx.stroke(); }
+    } else if (glyph === "ripples" || glyph === "delta" || glyph === "fen-water" || glyph === "tidal-channel") {
+      for (const y of [-3, 2]) { ctx.beginPath(); ctx.arc(0, y, 5, Math.PI * 0.1, Math.PI * 0.9); ctx.stroke(); }
+    } else {
+      ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawPortfolioMarkers() {
+    if (!portfolioManors.length) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    for (const manor of portfolioManors) {
+      const hex = coreByCoordinate.get(`${manor.q},${manor.r}`) || coreById.get(manor.hexId);
+      if (!hex) continue;
+      const point = project(hex.world, elevationFor(hex) + 18);
+      const active = focusedManorId === manor.id;
+      const radius = active ? 10 : 7;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = visualLabels.surface ?? "rgba(31, 25, 18, 0.88)";
+      ctx.fill();
+      ctx.strokeStyle = active
+        ? (visualLabels.selectedRule ?? "#d0ad64")
+        : (visualLabels.rule ?? "#9f7d43");
+      ctx.lineWidth = active ? 2.6 : 1.8;
+      ctx.stroke();
+      ctx.save();
+      ctx.translate(point.x, point.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = visualLabels.placeInk ?? "#ded2b4";
+      ctx.fillRect(-2.5, -2.5, 5, 5);
+      ctx.restore();
+      if (camera.zoom >= 0.8) {
+        drawActionableLabelPlate(manor.name || "Recorded manor", point.x, point.y - radius - 15, {
+          font: active ? "700 14px Georgia, serif" : "600 12px Georgia, serif",
+          active,
+        });
+      }
+    }
+    ctx.restore();
+  }
+
+  function applyFocus(focus) {
+    if (!focus || typeof focus !== "object") return;
+    pendingFocus = focus;
+    focusedManorId = focus.manorId ?? focus.manor_id ?? focusedManorId;
+    if (!core.length) return;
+    const q = Number(focus.q);
+    const r = Number(focus.r);
+    selected =
+      (Number.isFinite(q) && Number.isFinite(r) ? coreByCoordinate.get(`${q},${r}`) : null) ||
+      coreById.get(focus.hexId ?? focus.hex_id) ||
+      selected;
+    if (countyLens && selected) {
+      camera.zoom = 4.4;
+      camera.panX = 0;
+      camera.panY = 0;
+      const rect = configureCanvas();
+      projection = makeProjection(rect);
+      const point = project(selected.world, elevationFor(selected));
+      camera.panX = rect.width * 0.5 - point.x;
+      camera.panY = rect.height * 0.56 - point.y;
+    }
+    requestRender();
+  }
+
+  function render() {
+    if (!map || !core.length) return;
+    const rect = configureCanvas();
+    ctx.fillStyle = visualTheme?.environment?.void ?? "#34352e";
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    projection = makeProjection(rect);
+    let waterPattern = null;
+    if (sharedWaterTexture) {
+      waterPattern = ctx.createPattern(sharedWaterTexture, "repeat");
+      if (waterPattern?.setTransform) {
+        const textureScale = Math.max(0.13, Math.min(0.62, projection.scale * 0.58));
+        waterPattern.setTransform(
+          new DOMMatrix()
+            .translate(camera.panX * 0.08, camera.panY * 0.08)
+            .rotate(camera.yaw * 180 / Math.PI)
+            .scale(textureScale),
+        );
+      }
+    }
+    const landPatterns = new Map();
+    if (sharedLandTextures) {
+      for (const [family, variants] of sharedLandTextures) {
+        variants.forEach((texture, variant) => {
+          const pattern = ctx.createPattern(texture, "repeat");
+          if (pattern?.setTransform) {
+            const textureScale = Math.max(0.12, Math.min(0.54, projection.scale * 0.52));
+            pattern.setTransform(
+              new DOMMatrix()
+                .translate(camera.panX * 0.08 + variant * 37, camera.panY * 0.08 + variant * 19)
+                .rotate(camera.yaw * 180 / Math.PI)
+                .scale(textureScale, textureScale * 0.68),
+            );
+          }
+          landPatterns.set(`${family}:${variant}`, pattern);
+        });
+      }
+    }
+    const size = 10;
+    if (depthOrderYaw !== camera.yaw || depthOrder.length !== core.length) {
+      depthOrder = [...core].sort((a, b) => {
+        const aDy = a.world.y - coreCenter.y;
+        const aDx = a.world.x - coreCenter.x;
+        const bDy = b.world.y - coreCenter.y;
+        const bDx = b.world.x - coreCenter.x;
+        return (aDx * projection.sin + aDy * projection.cos) - (bDx * projection.sin + bDy * projection.cos);
+      });
+      depthOrderYaw = camera.yaw;
+    }
+    ctx.lineWidth = Math.max(0.24, projection.scale * 0.028);
+    for (const hex of depthOrder) {
+      const topCenter = project(hex.world, elevationFor(hex));
+      const cullMargin = Math.max(90, projection.scale * 28);
+      if (topCenter.x < -cullMargin || topCenter.x > rect.width + cullMargin || topCenter.y < -cullMargin || topCenter.y > rect.height + cullMargin) continue;
+      const corners = hexCorners(hex.world.x, hex.world.y, size);
+      const top = corners.map((corner) => project(corner, elevationFor(hex)));
+      const isWater = hex.tile_kind === "sea" || hex.terrain === "sea" || hex.terrain === "lake";
+      if (!isWater) {
+        const base = corners.map((corner) => project(corner, 0));
+        const sideColor = terrainSideColors[hex.terrain] || "#58676b";
+        for (const edge of [2, 3]) {
+          const next = (edge + 1) % 6;
+          drawPolygon([top[edge], top[next], base[next], base[edge]], sideColor, "rgb(20 32 37 / 22%)");
+        }
+      }
+      const color = landcoverInput.checked ? (hex.landcover_color || terrainColors[hex.terrain]) : (terrainColors[hex.terrain] || "#a5a99c");
+      const lift = isWater ? 0 : Math.min(20, Math.round(elevationFor(hex) / 90));
+      if (isWater) {
+        drawPolygon(top, waterPattern ?? shade(color, lift), null);
+      } else {
+        const landPattern = landcoverInput.checked
+          ? landPatterns.get(`${hex.compositionFamily}:${hex.compositionVariant}`)
+          : null;
+        if (landPattern) {
+          const seam = camera.zoom >= 2.4 ? "rgb(16 28 34 / 10%)" : null;
+          drawLandPolygon(top, landPattern, hex.compositionTint || color, lift, seam);
+        } else {
+          drawPolygon(top, shade(color, lift), camera.zoom >= 2.4 ? "rgb(16 28 34 / 12%)" : null);
+        }
+      }
+    }
+
+    drawCountyBoundaries();
+    drawKingdomBoundaries();
+    drawMacroFeatureEdges();
+    drawGoldenZoneBoundaries();
+    drawSelectedLandcoverGlyph();
+
+    const marked = depthOrder.filter((hex) => hex.isSeat || hex.isCapital);
+    for (const hex of marked) {
+      const point = project(hex.world, elevationFor(hex));
+      ctx.beginPath();
+      ctx.arc(point.x, point.y - 2, hex.isCapital ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = hex.isCapital
+        ? (visualLabels.selectedRule ?? "#d0ad64")
+        : (visualLabels.surfaceSolid ?? "#1f1912");
+      ctx.fill();
+      ctx.strokeStyle = visualLabels.placeInk ?? "#ded2b4";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    drawPortfolioMarkers();
+
+    if (selected) {
+      const corners = hexCorners(selected.world.x, selected.world.y, size).map((corner) => project(corner, elevationFor(selected)));
+      ctx.lineWidth = 2.4;
+      drawPolygon(
+        corners,
+        "rgb(200 166 94 / 18%)",
+        visualTheme?.selection?.rule ?? "#d5b66b",
+      );
+    }
+    drawMapLabels();
+    compassNeedle.style.transform = `rotate(${camera.yaw}rad)`;
+  }
+
+  function requestRender() {
+    if (!viewerActive) return;
+    if (renderFrame !== null) return;
+    renderFrame = requestAnimationFrame(() => {
+      renderFrame = null;
+      try {
+        render();
+        if (map?.loaded && !firstUsableFrameAnnounced) {
+          firstUsableFrameAnnounced = true;
+          window.MERECROSS_EMBEDDED_ADAPTER_V1?.rendererReady?.({ rendererKey: activeRendererKey });
+        }
+      } catch (error) {
+        window.MERECROSS_EMBEDDED_ADAPTER_V1?.rendererError?.({
+          code: "REALM_FIRST_FRAME_FAILED",
+          message: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
+    });
+  }
+
+  function selectAt(x, y) {
+    if (!projection) return;
+    const size = 10;
+    const point = { x, y };
+    selected = [...depthOrder].reverse().find((hex) => pointInPolygon(point, hexCorners(hex.world.x, hex.world.y, size).map((corner) => project(corner, elevationFor(hex))))) || null;
+    if (selected) {
+      const adjustment = Number.isFinite(selected.visual_delta) ? (selected.visual_delta === 0 ? "unchanged" : `${selected.visual_delta > 0 ? "+" : ""}${selected.visual_delta}`) : "unchanged";
+      const protection = selected.protected_crossing ? `\nprotected crossing: ${selected.protected_crossing}` : "";
+      const landcover = selected.landcover_subtype ? selected.landcover_subtype.replaceAll("_", " ") : "surrounding land";
+      const marker = selected.landcover_glyph ? `\nmarker: ${selected.landcover_glyph.replaceAll("-", " ")}` : "";
+      const context = selected.is_core ? "Merecross" : "external realm";
+      const approvedElevation = selected.visual_elevation ?? selected.elevation;
+      const elevationText = selected.is_core ? `approved elevation ${approvedElevation} · source ${selected.elevation} (${adjustment})` : `elevation ${selected.elevation}`;
+      const authoredEdges = selected.road_edge_count || selected.river_edge_count
+        ? `\nauthored edges: ${selected.road_edge_count || 0} road · ${selected.river_edge_count || 0} river`
+        : "";
+      selectedHex.textContent = `${displayHexId(selected)}  ·  (${selected.q}, ${selected.r})\n${selected.terrain} · ${landcover}${marker}\n${context} · ${elevationText}${protection}${selected.county_name ? `\n${selected.county_name} (${selected.county_id})` : ""}${authoredEdges}`;
+      if (embeddedViewer && window.parent !== window) {
+        const portfolioManor = portfolioManors.find((manor) => manor.q === selected.q && manor.r === selected.r);
+        window.parent.postMessage({
+          type: "merecross:focus",
+          version: 1,
+          source: "realm",
+          level: "hex",
+          focus: {
+            hexId: displayHexId(selected),
+            q: selected.q,
+            r: selected.r,
+            countyId: selected.county_id || null,
+            countyName: selected.county_name || null,
+            manorId: portfolioManor?.id || selected.manor_id || null,
+            terrain: selected.terrain || null,
+            landcoverSubtype: selected.landcover_subtype || null
+          }
+        }, configuredParentOrigin);
+      }
+    }
+    requestRender();
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    dragging = true;
+    dragMode = event.shiftKey || event.button === 2 ? "rotate" : "pan";
+    moved = false;
+    lastPointer = { x: event.clientX, y: event.clientY };
+    canvas.setPointerCapture(event.pointerId);
+  });
+  canvas.addEventListener("pointermove", (event) => {
+    if (!dragging || !lastPointer) return;
+    const deltaX = event.clientX - lastPointer.x;
+    const deltaY = event.clientY - lastPointer.y;
+    if (Math.abs(deltaX) + Math.abs(deltaY) > 2) moved = true;
+    if (dragMode === "rotate") {
+      camera.yaw += deltaX * 0.006;
+    } else {
+      camera.panX += deltaX;
+      camera.panY += deltaY;
+    }
+    lastPointer = { x: event.clientX, y: event.clientY };
+    requestRender();
+  });
+  canvas.addEventListener("pointerup", (event) => {
+    if (!moved) {
+      const rect = canvas.getBoundingClientRect();
+      selectAt(event.clientX - rect.left, event.clientY - rect.top);
+    }
+    dragging = false;
+    dragMode = null;
+    lastPointer = null;
+  });
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    camera.zoom = Math.max(0.52, Math.min(12, camera.zoom * (event.deltaY < 0 ? 1.12 : 0.89)));
+    requestRender();
+  }, { passive: false });
+  scaleInput.addEventListener("input", () => {
+    camera.verticalScale = Number(scaleInput.value);
+    scaleValue.value = `${camera.verticalScale.toFixed(2)}×`;
+    requestRender();
+  });
+  goldenZonesInput.addEventListener("change", requestRender);
+  kingdomBordersInput.addEventListener("change", requestRender);
+  countyBordersInput.addEventListener("change", requestRender);
+  mapLabelsInput.addEventListener("change", requestRender);
+  landcoverInput.addEventListener("change", requestRender);
+  roadEdgesInput.addEventListener("change", requestRender);
+  riverEdgesInput.addEventListener("change", requestRender);
+  resetButton.addEventListener("click", () => {
+    camera.yaw = -0.73;
+    camera.zoom = 1;
+    camera.verticalScale = 1;
+    camera.panX = 0;
+    camera.panY = 0;
+    scaleInput.value = "1";
+    scaleValue.value = "1.00×";
+    requestRender();
+  });
+  document.getElementById("compass").addEventListener("click", () => {
+    camera.yaw = 0;
+    requestRender();
+  });
+  window.addEventListener("resize", requestRender);
+  window.addEventListener("message", (event) => {
+    if (!embeddedViewer || event.source !== window.parent || event.origin !== configuredParentOrigin) return;
+    const message = event.data;
+    if (message?.type === "merecross:viewer-active") {
+      const nextActive = message.active ?? message.viewerActive;
+      if (typeof nextActive !== "boolean" || nextActive === viewerActive) return;
+      viewerActive = nextActive;
+      if (!viewerActive && renderFrame !== null) {
+        cancelAnimationFrame(renderFrame);
+        renderFrame = null;
+      }
+      if (viewerActive) requestRender();
+    } else if (message?.type === "merecross:portfolio" || message?.type === "merecross:spatial:init:v1") {
+      const payload = message.payload && typeof message.payload === "object" ? message.payload : {};
+      portfolioManors = Array.isArray(payload.manors) ? payload.manors : [];
+      applyFocus(payload.focus);
+    } else if (message?.type === "merecross:focus" || message?.type === "merecross:spatial:focus:v1") {
+      applyFocus(message.focus ?? message.payload ?? message);
+    }
+  });
+
+  function initialiseTerrain(data) {
+    const seatHexes = new Set(data.seatHexIds || []);
+    const capitalHexes = new Set(data.capitalHexIds || []);
+    core = data.core.map((hex) => {
+      const recipeId = compositionLibrary?.hex_assignments?.[hex.hex_id] ?? null;
+      const recipe = recipeId ? compositionRecipeById.get(recipeId) : null;
+      const compositionFamily = window.MERECROSS_SHARED_LAND?.familyFor?.(hex, recipe) ?? "open";
+      return {
+        ...hex,
+        world: axialToPixel(hex.q, hex.r, 10),
+        isSeat: seatHexes.has(hex.hex_id),
+        isCapital: capitalHexes.has(hex.hex_id),
+        compositionFamily,
+        compositionVariant: window.MERECROSS_SHARED_LAND?.stableVariant?.(recipeId || hex.hex_id) ?? 0,
+        compositionTint: recipe?.procedural?.tint || hex.landcover_color || terrainColors[hex.terrain],
+      };
+    });
+    coreByCoordinate = new Map(core.map((hex) => [`${hex.q},${hex.r}`, hex]));
+    coreById = new Map(core.map((hex) => [hex.hex_id, hex]));
+    goldenZones = data.goldenZones || [];
+    countyBoundaryEdges = data.countyBoundaryEdges || [];
+    kingdomBoundaryEdges = data.kingdomBoundaryEdges || [];
+    macroFeatureEdges = data.macroFeatureEdges || [];
+    regionalBorders = data.regionalBorders || [];
+    regionalLabels = data.regionalLabels || [];
+    seatLabels = data.seatLabels || [];
+    map = { loaded: true };
+    coreCenter = core.reduce((total, hex) => ({ x: total.x + hex.world.x / core.length, y: total.y + hex.world.y / core.length }), { x: 0, y: 0 });
+    status.textContent = `${data.viewerHexCount.toLocaleString()} mapped hexes · ${data.viewerLandHexCount.toLocaleString()} land · ${data.viewerSeaHexCount.toLocaleString()} sea`;
+    if (pendingFocus) applyFocus(pendingFocus);
+    requestRender();
+  }
+
+  window.MERECROSS_SHARED_LAND?.load?.(384)
+    .then((textures) => {
+      sharedLandTextures = textures;
+      requestRender();
+    })
+    .catch((error) => console.warn("Shared land composition textures were unavailable.", error));
+
+  try {
+    if (!window.MERECROSS_TERRAIN_DATA?.core?.length) throw new Error("The embedded terrain data is unavailable.");
+    initialiseTerrain(window.MERECROSS_TERRAIN_DATA);
+  } catch (error) {
+    status.textContent = "Terrain could not be loaded";
+    selectedHex.textContent = error.message;
+    window.MERECROSS_EMBEDDED_ADAPTER_V1?.rendererError?.({
+      code: "REALM_INITIALIZATION_FAILED",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
+</script>
+</body>

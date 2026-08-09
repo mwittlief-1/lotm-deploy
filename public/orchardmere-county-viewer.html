@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orchardmere County — standard-hex terrain</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #162026;
+        color: #f2f0e8;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; min-height: 100vh; overflow: hidden; }
+      button, input { font: inherit; }
+      .shell { display: grid; grid-template-columns: minmax(0, 1fr) 286px; height: 100vh; }
+      .scene {
+        position: relative;
+        min-height: 560px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 47% 18%, rgb(203 191 159 / 16%), transparent 39%),
+          linear-gradient(#4f5d59 0 42%, #7d7b68 74%, #34352e);
+      }
+      #terrain { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; filter: saturate(.78) sepia(.12) contrast(.92) brightness(.88); }
+      .masthead {
+        position: absolute;
+        z-index: 3;
+        top: 18px;
+        left: 20px;
+        display: grid;
+        gap: 3px;
+        padding: 11px 14px;
+        border: 1px solid rgb(255 255 255 / 20%);
+        border-radius: 8px;
+        background: rgb(20 29 30 / 82%);
+        box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+        backdrop-filter: blur(8px);
+      }
+      .masthead strong { font: 600 18px/1.2 Georgia, serif; letter-spacing: .01em; }
+      .masthead span { color: #d3ddd7; font-size: 12px; }
+      .help {
+        position: absolute;
+        z-index: 3;
+        left: 20px;
+        bottom: 18px;
+        padding: 7px 10px;
+        border: 1px solid rgb(255 255 255 / 17%);
+        border-radius: 6px;
+        background: rgb(20 29 30 / 77%);
+        color: #dbe3de;
+        font-size: 12px;
+        backdrop-filter: blur(7px);
+      }
+      .compass {
+        position: absolute;
+        z-index: 4;
+        top: 18px;
+        right: 18px;
+        width: 58px;
+        min-height: 58px;
+        padding: 5px;
+        border: 1px solid rgb(255 255 255 / 28%);
+        border-radius: 50%;
+        background: rgb(20 29 30 / 82%);
+        box-shadow: 0 8px 28px rgb(0 0 0 / 18%);
+        color: #f5ecd1;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+      }
+      .compass:hover { background: rgb(38 61 54 / 92%); }
+      .compass-needle {
+        position: relative;
+        display: block;
+        width: 46px;
+        height: 46px;
+        transition: transform 80ms linear;
+      }
+      .compass-needle::before {
+        content: "";
+        position: absolute;
+        top: 11px;
+        left: 21px;
+        width: 4px;
+        height: 25px;
+        border-radius: 2px;
+        background: linear-gradient(#d9b85f 0 50%, #d7ddd7 50%);
+      }
+      .compass-needle::after {
+        content: "";
+        position: absolute;
+        top: 7px;
+        left: 17px;
+        border-right: 6px solid transparent;
+        border-bottom: 10px solid #d9b85f;
+        border-left: 6px solid transparent;
+      }
+      .compass-n {
+        position: absolute;
+        top: -1px;
+        left: 18px;
+        color: #f6df9b;
+        font: 700 10px/1 ui-sans-serif, system-ui, sans-serif;
+      }
+      .map-label {
+        position: absolute;
+        z-index: 2;
+        pointer-events: none;
+        transform: translate(-50%, -100%);
+        padding: 5px 8px 6px;
+        border: 1px solid rgb(159 125 67 / 54%);
+        border-radius: 2px;
+        background: rgb(31 25 18 / 88%);
+        box-shadow: 0 5px 14px rgb(11 9 6 / 36%);
+        color: #ded2b4;
+        font: 600 12px/1.05 Georgia, serif;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .map-label small { display: block; margin-top: 3px; color: #aaa18b; font: 9px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+      .map-label.focus { border-color: #d0ad64; background: rgb(31 25 18 / 92%); color: #ded2b4; }
+      .map-label.portfolio { border-color: #9f7d43; background: rgb(31 25 18 / 91%); color: #ded2b4; }
+      .map-label.portfolio.active { border-color: #d0ad64; box-shadow: 0 0 0 2px rgb(159 125 67 / 22%), 0 5px 14px rgb(11 9 6 / 40%); }
+      body.courtos-viewer .shell { grid-template-columns: minmax(0, 1fr); }
+      body.courtos-viewer .panel,
+      body.courtos-viewer .masthead,
+      body.courtos-viewer .help { display: none; }
+      .map-label.county_seat { border-color: #9f7d43; }
+      .map-label.neighbor_county {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        color: #ded2b4;
+        font-size: 13px;
+        font-style: italic;
+        opacity: .76;
+        text-shadow: 0 2px 5px rgb(11 9 6 / 72%);
+      }
+      .panel {
+        position: relative;
+        z-index: 4;
+        overflow-y: auto;
+        padding: 21px 18px 24px;
+        border-left: 1px solid rgb(255 255 255 / 14%);
+        background: #18252a;
+        box-shadow: -14px 0 40px rgb(0 0 0 / 12%);
+        font-size: 13px;
+        line-height: 1.42;
+      }
+      .eyebrow { margin: 0 0 5px; color: #9cb1aa; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+      h1 { margin: 0 0 5px; font: 600 23px/1.05 Georgia, serif; }
+      .lede { margin: 0 0 20px; color: #c3d0ca; }
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        margin-bottom: 20px;
+      }
+      .stat { padding: 9px 10px; border: 1px solid rgb(255 255 255 / 10%); border-radius: 6px; background: rgb(255 255 255 / 3%); }
+      .stat b { display: block; color: #f6f0dd; font-size: 17px; line-height: 1; }
+      .stat span { display: block; margin-top: 4px; color: #91a69f; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+      .controls { display: grid; gap: 11px; }
+      .scope-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+        margin-bottom: 18px;
+      }
+      .scope-nav a {
+        padding: 7px 4px;
+        border: 1px solid rgb(255 255 255 / 14%);
+        border-radius: 5px;
+        color: #c9d5cf;
+        font-size: 11px;
+        text-align: center;
+        text-decoration: none;
+      }
+      .scope-nav a:hover { background: rgb(255 255 255 / 7%); }
+      .scope-nav a[aria-current="page"] {
+        border-color: #bf9b55;
+        background: #3f392a;
+        color: #fff1c5;
+      }
+      .scope-nav[hidden] { display: none; }
+      .toggle { display: flex; align-items: center; gap: 8px; color: #dbe4df; cursor: pointer; }
+      .toggle input { accent-color: #bf9b55; }
+      .range-row { display: grid; gap: 6px; color: #dbe4df; }
+      .range-row span { display: flex; justify-content: space-between; }
+      input[type="range"] { width: 100%; accent-color: #bf9b55; }
+      button, .link-button {
+        width: 100%;
+        min-height: 38px;
+        padding: 9px 11px;
+        border: 1px solid #8fa89d;
+        border-radius: 6px;
+        background: #29443c;
+        color: #f3f6ed;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+      }
+      button:hover, .link-button:hover { background: #34564b; }
+      .link-button { display: block; margin-top: 8px; }
+      .section { margin-top: 20px; padding-top: 17px; border-top: 1px solid rgb(255 255 255 / 13%); }
+      .section h2 { margin: 0 0 8px; font: 600 15px/1.2 Georgia, serif; }
+      #inspection { margin: 0; color: #c9d5cf; white-space: pre-line; }
+      .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 9px; color: #cbd6d0; font-size: 11px; }
+      .legend div { display: flex; align-items: center; gap: 6px; }
+      .swatch { width: 12px; height: 12px; border: 1px solid rgb(255 255 255 / 25%); border-radius: 2px; }
+      .provenance { margin: 0; color: #869b94; font-size: 10px; }
+      @media (max-width: 760px) {
+        body { overflow: auto; }
+        .shell { grid-template-columns: 1fr; height: auto; }
+        .scene { height: 68vh; min-height: 480px; }
+        .panel { border-left: 0; border-top: 1px solid rgb(255 255 255 / 14%); }
+      }
+    </style>
+  </head>
+  <body data-map-renderer="orchardmere_county_v1">
+    <main class="shell">
+      <section class="scene" aria-label="Interactive standard-hex terrain view of Orchardmere county">
+        <canvas id="terrain" aria-label="Orchardmere elevated county terrain. Drag to pan, right-drag to rotate, scroll to zoom, and click a standard XMAP hex to inspect it."></canvas>
+        <div class="masthead">
+          <strong>Orchardmere County</strong>
+          <span id="status">Loading current XMAP fabric…</span>
+        </div>
+        <button id="compass" class="compass" type="button" aria-label="Turn map to north">
+          <span id="compass-needle" class="compass-needle"><span class="compass-n">N</span></span>
+        </button>
+        <div id="labels" aria-hidden="true"></div>
+        <div class="help">Drag to pan · right-drag to rotate · scroll to zoom · click a standard hex to inspect</div>
+      </section>
+      <aside class="panel">
+        <nav id="scope-nav" class="scope-nav" aria-label="Map scale">
+          <a href="./merecross-map-viewer.html?level=realm" target="_top">Realm</a>
+          <a href="./merecross-map-viewer.html?level=county" target="_top" aria-current="page">County</a>
+          <a href="./merecross-map-viewer.html?level=estate" target="_top">Estate</a>
+        </nav>
+        <p class="eyebrow">County context</p>
+        <h1>Orchardmere</h1>
+        <p class="lede">Current county boundary, standard XMAP hexes, and authored macro geography.</p>
+        <div class="stats">
+          <div class="stat"><b id="hex-count">—</b><span>county hexes</span></div>
+          <div class="stat"><b id="manor-count">—</b><span>manors</span></div>
+        </div>
+        <div class="controls" aria-label="Map display controls">
+          <label class="toggle"><input id="show-context" type="checkbox" checked /> Neighboring county context</label>
+          <label class="toggle"><input id="show-landscape-border" type="checkbox" checked /> Landscape border edges</label>
+          <label class="toggle"><input id="show-admin-border" type="checkbox" /> Administrative outline</label>
+          <label class="toggle"><input id="show-composition" type="checkbox" checked /> Recipe landscape surface</label>
+          <label class="toggle"><input id="show-assets" type="checkbox" checked /> Scale-aware landscape assets</label>
+          <label class="toggle"><input id="show-grid" type="checkbox" checked /> Standard hex grid</label>
+          <label class="toggle"><input id="show-holdings" type="checkbox" /> Manor boundaries</label>
+          <label class="toggle"><input id="show-roads" type="checkbox" checked /> Authored roads</label>
+          <label class="toggle"><input id="show-rivers" type="checkbox" checked /> Authored rivers</label>
+          <label class="toggle"><input id="show-labels" type="checkbox" checked /> Major labels</label>
+          <label class="range-row" for="relief">
+            <span>Relief <output id="relief-value">1.65×</output></span>
+            <input id="relief" type="range" min=".4" max="3" step=".05" value="1.65" />
+          </label>
+          <button id="reset" type="button">Reset county view</button>
+        </div>
+        <a class="link-button" href="./merecross-map-viewer.html?level=estate" target="_top">Open Pearwick estate</a>
+        <section class="section">
+          <h2>Hex inspector</h2>
+          <p id="inspection">Select a county hex.</p>
+        </section>
+        <section class="section">
+          <h2>Map key</h2>
+          <div class="legend">
+            <div><i class="swatch" style="background:#c8ad55"></i>Open fields</div>
+            <div><i class="swatch" style="background:#55704e"></i>Woodland</div>
+            <div><i class="swatch" style="background:#82a8b8"></i>Water</div>
+            <div><i class="swatch" style="background:#181614"></i>Optional outline</div>
+            <div><i class="swatch" style="background:#8b6543"></i>Road</div>
+            <div><i class="swatch" style="background:#337f9a"></i>River</div>
+            <div><i class="swatch" style="background:#4d6543"></i>Tree / hedge assets</div>
+            <div><i class="swatch" style="background:#b69569"></i>Manor / settlement</div>
+            <div><i class="swatch" style="background:#5d7448"></i>Hedge / treeline border</div>
+            <div><i class="swatch" style="background:#817553"></i>Bank / boundary stone</div>
+          </div>
+        </section>
+        <section class="section">
+          <p class="provenance">Current locked c_5 membership. County landscape is a deterministic summary of the 75-recipe composition library; no minihex fabric is loaded at this scale.</p>
+        </section>
+      </aside>
+    </main>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three/three.module.min.js"
+        }
+      }
+    </script>
+    <script src="./courtos-cartography-theme.v1.js"></script>
+    <script src="./courtos-embedded-adapter.v1.js"></script>
+    <script src="./orchardmere-county-viewer-data.js"></script>
+    <script src="./realm-zoom-composition-data.js"></script>
+    <script src="./orchardmere-composition-surface-data.js"></script>
+    <script src="./shared-water-texture.js"></script>
+    <script type="module" src="./orchardmere-county-viewer.js"></script>
+  </body>
+</html>

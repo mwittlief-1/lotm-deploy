@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 const ROOT = process.cwd();
 const allowUntrackedWorkspaceInputs = process.argv.includes("--allow-untracked-workspace-inputs");
 const RUNTIME_MANIFEST_PATH = "config/courtos-runtime-inputs.v1.json";
+const BUNDLED_MAPGEN_MANIFEST_PATH = "config/courtos-bundled-mapgen-inputs.v1.json";
 const ENTRYPOINTS = [
   "vite.config.ts",
   "src/courtos-home.tsx",
@@ -44,6 +45,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "tsconfig.courtos.json",
   "vercel.json",
   RUNTIME_MANIFEST_PATH,
+  BUNDLED_MAPGEN_MANIFEST_PATH,
   "config/courtos-mapgen-runtime-contract.v1.json",
   "scripts/buildCourtosProduction.mjs",
   "scripts/buildCourtosFoundationARelease.mts",
@@ -242,6 +244,12 @@ function isUnmaterializedLfsPointer(relativePath) {
 }
 
 const manifest = readRuntimeManifest();
+const bundledMapGenInputs = JSON.parse(
+  fs.readFileSync(absolute(BUNDLED_MAPGEN_MANIFEST_PATH), "utf8"),
+);
+if (bundledMapGenInputs.schema_version !== "courtos_bundled_mapgen_inputs_v1") {
+  throw new Error("Unsupported bundled MapGen input schema.");
+}
 const closure = runtimeImportClosure(ENTRYPOINTS);
 const preflightClosure = runtimeImportClosure([
   "dist_batch/src/sim/index.js",
@@ -253,6 +261,10 @@ const qaPackageFiles = repositoryFilesUnder("qa/uat");
 const runtimeDataPackageFiles = RUNTIME_DATA_PACKAGES.flatMap((directory) =>
   runtimePackageFiles(directory),
 );
+const bundledMapGenFiles = [
+  ...bundledMapGenInputs.entries,
+  ...bundledMapGenInputs.directories.flatMap((directory) => repositoryFilesUnder(directory)),
+];
 const testManifest = JSON.parse(
   fs.readFileSync(absolute("qa/uat/courtos-test-files.json"), "utf8"),
 );
@@ -282,6 +294,7 @@ const requiredTrackedInputs = [
     ...importedRuntimeAssets,
     ...qaPackageFiles,
     ...runtimeDataPackageFiles,
+    ...bundledMapGenFiles,
     ...testClosure.files,
     ...testSupportFiles,
     ...preflightInputs,
@@ -290,6 +303,11 @@ const requiredTrackedInputs = [
 ].sort();
 
 const errors = [];
+for (const directory of bundledMapGenInputs.directories) {
+  if (!fs.existsSync(absolute(directory)) || !fs.statSync(absolute(directory)).isDirectory()) {
+    errors.push(`Missing bundled MapGen runtime directory: ${directory}`);
+  }
+}
 for (const missingImport of closure.missingImports) {
   errors.push(`Unresolved runtime import: ${missingImport}`);
 }

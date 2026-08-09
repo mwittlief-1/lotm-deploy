@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <filter id="water-grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.012 0.042"
+        numOctaves="3"
+        seed="27"
+        stitchTiles="stitch"
+        result="noise"
+      />
+      <feColorMatrix
+        in="noise"
+        type="matrix"
+        values="
+          0.26 0 0 0 0.27
+          0 0.34 0 0 0.43
+          0 0 0.38 0 0.47
+          0 0 0 0.34 0"
+      />
+    </filter>
+    <filter id="soften">
+      <feGaussianBlur stdDeviation="0.7" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="#527f89" />
+  <rect width="512" height="512" fill="#315d68" opacity="0.28" filter="url(#water-grain)" />
+  <g fill="none" stroke-linecap="round" filter="url(#soften)">
+    <path d="M0 64 C64 53 128 75 192 64 S320 53 384 64 S448 75 512 64" stroke="#b4c9c4" stroke-width="3" opacity="0.18" />
+    <path d="M0 128 C52 119 116 137 176 128 S300 119 360 128 S452 137 512 128" stroke="#294f5a" stroke-width="6" opacity="0.20" />
+    <path d="M0 196 C72 184 120 208 192 196 S312 184 384 196 S452 208 512 196" stroke="#9fbcb9" stroke-width="2.4" opacity="0.20" />
+    <path d="M0 258 C52 248 116 268 176 258 S300 248 360 258 S452 268 512 258" stroke="#264f59" stroke-width="5" opacity="0.18" />
+    <path d="M0 326 C72 314 120 338 192 326 S312 314 384 326 S452 338 512 326" stroke="#b7ccc6" stroke-width="2.6" opacity="0.17" />
+    <path d="M0 392 C52 382 116 402 176 392 S300 382 360 392 S452 402 512 392" stroke="#274f5a" stroke-width="5.5" opacity="0.19" />
+    <path d="M0 458 C64 447 128 469 192 458 S320 447 384 458 S448 469 512 458" stroke="#aac2be" stroke-width="2.5" opacity="0.18" />
+  </g>
+  <g fill="none" stroke="#d3ddd4" stroke-width="1.4" stroke-linecap="round" opacity="0.18">
+    <path d="M42 101 Q70 96 98 101" />
+    <path d="M246 165 Q274 160 302 165" />
+    <path d="M390 228 Q422 222 454 228" />
+    <path d="M94 291 Q122 286 150 291" />
+    <path d="M278 355 Q308 349 338 355" />
+    <path d="M430 423 Q458 418 486 423" />
+  </g>
+</svg>

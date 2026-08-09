@@ -4,6 +4,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { verifiedMapGenBaseUrl } from "./verifyCourtosMapGenConfiguration.mjs";
 import mapGenContract from "../config/courtos-mapgen-runtime-contract.v1.json" with { type: "json" };
+import bundledMapGenInputs from "../config/courtos-bundled-mapgen-inputs.v1.json" with { type: "json" };
 
 const ROOT = process.cwd();
 const TARGET_ROOT = path.resolve(ROOT, ".courtos-public");
@@ -29,33 +30,9 @@ if (verifier.status !== 0) {
 const report = JSON.parse(verifier.stdout);
 const publicInputs = [...report.runtimeAssets];
 
-const bundledMapGenEntries = [
-  "public/merecross-3d-prototype.html",
-  "public/merecross-3d-prototype-data.js",
-  "public/realm-zoom-composition-data.js",
-  "public/shared-water-texture.js",
-  "public/shared-land-composition.js",
-  "public/orchardmere-county-viewer.html",
-  "public/orchardmere-county-viewer-data.js",
-  "public/orchardmere-composition-surface-data.js",
-  "public/orchardmere-county-viewer.js",
-  "public/pearwick-estate-pilot.html",
-  "public/pearwick-estate-pilot-data.js",
-  "public/roadcote-estate-pilot-data.js",
-  "public/pearwick-single-hex-assets.js",
-  "public/roadcote-single-hex-assets.js",
-  "public/pearwick-road-geometry.js",
-  "public/pearwick-estate-pilot-3d.js",
-  "public/courtos-cartography-theme.v1.js",
-  "public/courtos-embedded-adapter.v1.js",
-];
-const bundledMapGenDirectories = [
-  "public/assets/fiscal-office",
-  "public/vendor/three",
-  "public/assets/mapgen-landscape",
-  "public/assets/mapgen-manor-v2",
-  "public/assets/landscape-composition",
-];
+if (bundledMapGenInputs.schema_version !== "courtos_bundled_mapgen_inputs_v1") {
+  throw new Error("Unsupported bundled MapGen input schema.");
+}
 
 function filesBelow(relativeDirectory) {
   const absoluteDirectory = path.resolve(ROOT, relativeDirectory);
@@ -69,8 +46,8 @@ function filesBelow(relativeDirectory) {
 }
 
 publicInputs.push(
-  ...bundledMapGenEntries,
-  ...bundledMapGenDirectories.flatMap(filesBelow),
+  ...bundledMapGenInputs.entries,
+  ...bundledMapGenInputs.directories.flatMap(filesBelow),
 );
 
 for (const artifact of report.generatedArtifacts) {
