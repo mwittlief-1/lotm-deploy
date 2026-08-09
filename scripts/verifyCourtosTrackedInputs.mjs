@@ -43,6 +43,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "pnpm-lock.yaml",
   "tsconfig.json",
   "tsconfig.courtos.json",
+  "vitest.courtos.config.ts",
   "vercel.json",
   RUNTIME_MANIFEST_PATH,
   BUNDLED_MAPGEN_MANIFEST_PATH,
