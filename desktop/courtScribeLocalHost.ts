@@ -40,6 +40,17 @@ const CPU_WARM_START_TIMEOUT_MS = 45_000;
 const WARM_PRIME_TIMEOUT_MS = 8_000;
 const RESPONSE_CACHE_LIMIT = 64;
 
+/** Exact native identities shared with the immutable desktop package manifest. */
+export function courtScribeNativeAssetIdentity() {
+  return {
+    model_file: MODEL_FILE,
+    model_sha256: MODEL_SHA256,
+    runtime_directory: RUNTIME_DIRECTORY,
+    cli_sha256: RUNTIME_SHA256,
+    server_sha256: SERVER_SHA256,
+  } as const;
+}
+
 export interface CourtScribeLocalInstallV1 {
   root: string;
   model_path: string;

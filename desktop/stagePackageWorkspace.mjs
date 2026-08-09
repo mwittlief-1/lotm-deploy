@@ -1,4 +1,6 @@
-import { cp, mkdir, readFile, rm } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { cp, mkdir, readFile, rm, stat } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -10,6 +12,62 @@ const repositoryRoot = resolve(desktopRoot, "..");
 const stageRoot = process.env.COURTOS_DESKTOP_STAGING_ROOT
   ? resolve(process.env.COURTOS_DESKTOP_STAGING_ROOT)
   : "/private/tmp/merecross-courtos-desktop-staging";
+const scribeAssetRoot = process.env.COURTOS_SCRIBE_ASSET_ROOT
+  ? resolve(process.env.COURTOS_SCRIBE_ASSET_ROOT)
+  : resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1");
+const scribeManifestPath = resolve(
+  repositoryRoot,
+  "config/courtos-scribe-native-assets.v1.json",
+);
+
+async function sha256File(source) {
+  const hash = createHash("sha256");
+  await new Promise((resolvePromise, reject) => {
+    const stream = createReadStream(source);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("error", reject);
+    stream.on("end", resolvePromise);
+  });
+  return hash.digest("hex");
+}
+
+async function verifyScribeAssets() {
+  const manifest = JSON.parse(await readFile(scribeManifestPath, "utf8"));
+  if (
+    manifest.manifestVersion !== "courtos-native-scribe-manifest-v1" ||
+    manifest.status !== "local_uat_asset_pinned" ||
+    manifest.modelFile !== "Qwen3-4B-Instruct-Q4_K_M.gguf" ||
+    manifest.runtime?.directory !== "llama-b10099" ||
+    manifest.runtime?.platform !== "darwin-arm64"
+  ) {
+    throw new Error("CourtOS Scribe package manifest failed its identity contract.");
+  }
+  const modelPath = resolve(scribeAssetRoot, "local-models", manifest.modelFile);
+  const runtimeRoot = resolve(
+    scribeAssetRoot,
+    "local-runtime",
+    manifest.runtime.directory,
+  );
+  const cliPath = resolve(runtimeRoot, manifest.runtime.binaryPath);
+  const serverPath = resolve(runtimeRoot, manifest.runtime.serverPath);
+  const modelStats = await stat(modelPath);
+  if (modelStats.size !== manifest.expectedDiskBytes) {
+    throw new Error(
+      `CourtOS Scribe model byte size mismatch: expected ${manifest.expectedDiskBytes}, got ${modelStats.size}.`,
+    );
+  }
+  for (const [label, source, expected] of [
+    ["model", modelPath, manifest.expectedSha256],
+    ["CLI", cliPath, manifest.runtime.binarySha256],
+    ["server", serverPath, manifest.runtime.serverSha256],
+  ]) {
+    const actual = await sha256File(source);
+    if (actual !== expected) {
+      throw new Error(`CourtOS Scribe ${label} SHA-256 mismatch: expected ${expected}, got ${actual}.`);
+    }
+  }
+  return { manifest, modelPath, runtimeRoot };
+}
 
 async function replaceFrom(source, destination) {
   await rm(destination, { recursive: true, force: true });
@@ -133,18 +191,20 @@ if (dataOnly || process.env.COURTOS_DESKTOP_STAGE_CORE_ONLY === "1") {
   console.log(`Desktop core package workspace staged at ${stageRoot}`);
   process.exit(0);
 }
-// The pilot's native runtime and pinned local model are explicit package
-// inputs, never downloaded by the desktop app at launch.
+// Native Scribe bytes live in an explicit local asset cache rather than Git.
+// The package gate verifies every executable/model identity before copying;
+// the desktop app never downloads or accepts an arbitrary runtime at launch.
+const scribeAssets = await verifyScribeAssets();
 await replaceFrom(
-  resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1/local-runtime/llama-b10099"),
+  scribeAssets.runtimeRoot,
   resolve(stageRoot, "payload/poc/local-slm-financial-narrative-v1/local-runtime/llama-b10099"),
 );
 await replaceFrom(
-  resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1/local-models/Qwen3-4B-Instruct-Q4_K_M.gguf"),
+  scribeAssets.modelPath,
   resolve(stageRoot, "payload/poc/local-slm-financial-narrative-v1/local-models/Qwen3-4B-Instruct-Q4_K_M.gguf"),
 );
 await replaceFrom(
-  resolve(repositoryRoot, "poc/local-slm-financial-narrative-v1/model-manifest.json"),
+  scribeManifestPath,
   resolve(stageRoot, "payload/poc/local-slm-financial-narrative-v1/model-manifest.json"),
 );
 

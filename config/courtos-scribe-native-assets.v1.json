@@ -1,0 +1,28 @@
+{
+  "manifestVersion": "courtos-native-scribe-manifest-v1",
+  "status": "local_uat_asset_pinned",
+  "modelId": "Qwen/Qwen3-4B-GGUF",
+  "modelFamily": "Qwen3 4B Instruct",
+  "source": "https://huggingface.co/Qwen/Qwen3-4B-GGUF",
+  "licence": "Apache-2.0",
+  "quantization": "Q4_K_M GGUF (4-bit)",
+  "tokenizer": "Qwen3 tokenizer supplied with the pinned GGUF",
+  "modelFile": "Qwen3-4B-Instruct-Q4_K_M.gguf",
+  "expectedSha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+  "expectedDiskBytes": 2497280256,
+  "upstreamRevision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+  "runtime": {
+    "kind": "llama.cpp-style native CLI and server",
+    "platform": "darwin-arm64",
+    "version": "llama.cpp b10099 macOS arm64 prebuilt release",
+    "directory": "llama-b10099",
+    "binaryPath": "llama-cli",
+    "binarySha256": "eb234dbcc44181988b6722972f1f2faaca93d5395bc453c3227255a3d3888671",
+    "serverPath": "llama-server",
+    "serverSha256": "a4998768a70ba2be02617ec9d8773accc2952516f4f5a8f38f621ece54cbf04b",
+    "networkEndpoint": "forbidden"
+  },
+  "promptVersion": "courtos-fiscal-typed-clause-plan-v1",
+  "validatorVersion": "courtos-fiscal-typed-clause-validator-v1",
+  "admissionRule": "The desktop packager and host refuse inference unless the pinned model size and SHA-256 plus native CLI/server SHA-256 identities agree."
+}

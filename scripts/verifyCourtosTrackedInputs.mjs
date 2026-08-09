@@ -50,6 +50,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   RUNTIME_MANIFEST_PATH,
   BUNDLED_MAPGEN_MANIFEST_PATH,
   "config/courtos-mapgen-runtime-contract.v1.json",
+  "config/courtos-scribe-native-assets.v1.json",
   "scripts/buildCourtosProduction.mjs",
   "scripts/buildCourtosFoundationARelease.mts",
   "scripts/buildCourtosSpatialReadModelV1.mjs",

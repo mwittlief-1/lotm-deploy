@@ -1,7 +1,10 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   CourtScribeFiscalLocalHost,
+  courtScribeNativeAssetIdentity,
   courtScribeRequestDigest,
   courtScribeBriefingGrammar,
   courtScribeBriefingPrompt,
@@ -110,6 +113,30 @@ function genericPacket(): CourtScribeBriefingPacketV1 {
 }
 
 describe("CourtOS Scribe native fiscal host boundary", () => {
+  it("binds the packaged native asset manifest to the host admission hashes", () => {
+    const manifest = JSON.parse(
+      readFileSync("config/courtos-scribe-native-assets.v1.json", "utf8"),
+    ) as {
+      modelFile: string;
+      expectedSha256: string;
+      expectedDiskBytes: number;
+      runtime: {
+        directory: string;
+        binarySha256: string;
+        serverSha256: string;
+      };
+    };
+    const identity = courtScribeNativeAssetIdentity();
+    expect(manifest.expectedDiskBytes).toBe(2_497_280_256);
+    expect({
+      model_file: manifest.modelFile,
+      model_sha256: manifest.expectedSha256,
+      runtime_directory: manifest.runtime.directory,
+      cli_sha256: manifest.runtime.binarySha256,
+      server_sha256: manifest.runtime.serverSha256,
+    }).toEqual(identity);
+  });
+
   it("keys cached selections by the complete bounded packet, not request ID alone", () => {
     const first = request();
     const altered = structuredClone(first) as CourtScribeFiscalBriefRequestV1 & {
