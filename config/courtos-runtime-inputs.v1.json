@@ -9,6 +9,12 @@
   ],
   "pinned_inputs": [
     {
+      "path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/MANIFEST.json",
+      "sha256": "e979ea14cfb4c004268d11410a17ca33107e1de48eaef56dbf26953cc1590b0c",
+      "role": "immutable_courtos_read_contract_manifest",
+      "storage": "git"
+    },
+    {
       "path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
       "sha256": "0929255c270ac259e28dc750e4ec3cad8f438d50d8e0bb4cde9b34cccb966a8b",
       "role": "immutable_courtos_read_contract",

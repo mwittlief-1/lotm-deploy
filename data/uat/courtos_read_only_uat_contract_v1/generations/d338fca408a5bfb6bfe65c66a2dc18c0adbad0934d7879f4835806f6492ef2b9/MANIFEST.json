@@ -1,0 +1,184 @@
+{
+  "package_id": "january_1120_courtos_read_only_uat_contract_v1",
+  "title": "January 1120 CourtOS Read-Only UAT Contract v1",
+  "contract_status": "LOCKED_READ_ONLY_UAT_PROJECTION_CONTRACT_NOT_EXECUTABLE_RUNTIME_AUTHORITY",
+  "generation_id": "d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9",
+  "effective_date": "1120-01-01",
+  "builder_path": "scripts/buildCourtOSReadOnlyUatContract1120V1.mjs",
+  "builder_sha256": "4c1e8e5658a8f98a03a2434471fa3f820c7535c2528073ca5be93e81365e570a",
+  "sqlite_path": "data/uat/courtos_read_only_uat_contract_v1/generations/d338fca408a5bfb6bfe65c66a2dc18c0adbad0934d7879f4835806f6492ef2b9/courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
+  "sqlite_sha256": "0929255c270ac259e28dc750e4ec3cad8f438d50d8e0bb4cde9b34cccb966a8b",
+  "sqlite_integrity": "ok",
+  "projection_row_counts": {
+    "ro_entity_courtos_summary_v1": 3080,
+    "ro_person_assignment_capacity_summary_v1": 23550,
+    "ro_office_detail_v1": 4377,
+    "ro_responsibility_coverage_detail_v1": 18485,
+    "ro_residence_presence_v1": 23552,
+    "ro_standing_order_task_state_v1": 18485,
+    "ro_review_docket_v1": 1582,
+    "ro_provenance_readiness_v1": 22
+  },
+  "inputs": [
+    {
+      "path": "data/staging/world_1116_opening_v2/combined/generations/490e6eece6c9a0bc43c159e580b4a797d04a287f10e696633880d393a78de291/world_1116_opening_candidate.sqlite",
+      "sha256": "154d1f3ff19aaa1a18d2dcb413b047946ce6d9c039b7245825b2d851b96d7a57"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m4_workload_driver_candidate_v1/courtos_uat_m4_workload_driver_candidate.sqlite",
+      "sha256": "7949bb40c54698aceab293681a8901707e06b7b4a9836f47bdf9abc952be68a3"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/accepted_uat_house_identity_crosswalk_13.csv",
+      "sha256": "963672090424c2f82d7bfd6804950a2f551b8a93c69a15bae20bb072e032725a"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/retired_placeholder_uat_removal_docket_carried.csv",
+      "sha256": "8508b46157fbe94830ae58a319ef80e513383b76ee84b0df7b88b7fa38a39fc1"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/retired_placeholder_derived_demand_40_carried.csv",
+      "sha256": "8bd433e7ce8a58d7fcd573b7e4700bfacf36652f8439beb603c8efc2cec65d5e"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/turn1_1120_residence_validation_candidate.csv",
+      "sha256": "6ae5a8d196a0fedb6ee0a3227a56e7d65232ead627e20c4c9fe076ef5b351682"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/turn1_1120_missing_living_residence_exception.csv",
+      "sha256": "566f140589bc898c9a83987e3e2a816856c9c8b70e687ca569009f1f5f126a87"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/turn1_1120_inactive_dead_residence_rows.csv",
+      "sha256": "b14aae627d7a35021fd6bc1256281ad8df0313886a2c79815e12126513c9a4e1"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/turn1_1120_stale_unjoined_residence_rows.csv",
+      "sha256": "a0d25a87a7af542a341196544f5420a286ea475c72fe5587f91a3ee1f5b80439"
+    },
+    {
+      "path": "data/genrun/courtos_uat_temporal_rebase_1120_01_01_v2/turn1_1120_residence_cohort_disposition_198.csv",
+      "sha256": "5a73bc23f7a7b5a0c5e3a93dd2202a443970c28e0a08fb065c6afa20bf29b06b"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m4_opening_social_evidence_candidate_v1/protected_house_entity_crosswalk_candidate.csv",
+      "sha256": "2cb0393bf7af61dbee771699e63e7b8d0c9d3758c67ca5d2d51c436952039e53"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m4_opening_social_evidence_candidate_v1/stale_martial_authority_payer_sync_docket.csv",
+      "sha256": "edf808d5a6cddfbc4c6bd44c7ddc8ee882ff8ece42a581e568123eb0d44c8709"
+    },
+    {
+      "path": "data/genrun/courtos_uat_m4_specialized_resource_demand_gap_audit_v1/rights_context_authority_summary.csv",
+      "sha256": "689fbb4837edb5eb01b265395601edc2f45f6ed9044e0f448de03f242620882c"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "CONSUMER_HANDOFF.md",
+      "sha256": "b93269ee92531abe6e78e7ecfc5eb31eabcdd7ad90fa8bb34e4a79bff62622c4"
+    },
+    {
+      "path": "NULL_SEMANTICS.md",
+      "sha256": "85967641db49cefca50e71cf47f82072bce671556da76a4b71c53111a16c80e5"
+    },
+    {
+      "path": "ROLLBACK_AND_PREDECESSOR.md",
+      "sha256": "c0d0b46e2c80277c78527aff1acb17bb7663055a6de2d59e3a872528824ac44d"
+    },
+    {
+      "path": "controlled_enums.json",
+      "sha256": "b7a5957e558ce57c467b7c21c725740237970f98ebd6336b59bade2b754f9eea"
+    },
+    {
+      "path": "courtos_read_only_uat_contract_1120_01_01_v1.sqlite",
+      "sha256": "0929255c270ac259e28dc750e4ec3cad8f438d50d8e0bb4cde9b34cccb966a8b"
+    },
+    {
+      "path": "data_dictionary.csv",
+      "sha256": "5cb6650f00da50863c947541ced964bc79caa0d7a8d29558811dc9f0f4636779"
+    },
+    {
+      "path": "fixtures/representative_fixtures.json",
+      "sha256": "20ae0b1cf09d544b3933b2f1deae1d2827363574bb0dbb743a14f2c5fe495f8c"
+    },
+    {
+      "path": "jsonl/ro_entity_courtos_summary_v1.jsonl",
+      "sha256": "89f16d09ef1042626a4c4019ddfff802699ed0241d21f1fd1b76b6f10fd97175"
+    },
+    {
+      "path": "jsonl/ro_office_detail_v1.jsonl",
+      "sha256": "c3afbbc8130c6be0fb52591f19855a12f057cffec09bcc5027a9d99f3067adda"
+    },
+    {
+      "path": "jsonl/ro_person_assignment_capacity_summary_v1.jsonl",
+      "sha256": "f0fa13cd7f78715adf3fbd24f0b5153dfabd738ba4ad67f29cf5fecb2fea7381"
+    },
+    {
+      "path": "jsonl/ro_provenance_readiness_v1.jsonl",
+      "sha256": "8ff460491c67c0ccff3686557d2dca8ab681c424349cc2be55b106803f3e2839"
+    },
+    {
+      "path": "jsonl/ro_residence_presence_v1.jsonl",
+      "sha256": "2c4a891ba569a3015ee7c9c28f071e111f257d975b08caa8d6112fcc764031e3"
+    },
+    {
+      "path": "jsonl/ro_responsibility_coverage_detail_v1.jsonl",
+      "sha256": "355e75254a7670b64a7a3c5ad9818fa02cb87f56a2b0e5d8dfe6ffd60a78be0b"
+    },
+    {
+      "path": "jsonl/ro_review_docket_v1.jsonl",
+      "sha256": "ccaf1a0bc328e9ce349490ba6279b2b16c6d65813c75c5f9766e35abf79f1f31"
+    },
+    {
+      "path": "jsonl/ro_standing_order_task_state_v1.jsonl",
+      "sha256": "cad3b7962c4c590892f907c714e5b8017719f9254e8732b16c70928a7639995c"
+    },
+    {
+      "path": "reconciliation.csv",
+      "sha256": "4b12cb80af78ded57ce98e22c8c1827a354b9cb253723476413d554aef33d1ed"
+    },
+    {
+      "path": "schemas/ro_entity_courtos_summary_v1.schema.json",
+      "sha256": "f4e2899dee82f6c65d5a7fa31872b89e177733d1a3497839616d3d7a583b73b5"
+    },
+    {
+      "path": "schemas/ro_office_detail_v1.schema.json",
+      "sha256": "1037efdd1cbe4b1f2e612adf2c3356758ca7ddcfcd612583b1641febc5061504"
+    },
+    {
+      "path": "schemas/ro_person_assignment_capacity_summary_v1.schema.json",
+      "sha256": "2cccb9b46ce7fc16e5e08ccbdec6b3e773b9571efc89242da2cc1496a5bbfcc1"
+    },
+    {
+      "path": "schemas/ro_provenance_readiness_v1.schema.json",
+      "sha256": "2e8036f8f324308a45c961384ec2bb1ec12ab8c7267cb9cebb82ed02cacf23ac"
+    },
+    {
+      "path": "schemas/ro_residence_presence_v1.schema.json",
+      "sha256": "0fe398465353e41fac042f6800776724b65b790dd35c108657d42c4a4bc39831"
+    },
+    {
+      "path": "schemas/ro_responsibility_coverage_detail_v1.schema.json",
+      "sha256": "751d3e9825dbf201469b4beb95d353f41f224acb5f3cf2e422a88e88a2958d8d"
+    },
+    {
+      "path": "schemas/ro_review_docket_v1.schema.json",
+      "sha256": "7a8ddf449ba2f60dba5c647338b3f7d172a32374e329eb71ea9905d12d2c1f15"
+    },
+    {
+      "path": "schemas/ro_standing_order_task_state_v1.schema.json",
+      "sha256": "a743b61dce26797d1e38256d69da910d4b0a90a16eb81327a46024a146d63e91"
+    },
+    {
+      "path": "validation.json",
+      "sha256": "897391dc94fd4fae0ffddc39fa04ee251c24077d067b35b64a30d6493777f565"
+    }
+  ],
+  "authority_boundary": "read_only_design_runtime_projection_contract_lock_not_full_executable_courtos_runtime_authority",
+  "non_authorization": [
+    "no_source_graph_canon_office_working_truth_economy_art_runtime_ui_fixture_or_golden_mutation",
+    "no_numeric_policy_or_value_promotion",
+    "no_1116_historical_inference"
+  ]
+}
