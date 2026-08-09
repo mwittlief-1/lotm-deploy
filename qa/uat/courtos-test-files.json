@@ -35,6 +35,7 @@
     "tests/ui/courtScribeBriefingContract.test.ts",
     "tests/ui/courtScribeDesktopHost.test.ts",
     "tests/ui/courtScribeFiscalBrief.test.ts",
+    "tests/ui/courtScribePerformanceReport.test.ts",
     "tests/ui/courtScribeResponsibilityBrief.test.ts",
     "tests/ui/courtosAlternateStewardEligibilityUat1Projection.test.ts",
     "tests/ui/courtosDesktopAccessibilityContract.test.ts",

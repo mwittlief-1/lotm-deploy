@@ -35,7 +35,8 @@
     "courtos:desktop:build": "npm --prefix desktop run build",
     "courtos:desktop:package": "npm --prefix desktop run package",
     "courtos:desktop:uat-package": "npm run courtos:spatial:build && npm run courtos:foundation-a:build && npm run courtos:foundation-a:verify && COURTOS_UAT_WORKSPACE_BUILD=1 node scripts/prepareCourtosPublic.mjs && node scripts/verifyCourtosRoomAssets.mjs --root .courtos-public && CSC_IDENTITY_AUTO_DISCOVERY=false npm --prefix desktop run package && node scripts/verifyCourtosDesktopUatPackage.mjs",
-    "courtos:scribe:fiscal-pilot": "tsx scripts/runCourtosFiscalScribePilot.mts"
+    "courtos:scribe:fiscal-pilot": "tsx scripts/runCourtosFiscalScribePilot.mts",
+    "courtos:scribe:verify-performance": "node scripts/verifyCourtosScribePerformanceReport.mjs"
   },
   "dependencies": {
     "better-sqlite3": "12.4.1",

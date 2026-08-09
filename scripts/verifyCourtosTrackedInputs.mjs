@@ -71,6 +71,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "scripts/verifyCourtosBundleBudget.mjs",
   "scripts/verifyCourtosMapGenConfiguration.mjs",
   "scripts/verifyCourtosDesktopUatPackage.mjs",
+  "scripts/verifyCourtosScribePerformanceReport.mjs",
   "scripts/verifyCourtosRoomAssets.mjs",
   "public/assets/council-command-room/command-surfaces/atlas-table.png",
   "public/assets/council-command-room/command-surfaces/council-table.png",
