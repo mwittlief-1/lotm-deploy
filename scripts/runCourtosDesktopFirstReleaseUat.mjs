@@ -167,6 +167,11 @@ async function scenario(id, title, body) {
     });
     console.error(`FAIL ${id} ${title}: ${error instanceof Error ? error.message : String(error)}`);
   }
+  writeJson(path.join(artifactRoot, "progress.json"), {
+    schema_version: "merecross_desktop_first_release_uat_progress_v1",
+    updated_at: new Date().toISOString(),
+    results,
+  });
 }
 
 try {

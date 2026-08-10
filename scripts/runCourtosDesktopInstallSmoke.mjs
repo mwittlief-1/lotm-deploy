@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { mkdtemp, mkdir, rm } from "node:fs/promises";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -8,6 +8,14 @@ import { promisify } from "node:util";
 import { inspectMacApplication } from "./lib/courtosDesktopDistribution.mjs";
 
 const execFileAsync = promisify(execFile);
+const runInherited = (command, commandArgs, options = {}) => new Promise((resolvePromise, reject) => {
+  const child = spawn(command, commandArgs, { ...options, stdio: "inherit" });
+  child.once("error", reject);
+  child.once("close", (code, signal) => {
+    if (code === 0) resolvePromise();
+    else reject(new Error(`${command} exited with ${code ?? `signal ${signal}`}`));
+  });
+});
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
 const valueAfter = (flag) => {
@@ -53,19 +61,19 @@ try {
   await mkdir(steamLibrary, { recursive: true });
   await execFileAsync("ditto", ["--noextattr", sourceApp, installedApp]);
   await inspectMacApplication(installedApp);
-  await execFileAsync(process.execPath, [
+  await runInherited(process.execPath, [
     join(repositoryRoot, "scripts", "verifyCourtosDesktopUatPackage.mjs"),
     "--app",
     installedApp,
     "--expected-posture",
     expectedPosture,
-  ], { cwd: repositoryRoot, stdio: "inherit" });
+  ], { cwd: repositoryRoot });
   if (launch) {
-    await execFileAsync(process.execPath, [
+    await runInherited(process.execPath, [
       join(repositoryRoot, "scripts", "runCourtosDesktopFirstReleaseUat.mjs"),
       "--app",
       installedApp,
-    ], { cwd: repositoryRoot, stdio: "inherit" });
+    ], { cwd: repositoryRoot });
   }
   console.log(JSON.stringify({ status: "passed", installed_app: installedApp, launch_uat: launch }, null, 2));
 } finally {

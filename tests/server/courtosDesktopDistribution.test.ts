@@ -115,6 +115,7 @@ describe("CourtOS desktop distribution", () => {
     const smoke = fs.readFileSync(path.join(root, "scripts/runCourtosDesktopInstallSmoke.mjs"), "utf8");
     expect(smoke).toContain("if (!keep && cleanupRoot)");
     expect(smoke).toContain("} finally {");
+    expect(smoke).toContain('stdio: "inherit"');
     expect(smoke).not.toContain("dirname(dirname(dirname(steamLibrary)))");
   });
 
