@@ -84,6 +84,12 @@ describe("CourtOS desktop distribution", () => {
     const staging = fs.readFileSync(path.join(root, "desktop/stagePackageWorkspace.mjs"), "utf8");
     expect(staging).toContain('resolve(desktopRoot, "build/icon.icns")');
     expect(staging).toContain('resolve(stageRoot, "build/icon.icns")');
+    const preflight = fs.readFileSync(
+      path.join(root, "scripts/preflightCourtosDesktopExternalBuild.mjs"),
+      "utf8",
+    );
+    expect(preflight).toContain("portraitBankExpected");
+    expect(preflight).toContain("portrait_bank_missing_assets");
   });
 
   it("honors isolated staging roots instead of silently packaging a stale default workspace", () => {
@@ -124,5 +130,15 @@ describe("CourtOS desktop distribution", () => {
     expect(main).toContain("app.requestSingleInstanceLock()");
     expect(main).toContain('app.on("second-instance", focusPrimaryWindow)');
     expect(main).toContain('join(app.getPath("userData"), "merecross-player-v1.sqlite")');
+  });
+
+  it("loads the shared authority projection for every responsibility drill-down", () => {
+    const surface = fs.readFileSync(
+      path.join(root, "src/ui/panels/HouseholdVerticalSlice.tsx"),
+      "utf8",
+    );
+    expect(surface).toContain(
+      'householdRoute || scene === "house_command" || responsibilityPlace !== null',
+    );
   });
 });

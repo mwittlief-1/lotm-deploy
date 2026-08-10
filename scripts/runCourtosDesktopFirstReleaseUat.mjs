@@ -12,6 +12,13 @@ const configPath = path.resolve(root, valueAfter("--config") ?? "qa/desktop/firs
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
 const dryRun = argv.includes("--dry-run");
 const keepProfile = argv.includes("--keep-profile");
+const selectedScenarioIds = new Set(
+  (valueAfter("--scenario") ?? "").split(",").map((value) => value.trim()).filter(Boolean),
+);
+const selectedResponsibilityIds = new Set(
+  (valueAfter("--responsibility") ?? "").split(",").map((value) => value.trim()).filter(Boolean),
+);
+const responsibilityRouteTimeoutMs = Number(valueAfter("--route-timeout-ms") ?? 8_000);
 const appBundle = path.resolve(valueAfter("--app") ?? process.env.COURTOS_DESKTOP_APP ?? config.installed_app);
 const executablePath = executableForApp(appBundle);
 const runId = valueAfter("--run-id") ?? new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
@@ -148,6 +155,7 @@ async function returnToCouncil() {
 }
 
 async function scenario(id, title, body) {
+  if (selectedScenarioIds.size > 0 && !selectedScenarioIds.has(id)) return;
   const started = Date.now();
   const evidence = [];
   try {
@@ -235,7 +243,7 @@ try {
     await page.getByText(config.player_house.house_name, { exact: false }).first().waitFor();
     expect(await page.locator(".uat-council-person").count() === config.expected_projection.council_seats, "Inner Council seat count does not match the release contract.");
     expect(await page.locator(".uat-council-domain-objects > button").count() === config.domains.length, "Council must expose exactly eight operational rooms.");
-    await page.getByRole("button", { name: /House Command/ }).waitFor();
+    await page.getByRole("button", { name: "House Command", exact: true }).waitFor();
     await page.getByRole("button", { name: /Council Docket/ }).waitFor();
     evidence.push(await screenshot("fr-002-inner-council"));
   });
@@ -244,7 +252,7 @@ try {
     await goto();
     await waitForCouncil();
     evidence.push(await screenshot("fr-003-00-council"));
-    await page.getByRole("button", { name: /House Command/ }).click();
+    await page.getByRole("button", { name: "House Command", exact: true }).click();
     await page.getByRole("region", { name: "House Command" }).waitFor();
     evidence.push(await screenshot("fr-003-01-house-command"));
     for (const [index, domain] of config.domains.entries()) {
@@ -258,12 +266,16 @@ try {
 
   await scenario("FR-004", "All 24 responsibility routes", async (evidence) => {
     const failures = [];
+    const routeResults = [];
     for (const responsibility of config.responsibilities) {
+      if (selectedResponsibilityIds.size > 0 && !selectedResponsibilityIds.has(responsibility.key)) continue;
       if (responsibility.domain === "house_command") {
         await goto("?place=house_command");
         await page.getByRole("region", { name: "House Command" }).waitFor();
-        const present = await page.getByRole("button", { name: /Open Office Appointments/ }).count();
+        const present = await page.getByRole("button", { name: "Manage appointment stewardship", exact: true }).count();
         if (!present) failures.push(`${responsibility.key}: missing from House Command`);
+        routeResults.push({ responsibility: responsibility.key, status: present ? "pass" : "fail" });
+        writeJson(path.join(artifactRoot, "fr-004-route-progress.json"), { route_results: routeResults });
         continue;
       }
       const search = `?place=responsibility&domain=${encodeURIComponent(responsibility.domain)}&responsibility=${encodeURIComponent(responsibility.key)}`;
@@ -273,9 +285,19 @@ try {
         ? page.getByRole("region", { name: "Manor Stewardship" })
         : null;
       const visible = manorWorkspace
-        ? await manorWorkspace.waitFor({ state: "visible" }).then(() => true).catch(() => false)
-        : await workspace.waitFor({ state: "visible" }).then(() => true).catch(() => false);
+        ? await manorWorkspace.waitFor({ state: "visible", timeout: responsibilityRouteTimeoutMs }).then(() => true).catch(() => false)
+        : await workspace.waitFor({ state: "visible", timeout: responsibilityRouteTimeoutMs }).then(() => true).catch(() => false);
       if (!visible) failures.push(`${responsibility.key}: no responsibility workspace`);
+      routeResults.push({
+        responsibility: responsibility.key,
+        status: visible ? "pass" : "fail",
+        ...(visible ? {} : {
+          url: page.url(),
+          selector_count: manorWorkspace ? await manorWorkspace.count() : await workspace.count(),
+          visible_text_excerpt: (await page.locator("body").innerText()).slice(0, 600),
+        }),
+      });
+      writeJson(path.join(artifactRoot, "fr-004-route-progress.json"), { route_results: routeResults });
     }
     expect(failures.length === 0, `Responsibility depth failures: ${failures.join("; ")}`);
     evidence.push(await screenshot("fr-004-final-responsibility"));
@@ -296,14 +318,14 @@ try {
       await page.locator(`[data-responsibility="${item.key}"]`).waitFor();
       const count = await page.locator(item.record).count();
       expect(count >= item.minimum, `${item.key} has no player-readable records.`);
-      await page.getByRole("button", { name: "Review assignment basis" }).waitFor();
+      await page.getByRole("button", { name: "Review stewardship", exact: true }).waitFor();
       evidence.push(await screenshot(`fr-005-${slug(item.key)}`));
     }
   });
 
   await scenario("FR-006", "Household record-detail modals", async (evidence) => {
     const cases = [
-      { key: "household_stores_provisioning_procurement", selector: "button[aria-label^='Inspect '], .uat-record-table button", term: "Prior-cycle evidence" },
+      { key: "household_stores_provisioning_procurement", selector: "button[aria-label^='Inspect '], .uat-record-table button", term: "Prior-cycle entries" },
       { key: "adult_kin_support", selector: "button[aria-label^='Inspect support record']", term: "Why this remains Household work" },
       { key: "education_formation", selector: ".uat-learner-ledger button", term: "Responsible party" },
       { key: "household_service_care", selector: "button[aria-label^='Inspect care record']", term: "Course since last report" },
@@ -315,7 +337,7 @@ try {
       await record.click();
       const dialog = page.getByRole("dialog");
       await dialog.waitFor();
-      await dialog.getByText(item.term, { exact: false }).waitFor();
+      await dialog.getByText(item.term, { exact: true }).waitFor();
       expect(await dialog.getByRole("button", { name: "Close record" }).count() === 1, "Record dialog has no accessible close control.");
       evidence.push(await screenshot(`fr-006-${slug(item.key)}-detail`));
       await dialog.getByRole("button", { name: "Close record" }).click();
@@ -327,22 +349,22 @@ try {
     await goto("?place=responsibility&domain=household&responsibility=adult_kin_support&detail=assignment_basis");
     const dialog = page.getByRole("dialog");
     await dialog.waitFor();
-    const editor = dialog.getByRole("region", { name: "Assignment planning draft" });
-    const select = editor.getByLabel("Proposed principal");
+    const editor = dialog.getByRole("region", { name: "Three-year stewardship" });
+    const select = editor.locator("fieldset select");
     expect(await select.isEnabled(), "Head-of-House assignment planning is not enabled.");
     const options = await select.locator("option").count();
     expect(options >= 2, "Assignment planning needs at least two eligible Council principals for this test.");
     await select.selectOption({ index: 1 });
-    await editor.getByRole("button", { name: "Save planning draft" }).click();
-    await editor.getByText(/Draft v1 saved .*1120–1122/).waitFor();
+    await editor.getByRole("button", { name: "Save proposal", exact: true }).click();
+    await editor.getByText("Stewardship proposal saved. The current assignment has not changed.", { exact: true }).waitFor();
     evidence.push(await screenshot("fr-007-assignment-saved"));
 
     await page.reload({ waitUntil: "domcontentloaded" });
-    const reloaded = page.getByRole("dialog").getByRole("region", { name: "Assignment planning draft" });
-    await reloaded.getByText(/Draft v1 saved .*1120–1122/).waitFor();
+    const reloaded = page.getByRole("dialog").getByRole("region", { name: "Three-year stewardship" });
+    await reloaded.getByText("A stewardship proposal is saved for this charge.", { exact: true }).waitFor();
     evidence.push(await screenshot("fr-007-assignment-reloaded"));
-    await reloaded.getByRole("button", { name: "Discard saved draft" }).click();
-    await reloaded.getByText(/Draft v1 saved/).waitFor({ state: "hidden" });
+    await reloaded.getByRole("button", { name: "Discard saved proposal", exact: true }).click();
+    await reloaded.getByText("The proposal was set aside. The current assignment remains unchanged.", { exact: true }).waitFor();
   });
 
   await scenario("FR-008", "Map portfolio and scale continuity", async (evidence) => {

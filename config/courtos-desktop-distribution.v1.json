@@ -24,6 +24,7 @@
       "scribe_asset_manifest": "config/courtos-scribe-native-assets.v1.json",
       "external_distribution_requirements": [
         "branded_app_icon",
+        "complete_portrait_bank",
         "developer_id_application_signature",
         "hardened_runtime",
         "apple_notarization",

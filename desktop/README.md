@@ -36,8 +36,10 @@ That mode enables Hardened Runtime and the tracked Electron/Steam entitlements,
 skips the local ad-hoc signature, and requires Developer ID signing plus Apple
 notarization. It also requires the approved branded icon at
 `desktop/build/icon.icns`; the Electron default icon is never eligible for an
-external build. The preflight records only whether required credentials exist;
-it never prints or stores a secret.
+external build. The same preflight requires the 24 deterministic portrait-bank
+assets referenced by uncommissioned canonical people, preventing a Steam build
+from shipping broken likenesses. It records only whether required credentials
+exist; it never prints or stores a secret.
 
 The shared Windows target is contract-ready but intentionally fail-closed until
 three external identities exist: a pinned Windows x64 Scribe runtime, a Windows

@@ -3214,7 +3214,12 @@ function AuthorizedHouseholdVerticalSlice({
   // Council boot is intentionally light. Household data begins only when a
   // Household place is selected, including House Command where it supplies
   // the planning register.
-  const householdProjectionRequired = householdRoute || scene === "house_command";
+  // The current unified opening projection carries the shared 24-responsibility
+  // authority register as well as the four Household workspaces. Every
+  // responsibility drill-down therefore needs that projection even when its
+  // domain-owned records are fetched through the lazy workspace endpoint.
+  const householdProjectionRequired =
+    householdRoute || scene === "house_command" || responsibilityPlace !== null;
   const estateProjectionRequired =
     scene === "estate_holdings" || scene === "manor_stewardship";
   const retrySources = () => setReloadKey((current) => current + 1);

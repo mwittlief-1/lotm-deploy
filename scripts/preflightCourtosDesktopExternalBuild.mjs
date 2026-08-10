@@ -7,6 +7,15 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const repositoryRoot = resolve(import.meta.dirname, "..");
 const brandedIconPath = resolve(repositoryRoot, "desktop/build/icon.icns");
+const portraitBankRoot = resolve(repositoryRoot, "public/assets/portrait-bank/proof");
+const portraitBankExpected = ["001", "002", "003", "004", "005", "006"].flatMap(
+  (base) => ["child", "young_adult", "mature_adult", "old_age"].map(
+    (ageBand) => `portrait_age_pf${base}_${ageBand}.png`,
+  ),
+);
+const missingPortraitBankAssets = portraitBankExpected.filter(
+  (fileName) => !existsSync(resolve(portraitBankRoot, fileName)),
+);
 
 if (process.platform !== "darwin") {
   throw new Error("Developer ID signing and Apple notarization preflight must run on macOS.");
@@ -31,12 +40,16 @@ const apiKeyCredentials = Boolean(
 const signingCredential = developerIdAvailable || Boolean(process.env.CSC_LINK);
 const notarizationCredential = appleIdCredentials || apiKeyCredentials;
 const brandedIconAvailable = existsSync(brandedIconPath);
+const portraitBankComplete = missingPortraitBankAssets.length === 0;
 
 const result = {
   schema_version: "merecross_macos_external_build_preflight_v1",
-  status: signingCredential && notarizationCredential && brandedIconAvailable ? "ready" : "blocked",
+  status: signingCredential && notarizationCredential && brandedIconAvailable && portraitBankComplete ? "ready" : "blocked",
   branded_app_icon_available: brandedIconAvailable,
   branded_app_icon_path: brandedIconPath,
+  portrait_bank_complete: portraitBankComplete,
+  portrait_bank_expected_assets: portraitBankExpected.length,
+  portrait_bank_missing_assets: missingPortraitBankAssets,
   developer_id_identity_available: developerIdAvailable,
   csc_link_available: Boolean(process.env.CSC_LINK),
   notarization_credential_mode: appleIdCredentials
@@ -46,6 +59,7 @@ const result = {
       : "missing",
   required_actions: [
     ...(!brandedIconAvailable ? ["provide the approved Merecross macOS app icon at desktop/build/icon.icns"] : []),
+    ...(!portraitBankComplete ? [`provide all ${portraitBankExpected.length} deterministic portrait-bank assets under public/assets/portrait-bank/proof`] : []),
     ...(!signingCredential ? ["install a Developer ID Application identity or provide CSC_LINK"] : []),
     ...(!notarizationCredential ? ["provide Apple notarization credentials through the build environment"] : []),
   ],
