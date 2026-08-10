@@ -13,8 +13,10 @@
     "stage:package": "node stagePackageWorkspace.mjs",
     "package:dir:staged": "electron-builder --config electron-builder.config.mjs --dir",
     "package:staged": "electron-builder --config electron-builder.config.mjs",
-    "package:dir": "npm run build && npm run stage:package && npm --prefix /private/tmp/merecross-courtos-desktop-staging install --no-audit --no-fund && npm --prefix /private/tmp/merecross-courtos-desktop-staging run package:dir:staged",
-    "package": "npm run build && npm run stage:package && npm --prefix /private/tmp/merecross-courtos-desktop-staging install --no-audit --no-fund && npm --prefix /private/tmp/merecross-courtos-desktop-staging run package:staged"
+    "package:dir": "npm run build && npm run stage:package && node runStagedPackage.mjs dir",
+    "package": "npm run build && npm run stage:package && node runStagedPackage.mjs package",
+    "package:local:mac": "CSC_IDENTITY_AUTO_DISCOVERY=false COURTOS_DESKTOP_DISTRIBUTION_MODE=local_uat npm run package:dir",
+    "package:external:mac": "COURTOS_DESKTOP_DISTRIBUTION_MODE=external_alpha npm run package"
   },
   "devDependencies": {
     "electron": "33.4.11",

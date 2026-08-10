@@ -1,0 +1,90 @@
+{
+  "schema_version": "merecross_desktop_distribution_v1",
+  "product": {
+    "name": "Merecross",
+    "bundle_id": "com.vytis.merecross",
+    "steam_app_id": 5084580,
+    "install_folder": "Merecross"
+  },
+  "platforms": {
+    "macos-arm64": {
+      "status": "package_ready_external_identity_and_icon_pending",
+      "artifact_kind": "app_bundle",
+      "artifact_name": "Merecross.app",
+      "executable_relative_path": "Merecross.app",
+      "binary_relative_path": "Merecross.app/Contents/MacOS/Merecross",
+      "architecture": "arm64",
+      "steam": {
+        "depot_id": 5084581,
+        "depot_name": "Merecross Content",
+        "current_scope": "all_os_single_platform_bootstrap",
+        "launch_type": "Launch (Default)",
+        "operating_system": "macOS"
+      },
+      "scribe_asset_manifest": "config/courtos-scribe-native-assets.v1.json",
+      "external_distribution_requirements": [
+        "branded_app_icon",
+        "developer_id_application_signature",
+        "hardened_runtime",
+        "apple_notarization",
+        "stapled_notarization_ticket"
+      ]
+    },
+    "windows-x64": {
+      "status": "contract_ready_dependencies_pending",
+      "artifact_kind": "unpacked_directory",
+      "artifact_name": "Merecross.exe",
+      "executable_relative_path": "Merecross.exe",
+      "architecture": "x64",
+      "steam": {
+        "depot_id": null,
+        "depot_name": "Merecross Windows Content",
+        "required_action": "create_os_specific_windows_depot",
+        "launch_type": "Launch (Default)",
+        "operating_system": "Windows"
+      },
+      "blocking_dependencies": [
+        "pinned_windows_x64_llama_runtime_manifest",
+        "windows_x64_native_module_build",
+        "steam_windows_depot_id"
+      ]
+    }
+  },
+  "channels": {
+    "local_uat": {
+      "signing": "adhoc",
+      "notarization_required": false,
+      "steam_upload_allowed": false
+    },
+    "steam_internal": {
+      "signing": "developer_id_application",
+      "notarization_required": true,
+      "steam_upload_allowed": true,
+      "set_live_automatically": false
+    },
+    "external_alpha": {
+      "signing": "developer_id_application",
+      "notarization_required": true,
+      "steam_upload_allowed": true,
+      "set_live_automatically": false
+    },
+    "release": {
+      "signing": "developer_id_application",
+      "notarization_required": true,
+      "steam_upload_allowed": true,
+      "set_live_automatically": false
+    }
+  },
+  "size_budgets_bytes": {
+    "macos_app_bundle": 3435973837,
+    "application_asar": 209715200,
+    "foundation_a_sqlite": 367001600,
+    "scribe_model": 2621440000
+  },
+  "steam_safety": {
+    "content_builder_upload_script_generated_only": true,
+    "credentials_never_written_to_repo_or_manifest": true,
+    "set_live_forbidden_in_generated_vdf": true,
+    "publish_requires_human_confirmation": true
+  }
+}

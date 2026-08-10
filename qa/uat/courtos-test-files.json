@@ -11,6 +11,7 @@
     "tests/spatialVisualProof.test.ts",
     "tests/server/courtos1120ApiHandler.test.ts",
     "tests/server/courtos1120DeploymentAdapter.test.ts",
+    "tests/server/courtosDesktopDistribution.test.ts",
     "tests/server/courtosHouseholdLazyWorkspaceBoundary.test.ts",
     "tests/server/courtosManorFabricVisualAdapter.test.ts",
     "tests/server/courtosPlanningLifecycle.test.ts",

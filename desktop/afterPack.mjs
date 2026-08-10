@@ -21,10 +21,15 @@ export default async function afterPack(context) {
   // owner-writable long enough to remove inherited metadata before signing.
   await execFileAsync("chmod", ["-R", "u+w", context.appOutDir]);
   await execFileAsync("xattr", ["-cr", context.appOutDir]);
+  const distributionMode = process.env.COURTOS_DESKTOP_DISTRIBUTION_MODE ?? "local_uat";
+  if (distributionMode !== "local_uat") {
+    // electron-builder signs after this hook. External packages must never
+    // receive our local ad-hoc signature or silently fall back to one.
+    return;
+  }
   // A local UAT package has no Developer ID identity, and modifying Electron's
   // pre-signed bundle invalidates that inherited signature. Apply an ad-hoc
-  // signature here so the generated `.app` remains launchable. When release
-  // credentials exist, electron-builder's later signing phase replaces it.
+  // signature only for the explicitly local channel.
   await execFileAsync("codesign", [
     "--force",
     "--deep",

@@ -6,7 +6,18 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
 const root = path.resolve(import.meta.dirname, "..");
+const argv = process.argv.slice(2);
 const appArgument = process.argv.indexOf("--app");
+const postureArgument = argv.indexOf("--expected-posture");
+const expectedPosture = postureArgument >= 0
+  ? argv[postureArgument + 1]
+  : "human_uat_workspace_candidate_not_promotable";
+if (!new Set([
+  "human_uat_workspace_candidate_not_promotable",
+  "clean_checkout_production_candidate",
+]).has(expectedPosture)) {
+  throw new Error(`Unsupported packaged CourtOS posture: ${expectedPosture}`);
+}
 const appPath = path.resolve(
   appArgument >= 0 && process.argv[appArgument + 1]
     ? process.argv[appArgument + 1]
@@ -57,8 +68,10 @@ const runtimeManifest = JSON.parse(
 );
 fs.rmSync(extractionRoot, { recursive: true, force: true });
 console.log("Verified packaged CourtOS runtime posture and bundled MapGen declaration.");
-if (runtimeManifest.build_posture !== "human_uat_workspace_candidate_not_promotable") {
-  throw new Error(`Packaged CourtOS UAT posture is invalid: ${runtimeManifest.build_posture ?? "missing"}.`);
+if (runtimeManifest.build_posture !== expectedPosture) {
+  throw new Error(
+    `Packaged CourtOS posture is invalid: expected ${expectedPosture}, received ${runtimeManifest.build_posture ?? "missing"}.`,
+  );
 }
 if (runtimeManifest.mapgen?.status !== "bundled" || runtimeManifest.mapgen?.base_url !== "./") {
   throw new Error("Packaged CourtOS UAT must use its bundled MapGen runtime.");
@@ -171,5 +184,5 @@ for (const entry of exportManifest.exports ?? []) {
 }
 
 console.log(
-  `Verified CourtOS desktop UAT package: 32 rooms, one immutable Foundation A database, bundled MapGen, ${exportManifest.exports?.length ?? 0} manifest-selected exports, pinned offline Scribe, non-promotable workspace posture.`,
+  `Verified CourtOS desktop package: 32 rooms, one immutable Foundation A database, bundled MapGen, ${exportManifest.exports?.length ?? 0} manifest-selected exports, pinned offline Scribe, ${expectedPosture}.`,
 );

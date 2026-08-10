@@ -117,8 +117,14 @@ if (!dataOnly) {
     "package-lock.json",
     "electron-builder.config.mjs",
     "afterPack.mjs",
+    "entitlements.mac.plist",
   ]) {
     await cp(resolve(desktopRoot, name), resolve(stageRoot, name), { force: true });
+  }
+  const brandedIcon = resolve(desktopRoot, "build/icon.icns");
+  if (existsSync(brandedIcon)) {
+    await mkdir(resolve(stageRoot, "build"), { recursive: true });
+    await cp(brandedIcon, resolve(stageRoot, "build/icon.icns"), { force: true });
   }
 
   // Never stage a prior Electron output directory. `desktop/dist` also contains

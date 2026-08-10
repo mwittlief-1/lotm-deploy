@@ -8,6 +8,16 @@ const payloadRoot = existsSync(resolve(desktopRoot, "payload"))
 const macTargets = process.env.COURTOS_DESKTOP_TARGETS
   ? process.env.COURTOS_DESKTOP_TARGETS.split(",").map((target) => target.trim()).filter(Boolean)
   : ["dmg", "zip"];
+const distributionMode = process.env.COURTOS_DESKTOP_DISTRIBUTION_MODE ?? "local_uat";
+const distributionModes = new Set(["local_uat", "steam_internal", "external_alpha", "release"]);
+if (!distributionModes.has(distributionMode)) {
+  throw new Error(`Unknown CourtOS desktop distribution mode: ${distributionMode}`);
+}
+const externalDistribution = distributionMode !== "local_uat";
+const externalMacIcon = resolve(desktopRoot, "build/icon.icns");
+if (externalDistribution && !existsSync(externalMacIcon)) {
+  throw new Error(`External CourtOS packaging requires the branded macOS icon: ${externalMacIcon}`);
+}
 
 export default {
   appId: "com.vytis.merecross",
@@ -19,6 +29,7 @@ export default {
     },
   ],
   afterPack: "./afterPack.mjs",
+  electronLanguages: ["en-US"],
   directories: {
     // Local Documents/Cloud volumes may attach Finder metadata to an .app,
     // invalidating its ad-hoc signature. The default UAT output stays on the
@@ -55,7 +66,18 @@ export default {
   mac: {
     category: "public.app-category.games",
     target: macTargets,
+    icon: externalDistribution ? externalMacIcon : undefined,
+    identity: externalDistribution ? undefined : null,
+    hardenedRuntime: externalDistribution,
+    gatekeeperAssess: false,
+    entitlements: externalDistribution ? resolve(desktopRoot, "entitlements.mac.plist") : undefined,
+    entitlementsInherit: externalDistribution ? resolve(desktopRoot, "entitlements.mac.plist") : undefined,
+    notarize: externalDistribution,
   },
-  win: { target: ["nsis"] },
+  win: {
+    target: process.env.COURTOS_DESKTOP_WINDOWS_TARGETS
+      ? process.env.COURTOS_DESKTOP_WINDOWS_TARGETS.split(",").map((target) => target.trim()).filter(Boolean)
+      : ["nsis"],
+  },
   linux: { target: ["AppImage"] },
 };
