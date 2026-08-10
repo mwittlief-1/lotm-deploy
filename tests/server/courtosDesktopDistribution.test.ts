@@ -129,6 +129,8 @@ describe("CourtOS desktop distribution", () => {
     const main = fs.readFileSync(path.join(root, "desktop/main.ts"), "utf8");
     expect(main).toContain("app.requestSingleInstanceLock()");
     expect(main).toContain('app.on("second-instance", focusPrimaryWindow)');
+    expect(main).toContain('process.env.COURTOS_DESKTOP_UAT_AUTOMATION === "1"');
+    expect(main).toContain("desktopUatAutomation || app.requestSingleInstanceLock()");
     expect(main).toContain('join(app.getPath("userData"), "merecross-player-v1.sqlite")');
   });
 

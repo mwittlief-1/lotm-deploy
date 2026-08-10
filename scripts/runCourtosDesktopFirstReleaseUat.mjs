@@ -95,6 +95,7 @@ async function launch() {
   app = await electron.launch({
     executablePath,
     args: [`--user-data-dir=${profilePath}`],
+    env: { ...process.env, COURTOS_DESKTOP_UAT_AUTOMATION: "1" },
     timeout: 90_000,
   });
   page = await app.firstWindow({ timeout: 90_000 });

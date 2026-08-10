@@ -28,6 +28,7 @@ import {
   CourtOsResponsibilityHousePapers,
   type CourtOsResponsibilityPaperSelectionV1,
 } from "../responsibilityHousePapers";
+import { buildCourtOsEducationCyclePresentation } from "../educationBriefPresentation";
 import {
   resolveCourtOsResponsibilityPresentation,
   resolveCourtOsRoomPresentation,
@@ -314,6 +315,7 @@ function sourceSurfaceLabel(value: string): string {
     ro_adult_kin_support_arrangement_v1: "Adult Kin support arrangements",
     ro_education_learner_plan_v1: "Learner plans",
     ro_education_cycle_report_uat1_v1: "Education cycle reports",
+    ro_household_education_cycle_report_v1: "Education cycle reports",
     ro_health_roster_v1: "Health and care roster",
     ro_health_cycle_report_v1: "Health cycle reports",
     ro_care_arrangement_v1: "Care arrangements",
@@ -324,6 +326,7 @@ function sourceSurfaceLabel(value: string): string {
 function playerFacingRecordText(value: string): string {
   return value
     .replace(/\bUAT1\b/g, "the opening planning cycle")
+    .replace(/\bprovisional\b/gi, "opening-cycle")
     .replace(/\badmitted\b/gi, (word) => word[0] === "A" ? "Recorded" : "recorded")
     .replace(/\bcandidate\b/gi, (word) => word[0] === "C" ? "Unconfirmed" : "unconfirmed")
     .replace(/\bruntime\b/gi, (word) => word[0] === "R" ? "Turn" : "turn")
@@ -2166,6 +2169,9 @@ function EducationRecords({
   const hasActiveUatArrangements = projection.education_plans.some(
     (plan) => plan.contract_state === "active_uat_formation_arrangement",
   );
+  const reportsByLearner = new Map(
+    projection.education_cycle_reports.map((report) => [report.learner_person_id, report]),
+  );
   return (
     <section className="uat-learner-ledger">
       <header>
@@ -2184,12 +2190,17 @@ function EducationRecords({
         <span>{projection.education_plans.length}</span>
       </header>
       <div>
-        {projection.education_plans.map((plan) => (
-          <button
+        {projection.education_plans.map((plan) => {
+          const cycle = buildCourtOsEducationCyclePresentation(
+            plan,
+            reportsByLearner.get(plan.learner_person_id),
+          );
+          return <button
             key={plan.education_assignment_id}
             onClick={() => onOpenPlan(plan)}
             type="button"
             data-plan-state={plan.contract_state}
+            data-report-state={cycle.state}
           >
             <span className="uat-learner-name">
               <strong>{plan.learner_name}</strong>
@@ -2212,11 +2223,12 @@ function EducationRecords({
             </span>
             <span className="uat-learner-posture">
               <small>{educationPlanStateLabel(plan.contract_state)}</small>
-              <small>{educationCapacityStateLabel(plan.capacity_availability_state)}</small>
+              <small>{cycle.headline}</small>
+              <em>{cycle.accountSpan}</em>
             </span>
             <i aria-hidden="true">›</i>
-          </button>
-        ))}
+          </button>;
+        })}
       </div>
     </section>
   );
@@ -2643,82 +2655,41 @@ function RecordDialog({
     const progressReport = householdProjection?.education_cycle_reports.find(
       (report) => report.learner_person_id === dialog.plan.learner_person_id,
     );
+    const cycle = buildCourtOsEducationCyclePresentation(dialog.plan, progressReport);
     kicker = "Education & Formation";
     title = dialog.plan.learner_name;
     body = (
-      <div className="uat-source-record">
-        <dl>
+      <div className="uat-education-dossier" data-cycle-state={cycle.state}>
+        <section className="uat-education-dossier__arrangement" aria-label="Current formation arrangement">
+          <small>Present formation</small>
+          <h3>{dialog.plan.recommended_track}</h3>
+          <p>{dialog.plan.setting_entity ?? sentenceCase(dialog.plan.setting_type)}</p>
+          <dl>
+            <div><dt>Provider</dt><dd>{dialog.plan.primary_provider_name ?? "Not named"}</dd></div>
+            <div><dt>Answers for the learner</dt><dd>{dialog.plan.responsible_party_name ?? "Not named"}</dd></div>
+          </dl>
+        </section>
+        <section className="uat-education-dossier__cycle" aria-label="Prior formation account">
+          <small>The prior account</small>
+          <h3>{cycle.headline}</h3>
+          <p>{cycle.course}</p>
           <div>
-            <dt>Recommended formation</dt>
-            <dd>{dialog.plan.recommended_track}</dd>
+            <span>{cycle.accountSpan}</span>
+            <span>{cycle.continuity}</span>
           </div>
-          <div>
-            <dt>Setting</dt>
-            <dd>
-              {dialog.plan.setting_entity ??
-                sentenceCase(dialog.plan.setting_type)}
-            </dd>
-          </div>
-          <div>
-            <dt>
-              {dialog.plan.contract_state === "active_uat_formation_arrangement"
-                ? "Formation provider"
-                : "Proposed provider"}
-            </dt>
-            <dd>{dialog.plan.primary_provider_name ?? "Not named"}</dd>
-          </div>
-          <div>
-            <dt>Responsible party</dt>
-            <dd>{dialog.plan.responsible_party_name ?? "Not named"}</dd>
-          </div>
-          <div>
-            <dt>Review</dt>
-            <dd>{dialog.plan.review_date ?? "No review date"}</dd>
-          </div>
-          <div>
-            <dt>Plan state</dt>
-            <dd>{educationPlanStateLabel(dialog.plan.contract_state)}</dd>
-          </div>
-          <div>
-            <dt>Provider capacity</dt>
-            <dd>
-              {educationCapacityStateLabel(
-                dialog.plan.capacity_availability_state,
-              )}
-            </dd>
-          </div>
-          {progressReport ? (
-            <>
-              <div>
-                <dt>Last cycle</dt>
-                <dd>{sentenceCase(progressReport.progress_interpretation ?? progressReport.report_state)}</dd>
-              </div>
-              <div>
-                <dt>Provider’s course</dt>
-                <dd>{sentenceCase(progressReport.progress_course_interpretation ?? "not reported")}</dd>
-              </div>
-              <div>
-                <dt>Report route</dt>
-                <dd>{sentenceCase(progressReport.report_delivery_route ?? "not recorded")}</dd>
-              </div>
-              <div>
-                <dt>Review window</dt>
-                <dd>1117–1119 · {progressReport.annual_receipt_count ?? 0} annual records</dd>
-              </div>
-              <div>
-                <dt>Continuity basis</dt>
-                <dd>{sentenceCase(progressReport.assignment_continuity_basis ?? "not recorded")}</dd>
-              </div>
-            </>
-          ) : null}
-        </dl>
-        <p>
-          {dialog.plan.contract_state === "active_uat_formation_arrangement"
-            ? progressReport
-              ? "This active formation arrangement includes a 1117–1119 responsible-party report. It is an opening-cycle reconstruction, not observed history or raw progress data."
-              : "This active formation arrangement has no available responsible-party report."
-            : "This is a starting plan. It does not establish an executed agreement or available provider capacity."}
-        </p>
+        </section>
+        <section className="uat-education-dossier__review" aria-label="Next review">
+          <small>For the Head's review</small>
+          <h3>{cycle.nextReview}</h3>
+          <p>Confirm that the named provider, setting, and responsible party remain right for the coming three years.</p>
+        </section>
+        <details>
+          <summary>Arrangement terms</summary>
+          <dl>
+            <div><dt>Arrangement</dt><dd>{educationPlanStateLabel(dialog.plan.contract_state)}</dd></div>
+            <div><dt>Provider availability</dt><dd>{educationCapacityStateLabel(dialog.plan.capacity_availability_state)}</dd></div>
+          </dl>
+        </details>
       </div>
     );
   } else if (dialog.kind === "stores_position") {

@@ -244,7 +244,7 @@ describe("Household UAT runtime model", () => {
     expect(runtime.responsibilities.find((row) => row.definition.key === "education")).toMatchObject({
       state: "current",
       currentRecordCount: 4,
-      cycleRecordCount: 0,
+      cycleRecordCount: 4,
     });
     expect(runtime.responsibilities.find((row) => row.definition.key === "service_care")).toMatchObject({
       state: "current",
@@ -287,7 +287,7 @@ describe("Household UAT runtime model", () => {
     });
     expect(shell.councilSource).toEqual({
       status: "candidate_projection",
-      label: "provisional Council membership · opening record",
+      label: "Council membership · opening record",
     });
     expect(shell.player).toEqual({
       principal: "local_player",

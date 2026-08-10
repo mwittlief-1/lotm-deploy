@@ -83,13 +83,18 @@ async function createWindow(): Promise<void> {
   await window.loadURL("merecross://app/courtos-home.html");
 }
 
-const hasSingleInstanceLock = app.requestSingleInstanceLock();
+// The read-only desktop UAT harness must be able to inspect a newly packaged
+// candidate while the founder keeps an older Merecross build open. Each UAT
+// launch uses an isolated profile and this explicit opt-in; ordinary Finder and
+// Steam launches retain the single-writer lock.
+const desktopUatAutomation = process.env.COURTOS_DESKTOP_UAT_AUTOMATION === "1";
+const hasSingleInstanceLock = desktopUatAutomation || app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {
   // Steam and Finder can both deliver a second launch request. The running
   // client owns the player database and must remain the only writer.
   app.quit();
 } else {
-  app.on("second-instance", focusPrimaryWindow);
+  if (!desktopUatAutomation) app.on("second-instance", focusPrimaryWindow);
   app.whenReady().then(async () => {
   process.env.COURTOS_DATA_ROOT = app.isPackaged
     ? process.resourcesPath

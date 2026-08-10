@@ -10,6 +10,7 @@ import type {
   Household1120AdultKinArrangementRow,
   Household1120AdultKinRosterRow,
   Household1120CareArrangementRow,
+  Household1120EducationCycleReportRow,
   Household1120EducationLearnerPlanRow,
   Household1120HealthRosterRow,
   Household1120MembershipRow,
@@ -85,6 +86,21 @@ interface EducationSourceRow {
   responsible_party_person_id: string | null;
   responsible_party_name: string | null;
   progress_disclosure_state: string;
+}
+
+interface EducationCycleReportSourceRow {
+  cycle_report_id: string;
+  education_assignment_id: string;
+  learner_person_id: string;
+  house_id: string;
+  report_delivery_route: string;
+  report_state: string;
+  progress_interpretation: string;
+  progress_course_interpretation: string;
+  annual_receipt_count: number;
+  assignment_continuity_basis: string;
+  source_status: string;
+  disclosure_posture: string;
 }
 
 interface HealthSourceRow {
@@ -174,7 +190,9 @@ function assertManifest(value: unknown): asserts value is RuntimeReleaseManifest
     membership: "runtime_admitted",
     adult_kin: "runtime_admitted_resolved_rows_only",
     service_care: "runtime_admitted_courtos_house_scope_only",
-    education_arrangements: "runtime_admitted_without_progress_presentation",
+    education_arrangements: "runtime_admitted_with_provisional_fuzzy_cycle_reports",
+    education_progress_presentation:
+      "runtime_admitted_provisional_fuzzy_report_no_raw_score_or_prose",
     stores_positions_and_custody: "runtime_admitted_static_uat_bound_house_and_manor_rows",
     matters_opening: "empty_at_opening",
   } as const;
@@ -260,7 +278,7 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
     if (sourceHouseholdIds.size !== 1) {
       throw new Error("Foundation A Household membership has no single admitted Household scope.");
     }
-    const [authority, adultKin, education, health, care, stores, economicActivity] = await Promise.all([
+    const [authority, adultKin, education, educationReports, health, care, stores, economicActivity] = await Promise.all([
       this.driver.all<AuthoritySourceRow>(`
         SELECT responsibility_instance_id, responsibility_key, responsibility_label, scope_id, scope_label,
                accountable_owner_person_id, accountable_owner_person_name, instance_admission_basis
@@ -283,6 +301,15 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
         FROM ro_household_education_arrangement_v1
         WHERE house_id=${house}
         ORDER BY learner_name, learner_person_id, education_assignment_id
+      `),
+      this.driver.all<EducationCycleReportSourceRow>(`
+        SELECT cycle_report_id, education_assignment_id, learner_person_id, house_id,
+               report_delivery_route, report_state, progress_interpretation,
+               progress_course_interpretation, annual_receipt_count,
+               assignment_continuity_basis, source_status, disclosure_posture
+        FROM ro_household_education_cycle_report_v1
+        WHERE house_id=${house}
+        ORDER BY learner_person_id, education_assignment_id, cycle_report_id
       `),
       this.driver.all<HealthSourceRow>(`
         SELECT id, person_id, health_condition_id, overall_state, source_status, disclosure_posture
@@ -366,6 +393,9 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
       arrangement_state: row.primary_support_basis ?? "resolved_support_arrangement",
       ...boundary(row.source_status),
     }));
+    const educationReportAssignments = new Set(
+      educationReports.map((row) => row.education_assignment_id),
+    );
     const educationPlans: Household1120EducationLearnerPlanRow[] = education.map((row) => ({
       education_assignment_id: row.education_assignment_id,
       learner_person_id: row.learner_person_id,
@@ -386,8 +416,27 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
       review_date: null,
       contract_state: "active_uat_formation_arrangement",
       capacity_availability_state: "provider_capacity_not_modeled_in_uat",
-      knowledge_state: row.progress_disclosure_state,
-      ...boundary("foundation_a_runtime_admitted_education_arrangement", "raw_progress_withheld_pending_knowledge_safe_report_projection"),
+      knowledge_state: educationReportAssignments.has(row.education_assignment_id)
+        ? "provisional_uat1_fuzzy_report_available_to_responsible_party"
+        : row.progress_disclosure_state,
+      ...boundary(
+        "foundation_a_runtime_admitted_education_arrangement",
+        educationReportAssignments.has(row.education_assignment_id)
+          ? "education_arrangement_with_provisional_uat1_fuzzy_report"
+          : "progress_withheld_pending_knowledge_safe_report_projection",
+      ),
+    }));
+    const educationCycleReports: Household1120EducationCycleReportRow[] = educationReports.map((row) => ({
+      cycle_report_id: row.cycle_report_id,
+      learner_person_id: row.learner_person_id,
+      cycle_year: 1119,
+      report_state: row.report_state,
+      report_delivery_route: row.report_delivery_route,
+      progress_interpretation: row.progress_interpretation,
+      progress_course_interpretation: row.progress_course_interpretation,
+      annual_receipt_count: row.annual_receipt_count,
+      assignment_continuity_basis: row.assignment_continuity_basis,
+      ...boundary(row.source_status, row.disclosure_posture),
     }));
     const healthRoster: Household1120HealthRosterRow[] = health.map((row) => ({
       health_roster_id: row.id,
@@ -445,7 +494,12 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
       source_path: this.manifest.artifact.path,
       source_sha256: this.manifest.artifact.sha256,
       admission_state: disposition.startsWith("runtime_admitted") ? "projected_read_ready" : "withheld_pending_admission",
-      row_count: key === "stores_positions_and_custody" ? storesPositions.length : 0,
+      row_count:
+        key === "stores_positions_and_custody"
+          ? storesPositions.length
+          : key === "education_progress_presentation"
+            ? educationCycleReports.length
+            : 0,
       withheld_reason: disposition.startsWith("runtime_admitted") ? null : disposition,
       ...boundary("foundation_a_household_runtime_release_v1"),
     }));
@@ -468,7 +522,7 @@ export class FoundationAHouseholdRuntimeReleaseProjection {
       adult_kin_roster: adultKinRoster,
       adult_kin_arrangements: adultKinArrangements,
       education_plans: educationPlans,
-      education_cycle_reports: [],
+      education_cycle_reports: educationCycleReports,
       health_roster: healthRoster,
       health_cycle_reports: [],
       care_arrangements: careArrangements,

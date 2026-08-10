@@ -1,7 +1,7 @@
 {
   "package_id": "foundation_a_household_runtime_release_v1",
   "schema_version": "foundation_a_household_runtime_release_v1",
-  "generation_id": "618e2bc4b9362883c1b439d2cb92e4fe62de8ec92e991dea8044da2845278442",
+  "generation_id": "44457dd3c60cead5a8691f39bf99e74314612d25342ac2fdecb4a72b663bbb3f",
   "effective_date": "1120-01-01",
   "release_status": "runtime_admitted_foundation_a_uat",
   "release_boundary": "Bounded January 1120 Foundation A UAT projection. It is not a historical 1120 successor, canonical outcome, or simulator output.",
@@ -45,14 +45,24 @@
       "role": "foundation_a_economic_activity_sqlite",
       "path": "data/uat/foundation_a_household_economic_activity_projection_v1/generations/5e6b561720519c9d21dd62547c044cbb3f82e48814d4d30f063c8d3de6c8890e/foundation_a_household_economic_activity_projection_v1.sqlite",
       "sha256": "c9e6029aa63ae005ab6bf33f53b3bcf1706ac675868b69cbc1eda172c9aa3e12"
+    },
+    {
+      "role": "household_uat1_education_report_manifest",
+      "path": "data/genrun/foundation_a_household_uat1_release_v1/MANIFEST.json",
+      "sha256": "a13567f3dc0338c18812a991fb6fbb7536ce194399fd833f0e2551825a89915e"
+    },
+    {
+      "role": "household_uat1_education_report_sqlite",
+      "path": "data/genrun/foundation_a_household_uat1_release_v1/generations/aeb8937c65b31c11c1980df8ba1406ff09702b20ae28a19fd3b6f2e0928c2195/foundation_a_household_uat1_release_v1.sqlite",
+      "sha256": "0907ed72bb1379f7e85a02d26047503e663715565f1e6ea74f8349115e7f45b3"
     }
   ],
   "module_dispositions": {
     "membership": "runtime_admitted",
     "adult_kin": "runtime_admitted_resolved_rows_only",
     "service_care": "runtime_admitted_courtos_house_scope_only",
-    "education_arrangements": "runtime_admitted_without_progress_presentation",
-    "education_progress_presentation": "withheld_pending_knowledge_safe_report_projection",
+    "education_arrangements": "runtime_admitted_with_provisional_fuzzy_cycle_reports",
+    "education_progress_presentation": "runtime_admitted_provisional_fuzzy_report_no_raw_score_or_prose",
     "responsibility_authority": "runtime_admitted_with_four_explicit_scope_holds",
     "stores_provenance": "runtime_admitted",
     "stores_positions_and_custody": "runtime_admitted_static_uat_bound_house_and_manor_rows",
@@ -72,7 +82,8 @@
     "ro_household_economic_activity_lookback_v1": 102765,
     "ro_responsibility_authority_v1": 10750,
     "ro_responsibility_authority_withheld_v1": 4,
-    "ro_opening_matters_v1": 0
+    "ro_opening_matters_v1": 0,
+    "ro_household_education_cycle_report_v1": 1284
   },
   "assertions": {
     "membership_complete": true,
@@ -90,10 +101,12 @@
     "economic_activity_is_nonexecuting": true,
     "matters_empty": true,
     "authority_has_twenty_resolved_keys": true,
-    "authority_has_four_explicit_scope_holds": true
+    "authority_has_four_explicit_scope_holds": true,
+    "education_fuzzy_cycle_reports_complete": true,
+    "authoritative_player_prose_absent": true
   },
   "artifact": {
-    "path": "data/genrun/foundation_a_household_runtime_release_v1/generations/618e2bc4b9362883c1b439d2cb92e4fe62de8ec92e991dea8044da2845278442/foundation_a_household_runtime_release_v1.sqlite",
-    "sha256": "1e67e9c78dabf287047869ab65a990a8b80ba1d0ce7506a962531c18a3e780ac"
+    "path": "data/genrun/foundation_a_household_runtime_release_v1/generations/44457dd3c60cead5a8691f39bf99e74314612d25342ac2fdecb4a72b663bbb3f/foundation_a_household_runtime_release_v1.sqlite",
+    "sha256": "e7084d90bc89614be1199292477848c32410e7dd28194c0fb2c901792724ad5b"
   }
 }

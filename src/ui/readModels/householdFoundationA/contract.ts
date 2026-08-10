@@ -44,8 +44,9 @@ export function assertFoundationAHouseholdUatManifest(
     membership: "runtime_admitted",
     adult_kin: "runtime_admitted_resolved_rows_only",
     service_care: "runtime_admitted_courtos_house_scope_only",
-    education_arrangements: "runtime_admitted_without_progress_presentation",
-    education_progress_presentation: "withheld_pending_knowledge_safe_report_projection",
+    education_arrangements: "runtime_admitted_with_provisional_fuzzy_cycle_reports",
+    education_progress_presentation:
+      "runtime_admitted_provisional_fuzzy_report_no_raw_score_or_prose",
     stores_positions_and_custody: "runtime_admitted_static_uat_bound_house_and_manor_rows",
     economic_activity_1117_1119: "runtime_admitted_founder_approved_provisional_evidence",
     matters_opening: "empty_at_opening",

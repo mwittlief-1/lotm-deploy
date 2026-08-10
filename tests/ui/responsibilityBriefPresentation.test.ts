@@ -66,9 +66,11 @@ describe("responsibility Head's Brief presentation", () => {
     );
     expect(brief.sections[0]?.body).not.toContain("structured receipts");
     expect(brief.sections[1]?.body).toContain(
-      "held in the House papers rather than treated as a new turn result",
+      "prior account is held in the House papers",
     );
-    expect(brief.evidenceSummary).toContain("12 House-scoped opening records");
+    expect(brief.evidenceSummary).toBe(
+      "The supporting House papers contain the opening entries behind this account.",
+    );
     expect(brief.actionSurfaceEligible).toBe(false);
   });
 

@@ -35,4 +35,13 @@ describe("Foundation A Household release contract", () => {
       "unsafe matters_opening disposition",
     );
   });
+
+  it("rejects Education presentation that admits raw scores or authoritative prose", () => {
+    const manifest = JSON.parse(readFileSync(releaseManifestPath, "utf8"));
+    manifest.module_dispositions.education_progress_presentation =
+      "runtime_admitted_raw_progress";
+    expect(() => assertFoundationAHouseholdUatManifest(manifest)).toThrow(
+      "unsafe education_progress_presentation disposition",
+    );
+  });
 });

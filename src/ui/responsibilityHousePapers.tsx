@@ -42,6 +42,7 @@ const REGISTER_LABELS: Readonly<Record<string, string>> = {
   ro_adult_kin_support_arrangement_v1: "Support arrangements",
   ro_education_learner_plan_v1: "Learner arrangements",
   ro_education_cycle_report_uat1_v1: "Formation reports",
+  ro_household_education_cycle_report_v1: "Formation reports",
   ro_health_roster_v1: "Care roll",
   ro_health_cycle_report_v1: "Care reports",
   ro_care_arrangement_v1: "Specialized-care arrangements",
@@ -68,6 +69,7 @@ function stateLabel(state: string | null | undefined): string {
     read_ready: "Available for review",
     conditional_empty: "No current instance",
     withheld_fail_closed: "No verified entry in the House papers",
+    provisional_uat1_fuzzy_report_no_raw_score_or_prose: "Responsible-party account recorded",
   };
   return labels[state] ?? sentenceCase(state);
 }

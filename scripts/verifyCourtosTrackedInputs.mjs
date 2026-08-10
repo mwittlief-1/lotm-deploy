@@ -56,6 +56,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "config/courtos-scribe-native-assets.v1.json",
   "scripts/buildCourtosProduction.mjs",
   "scripts/buildCourtosFoundationARelease.mts",
+  "scripts/buildFoundationAHouseholdEducationReportReleaseV1.mjs",
   "scripts/buildCourtosSpatialReadModelV1.mjs",
   "scripts/buildRoadcoteSpatialVisualExportV1.mjs",
   "scripts/prepareCourtosPublic.mjs",

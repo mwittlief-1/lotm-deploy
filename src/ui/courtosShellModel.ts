@@ -113,7 +113,7 @@ export function buildCourtOsShellRuntimeModel(input: {
     councilSource: candidateCouncil
       ? {
           status: "candidate_projection",
-          label: "provisional Council membership · opening record",
+          label: "Council membership · opening record",
         }
       : {
           status: "non_authoritative_projection",

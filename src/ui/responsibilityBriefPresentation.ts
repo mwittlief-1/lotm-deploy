@@ -162,12 +162,12 @@ export function buildCourtOsResponsibilityBrief(
       ? `${input.authorityScopeCount} accountable scopes are recorded.`
       : "No accountable scope is recorded.";
   const recordPhrase = input.openingRecordCount > 0
-    ? `${input.openingRecordCount} House-scoped opening record${input.openingRecordCount === 1 ? " is" : "s are"} available in the papers.`
-    : "No further House-scoped detail is recorded in the papers.";
+    ? "The supporting House papers contain the opening entries behind this account."
+    : "The named House papers form the complete opening account.";
   const changeBody = (input.priorCycleRecordCount ?? 0) > 0
     ? `${input.priorCycleRecordCount} prior-cycle ${input.priorCycleRecordCount === 1 ? "account is" : "accounts are"} available for comparison in the House papers. Nothing in that record is treated as a new turn result.`
     : priorEvidence.length > 0
-      ? `Prior-cycle evidence is present: ${priorEvidence.join("; ")}. It is held in the House papers rather than treated as a new turn result.`
+      ? "A prior account is held in the House papers. Its recorded course is reflected here and remains available for examination."
     : "This opening account is the baseline. No later change report has yet been received.";
   const attentionBody = unavailable
     ? "No verified charge is entered in the House papers. No person, place, or authority is assumed."
@@ -183,7 +183,7 @@ export function buildCourtOsResponsibilityBrief(
   return {
     responsibility: input.responsibility,
     actionSurfaceEligible: input.headOfHouseAssigned && !unavailable && !conditional,
-    evidenceSummary: `${recordPhrase} ${input.evidence.length} supporting record famil${input.evidence.length === 1 ? "y is" : "ies are"} named.`,
+    evidenceSummary: recordPhrase,
     sections: [
       { key: "account", label: "Current account", heading: vocabulary.accountLabel, body: currentAccount, state: unavailable ? "withheld" : conditional ? "watch" : "settled" },
       { key: "change", label: "Since the prior report", heading: vocabulary.changeLabel, body: changeBody, state: priorEvidence.length > 0 || (input.priorCycleRecordCount ?? 0) > 0 ? "settled" : "watch" },

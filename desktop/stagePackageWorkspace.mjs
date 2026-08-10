@@ -193,6 +193,10 @@ const expectedArtifactPath =
 if (foundationManifest.artifact.path !== expectedArtifactPath) {
   throw new Error("Foundation A package artifact path escaped its generation.");
 }
+// The staging root is reusable across local builds. Remove its prior selected
+// generation before copying the current one so a rebuilt app cannot retain a
+// valid-but-superseded Foundation A database from an earlier package.
+await rm(foundationDestinationRoot, { recursive: true, force: true });
 await mkdir(
   resolve(foundationDestinationRoot, "generations", foundationManifest.generation_id),
   { recursive: true },

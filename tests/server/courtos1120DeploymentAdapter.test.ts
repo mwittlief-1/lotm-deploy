@@ -199,10 +199,17 @@ describe("CourtOS packaged deployment adapter", () => {
         projection.education_plans.every(
           (row) =>
             row.knowledge_state ===
-            "withheld_pending_knowledge_safe_report_projection",
+            "provisional_uat1_fuzzy_report_available_to_responsible_party",
         ),
       ).toBe(true);
-      expect(projection.education_cycle_reports).toEqual([]);
+      expect(projection.education_cycle_reports).toHaveLength(4);
+      expect(projection.education_cycle_reports).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          cycle_year: 1119,
+          disclosure_posture: "provisional_uat1_fuzzy_report_no_raw_score_or_prose",
+          runtime_authority: 0,
+        }),
+      ]));
     } finally {
       await service.close();
     }

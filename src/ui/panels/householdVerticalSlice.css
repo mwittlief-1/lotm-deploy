@@ -1411,22 +1411,23 @@ button:focus-visible {
   z-index: 4;
   top: 4%;
   left: 50%;
-  width: min(680px, 72vw);
+  width: min(540px, 62vw);
   transform: translateX(-50%);
   text-align: center;
   text-shadow: 0 3px 14px #000;
 }
 
 .uat-room-introduction h2 {
-  margin: 6px 0 7px;
-  font-size: clamp(30px, 3.1vw, 48px);
+  margin: 4px 0 5px;
+  font-size: clamp(25px, 2.35vw, 36px);
   font-weight: 500;
 }
 
 .uat-room-introduction p {
   margin: 0;
   color: #d1c0a3;
-  font-size: 15px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .uat-domain-scene[data-room-title-anchor="top_left"] .uat-room-introduction {
@@ -2656,6 +2657,20 @@ button:focus-visible {
   text-transform: uppercase;
 }
 
+.uat-learner-posture em {
+  color: #95856d;
+  font-size: 8px;
+  font-style: normal;
+}
+
+.uat-learner-ledger button[data-report-state="reported"] .uat-learner-posture small:last-of-type {
+  color: #c9be8d !important;
+}
+
+.uat-learner-ledger button[data-report-state="begins_this_turn"] .uat-learner-posture small:last-of-type {
+  color: #9db18a !important;
+}
+
 .uat-learner-ledger button i {
   grid-column: 4;
   grid-row: 1 / 3;
@@ -2998,6 +3013,114 @@ button:focus-visible {
 .uat-source-record {
   display: grid;
   gap: 17px;
+}
+
+.uat-education-dossier {
+  padding: 24px 26px 26px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  color: #eadfc6;
+}
+
+.uat-education-dossier > section,
+.uat-education-dossier > details {
+  padding: 18px;
+  border: 1px solid rgba(181, 127, 56, 0.34);
+  background:
+    linear-gradient(135deg, rgba(72, 45, 24, 0.5), rgba(22, 15, 11, 0.78));
+}
+
+.uat-education-dossier__cycle {
+  border-left: 3px solid rgba(173, 142, 76, 0.78) !important;
+}
+
+.uat-education-dossier[data-cycle-state="begins_this_turn"] .uat-education-dossier__cycle {
+  border-left-color: rgba(124, 151, 104, 0.84) !important;
+}
+
+.uat-education-dossier__review {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 1.5fr);
+  align-items: center;
+  gap: 0.4rem 1.5rem;
+  border-left: 3px solid rgba(198, 144, 67, 0.86) !important;
+}
+
+.uat-education-dossier__review small {
+  grid-column: 1 / -1;
+}
+
+.uat-education-dossier h3 {
+  margin: 0.35rem 0 0.5rem;
+  color: #f0e2c2;
+  font: 600 1.3rem/1.15 Georgia, serif;
+}
+
+.uat-education-dossier p {
+  margin: 0;
+  color: #b9a587;
+  font-size: 0.86rem;
+  line-height: 1.48;
+}
+
+.uat-education-dossier small,
+.uat-education-dossier dt {
+  color: #c8a567;
+  font: 700 0.68rem/1.2 Arial, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.uat-education-dossier dl {
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.uat-education-dossier dl > div {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.65fr) minmax(0, 1fr);
+  gap: 0.7rem;
+}
+
+.uat-education-dossier dd {
+  margin: 0;
+  color: #e0d2b4;
+  font-size: 0.82rem;
+}
+
+.uat-education-dossier__cycle > div {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.uat-education-dossier__cycle > div span {
+  padding: 0.35rem 0.52rem;
+  color: #c8b694;
+  border: 1px solid rgba(181, 127, 56, 0.28);
+  background: rgba(14, 10, 8, 0.34);
+  font-size: 0.7rem;
+}
+
+.uat-education-dossier > details {
+  grid-column: 1 / -1;
+  padding: 0;
+}
+
+.uat-education-dossier > details summary {
+  padding: 0.85rem 1rem;
+  color: #d8c39a;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.uat-education-dossier > details dl {
+  margin: 0;
+  padding: 0 1rem 1rem;
 }
 
 .uat-source-record > section {
@@ -3713,7 +3836,7 @@ button:focus-visible {
 }
 
 .uat-room-introduction {
-  padding: 14px 22px 16px;
+  padding: 10px 18px 12px;
   border: 1px solid rgba(180, 135, 70, 0.34);
   border-radius: 3px;
   background: linear-gradient(90deg, rgba(12, 8, 6, 0.2), rgba(12, 8, 6, 0.82) 18%, rgba(12, 8, 6, 0.82) 82%, rgba(12, 8, 6, 0.2));

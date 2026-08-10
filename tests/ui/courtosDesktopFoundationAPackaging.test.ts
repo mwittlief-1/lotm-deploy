@@ -59,6 +59,9 @@ describe("CourtOS desktop Foundation A source binding", () => {
     }
     expect(staging).not.toContain("pearwick_microhex_pilot_v1.json");
     expect(staging).not.toContain("roadcote_microhex_pilot_v1.json");
+    expect(staging).toContain(
+      "await rm(foundationDestinationRoot, { recursive: true, force: true })",
+    );
     expect(builderConfig).not.toContain("pearwick_microhex_pilot_v1.json");
     expect(builderConfig).not.toContain("roadcote_microhex_pilot_v1.json");
     expect(rootPackage.scripts["courtos:desktop:uat-package"]).toContain(
