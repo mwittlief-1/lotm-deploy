@@ -1,0 +1,136 @@
+{
+  "age_variants" : [
+    "child",
+    "young_adult",
+    "mature_adult",
+    "old_age"
+  ],
+  "assets" : [
+    {
+      "age_variant" : "child",
+      "base_id" : "pf001",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf001_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf001",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf001_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf001",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf001_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf001",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf001_old_age.png"
+    },
+    {
+      "age_variant" : "child",
+      "base_id" : "pf002",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf002_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf002",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf002_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf002",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf002_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf002",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf002_old_age.png"
+    },
+    {
+      "age_variant" : "child",
+      "base_id" : "pf003",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf003_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf003",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf003_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf003",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf003_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf003",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf003_old_age.png"
+    },
+    {
+      "age_variant" : "child",
+      "base_id" : "pf004",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf004_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf004",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf004_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf004",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf004_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf004",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf004_old_age.png"
+    },
+    {
+      "age_variant" : "child",
+      "base_id" : "pf005",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf005_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf005",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf005_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf005",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf005_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf005",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf005_old_age.png"
+    },
+    {
+      "age_variant" : "child",
+      "base_id" : "pf006",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf006_child.png"
+    },
+    {
+      "age_variant" : "young_adult",
+      "base_id" : "pf006",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf006_young_adult.png"
+    },
+    {
+      "age_variant" : "mature_adult",
+      "base_id" : "pf006",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf006_mature_adult.png"
+    },
+    {
+      "age_variant" : "old_age",
+      "base_id" : "pf006",
+      "path" : "\/assets\/portrait-bank\/proof\/portrait_age_pf006_old_age.png"
+    }
+  ],
+  "base_face_count" : 6,
+  "no_hidden_inference" : true,
+  "presentation_only_not_source_truth" : true,
+  "schema_version" : "portrait_bank_proof_manifest_v1",
+  "source_ref" : "TURN0-M41 production proof portrait facebank candidate",
+  "source_status" : "current_draft_wired_as_truth_for_uat"
+}

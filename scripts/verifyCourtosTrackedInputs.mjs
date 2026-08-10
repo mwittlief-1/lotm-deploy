@@ -8,6 +8,7 @@ const ROOT = process.cwd();
 const allowUntrackedWorkspaceInputs = process.argv.includes("--allow-untracked-workspace-inputs");
 const RUNTIME_MANIFEST_PATH = "config/courtos-runtime-inputs.v1.json";
 const BUNDLED_MAPGEN_MANIFEST_PATH = "config/courtos-bundled-mapgen-inputs.v1.json";
+const PORTRAIT_BANK_MANIFEST_PATH = "public/assets/portrait-bank/proof/portrait_bank_manifest_v1.json";
 const ENTRYPOINTS = [
   "vite.config.ts",
   "src/courtos-home.tsx",
@@ -49,6 +50,7 @@ const REQUIRED_REPOSITORY_INPUTS = [
   "vercel.json",
   RUNTIME_MANIFEST_PATH,
   BUNDLED_MAPGEN_MANIFEST_PATH,
+  PORTRAIT_BANK_MANIFEST_PATH,
   "config/courtos-desktop-distribution.v1.json",
   "config/courtos-mapgen-runtime-contract.v1.json",
   "config/courtos-scribe-native-assets.v1.json",
@@ -274,13 +276,27 @@ const bundledMapGenInputs = JSON.parse(
 if (bundledMapGenInputs.schema_version !== "courtos_bundled_mapgen_inputs_v1") {
   throw new Error("Unsupported bundled MapGen input schema.");
 }
+const portraitBank = JSON.parse(
+  fs.readFileSync(absolute(PORTRAIT_BANK_MANIFEST_PATH), "utf8"),
+);
+if (
+  portraitBank.schema_version !== "portrait_bank_proof_manifest_v1" ||
+  portraitBank.assets?.length !== 24
+) {
+  throw new Error("The CourtOS portrait bank must declare exactly 24 proof assets.");
+}
+const portraitBankAssets = portraitBank.assets.map(({ path: assetPath }) =>
+  normalize(path.join("public", assetPath)),
+);
 const closure = runtimeImportClosure(ENTRYPOINTS);
 const preflightClosure = runtimeImportClosure([
   "dist_batch/src/sim/index.js",
   "dist_batch/src/sim/policies.js",
   "dist_batch/src/version.js",
 ]);
-const importedRuntimeAssets = runtimeAssetPaths(closure.files);
+const importedRuntimeAssets = [
+  ...new Set([...runtimeAssetPaths(closure.files), ...portraitBankAssets]),
+].sort();
 const qaPackageFiles = repositoryFilesUnder("qa/uat");
 const runtimeDataPackageFiles = RUNTIME_DATA_PACKAGES.flatMap((directory) =>
   runtimePackageFiles(directory),

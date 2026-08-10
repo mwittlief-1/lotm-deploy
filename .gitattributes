@@ -18,3 +18,4 @@ public/assets/courtos/rooms/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 public/assets/mapgen-landscape/**/*.jpg filter=lfs diff=lfs merge=lfs -text
 public/assets/mapgen-manor-v2/**/*.png filter=lfs diff=lfs merge=lfs -text
 public/assets/landscape-composition/**/*.png filter=lfs diff=lfs merge=lfs -text
+public/assets/portrait-bank/**/*.png filter=lfs diff=lfs merge=lfs -text

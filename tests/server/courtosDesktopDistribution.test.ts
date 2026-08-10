@@ -141,4 +141,15 @@ describe("CourtOS desktop distribution", () => {
       'householdRoute || scene === "house_command" || responsibilityPlace !== null',
     );
   });
+
+  it("ships every deterministic fallback portrait referenced by the resolver", () => {
+    const bankRoot = path.join(root, "public/assets/portrait-bank/proof");
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(bankRoot, "portrait_bank_manifest_v1.json"), "utf8"),
+    ) as { assets: Array<{ path: string }> };
+    expect(manifest.assets).toHaveLength(24);
+    for (const asset of manifest.assets) {
+      expect(fs.existsSync(path.join(root, "public", asset.path))).toBe(true);
+    }
+  });
 });
