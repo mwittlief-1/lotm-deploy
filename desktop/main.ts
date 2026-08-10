@@ -48,6 +48,14 @@ function contentTypeFor(assetPath: string): string {
   }
 }
 
+function focusPrimaryWindow(): void {
+  const window = BrowserWindow.getAllWindows()[0];
+  if (!window) return;
+  if (window.isMinimized()) window.restore();
+  window.show();
+  window.focus();
+}
+
 async function createWindow(): Promise<void> {
   const window = new BrowserWindow({
     width: 1440,
@@ -75,7 +83,14 @@ async function createWindow(): Promise<void> {
   await window.loadURL("merecross://app/courtos-home.html");
 }
 
-app.whenReady().then(async () => {
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  // Steam and Finder can both deliver a second launch request. The running
+  // client owns the player database and must remain the only writer.
+  app.quit();
+} else {
+  app.on("second-instance", focusPrimaryWindow);
+  app.whenReady().then(async () => {
   process.env.COURTOS_DATA_ROOT = app.isPackaged
     ? process.resourcesPath
     : resolve(import.meta.dirname, "..", "..");
@@ -179,7 +194,8 @@ app.whenReady().then(async () => {
     fiscalScribe.dispose();
     playerStore.close();
   });
-});
+  });
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

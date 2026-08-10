@@ -114,6 +114,14 @@ describe("CourtOS desktop distribution", () => {
   it("never removes a caller-supplied Steam smoke-test library", () => {
     const smoke = fs.readFileSync(path.join(root, "scripts/runCourtosDesktopInstallSmoke.mjs"), "utf8");
     expect(smoke).toContain("if (!keep && cleanupRoot)");
+    expect(smoke).toContain("} finally {");
     expect(smoke).not.toContain("dirname(dirname(dirname(steamLibrary)))");
+  });
+
+  it("keeps one native writer for player planning state across repeated Steam launches", () => {
+    const main = fs.readFileSync(path.join(root, "desktop/main.ts"), "utf8");
+    expect(main).toContain("app.requestSingleInstanceLock()");
+    expect(main).toContain('app.on("second-instance", focusPrimaryWindow)');
+    expect(main).toContain('join(app.getPath("userData"), "merecross-player-v1.sqlite")');
   });
 });

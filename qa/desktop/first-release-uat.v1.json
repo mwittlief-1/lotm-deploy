@@ -1,0 +1,64 @@
+{
+  "schema_version": "merecross_desktop_first_release_uat_v1",
+  "release_name": "Merecross CourtOS Foundation A UAT-1",
+  "player_house": {
+    "house_id": "t0h_bcae5bd911ab10f4c7fdfea0",
+    "house_name": "House Pearwick Hall"
+  },
+  "installed_app": "/Users/matt_wittlief_home/Applications/Merecross UAT.app",
+  "steam_viewports": [
+    { "name": "minimum", "width": 1280, "height": 720 },
+    { "name": "reference", "width": 1920, "height": 1080 }
+  ],
+  "expected_projection": {
+    "effective_date": "1120-01-01",
+    "membership_context": 14,
+    "responsibility_summary": 22,
+    "stores_positions": 7,
+    "economic_activity_lookback": 276,
+    "adult_kin_roster": 6,
+    "education_plans": 4,
+    "education_cycle_reports": 4,
+    "health_roster": 2,
+    "health_cycle_reports": 2,
+    "opening_matters": 0,
+    "council_seats": 4,
+    "manors": 2
+  },
+  "domains": [
+    { "key": "household", "label": "Household", "surface": "The Household Solar" },
+    { "key": "marriage_dynasty", "label": "Marriage & Dynasty", "surface": "The Dynasty Chamber" },
+    { "key": "estate_holdings", "label": "Estate & Holdings", "surface": "Estate and Holdings" },
+    { "key": "resources_finance", "label": "Resources & Finance", "surface": "The Counting Chamber" },
+    { "key": "records_correspondence", "label": "Records & Correspondence", "surface": "The Records Room" },
+    { "key": "security_readiness", "label": "Security & Readiness", "surface": "The Readiness Chamber" },
+    { "key": "court_relations", "label": "Court & Relations", "surface": "The Audience Chamber" },
+    { "key": "church", "label": "Church", "surface": "The House Chapel" }
+  ],
+  "responsibilities": [
+    { "key": "office_post_appointments", "label": "Office & Post Appointments", "domain": "house_command" },
+    { "key": "household_stores_provisioning_procurement", "runtime_key": "stores", "label": "Household Stores, Provisioning & Procurement", "domain": "household" },
+    { "key": "adult_kin_support", "runtime_key": "adult_kin", "label": "Adult Kin Support", "domain": "household" },
+    { "key": "education_formation", "runtime_key": "education", "label": "Education & Formation", "domain": "household" },
+    { "key": "household_service_care", "runtime_key": "service_care", "label": "Household Service & Care", "domain": "household" },
+    { "key": "marriage_dynasty_stewardship", "label": "Marriage & Dynasty Stewardship", "domain": "marriage_dynasty" },
+    { "key": "patronage_hospitality_gifts", "label": "Patronage, Hospitality & Gifts", "domain": "marriage_dynasty" },
+    { "key": "manor_stewardship", "label": "Manor Stewardship", "domain": "estate_holdings" },
+    { "key": "estate_fabric_maintenance_oversight", "label": "Estate Fabric & Maintenance Oversight", "domain": "estate_holdings" },
+    { "key": "works_project_supervision", "label": "Works Project Supervision", "domain": "estate_holdings" },
+    { "key": "franchise_operations", "label": "Franchise Operations", "domain": "estate_holdings" },
+    { "key": "portfolio_oversight", "label": "Portfolio Oversight", "domain": "estate_holdings" },
+    { "key": "house_fiscal_administration", "label": "House Fiscal Administration", "domain": "resources_finance" },
+    { "key": "manor_fiscal_administration", "label": "Manor Fiscal Administration", "domain": "resources_finance" },
+    { "key": "revenue_right_administration_collection", "label": "Revenue Right Administration & Collection", "domain": "resources_finance" },
+    { "key": "reception_intake", "label": "Reception & Intake", "domain": "records_correspondence" },
+    { "key": "records_archives", "label": "Records & Archives", "domain": "records_correspondence" },
+    { "key": "correspondence_dispatch", "label": "Correspondence & Dispatch", "domain": "records_correspondence" },
+    { "key": "security_asset_protection", "label": "Security & Asset Protection", "domain": "security_readiness" },
+    { "key": "martial_readiness_training", "label": "Martial Readiness & Training", "domain": "security_readiness" },
+    { "key": "martial_stores_horse_capacity", "label": "Martial Stores & Horse Capacity", "domain": "security_readiness" },
+    { "key": "external_relations_representation", "label": "External Relations & Representation", "domain": "court_relations" },
+    { "key": "household_observance_chaplaincy", "label": "Household Observance & Chaplaincy", "domain": "church" },
+    { "key": "church_rights_institutional_affairs", "label": "Church Rights & Institutional Affairs", "domain": "church" }
+  ]
+}

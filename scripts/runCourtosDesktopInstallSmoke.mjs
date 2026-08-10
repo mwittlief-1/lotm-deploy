@@ -48,23 +48,26 @@ if (dryRun) {
   process.exit(0);
 }
 
-await inspectMacApplication(sourceApp);
-await mkdir(steamLibrary, { recursive: true });
-await execFileAsync("ditto", ["--noextattr", sourceApp, installedApp]);
-await inspectMacApplication(installedApp);
-await execFileAsync(process.execPath, [
-  join(repositoryRoot, "scripts", "verifyCourtosDesktopUatPackage.mjs"),
-  "--app",
-  installedApp,
-  "--expected-posture",
-  expectedPosture,
-], { cwd: repositoryRoot, stdio: "inherit" });
-if (launch) {
+try {
+  await inspectMacApplication(sourceApp);
+  await mkdir(steamLibrary, { recursive: true });
+  await execFileAsync("ditto", ["--noextattr", sourceApp, installedApp]);
+  await inspectMacApplication(installedApp);
   await execFileAsync(process.execPath, [
-    join(repositoryRoot, "scripts", "runCourtosDesktopFirstReleaseUat.mjs"),
+    join(repositoryRoot, "scripts", "verifyCourtosDesktopUatPackage.mjs"),
     "--app",
     installedApp,
+    "--expected-posture",
+    expectedPosture,
   ], { cwd: repositoryRoot, stdio: "inherit" });
+  if (launch) {
+    await execFileAsync(process.execPath, [
+      join(repositoryRoot, "scripts", "runCourtosDesktopFirstReleaseUat.mjs"),
+      "--app",
+      installedApp,
+    ], { cwd: repositoryRoot, stdio: "inherit" });
+  }
+  console.log(JSON.stringify({ status: "passed", installed_app: installedApp, launch_uat: launch }, null, 2));
+} finally {
+  if (!keep && cleanupRoot) await rm(cleanupRoot, { recursive: true, force: true });
 }
-console.log(JSON.stringify({ status: "passed", installed_app: installedApp, launch_uat: launch }, null, 2));
-if (!keep && cleanupRoot) await rm(cleanupRoot, { recursive: true, force: true });
